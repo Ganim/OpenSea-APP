@@ -413,44 +413,55 @@ export interface Location {
   code: string;
   name?: string;
   type: LocationType;
-  parentLocationId?: string;
+  locationType?: string; // Campo da API
+  parentId?: string;
   capacity?: number;
   currentOccupancy?: number;
   isActive: boolean;
-  notes?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
+}
+
+// Tipo para resposta da API (campos diferentes)
+export interface ApiLocation {
+  id: string;
+  code: string;
+  titulo?: string; // Campo da API
+  type: string; // Campo da API
+  parentId?: string;
+  capacity?: number;
+  currentOccupancy?: number;
+  isActive: boolean;
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
 }
 
 export interface CreateLocationRequest {
-  code: string;
-  name?: string;
-  type: LocationType;
-  parentLocationId?: string;
+  titulo?: string;
+  type?: LocationType;
+  parentId?: string;
   capacity?: number;
   currentOccupancy?: number;
   isActive?: boolean;
-  notes?: string;
 }
 
 export interface UpdateLocationRequest {
-  code?: string;
-  name?: string;
+  titulo?: string;
   type?: LocationType;
-  parentLocationId?: string;
+  parentId?: string;
   capacity?: number;
   currentOccupancy?: number;
   isActive?: boolean;
-  notes?: string;
 }
 
 export interface LocationsResponse {
-  locations: Location[];
+  locations: ApiLocation[];
 }
 
 export interface LocationResponse {
-  location: Location;
+  location: ApiLocation;
 }
 
 // Tag Types

@@ -34,9 +34,9 @@ import {
   useUpdateTemplate,
 } from '@/hooks/stock';
 import type { UpdateTemplateRequest } from '@/types/stock';
-import { Layers, Plus, Trash2 } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Layers, Plus, Save, Trash2, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 type AttributeType = 'string' | 'number' | 'boolean' | 'date' | 'select';
@@ -66,10 +66,13 @@ const generateSlug = (label: string): string => {
     .replace(/^_+|_+$/g, ''); // Remove _ do início e fim
 };
 
-export default function EditTemplatePage() {
-  const params = useParams();
+export default function EditTemplatePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
-  const templateId = params.id as string;
+  const { id: templateId } = use(params);
 
   const { data: template, isLoading: isLoadingTemplate } =
     useTemplate(templateId);
@@ -352,16 +355,30 @@ export default function EditTemplatePage() {
           description="Atualize as configurações do template"
           showBackButton={true}
           backUrl="/stock/assets/templates"
-          onCancel={() => router.push('/stock/assets/templates')}
-          onSave={() => {
-            const event = { preventDefault: () => {} } as React.FormEvent;
-            handleSubmit(event);
-          }}
-          onDelete={handleDeleteClick}
-          saveLabel="Salvar Alterações"
-          deleteLabel="Excluir Template"
-          isLoading={isLoading || isDeleting}
-          saveDisabled={!name.trim()}
+          buttons={[
+            {
+              icon: Save,
+              text: 'Salvar Alterações',
+              onClick: () => {
+                const event = { preventDefault: () => {} } as React.FormEvent;
+                handleSubmit(event);
+              },
+              variant: 'default',
+              disabled: !name.trim(),
+            },
+            {
+              icon: X,
+              text: 'Cancelar',
+              onClick: () => router.push('/stock/assets/templates'),
+              variant: 'outline',
+            },
+            {
+              icon: Trash2,
+              text: 'Excluir Template',
+              onClick: handleDeleteClick,
+              variant: 'destructive',
+            },
+          ]}
         />
 
         <form className="space-y-6">

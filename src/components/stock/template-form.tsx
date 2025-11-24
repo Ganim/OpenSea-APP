@@ -1,0 +1,500 @@
+/**
+ * Template Form Component
+ * Formulário reutilizável para criação e edição de templates
+ * Usado na página de edição e no modal de visualização
+ */
+
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { Template } from '@/types/stock';
+import { Layers, Plus, Settings, Trash2 } from 'lucide-react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+
+type AttributeType = 'string' | 'number' | 'boolean' | 'date' | 'select';
+
+interface Attribute {
+  key: string;
+  label: string;
+  type: AttributeType;
+  required: boolean;
+  options?: string[];
+}
+
+interface AttributeDefinition {
+  label: string;
+  type: string;
+  required: boolean;
+  options?: string[];
+}
+
+interface TemplateFormProps {
+  template?: Template;
+  onSubmit: (data: {
+    name: string;
+    productAttributes: Record<string, unknown>;
+    variantAttributes: Record<string, unknown>;
+    itemAttributes: Record<string, unknown>;
+  }) => void;
+  submitLabel?: string;
+}
+
+export interface TemplateFormRef {
+  submit: () => void;
+  getData: () => {
+    name: string;
+    productAttributes: Record<string, unknown>;
+    variantAttributes: Record<string, unknown>;
+    itemAttributes: Record<string, unknown>;
+  };
+}
+
+// Gera slug a partir do rótulo
+const generateSlug = (label: string): string => {
+  return label
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+};
+
+export const TemplateForm = forwardRef<TemplateFormRef, TemplateFormProps>(
+  function TemplateForm({ template, onSubmit, submitLabel = 'Salvar' }, ref) {
+    const [name, setName] = useState('');
+    const [productAttributes, setProductAttributes] = useState<Attribute[]>([]);
+    const [variantAttributes, setVariantAttributes] = useState<Attribute[]>([]);
+    const [itemAttributes, setItemAttributes] = useState<Attribute[]>([]);
+
+    // Função para formatar atributos
+    const formatAttributes = (
+      attributes: Attribute[]
+    ): Record<string, unknown> => {
+      if (attributes.length === 0) return {};
+      return attributes.reduce(
+        (acc, attr) => {
+          if (attr.key) {
+            acc[attr.key] = {
+              label: attr.label,
+              type: attr.type,
+              required: attr.required,
+              ...(attr.type === 'select' && attr.options
+                ? { options: attr.options }
+                : {}),
+            };
+          }
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
+    };
+
+    // Função para obter dados do formulário
+    const getData = () => ({
+      name: name.trim(),
+      productAttributes: formatAttributes(productAttributes),
+      variantAttributes: formatAttributes(variantAttributes),
+      itemAttributes: formatAttributes(itemAttributes),
+    });
+
+    // Expor métodos para o componente pai
+    useImperativeHandle(ref, () => ({
+      submit: () => {
+        const data = getData();
+        onSubmit(data);
+      },
+      getData,
+    }));
+
+    // Carregar dados do template
+    useEffect(() => {
+      if (template) {
+        setName(template.name);
+
+        // Converter productAttributes
+        if (template.productAttributes) {
+          const attrs = template.productAttributes as Record<
+            string,
+            AttributeDefinition
+          >;
+          const productAttrs = Object.entries(attrs).map(([key, value]) => ({
+            key,
+            label: value.label,
+            type: value.type as AttributeType,
+            required: value.required,
+            options: value.options,
+          }));
+          setProductAttributes(productAttrs);
+        }
+
+        // Converter variantAttributes
+        if (template.variantAttributes) {
+          const attrs = template.variantAttributes as Record<
+            string,
+            AttributeDefinition
+          >;
+          const variantAttrs = Object.entries(attrs).map(([key, value]) => ({
+            key,
+            label: value.label,
+            type: value.type as AttributeType,
+            required: value.required,
+            options: value.options,
+          }));
+          setVariantAttributes(variantAttrs);
+        }
+
+        // Converter itemAttributes
+        if (template.itemAttributes) {
+          const attrs = template.itemAttributes as Record<
+            string,
+            AttributeDefinition
+          >;
+          const itemAttrs = Object.entries(attrs).map(([key, value]) => ({
+            key,
+            label: value.label,
+            type: value.type as AttributeType,
+            required: value.required,
+            options: value.options,
+          }));
+          setItemAttributes(itemAttrs);
+        }
+      }
+    }, [template]);
+
+    // Funções para Products
+    const addProductAttribute = () => {
+      setProductAttributes([
+        ...productAttributes,
+        { key: '', label: '', type: 'string', required: false },
+      ]);
+    };
+
+    const removeProductAttribute = (index: number) => {
+      setProductAttributes(productAttributes.filter((_, i) => i !== index));
+    };
+
+    const updateProductAttribute = (
+      index: number,
+      field: keyof Attribute,
+      value: string | boolean | string[]
+    ) => {
+      const updated = [...productAttributes];
+      updated[index] = { ...updated[index], [field]: value };
+      if (field === 'label' && typeof value === 'string') {
+        updated[index].key = generateSlug(value);
+      }
+      setProductAttributes(updated);
+    };
+
+    // Funções para Variants
+    const addVariantAttribute = () => {
+      setVariantAttributes([
+        ...variantAttributes,
+        { key: '', label: '', type: 'string', required: false },
+      ]);
+    };
+
+    const removeVariantAttribute = (index: number) => {
+      setVariantAttributes(variantAttributes.filter((_, i) => i !== index));
+    };
+
+    const updateVariantAttribute = (
+      index: number,
+      field: keyof Attribute,
+      value: string | boolean | string[]
+    ) => {
+      const updated = [...variantAttributes];
+      updated[index] = { ...updated[index], [field]: value };
+      if (field === 'label' && typeof value === 'string') {
+        updated[index].key = generateSlug(value);
+      }
+      setVariantAttributes(updated);
+    };
+
+    // Funções para Items
+    const addItemAttribute = () => {
+      setItemAttributes([
+        ...itemAttributes,
+        { key: '', label: '', type: 'string', required: false },
+      ]);
+    };
+
+    const removeItemAttribute = (index: number) => {
+      setItemAttributes(itemAttributes.filter((_, i) => i !== index));
+    };
+
+    const updateItemAttribute = (
+      index: number,
+      field: keyof Attribute,
+      value: string | boolean | string[]
+    ) => {
+      const updated = [...itemAttributes];
+      updated[index] = { ...updated[index], [field]: value };
+      if (field === 'label' && typeof value === 'string') {
+        updated[index].key = generateSlug(value);
+      }
+      setItemAttributes(updated);
+    };
+
+    const renderAttributeFields = (
+      attributes: Attribute[],
+      updateFn: (
+        index: number,
+        field: keyof Attribute,
+        value: string | boolean | string[]
+      ) => void,
+      removeFn: (index: number) => void
+    ) => {
+      return attributes.map((attr, index) => (
+        <div
+          key={index}
+          className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Rótulo</Label>
+              <Input
+                placeholder="ex: Marca, Cor, Tamanho..."
+                value={attr.label}
+                onChange={e => updateFn(index, 'label', e.target.value)}
+                className="h-11"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select
+                value={attr.type}
+                onValueChange={value =>
+                  updateFn(index, 'type', value as AttributeType)
+                }
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="string">Texto</SelectItem>
+                  <SelectItem value="number">Número</SelectItem>
+                  <SelectItem value="boolean">Sim/Não</SelectItem>
+                  <SelectItem value="date">Data</SelectItem>
+                  <SelectItem value="select">Seleção</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Ações</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={attr.required ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateFn(index, 'required', !attr.required)}
+                  className={
+                    attr.required
+                      ? 'flex-1 h-11'
+                      : 'flex-1 h-11 bg-white dark:bg-gray-900'
+                  }
+                >
+                  {attr.required ? 'Obrigatório' : 'Opcional'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFn(index)}
+                  className="h-11 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {attr.type === 'select' && (
+              <div className="col-span-full space-y-2">
+                <Label>Opções (separadas por vírgula)</Label>
+                <Input
+                  placeholder="ex: Nike, Adidas, Puma"
+                  value={attr.options?.join(', ') || ''}
+                  onChange={e =>
+                    updateFn(
+                      index,
+                      'options',
+                      e.target.value.split(',').map(s => s.trim())
+                    )
+                  }
+                  className="h-11 bg-white dark:bg-gray-900"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ));
+    };
+
+    return (
+      <div className="space-y-6">
+        {/* Campo Nome */}
+        <div className="px-6 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">
+              Nome do Template <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="name"
+              placeholder="Ex: Eletrônicos, Roupas, Alimentos..."
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+              className="h-11"
+            />
+          </div>
+        </div>
+
+        {/* Tabs para atributos */}
+        <Tabs defaultValue="product" className="w-full">
+          <div className="px-6">
+            <TabsList className="grid w-full grid-cols-3 h-12">
+              <TabsTrigger value="product" className="gap-2">
+                <Layers className="w-4 h-4" />
+                Produtos
+              </TabsTrigger>
+              <TabsTrigger value="variant" className="gap-2">
+                <Layers className="w-4 h-4" />
+                Variantes
+              </TabsTrigger>
+              <TabsTrigger value="item" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Itens
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          {/* Tab: Produtos */}
+          <TabsContent value="product" className="space-y-4 mt-6 px-6 pb-6">
+            <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold">Atributos de Produtos</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Defina os campos que cada produto terá
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addProductAttribute}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar
+                </Button>
+              </div>
+
+              {productAttributes.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum atributo adicionado. Clique em &quot;Adicionar&quot;
+                  para começar.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {renderAttributeFields(
+                    productAttributes,
+                    updateProductAttribute,
+                    removeProductAttribute
+                  )}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Tab: Variantes */}
+          <TabsContent value="variant" className="space-y-4 mt-6 px-6 pb-6">
+            <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold">Atributos de Variantes</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Defina os campos que cada variante terá
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addVariantAttribute}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar
+                </Button>
+              </div>
+
+              {variantAttributes.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum atributo adicionado. Clique em &quot;Adicionar&quot;
+                  para começar.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {renderAttributeFields(
+                    variantAttributes,
+                    updateVariantAttribute,
+                    removeVariantAttribute
+                  )}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Tab: Itens */}
+          <TabsContent value="item" className="space-y-4 mt-6 px-6 pb-6">
+            <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold">Atributos de Itens</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Defina os campos que cada item terá
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addItemAttribute}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar
+                </Button>
+              </div>
+
+              {itemAttributes.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum atributo adicionado. Clique em &quot;Adicionar&quot;
+                  para começar.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {renderAttributeFields(
+                    itemAttributes,
+                    updateItemAttribute,
+                    removeItemAttribute
+                  )}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
+);

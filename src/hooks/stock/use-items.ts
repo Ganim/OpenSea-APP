@@ -22,6 +22,15 @@ export function useItems() {
   });
 }
 
+// GET /v1/items?variantId=:variantId - Lista itens de uma variante
+export function useVariantItems(variantId: string) {
+  return useQuery({
+    queryKey: ['items', 'variant', variantId],
+    queryFn: () => itemsService.listItems(variantId),
+    enabled: !!variantId,
+  });
+}
+
 // GET /v1/items/:itemId - Busca um item específico
 export function useItem(itemId: string) {
   return useQuery({

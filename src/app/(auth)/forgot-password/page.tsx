@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 type ForgotPasswordStep = 'email' | 'code' | 'new-password' | 'success';
 
@@ -28,7 +28,7 @@ interface ForgotPasswordFormData {
   confirmPassword: string;
 }
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -376,5 +376,13 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
     </AuthBackground>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordForm />
+    </Suspense>
   );
 }

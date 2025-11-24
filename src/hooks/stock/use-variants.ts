@@ -15,6 +15,15 @@ export function useVariants() {
   });
 }
 
+// GET /v1/variants?productId=:productId - Lista variantes de um produto
+export function useProductVariants(productId: string) {
+  return useQuery({
+    queryKey: ['variants', 'product', productId],
+    queryFn: () => variantsService.listVariants(productId),
+    enabled: !!productId,
+  });
+}
+
 // GET /v1/variants/:id - Busca uma variante específica
 export function useVariant(id: string) {
   return useQuery({

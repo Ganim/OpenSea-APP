@@ -8,9 +8,12 @@ import type {
 } from '@/types/stock';
 
 export const variantsService = {
-  // GET /v1/variants
-  async listVariants(): Promise<VariantsResponse> {
-    return apiClient.get<VariantsResponse>(API_ENDPOINTS.VARIANTS.LIST);
+  // GET /v1/variants or /v1/variants?productId=:productId
+  async listVariants(productId?: string): Promise<VariantsResponse> {
+    const url = productId
+      ? `${API_ENDPOINTS.VARIANTS.LIST}?productId=${productId}`
+      : API_ENDPOINTS.VARIANTS.LIST;
+    return apiClient.get<VariantsResponse>(url);
   },
 
   // GET /v1/variants/:id

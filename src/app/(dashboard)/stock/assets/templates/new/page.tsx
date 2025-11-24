@@ -20,7 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateTemplate } from '@/hooks/stock';
 import type { CreateTemplateRequest } from '@/types/stock';
-import { Layers, Plus, Trash2 } from 'lucide-react';
+import { Layers, Plus, Save, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -213,14 +213,24 @@ export default function NewTemplatePage() {
           description="Configure um template completo com todos os atributos necessários"
           showBackButton={true}
           backUrl="/stock/assets/templates"
-          onCancel={() => router.push('/stock/assets/templates')}
-          onSave={() => {
-            const event = { preventDefault: () => {} } as React.FormEvent;
-            handleSubmit(event);
-          }}
-          saveLabel="Criar Template"
-          isLoading={isLoading}
-          saveDisabled={!name.trim()}
+          buttons={[
+            {
+              icon: Save,
+              text: 'Criar Template',
+              onClick: () => {
+                const event = { preventDefault: () => {} } as React.FormEvent;
+                handleSubmit(event);
+              },
+              variant: 'default',
+              disabled: !name.trim(),
+            },
+            {
+              icon: X,
+              text: 'Cancelar',
+              onClick: () => router.push('/stock/assets/templates'),
+              variant: 'outline',
+            },
+          ]}
         />
 
         <form className="space-y-6">

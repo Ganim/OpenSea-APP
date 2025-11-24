@@ -1,17 +1,11 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-  CategoriesResponse,
-  CategoryResponse,
-  CreateCategoryRequest,
-  CreateLocationRequest,
   CreateManufacturerRequest,
   CreatePurchaseOrderRequest,
   CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
-  LocationResponse,
-  LocationsResponse,
   ManufacturerResponse,
   ManufacturersResponse,
   PurchaseOrderResponse,
@@ -22,46 +16,12 @@ import type {
   TagsResponse,
   TemplateResponse,
   TemplatesResponse,
-  UpdateCategoryRequest,
-  UpdateLocationRequest,
   UpdateManufacturerRequest,
   UpdatePurchaseOrderStatusRequest,
   UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
 } from '@/types/stock';
-
-// Categories Service
-export const categoriesService = {
-  async listCategories(): Promise<CategoriesResponse> {
-    return apiClient.get<CategoriesResponse>(API_ENDPOINTS.CATEGORIES.LIST);
-  },
-
-  async getCategory(id: string): Promise<CategoryResponse> {
-    return apiClient.get<CategoryResponse>(API_ENDPOINTS.CATEGORIES.GET(id));
-  },
-
-  async createCategory(data: CreateCategoryRequest): Promise<CategoryResponse> {
-    return apiClient.post<CategoryResponse>(
-      API_ENDPOINTS.CATEGORIES.CREATE,
-      data
-    );
-  },
-
-  async updateCategory(
-    id: string,
-    data: UpdateCategoryRequest
-  ): Promise<CategoryResponse> {
-    return apiClient.patch<CategoryResponse>(
-      API_ENDPOINTS.CATEGORIES.UPDATE(id),
-      data
-    );
-  },
-
-  async deleteCategory(id: string): Promise<void> {
-    return apiClient.delete<void>(API_ENDPOINTS.CATEGORIES.DELETE(id));
-  },
-};
 
 // Manufacturers Service
 export const manufacturersService = {
@@ -133,37 +93,7 @@ export const suppliersService = {
   },
 };
 
-// Locations Service
-export const locationsService = {
-  async listLocations(): Promise<LocationsResponse> {
-    return apiClient.get<LocationsResponse>(API_ENDPOINTS.LOCATIONS.LIST);
-  },
-
-  async getLocation(id: string): Promise<LocationResponse> {
-    return apiClient.get<LocationResponse>(API_ENDPOINTS.LOCATIONS.GET(id));
-  },
-
-  async createLocation(data: CreateLocationRequest): Promise<LocationResponse> {
-    return apiClient.post<LocationResponse>(
-      API_ENDPOINTS.LOCATIONS.CREATE,
-      data
-    );
-  },
-
-  async updateLocation(
-    id: string,
-    data: UpdateLocationRequest
-  ): Promise<LocationResponse> {
-    return apiClient.patch<LocationResponse>(
-      API_ENDPOINTS.LOCATIONS.UPDATE(id),
-      data
-    );
-  },
-
-  async deleteLocation(id: string): Promise<void> {
-    return apiClient.delete<void>(API_ENDPOINTS.LOCATIONS.DELETE(id));
-  },
-};
+// Locations Service foi movido para locations.service.ts
 
 // Tags Service
 export const tagsService = {
@@ -209,10 +139,13 @@ export const templatesService = {
     id: string,
     data: UpdateTemplateRequest
   ): Promise<TemplateResponse> {
-    return apiClient.put<TemplateResponse>(
+    console.log('[SERVICE] updateTemplate chamado:', { id, data });
+    const result = await apiClient.put<TemplateResponse>(
       API_ENDPOINTS.TEMPLATES.UPDATE(id),
       data
     );
+    console.log('[SERVICE] updateTemplate resposta:', result);
+    return result;
   },
 
   async deleteTemplate(id: string): Promise<void> {

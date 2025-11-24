@@ -15,6 +15,7 @@ import {
   TemplateGridCard,
   TemplateListCard,
 } from '@/components/stock/items-grid';
+import { MultiViewModal } from '@/components/stock/multi-view-modal';
 import { PageHeader } from '@/components/stock/page-header';
 import { SearchSection } from '@/components/stock/search-section';
 import { StatsSection } from '@/components/stock/stats-section';
@@ -38,7 +39,15 @@ import {
 import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
 import type { CreateTemplateRequest } from '@/types/stock';
 import { useQueryClient } from '@tanstack/react-query';
-import { CheckCircle, FileText, Layers } from 'lucide-react';
+import {
+  CheckCircle,
+  FileText,
+  HelpCircle,
+  Layers,
+  Plus,
+  Upload,
+  Zap,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -66,6 +75,10 @@ function TemplatesPageContent() {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [isMultiViewModalOpen, setIsMultiViewModalOpen] = useState(false);
+  const [multiViewTemplateIds, setMultiViewTemplateIds] = useState<string[]>(
+    []
+  );
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
   const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
   const [activeOperation, setActiveOperation] = useState<
@@ -252,10 +265,16 @@ function TemplatesPageContent() {
   const handleTemplatesView = (ids: string[]) => {
     if (ids.length === 1) {
       router.push(`/stock/assets/templates/${ids[0]}`);
-    } else {
+    } else if (ids.length >= 2 && ids.length <= 5) {
+      // Abre visualização múltipla
+      setMultiViewTemplateIds(ids);
+      setIsMultiViewModalOpen(true);
+    } else if (ids.length > 5) {
       toast.info(
-        `Visualização múltipla não disponível. Selecione apenas um template.`
+        `Visualização múltipla suporta até 5 templates. Você selecionou ${ids.length}.`
       );
+    } else {
+      toast.info(`Selecione pelo menos um template para visualizar.`);
     }
   };
 
@@ -368,11 +387,32 @@ function TemplatesPageContent() {
         <PageHeader
           title="Templates"
           description="Crie e gerencie modelos de produtos para padronizar atributos e facilitar o cadastro em massa."
-          onAdd={handleNavigateToNew}
-          onQuickAdd={() => setIsQuickCreateModalOpen(true)}
-          onImport={() => setIsImportModalOpen(true)}
-          onHelp={() => setIsHelpModalOpen(true)}
-          addLabel="Novo Template"
+          buttons={[
+            {
+              icon: HelpCircle,
+              onClick: () => setIsHelpModalOpen(true),
+              variant: 'ghost',
+            },
+            {
+              icon: Zap,
+              text: 'Rápido',
+              onClick: () => setIsQuickCreateModalOpen(true),
+              variant: 'outline',
+              style: { iconColor: 'text-yellow-500' },
+            },
+            {
+              icon: Upload,
+              text: 'Importar',
+              onClick: () => setIsImportModalOpen(true),
+              variant: 'outline',
+            },
+            {
+              icon: Plus,
+              text: 'Novo Template',
+              onClick: handleNavigateToNew,
+              variant: 'default',
+            },
+          ]}
         />
 
         <SearchSection
@@ -531,6 +571,22 @@ function TemplatesPageContent() {
           onPause={batchDuplicate.pause}
           onResume={batchDuplicate.resume}
           onCancel={batchDuplicate.cancel}
+        />
+
+        {/* Modal de visualização múltipla */}
+        <MultiViewModal
+          isOpen={isMultiViewModalOpen}
+          onClose={() => {
+            setIsMultiViewModalOpen(false);
+            setMultiViewTemplateIds([]);
+          }}
+          templates={templates.filter(t => multiViewTemplateIds.includes(t.id))}
+          availableTemplates={templates}
+          onAddTemplate={templateId => {
+            if (multiViewTemplateIds.length < 5) {
+              setMultiViewTemplateIds([...multiViewTemplateIds, templateId]);
+            }
+          }}
         />
       </div>
     </ProtectedRoute>

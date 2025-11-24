@@ -14,9 +14,12 @@ import type {
 } from '@/types/stock';
 
 export const itemsService = {
-  // GET /v1/items
-  async listItems(): Promise<ItemsResponse> {
-    return apiClient.get<ItemsResponse>(API_ENDPOINTS.ITEMS.LIST);
+  // GET /v1/items or /v1/items?variantId=:variantId
+  async listItems(variantId?: string): Promise<ItemsResponse> {
+    const url = variantId
+      ? `${API_ENDPOINTS.ITEMS.LIST}?variantId=${variantId}`
+      : API_ENDPOINTS.ITEMS.LIST;
+    return apiClient.get<ItemsResponse>(url);
   },
 
   // GET /v1/items/:itemId

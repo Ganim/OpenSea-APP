@@ -1,21 +1,20 @@
 import {
-  categoriesService,
-  locationsService,
   manufacturersService,
   purchaseOrdersService,
   suppliersService,
   tagsService,
   templatesService,
 } from '@/services/stock';
+import { locationsService } from '@/services/stock/locations.service';
 import type {
-  CreateCategoryRequest,
+  ApiLocation,
   CreateLocationRequest,
   CreateManufacturerRequest,
   CreatePurchaseOrderRequest,
   CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
-  UpdateCategoryRequest,
+  LocationType,
   UpdateLocationRequest,
   UpdateManufacturerRequest,
   UpdatePurchaseOrderStatusRequest,
@@ -26,8 +25,6 @@ import type {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const QUERY_KEYS = {
-  CATEGORIES: ['categories'],
-  CATEGORY: (id: string) => ['categories', id],
   MANUFACTURERS: ['manufacturers'],
   MANUFACTURER: (id: string) => ['manufacturers', id],
   SUPPLIERS: ['suppliers'],
@@ -41,61 +38,6 @@ const QUERY_KEYS = {
   PURCHASE_ORDERS: ['purchase-orders'],
   PURCHASE_ORDER: (id: string) => ['purchase-orders', id],
 } as const;
-
-// ==================== CATEGORIES ====================
-
-export function useCategories() {
-  return useQuery({
-    queryKey: QUERY_KEYS.CATEGORIES,
-    queryFn: () => categoriesService.listCategories(),
-  });
-}
-
-export function useCategory(id: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.CATEGORY(id),
-    queryFn: () => categoriesService.getCategory(id),
-    enabled: !!id,
-  });
-}
-
-export function useCreateCategory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateCategoryRequest) =>
-      categoriesService.createCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
-    },
-  });
-}
-
-export function useUpdateCategory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateCategoryRequest }) =>
-      categoriesService.updateCategory(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.CATEGORY(variables.id),
-      });
-    },
-  });
-}
-
-export function useDeleteCategory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => categoriesService.deleteCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
-    },
-  });
-}
 
 // ==================== MANUFACTURERS ====================
 
@@ -214,18 +156,67 @@ export function useDeleteSupplier() {
 
 // ==================== LOCATIONS ====================
 
-export function useLocations() {
+export function useLocations(query?: {
+  type?: string;
+  parentId?: string;
+  isActive?: boolean;
+  search?: string;
+}) {
   return useQuery({
-    queryKey: QUERY_KEYS.LOCATIONS,
-    queryFn: () => locationsService.listLocations(),
+    queryKey: ['locations', query],
+    queryFn: async () => {
+      const response = await locationsService.listLocations(query);
+      // Mapear campos da API para manter consistência com o tipo Location
+      return response.locations.map((location: ApiLocation) => ({
+        ...location,
+        name: location.titulo, // Mapear titulo da API para name do frontend
+        type: location.type as LocationType, // Mapear type da API para type do frontend
+        locationType: location.type, // Manter o campo original também
+      }));
+    },
+    enabled:
+      typeof window !== 'undefined' && !!localStorage.getItem('auth_token'),
+    retry: (failureCount, error) => {
+      // Não tentar novamente se for erro de autenticação
+      if (
+        error instanceof Error &&
+        error.message.includes('User not authorized')
+      ) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }
 
 export function useLocation(id: string) {
   return useQuery({
     queryKey: QUERY_KEYS.LOCATION(id),
-    queryFn: () => locationsService.getLocation(id),
-    enabled: !!id,
+    queryFn: async () => {
+      const response = await locationsService.getLocation(id);
+      // Mapear campos da API para manter consistência com o tipo Location
+      const location: ApiLocation = response.location;
+      return {
+        ...location,
+        name: location.titulo, // Mapear titulo da API para name do frontend
+        type: location.type as LocationType, // Mapear type da API para type do frontend
+        locationType: location.type, // Manter o campo original também
+      };
+    },
+    enabled:
+      !!id &&
+      typeof window !== 'undefined' &&
+      !!localStorage.getItem('auth_token'),
+    retry: (failureCount, error) => {
+      // Não tentar novamente se for erro de autenticação
+      if (
+        error instanceof Error &&
+        error.message.includes('User not authorized')
+      ) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }
 
@@ -233,8 +224,17 @@ export function useCreateLocation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateLocationRequest) =>
-      locationsService.createLocation(data),
+    mutationFn: async (data: CreateLocationRequest) => {
+      const response = await locationsService.createLocation(data);
+      // Mapear campos da API para manter consistência com o tipo Location
+      const location: ApiLocation = response.location;
+      return {
+        ...location,
+        name: location.titulo, // Mapear titulo da API para name do frontend
+        type: location.type as LocationType,
+        locationType: location.type,
+      };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOCATIONS });
     },
@@ -245,8 +245,23 @@ export function useUpdateLocation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateLocationRequest }) =>
-      locationsService.updateLocation(id, data),
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateLocationRequest;
+    }) => {
+      const response = await locationsService.updateLocation(id, data);
+      // Mapear campos da API para manter consistência com o tipo Location
+      const location: ApiLocation = response.location;
+      return {
+        ...location,
+        name: location.titulo, // Mapear titulo da API para name do frontend
+        type: location.type as LocationType,
+        locationType: location.type,
+      };
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOCATIONS });
       queryClient.invalidateQueries({

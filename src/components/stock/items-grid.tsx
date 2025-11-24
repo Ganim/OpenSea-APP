@@ -10,7 +10,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-import { Grid3x3, List, RefreshCw, Sparkles } from 'lucide-react';
+import {
+  Grid3x2,
+  Grid3x3,
+  List,
+  MapPin,
+  Package,
+  RefreshCw,
+  Sparkles,
+  SquareDashed,
+  SquareSquare,
+  SquareStack,
+  Warehouse,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type ViewMode = 'grid' | 'list';
@@ -564,6 +576,284 @@ export function TemplateListCard({
             >
               <Sparkles className="w-3 h-3" />
               {/* Se foi atualizado, mostra só o ícone, senão mostra com texto */}
+              {!isUpdated && <span className="ml-1">Novo</span>}
+            </Badge>
+          )}
+          {/* Badge Atualizado */}
+          {isUpdated && (
+            <Badge
+              variant="secondary"
+              className="bg-amber-400 dark:bg-amber-500/70 text-white dark:text-white flex items-center gap-1 shadow-md shadow-amber-400/50 dark:shadow-amber-500/20"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span>Atualizado</span>
+            </Badge>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ==================== LOCATION CARDS ====================
+
+export function LocationGridCard({
+  code,
+  name,
+  type,
+  capacity,
+  currentOccupancy,
+  isActive,
+  createdAt,
+  updatedAt,
+  onClick,
+  isSelected = false,
+}: {
+  code: string;
+  name?: string;
+  type: string;
+  capacity?: number;
+  currentOccupancy?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+  onClick?: () => void;
+  isSelected?: boolean;
+}) {
+  const { isNew, isUpdated } = getItemBadge(createdAt, updatedAt);
+
+  const typeLabels = {
+    WAREHOUSE: 'Armazém',
+    ZONE: 'Zona',
+    AISLE: 'Corredor',
+    SHELF: 'Prateleira',
+    BIN: 'Compartimento',
+    OTHER: 'Outro',
+  };
+
+  const displayName = name || code;
+  const occupancyRate =
+    capacity && currentOccupancy
+      ? Math.round((currentOccupancy / capacity) * 100)
+      : 0;
+
+  return (
+    <Card
+      onClick={onClick}
+      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+        isSelected
+          ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
+          : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
+      }`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${
+            isSelected
+              ? 'bg-blue-600'
+              : 'bg-linear-to-br from-green-500 to-blue-600'
+          }`}
+        >
+          {type === 'WAREHOUSE' ? (
+            <Warehouse className="w-6 h-6" />
+          ) : type === 'ZONE' ? (
+            <SquareDashed className="w-6 h-6" />
+          ) : type === 'AISLE' ? (
+            <SquareStack className="w-6 h-6" />
+          ) : type === 'SHELF' ? (
+            <Grid3x2 className="w-6 h-6" />
+          ) : type === 'BIN' ? (
+            <SquareSquare className="w-6 h-6" />
+          ) : type === 'OTHER' ? (
+            <Package className="w-6 h-6" />
+          ) : (
+            <MapPin className="w-6 h-6" />
+          )}
+        </div>
+        <div className="flex gap-1">
+          {/* Badge Novo */}
+          {isNew && (
+            <Badge
+              variant="default"
+              className="bg-cyan-400 dark:bg-cyan-500/70 text-white dark:text-white shadow-md shadow-cyan-400/50 dark:shadow-cyan-500/20"
+            >
+              <Sparkles className="w-3 h-3" />
+              {!isUpdated && <span className="ml-1">Novo</span>}
+            </Badge>
+          )}
+          {/* Badge Atualizado */}
+          {isUpdated && (
+            <Badge
+              variant="secondary"
+              className="bg-amber-400 dark:bg-amber-500/70 text-white dark:text-white flex items-center gap-1 shadow-md shadow-amber-400/50 dark:shadow-amber-500/20"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span>Atualizado</span>
+            </Badge>
+          )}
+        </div>
+      </div>
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2 truncate">
+        {displayName}
+      </h3>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">
+            {typeLabels[type as keyof typeof typeLabels] || type}
+          </Badge>
+          <Badge
+            variant={isActive ? 'default' : 'secondary'}
+            className="text-xs"
+          >
+            {isActive ? 'Ativa' : 'Inativa'}
+          </Badge>
+        </div>
+        {capacity && (
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center justify-between">
+              <span>
+                Ocupação: {currentOccupancy || 0}/{capacity}
+              </span>
+              <span
+                className={`font-medium ${
+                  occupancyRate > 90
+                    ? 'text-red-500'
+                    : occupancyRate > 70
+                      ? 'text-yellow-500'
+                      : 'text-green-500'
+                }`}
+              >
+                {occupancyRate}%
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+export function LocationListCard({
+  code,
+  name,
+  type,
+  capacity,
+  currentOccupancy,
+  isActive,
+  createdAt,
+  updatedAt,
+  onClick,
+  isSelected = false,
+}: {
+  code: string;
+  name?: string;
+  type: string;
+  capacity?: number;
+  currentOccupancy?: number;
+  isActive: boolean;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+  onClick?: () => void;
+  isSelected?: boolean;
+}) {
+  const createdDate =
+    typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
+  const updatedDate = updatedAt
+    ? typeof updatedAt === 'string'
+      ? new Date(updatedAt)
+      : updatedAt
+    : undefined;
+  const { isNew, isUpdated } = getItemBadge(createdDate, updatedDate);
+
+  const typeLabels = {
+    WAREHOUSE: 'Armazém',
+    ZONE: 'Zona',
+    AISLE: 'Corredor',
+    SHELF: 'Prateleira',
+    BIN: 'Compartimento',
+    OTHER: 'Outro',
+  };
+
+  const displayName = name || code;
+  const occupancyRate =
+    capacity && currentOccupancy
+      ? Math.round((currentOccupancy / capacity) * 100)
+      : 0;
+
+  return (
+    <Card
+      onClick={onClick}
+      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+        isSelected
+          ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
+          : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div
+            className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+              isSelected
+                ? 'bg-blue-600'
+                : 'bg-linear-to-br from-green-500 to-blue-600'
+            }`}
+          >
+            {type === 'WAREHOUSE' ? (
+              <Warehouse className="w-5 h-5" />
+            ) : type === 'ZONE' ? (
+              <SquareDashed className="w-5 h-5" />
+            ) : type === 'AISLE' ? (
+              <SquareStack className="w-5 h-5" />
+            ) : type === 'SHELF' ? (
+              <Grid3x2 className="w-5 h-5" />
+            ) : type === 'BIN' ? (
+              <SquareSquare className="w-5 h-5" />
+            ) : type === 'OTHER' ? (
+              <Package className="w-5 h-5" />
+            ) : (
+              <MapPin className="w-5 h-5" />
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+              {displayName}
+            </h3>
+            <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+              <Badge variant="outline" className="text-xs">
+                {typeLabels[type as keyof typeof typeLabels] || type}
+              </Badge>
+              <Badge
+                variant={isActive ? 'default' : 'secondary'}
+                className="text-xs"
+              >
+                {isActive ? 'Ativa' : 'Inativa'}
+              </Badge>
+              {capacity && (
+                <>
+                  <span>•</span>
+                  <span>
+                    {currentOccupancy || 0}/{capacity} unidades ({occupancyRate}
+                    %)
+                  </span>
+                </>
+              )}
+              <span>•</span>
+              <span>
+                {typeof createdAt === 'string'
+                  ? createdAt
+                  : createdDate.toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-1 ml-2">
+          {/* Badge Novo */}
+          {isNew && (
+            <Badge
+              variant="default"
+              className="bg-cyan-400 dark:bg-cyan-500/70 text-white dark:text-white flex items-center shadow-md shadow-cyan-400/50 dark:shadow-cyan-500/20"
+            >
+              <Sparkles className="w-3 h-3" />
               {!isUpdated && <span className="ml-1">Novo</span>}
             </Badge>
           )}

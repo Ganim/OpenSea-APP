@@ -235,12 +235,30 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({
-          message: 'An error occurred',
-        }));
+        let error: any;
+        try {
+          error = await response.json();
+        } catch (jsonError) {
+          // Se não conseguir fazer parse do JSON, cria um erro com informações da resposta
+          error = {
+            message: `HTTP ${response.status}: ${response.statusText}`,
+            status: response.status,
+            statusText: response.statusText,
+            url: response.url,
+          };
+        }
+
         const errorMessage =
           error.message || `HTTP error! status: ${response.status}`;
-        console.error('[API] Error response:', error);
+
+        console.error('[API] Error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          headers: Object.fromEntries(response.headers.entries()),
+          error,
+        });
+
         throw new Error(errorMessage);
       }
 
@@ -252,6 +270,8 @@ class ApiClient {
       return await response.json();
     } catch (error) {
       console.error('[API] Request failed:', {
+        method: options?.method || 'GET',
+        url: `${this.baseURL}${endpoint}`,
         error,
         type: error instanceof Error ? error.constructor.name : typeof error,
         message: error instanceof Error ? error.message : String(error),
