@@ -1,6 +1,6 @@
 /**
- * Enterprise Detail Page
- * Página de visualização de um empresa específica
+ * Enterprise Edit Page
+ * Página para edição completa de uma empresa
  */
 
 'use client';
@@ -10,21 +10,22 @@ import { Card } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { enterprisesService } from '@/services/hr';
 import type { Enterprise } from '@/types/hr';
-import { ArrowLeft, Edit2, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useState } from 'react';
 import { toast } from 'sonner';
-import { DeleteConfirmModal, deleteEnterprise, EnterpriseViewer } from '../src';
+import { EnterpriseForm, updateEnterprise } from '../../src';
+import type { EnterpriseFormData } from '../../src';
 
-export default function EnterprisePage({
+export default function EnterpriseEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch enterprise
   const { data: enterprise, isLoading } = useQuery<Enterprise>({
@@ -36,17 +37,25 @@ export default function EnterprisePage({
   });
 
   // Update mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      return await deleteEnterprise(id);
+  const updateMutation = useMutation({
+    mutationFn: async (data: EnterpriseFormData) => {
+      setIsSubmitting(true);
+      try {
+        return await updateEnterprise(
+          id,
+          data as unknown as Partial<Enterprise>
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     onSuccess: () => {
-      toast.success('Empresa deletada com sucesso');
-      router.push('/hr/enterprises');
+      toast.success('Empresa atualizada com sucesso');
+      router.push(`/hr/enterprises/${id}`);
     },
     onError: error => {
-      console.error('Erro ao deletar empresa:', error);
-      toast.error('Erro ao deletar empresa');
+      console.error('Erro ao atualizar empresa:', error);
+      toast.error('Erro ao atualizar empresa');
     },
   });
 
@@ -81,45 +90,29 @@ export default function EnterprisePage({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Link href="/hr/enterprises">
-          <Button variant="outline" className="gap-2" size="sm">
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link href={`/hr/enterprises/${enterprise.id}/edit`}>
-            <Button className="gap-2">
-              <Edit2 className="h-4 w-4" />
-              Editar
+        <div>
+          <Link href={`/hr/enterprises/${enterprise.id}`}>
+            <Button variant="outline" className="gap-2" size="sm">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
             </Button>
           </Link>
-          <Button
-            variant="destructive"
-            className="gap-2"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-            Deletar
-          </Button>
+          <h1 className="mt-4 text-3xl font-bold">Editar Empresa</h1>
+          <p className="text-muted-foreground">{enterprise.legalName}</p>
         </div>
       </div>
 
-      {/* Content */}
-      <EnterpriseViewer
-        enterprise={enterprise}
-        showHeader={true}
-        showEditButton={false}
-      />
-
-      {/* Delete Modal */}
-      <DeleteConfirmModal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        itemCount={1}
-        onConfirm={() => deleteMutation.mutateAsync()}
-        isLoading={deleteMutation.isPending}
-      />
+      {/* Form */}
+      <Card className="p-6">
+        <EnterpriseForm
+          enterprise={enterprise}
+          onSave={async data => {
+            await updateMutation.mutateAsync(data);
+          }}
+          onCancel={() => router.back()}
+          isSubmitting={isSubmitting || updateMutation.isPending}
+        />
+      </Card>
     </div>
   );
 }
