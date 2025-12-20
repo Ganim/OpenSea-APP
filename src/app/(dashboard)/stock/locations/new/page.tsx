@@ -44,7 +44,7 @@ export default function NewLocationPage() {
       const parentLocation = locations.find(loc => loc.id === parentIdParam);
       if (parentLocation) {
         setParentId(parentIdParam);
-        
+
         // Ajustar o tipo baseado na localização pai (hierarquia)
         if (parentLocation.type === 'WAREHOUSE') {
           setLocationType('ZONE');

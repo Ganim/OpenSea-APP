@@ -17,6 +17,8 @@ export interface User {
   username: string;
   email: string;
   role: 'USER' | 'MANAGER' | 'ADMIN';
+  createdAt: Date;
+  updatedAt?: Date;
   lastLoginAt: Date | null;
   deletedAt?: Date | null;
   profile?: Profile | null;

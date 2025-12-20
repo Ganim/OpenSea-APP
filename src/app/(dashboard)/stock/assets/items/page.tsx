@@ -1,436 +1,286 @@
 /**
- * Items Listing Page
- * Página de listagem de itens usando componentes 100% genéricos
+ * OpenSea OS - Items Page
+ * Página de gerenciamento de itens usando o novo sistema OpenSea OS
  */
 
 'use client';
 
-import { Box, CheckCircle, Package, TrendingUp } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
-import { useItems } from '@/hooks/stock/use-items';
-
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
-  BatchProgressDialog,
-  EntityGrid,
-  HelpModal,
-  ImportModal,
-  PageHeader,
-  PageHeaderConfig,
-  QuickCreateModal,
-  SearchSection,
-  StatsSection,
-  type FAQItem,
-} from '@/components/shared';
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { itemsConfig } from '@/config/entities/items.config';
 import {
-  ItemGridCard,
-  ItemListCard,
-} from '@/components/shared/cards/entity-cards';
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-
-function ItemsContent() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isQuickCreateModalOpen, setIsQuickCreateModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<
-    'delete' | 'duplicate' | null
-  >(null);
-
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
-
-  // API Data
-  const { data: itemsResponse, isLoading } = useItems();
-  const items = itemsResponse?.items || [];
-
-  const batchDelete = useBatchOperation(
-    async (id: string) => {
-      // Items não possuem delete direto - apenas movimentações
-      await new Promise(resolve => setTimeout(resolve, 500));
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Item excluído com sucesso!'
-              : `${succeeded} itens excluídos com sucesso!`
-          );
-        } else {
-          toast.error('Erro ao excluir alguns itens');
-        }
-        clearSelection();
-      },
-    }
-  );
-
-  const batchDuplicate = useBatchOperation(
-    async (id: string) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        toast.success(`${succeeded} itens duplicados com sucesso!`);
-        clearSelection();
-      },
-    }
-  );
-
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return items;
-    return items.filter(item =>
-      item.uniqueCode.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [items, searchQuery]);
-
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleQuickCreate = async (name: string) => {
-    toast.success(`Item "${name}" criado com sucesso!`);
-  };
-
-  const handleItemClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      const allIds = filteredItems.map(i => i.id);
-      selectRange(lastSelectedId, id, allIds);
-    } else {
-      selectItem(id, event);
-    }
-  };
-
-  const handleItemDoubleClick = (id: string) => {
-    router.push(`/stock/assets/items/${id}`);
-  };
-
-  const handleItemsView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/items/${ids[0]}`);
-    } else {
-      toast.info('Visualização múltipla em breve');
-    }
-  };
-
-  const handleItemsEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/items/${ids[0]}/edit`);
-    } else {
-      toast.info('Edição múltipla não disponível');
-    }
-  };
-
-  const handleItemsDuplicate = (ids: string[]) => {
-    setItemsToDuplicate(ids);
-    setIsDuplicateDialogOpen(true);
-  };
-
-  const handleDuplicateConfirm = async () => {
-    setIsDuplicateDialogOpen(false);
-    setActiveOperation('duplicate');
-    await batchDuplicate.start(itemsToDuplicate);
-  };
-
-  const handleItemsDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
-  };
-
-  const handleSelectRange = (startId: string, endId: string) => {
-    const allIds = filteredItems.map(i => i.id);
-    selectRange(startId, endId, allIds);
-  };
-
-  const stats = [
-    {
-      label: 'Total de Itens',
-      value: items.length,
-      icon: <Box className="w-5 h-5" />,
-      trend: 12,
-    },
-    {
-      label: 'Disponíveis',
-      value: items.filter(i => i.status === 'AVAILABLE').length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Reservados',
-      value: items.filter(i => i.status === 'RESERVED').length,
-      icon: <Package className="w-5 h-5" />,
-    },
-    {
-      label: 'Vendidos',
-      value: items.filter(i => i.status === 'SOLD').length,
-      icon: <TrendingUp className="w-5 h-5" />,
-    },
-  ];
-
-  const faqs: FAQItem[] = [
-    {
-      question: 'O que são itens individuais?',
-      answer:
-        'Itens são unidades únicas rastreadas individualmente por número de série. Cada item representa uma unidade física específica.',
-    },
-    {
-      question: 'Como rastrear itens?',
-      answer:
-        'Use o número de série único para rastrear cada item. Você pode registrar localização, condição, status e histórico de movimentação.',
-    },
-    {
-      question: 'Qual a diferença entre item e produto?',
-      answer:
-        'Produto é a categoria geral (ex: Notebook Dell). Item é a unidade específica com número de série próprio (ex: NB001-2025-001).',
-    },
-  ];
-
-  const pageHeaderConfig: PageHeaderConfig = {
-    title: 'Itens',
-    description: 'Gerencie itens individuais rastreados',
-    onAdd: () => router.push('/stock/assets/items/new'),
-    onQuickAdd: () => setIsQuickCreateModalOpen(true),
-    onImport: () => setIsImportModalOpen(true),
-    onHelp: () => setIsHelpModalOpen(true),
-    addLabel: 'Novo Item',
-    quickAddLabel: 'Criação Rápida',
-    importLabel: 'Importar',
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Carregando itens...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-col flex gap-4">
-      <PageHeader config={pageHeaderConfig} />
-      <SearchSection
-        searchPlaceholder="Buscar itens..."
-        onSearch={handleSearch}
-      />
-      <StatsSection stats={stats} defaultExpanded />
-
-      <EntityGrid
-        items={filteredItems}
-        isSearching={!!searchQuery.trim()}
-        selectedIds={selectedIds}
-        onItemClick={handleItemClick}
-        onItemDoubleClick={handleItemDoubleClick}
-        onItemsView={handleItemsView}
-        onItemsEdit={handleItemsEdit}
-        onItemsDuplicate={handleItemsDuplicate}
-        onItemsDelete={handleItemsDelete}
-        onClearSelection={clearSelection}
-        onSelectRange={handleSelectRange}
-        renderGridItem={(item, isSelected) => (
-          <ItemGridCard
-            serialNumber={item.uniqueCode}
-            condition={'new' as const}
-            status={
-              item.status.toLowerCase() as
-                | 'available'
-                | 'reserved'
-                | 'sold'
-                | 'in_transit'
-                | 'maintenance'
-            }
-            location={item.locationId}
-            createdAt={item.createdAt}
-            updatedAt={item.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        renderListItem={(item, isSelected) => (
-          <ItemListCard
-            serialNumber={item.uniqueCode}
-            condition={'new' as const}
-            status={
-              item.status.toLowerCase() as
-                | 'available'
-                | 'reserved'
-                | 'sold'
-                | 'in_transit'
-                | 'maintenance'
-            }
-            location={item.locationId}
-            createdAt={item.createdAt}
-            updatedAt={item.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        emptyMessage="Nenhum item encontrado"
-      />
-
-      <QuickCreateModal
-        isOpen={isQuickCreateModalOpen}
-        onClose={() => setIsQuickCreateModalOpen(false)}
-        onSubmit={handleQuickCreate}
-        title="Criação Rápida de Item"
-        description="Crie um item rapidamente. Adicione detalhes depois."
-        inputLabel="Número de Série"
-        inputPlaceholder="Digite o número de série"
-        submitButtonText="Criar Item"
-      />
-
-      <ImportModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onImport={async file => console.log('Importando:', file.name)}
-        title="Importar Itens"
-        description="Faça upload de um arquivo CSV ou Excel com itens."
-        acceptedFormats=".csv,.xlsx,.xls"
-      />
-
-      <HelpModal
-        isOpen={isHelpModalOpen}
-        onClose={() => setIsHelpModalOpen(false)}
-        title="Itens"
-        description="Perguntas frequentes sobre itens"
-        faqs={faqs}
-      />
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDelete.length === 1
-                ? 'Tem certeza que deseja excluir este item?'
-                : `Tem certeza que deseja excluir ${itemsToDelete.length} itens?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={isDuplicateDialogOpen}
-        onOpenChange={setIsDuplicateDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar duplicação</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDuplicate.length === 1
-                ? 'Tem certeza que deseja duplicar este item?'
-                : `Tem certeza que deseja duplicar ${itemsToDuplicate.length} itens?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDuplicateConfirm}>
-              Duplicar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <BatchProgressDialog
-        open={activeOperation === 'delete' && !batchDelete.isIdle}
-        status={batchDelete.status}
-        total={batchDelete.total}
-        processed={batchDelete.processed}
-        succeeded={batchDelete.succeeded}
-        failed={batchDelete.failed}
-        progress={batchDelete.progress}
-        operationType="delete"
-        itemName="itens"
-        onClose={() => {
-          batchDelete.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDelete.pause}
-        onResume={batchDelete.resume}
-        onCancel={batchDelete.cancel}
-      />
-
-      <BatchProgressDialog
-        open={activeOperation === 'duplicate' && !batchDuplicate.isIdle}
-        status={batchDuplicate.status}
-        total={batchDuplicate.total}
-        processed={batchDuplicate.processed}
-        succeeded={batchDuplicate.succeeded}
-        failed={batchDuplicate.failed}
-        progress={batchDuplicate.progress}
-        operationType="duplicate"
-        itemName="itens"
-        onClose={() => {
-          batchDuplicate.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDuplicate.pause}
-        onResume={batchDuplicate.resume}
-        onCancel={batchDuplicate.cancel}
-      />
-    </div>
-  );
-}
+    CoreProvider,
+    EntityForm,
+    EntityGrid,
+    SelectionToolbar,
+    UniversalCard,
+    useEntityCrud,
+    useEntityPage
+} from '@/core';
+import { itemsService } from '@/services/stock';
+import type { Item } from '@/types/stock';
+import { Box, Plus, Search } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function ItemsPage() {
+  const crud = useEntityCrud<Item>({
+    entityName: 'Item',
+    entityNamePlural: 'Itens',
+    queryKey: ['items'],
+    baseUrl: '/api/v1/items',
+    listFn: async () => {
+      const response = await itemsService.listItems();
+      return response.items;
+    },
+    getFn: (id: string) => itemsService.getItem(id).then(r => r.item),
+    createFn: data => itemsService.registerEntry(data as any).then(r => r.item),
+    updateFn: async () => {
+      throw new Error(
+        'Items não podem ser editados. Use movimentações de estoque.'
+      );
+    },
+    deleteFn: async () => {
+      throw new Error(
+        'Items não podem ser excluídos. Use movimentações de estoque.'
+      );
+    },
+  });
+
+  const page = useEntityPage<Item>({
+    entityName: 'Item',
+    entityNamePlural: 'Itens',
+    queryKey: ['items'],
+    crud,
+    viewRoute: (id) => `/stock/assets/items/${id}`,
+    filterFn: (item, query) => {
+      const q = query.toLowerCase();
+      return (
+        item.uniqueCode.toLowerCase().includes(q) ||
+        (item.batchNumber?.toLowerCase().includes(q) ?? false)
+      );
+    },
+  });
+
+  const renderGridCard = (item: Item, isSelected: boolean) => {
+    const statusLabels = {
+      AVAILABLE: 'Disponível',
+      RESERVED: 'Reservado',
+      SOLD: 'Vendido',
+      DAMAGED: 'Danificado',
+    };
+
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="grid"
+        title={item.uniqueCode}
+        subtitle={item.batchNumber || 'Sem lote'}
+        icon={Box}
+        iconBgColor="bg-gradient-to-br from-teal-500 to-cyan-600"
+        badges={[
+          {
+            label: statusLabels[item.status] || item.status,
+            variant: item.status === 'AVAILABLE' ? 'default' : 'secondary',
+          },
+          {
+            label: `${item.currentQuantity} un`,
+            variant: 'outline',
+          },
+        ]}
+        metadata={
+          <div className="flex items-center gap-4 text-xs">
+            {item.entryDate && (
+              <span>
+                Entrada: {new Date(item.entryDate).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => page.handlers.handleItemDoubleClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  const renderListCard = (item: Item, isSelected: boolean) => {
+    const statusLabels = {
+      AVAILABLE: 'Disponível',
+      RESERVED: 'Reservado',
+      SOLD: 'Vendido',
+      DAMAGED: 'Danificado',
+    };
+
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="list"
+        title={item.uniqueCode}
+        subtitle={item.batchNumber || 'Sem lote'}
+        icon={Box}
+        iconBgColor="bg-gradient-to-br from-teal-500 to-cyan-600"
+        badges={[
+          {
+            label: statusLabels[item.status] || item.status,
+            variant: item.status === 'AVAILABLE' ? 'default' : 'secondary',
+          },
+        ]}
+        metadata={
+          <>
+            <span className="text-xs">{item.currentQuantity} unidades</span>
+          </>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => page.handlers.handleItemDoubleClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
+  const hasSelection = selectedIds.length > 0;
+
+  const initialIds = useMemo(
+    () => page.filteredItems.map(i => i.id),
+    [page.filteredItems]
+  );
+
   return (
-    <SelectionProvider>
-      <ItemsContent />
-    </SelectionProvider>
+    <CoreProvider
+      selection={{
+        namespace: 'items',
+        initialIds,
+      }}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-gray-50 to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 p-6">
+        <div className="max-w-8xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Itens
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Gerencie os itens físicos do estoque
+              </p>
+            </div>
+            <Button
+              onClick={() => page.modals.open('create')}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Item
+            </Button>
+          </div>
+
+          <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={itemsConfig.display.labels.searchPlaceholder}
+                value={page.searchQuery}
+                onChange={e => page.handlers.handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </Card>
+
+          {page.isLoading ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-gray-600 dark:text-white/60">Carregando...</p>
+            </Card>
+          ) : page.error ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-destructive">Erro ao carregar itens</p>
+            </Card>
+          ) : (
+            <EntityGrid
+              config={itemsConfig}
+              items={page.filteredItems}
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={page.isLoading}
+              isSearching={!!page.searchQuery}
+              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
+              onItemDoubleClick={item =>
+                page.handlers.handleItemDoubleClick(item)
+              }
+            />
+          )}
+
+          {hasSelection && (
+            <SelectionToolbar
+              selectedIds={selectedIds}
+              totalItems={page.filteredItems.length}
+              onClear={() => page.selection?.actions.clear()}
+              onSelectAll={() => page.selection?.actions.selectAll()}
+              defaultActions={{
+                view: true,
+                edit: false,
+                duplicate: false,
+                delete: false,
+              }}
+              handlers={{
+                onView: page.handlers.handleItemsView,
+              }}
+            />
+          )}
+
+          <Dialog
+            open={page.modals.isOpen('create')}
+            onOpenChange={open => !open && page.modals.close('create')}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Novo Item</DialogTitle>
+              </DialogHeader>
+              <EntityForm
+                config={itemsConfig.form!}
+                mode="create"
+                onSubmit={async data => {
+                  await crud.create(data);
+                  page.modals.close('create');
+                }}
+                onCancel={() => page.modals.close('create')}
+                isSubmitting={crud.isCreating}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </CoreProvider>
   );
 }

@@ -1,12 +1,12 @@
 import { meService } from '@/services';
 import type {
-  MessageResponse,
-  ProfileResponse,
-  UpdateEmailRequest,
-  UpdatePasswordRequest,
-  UpdateProfileRequest,
-  UpdateUsernameRequest,
-  UserResponse,
+    MessageResponse,
+    ProfileResponse,
+    UpdateEmailRequest,
+    UpdatePasswordRequest,
+    UpdateProfileRequest,
+    UpdateUsernameRequest,
+    UserResponse,
 } from '@/types/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -28,6 +28,8 @@ export function useMe(enabled = true) {
     queryKey: meKeys.detail(),
     queryFn: () => meService.getMe(),
     enabled,
+    retry: false, // Não tentar novamente em caso de erro (ex: token inválido)
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
 

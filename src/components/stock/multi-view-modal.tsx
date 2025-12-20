@@ -6,14 +6,14 @@
 
 'use client';
 
+import { TemplateViewer } from '@/app/(dashboard)/stock/assets/templates/src/components';
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
 import { cn } from '@/lib/utils';
-import type { Template } from '@/types/stock';
+import type { Template, UnitOfMeasure } from '@/types/stock';
 import { Eye, Plus, SquareSplitHorizontal, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { TemplateViewer } from './template-viewer';
 
 // Componente de busca de templates
 function SearchTemplates({
@@ -93,6 +93,7 @@ function ComparePanel({
   showBorder?: boolean;
   onSave?: (data: {
     name: string;
+    unitOfMeasure: UnitOfMeasure;
     productAttributes: Record<string, unknown>;
     variantAttributes: Record<string, unknown>;
     itemAttributes: Record<string, unknown>;
@@ -154,6 +155,7 @@ export function MultiViewModal({
   // Função para salvar edições do template
   const handleSaveTemplate = async (data: {
     name: string;
+    unitOfMeasure: UnitOfMeasure;
     productAttributes: Record<string, unknown>;
     variantAttributes: Record<string, unknown>;
     itemAttributes: Record<string, unknown>;
@@ -173,6 +175,7 @@ export function MultiViewModal({
     // Verificar se houve alguma mudança real
     const hasChanges =
       data.name.trim() !== currentTemplate.name ||
+      data.unitOfMeasure !== currentTemplate.unitOfMeasure ||
       JSON.stringify(data.productAttributes) !==
         JSON.stringify(currentTemplate.productAttributes) ||
       JSON.stringify(data.variantAttributes) !==
@@ -330,14 +333,8 @@ export function MultiViewModal({
                   (compareSlots[0] === index || compareSlots[1] === index);
 
                 return (
-                  <button
+                  <div
                     key={template.id}
-                    onClick={() => {
-                      setShowSearch(false);
-                      if (viewMode === 'single') {
-                        setActiveIndex(index);
-                      }
-                    }}
                     className={cn(
                       'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all shrink-0 cursor-pointer',
                       'hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md',
@@ -350,19 +347,30 @@ export function MultiViewModal({
                         'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                     )}
                   >
-                    <span className="font-medium text-sm truncate max-w-[150px]">
-                      {template.name}
-                    </span>
+                    <button
+                      onClick={() => {
+                        setShowSearch(false);
+                        if (viewMode === 'single') {
+                          setActiveIndex(index);
+                        }
+                      }}
+                      className="flex-1 text-left"
+                    >
+                      <span className="font-medium text-sm truncate max-w-[150px] block">
+                        {template.name}
+                      </span>
+                    </button>
                     <button
                       onClick={e => {
                         e.stopPropagation();
                         handleRemove(index);
                       }}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                      className="ml-1 hover:bg-white/20 rounded p-0.5 shrink-0"
+                      aria-label="Remover template"
                     >
                       <X className="w-3 h-3" />
                     </button>
-                  </button>
+                  </div>
                 );
               })}
 

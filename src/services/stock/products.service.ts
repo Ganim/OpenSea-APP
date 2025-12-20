@@ -8,9 +8,12 @@ import type {
 } from '@/types/stock';
 
 export const productsService = {
-  // GET /v1/products
-  async listProducts(): Promise<ProductsResponse> {
-    return apiClient.get<ProductsResponse>(API_ENDPOINTS.PRODUCTS.LIST);
+  // GET /v1/products or /v1/products?templateId=:templateId
+  async listProducts(templateId?: string): Promise<ProductsResponse> {
+    const url = templateId
+      ? `${API_ENDPOINTS.PRODUCTS.LIST}?templateId=${templateId}`
+      : API_ENDPOINTS.PRODUCTS.LIST;
+    return apiClient.get<ProductsResponse>(url);
   },
 
   // GET /v1/products/:productId

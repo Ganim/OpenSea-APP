@@ -1,463 +1,407 @@
 /**
- * Products Listing Page
- * Página de listagem de produtos usando componentes 100% genéricos
- * Template para outras entidades (Variants, Items)
+ * OpenSea OS - Products Page
+ * Página de gerenciamento de produtos usando o novo sistema OpenSea OS
  */
 
 'use client';
 
-import { AlertCircle, CheckCircle, Package, TrendingUp } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
-// Componentes genéricos
+import { CreateProductForm } from '@/components/stock/create-product-form';
+import { ProductDetailModal } from '@/components/stock/product-detail-modal';
+import { VariantDetailModal } from '@/components/stock/variant-detail-modal';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
-  BatchProgressDialog,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { productsConfig } from '@/config/entities/products.config';
+import {
+  ConfirmDialog,
+  CoreProvider,
+  EntityForm,
   EntityGrid,
-  HelpModal,
-  ImportModal,
-  PageHeader,
-  PageHeaderConfig,
-  QuickCreateModal,
-  SearchSection,
-  StatsSection,
-  type FAQItem,
-} from '@/components/shared';
-
-// Cards específicos
-import {
-  ProductGridCard,
-  ProductListCard,
-} from '@/components/shared/cards/entity-cards';
-
-// Dialogs
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-// Context e hooks
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
-import { useDeleteProduct, useProducts } from '@/hooks/stock/use-products';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-import { useQueryClient } from '@tanstack/react-query';
-
-// Tipos mock (você deve usar os tipos reais de @/types/stock)
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  price: number;
-  cost?: number;
-  quantity?: number;
-  category?: string;
-  createdAt: Date;
-  updatedAt?: Date;
-}
-
-const PRODUCTS_QUERY_KEY = ['products'];
-
-function ProductsContent() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
-  // State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isQuickCreateModalOpen, setIsQuickCreateModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<
-    'delete' | 'duplicate' | null
-  >(null);
-
-  // Selection context
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
-
-  // API Data
-  const { data: productsResponse, isLoading } = useProducts();
-  const products = productsResponse?.products || [];
-  const deleteProductMutation = useDeleteProduct();
-
-  // Batch operations
-  const batchDelete = useBatchOperation(
-    async (id: string) => {
-      await deleteProductMutation.mutateAsync(id);
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
-
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Produto excluído com sucesso!'
-              : `${succeeded} produtos excluídos com sucesso!`
-          );
-        } else {
-          toast.error('Erro ao excluir alguns produtos');
-        }
-        clearSelection();
-      },
-    }
-  );
-
-  const batchDuplicate = useBatchOperation(
-    async (id: string) => {
-      const product = products.find(p => p.id === id);
-      if (!product) throw new Error('Produto não encontrado');
-      // await createProductMutation.mutateAsync({ ...product, name: `${product.name} (cópia)` });
-      await new Promise(resolve => setTimeout(resolve, 500));
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        toast.success(`${succeeded} produtos duplicados com sucesso!`);
-        clearSelection();
-      },
-    }
-  );
-
-  // Filtered products
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
-    return products.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [products, searchQuery]);
-
-  // Handlers
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleQuickCreate = async (name: string) => {
-    toast.success(`Produto "${name}" criado com sucesso!`);
-    // Implemente createProductMutation.mutateAsync({ name, ... })
-  };
-
-  const handleProductClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      const allIds = filteredProducts.map(p => p.id);
-      selectRange(lastSelectedId, id, allIds);
-    } else {
-      selectItem(id, event);
-    }
-  };
-
-  const handleProductDoubleClick = (id: string) => {
-    router.push(`/stock/assets/products/${id}`);
-  };
-
-  const handleProductsView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/products/${ids[0]}`);
-    } else {
-      toast.info('Visualização múltipla em breve');
-    }
-  };
-
-  const handleProductsEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/products/${ids[0]}/edit`);
-    } else {
-      toast.info('Edição múltipla não disponível');
-    }
-  };
-
-  const handleProductsDuplicate = (ids: string[]) => {
-    setItemsToDuplicate(ids);
-    setIsDuplicateDialogOpen(true);
-  };
-
-  const handleDuplicateConfirm = async () => {
-    setIsDuplicateDialogOpen(false);
-    setActiveOperation('duplicate');
-    await batchDuplicate.start(itemsToDuplicate);
-  };
-
-  const handleProductsDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
-  };
-
-  const handleSelectRange = (startId: string, endId: string) => {
-    const allIds = filteredProducts.map(p => p.id);
-    selectRange(startId, endId, allIds);
-  };
-
-  // Stats
-  const stats = [
-    {
-      label: 'Total de Produtos',
-      value: products.length,
-      icon: <Package className="w-5 h-5" />,
-      trend: 5,
-    },
-    {
-      label: 'Ativos',
-      value: products.filter(p => p.status === 'ACTIVE').length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Inativos',
-      value: products.filter(p => p.status === 'INACTIVE').length,
-      icon: <AlertCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Arquivados',
-      value: products.filter(p => p.status === 'ARCHIVED').length,
-      icon: <TrendingUp className="w-5 h-5" />,
-    },
-  ];
-
-  // FAQs
-  const faqs: FAQItem[] = [
-    {
-      question: 'Como adicionar um novo produto?',
-      answer:
-        'Clique no botão "Novo Produto" para abrir o formulário completo, ou use "Criação Rápida" para adicionar apenas o nome e completar depois.',
-    },
-    {
-      question: 'Como controlar o estoque?',
-      answer:
-        'Ative a opção "Rastrear Estoque" nas configurações do produto e defina a quantidade disponível. O sistema alertará quando o estoque estiver baixo.',
-    },
-    {
-      question: 'Posso importar produtos em massa?',
-      answer:
-        'Sim! Use o botão "Importar" para fazer upload de um arquivo CSV ou Excel. Baixe nosso modelo para garantir a formatação correta.',
-    },
-  ];
-
-  // Page Header Config
-  const pageHeaderConfig: PageHeaderConfig = {
-    title: 'Produtos',
-    description: 'Gerencie seu catálogo de produtos',
-    onAdd: () => router.push('/stock/assets/products/new'),
-    onQuickAdd: () => setIsQuickCreateModalOpen(true),
-    onImport: () => setIsImportModalOpen(true),
-    onHelp: () => setIsHelpModalOpen(true),
-    addLabel: 'Novo Produto',
-    quickAddLabel: 'Criação Rápida',
-    importLabel: 'Importar',
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Carregando produtos...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-col flex gap-4">
-      <PageHeader config={pageHeaderConfig} />
-
-      <SearchSection
-        searchPlaceholder="Buscar produtos..."
-        onSearch={handleSearch}
-      />
-
-      <StatsSection stats={stats} defaultExpanded />
-
-      <EntityGrid
-        items={filteredProducts}
-        isSearching={!!searchQuery.trim()}
-        selectedIds={selectedIds}
-        onItemClick={handleProductClick}
-        onItemDoubleClick={handleProductDoubleClick}
-        onItemsView={handleProductsView}
-        onItemsEdit={handleProductsEdit}
-        onItemsDuplicate={handleProductsDuplicate}
-        onItemsDelete={handleProductsDelete}
-        onClearSelection={clearSelection}
-        onSelectRange={handleSelectRange}
-        renderGridItem={(product, isSelected) => (
-          <ProductGridCard
-            name={product.name}
-            sku={product.code}
-            price={0}
-            quantity={0}
-            createdAt={product.createdAt}
-            updatedAt={product.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        renderListItem={(product, isSelected) => (
-          <ProductListCard
-            name={product.name}
-            sku={product.code}
-            price={0}
-            quantity={0}
-            createdAt={product.createdAt}
-            updatedAt={product.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        emptyMessage="Nenhum produto encontrado"
-      />
-
-      {/* Modals Genéricos */}
-      <QuickCreateModal
-        isOpen={isQuickCreateModalOpen}
-        onClose={() => setIsQuickCreateModalOpen(false)}
-        onSubmit={handleQuickCreate}
-        title="Criação Rápida de Produto"
-        description="Crie um produto rapidamente. Adicione detalhes depois."
-        inputLabel="Nome do Produto"
-        inputPlaceholder="Digite o nome do produto"
-        submitButtonText="Criar Produto"
-      />
-
-      <ImportModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onImport={async file => console.log('Importando:', file.name)}
-        title="Importar Produtos"
-        description="Faça upload de um arquivo CSV ou Excel com produtos."
-        acceptedFormats=".csv,.xlsx,.xls"
-      />
-
-      <HelpModal
-        isOpen={isHelpModalOpen}
-        onClose={() => setIsHelpModalOpen(false)}
-        title="Produtos"
-        description="Perguntas frequentes sobre produtos"
-        faqs={faqs}
-      />
-
-      {/* Alert Dialogs */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDelete.length === 1
-                ? 'Tem certeza que deseja excluir este produto?'
-                : `Tem certeza que deseja excluir ${itemsToDelete.length} produtos?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={isDuplicateDialogOpen}
-        onOpenChange={setIsDuplicateDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar duplicação</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDuplicate.length === 1
-                ? 'Tem certeza que deseja duplicar este produto?'
-                : `Tem certeza que deseja duplicar ${itemsToDuplicate.length} produtos?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDuplicateConfirm}>
-              Duplicar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Batch Progress Dialogs */}
-      <BatchProgressDialog
-        open={activeOperation === 'delete' && !batchDelete.isIdle}
-        status={batchDelete.status}
-        total={batchDelete.total}
-        processed={batchDelete.processed}
-        succeeded={batchDelete.succeeded}
-        failed={batchDelete.failed}
-        progress={batchDelete.progress}
-        operationType="delete"
-        itemName="produtos"
-        onClose={() => {
-          batchDelete.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDelete.pause}
-        onResume={batchDelete.resume}
-        onCancel={batchDelete.cancel}
-      />
-
-      <BatchProgressDialog
-        open={activeOperation === 'duplicate' && !batchDuplicate.isIdle}
-        status={batchDuplicate.status}
-        total={batchDuplicate.total}
-        processed={batchDuplicate.processed}
-        succeeded={batchDuplicate.succeeded}
-        failed={batchDuplicate.failed}
-        progress={batchDuplicate.progress}
-        operationType="duplicate"
-        itemName="produtos"
-        onClose={() => {
-          batchDuplicate.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDuplicate.pause}
-        onResume={batchDuplicate.resume}
-        onCancel={batchDuplicate.cancel}
-      />
-    </div>
-  );
-}
+  SelectionToolbar,
+  UniversalCard,
+  useEntityCrud,
+  useEntityPage,
+} from '@/core';
+import { productsService } from '@/services/stock';
+import type { Product, Variant } from '@/types/stock';
+import { Package, Plus, Search } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 
 export default function ProductsPage() {
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [variantDetailModalOpen, setVariantDetailModalOpen] = useState(false);
+
+  // ============================================================================
+  // CRUD SETUP
+  // ============================================================================
+
+  const crud = useEntityCrud<Product>({
+    entityName: 'Produto',
+    entityNamePlural: 'Produtos',
+    queryKey: ['products'],
+    baseUrl: '/api/v1/products',
+    listFn: async () => {
+      const response = await productsService.listProducts();
+      return response.products;
+    },
+    getFn: (id: string) => productsService.getProduct(id).then(r => r.product),
+    createFn: data =>
+      productsService.createProduct(data as any).then(r => r.product),
+    updateFn: (id, data) =>
+      productsService.updateProduct(id, data as any).then(r => r.product),
+    deleteFn: id => productsService.deleteProduct(id),
+  });
+
+  // ============================================================================
+  // PAGE SETUP
+  // ============================================================================
+
+  const page = useEntityPage<Product>({
+    entityName: 'Produto',
+    entityNamePlural: 'Produtos',
+    queryKey: ['products'],
+    crud,
+    viewRoute: (id) => `/stock/assets/products/${id}`,
+    filterFn: (item, query) => {
+      const q = query.toLowerCase();
+      return (
+        item.name.toLowerCase().includes(q) ||
+        (item.code?.toLowerCase().includes(q) ?? false) ||
+        (item.description?.toLowerCase().includes(q) ?? false)
+      );
+    },
+  });
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleProductClick = useCallback((product: Product) => {
+    setSelectedProduct(product);
+    setDetailModalOpen(true);
+  }, []);
+
+  const handleVariantClick = useCallback((variant: Variant) => {
+    setSelectedVariant(variant);
+    setVariantDetailModalOpen(true);
+  }, []);
+
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
+
+  const renderGridCard = (item: Product, isSelected: boolean) => {
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="grid"
+        title={item.name}
+        subtitle={item.code}
+        icon={Package}
+        iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
+        badges={[
+          {
+            label:
+              item.status === 'ACTIVE'
+                ? 'Ativo'
+                : item.status === 'INACTIVE'
+                  ? 'Inativo'
+                  : 'Arquivado',
+            variant: item.status === 'ACTIVE' ? 'default' : 'secondary',
+          },
+        ]}
+        metadata={
+          <div className="flex items-center gap-4 text-xs">
+            {item.description && (
+              <span className="truncate">{item.description}</span>
+            )}
+            {item.createdAt && (
+              <span>
+                Criado em {new Date(item.createdAt).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => handleProductClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  const renderListCard = (item: Product, isSelected: boolean) => {
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="list"
+        title={item.name}
+        subtitle={item.code}
+        icon={Package}
+        iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
+        badges={[
+          {
+            label:
+              item.status === 'ACTIVE'
+                ? 'Ativo'
+                : item.status === 'INACTIVE'
+                  ? 'Inativo'
+                  : 'Arquivado',
+            variant: item.status === 'ACTIVE' ? 'default' : 'secondary',
+          },
+        ]}
+        metadata={
+          <>
+            {item.description && (
+              <span className="text-xs truncate">{item.description}</span>
+            )}
+          </>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => handleProductClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const selectedIds = useMemo(
+    () => Array.from(page.selection?.state.selectedIds || []),
+    [page.selection?.state.selectedIds]
+  );
+
+  const hasSelection = selectedIds.length > 0;
+
+  // Memoize initialIds para evitar recálculos desnecessários
+  const initialIds = useMemo(
+    () => page.filteredItems.map(i => i.id),
+    [page.filteredItems]
+  );
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <SelectionProvider>
-      <ProductsContent />
-    </SelectionProvider>
+    <CoreProvider
+      selection={{
+        namespace: 'products',
+        initialIds,
+      }}
+    >
+      <div className="min-h-screen  from-blue-50 via-gray-50 to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 p-6">
+        <div className="max-w-8xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Produtos
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Gerencie o catálogo de produtos
+              </p>
+            </div>
+            <Button
+              onClick={() => page.modals.open('create')}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Produto
+            </Button>
+          </div>
+
+          {/* Search Bar */}
+          <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={productsConfig.display.labels.searchPlaceholder}
+                value={page.searchQuery}
+                onChange={e => page.handlers.handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </Card>
+
+          {/* Grid */}
+          {page.isLoading ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-gray-600 dark:text-white/60">Carregando...</p>
+            </Card>
+          ) : page.error ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-destructive">Erro ao carregar produtos</p>
+            </Card>
+          ) : (
+            <EntityGrid
+              config={productsConfig}
+              items={page.filteredItems}
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={page.isLoading}
+              isSearching={!!page.searchQuery}
+              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
+              onItemDoubleClick={item =>
+                page.handlers.handleItemDoubleClick(item)
+              }
+            />
+          )}
+
+          {/* Selection Toolbar */}
+          {hasSelection && (
+            <SelectionToolbar
+              selectedIds={selectedIds}
+              totalItems={page.filteredItems.length}
+              onClear={() => page.selection?.actions.clear()}
+              onSelectAll={() => page.selection?.actions.selectAll()}
+              defaultActions={{
+                view: true,
+                edit: true,
+                duplicate: true,
+                delete: true,
+              }}
+              handlers={{
+                onView: page.handlers.handleItemsView,
+                onEdit: page.handlers.handleItemsEdit,
+                onDuplicate: page.handlers.handleItemsDuplicate,
+                onDelete: page.handlers.handleItemsDelete,
+              }}
+            />
+          )}
+
+          {/* Create Modal */}
+          <Dialog
+            open={page.modals.isOpen('create')}
+            onOpenChange={open => !open && page.modals.close('create')}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Novo Produto</DialogTitle>
+              </DialogHeader>
+              <CreateProductForm
+                onSubmit={async data => {
+                  await crud.create(data);
+                }}
+                onCancel={() => page.modals.close('create')}
+                isSubmitting={crud.isCreating}
+              />
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Modal */}
+          <Dialog
+            open={page.modals.isOpen('edit')}
+            onOpenChange={open => !open && page.modals.close('edit')}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Editar Produto</DialogTitle>
+              </DialogHeader>
+              {page.modals.editingItem && (
+                <EntityForm
+                  config={productsConfig.form!}
+                  mode="edit"
+                  initialData={page.modals.editingItem}
+                  onSubmit={async data => {
+                    await crud.update(page.modals.editingItem!.id, data);
+                    page.modals.close('edit');
+                  }}
+                  onCancel={() => page.modals.close('edit')}
+                  isSubmitting={crud.isUpdating}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Delete Confirmation */}
+          <ConfirmDialog
+            open={page.modals.isOpen('delete')}
+            onOpenChange={open => !open && page.modals.close('delete')}
+            title="Excluir Produto"
+            description={
+              page.modals.itemsToDelete.length === 1
+                ? 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
+                : `Tem certeza que deseja excluir ${page.modals.itemsToDelete.length} produtos? Esta ação não pode ser desfeita.`
+            }
+            onConfirm={page.handlers.handleDeleteConfirm}
+            confirmLabel="Excluir"
+            cancelLabel="Cancelar"
+            variant="destructive"
+            isLoading={crud.isDeleting}
+          />
+
+          {/* Duplicate Confirmation */}
+          <ConfirmDialog
+            open={page.modals.isOpen('duplicate')}
+            onOpenChange={open => !open && page.modals.close('duplicate')}
+            title="Duplicar Produto"
+            description={
+              page.modals.itemsToDuplicate.length === 1
+                ? 'Tem certeza que deseja duplicar este produto?'
+                : `Tem certeza que deseja duplicar ${page.modals.itemsToDuplicate.length} produtos?`
+            }
+            onConfirm={page.handlers.handleDuplicateConfirm}
+            confirmLabel="Duplicar"
+            cancelLabel="Cancelar"
+            isLoading={crud.isDuplicating}
+          />
+
+          {/* Hierarchical Detail Modals */}
+          <ProductDetailModal
+            product={selectedProduct}
+            open={detailModalOpen}
+            onOpenChange={setDetailModalOpen}
+            onVariantClick={handleVariantClick}
+          />
+
+          <VariantDetailModal
+            variant={selectedVariant}
+            open={variantDetailModalOpen}
+            onOpenChange={setVariantDetailModalOpen}
+          />
+        </div>
+      </div>
+    </CoreProvider>
   );
 }

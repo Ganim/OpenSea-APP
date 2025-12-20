@@ -10,13 +10,13 @@ import { useAuth } from '@/contexts/auth-context';
 import { translateError } from '@/lib/error-messages';
 import { useForm } from '@tanstack/react-form';
 import {
-  CheckCircle2,
-  ChevronRight,
-  Hash,
-  Info,
-  Lock,
-  Mail,
-  User,
+    CheckCircle2,
+    ChevronRight,
+    Hash,
+    Info,
+    Lock,
+    Mail,
+    User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -124,7 +124,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="name">Nome Completo</Label>
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40  z-10 pointer-events-none" />
                         <Input
                           id="name"
                           type="text"
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="username">Nome de Usuário</Label>
                       <div className="relative">
-                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
+                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none " />
                         <Input
                           id="username"
                           type="text"
@@ -167,7 +167,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
                         <Input
                           id="email"
                           type="email"
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="password">Senha</Label>
                       <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
                         <Input
                           id="password"
                           type="password"
@@ -209,7 +209,7 @@ export default function RegisterPage() {
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">Confirmar Senha</Label>
                       <div className="relative">
-                        <CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
+                        <CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
                         <Input
                           id="confirmPassword"
                           type="password"
@@ -265,7 +265,7 @@ export default function RegisterPage() {
             <p className="text-gray-600 dark:text-white/60">
               Já tem uma conta?{' '}
               <Link
-                href="/login"
+                href="/fast-login"
                 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
                 Entrar

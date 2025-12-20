@@ -2,6 +2,7 @@
 
 import { authConfig } from '@/config/api';
 import { useLogin, useLogout, useMe, useRegister } from '@/hooks';
+import { saveAccount } from '@/lib/saved-accounts';
 import type { LoginCredentials, RegisterData, User } from '@/types';
 import { useRouter } from 'next/navigation';
 import React, { createContext, useContext } from 'react';
@@ -35,10 +36,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     data: userData,
     isLoading: isLoadingUser,
     refetch: refetchUser,
+    error: userError,
   } = useMe(hasToken);
 
+  // Se houve erro ao buscar usuário (token inválido/expirado), limpa os tokens
+  React.useEffect(() => {
+    if (userError && hasToken) {
+      console.log('🔑 Token inválido ou usuário não encontrado, limpando...');
+      localStorage.removeItem(authConfig.tokenKey);
+      localStorage.removeItem(authConfig.refreshTokenKey);
+    }
+  }, [userError, hasToken]);
+
   const user = userData?.user || null;
-  const isAuthenticated = !!user && hasToken;
+  const isAuthenticated = !!user && hasToken && !userError;
 
   // Login
   const login = async (credentials: LoginCredentials) => {
@@ -54,8 +65,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Aguarda os dados do usuário serem carregados
       console.log('🔄 Buscando dados do usuário...');
-      await refetchUser();
+      const userResult = await refetchUser();
       console.log('✅ Dados do usuário carregados');
+
+      // Salva a conta para Fast Login
+      if (userResult.data?.user) {
+        const u = userResult.data.user;
+        saveAccount({
+          id: u.id,
+          identifier: credentials.email, // Salva o que o usuário digitou (email ou username)
+          displayName: u.profile?.name
+            ? `${u.profile.name}${u.profile.surname ? ` ${u.profile.surname}` : ''}`
+            : u.username,
+          avatarUrl: u.profile?.avatarUrl,
+        });
+        console.log('💾 Conta salva para Fast Login');
+      }
 
       // Redireciona para o dashboard
       console.log('🚀 Redirecionando para /');
@@ -95,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(authConfig.refreshTokenKey);
 
       // Redireciona para login
-      router.push('/login');
+      router.push('/fast-login');
     }
   };
 

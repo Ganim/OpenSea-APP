@@ -1,16 +1,16 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-  ItemEntryResponse,
-  ItemExitResponse,
-  ItemMovementsQuery,
-  ItemMovementsResponse,
-  ItemResponse,
-  ItemsResponse,
-  ItemTransferResponse,
-  RegisterItemEntryRequest,
-  RegisterItemExitRequest,
-  TransferItemRequest,
+    ItemEntryResponse,
+    ItemExitResponse,
+    ItemMovementsQuery,
+    ItemMovementsResponse,
+    ItemResponse,
+    ItemsResponse,
+    ItemTransferResponse,
+    RegisterItemEntryRequest,
+    RegisterItemExitRequest,
+    TransferItemRequest,
 } from '@/types/stock';
 
 export const itemsService = {
@@ -45,6 +45,11 @@ export const itemsService = {
       API_ENDPOINTS.ITEMS.TRANSFER,
       data
     );
+  },
+
+  // DELETE /v1/items/:itemId
+  async deleteItem(itemId: string): Promise<void> {
+    return apiClient.delete<void>(API_ENDPOINTS.ITEMS.DELETE(itemId));
   },
 };
 

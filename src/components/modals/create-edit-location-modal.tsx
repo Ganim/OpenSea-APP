@@ -161,36 +161,47 @@ export function CreateEditLocationModal({
     locations: LocationCreationData[],
     creatingChildren: boolean
   ) => {
-    const dataList = locations.map(location => JSON.stringify({ ...location, creatingChildren }));
+    const dataList = locations.map(location =>
+      JSON.stringify({ ...location, creatingChildren })
+    );
     await hierarchicalBatch.start(dataList);
   };
 
   // Batch operation para hierarquia (pais primeiro, filhos depois)
   const hierarchicalBatch = useBatchOperation(
     async (locationData: string) => {
-      const data = JSON.parse(locationData) as LocationCreationData & { creatingChildren?: boolean };
+      const data = JSON.parse(locationData) as LocationCreationData & {
+        creatingChildren?: boolean;
+      };
       const creatingChildren = data.creatingChildren || false;
-      
+
       // Se estamos criando filhos, resolver o parentId baseado no nome do pai
       let parentId = data.parentId;
       if (creatingChildren && data.parentName) {
         parentId = createdLocationIdsRef.current.get(data.parentName);
-        console.log(`Resolvendo parentId para ${data.titulo}: parentName=${data.parentName}, resolvedId=${parentId}`);
+        console.log(
+          `Resolvendo parentId para ${data.titulo}: parentName=${data.parentName}, resolvedId=${parentId}`
+        );
       }
-      
+
       const result = await createLocationMutation.mutateAsync({
         titulo: data.titulo,
         type: data.type,
         parentId,
         isActive: data.isActive,
       });
-      
+
       // Se estamos criando pais, armazenar o ID para referência futura
-      if (!creatingChildren && result && typeof result.id === 'string' && data.titulo) {
+      if (
+        !creatingChildren &&
+        result &&
+        typeof result.id === 'string' &&
+        data.titulo
+      ) {
         createdLocationIdsRef.current.set(data.titulo, result.id);
         console.log(`Armazenado ID para ${data.titulo}: ${result.id}`);
       }
-      
+
       return result;
     },
     {
@@ -412,19 +423,21 @@ export function CreateEditLocationModal({
   };
 
   // Função para expandir padrões com chaves e colchetes
-  const expandPattern = (pattern: string): string[] | { parents: string[]; childrenPattern: string } => {
+  const expandPattern = (
+    pattern: string
+  ): string[] | { parents: string[]; childrenPattern: string } => {
     // Verificar primeiro padrões de hierarquia: basePattern*(subPattern)
     const hierarchyMatch = pattern.match(HIERARCHY_PATTERN);
 
     if (hierarchyMatch) {
       const [, basePattern, subPattern] = hierarchyMatch;
-      
+
       // Expandir o padrão base para obter todos os pais
       const baseExpanded = expandPattern(basePattern);
       if (Array.isArray(baseExpanded)) {
-        return { 
-          parents: baseExpanded, 
-          childrenPattern: subPattern 
+        return {
+          parents: baseExpanded,
+          childrenPattern: subPattern,
         };
       }
     }
@@ -499,15 +512,18 @@ export function CreateEditLocationModal({
   const parseLocationStringAdvanced = (input: string): LocationNode[] => {
     // Primeiro expandir padrões com chaves e colchetes
     const expandedPatterns: string[] = [];
-    const hierarchyPatterns: Array<{ parents: string[]; childrenPattern: string }> = [];
-    
+    const hierarchyPatterns: Array<{
+      parents: string[];
+      childrenPattern: string;
+    }> = [];
+
     const parts = input.split(',');
 
     for (const part of parts) {
       const trimmed = part.trim();
       if (trimmed) {
         const expanded = expandPattern(trimmed);
-        
+
         if (typeof expanded === 'object' && 'parents' in expanded) {
           // É um padrão hierárquico
           hierarchyPatterns.push(expanded);
@@ -520,37 +536,47 @@ export function CreateEditLocationModal({
 
     // Processar padrões hierárquicos
     const result: LocationNode[] = [];
-    
+
     for (const hierarchy of hierarchyPatterns) {
       for (const parentName of hierarchy.parents) {
         const children: LocationNode[] = [];
-        
+
         // Processar o childrenPattern
-        if (hierarchy.childrenPattern.startsWith('+-[') && hierarchy.childrenPattern.endsWith(']')) {
+        if (
+          hierarchy.childrenPattern.startsWith('+-[') &&
+          hierarchy.childrenPattern.endsWith(']')
+        ) {
           // Padrão +- [n] significa usar nome do pai + hífen + letras
-          const letterCount = parseInt(hierarchy.childrenPattern.match(/\[(\d+)\]/)?.[1] || '1');
+          const letterCount = parseInt(
+            hierarchy.childrenPattern.match(/\[(\d+)\]/)?.[1] || '1'
+          );
           for (let i = 0; i < letterCount; i++) {
             const letter = String.fromCharCode(65 + i); // A, B, C...
             children.push({
               name: `${parentName}-${letter}`,
-              children: []
+              children: [],
             });
           }
-        } else if (hierarchy.childrenPattern.startsWith('+[') && hierarchy.childrenPattern.endsWith(']')) {
+        } else if (
+          hierarchy.childrenPattern.startsWith('+[') &&
+          hierarchy.childrenPattern.endsWith(']')
+        ) {
           // Padrão +[n] significa usar nome do pai + letras (sem hífen)
-          const letterCount = parseInt(hierarchy.childrenPattern.match(/\[(\d+)\]/)?.[1] || '1');
+          const letterCount = parseInt(
+            hierarchy.childrenPattern.match(/\[(\d+)\]/)?.[1] || '1'
+          );
           for (let i = 0; i < letterCount; i++) {
             const letter = String.fromCharCode(65 + i); // A, B, C...
             children.push({
               name: `${parentName}${letter}`,
-              children: []
+              children: [],
             });
           }
         }
-        
+
         result.push({
           name: parentName,
-          children
+          children,
         });
       }
     }
@@ -559,7 +585,7 @@ export function CreateEditLocationModal({
     for (const pattern of expandedPatterns) {
       result.push({
         name: pattern,
-        children: []
+        children: [],
       });
     }
 
@@ -637,7 +663,8 @@ export function CreateEditLocationModal({
 
     for (const node of nodes) {
       // Determinar o tipo correto baseado na hierarquia
-      const locationType = currentType || getNextTypeInHierarchy(parentLocation?.type);
+      const locationType =
+        currentType || getNextTypeInHierarchy(parentLocation?.type);
 
       const data: LocationCreationData = {
         titulo: node.name,
@@ -777,7 +804,9 @@ export function CreateEditLocationModal({
 
                 <TabsContent value="basic" className="space-y-4 mt-4">
                   {(() => {
-                    const nextType = getNextTypeInHierarchy(parentLocation?.type);
+                    const nextType = getNextTypeInHierarchy(
+                      parentLocation?.type
+                    );
                     const typeLabels = {
                       WAREHOUSE: 'Armazém',
                       ZONE: 'Zona',
@@ -791,9 +820,9 @@ export function CreateEditLocationModal({
                       return (
                         <div className="space-y-4">
                           <div className="text-sm text-gray-600 dark:text-gray-400">
-                            Configurando <strong>{typeLabels[nextType]}</strong> -
-                            Digite o nome base e defina colunas (números) e linhas
-                            (letras A, B, C...).
+                            Configurando <strong>{typeLabels[nextType]}</strong>{' '}
+                            - Digite o nome base e defina colunas (números) e
+                            linhas (letras A, B, C...).
                           </div>
 
                           {aisleConfigs.map((config, index) => (
@@ -938,13 +967,16 @@ export function CreateEditLocationModal({
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Use vírgulas para separar, parênteses para hierarquia,
-                      chaves {'{n}'} para números sequenciais com padding automático e colchetes [n] para
-                      letras (A, B, C...).
+                      chaves {'{n}'} para números sequenciais com padding
+                      automático e colchetes [n] para letras (A, B, C...).
                       <br />
-                      <strong>Hierarquia automática:</strong> <code>padrão*(subpadrão)</code> cria sublocalizações para cada localização.
-                      Exemplo: <code>20{'{2}'}*(+-[2])</code> cria 201 (201-A, 201-B) e 202 (202-A, 202-B)
+                      <strong>Hierarquia automática:</strong>{' '}
+                      <code>padrão*(subpadrão)</code> cria sublocalizações para
+                      cada localização. Exemplo: <code>20{'{2}'}*(+-[2])</code>{' '}
+                      cria 201 (201-A, 201-B) e 202 (202-A, 202-B)
                       <br />
-                      Exemplos: <code>{'{3}'}00</code> cria 100, 200, 300; <code>PRT{'{20}'}</code> cria PRT01, PRT02, ..., PRT20
+                      Exemplos: <code>{'{3}'}00</code> cria 100, 200, 300;{' '}
+                      <code>PRT{'{20}'}</code> cria PRT01, PRT02, ..., PRT20
                     </p>
                   </div>
                 </TabsContent>
@@ -995,7 +1027,11 @@ export function CreateEditLocationModal({
                             batchCreate.isRunning
                           );
                         } else {
-                          return !basicName.trim() || isLoading || batchCreate.isRunning;
+                          return (
+                            !basicName.trim() ||
+                            isLoading ||
+                            batchCreate.isRunning
+                          );
                         }
                       })()
                     : !names.trim() || isLoading || batchCreate.isRunning

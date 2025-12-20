@@ -1,594 +1,428 @@
 /**
- * Templates Page
- * Página de gestão de templates de estoque
+ * OpenSea OS - Templates Page
+ * Página de gerenciamento de templates usando o novo sistema OpenSea OS
  */
 
 'use client';
 
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { HelpModal } from '@/components/modals/help-modal';
-import { ImportTemplatesModal } from '@/components/modals/import-templates-modal';
-import { QuickCreateTemplateModal } from '@/components/modals/quick-create-template-modal';
-import { BatchProgressDialog } from '@/components/stock/batch-progress-dialog';
-import {
-  ItemsGrid,
-  TemplateGridCard,
-  TemplateListCard,
-} from '@/components/stock/items-grid';
 import { MultiViewModal } from '@/components/stock/multi-view-modal';
-import { PageHeader } from '@/components/stock/page-header';
-import { SearchSection } from '@/components/stock/search-section';
-import { StatsSection } from '@/components/stock/stats-section';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useAuth } from '@/contexts/auth-context';
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
+  CoreProvider,
+  EntityContextMenu,
+  EntityGrid,
+  SelectionToolbar,
+  UniversalCard,
+  useEntityCrud,
+  useEntityPage,
+  type SortDirection,
+} from '@/core';
+import { templatesService } from '@/services/stock';
+import type { Template } from '@/types/stock';
 import {
-  useCreateTemplate,
-  useDeleteTemplate,
-  useTemplates,
-} from '@/hooks/stock';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-import type { CreateTemplateRequest } from '@/types/stock';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  CheckCircle,
-  FileText,
-  HelpCircle,
-  Layers,
+  Calendar,
+  LayoutTemplate,
   Plus,
-  Upload,
-  Zap,
+  RefreshCcwDot,
+  Search,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
-// Query key para templates
-const TEMPLATES_QUERY_KEY = ['templates'];
+import { useMemo, useState } from 'react';
+import {
+  CreateModal,
+  createTemplate,
+  DeleteConfirmModal,
+  deleteTemplate,
+  DuplicateConfirmModal,
+  duplicateTemplate,
+  EditModal,
+  getUnitLabel,
+  templatesConfig,
+  updateTemplate,
+  ViewModal,
+} from './src';
 
 export default function TemplatesPage() {
-  return (
-    <ProtectedRoute requiredRole="MANAGER">
-      <SelectionProvider>
-        <TemplatesPageContent />
-      </SelectionProvider>
-    </ProtectedRoute>
-  );
-}
+  // ============================================================================
+  // STATE
+  // ============================================================================
 
-function TemplatesPageContent() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isQuickCreateModalOpen, setIsQuickCreateModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-  const [isMultiViewModalOpen, setIsMultiViewModalOpen] = useState(false);
-  const [multiViewTemplateIds, setMultiViewTemplateIds] = useState<string[]>(
-    []
-  );
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<
-    'delete' | 'duplicate' | null
-  >(null);
+  const [multiViewOpen, setMultiViewOpen] = useState(false);
+  const [multiViewTemplates, setMultiViewTemplates] = useState<Template[]>([]);
 
-  // Selection context
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
+  // ============================================================================
+  // CRUD SETUP
+  // ============================================================================
 
-  // TanStack Query hooks
-  const { data: templates = [], isLoading } = useTemplates();
-  const createTemplateMutation = useCreateTemplate();
-  const deleteTemplateMutation = useDeleteTemplate();
-
-  // Batch delete operation
-  const batchDelete = useBatchOperation(
-    (id: string) => deleteTemplateMutation.mutateAsync(id),
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onItemComplete: result => {
-        // Invalida o cache após cada item deletado com sucesso
-        if (result.status === 'success') {
-          queryClient.invalidateQueries({ queryKey: TEMPLATES_QUERY_KEY });
-        }
-      },
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
-
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Template excluído com sucesso!'
-              : `${succeeded} templates excluídos com sucesso!`
-          );
-        } else if (succeeded > 0) {
-          toast.warning(
-            `${succeeded} templates excluídos, mas ${failed} falharam.`
-          );
-        } else {
-          toast.error('Erro ao excluir templates');
-        }
-
-        clearSelection();
-      },
-    }
-  );
-
-  // Batch duplicate operation
-  const batchDuplicate = useBatchOperation(
-    async (id: string) => {
-      const template = templates.find(t => t.id === id);
-      if (!template) throw new Error('Template não encontrado');
-
-      const data: CreateTemplateRequest = {
-        name: `${template.name} (cópia)`,
-        productAttributes: template.productAttributes || {},
-        variantAttributes: template.variantAttributes,
-        itemAttributes: template.itemAttributes,
-      };
-      return createTemplateMutation.mutateAsync(data);
+  const crud = useEntityCrud<Template>({
+    entityName: 'Template',
+    entityNamePlural: 'Templates',
+    queryKey: ['templates'],
+    baseUrl: '/api/v1/templates',
+    listFn: async () => {
+      const response = await templatesService.listTemplates();
+      return response.templates;
     },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onItemComplete: result => {
-        // Invalida o cache após cada item duplicado com sucesso
-        if (result.status === 'success') {
-          queryClient.invalidateQueries({ queryKey: TEMPLATES_QUERY_KEY });
-        }
-      },
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
+    getFn: (id: string) =>
+      templatesService.getTemplate(id).then(r => r.template),
+    createFn: createTemplate,
+    updateFn: updateTemplate,
+    deleteFn: deleteTemplate,
+    duplicateFn: duplicateTemplate,
+  });
 
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Template duplicado com sucesso!'
-              : `${succeeded} templates duplicados com sucesso!`
-          );
-        } else if (succeeded > 0) {
-          toast.warning(
-            `${succeeded} templates duplicados, mas ${failed} falharam.`
-          );
-        } else {
-          toast.error('Erro ao duplicar templates');
-        }
+  // ============================================================================
+  // PAGE SETUP
+  // ============================================================================
 
-        clearSelection();
-      },
-    }
-  );
+  const page = useEntityPage<Template>({
+    entityName: 'Template',
+    entityNamePlural: 'Templates',
+    queryKey: ['templates'],
+    crud,
+    viewRoute: id => `/stock/assets/templates/${id}`,
+    filterFn: (item, query) => {
+      const q = query.toLowerCase();
+      return item.name.toLowerCase().includes(q);
+    },
+    duplicateConfig: {
+      getNewName: item => `${item.name} (cópia)`,
+      getData: item => ({
+        name: `${item.name} (cópia)`,
+        unitOfMeasure: item.unitOfMeasure,
+        productAttributes: item.productAttributes,
+        variantAttributes: item.variantAttributes,
+        itemAttributes: item.itemAttributes,
+        careInstructions: item.careInstructions,
+      }),
+    },
+  });
 
-  // Redirecionar usuários USER para página de requisição
-  useEffect(() => {
-    if (user && user.role === 'USER') {
-      router.replace('/stock/assets/templates/request');
-    }
-  }, [user, router]);
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-  // Filtrar templates com base na busca
-  const filteredTemplates = useMemo(() => {
-    if (!searchQuery.trim()) return templates;
-    return templates.filter(template =>
-      template.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [templates, searchQuery]);
-
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleQuickCreate = async (name: string) => {
-    try {
-      const data: CreateTemplateRequest = {
-        name,
-        productAttributes: {},
-      };
-      await createTemplateMutation.mutateAsync(data);
-      toast.success('Template criado com sucesso!');
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-      const errorDetails = JSON.stringify(
-        {
-          error: message,
-          templateName: name,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        2
+  // Context menu handlers
+  const handleContextView = (ids: string[]) => {
+    if (ids.length > 1) {
+      // Visualização múltipla - usar MultiViewModal
+      const templates = page.filteredItems.filter(item =>
+        ids.includes(item.id)
       );
-
-      toast.error('Erro ao criar template', {
-        description: message,
-        action: {
-          label: 'Copiar erro',
-          onClick: () => {
-            navigator.clipboard.writeText(errorDetails);
-            toast.success('Erro copiado para área de transferência');
-          },
-        },
-      });
-      throw error;
-    }
-  };
-
-  const handleNavigateToNew = () => {
-    router.push('/stock/assets/templates/new');
-  };
-
-  const handleImportTemplates = async (file: File) => {
-    // TODO: Implementar importação de templates
-    console.log('Importando arquivo:', file.name);
-  };
-
-  const handleTemplateClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      // Shift+Click: seleção em range
-      const allIds = filteredTemplates.map(t => t.id);
-      selectRange(lastSelectedId, id, allIds);
+      setMultiViewTemplates(templates);
+      setMultiViewOpen(true);
     } else {
-      // Click normal ou Ctrl+Click
-      selectItem(id, event);
+      // Visualização única - usar modal padrão
+      page.handlers.handleItemsView(ids);
     }
   };
 
-  const handleTemplateDoubleClick = (id: string) => {
-    router.push(`/stock/assets/templates/${id}`);
-  };
-
-  const handleTemplatesView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/templates/${ids[0]}`);
-    } else if (ids.length >= 2 && ids.length <= 5) {
-      // Abre visualização múltipla
-      setMultiViewTemplateIds(ids);
-      setIsMultiViewModalOpen(true);
-    } else if (ids.length > 5) {
-      toast.info(
-        `Visualização múltipla suporta até 5 templates. Você selecionou ${ids.length}.`
+  const handleContextEdit = (ids: string[]) => {
+    if (ids.length > 1) {
+      // Edição múltipla - usar MultiViewModal com ?action=edit
+      const templates = page.filteredItems.filter(item =>
+        ids.includes(item.id)
       );
+      setMultiViewTemplates(templates);
+      setMultiViewOpen(true);
     } else {
-      toast.info(`Selecione pelo menos um template para visualizar.`);
+      // Edição única - usar modal padrão ou navegar para página
+      page.handlers.handleItemsEdit(ids);
     }
   };
 
-  const handleTemplatesEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/templates/${ids[0]}/edit`);
-    } else {
-      toast.info(
-        `Edição múltipla não disponível. Selecione apenas um template.`
-      );
-    }
+  const handleContextDuplicate = (ids: string[]) => {
+    page.handlers.handleItemsDuplicate(ids);
   };
 
-  const handleTemplatesDuplicate = (ids: string[]) => {
-    setItemsToDuplicate(ids);
-    setIsDuplicateDialogOpen(true);
+  const handleContextDelete = (ids: string[]) => {
+    page.modals.setItemsToDelete(ids);
+    page.modals.open('delete');
   };
 
-  const handleDuplicateConfirm = async () => {
-    setIsDuplicateDialogOpen(false);
-    setActiveOperation('duplicate');
-    await batchDuplicate.start(itemsToDuplicate);
-  };
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
 
-  const handleTemplatesDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
-    setIsDeleteDialogOpen(true);
-  };
+  const renderGridCard = (item: Template, isSelected: boolean) => {
+    const attributesCount =
+      (Object.keys(item.productAttributes || {}).length || 0) +
+      (Object.keys(item.variantAttributes || {}).length || 0) +
+      (Object.keys(item.itemAttributes || {}).length || 0);
 
-  const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
-  };
-
-  const handleSelectRange = (startId: string, endId: string) => {
-    const allIds = filteredTemplates.map(t => t.id);
-    selectRange(startId, endId, allIds);
-  };
-
-  const stats = [
-    {
-      label: 'Total de Templates',
-      value: templates.length,
-      icon: <FileText className="w-5 h-5" />,
-      trend: 5,
-    },
-    {
-      label: 'Atributos Variantes',
-      value: templates.reduce(
-        (sum, t) => sum + (Object.keys(t.variantAttributes || {}).length || 0),
-        0
-      ),
-      icon: <Layers className="w-5 h-5" />,
-    },
-    {
-      label: 'Atributos Itens',
-      value: templates.reduce(
-        (sum, t) => sum + (Object.keys(t.itemAttributes || {}).length || 0),
-        0
-      ),
-      icon: <Layers className="w-5 h-5" />,
-    },
-    {
-      label: 'Templates Ativos',
-      value: templates.length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-  ];
-
-  const faqs = [
-    {
-      question: 'O que são templates?',
-      answer:
-        'Templates são modelos que definem a estrutura de atributos para produtos e variantes. Eles ajudam a padronizar as informações e facilitar o cadastro em massa.',
-    },
-    {
-      question: 'Como criar um novo template?',
-      answer:
-        'Clique no botão "Novo Template", defina um nome e configure os atributos necessários. Você pode adicionar atributos tanto para variantes quanto para itens individuais.',
-    },
-    {
-      question: 'Posso importar templates em massa?',
-      answer:
-        'Sim! Use o botão "Importar" para fazer upload de um arquivo CSV ou Excel com múltiplos templates. Baixe nosso modelo para garantir a formatação correta.',
-    },
-    {
-      question: 'Como editar um template existente?',
-      answer:
-        'Clique no template desejado na lista para acessar a página de edição. Lá você poderá modificar nome, adicionar ou remover atributos.',
-    },
-  ];
-
-  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Carregando templates...
-          </p>
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleContextView}
+        onEdit={handleContextEdit}
+        onDuplicate={handleContextDuplicate}
+        onDelete={handleContextDelete}
+      >
+        <UniversalCard
+          id={item.id}
+          variant="grid"
+          title={item.name}
+          subtitle={`${attributesCount} atributos definidos`}
+          icon={LayoutTemplate}
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
+          badges={[
+            { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
+          ]}
+          metadata={
+            <div className="flex items-center gap-4 text-xs">
+              {item.createdAt && (
+                <span className="flex items-center gap-1 ">
+                  <Calendar className="h-3 w-3 text-blue-500" />
+                  Criado em {new Date(item.createdAt).toLocaleDateString()}
+                </span>
+              )}
+              {item.updatedAt && item.updatedAt !== item.createdAt && (
+                <span className="flex items-center gap-1 ">
+                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
+                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          }
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          showStatusBadges={true}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  const renderListCard = (item: Template, isSelected: boolean) => {
+    const attributesCount =
+      (Object.keys(item.productAttributes || {}).length || 0) +
+      (Object.keys(item.variantAttributes || {}).length || 0) +
+      (Object.keys(item.itemAttributes || {}).length || 0);
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleContextView}
+        onEdit={handleContextEdit}
+        onDuplicate={handleContextDuplicate}
+        onDelete={handleContextDelete}
+      >
+        <UniversalCard
+          id={item.id}
+          variant="list"
+          title={item.name}
+          subtitle={`${attributesCount} atributos definidos`}
+          icon={LayoutTemplate}
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
+          badges={[
+            { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
+          ]}
+          metadata={
+            <div className="flex items-center gap-4 text-xs">
+              {item.createdAt && (
+                <span className="flex items-center gap-1 ">
+                  <Calendar className="h-3 w-3 text-blue-500" />
+                  Criado em {new Date(item.createdAt).toLocaleDateString()}
+                </span>
+              )}
+              {item.updatedAt && item.updatedAt !== item.createdAt && (
+                <span className="flex items-center gap-1 ">
+                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
+                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          }
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          showStatusBadges={true}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
+  const hasSelection = selectedIds.length > 0;
+
+  const initialIds = useMemo(
+    () => page.filteredItems.map(i => i.id),
+    [page.filteredItems]
+  );
+
+  // Função de ordenação customizada por unidade de medida
+  const customSortByUnit = (
+    a: Template,
+    b: Template,
+    direction: SortDirection
+  ) => {
+    const unitA = a.unitOfMeasure?.toLowerCase() ?? '';
+    const unitB = b.unitOfMeasure?.toLowerCase() ?? '';
+    const result = unitA.localeCompare(unitB, 'pt-BR');
+    return direction === 'asc' ? result : -result;
+  };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  return (
+    <CoreProvider
+      selection={{
+        namespace: 'templates',
+        initialIds,
+      }}
+    >
+      <div className="min-h-screen  from-purple-50 via-gray-50 to-pink-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
+        <div className="max-w-8xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Templates
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Gerencie os templates de produtos
+              </p>
+            </div>
+            <Button
+              onClick={() => page.modals.open('create')}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Template
+            </Button>
+          </div>
+
+          {/* Search Bar */}
+          <Card className="p-4 backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+              <Input
+                type="text"
+                placeholder={templatesConfig.display.labels.searchPlaceholder}
+                value={page.searchQuery}
+                onChange={e => page.handlers.handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </Card>
+
+          {/* Grid */}
+          {page.isLoading ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-gray-600 dark:text-white/60">Carregando...</p>
+            </Card>
+          ) : page.error ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-destructive">Erro ao carregar templates</p>
+            </Card>
+          ) : (
+            <EntityGrid
+              config={templatesConfig}
+              items={page.filteredItems}
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={page.isLoading}
+              isSearching={!!page.searchQuery}
+              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
+              onItemDoubleClick={item =>
+                page.handlers.handleItemDoubleClick(item)
+              }
+              showSorting={true}
+              defaultSortField="name"
+              defaultSortDirection="asc"
+              customSortFn={customSortByUnit}
+              customSortLabel="Unidade de Medida"
+            />
+          )}
+
+          {/* Selection Toolbar */}
+          {hasSelection && (
+            <SelectionToolbar
+              selectedIds={selectedIds}
+              totalItems={page.filteredItems.length}
+              onClear={() => page.selection?.actions.clear()}
+              onSelectAll={() => page.selection?.actions.selectAll()}
+              defaultActions={{
+                view: true,
+                edit: true,
+                duplicate: true,
+                delete: true,
+              }}
+              handlers={{
+                onView: page.handlers.handleItemsView,
+                onEdit: page.handlers.handleItemsEdit,
+                onDuplicate: page.handlers.handleItemsDuplicate,
+                onDelete: page.handlers.handleItemsDelete,
+              }}
+            />
+          )}
+
+          {/* View Modal */}
+          <ViewModal
+            isOpen={page.modals.isOpen('view')}
+            onClose={() => page.modals.close('view')}
+            template={page.modals.viewingItem}
+          />
+
+          {/* Create Modal */}
+          <CreateModal
+            isOpen={page.modals.isOpen('create')}
+            onClose={() => page.modals.close('create')}
+            isSubmitting={crud.isCreating}
+            onSubmit={async data => {
+              await crud.create(data);
+            }}
+          />
+
+          {/* Edit Modal */}
+          <EditModal
+            isOpen={page.modals.isOpen('edit')}
+            onClose={() => page.modals.close('edit')}
+            template={page.modals.editingItem}
+            isSubmitting={crud.isUpdating}
+            onSubmit={async (id, data) => {
+              await crud.update(id, data);
+            }}
+          />
+
+          {/* Multi View Modal */}
+          <MultiViewModal
+            isOpen={multiViewOpen}
+            onClose={() => setMultiViewOpen(false)}
+            templates={multiViewTemplates}
+            availableTemplates={page.filteredItems}
+          />
+
+          {/* Delete Confirmation */}
+          <DeleteConfirmModal
+            isOpen={page.modals.isOpen('delete')}
+            onClose={() => page.modals.close('delete')}
+            itemCount={page.modals.itemsToDelete.length}
+            onConfirm={page.handlers.handleDeleteConfirm}
+            isLoading={crud.isDeleting}
+          />
+
+          {/* Duplicate Confirmation */}
+          <DuplicateConfirmModal
+            isOpen={page.modals.isOpen('duplicate')}
+            onClose={() => page.modals.close('duplicate')}
+            itemCount={page.modals.itemsToDuplicate.length}
+            onConfirm={page.handlers.handleDuplicateConfirm}
+            isLoading={crud.isDuplicating}
+          />
         </div>
       </div>
-    );
-  }
-
-  return (
-    <ProtectedRoute requiredRole="MANAGER">
-      <div className="flex-col flex gap-4">
-        <PageHeader
-          title="Templates"
-          description="Crie e gerencie modelos de produtos para padronizar atributos e facilitar o cadastro em massa."
-          buttons={[
-            {
-              icon: HelpCircle,
-              onClick: () => setIsHelpModalOpen(true),
-              variant: 'ghost',
-            },
-            {
-              icon: Zap,
-              text: 'Rápido',
-              onClick: () => setIsQuickCreateModalOpen(true),
-              variant: 'outline',
-              style: { iconColor: 'text-yellow-500' },
-            },
-            {
-              icon: Upload,
-              text: 'Importar',
-              onClick: () => setIsImportModalOpen(true),
-              variant: 'outline',
-            },
-            {
-              icon: Plus,
-              text: 'Novo Template',
-              onClick: handleNavigateToNew,
-              variant: 'default',
-            },
-          ]}
-        />
-
-        <SearchSection
-          searchPlaceholder="Buscar templates..."
-          onSearch={handleSearch}
-        />
-
-        <StatsSection stats={stats} defaultExpanded />
-
-        <ItemsGrid
-          items={filteredTemplates}
-          isSearching={!!searchQuery.trim()}
-          selectedIds={selectedIds}
-          onItemClick={handleTemplateClick}
-          onItemDoubleClick={handleTemplateDoubleClick}
-          onItemsView={handleTemplatesView}
-          onItemsEdit={handleTemplatesEdit}
-          onItemsDuplicate={handleTemplatesDuplicate}
-          onItemsDelete={handleTemplatesDelete}
-          onClearSelection={clearSelection}
-          onSelectRange={handleSelectRange}
-          renderGridItem={(template, isSelected) => (
-            <TemplateGridCard
-              name={template.name}
-              attributesCount={
-                (Object.keys(template.variantAttributes || {}).length || 0) +
-                (Object.keys(template.itemAttributes || {}).length || 0)
-              }
-              createdAt={template.createdAt}
-              updatedAt={template.updatedAt}
-              isSelected={isSelected}
-            />
-          )}
-          renderListItem={(template, isSelected) => (
-            <TemplateListCard
-              name={template.name}
-              attributesCount={
-                (Object.keys(template.variantAttributes || {}).length || 0) +
-                (Object.keys(template.itemAttributes || {}).length || 0)
-              }
-              createdAt={template.createdAt}
-              updatedAt={template.updatedAt}
-              isSelected={isSelected}
-            />
-          )}
-          emptyMessage="Nenhum template encontrado"
-        />
-
-        <QuickCreateTemplateModal
-          isOpen={isQuickCreateModalOpen}
-          onClose={() => setIsQuickCreateModalOpen(false)}
-          onSubmit={handleQuickCreate}
-        />
-
-        <ImportTemplatesModal
-          isOpen={isImportModalOpen}
-          onClose={() => setIsImportModalOpen(false)}
-          onImport={handleImportTemplates}
-        />
-
-        <HelpModal
-          isOpen={isHelpModalOpen}
-          onClose={() => setIsHelpModalOpen(false)}
-          title="Templates"
-          faqs={faqs}
-        />
-
-        <AlertDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-              <AlertDialogDescription>
-                {itemsToDelete.length === 1
-                  ? 'Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita.'
-                  : `Tem certeza que deseja excluir ${itemsToDelete.length} templates? Esta ação não pode ser desfeita.`}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDeleteConfirm}
-                disabled={deleteTemplateMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
-              >
-                {deleteTemplateMutation.isPending ? 'Excluindo...' : 'Excluir'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <AlertDialog
-          open={isDuplicateDialogOpen}
-          onOpenChange={setIsDuplicateDialogOpen}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar duplicação</AlertDialogTitle>
-              <AlertDialogDescription>
-                {itemsToDuplicate.length === 1
-                  ? 'Tem certeza que deseja duplicar este template?'
-                  : `Tem certeza que deseja duplicar ${itemsToDuplicate.length} templates? Isso criará ${itemsToDuplicate.length} novos templates.`}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDuplicateConfirm}
-                disabled={createTemplateMutation.isPending}
-              >
-                {createTemplateMutation.isPending
-                  ? 'Duplicando...'
-                  : 'Duplicar'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Dialog de progresso para exclusão */}
-        <BatchProgressDialog
-          open={activeOperation === 'delete' && !batchDelete.isIdle}
-          status={batchDelete.status}
-          total={batchDelete.total}
-          processed={batchDelete.processed}
-          succeeded={batchDelete.succeeded}
-          failed={batchDelete.failed}
-          progress={batchDelete.progress}
-          operationType="delete"
-          itemName="templates"
-          onClose={() => {
-            batchDelete.reset();
-            setActiveOperation(null);
-          }}
-          onPause={batchDelete.pause}
-          onResume={batchDelete.resume}
-          onCancel={batchDelete.cancel}
-        />
-
-        {/* Dialog de progresso para duplicação */}
-        <BatchProgressDialog
-          open={activeOperation === 'duplicate' && !batchDuplicate.isIdle}
-          status={batchDuplicate.status}
-          total={batchDuplicate.total}
-          processed={batchDuplicate.processed}
-          succeeded={batchDuplicate.succeeded}
-          failed={batchDuplicate.failed}
-          progress={batchDuplicate.progress}
-          operationType="duplicate"
-          itemName="templates"
-          onClose={() => {
-            batchDuplicate.reset();
-            setActiveOperation(null);
-          }}
-          onPause={batchDuplicate.pause}
-          onResume={batchDuplicate.resume}
-          onCancel={batchDuplicate.cancel}
-        />
-
-        {/* Modal de visualização múltipla */}
-        <MultiViewModal
-          isOpen={isMultiViewModalOpen}
-          onClose={() => {
-            setIsMultiViewModalOpen(false);
-            setMultiViewTemplateIds([]);
-          }}
-          templates={templates.filter(t => multiViewTemplateIds.includes(t.id))}
-          availableTemplates={templates}
-          onAddTemplate={templateId => {
-            if (multiViewTemplateIds.length < 5) {
-              setMultiViewTemplateIds([...multiViewTemplateIds, templateId]);
-            }
-          }}
-        />
-      </div>
-    </ProtectedRoute>
+    </CoreProvider>
   );
 }

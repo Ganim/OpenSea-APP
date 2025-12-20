@@ -1,13 +1,13 @@
 import { API_ENDPOINTS, authConfig } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-  AuthResponse,
-  LoginCredentials,
-  MessageResponse,
-  RegisterData,
-  RegisterResponse,
-  ResetPasswordRequest,
-  SendPasswordResetRequest,
+    AuthResponse,
+    LoginCredentials,
+    MessageResponse,
+    RegisterData,
+    RegisterResponse,
+    ResetPasswordRequest,
+    SendPasswordResetRequest,
 } from '@/types/auth';
 
 export const authService = {

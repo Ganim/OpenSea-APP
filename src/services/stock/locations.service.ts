@@ -4,7 +4,7 @@ import type {
   CreateLocationRequest,
   LocationResponse,
   LocationsResponse,
-  UpdateLocationRequest
+  UpdateLocationRequest,
 } from '@/types/stock';
 
 /**

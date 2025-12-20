@@ -94,7 +94,7 @@ class ApiClient {
         // Se falhar, limpa os tokens e redireciona para login
         this.clearTokens();
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          window.location.href = '/fast-login';
         }
         throw error;
       } finally {
@@ -269,14 +269,19 @@ class ApiClient {
 
       return await response.json();
     } catch (error) {
-      console.error('[API] Request failed:', {
+      const errorInfo = {
         method: options?.method || 'GET',
         url: `${this.baseURL}${endpoint}`,
-        error,
-        type: error instanceof Error ? error.constructor.name : typeof error,
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+        errorType:
+          error instanceof Error ? error.constructor.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorName: error instanceof Error ? error.name : 'Unknown',
+      };
+
+      console.error('[API] Request failed:', errorInfo);
+      if (error instanceof Error && error.stack) {
+        console.error('[API] Stack trace:', error.stack);
+      }
 
       if (error instanceof Error) {
         if (error.name === 'AbortError') {

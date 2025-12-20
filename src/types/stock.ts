@@ -3,7 +3,37 @@
 
 // Enums
 export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
-export type UnitOfMeasure = 'METERS' | 'KILOGRAMS' | 'UNITS';
+export type UnitOfMeasure =
+  | 'UNITS'
+  | 'KILOGRAMS'
+  | 'GRAMS'
+  | 'LITERS'
+  | 'MILLILITERS'
+  | 'METERS'
+  | 'CENTIMETERS'
+  | 'MILLIMETERS'
+  | 'SQUARE_METERS'
+  | 'CUBIC_METERS'
+  | 'PIECES'
+  | 'BOXES'
+  | 'PACKAGES'
+  | 'BAGS'
+  | 'BOTTLES'
+  | 'CANS'
+  | 'TUBES'
+  | 'ROLLS'
+  | 'SHEETS'
+  | 'BARS'
+  | 'COILS'
+  | 'POUNDS'
+  | 'OUNCES'
+  | 'GALLONS'
+  | 'QUARTS'
+  | 'PINTS'
+  | 'CUPS'
+  | 'TABLESPOONS'
+  | 'TEASPOONS'
+  | 'CUSTOM';
 export type ItemStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'DAMAGED';
 export type MovementType = 'ENTRY' | 'EXIT' | 'TRANSFER' | 'ADJUSTMENT';
 export type ExitMovementType = 'SALE' | 'PRODUCTION' | 'SAMPLE' | 'LOSS';
@@ -20,14 +50,83 @@ export type LocationType =
   | 'BIN'
   | 'OTHER';
 
+// Care Instructions Types (Etiquetas de Conservação - NBR 16365:2015)
+export type WashingInstruction =
+  | 'HAND_WASH' // Lavar à mão
+  | 'MACHINE_30' // Máquina 30°C
+  | 'MACHINE_40' // Máquina 40°C
+  | 'MACHINE_60' // Máquina 60°C
+  | 'DO_NOT_WASH'; // Não lavar
+
+export type BleachingInstruction =
+  | 'ANY_BLEACH' // Pode usar qualquer alvejante
+  | 'NON_CHLORINE' // Apenas alvejante sem cloro
+  | 'DO_NOT_BLEACH'; // Não alvejar
+
+export type DryingInstruction =
+  | 'TUMBLE_DRY_LOW' // Secadora temperatura baixa
+  | 'TUMBLE_DRY_MEDIUM' // Secadora temperatura média
+  | 'LINE_DRY' // Secar à sombra
+  | 'DRIP_DRY' // Secar pingando
+  | 'DO_NOT_TUMBLE_DRY'; // Não usar secadora
+
+export type IroningInstruction =
+  | 'IRON_LOW' // Passar com ferro baixo (110°C)
+  | 'IRON_MEDIUM' // Passar com ferro médio (150°C)
+  | 'IRON_HIGH' // Passar com ferro alto (200°C)
+  | 'DO_NOT_IRON'; // Não passar
+
+export type ProfessionalCleaningInstruction =
+  | 'DRY_CLEAN_ANY' // Limpeza a seco - qualquer solvente
+  | 'DRY_CLEAN_PETROLEUM' // Limpeza a seco - só petróleo
+  | 'WET_CLEAN' // Limpeza úmida profissional
+  | 'DO_NOT_DRY_CLEAN'; // Não fazer limpeza a seco
+
+export interface FiberComposition {
+  fiber: string; // Ex: "Algodão", "Poliéster", "Elastano"
+  percentage: number; // Ex: 95, 5
+}
+
+export interface CustomSymbol {
+  code: string;
+  description: string;
+  svgPath?: string; // SVG personalizado
+}
+
+export interface CareInstructions {
+  // Composição têxtil (obrigatório por lei)
+  composition: FiberComposition[];
+
+  // Instruções de lavagem
+  washing?: WashingInstruction;
+
+  // Instruções de alvejamento
+  bleaching?: BleachingInstruction;
+
+  // Instruções de secagem
+  drying?: DryingInstruction;
+
+  // Instruções de passagem
+  ironing?: IroningInstruction;
+
+  // Limpeza profissional
+  professionalCleaning?: ProfessionalCleaningInstruction;
+
+  // Avisos especiais
+  warnings?: string[];
+
+  // Símbolos personalizados (para casos especiais)
+  customSymbols?: CustomSymbol[];
+}
+
 // Product Types
 export interface Product {
   id: string;
   name: string;
-  code: string;
+  code?: string; // Opcional - auto-gerado pelo backend
   description?: string;
   status: ProductStatus;
-  unitOfMeasure: UnitOfMeasure;
+  // unitOfMeasure removido - agora está no Template
   attributes: Record<string, any>;
   templateId: string;
   supplierId?: string;
@@ -39,10 +138,10 @@ export interface Product {
 
 export interface CreateProductRequest {
   name: string;
-  code: string;
+  code?: string; // Opcional - será auto-gerado se não fornecido
   description?: string;
-  status?: ProductStatus;
-  unitOfMeasure: UnitOfMeasure;
+  // status omitido - será ACTIVE por padrão no backend
+  // unitOfMeasure removido - vem do Template
   attributes?: Record<string, any>;
   templateId: string;
   supplierId?: string;
@@ -54,7 +153,7 @@ export interface UpdateProductRequest {
   code?: string;
   description?: string;
   status?: ProductStatus;
-  unitOfMeasure?: UnitOfMeasure;
+  // unitOfMeasure removido
   attributes?: Record<string, any>;
   templateId?: string;
   supplierId?: string;
@@ -73,7 +172,7 @@ export interface ProductResponse {
 export interface Variant {
   id: string;
   productId: string;
-  sku: string;
+  sku?: string; // Opcional - auto-gerado pelo backend
   name: string;
   price: number;
   imageUrl?: string;
@@ -95,9 +194,9 @@ export interface Variant {
 
 export interface CreateVariantRequest {
   productId: string;
-  sku: string;
+  sku?: string; // Opcional - será auto-gerado se não fornecido
   name: string;
-  price: number;
+  price: number; // Obrigatório para controle financeiro
   imageUrl?: string;
   attributes?: Record<string, unknown>;
   costPrice?: number;
@@ -499,9 +598,12 @@ export interface TagResponse {
 export interface Template {
   id: string;
   name: string;
+  code?: string; // Opcional - auto-gerado pelo backend
+  unitOfMeasure: UnitOfMeasure; // NOVO: Movido de Product para cá
   productAttributes?: Record<string, unknown>;
   variantAttributes?: Record<string, unknown>;
   itemAttributes?: Record<string, unknown>;
+  careInstructions?: CareInstructions; // NOVO: Etiquetas de conservação
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -509,16 +611,22 @@ export interface Template {
 
 export interface CreateTemplateRequest {
   name: string;
+  code?: string; // Opcional - será auto-gerado se não fornecido
+  unitOfMeasure: UnitOfMeasure; // OBRIGATÓRIO
   productAttributes?: Record<string, unknown>;
   variantAttributes?: Record<string, unknown>;
   itemAttributes?: Record<string, unknown>;
+  careInstructions?: CareInstructions; // Opcional
 }
 
 export interface UpdateTemplateRequest {
   name?: string;
+  code?: string;
+  unitOfMeasure?: UnitOfMeasure;
   productAttributes?: Record<string, unknown>;
   variantAttributes?: Record<string, unknown>;
   itemAttributes?: Record<string, unknown>;
+  careInstructions?: CareInstructions;
 }
 
 export interface TemplatesResponse {

@@ -30,13 +30,14 @@ export function useUser(): UseUserReturn {
           username: 'joaosilva',
           email: 'joao@example.com',
           role: 'USER',
+          createdAt: new Date(),
           lastLoginAt: new Date(),
         };
 
         setUser(mockUser);
       } catch (error) {
         console.error('Failed to fetch user:', error);
-        router.push('/login');
+        router.push('/fast-login');
       } finally {
         setIsLoading(false);
       }
@@ -51,7 +52,7 @@ export function useUser(): UseUserReturn {
       await new Promise(resolve => setTimeout(resolve, 300));
 
       setUser(null);
-      router.push('/login');
+      router.push('/fast-login');
     } catch (error) {
       console.error('Failed to logout:', error);
     }

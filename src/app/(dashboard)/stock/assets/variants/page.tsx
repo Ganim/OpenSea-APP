@@ -1,444 +1,361 @@
 /**
- * Variants Listing Page
- * Página de listagem de variantes usando componentes 100% genéricos
+ * OpenSea OS - Variants Page
+ * Página de gerenciamento de variantes usando o novo sistema OpenSea OS
  */
 
 'use client';
 
-import { AlertCircle, CheckCircle, Layers, TrendingUp } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
-import { useDeleteVariant, useVariants } from '@/hooks/stock/use-variants';
-
+import { VariantDetailModal } from '@/components/stock/variant-detail-modal';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
-  BatchProgressDialog,
-  EntityGrid,
-  HelpModal,
-  ImportModal,
-  PageHeader,
-  PageHeaderConfig,
-  QuickCreateModal,
-  SearchSection,
-  StatsSection,
-  type FAQItem,
-} from '@/components/shared';
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { variantsConfig } from '@/config/entities/variants.config';
 import {
-  VariantGridCard,
-  VariantListCard,
-} from '@/components/shared/cards/entity-cards';
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-
-function VariantsContent() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isQuickCreateModalOpen, setIsQuickCreateModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<
-    'delete' | 'duplicate' | null
-  >(null);
-
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
-
-  // API Data
-  const { data: variantsResponse, isLoading } = useVariants();
-  const variants = variantsResponse?.variants || [];
-  const deleteVariantMutation = useDeleteVariant();
-
-  const batchDelete = useBatchOperation(
-    async (id: string) => {
-      await deleteVariantMutation.mutateAsync(id);
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Variante excluída com sucesso!'
-              : `${succeeded} variantes excluídas com sucesso!`
-          );
-        } else {
-          toast.error('Erro ao excluir algumas variantes');
-        }
-        clearSelection();
-      },
-    }
-  );
-
-  const batchDuplicate = useBatchOperation(
-    async (id: string) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        toast.success(`${succeeded} variantes duplicadas com sucesso!`);
-        clearSelection();
-      },
-    }
-  );
-
-  const filteredVariants = useMemo(() => {
-    if (!searchQuery.trim()) return variants;
-    return variants.filter(variant =>
-      variant.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [variants, searchQuery]);
-
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleQuickCreate = async (name: string) => {
-    toast.success(`Variante "${name}" criada com sucesso!`);
-  };
-
-  const handleVariantClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      const allIds = filteredVariants.map(v => v.id);
-      selectRange(lastSelectedId, id, allIds);
-    } else {
-      selectItem(id, event);
-    }
-  };
-
-  const handleVariantDoubleClick = (id: string) => {
-    router.push(`/stock/assets/variants/${id}`);
-  };
-
-  const handleVariantsView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/variants/${ids[0]}`);
-    } else {
-      toast.info('Visualização múltipla em breve');
-    }
-  };
-
-  const handleVariantsEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/variants/${ids[0]}/edit`);
-    } else {
-      toast.info('Edição múltipla não disponível');
-    }
-  };
-
-  const handleVariantsDuplicate = (ids: string[]) => {
-    setItemsToDuplicate(ids);
-    setIsDuplicateDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
-  };
-
-  const handleDuplicateConfirm = async () => {
-    setIsDuplicateDialogOpen(false);
-    setActiveOperation('duplicate');
-    await batchDuplicate.start(itemsToDuplicate);
-  };
-
-  const handleVariantsDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleVariantsStockMovement = (ids: string[]) => {
-    if (ids.length === 1) {
-      toast.info('Funcionalidade de movimentação em desenvolvimento');
-    } else {
-      toast.info('Movimentação múltipla não disponível');
-    }
-  };
-
-  const handleVariantsCopyCode = async (ids: string[]) => {
-    if (ids.length === 1) {
-      const variant = variants.find(v => v.id === ids[0]);
-      if (variant?.sku) {
-        await navigator.clipboard.writeText(variant.sku);
-        toast.success('Código SKU copiado!');
-      }
-    } else {
-      toast.info('Copiar código disponível apenas para uma variante');
-    }
-  };
-
-  const handleSelectRange = (startId: string, endId: string) => {
-    const allIds = filteredVariants.map(v => v.id);
-    selectRange(startId, endId, allIds);
-  };
-
-  const stats = [
-    {
-      label: 'Total de Variantes',
-      value: variants.length,
-      icon: <Layers className="w-5 h-5" />,
-      trend: 3,
-    },
-    {
-      label: 'Com Preço',
-      value: variants.filter(v => v.price > 0).length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Com Custo',
-      value: variants.filter(v => v.costPrice).length,
-      icon: <TrendingUp className="w-5 h-5" />,
-    },
-    {
-      label: 'Com Estoque Mín.',
-      value: variants.filter(v => v.minStock).length,
-      icon: <AlertCircle className="w-5 h-5" />,
-    },
-  ];
-
-  const faqs: FAQItem[] = [
-    {
-      question: 'O que são variantes?',
-      answer:
-        'Variantes são versões diferentes de um mesmo produto. Por exemplo: um produto pode ter variantes de cor, tamanho, ou material.',
-    },
-    {
-      question: 'Como criar variantes?',
-      answer:
-        'Clique em "Nova Variante" e associe a um produto existente. Defina as opções (cor, tamanho, etc.) e o ajuste de preço se necessário.',
-    },
-    {
-      question: 'Variantes herdam dados do produto?',
-      answer:
-        'Sim! Variantes herdam informações base do produto, mas podem ter SKU, preço, e estoque próprios.',
-    },
-  ];
-
-  const pageHeaderConfig: PageHeaderConfig = {
-    title: 'Variantes',
-    description: 'Gerencie variações de produtos',
-    onAdd: () => router.push('/stock/assets/variants/new'),
-    onQuickAdd: () => setIsQuickCreateModalOpen(true),
-    onImport: () => setIsImportModalOpen(true),
-    onHelp: () => setIsHelpModalOpen(true),
-    addLabel: 'Nova Variante',
-    quickAddLabel: 'Criação Rápida',
-    importLabel: 'Importar',
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Carregando variantes...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-col flex gap-4">
-      <PageHeader config={pageHeaderConfig} />
-      <SearchSection
-        searchPlaceholder="Buscar variantes..."
-        onSearch={handleSearch}
-      />
-      <StatsSection stats={stats} defaultExpanded />
-
-      <EntityGrid
-        items={filteredVariants}
-        isSearching={!!searchQuery.trim()}
-        selectedIds={selectedIds}
-        onItemClick={handleVariantClick}
-        onItemDoubleClick={handleVariantDoubleClick}
-        onItemsView={handleVariantsView}
-        onItemsEdit={handleVariantsEdit}
-        onItemsDuplicate={handleVariantsDuplicate}
-        onItemsDelete={handleVariantsDelete}
-        onItemsStockMovement={handleVariantsStockMovement}
-        onItemsCopyCode={handleVariantsCopyCode}
-        onClearSelection={clearSelection}
-        onSelectRange={handleSelectRange}
-        renderGridItem={(variant, isSelected) => (
-          <VariantGridCard
-            name={variant.name}
-            sku={variant.sku}
-            options={[]}
-            quantity={0}
-            createdAt={variant.createdAt}
-            updatedAt={variant.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        renderListItem={(variant, isSelected) => (
-          <VariantListCard
-            name={variant.name}
-            sku={variant.sku}
-            options={[]}
-            quantity={0}
-            createdAt={variant.createdAt}
-            updatedAt={variant.updatedAt}
-            isSelected={isSelected}
-          />
-        )}
-        emptyMessage="Nenhuma variante encontrada"
-      />
-
-      <QuickCreateModal
-        isOpen={isQuickCreateModalOpen}
-        onClose={() => setIsQuickCreateModalOpen(false)}
-        onSubmit={handleQuickCreate}
-        title="Criação Rápida de Variante"
-        description="Crie uma variante rapidamente. Adicione detalhes depois."
-        inputLabel="Nome da Variante"
-        inputPlaceholder="Digite o nome da variante"
-        submitButtonText="Criar Variante"
-      />
-
-      <ImportModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onImport={async file => console.log('Importando:', file.name)}
-        title="Importar Variantes"
-        description="Faça upload de um arquivo CSV ou Excel com variantes."
-        acceptedFormats=".csv,.xlsx,.xls"
-      />
-
-      <HelpModal
-        isOpen={isHelpModalOpen}
-        onClose={() => setIsHelpModalOpen(false)}
-        title="Variantes"
-        description="Perguntas frequentes sobre variantes"
-        faqs={faqs}
-      />
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDelete.length === 1
-                ? 'Tem certeza que deseja excluir esta variante?'
-                : `Tem certeza que deseja excluir ${itemsToDelete.length} variantes?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={isDuplicateDialogOpen}
-        onOpenChange={setIsDuplicateDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar duplicação</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemsToDuplicate.length === 1
-                ? 'Tem certeza que deseja duplicar esta variante?'
-                : `Tem certeza que deseja duplicar ${itemsToDuplicate.length} variantes?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDuplicateConfirm}>
-              Duplicar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <BatchProgressDialog
-        open={activeOperation === 'delete' && !batchDelete.isIdle}
-        status={batchDelete.status}
-        total={batchDelete.total}
-        processed={batchDelete.processed}
-        succeeded={batchDelete.succeeded}
-        failed={batchDelete.failed}
-        progress={batchDelete.progress}
-        operationType="delete"
-        itemName="variantes"
-        onClose={() => {
-          batchDelete.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDelete.pause}
-        onResume={batchDelete.resume}
-        onCancel={batchDelete.cancel}
-      />
-
-      <BatchProgressDialog
-        open={activeOperation === 'duplicate' && !batchDuplicate.isIdle}
-        status={batchDuplicate.status}
-        total={batchDuplicate.total}
-        processed={batchDuplicate.processed}
-        succeeded={batchDuplicate.succeeded}
-        failed={batchDuplicate.failed}
-        progress={batchDuplicate.progress}
-        operationType="duplicate"
-        itemName="variantes"
-        onClose={() => {
-          batchDuplicate.reset();
-          setActiveOperation(null);
-        }}
-        onPause={batchDuplicate.pause}
-        onResume={batchDuplicate.resume}
-        onCancel={batchDuplicate.cancel}
-      />
-    </div>
-  );
-}
+    ConfirmDialog,
+    CoreProvider,
+    EntityForm,
+    EntityGrid,
+    SelectionToolbar,
+    UniversalCard,
+    useEntityCrud,
+    useEntityPage,
+} from '@/core';
+import { variantsService } from '@/services/stock';
+import type { Variant } from '@/types/stock';
+import { Palette, Plus, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 export default function VariantsPage() {
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+  // ============================================================================
+  // CRUD SETUP
+  // ============================================================================
+
+  const crud = useEntityCrud<Variant>({
+    entityName: 'Variante',
+    entityNamePlural: 'Variantes',
+    queryKey: ['variants'],
+    baseUrl: '/api/v1/variants',
+    listFn: async () => {
+      const response = await variantsService.listVariants();
+      return response.variants;
+    },
+    getFn: (id: string) => variantsService.getVariant(id).then(r => r.variant),
+    createFn: data =>
+      variantsService.createVariant(data as any).then(r => r.variant),
+    updateFn: (id, data) =>
+      variantsService.updateVariant(id, data as any).then(r => r.variant),
+    deleteFn: id => variantsService.deleteVariant(id),
+  });
+
+  const page = useEntityPage<Variant>({
+    entityName: 'Variante',
+    entityNamePlural: 'Variantes',
+    queryKey: ['variants'],
+    crud,
+    viewRoute: (id) => `/stock/assets/variants/${id}`,
+    filterFn: (item, query) => {
+      const q = query.toLowerCase();
+      return (
+        item.name.toLowerCase().includes(q) ||
+        (item.sku?.toLowerCase().includes(q) ?? false) ||
+        (item.barcode?.toLowerCase().includes(q) ?? false)
+      );
+    },
+  });
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleVariantClick = (variant: Variant) => {
+    setSelectedVariant(variant);
+    setDetailModalOpen(true);
+  };
+
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
+
+  const renderGridCard = (item: Variant, isSelected: boolean) => {
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="grid"
+        title={item.name}
+        subtitle={item.sku}
+        icon={Palette}
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
+        badges={[
+          {
+            label: `R$ ${Number(item.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+            variant: 'default',
+          },
+        ]}
+        metadata={
+          <div className="flex items-center gap-4 text-xs">
+            {item.barcode && <span>Código: {item.barcode}</span>}
+            {item.createdAt && (
+              <span>
+                Criado em {new Date(item.createdAt).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => handleVariantClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  const renderListCard = (item: Variant, isSelected: boolean) => {
+    return (
+      <UniversalCard
+        id={item.id}
+        variant="list"
+        title={item.name}
+        subtitle={item.sku}
+        icon={Palette}
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
+        badges={[
+          {
+            label: `R$ ${Number(item.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+            variant: 'default',
+          },
+        ]}
+        metadata={
+          <>
+            {item.barcode && (
+              <span className="text-xs">Código: {item.barcode}</span>
+            )}
+          </>
+        }
+        isSelected={isSelected}
+        showSelection={true}
+        onSelectionChange={checked => {
+          if (page.selection) {
+            if (checked) {
+              page.selection.actions.select(item.id);
+            } else {
+              page.selection.actions.deselect(item.id);
+            }
+          }
+        }}
+        onClick={e => page.handlers.handleItemClick(item, e)}
+        onDoubleClick={() => handleVariantClick(item)}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        showStatusBadges={true}
+      />
+    );
+  };
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
+  const hasSelection = selectedIds.length > 0;
+
+  const initialIds = useMemo(
+    () => page.filteredItems.map(i => i.id),
+    [page.filteredItems]
+  );
+
   return (
-    <SelectionProvider>
-      <VariantsContent />
-    </SelectionProvider>
+    <CoreProvider
+      selection={{
+        namespace: 'variants',
+        initialIds,
+      }}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-gray-50 to-purple-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 p-6">
+        <div className="max-w-8xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Variantes
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Gerencie as variantes de produtos
+              </p>
+            </div>
+            <Button
+              onClick={() => page.modals.open('create')}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Variante
+            </Button>
+          </div>
+
+          <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={variantsConfig.display.labels.searchPlaceholder}
+                value={page.searchQuery}
+                onChange={e => page.handlers.handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </Card>
+
+          {page.isLoading ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-gray-600 dark:text-white/60">Carregando...</p>
+            </Card>
+          ) : page.error ? (
+            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+              <p className="text-destructive">Erro ao carregar variantes</p>
+            </Card>
+          ) : (
+            <EntityGrid
+              config={variantsConfig}
+              items={page.filteredItems}
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={page.isLoading}
+              isSearching={!!page.searchQuery}
+              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
+              onItemDoubleClick={item =>
+                page.handlers.handleItemDoubleClick(item)
+              }
+            />
+          )}
+
+          {hasSelection && (
+            <SelectionToolbar
+              selectedIds={selectedIds}
+              totalItems={page.filteredItems.length}
+              onClear={() => page.selection?.actions.clear()}
+              onSelectAll={() => page.selection?.actions.selectAll()}
+              defaultActions={{
+                view: true,
+                edit: true,
+                duplicate: true,
+                delete: true,
+              }}
+              handlers={{
+                onView: page.handlers.handleItemsView,
+                onEdit: page.handlers.handleItemsEdit,
+                onDuplicate: page.handlers.handleItemsDuplicate,
+                onDelete: page.handlers.handleItemsDelete,
+              }}
+            />
+          )}
+
+          <Dialog
+            open={page.modals.isOpen('create')}
+            onOpenChange={open => !open && page.modals.close('create')}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Nova Variante</DialogTitle>
+              </DialogHeader>
+              <EntityForm
+                config={variantsConfig.form!}
+                mode="create"
+                onSubmit={async data => {
+                  await crud.create(data);
+                  page.modals.close('create');
+                }}
+                onCancel={() => page.modals.close('create')}
+                isSubmitting={crud.isCreating}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog
+            open={page.modals.isOpen('edit')}
+            onOpenChange={open => !open && page.modals.close('edit')}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Editar Variante</DialogTitle>
+              </DialogHeader>
+              {page.modals.editingItem && (
+                <EntityForm
+                  config={variantsConfig.form!}
+                  mode="edit"
+                  initialData={page.modals.editingItem}
+                  onSubmit={async data => {
+                    await crud.update(page.modals.editingItem!.id, data);
+                    page.modals.close('edit');
+                  }}
+                  onCancel={() => page.modals.close('edit')}
+                  isSubmitting={crud.isUpdating}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <ConfirmDialog
+            open={page.modals.isOpen('delete')}
+            onOpenChange={open => !open && page.modals.close('delete')}
+            title="Excluir Variante"
+            description={
+              page.modals.itemsToDelete.length === 1
+                ? 'Tem certeza que deseja excluir esta variante? Esta ação não pode ser desfeita.'
+                : `Tem certeza que deseja excluir ${page.modals.itemsToDelete.length} variantes? Esta ação não pode ser desfeita.`
+            }
+            onConfirm={page.handlers.handleDeleteConfirm}
+            confirmLabel="Excluir"
+            cancelLabel="Cancelar"
+            variant="destructive"
+            isLoading={crud.isDeleting}
+          />
+
+          <ConfirmDialog
+            open={page.modals.isOpen('duplicate')}
+            onOpenChange={open => !open && page.modals.close('duplicate')}
+            title="Duplicar Variante"
+            description={
+              page.modals.itemsToDuplicate.length === 1
+                ? 'Tem certeza que deseja duplicar esta variante?'
+                : `Tem certeza que deseja duplicar ${page.modals.itemsToDuplicate.length} variantes?`
+            }
+            onConfirm={page.handlers.handleDuplicateConfirm}
+            confirmLabel="Duplicar"
+            cancelLabel="Cancelar"
+            isLoading={crud.isDuplicating}
+          />
+
+          {/* Hierarchical Detail Modal */}
+          <VariantDetailModal
+            variant={selectedVariant}
+            open={detailModalOpen}
+            onOpenChange={setDetailModalOpen}
+          />
+        </div>
+      </div>
+    </CoreProvider>
   );
 }

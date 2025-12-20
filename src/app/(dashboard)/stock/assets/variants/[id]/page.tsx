@@ -1,373 +1,220 @@
 /**
- * Variant View Page
- * Página de visualização de variante com lista de itens
+ * OpenSea OS - Variant Detail Page
+ * Página de detalhes de uma variante específica
  */
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { variantsService } from '@/services/stock';
+import type { Variant } from '@/types/stock';
+import { useQuery } from '@tanstack/react-query';
 import {
-  AlertCircle,
-  CheckCircle,
-  Copy,
-  Edit,
-  Package,
-  Trash2,
-  TrendingUp,
-  Warehouse,
+    ArrowLeft,
+    Edit,
+    Package,
+    Trash,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { use, useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { useParams, useRouter } from 'next/navigation';
 
-import {
-  EntityGrid,
-  PageHeader,
-  PageHeaderConfig,
-  SearchSection,
-  StatsSection,
-} from '@/components/shared';
-import { ItemListCard } from '@/components/shared/cards/entity-cards';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
-import { useVariantItems } from '@/hooks/stock/use-items';
-import { useDeleteVariant, useVariant } from '@/hooks/stock/use-variants';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-import type { Item } from '@/types/stock';
-
-function VariantViewContent({ variantId }: { variantId: string }) {
+export default function VariantDetailPage() {
+  const params = useParams();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<'delete' | null>(null);
+  const variantId = params.id as string;
 
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
 
-  // API Data
-  const { data: variant, isLoading: loadingVariant } = useVariant(variantId);
-  const { data: itemsResponse, isLoading: loadingItems } =
-    useVariantItems(variantId);
-  const deleteVariantMutation = useDeleteVariant();
-
-  const items = useMemo(() => {
-    return itemsResponse?.items || [];
-  }, [itemsResponse]);
-
-  // Batch operations for items (if needed in the future)
-  const batchDelete = useBatchOperation(
-    async (id: string) => {
-      // Items don't have direct deletion - only movements
-      throw new Error('Items should be managed through movements');
+  const { data: variant, isLoading } = useQuery<Variant>({
+    queryKey: ['variants', variantId],
+    queryFn: async () => {
+      const response = await variantsService.getVariant(variantId);
+      return response.variant;
     },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
+  });
 
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Item processado com sucesso!'
-              : `${succeeded} items processados com sucesso!`
-          );
-        } else {
-          toast.error('Erro ao processar alguns items');
-        }
-        clearSelection();
-      },
-    }
-  );
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-  // Filtered items
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return items;
-    return items.filter(
-      item =>
-        item.uniqueCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.status.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [items, searchQuery]);
-
-  // Handlers
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleItemClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      const allIds = filteredItems.map(item => item.id);
-      selectRange(lastSelectedId, id, allIds);
-    } else {
-      selectItem(id, event);
-    }
+  const handleBack = () => {
+    router.push('/stock/assets/variants');
   };
 
-  const handleItemDoubleClick = (id: string) => {
-    router.push(`/stock/assets/items/${id}`);
-  };
-
-  const handleItemsView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/items/${ids[0]}`);
-    } else {
-      toast.info('Visualização múltipla em breve');
-    }
-  };
-
-  const handleItemsEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/assets/items/${ids[0]}/edit`);
-    } else {
-      toast.info('Edição múltipla não disponível');
-    }
-  };
-
-  const handleItemsDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
-  };
-
-  const handleVariantEdit = () => {
+  const handleEdit = () => {
     router.push(`/stock/assets/variants/${variantId}/edit`);
   };
 
-  const handleVariantDelete = async () => {
-    try {
-      await deleteVariantMutation.mutateAsync(variantId);
-      toast.success('Variante excluída com sucesso!');
-      router.push('/stock/assets/variants');
-    } catch {
-      toast.error('Erro ao excluir variante');
+  const handleDelete = async () => {
+    if (confirm('Tem certeza que deseja excluir esta variante?')) {
+      try {
+        await variantsService.deleteVariant(variantId);
+        router.push('/stock/assets/variants');
+      } catch (error) {
+        console.error('Erro ao deletar variante:', error);
+      }
     }
   };
 
-  const handleStockMovement = () => {
-    toast.info('Funcionalidade de movimentação em desenvolvimento');
-  };
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
 
-  const handleCopyCode = async () => {
-    if (variant?.variant.sku) {
-      await navigator.clipboard.writeText(variant.variant.sku);
-      toast.success('Código SKU copiado!');
-    }
-  };
-
-  // Stats
-  const stats = [
-    {
-      label: 'Total de Itens',
-      value: items.length,
-      icon: <Package className="w-5 h-5" />,
-    },
-    {
-      label: 'Itens Disponíveis',
-      value: items.filter(item => item.status === 'AVAILABLE').length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Itens Reservados',
-      value: items.filter(item => item.status === 'RESERVED').length,
-      icon: <Warehouse className="w-5 h-5" />,
-    },
-    {
-      label: 'Estoque Total',
-      value: items.reduce((sum, item) => sum + item.currentQuantity, 0),
-      icon: <TrendingUp className="w-5 h-5" />,
-    },
-  ];
-
-  // Page Header Config
-  const pageHeaderConfig: PageHeaderConfig = {
-    title: variant?.variant.name || 'Variante',
-    description: `SKU: ${variant?.variant.sku || ''} • Gerencie os itens desta variante`,
-    showBackButton: true,
-    backUrl: '/stock/assets/variants',
-    customActions: [
-      {
-        label: 'Movimentar Estoque',
-        onClick: handleStockMovement,
-        variant: 'outline' as const,
-        icon: <Warehouse className="w-4 h-4" />,
-      },
-      {
-        label: 'Copiar Código',
-        onClick: handleCopyCode,
-        variant: 'outline' as const,
-        icon: <Copy className="w-4 h-4" />,
-      },
-      {
-        label: 'Editar',
-        onClick: handleVariantEdit,
-        variant: 'outline' as const,
-        icon: <Edit className="w-4 h-4" />,
-      },
-      {
-        label: 'Excluir',
-        onClick: () => setIsDeleteDialogOpen(true),
-        variant: 'destructive' as const,
-        icon: <Trash2 className="w-4 h-4" />,
-      },
-    ],
-  };
-
-  const renderListItem = (item: Item, isSelected: boolean) => {
-    // Map status to display format
-    const statusMap: Record<string, string> = {
-      AVAILABLE: 'available',
-      RESERVED: 'reserved',
-      SOLD: 'sold',
-      DAMAGED: 'returned', // Using returned for damaged
-      IN_TRANSIT: 'in_transit',
-    };
-
-    // Generate badges based on item properties
-    const badges: Array<{
-      label: string;
-      variant?: 'default' | 'secondary' | 'destructive' | 'outline';
-    }> = [];
-
-    // Stock level badges
-    if (item.currentQuantity <= (variant?.variant.minStock || 0)) {
-      badges.push({ label: 'Estoque Baixo', variant: 'destructive' });
-    } else if (item.currentQuantity >= (variant?.variant.maxStock || 999)) {
-      badges.push({ label: 'Estoque Alto', variant: 'secondary' });
-    }
-
-    // Add more badges based on item attributes or business logic
-    // TODO: Add champion seller, low rotation, etc. based on movement history
-
+  if (isLoading) {
     return (
-      <ItemListCard
-        serialNumber={item.uniqueCode}
-        condition={String(item.attributes?.condition || 'Novo')}
-        status={statusMap[item.status] || 'available'}
-        location={item.locationId} // TODO: Get location name from locationId
-        quantity={item.currentQuantity}
-        createdAt={item.createdAt}
-        updatedAt={item.updatedAt}
-        isSelected={isSelected}
-        badges={badges}
-      />
-    );
-  };
-
-  if (loadingVariant || loadingItems) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
-            Carregando variante...
-          </p>
-        </div>
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
   if (!variant) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Variante não encontrada
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            A variante solicitada não existe ou foi removida.
+      <div className="container mx-auto p-6">
+        <Card className="p-12 text-center">
+          <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-semibold mb-2">Variante não encontrada</h2>
+          <p className="text-muted-foreground mb-6">
+            A variante que você está procurando não existe ou foi removida.
           </p>
-        </div>
+          <Button onClick={handleBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Variantes
+          </Button>
+        </Card>
       </div>
     );
   }
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <div className="flex-col flex gap-4">
-      <PageHeader config={pageHeaderConfig} />
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{variant.name}</h1>
+              {variant.sku && (
+                <p className="text-muted-foreground">SKU: {variant.sku}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            <Trash className="mr-2 h-4 w-4" />
+            Excluir
+          </Button>
+        </div>
+      </div>
 
-      <SearchSection
-        searchPlaceholder="Buscar itens..."
-        onSearch={handleSearch}
-      />
+      {/* Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Info */}
+        <Card className="lg:col-span-2 p-6 space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Informações Gerais</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Nome
+                </label>
+                <p className="text-lg">{variant.name}</p>
+              </div>
+              {variant.sku && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    SKU
+                  </label>
+                  <p className="text-lg font-mono">{variant.sku}</p>
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Preço
+                </label>
+                <p className="text-lg">R$ {variant.price?.toFixed(2) ?? '0.00'}</p>
+              </div>
+              {variant.costPrice && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Preço de Custo
+                  </label>
+                  <p className="text-lg">R$ {variant.costPrice.toFixed(2)}</p>
+                </div>
+              )}
+            </div>
+          </div>
 
-      <StatsSection stats={stats} defaultExpanded />
+          {/* Attributes */}
+          {variant.attributes && Object.keys(variant.attributes).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Atributos</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(variant.attributes).map(([key, value]) => (
+                  <div key={key} className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium">{key}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {JSON.stringify(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
 
-      <EntityGrid
-        items={filteredItems}
-        renderGridItem={renderListItem} // Only list view for items
-        renderListItem={renderListItem}
-        selectedIds={selectedIds}
-        onItemClick={handleItemClick}
-        onItemDoubleClick={handleItemDoubleClick}
-        onItemsView={handleItemsView}
-        onItemsEdit={handleItemsEdit}
-        onItemsDelete={handleItemsDelete}
-        emptyMessage="Nenhum item cadastrado para esta variante"
-        isSearching={!!searchQuery.trim()}
-        defaultView="list" // Force list view for items
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir a variante &quot;
-              {variant.variant.name}&quot;? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleVariantDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Sidebar */}
+        <Card className="p-6 space-y-4 h-fit">
+          <h2 className="text-xl font-semibold">Metadados</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">
+                Produto ID
+              </label>
+              <p className="text-sm font-mono">{variant.productId}</p>
+            </div>
+            {variant.createdAt && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Criado em
+                </label>
+                <p className="text-sm">
+                  {new Date(variant.createdAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            )}
+            {variant.updatedAt && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Atualizado em
+                </label>
+                <p className="text-sm">
+                  {new Date(variant.updatedAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
-  );
-}
-
-export default function VariantViewPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id: variantId } = use(params);
-  return (
-    <SelectionProvider>
-      <VariantViewContent variantId={variantId} />
-    </SelectionProvider>
   );
 }

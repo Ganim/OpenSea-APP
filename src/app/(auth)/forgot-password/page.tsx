@@ -9,11 +9,11 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useResetPassword, useSendPasswordReset } from '@/hooks/use-auth';
 import { useForm } from '@tanstack/react-form';
 import {
-  CheckCircle2,
-  ChevronLeft,
-  Lock,
-  Mail,
-  ShieldCheck,
+    CheckCircle2,
+    ChevronLeft,
+    Lock,
+    Mail,
+    ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -156,7 +156,7 @@ function ForgotPasswordForm() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => router.push('/login')}
+                    onClick={() => router.push('/fast-login')}
                     className="w-full"
                     size="lg"
                   >
@@ -365,7 +365,7 @@ function ForgotPasswordForm() {
           {currentStep !== 'success' && (
             <div className="mt-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
               <Link
-                href="/login"
+                href="/fast-login"
                 className="text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center gap-2 font-medium"
               >
                 <ChevronLeft className="w-4 h-4" />

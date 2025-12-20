@@ -7,12 +7,17 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   const { pathname } = request.nextUrl;
 
-  // Public routes
-  const publicRoutes = ['/login', '/register', '/'];
+  // Public routes (inclui fast-login)
+  const publicRoutes = ['/login', '/fast-login', '/register', '/'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // Se tiver cookie de token e está tentando acessar login/register, redireciona para dashboard
-  if (token && (pathname === '/login' || pathname === '/register')) {
+  if (
+    token &&
+    (pathname === '/login' ||
+      pathname === '/register' ||
+      pathname === '/fast-login')
+  ) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 

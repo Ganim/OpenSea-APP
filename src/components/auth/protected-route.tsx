@@ -34,7 +34,7 @@ export function ProtectedRoute({
 
     if (!isLoading && !isAuthenticated) {
       console.log('🔒 Usuário não autenticado, redirecionando para /login');
-      router.push('/login');
+      router.push('/fast-login');
       return;
     }
 

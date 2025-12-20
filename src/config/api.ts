@@ -77,6 +77,7 @@ export const API_ENDPOINTS = {
   ITEMS: {
     LIST: '/v1/items',
     GET: (itemId: string) => `/v1/items/${itemId}`,
+    DELETE: (itemId: string) => `/v1/items/${itemId}`,
     ENTRY: '/v1/items/entry',
     EXIT: '/v1/items/exit',
     TRANSFER: '/v1/items/transfer',

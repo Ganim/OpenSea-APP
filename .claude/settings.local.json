@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(tail:*)",
+      "Bash(npm run lint:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

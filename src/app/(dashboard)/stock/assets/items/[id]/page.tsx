@@ -1,157 +1,247 @@
 /**
- * Item View Page
- * Página de visualização de item usando EntityViewer genérico
+ * OpenSea OS - Item Detail Page
+ * Página de detalhes de um item específico
  */
 
 'use client';
 
-import { ArrowLeft, Copy, Pencil, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
-import { toast } from 'sonner';
-
-import { EntityViewer } from '@/components/shared';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { itemViewerConfig } from '@/config/entities/items.config';
-import { useItem } from '@/hooks/stock/use-items';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { itemsService } from '@/services/stock';
+import type { Item } from '@/types/stock';
+import { useQuery } from '@tanstack/react-query';
+import {
+    ArrowLeft,
+    Barcode,
+    Edit,
+    Trash,
+} from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 
-export default function ItemViewPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function ItemDetailPage() {
+  const params = useParams();
   const router = useRouter();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const itemId = params.id as string;
 
-  const { id: itemId } = use(params);
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
 
-  // API Data
-  const { data: item, isLoading } = useItem(itemId);
+  const { data: item, isLoading } = useQuery<Item>({
+    queryKey: ['items', itemId],
+    queryFn: async () => {
+      const response = await itemsService.getItem(itemId);
+      return response.item;
+    },
+  });
 
-  if (!item && !isLoading) {
-    router.push('/stock/assets/items');
-    return null;
-  }
-
-  const handleEdit = () => {
-    router.push(`/stock/assets/items/${itemId}/edit`);
-  };
-
-  const handleDuplicate = async () => {
-    toast.success('Item duplicado com sucesso!');
-    router.push('/stock/assets/items');
-  };
-
-  const handleDelete = async () => {
-    setIsDeleteDialogOpen(false);
-    // Items não possuem deleção direta - apenas movimentações
-    toast.info('Use movimentações para gerenciar itens');
-    router.push('/stock/assets/items');
-  };
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
   const handleBack = () => {
     router.push('/stock/assets/items');
   };
 
-  if (isLoading || !item) {
+  const handleEdit = () => {
+    router.push(`/stock/assets/items/${itemId}/edit`);
+  };
+
+  const handleDelete = async () => {
+    if (confirm('Tem certeza que deseja excluir este item?')) {
+      try {
+        await itemsService.deleteItem(itemId);
+        router.push('/stock/assets/items');
+      } catch (error) {
+        console.error('Erro ao deletar item:', error);
+      }
+    }
+  };
+
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Carregando item...</p>
-        </div>
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
+  if (!item) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card className="p-12 text-center">
+          <Barcode className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-semibold mb-2">Item não encontrado</h2>
+          <p className="text-muted-foreground mb-6">
+            O item que você está procurando não existe ou foi removido.
+          </p>
+          <Button onClick={handleBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Itens
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // COMPUTED
+  // ============================================================================
+
+  const statusColors: Record<string, string> = {
+    AVAILABLE: 'bg-green-500',
+    RESERVED: 'bg-yellow-500',
+    SOLD: 'bg-blue-500',
+    DAMAGED: 'bg-red-500',
+  };
+
+  const statusLabels: Record<string, string> = {
+    AVAILABLE: 'Disponível',
+    RESERVED: 'Reservado',
+    SOLD: 'Vendido',
+    DAMAGED: 'Danificado',
+  };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBack}
-            className="hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <Button variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {item.item.uniqueCode}
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Item ID: {item.item.id}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
+              <Barcode className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{item.uniqueCode}</h1>
+              {item.batchNumber && (
+                <p className="text-muted-foreground">Lote: {item.batchNumber}</p>
+              )}
+            </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDuplicate}
-            className="gap-2"
-          >
-            <Copy className="w-4 h-4" />
-            Duplicar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEdit}
-            className="gap-2"
-          >
-            <Pencil className="w-4 h-4" />
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" />
             Editar
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setIsDeleteDialogOpen(true)}
-            className="gap-2"
-          >
-            <Trash2 className="w-4 h-4" />
+          <Button variant="destructive" onClick={handleDelete}>
+            <Trash className="mr-2 h-4 w-4" />
             Excluir
           </Button>
         </div>
       </div>
 
-      <EntityViewer config={itemViewerConfig(item.item)} />
+      {/* Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Info */}
+        <Card className="lg:col-span-2 p-6 space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Informações Gerais</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Código Único
+                </label>
+                <p className="text-lg">{item.uniqueCode}</p>
+              </div>
+              {item.batchNumber && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Número do Lote
+                  </label>
+                  <p className="text-lg">{item.batchNumber}</p>
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Status
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${statusColors[item.status]}`} />
+                  <span>{statusLabels[item.status]}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Quantidade Atual
+                </label>
+                <p className="text-lg">{item.currentQuantity}</p>
+              </div>
+              {item.locationId && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Localização ID
+                  </label>
+                  <p className="text-sm font-mono">{item.locationId}</p>
+                </div>
+              )}
+            </div>
+          </div>
 
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o item &quot;{item.item.uniqueCode}
-              &quot;? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          {/* Attributes */}
+          {item.attributes && Object.keys(item.attributes).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Atributos</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(item.attributes).map(([key, value]) => (
+                  <div key={key} className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium">{key}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {JSON.stringify(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Sidebar */}
+        <Card className="p-6 space-y-4 h-fit">
+          <h2 className="text-xl font-semibold">Metadados</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">
+                Variante ID
+              </label>
+              <p className="text-sm font-mono">{item.variantId}</p>
+            </div>
+            {item.createdAt && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Criado em
+                </label>
+                <p className="text-sm">
+                  {new Date(item.createdAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            )}
+            {item.updatedAt && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Atualizado em
+                </label>
+                <p className="text-sm">
+                  {new Date(item.updatedAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

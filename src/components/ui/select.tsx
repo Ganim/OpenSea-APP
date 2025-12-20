@@ -19,9 +19,16 @@ function SelectGroup({
 }
 
 function SelectValue({
+  placeholder,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Value>) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+  return (
+    <SelectPrimitive.Value
+      data-slot="select-value"
+      placeholder={placeholder}
+      {...props}
+    />
+  );
 }
 
 function SelectTrigger({
@@ -37,7 +44,20 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "border-input rounded-xl data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full items-center justify-between gap-2  border px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 [&:not([class*='h-'])]:data-[size=default]:h-9 [&:not([class*='h-'])]:data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 backdrop-blur-xl bg-white dark:bg-gray-900",
+        'h-12 w-full rounded-(--input-radius) px-4 py-3 text-base',
+        'backdrop-blur-(--glass-blur) bg-(--input-bg)',
+        'border border-[rgb(var(--color-border))]',
+        'text-[rgb(var(--color-foreground))]',
+        'placeholder:text-[rgb(var(--color-foreground-subtle))]',
+        'transition-all duration-(--transition-normal)',
+        'focus:outline-none focus:border-[rgb(var(--color-border-focus))]',
+        'focus:ring-[3px] focus:ring-[rgb(var(--color-ring)/0.5)]',
+        'disabled:pointer-events-none disabled:opacity-(--state-disabled-opacity) disabled:bg-[rgb(var(--color-background-muted))]',
+        'aria-invalid:border-[rgb(var(--color-border-error))] aria-invalid:ring-[rgb(var(--color-destructive)/0.2)]',
+        'flex items-center justify-between gap-2',
+        '[&_svg:not([class*="text-"])]:text-muted-foreground',
+        '[&_svg]:pointer-events-none [&_svg]:shrink-0',
+        '[&_svg:not([class*="size-"])]:size-4',
         className
       )}
       {...props}
@@ -183,5 +203,6 @@ export {
   SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 };
+

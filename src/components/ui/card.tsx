@@ -7,11 +7,12 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        'backdrop-blur-xl bg-white/90 dark:bg-white/5',
-        'border border-gray-200 dark:border-white/10',
-        'rounded-2xl shadow-xl hover:shadow-2xl',
-        'transition-all duration-300',
-        'flex flex-col gap-6 py-6',
+        'backdrop-blur-[var(--glass-blur)] bg-[var(--card-bg)]',
+        'border border-[var(--card-border)]',
+        'rounded-[var(--card-radius)] shadow-[0_10px_40px_var(--card-shadow)]',
+        'hover:shadow-[0_20px_60px_var(--card-shadow-hover)]',
+        'transition-all duration-[var(--transition-normal)]',
+        'flex flex-col gap-3 py-6',
         className
       )}
       {...props}
@@ -37,7 +38,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-title"
       className={cn(
-        'leading-none font-semibold text-gray-900 dark:text-white',
+        'leading-none font-semibold text-[rgb(var(--color-foreground))]',
         className
       )}
       {...props}
@@ -49,7 +50,10 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-description"
-      className={cn('text-sm text-gray-600 dark:text-white/60', className)}
+      className={cn(
+        'text-sm text-[rgb(var(--color-foreground-muted))]',
+        className
+      )}
       {...props}
     />
   );
@@ -95,5 +99,6 @@ export {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 };
+

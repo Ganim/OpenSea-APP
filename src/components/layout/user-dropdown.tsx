@@ -16,27 +16,47 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/auth-context';
-import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut, Moon, Settings, Sun, Users } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
 
 export function UserDropdown() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     }
-  };
+  }, [logout]);
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  const toggleTheme = useCallback(
+    (e: Event) => {
+      e.preventDefault();
+      setTheme(theme === 'dark' ? 'light' : 'dark');
+    },
+    [theme, setTheme]
+  );
+
+  const userName = useMemo(
+    () => user?.profile?.name || user?.username || 'Usuário',
+    [user]
+  );
+
+  const userEmail = useMemo(
+    () => user?.email || 'email@example.com',
+    [user]
+  );
+
+  const userInitial = useMemo(
+    () =>
+      user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || 'U',
+    [user]
+  );
 
   return (
     <DropdownMenu modal={false}>
@@ -44,11 +64,7 @@ export function UserDropdown() {
         <Button variant="ghost" className="rounded-xl h-10 px-2 gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>
-              {user?.profile?.name?.charAt(0) ||
-                user?.username?.charAt(0) ||
-                'U'}
-            </AvatarFallback>
+            <AvatarFallback>{userInitial}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -59,10 +75,10 @@ export function UserDropdown() {
       >
         <DropdownMenuLabel className="px-3 py-2">
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {user?.profile?.name || user?.username || 'Usuário'}
+            {userName}
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {user?.email || 'email@example.com'}
+            {userEmail}
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-2" />
@@ -86,55 +102,21 @@ export function UserDropdown() {
         <DropdownMenuSeparator className="my-2" />
 
         <DropdownMenuItem
-          onSelect={e => {
-            e.preventDefault();
-            toggleTheme();
-          }}
+          onSelect={toggleTheme}
           className="px-3 py-3 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
         >
-          <motion.div
-            className="flex items-center w-full"
-            initial={false}
-            animate={{ scale: 1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <div className="relative w-5 h-5 mr-3">
-              <AnimatePresence mode="wait">
-                {theme === 'dark' ? (
-                  <motion.div
-                    key="sun"
-                    initial={{ scale: 0, rotate: -180, opacity: 0 }}
-                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                    exit={{ scale: 0, rotate: 180, opacity: 0 }}
-                    transition={{
-                      duration: 0.3,
-                      ease: 'backOut',
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <Sun className="w-5 h-5" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="moon"
-                    initial={{ scale: 0, rotate: 180, opacity: 0 }}
-                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                    exit={{ scale: 0, rotate: -180, opacity: 0 }}
-                    transition={{
-                      duration: 0.3,
-                      ease: 'backOut',
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <Moon className="w-5 h-5" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          <div className="flex items-center w-full">
+            <div className="w-5 h-5 mr-3">
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </div>
             <span className="text-sm font-medium">
               {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
             </span>
-          </motion.div>
+          </div>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="my-2" />

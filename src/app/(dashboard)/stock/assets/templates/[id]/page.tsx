@@ -1,135 +1,122 @@
 /**
- * Template View Page
- * Página de visualização detalhada de um template
+ * OpenSea OS - Template Detail Page
+ * Página de detalhes de um template específico com edição avançada
  */
 
 'use client';
 
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { PageHeader } from '@/components/stock/page-header';
-import { TemplateViewer } from '@/components/stock/template-viewer';
 import { Button } from '@/components/ui/button';
-import { useCreateTemplate, useTemplate } from '@/hooks/stock';
-import type { CreateTemplateRequest } from '@/types/stock';
-import { Copy, Edit } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { use } from 'react';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { templatesService } from '@/services/stock';
+import type { Template, UnitOfMeasure } from '@/types/stock';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { TemplateViewer } from '../src/components';
 
-export default function ViewTemplatePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function TemplateDetailPage() {
+  const params = useParams();
   const router = useRouter();
-  const { id: templateId } = use(params);
+  const queryClient = useQueryClient();
+  const templateId = params.id as string;
 
-  const { data: template, isLoading, error } = useTemplate(templateId);
-  const createTemplateMutation = useCreateTemplate();
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
 
-  const handleEdit = () => {
-    router.push(`/stock/assets/templates/${templateId}/edit`);
+  const { data: template, isLoading } = useQuery<Template>({
+    queryKey: ['templates', templateId],
+    queryFn: async () => {
+      const response = await templatesService.getTemplate(templateId);
+      return response.template;
+    },
+  });
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleBack = () => {
+    router.push('/stock/assets/templates');
   };
 
-  const handleDuplicate = async () => {
-    if (!template) return;
-
+  const handleSave = async (data: {
+    name: string;
+    unitOfMeasure: UnitOfMeasure;
+    productAttributes: Record<string, unknown>;
+    variantAttributes: Record<string, unknown>;
+    itemAttributes: Record<string, unknown>;
+  }) => {
     try {
-      const data: CreateTemplateRequest = {
-        name: `${template.name} (Cópia)`,
-        productAttributes: template.productAttributes || {},
-        variantAttributes: template.variantAttributes || {},
-        itemAttributes: template.itemAttributes || {},
-      };
-
-      const newTemplate = await createTemplateMutation.mutateAsync(data);
-      toast.success('Template duplicado com sucesso!');
-      router.push(`/stock/assets/templates/${newTemplate.id}`);
+      await templatesService.updateTemplate(templateId, data);
+      await queryClient.invalidateQueries({ queryKey: ['templates'] });
+      toast.success('Template atualizado com sucesso!');
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-      const errorDetails = JSON.stringify(
-        {
-          error: message,
-          templateId,
-          templateName: template.name,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        2
-      );
-
-      toast.error('Erro ao duplicar template', {
-        description: message,
-        action: {
-          label: 'Copiar erro',
-          onClick: () => {
-            navigator.clipboard.writeText(errorDetails);
-            toast.success('Erro copiado para área de transferência');
-          },
-        },
-      });
+      console.error('Erro ao salvar template:', error);
+      toast.error('Erro ao salvar template');
+      throw error;
     }
   };
 
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
   if (isLoading) {
     return (
-      <ProtectedRoute requiredRole="MANAGER">
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Carregando template...
-            </p>
-          </div>
-        </div>
-      </ProtectedRoute>
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-96 w-full" />
+      </div>
     );
   }
 
-  if (error || !template) {
+  if (!template) {
     return (
-      <ProtectedRoute requiredRole="MANAGER">
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center space-y-4">
-            <p className="text-red-600 dark:text-red-400">
-              Erro ao carregar template
-            </p>
-            <Button onClick={() => router.push('/stock/assets/templates')}>
-              Voltar
-            </Button>
-          </div>
-        </div>
-      </ProtectedRoute>
+      <div className="container mx-auto p-6">
+        <Card className="p-12 text-center">
+          <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-semibold mb-2">
+            Template não encontrado
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            O template que você está procurando não existe ou foi removido.
+          </p>
+          <Button onClick={handleBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Templates
+          </Button>
+        </Card>
+      </div>
     );
   }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <ProtectedRoute requiredRole="MANAGER">
-      <div className="pb-8">
-        <PageHeader
-          title={template.name}
-          description={`Criado em ${new Date(template.createdAt).toLocaleDateString('pt-BR')}`}
-          showBackButton={true}
-          backUrl="/stock/assets/templates"
-          buttons={[
-            {
-              icon: Copy,
-              text: 'Duplicar',
-              onClick: handleDuplicate,
-              variant: 'outline',
-            },
-            {
-              icon: Edit,
-              text: 'Editar',
-              onClick: handleEdit,
-              variant: 'default',
-            },
-          ]}
-        />
-
-        <TemplateViewer template={template} />
+    <div className="min-h-screen  from-purple-50 via-gray-50 to-pink-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
+      {/* Header com botão voltar */}
+      <div className="max-w-8xl  flex items-center gap-4  mb-2">
+        <Button variant="ghost" size={'sm'} onClick={handleBack}>
+          <ArrowLeft className="h-5 w-5" />
+          Voltar para Templates
+        </Button>
       </div>
-    </ProtectedRoute>
+
+      {/* Content - TemplateViewer com edição */}
+      <div className="max-w-8xl mx-auto space-y-6">
+        <TemplateViewer
+          template={template}
+          showHeader={false}
+          showEditButton={true}
+          onSave={handleSave}
+          isModal={false}
+        />
+      </div>
+    </div>
   );
 }

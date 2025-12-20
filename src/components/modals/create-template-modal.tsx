@@ -7,22 +7,22 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import type { CreateTemplateRequest } from '@/types/stock';
 import { Plus, Trash2 } from 'lucide-react';
@@ -56,6 +56,7 @@ export function CreateTemplateModal({
   initialData,
 }: CreateTemplateModalProps) {
   const [name, setName] = useState(initialData?.name || '');
+  const [unitOfMeasure, setUnitOfMeasure] = useState<string>('UNITS');
   const [variantAttributes, setVariantAttributes] = useState<Attribute[]>(
     parseAttributes(initialData?.variantAttributes || {})
   );
@@ -147,6 +148,7 @@ export function CreateTemplateModal({
     try {
       const data: CreateTemplateRequest = {
         name: name.trim(),
+        unitOfMeasure: unitOfMeasure as any,
         variantAttributes: formatAttributes(variantAttributes),
         itemAttributes: formatAttributes(itemAttributes),
       };
@@ -161,6 +163,7 @@ export function CreateTemplateModal({
 
   const handleClose = () => {
     setName('');
+    setUnitOfMeasure('UNITS');
     setVariantAttributes([]);
     setItemAttributes([]);
     onClose();
@@ -193,6 +196,22 @@ export function CreateTemplateModal({
                   className="h-12"
                   required
                 />
+              </div>
+
+              {/* Unit of Measure */}
+              <div className="space-y-2">
+                <Label htmlFor="unitOfMeasure">Unidade de Medida *</Label>
+                <Select value={unitOfMeasure} onValueChange={setUnitOfMeasure}>
+                  <SelectTrigger id="unitOfMeasure" className="h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="UNITS">Unidades</SelectItem>
+                    <SelectItem value="METERS">Metros</SelectItem>
+                    <SelectItem value="KILOGRAMS">Quilogramas</SelectItem>
+                    <SelectItem value="LITERS">Litros</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Variant Attributes */}
