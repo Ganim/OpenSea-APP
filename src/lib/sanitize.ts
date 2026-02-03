@@ -40,6 +40,19 @@ const SENSITIVE_KEYS = [
  * @param obj - Objeto a sanitizar
  * @returns Objeto sanitizado
  */
+function isSensitiveKey(key: string): boolean {
+  const lowerKey = key.toLowerCase();
+  
+  // Normalize: remove underscores and check both forms
+  const normalizedKey = lowerKey.replace(/_/g, '');
+  
+  return SENSITIVE_KEYS.some(sensitiveKey => {
+    const normalizedSensitive = sensitiveKey.toLowerCase().replace(/_/g, '');
+    return lowerKey.includes(sensitiveKey.toLowerCase()) || 
+           normalizedKey.includes(normalizedSensitive);
+  });
+}
+
 export function sanitizeForLogging(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
@@ -52,14 +65,8 @@ export function sanitizeForLogging(obj: unknown): unknown {
   const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-    const lowerKey = key.toLowerCase();
-
     // Verificar se a chave é sensível
-    const isSensitive = SENSITIVE_KEYS.some(
-      sensitiveKey => lowerKey.includes(sensitiveKey)
-    );
-
-    if (isSensitive) {
+    if (isSensitiveKey(key)) {
       sanitized[key] = '[REDACTED]';
     } else if (typeof value === 'object' && value !== null) {
       // Recursivamente sanitizar objetos aninhados
