@@ -3,6 +3,7 @@
 import { authConfig } from '@/config/api';
 import { useLogin, useLogout, useMe, useRegister } from '@/hooks';
 import { saveAccount } from '@/lib/saved-accounts';
+import { logger } from '@/lib/logger';
 import type { LoginCredentials, RegisterData, User } from '@/types';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -128,18 +129,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       message.includes('token inválido');
 
     if (isAuthError) {
-      console.log('🔑 Token inválido ou usuário não encontrado, limpando...');
+      logger.debug('🔑 Token inválido ou usuário não encontrado, limpando...');
       localStorage.removeItem(authConfig.tokenKey);
       localStorage.removeItem(authConfig.refreshTokenKey);
       setHasToken(false);
 
       // Redireciona para login se não estiver em rota pública
       if (!isPublicRoute) {
-        console.log('🔄 Redirecionando para login...');
+        logger.debug('🔄 Redirecionando para login...');
         router.push('/fast-login?session=expired');
       }
     } else {
-      console.warn('⚠️ Erro não-autorização em /me, tokens preservados', {
+      logger.warn('Erro não-autorização em /me, tokens preservados', {
         status,
         message,
       });
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Redireciona para login se não tem token e está em rota protegida
   useEffect(() => {
     if (!hasToken && !isPublicRoute && !isLoadingUser) {
-      console.log('🔒 Sem token em rota protegida, redirecionando...');
+      logger.debug('🔒 Sem token em rota protegida, redirecionando...');
       router.push('/fast-login?session=expired');
     }
   }, [hasToken, isPublicRoute, isLoadingUser, router]);
@@ -175,9 +176,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login
   const login = async (credentials: LoginCredentials): Promise<LoginResult> => {
     try {
-      console.log('🔐 Iniciando login...');
+      logger.debug('🔐 Iniciando login...', { email: credentials.email });
       const response = await loginMutation.mutateAsync(credentials);
-      console.log('✅ Login bem-sucedido:', response);
+      logger.info('✅ Login bem-sucedido', { userId: response.user?.id });
 
       // Salva os tokens usando as chaves corretas
       localStorage.setItem(authConfig.tokenKey, response.token);
@@ -186,12 +187,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('session_id', response.sessionId);
       }
       setHasToken(true);
-      console.log('💾 Tokens salvos no localStorage');
+      logger.debug('💾 Tokens salvos no localStorage');
 
       // Aguarda os dados do usuário serem carregados
-      console.log('🔄 Buscando dados do usuário...');
+      logger.debug('🔄 Buscando dados do usuário...');
       const userResult = await refetchUser();
-      console.log('✅ Dados do usuário carregados');
+      logger.info('✅ Dados do usuário carregados', { userId: userResult.data?.user?.id });
 
       // Salva a conta para Fast Login
       if (userResult.data?.user) {
@@ -204,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             : u.username,
           avatarUrl: u.profile?.avatarUrl,
         });
-        console.log('💾 Conta salva para Fast Login');
+        logger.debug('💾 Conta salva para Fast Login', { userId: u.id });
       }
 
       // Fluxo padrão segue para o caller decidir o redirecionamento
@@ -236,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      console.error('❌ Erro no login:', error);
+      logger.error('Erro no login', error as Error, { action: 'login', email: credentials.email });
       throw error;
     }
   };
@@ -253,7 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password: data.password,
       });
     } catch (error) {
-      console.error('Erro no registro:', error);
+      logger.error('Erro no registro', error as Error, { action: 'register', email: data.email });
       throw error;
     }
   };
@@ -263,7 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      logger.error('Erro ao fazer logout', error as Error, { action: 'logout', userId: user?.id });
     } finally {
       // Limpa os tokens independentemente do resultado
       localStorage.removeItem(authConfig.tokenKey);
