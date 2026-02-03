@@ -14,6 +14,7 @@ import React, {
   useState,
 } from 'react';
 import { nanoid } from 'nanoid';
+import { logger } from '@/lib/logger';
 import {
   DEFAULT_PAGE_SETTINGS,
   DEFAULT_TEMPLATE_ID,
@@ -94,8 +95,8 @@ export function PrintQueueProvider({ children }: PrintQueueProviderProps) {
       setState(prev => {
         // Verificar limite
         if (prev.items.length + inputs.length > MAX_QUEUE_ITEMS) {
-          console.warn(
-            `[PrintQueue] Limite de ${MAX_QUEUE_ITEMS} itens atingido`
+          logger.warn(
+            `Limite de ${MAX_QUEUE_ITEMS} itens atingido na fila de impressão`
           );
           // Adicionar apenas o que couber
           const available = MAX_QUEUE_ITEMS - prev.items.length;
@@ -111,7 +112,7 @@ export function PrintQueueProvider({ children }: PrintQueueProviderProps) {
           const existing = prev.items.find(qi => qi.item.id === inp.item.id);
           if (existing) {
             // Atualizar cópias ao invés de adicionar duplicata
-            console.info(`[PrintQueue] Item ${inp.item.id} já está na fila`);
+            logger.debug(`Item ${inp.item.id} já está na fila de impressão`);
             continue;
           }
 

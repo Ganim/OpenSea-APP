@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import JsBarcode from 'jsbarcode';
 import { QRCodeSVG } from 'qrcode.react';
@@ -344,7 +345,10 @@ function BarcodeImage({ value, height = 30, width = 1 }: BarcodeImageProps) {
           background: 'transparent',
         });
       } catch (error) {
-        console.error('Erro ao gerar barcode:', error);
+        logger.error('Erro ao gerar barcode', error as Error, { 
+          component: 'label-preview',
+          value: value.substring(0, 10) + '...' 
+        });
       }
     }
   }, [value, height, width]);
