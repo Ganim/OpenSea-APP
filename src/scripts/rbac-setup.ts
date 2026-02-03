@@ -9,6 +9,7 @@
 import baseGroups from '@/config/rbac/base-groups';
 import { allBasePermissions } from '@/config/rbac/base-permissions';
 import * as rbacService from '@/services/rbac/rbac.service';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // TYPES
@@ -35,17 +36,17 @@ async function setupPermissions(): Promise<{
   const errors: string[] = [];
   let created = 0;
 
-  console.log('📝 Criando permissões base...');
+  logger.info('📝 Criando permissões base...');
 
   for (const permission of allBasePermissions) {
     try {
       await rbacService.createPermission(permission);
       created++;
-      console.log(`✓ Criada: ${permission.code}`);
+      logger.debug(`✓ Criada: ${permission.code}`);
     } catch (error: unknown) {
       const errorMsg = `Erro ao criar ${permission.code}: ${(error as Error).message}`;
       errors.push(errorMsg);
-      console.error(`✗ ${errorMsg}`);
+      logger.error(`Erro ao criar permissão`, error as Error, { code: permission.code });
     }
   }
 
@@ -59,7 +60,7 @@ async function setupGroups(): Promise<{ created: number; errors: string[] }> {
   const errors: string[] = [];
   let created = 0;
 
-  console.log('\n👥 Criando grupos de permissões base...');
+  logger.info('👥 Criando grupos de permissões base...');
 
   for (const groupDef of baseGroups) {
     try {
@@ -67,7 +68,7 @@ async function setupGroups(): Promise<{ created: number; errors: string[] }> {
       const { permissions, ...groupData } = groupDef;
       const group = await rbacService.createPermissionGroup(groupData);
       created++;
-      console.log(`✓ Criado grupo: ${group.name} (${group.slug})`);
+      logger.debug(`✓ Criado grupo: ${group.name} (${group.slug})`);
 
       // Atribuir permissões ao grupo
       for (const perm of permissions) {
@@ -76,19 +77,19 @@ async function setupGroups(): Promise<{ created: number; errors: string[] }> {
             permissionCode: perm.code,
             effect: perm.effect,
           });
-          console.log(
+          logger.debug(
             `  ✓ Permissão adicionada: ${perm.code} (${perm.effect})`
           );
         } catch (error: unknown) {
           const errorMsg = `Erro ao adicionar permissão ${perm.code} ao grupo ${group.name}: ${(error as Error).message}`;
           errors.push(errorMsg);
-          console.error(`  ✗ ${errorMsg}`);
+          logger.error('Erro ao adicionar permissão ao grupo', error as Error, { groupName: group.name, permCode: perm.code });
         }
       }
     } catch (error: unknown) {
       const errorMsg = `Erro ao criar grupo ${groupDef.name}: ${(error as Error).message}`;
       errors.push(errorMsg);
-      console.error(`✗ ${errorMsg}`);
+      logger.error('Erro ao criar grupo', error as Error, { groupName: groupDef.name });
     }
   }
 
@@ -99,7 +100,7 @@ async function setupGroups(): Promise<{ created: number; errors: string[] }> {
  * Executa o setup completo do RBAC
  */
 export async function setupRBAC(): Promise<SetupResult> {
-  console.log('🚀 Iniciando setup do RBAC...\n');
+  logger.info('🚀 Iniciando setup do RBAC...');
 
   const result: SetupResult = {
     success: false,
@@ -122,18 +123,18 @@ export async function setupRBAC(): Promise<SetupResult> {
     // Verificar se houve erros
     if (result.errors.length === 0) {
       result.success = true;
-      console.log('\n✅ Setup do RBAC concluído com sucesso!');
-      console.log(`📝 ${result.permissionsCreated} permissões criadas`);
-      console.log(`👥 ${result.groupsCreated} grupos criados`);
+      logger.info('✅ Setup do RBAC concluído com sucesso!');
+      logger.info(`📝 ${result.permissionsCreated} permissões criadas`);
+      logger.info(`👥 ${result.groupsCreated} grupos criados`);
     } else {
-      console.log('\n⚠️  Setup concluído com alguns erros:');
-      console.log(`📝 ${result.permissionsCreated} permissões criadas`);
-      console.log(`👥 ${result.groupsCreated} grupos criados`);
-      console.log(`❌ ${result.errors.length} erros`);
+      logger.warn('Setup concluído com alguns erros');
+      logger.info(`📝 ${result.permissionsCreated} permissões criadas`);
+      logger.info(`👥 ${result.groupsCreated} grupos criados`);
+      logger.error(`${result.errors.length} erros durante setup`, new Error('Setup incompleto'), { errorCount: result.errors.length });
     }
   } catch (error: unknown) {
     result.errors.push(`Erro fatal no setup: ${(error as Error).message}`);
-    console.error('\n❌ Erro fatal no setup:', error);
+    logger.error('Erro fatal no setup', error as Error, { step: 'rbac-setup' });
   }
 
   return result;
@@ -174,17 +175,17 @@ export async function checkRBACSetup(): Promise<{
  */
 if (require.main === module) {
   (async () => {
-    console.log('====================================');
-    console.log('  OpenSea OS - RBAC Setup Script  ');
-    console.log('====================================\n');
+    logger.info('====================================');
+    logger.info('  OpenSea OS - RBAC Setup Script  ');
+    logger.info('====================================');
 
     // Verificar se já foi configurado
     const check = await checkRBACSetup();
 
     if (check.isSetup) {
-      console.log('⚠️  O RBAC já foi configurado anteriormente:');
-      console.log(`   - ${check.permissionsCount} permissões encontradas`);
-      console.log(`   - ${check.groupsCount} grupos encontrados\n`);
+      logger.warn('⚠️  O RBAC já foi configurado anteriormente:');
+      logger.info(`   - ${check.permissionsCount} permissões encontradas`);
+      logger.info(`   - ${check.groupsCount} grupos encontrados`);
 
       const readline = require('readline');
       const rl = readline.createInterface({
@@ -198,7 +199,7 @@ if (require.main === module) {
           rl.close();
 
           if (answer.toLowerCase() !== 's') {
-            console.log('❌ Setup cancelado pelo usuário');
+            logger.info('❌ Setup cancelado pelo usuário');
             process.exit(0);
           }
 
