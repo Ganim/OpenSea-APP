@@ -1,17 +1,41 @@
 import { productsService } from '@/services/stock';
-import type { CreateProductRequest, UpdateProductRequest } from '@/types/stock';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  CreateProductRequest,
+  ProductsQuery,
+  UpdateProductRequest,
+} from '@/types/stock';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 
 const QUERY_KEYS = {
   PRODUCTS: ['products'],
+  PRODUCTS_PAGINATED: (query?: ProductsQuery) => [
+    'products',
+    'paginated',
+    query,
+  ],
   PRODUCT: (id: string) => ['products', id],
 } as const;
 
-// GET /v1/products - Lista todos os produtos
+// GET /v1/products - Lista todos os produtos (legacy)
 export function useProducts() {
   return useQuery({
     queryKey: QUERY_KEYS.PRODUCTS,
     queryFn: () => productsService.listProducts(),
+  });
+}
+
+// GET /v1/products - Lista produtos com paginação e filtros
+export function useProductsPaginated(query?: ProductsQuery) {
+  return useQuery({
+    queryKey: QUERY_KEYS.PRODUCTS_PAGINATED(query),
+    queryFn: () => productsService.list(query),
+    placeholderData: keepPreviousData,
+    staleTime: 30000,
   });
 }
 

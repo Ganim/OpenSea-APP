@@ -6,8 +6,8 @@
 'use client';
 
 import type {
-    SelectionContextValue,
-    SelectionProviderProps,
+  SelectionContextValue,
+  SelectionProviderProps,
 } from '@/core/types';
 import React, { createContext, useContext, useEffect } from 'react';
 import { useSelection, type UseSelectionOptions } from './hooks/use-selection';
@@ -69,7 +69,7 @@ export function SelectionProvider({
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      
+
       // Check if this was a drag (moved more than threshold)
       if (mouseDownPos) {
         const deltaX = Math.abs(e.clientX - mouseDownPos.x);
@@ -81,28 +81,28 @@ export function SelectionProvider({
         }
       }
       mouseDownPos = null;
-      
+
       // Ignorar se clicou em um card, menu, toolbar de seleção ou popup
       const interactiveSelectors = [
-        '[data-item-card]',           // Cards de entidade
-        '[data-radix-menu-content]',  // Context menu
-        '[data-selection-toolbar]',   // Toolbar de seleção
-        '[role="dialog"]',            // Modais
+        '[data-item-card]', // Cards de entidade
+        '[data-radix-menu-content]', // Context menu
+        '[data-selection-toolbar]', // Toolbar de seleção
+        '[role="dialog"]', // Modais
         '[data-radix-popper-content-wrapper]', // Poppers do Radix
-        '[data-entity-grid]',         // Container do grid (para drag selection)
-        'button',                     // Botões
-        'a',                          // Links
-        'input',                      // Inputs
-        'select',                     // Selects
-        'textarea',                   // Textareas
+        '[data-entity-grid]', // Container do grid (para drag selection)
+        'button', // Botões
+        'a', // Links
+        'input', // Inputs
+        'select', // Selects
+        'textarea', // Textareas
       ];
-      
-      const clickedOnInteractive = interactiveSelectors.some(selector => 
+
+      const clickedOnInteractive = interactiveSelectors.some(selector =>
         target.closest(selector)
       );
-      
+
       if (clickedOnInteractive) return;
-      
+
       // Limpa a seleção se clicou fora
       if (selection.state.selectedIds.size > 0) {
         selection.actions.clear();
@@ -111,7 +111,7 @@ export function SelectionProvider({
 
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('click', handleClick);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('click', handleClick);
@@ -216,4 +216,3 @@ export function SelectAllCheckbox({
 // =============================================================================
 
 export { SelectionContext };
-

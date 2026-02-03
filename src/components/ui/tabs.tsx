@@ -26,7 +26,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        'bg-(--tabs-list-bg) text-[rgb(var(--color-foreground-muted))] inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] backdrop-blur-sm',
+        'bg-(--tabs-list-bg) text-[rgb(var(--color-foreground-muted))] inline-flex h-9 gap-2 w-fit items-center justify-center rounded-lg p-[3px] backdrop-blur-sm',
         className
       )}
       {...props}
@@ -64,7 +64,10 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn('flex-1 outline-none', className)}
+      className={cn(
+        'flex-1 outline-none hidden data-[state=active]:flex',
+        className
+      )}
       {...props}
     />
   );

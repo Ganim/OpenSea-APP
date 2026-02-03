@@ -120,7 +120,7 @@ export interface UseEntityCrudReturn<T extends BaseEntity> {
  *   listFn: () => api.get('/api/products'),
  *   getFn: (id) => api.get(`/api/products/${id}`),
  *   createFn: (data) => api.post('/api/products', data),
- *   updateFn: (id, data) => api.patch(`/api/products/${id}`, data),
+ *   updateFn: (id, data) => api.put(`/api/products/${id}`, data),
  *   deleteFn: (id) => api.delete(`/api/products/${id}`),
  * });
  *
@@ -177,7 +177,7 @@ export function useEntityCrud<T extends BaseEntity>(
   const createMutation = useMutation({
     mutationFn: createFn,
     onSuccess: data => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
       toast.success(
         messages.createSuccess || `${entityName} criado com sucesso!`
       );
@@ -196,7 +196,7 @@ export function useEntityCrud<T extends BaseEntity>(
     mutationFn: ({ id, data }: { id: string; data: Partial<T> }) =>
       updateFn(id, data),
     onSuccess: data => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
       toast.success(
         messages.updateSuccess || `${entityName} atualizado com sucesso!`
       );
@@ -214,7 +214,7 @@ export function useEntityCrud<T extends BaseEntity>(
   const deleteMutation = useMutation({
     mutationFn: deleteFn,
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
       if (!silentModeRef.current) {
         toast.success(
           messages.deleteSuccess || `${entityName} excluído com sucesso!`
@@ -237,7 +237,7 @@ export function useEntityCrud<T extends BaseEntity>(
     mutationFn: ({ id, data }: { id: string; data?: Partial<T> }) =>
       duplicateFn!(id, data),
     onSuccess: data => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
       toast.success(
         messages.duplicateSuccess || `${entityName} duplicado com sucesso!`
       );
@@ -305,8 +305,12 @@ export function useEntityCrud<T extends BaseEntity>(
   );
 
   const invalidate = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey });
-  }, [queryClient, queryKey]);
+    console.log('[invalidate] Invalidando cache para queryKey:', queryKey);
+    await queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
+    console.log('[invalidate] Refetching data após invalidação...');
+    await refetch();
+    console.log('[invalidate] Refetch completo!');
+  }, [queryClient, queryKey, refetch]);
 
   const clearCache = useCallback(() => {
     queryClient.removeQueries({ queryKey });

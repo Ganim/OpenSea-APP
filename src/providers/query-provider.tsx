@@ -1,8 +1,16 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+import { type ReactNode } from 'react';
+
+const ReactQueryDevtools = dynamic(
+  () =>
+    import('@tanstack/react-query-devtools').then(
+      mod => mod.ReactQueryDevtools
+    ),
+  { ssr: false }
+);
 
 const defaultQueryClientOptions = {
   defaultOptions: {
@@ -18,11 +26,14 @@ const defaultQueryClientOptions = {
   },
 };
 
-export function QueryProvider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(
-    () => new QueryClient(defaultQueryClientOptions)
-  );
+/**
+ * Instancia singleton do QueryClient.
+ * Exportado para uso em contextos que precisam invalidar cache
+ * (ex: troca de tenant).
+ */
+export const queryClient = new QueryClient(defaultQueryClientOptions);
 
+export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}

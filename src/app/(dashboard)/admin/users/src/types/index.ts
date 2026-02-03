@@ -8,7 +8,6 @@ export {
   type DetailModalProps,
   type ManageGroupsModalProps,
   type NewUserData,
-  type RoleBadgeVariantMap,
   type UserGridCardProps,
   type UserListCardProps,
 } from './users.types';

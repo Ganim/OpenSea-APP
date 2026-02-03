@@ -318,11 +318,18 @@ export function useEntityPage<T extends BaseEntity>(
     const ids = modals.itemsToDelete;
     if (ids.length === 0) return;
 
+    console.log('[handleDeleteConfirm] Iniciando deleção de IDs:', ids);
+
     try {
       // Deletar todos os itens em modo silencioso (sem toast individual)
       for (const id of ids) {
+        console.log('[handleDeleteConfirm] Deletando ID:', id);
         await crud.deleteItem(id, true);
+        console.log('[handleDeleteConfirm] ID deletado com sucesso:', id);
       }
+
+      // Invalidar cache para refetch
+      await crud.invalidate();
 
       // Mostrar toast consolidado
       toast.success(

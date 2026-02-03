@@ -7,7 +7,7 @@ import { defineEntityConfig } from '@/core/types';
 import type { Permission } from '@/types/rbac';
 import { Shield, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
 
-export const permissionsConfig = defineEntityConfig<Permission>()(  {
+export const permissionsConfig = defineEntityConfig<Permission>()({
   // ======================== IDENTIFICAÇÃO ========================
   name: 'Permission',
   namePlural: 'Permissions',
@@ -113,7 +113,8 @@ export const permissionsConfig = defineEntityConfig<Permission>()(  {
       {
         id: 'basic',
         title: 'Informações da Permissão',
-        description: 'Formato do código: módulo.recurso.ação (ex: stock.products.create)',
+        description:
+          'Formato do código: módulo.recurso.ação (ex: stock.products.create)',
         fields: [
           {
             name: 'code',
@@ -122,7 +123,8 @@ export const permissionsConfig = defineEntityConfig<Permission>()(  {
             required: true,
             placeholder: 'Ex: stock.products.create',
             colSpan: 4,
-            description: 'Formato: módulo.recurso.ação. Use * para wildcards (ex: stock.*.read)',
+            description:
+              'Formato: módulo.recurso.ação. Use * para wildcards (ex: stock.*.read)',
             pattern: /^[a-z*]+\.[a-z*]+\.[a-z*]+$/,
           },
           {

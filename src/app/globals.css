@@ -180,6 +180,88 @@
 }
 
 /* ===========================================
+   2.5 LIGHT THEME (Explicit Class)
+   =========================================== */
+
+.light {
+  /* === BACKGROUND === */
+  --color-background: var(--os-gray-50);
+  --color-background-subtle: var(--os-white);
+  --color-background-muted: var(--os-slate-100);
+  --color-background-elevated: var(--os-white);
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: var(--os-slate-700);
+  --color-foreground-muted: var(--os-slate-500);
+  --color-foreground-subtle: var(--os-slate-400);
+  --color-foreground-inverted: var(--os-white);
+
+  /* === PRIMARY (Actions, Links) === */
+  --color-primary: var(--os-blue-500);
+  --color-primary-hover: var(--os-blue-600);
+  --color-primary-active: var(--os-blue-700);
+  --color-primary-subtle: var(--os-blue-50);
+  --color-primary-foreground: var(--os-white);
+
+  /* === SECONDARY === */
+  --color-secondary: var(--os-slate-100);
+  --color-secondary-hover: var(--os-slate-200);
+  --color-secondary-foreground: var(--os-slate-700);
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: var(--os-red-500);
+  --color-destructive-hover: var(--os-red-600);
+  --color-destructive-subtle: var(--os-red-50);
+  --color-destructive-foreground: var(--os-white);
+
+  /* === SUCCESS === */
+  --color-success: var(--os-green-500);
+  --color-success-hover: var(--os-green-600);
+  --color-success-subtle: var(--os-green-50);
+  --color-success-foreground: var(--os-white);
+
+  /* === WARNING === */
+  --color-warning: var(--os-orange-500);
+  --color-warning-hover: var(--os-orange-400);
+  --color-warning-subtle: var(--os-yellow-50);
+  --color-warning-foreground: var(--os-black);
+
+  /* === BORDERS === */
+  --color-border: var(--os-gray-200);
+  --color-border-muted: var(--os-gray-100);
+  --color-border-focus: var(--os-blue-500);
+  --color-border-error: var(--os-red-500);
+
+  /* === RING (Focus) === */
+  --color-ring: var(--os-blue-500);
+  --color-ring-offset: var(--os-white);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: var(--os-white);
+  --glass-bg-opacity: 0.9;
+  --glass-border: var(--os-gray-200);
+  --glass-border-opacity: 0.5;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: var(--os-slate-900);
+  --shadow-opacity-sm: 0.05;
+  --shadow-opacity-md: 0.1;
+  --shadow-opacity-lg: 0.15;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: var(--os-blue-50);
+  --bg-via: var(--os-gray-50);
+  --bg-to: var(--os-purple-50);
+  --sphere-1: var(--os-blue-400);
+  --sphere-1-opacity: 0.3;
+  --sphere-2: var(--os-purple-400);
+  --sphere-2-opacity: 0.3;
+  --sphere-3: var(--os-blue-300);
+  --sphere-3-opacity: 0.2;
+}
+
+/* ===========================================
    3. SEMANTIC TOKENS (Dark Theme)
    =========================================== */
 
@@ -262,6 +344,88 @@
 }
 
 /* ===========================================
+   3.5 CENTRAL DARK BLUE THEME
+   =========================================== */
+
+.dark-blue {
+  /* === BACKGROUND === */
+  --color-background: 13 20 38; /* #0d1426 */
+  --color-background-subtle: 19 32 56; /* #132038 */
+  --color-background-muted: 26 40 71; /* #1a2847 */
+  --color-background-elevated: 22 42 72; /* #162a48 */
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: 241 245 249; /* #f1f5f9 */
+  --color-foreground-muted: 148 163 184; /* #94a3b8 */
+  --color-foreground-subtle: 100 116 139; /* #64748b */
+  --color-foreground-inverted: 13 20 38; /* #0d1426 */
+
+  /* === PRIMARY === */
+  --color-primary: 59 130 246; /* #3b82f6 */
+  --color-primary-hover: 37 99 235; /* #2563eb */
+  --color-primary-active: 29 78 216; /* #1d4ed8 */
+  --color-primary-subtle: 30 58 95; /* #1e3a5f */
+  --color-primary-foreground: 255 255 255;
+
+  /* === SECONDARY === */
+  --color-secondary: 30 58 95; /* #1e3a5f */
+  --color-secondary-hover: 15 40 71; /* #0f2847 */
+  --color-secondary-foreground: 241 245 249;
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: 239 68 68; /* #ef4444 */
+  --color-destructive-hover: 220 38 38; /* #dc2626 */
+  --color-destructive-subtle: 63 28 28; /* #3f1c1c */
+  --color-destructive-foreground: 255 255 255;
+
+  /* === SUCCESS === */
+  --color-success: 16 185 129; /* #10b981 */
+  --color-success-hover: 5 150 105; /* #059669 */
+  --color-success-subtle: 28 58 46; /* #1c3a2e */
+  --color-success-foreground: 255 255 255;
+
+  /* === WARNING === */
+  --color-warning: 249 115 22; /* #f97316 */
+  --color-warning-hover: 234 88 12; /* #ea580c */
+  --color-warning-subtle: 58 39 20; /* #3a2714 */
+  --color-warning-foreground: 255 255 255;
+
+  /* === BORDERS === */
+  --color-border: 30 58 95; /* #1e3a5f */
+  --color-border-muted: 19 32 56; /* #132038 */
+  --color-border-focus: 59 130 246; /* #3b82f6 */
+  --color-border-error: 239 68 68; /* #ef4444 */
+
+  /* === RING (Focus) === */
+  --color-ring: 59 130 246; /* #3b82f6 */
+  --color-ring-offset: 13 20 38; /* #0d1426 */
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: 19 32 56; /* #132038 */
+  --glass-bg-opacity: 0.6;
+  --glass-border: 255 255 255;
+  --glass-border-opacity: 0.08;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: 0 0 0;
+  --shadow-opacity-sm: 0.3;
+  --shadow-opacity-md: 0.4;
+  --shadow-opacity-lg: 0.5;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: 10 15 30; /* #0a0f1e */
+  --bg-via: 13 20 38; /* #0d1426 */
+  --bg-to: 19 32 56; /* #132038 */
+  --sphere-1: 59 130 246; /* #3b82f6 */
+  --sphere-1-opacity: 0.08;
+  --sphere-2: 96 165 250; /* #60a5fa */
+  --sphere-2-opacity: 0.06;
+  --sphere-3: 37 99 235; /* #2563eb */
+  --sphere-3-opacity: 0.04;
+}
+
+/* ===========================================
    4. COMPONENT TOKENS
    =========================================== */
 
@@ -301,6 +465,10 @@
   /* Button - Link */
   --btn-link-text: var(--color-primary);
   --btn-link-text-hover: var(--color-primary-hover);
+
+  /* Button - Text */
+  --btn-text-text: var(--color-foreground);
+  --btn-text-text-hover: var(--color-background-muted);
 
   /* Button - States */
   --btn-disabled-opacity: 0.5;
@@ -478,9 +646,9 @@
 /* Dark theme component overrides */
 .dark {
   /* Tabs */
-  --tabs-list-bg: rgb(var(--os-gray-800) / 0.8);
-  --tabs-trigger-hover: rgb(var(--os-gray-800) / 0.5);
-  --tabs-trigger-active-bg: rgb(var(--os-gray-800));
+  --tabs-list-bg: rgb(var(--os-gray-900) / 0.8);
+  --tabs-trigger-hover: rgb(var(--os-slate-800) / 0.5);
+  --tabs-trigger-active-bg: rgb(var(--os-slate-800));
 
   /* Scrollbar */
   --scrollbar-thumb: rgb(var(--os-slate-600) / 0.4);
@@ -565,23 +733,23 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 
   /* Muted compatibility */
-  --color-muted: var(--os-slate-100);
-  --color-muted-foreground: var(--os-slate-500);
+  --color-muted: rgb(var(--os-slate-100));
+  --color-muted-foreground: rgb(var(--os-slate-500));
 
   /* Accent compatibility */
-  --color-accent: var(--os-blue-50);
-  --color-accent-foreground: var(--os-blue-800);
+  --color-accent: rgb(var(--os-blue-50));
+  --color-accent-foreground: rgb(var(--os-blue-800));
 
   /* Card compatibility */
-  --color-card: var(--os-white);
-  --color-card-foreground: var(--os-slate-700);
+  --color-card: rgb(var(--os-white));
+  --color-card-foreground: rgb(var(--os-slate-700));
 
   /* Popover compatibility */
-  --color-popover: var(--os-white);
-  --color-popover-foreground: var(--os-slate-700);
+  --color-popover: rgb(var(--os-white));
+  --color-popover-foreground: rgb(var(--os-slate-700));
 
   /* Input compatibility */
-  --color-input: var(--os-slate-100);
+  --color-input: rgb(var(--os-slate-100));
 }
 
 .dark {
@@ -595,23 +763,23 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 
   /* Muted compatibility */
-  --color-muted: var(--os-slate-700);
-  --color-muted-foreground: var(--os-slate-400);
+  --color-muted: rgb(var(--os-slate-700));
+  --color-muted-foreground: rgb(var(--os-slate-400));
 
   /* Accent compatibility */
-  --color-accent: var(--os-slate-700);
-  --color-accent-foreground: var(--os-blue-300);
+  --color-accent: rgb(var(--os-slate-700));
+  --color-accent-foreground: rgb(var(--os-blue-300));
 
   /* Card compatibility */
-  --color-card: var(--os-slate-800);
-  --color-card-foreground: var(--os-slate-50);
+  --color-card: rgb(var(--os-slate-800));
+  --color-card-foreground: rgb(var(--os-slate-50));
 
   /* Popover compatibility */
-  --color-popover: var(--os-slate-800);
-  --color-popover-foreground: var(--os-slate-50);
+  --color-popover: rgb(var(--os-slate-800));
+  --color-popover-foreground: rgb(var(--os-slate-50));
 
   /* Input compatibility */
-  --color-input: var(--os-slate-700);
+  --color-input: rgb(var(--os-slate-700));
 }
 
 /* ===========================================
@@ -633,7 +801,8 @@ body {
     color var(--transition-normal) ease;
 }
 
-@theme inline {
+@theme {
+  /* Sidebar colors */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -643,10 +812,51 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Text colors from color palette */
-  --color-text-muted-foreground: rgb(var(--os-slate-800) / <alpha-value>);
-  --color-foreground: rgb(var(--os-slate-900) / <alpha-value>);
-  --color-foreground-muted: rgb(var(--os-slate-600) / <alpha-value>);
+  /* Background */
+  --color-background: var(--color-background);
+
+  /* Foreground */
+  --color-foreground: var(--color-foreground);
+  --color-foreground-muted: var(--color-foreground-muted);
+  --color-text-muted-foreground: var(--os-slate-500);
+
+  /* Primary */
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+
+  /* Secondary */
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+
+  /* Destructive */
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+
+  /* Popover */
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+
+  /* Muted */
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+
+  /* Accent */
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+
+  /* Card */
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+
+  /* Input */
+  --color-input: var(--color-input);
+
+  /* Border */
+  --color-border: var(--color-border);
+  --color-border-input: var(--color-border);
+
+  /* Ring */
+  --color-ring: var(--color-ring);
 }
 
 /* ===========================================
@@ -774,4 +984,176 @@ body {
   [data-slot='select-value'] {
     color: rgb(var(--color-foreground));
   }
+}
+
+/* ===========================================
+   12. REACT-SPREADSHEET CUSTOM STYLES
+   Dark mode using slate-800 tones
+   =========================================== */
+
+/* Light mode base */
+.Spreadsheet {
+  --spreadsheet-bg: rgb(var(--os-white));
+  --spreadsheet-header-bg: rgb(var(--os-slate-100));
+  --spreadsheet-cell-bg: rgb(var(--os-white));
+  --spreadsheet-cell-text: rgb(var(--os-slate-900));
+  --spreadsheet-border: rgb(var(--os-slate-200));
+  --spreadsheet-selected-bg: rgb(var(--os-blue-100));
+  --spreadsheet-selected-border: rgb(var(--os-blue-500));
+  --spreadsheet-active-bg: rgb(var(--os-blue-50));
+}
+
+/* Dark mode overrides using slate-800 tones */
+.dark .Spreadsheet,
+.Spreadsheet--dark-mode {
+  --spreadsheet-bg: rgb(var(--os-slate-900));
+  --spreadsheet-header-bg: rgb(var(--os-slate-800));
+  --spreadsheet-cell-bg: rgb(var(--os-slate-900));
+  --spreadsheet-cell-text: rgb(var(--os-slate-100));
+  --spreadsheet-border: rgb(var(--os-slate-700));
+  --spreadsheet-selected-bg: rgb(var(--os-slate-700));
+  --spreadsheet-selected-border: rgb(var(--os-blue-500));
+  --spreadsheet-active-bg: rgb(var(--os-slate-800));
+}
+
+/* Apply variables to spreadsheet elements */
+.Spreadsheet {
+  background-color: var(--spreadsheet-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  font-size: 0.875rem;
+}
+
+.Spreadsheet table {
+  background-color: var(--spreadsheet-bg) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Header cells (column labels) */
+.Spreadsheet__header {
+  background-color: var(--spreadsheet-header-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  font-weight: 600 !important;
+}
+
+/* Row indicators */
+.Spreadsheet__header--row {
+  background-color: var(--spreadsheet-header-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  min-width: 40px !important;
+}
+
+/* Regular cells */
+.Spreadsheet__cell {
+  background-color: var(--spreadsheet-cell-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Selected cells */
+.Spreadsheet__cell--selected {
+  background-color: var(--spreadsheet-selected-bg) !important;
+  box-shadow: inset 0 0 0 1px var(--spreadsheet-selected-border) !important;
+}
+
+/* Active/editing cell */
+.Spreadsheet__cell--active {
+  background-color: var(--spreadsheet-active-bg) !important;
+  box-shadow: inset 0 0 0 2px var(--spreadsheet-selected-border) !important;
+}
+
+/* Cell input (editing) */
+.Spreadsheet__cell input,
+.Spreadsheet__data-editor input {
+  background-color: var(--spreadsheet-cell-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Data viewer */
+.Spreadsheet__data-viewer {
+  color: var(--spreadsheet-cell-text) !important;
+}
+
+/* Copied cell indicator */
+.Spreadsheet__cell--copied {
+  background-color: var(--spreadsheet-selected-bg) !important;
+  border: 2px dashed var(--spreadsheet-selected-border) !important;
+}
+
+/* Corner button (select all) */
+.Spreadsheet__corner-indicator {
+  background-color: var(--spreadsheet-header-bg) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Table borders */
+.Spreadsheet table,
+.Spreadsheet th,
+.Spreadsheet td {
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Consistent cell height */
+.Spreadsheet__cell,
+.Spreadsheet__header {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  padding: 0 8px !important;
+  vertical-align: middle !important;
+  font-size: 13px !important;
+  line-height: 32px !important;
+}
+
+.Spreadsheet__data-viewer {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.Spreadsheet__cell input,
+.Spreadsheet__data-editor input {
+  height: 100% !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+}
+
+/* Error cell */
+.Spreadsheet__cell.cell-error {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .Spreadsheet__cell.cell-error,
+.Spreadsheet--dark-mode .Spreadsheet__cell.cell-error {
+  background-color: rgba(185, 28, 28, 0.3) !important;
+}
+
+/* Column minimum width */
+.Spreadsheet__header,
+.Spreadsheet__cell {
+  min-width: 120px !important;
+}
+
+/* Row header width */
+.Spreadsheet__header--row {
+  min-width: 50px !important;
+  max-width: 50px !important;
+  width: 50px !important;
+}
+
+/* Import spreadsheet container */
+.import-spreadsheet-container .Spreadsheet {
+  width: 100% !important;
+}
+
+.import-spreadsheet-container .Spreadsheet table {
+  width: 100% !important;
 }

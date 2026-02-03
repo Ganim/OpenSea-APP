@@ -5,13 +5,12 @@
 
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
-import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import type { FieldConfig } from '@/core/types';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface ArrayFieldProps<T = unknown> {
   field: FieldConfig<T>;
@@ -126,7 +125,7 @@ export function ArrayField<T = unknown>({
                   </div>
 
                   {/* Item number */}
-                  <div className="flex-shrink-0 w-8 text-sm text-muted-foreground font-medium">
+                  <div className="shrink-0 w-8 text-sm text-muted-foreground font-medium">
                     #{index + 1}
                   </div>
 
@@ -146,7 +145,7 @@ export function ArrayField<T = unknown>({
                     size="sm"
                     onClick={() => handleRemove(index)}
                     disabled={isDisabled || items.length <= minItems}
-                    className="flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                     title="Remover item"
                   >
                     <Trash2 className="w-4 h-4" />

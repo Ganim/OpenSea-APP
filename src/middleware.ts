@@ -8,8 +8,15 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes (inclui fast-login)
-  const publicRoutes = ['/login', '/fast-login', '/register', '/'];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const publicRoutes = [
+    '/login',
+    '/fast-login',
+    '/register',
+    '/',
+    '/select-tenant',
+  ];
+  const isPublicRoute =
+    publicRoutes.includes(pathname) || pathname.startsWith('/central');
 
   // Se tiver cookie de token e está tentando acessar login/register, redireciona para dashboard
   if (

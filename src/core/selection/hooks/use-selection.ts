@@ -4,9 +4,9 @@
  */
 
 import type {
-    SelectionActions,
-    SelectionContextValue,
-    SelectionState,
+  SelectionActions,
+  SelectionContextValue,
+  SelectionState,
 } from '@/core/types';
 import { useCallback, useMemo, useState } from 'react';
 

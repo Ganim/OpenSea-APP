@@ -1,0 +1,159 @@
+'use client';
+
+import { API_ENDPOINTS, authConfig } from '@/config/api';
+import { apiClient } from '@/lib/api-client';
+import { queryClient } from '@/providers/query-provider';
+import type { UserTenant, SelectTenantResponse } from '@/types/tenant';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+
+interface TenantContextType {
+  currentTenant: UserTenant | null;
+  tenants: UserTenant[];
+  isLoading: boolean;
+  selectTenant: (tenantId: string) => Promise<void>;
+  clearTenant: () => void;
+  refreshTenants: () => Promise<UserTenant[]>;
+}
+
+const TenantContext = createContext<TenantContextType | undefined>(undefined);
+
+export function TenantProvider({ children }: { children: React.ReactNode }) {
+  const [currentTenant, setCurrentTenant] = useState<UserTenant | null>(null);
+  const [tenants, setTenants] = useState<UserTenant[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refreshTenants = useCallback(async (): Promise<UserTenant[]> => {
+    try {
+      setIsLoading(true);
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem(authConfig.tokenKey)
+          : null;
+      if (!token) return [];
+
+      const data = await apiClient.get<{ tenants: UserTenant[] }>(
+        API_ENDPOINTS.TENANTS.LIST_MY
+      );
+      setTenants(data.tenants);
+
+      // Auto-select if saved tenant exists
+      const savedTenantId = localStorage.getItem('selected_tenant_id');
+      if (savedTenantId) {
+        const saved = data.tenants.find(t => t.id === savedTenantId);
+        if (saved) {
+          setCurrentTenant(saved);
+        }
+      }
+
+      return data.tenants;
+    } catch {
+      // Silently fail - user may not have tenants yet
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const selectTenant = useCallback(
+    async (tenantId: string) => {
+      try {
+        setIsLoading(true);
+        const data = await apiClient.post<SelectTenantResponse>(
+          API_ENDPOINTS.TENANTS.SELECT,
+          { tenantId }
+        );
+
+        // CRITICO: Limpar todo o cache do React Query antes de trocar de tenant
+        // Isso evita vazamento de dados entre tenants
+        queryClient.clear();
+
+        // Update token with tenant-scoped JWT
+        localStorage.setItem(authConfig.tokenKey, data.token);
+        localStorage.setItem('selected_tenant_id', data.tenant.id);
+
+        // Salvar refresh token se retornado
+        if (
+          'refreshToken' in data &&
+          typeof (data as { refreshToken?: string }).refreshToken === 'string'
+        ) {
+          localStorage.setItem(
+            authConfig.refreshTokenKey,
+            (data as { refreshToken: string }).refreshToken
+          );
+        }
+
+        window.dispatchEvent(new CustomEvent('auth-token-change'));
+
+        // Update current tenant in state
+        const selected = tenants.find(t => t.id === tenantId);
+        if (selected) {
+          setCurrentTenant(selected);
+        } else {
+          setCurrentTenant({
+            id: data.tenant.id,
+            name: data.tenant.name,
+            slug: data.tenant.slug,
+            logoUrl: null,
+            status: 'ACTIVE',
+            role: 'member',
+            joinedAt: new Date(),
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao selecionar tenant:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [tenants]
+  );
+
+  const clearTenant = useCallback(() => {
+    setCurrentTenant(null);
+    localStorage.removeItem('selected_tenant_id');
+    // Limpar cache ao desselecionar tenant
+    queryClient.clear();
+  }, []);
+
+  // Listen for auth changes to refresh tenants
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const token = localStorage.getItem(authConfig.tokenKey);
+      if (!token) {
+        setCurrentTenant(null);
+        setTenants([]);
+      }
+    };
+    window.addEventListener('auth-token-change', handleAuthChange);
+    return () =>
+      window.removeEventListener('auth-token-change', handleAuthChange);
+  }, []);
+
+  const value: TenantContextType = {
+    currentTenant,
+    tenants,
+    isLoading,
+    selectTenant,
+    clearTenant,
+    refreshTenants,
+  };
+
+  return (
+    <TenantContext.Provider value={value}>{children}</TenantContext.Provider>
+  );
+}
+
+export function useTenant() {
+  const context = useContext(TenantContext);
+  if (context === undefined) {
+    throw new Error('useTenant must be used within a TenantProvider');
+  }
+  return context;
+}

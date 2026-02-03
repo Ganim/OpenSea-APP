@@ -213,10 +213,7 @@ export function ProtectedPage({
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar
               </Button>
-              <Button
-                className="flex-1"
-                onClick={() => router.push('/')}
-              >
+              <Button className="flex-1" onClick={() => router.push('/')}>
                 <Home className="mr-2 h-4 w-4" />
                 Ir para Início
               </Button>

@@ -41,6 +41,9 @@ export { StatsSection } from './stats/stats-section';
 // Progress Components
 export { BatchProgressDialog } from './progress/batch-progress-dialog';
 
+// User Components
+export { UserAvatar } from './user-avatar';
+
 // Types
 export type {
   AttributeConfig,

@@ -1,0 +1,10 @@
+/**
+ * OpenSea OS - Design Tokens Index
+ *
+ * Arquivo central que importa todos os tokens do design system.
+ * Importe este arquivo no globals.css para usar todos os tokens.
+ */
+
+@import './colors.css';
+@import './semantic.css';
+@import './spacing.css';

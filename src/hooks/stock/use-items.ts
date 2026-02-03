@@ -1,24 +1,41 @@
 import { itemMovementsService, itemsService } from '@/services/stock';
 import type {
   ItemMovementsQuery,
+  ItemsQuery,
   RegisterItemEntryRequest,
   RegisterItemExitRequest,
   TransferItemRequest,
 } from '@/types/stock';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 
 const QUERY_KEYS = {
   ITEMS: ['items'],
+  ITEMS_PAGINATED: (query?: ItemsQuery) => ['items', 'paginated', query],
   ITEM: (id: string) => ['items', id],
   MOVEMENTS: ['item-movements'],
   MOVEMENTS_FILTERED: (query: ItemMovementsQuery) => ['item-movements', query],
 } as const;
 
-// GET /v1/items - Lista todos os itens
+// GET /v1/items - Lista todos os itens (legacy)
 export function useItems() {
   return useQuery({
     queryKey: QUERY_KEYS.ITEMS,
     queryFn: () => itemsService.listItems(),
+  });
+}
+
+// GET /v1/items - Lista itens com paginação e filtros
+export function useItemsPaginated(query?: ItemsQuery) {
+  return useQuery({
+    queryKey: QUERY_KEYS.ITEMS_PAGINATED(query),
+    queryFn: () => itemsService.list(query),
+    placeholderData: keepPreviousData,
+    staleTime: 30000,
   });
 }
 

@@ -7,7 +7,6 @@
 
 import { UniversalCard } from '@/core';
 import { Calendar, Shield, UserCircle } from 'lucide-react';
-import { getRoleBadgeVariant } from '../constants';
 import type { UserGridCardProps } from '../types/users.types';
 import { formatLastLogin, getFullName } from '../utils';
 
@@ -28,13 +27,7 @@ export function UserGridCard({
       title={user.username}
       subtitle={user.email}
       icon={UserCircle}
-      iconBgColor="bg-gradient-to-br from-green-500 to-teal-600"
-      badges={[
-        {
-          label: user.role,
-          variant: getRoleBadgeVariant(user.role),
-        },
-      ]}
+      iconBgColor="bg-linear-to-br from-green-500 to-teal-600"
       metadata={
         <div className="flex flex-col gap-1 text-xs">
           {fullName && <span>{fullName}</span>}
@@ -52,12 +45,12 @@ export function UserGridCard({
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       createdAt={user.createdAt}
-      updatedAt={user.updatedAt}
+      updatedAt={user.updatedAt ?? undefined}
       showStatusBadges={false}
       actions={[
         {
           id: 'manage-groups',
-          label: 'Gerenciar Grupos',
+          label: 'Gerenciar Grupos de Permissões',
           icon: Shield,
           onClick: () => onManageGroups(user),
         },

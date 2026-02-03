@@ -1,6 +1,5 @@
 import { sessionsService } from '@/services';
 import type {
-  MessageResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   SessionDateQuery,
@@ -101,12 +100,13 @@ export function useRefreshToken() {
 
 /**
  * Hook para fazer logout
- * POST /v1/sessions/logout
+ * PATCH /v1/sessions/logout
+ * Backend retorna 204 No Content
  */
 export function useLogout() {
   const queryClient = useQueryClient();
 
-  return useMutation<MessageResponse, Error>({
+  return useMutation<void, Error>({
     mutationFn: () => sessionsService.logout(),
     onSuccess: () => {
       queryClient.clear();
@@ -116,13 +116,14 @@ export function useLogout() {
 
 /**
  * Hook para revogar uma sessão
- * POST /v1/sessions/:sessionId/revoke
+ * PATCH /v1/sessions/:sessionId/revoke
+ * Backend retorna 204 No Content
  * @requires MANAGER role
  */
 export function useRevokeSession() {
   const queryClient = useQueryClient();
 
-  return useMutation<MessageResponse, Error, string>({
+  return useMutation<void, Error, string>({
     mutationFn: sessionId => sessionsService.revokeSession(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sessionsKeys.all });
@@ -132,13 +133,14 @@ export function useRevokeSession() {
 
 /**
  * Hook para expirar uma sessão
- * POST /v1/sessions/:sessionId/expire
+ * PATCH /v1/sessions/:sessionId/expire
+ * Backend retorna 204 No Content
  * @requires MANAGER role
  */
 export function useExpireSession() {
   const queryClient = useQueryClient();
 
-  return useMutation<MessageResponse, Error, string>({
+  return useMutation<void, Error, string>({
     mutationFn: sessionId => sessionsService.expireSession(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sessionsKeys.all });

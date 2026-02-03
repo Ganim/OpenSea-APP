@@ -5,8 +5,6 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -21,8 +19,10 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { cn } from '@/lib/utils';
+import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
+import { useState } from 'react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface ComboboxOption {
   value: string;
@@ -165,7 +165,7 @@ export function ComboboxField<T = unknown>({
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Criar "{search}"
+                    Criar &quot;{search}&quot;
                   </Button>
                 </div>
               ) : (
@@ -211,7 +211,7 @@ export function ComboboxField<T = unknown>({
                     className="w-full gap-2 justify-start"
                   >
                     <Plus className="h-4 w-4" />
-                    Criar "{search}"
+                    Criar &quot;{search}&quot;
                   </Button>
                 </div>
               )}

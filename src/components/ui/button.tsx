@@ -20,10 +20,12 @@ const buttonVariants = cva(
         ghost:
           'bg-transparent hover:bg-[rgb(var(--color-background-muted))] text-[rgb(var(--color-foreground))]',
         link: 'text-[rgb(var(--btn-link-text))] hover:text-[rgb(var(--btn-link-text-hover))] underline-offset-4 hover:underline',
+        text: 'text-[rgb(var(--btn-text-text))] hover:text-[rgb(var(--btn-text-text-hover))] bg-transparent',
       },
       size: {
         default: 'h-11 px-6 rounded-2xl',
         sm: 'h-9 px-4 rounded-xl',
+        plan: 'h-9',
         lg: 'h-12 px-8 rounded-2xl',
         icon: 'size-10 rounded-2xl',
         'icon-sm': 'size-9 rounded-xl',

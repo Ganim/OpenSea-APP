@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-  MessageResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   SessionDateQuery,
@@ -38,7 +37,7 @@ export const sessionsService = {
     return apiClient.get<SessionsResponse>(API_ENDPOINTS.SESSIONS.LIST_ACTIVE);
   },
 
-  // POST /v1/sessions/refresh
+  // PATCH /v1/sessions/refresh
   async refreshToken(
     data?: RefreshTokenRequest
   ): Promise<RefreshTokenResponse> {
@@ -49,11 +48,19 @@ export const sessionsService = {
       throw new Error('No refresh token available');
     }
 
-    const response = await apiClient.post<RefreshTokenResponse>(
+    // Backend requer apenas Authorization header, sem body
+    // Refresh token é single-use: retorna novo access token E novo refresh token
+    const response = await apiClient.patch<RefreshTokenResponse>(
       API_ENDPOINTS.SESSIONS.REFRESH,
-      { refreshToken }
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      }
     );
 
+    // IMPORTANTE: Sempre salvar ambos os tokens retornados (single-use)
     if (response.token) {
       authService.setToken(response.token);
     }
@@ -64,29 +71,25 @@ export const sessionsService = {
     return response;
   },
 
-  // POST /v1/sessions/logout
-  async logout(): Promise<MessageResponse> {
+  // PATCH /v1/sessions/logout
+  // Backend retorna 204 No Content
+  async logout(): Promise<void> {
     try {
-      const response = await apiClient.post<MessageResponse>(
-        API_ENDPOINTS.SESSIONS.LOGOUT
-      );
-      return response;
+      await apiClient.patch<void>(API_ENDPOINTS.SESSIONS.LOGOUT);
     } finally {
       authService.clearTokens();
     }
   },
 
-  // POST /v1/sessions/:sessionId/revoke
-  async revokeSession(sessionId: string): Promise<MessageResponse> {
-    return apiClient.post<MessageResponse>(
-      API_ENDPOINTS.SESSIONS.REVOKE(sessionId)
-    );
+  // PATCH /v1/sessions/:sessionId/revoke
+  // Backend retorna 204 No Content
+  async revokeSession(sessionId: string): Promise<void> {
+    await apiClient.patch<void>(API_ENDPOINTS.SESSIONS.REVOKE(sessionId));
   },
 
-  // POST /v1/sessions/:sessionId/expire
-  async expireSession(sessionId: string): Promise<MessageResponse> {
-    return apiClient.post<MessageResponse>(
-      API_ENDPOINTS.SESSIONS.EXPIRE(sessionId)
-    );
+  // PATCH /v1/sessions/:sessionId/expire
+  // Backend retorna 204 No Content
+  async expireSession(sessionId: string): Promise<void> {
+    await apiClient.patch<void>(API_ENDPOINTS.SESSIONS.EXPIRE(sessionId));
   },
 };

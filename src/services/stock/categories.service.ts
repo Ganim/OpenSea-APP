@@ -26,12 +26,12 @@ export const categoriesService = {
     );
   },
 
-  // PATCH /v1/categories/:id
+  // PUT /v1/categories/:id
   async updateCategory(
     id: string,
     data: UpdateCategoryRequest
   ): Promise<CategoryResponse> {
-    return apiClient.patch<CategoryResponse>(
+    return apiClient.put<CategoryResponse>(
       API_ENDPOINTS.CATEGORIES.UPDATE(id),
       data
     );
@@ -40,5 +40,12 @@ export const categoriesService = {
   // DELETE /v1/categories/:id
   async deleteCategory(id: string): Promise<void> {
     return apiClient.delete<void>(API_ENDPOINTS.CATEGORIES.DELETE(id));
+  },
+
+  // PATCH /v1/categories/reorder
+  async reorderCategories(
+    items: Array<{ id: string; displayOrder: number }>
+  ): Promise<void> {
+    return apiClient.patch<void>(API_ENDPOINTS.CATEGORIES.REORDER, { items });
   },
 };

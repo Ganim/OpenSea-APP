@@ -5,18 +5,19 @@
 
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Mail, Shield, UserCircle } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Calendar, Lock, Mail, Shield, Users, X } from 'lucide-react';
 import type { DetailModalProps } from '../types/users.types';
 import { formatLastLoginDateTime } from '../utils';
 
@@ -25,84 +26,129 @@ export function DetailModal({
   onOpenChange,
   selectedUser,
   onManageGroups,
-  getRoleBadgeVariant,
 }: DetailModalProps) {
+  if (!selectedUser) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-teal-600">
-              <UserCircle className="h-5 w-5 text-white" />
+    <Dialog open={isOpen} onOpenChange={open => !open && onOpenChange(false)}>
+      <DialogContent className="max-w-2xl [&>button]:hidden">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
+          <DialogTitle className="text-lg font-semibold">
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-blue-500 to-cyan-600 p-2 rounded-lg">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="flex-col flex">
+                <span className="text-xs text-slate-500/50">Usuário</span>
+                {selectedUser.username.length > 20
+                  ? `${selectedUser.username.substring(0, 20)}...`
+                  : selectedUser.username}
+              </div>
             </div>
-            {selectedUser?.username}
           </DialogTitle>
-          <DialogDescription>{selectedUser?.email}</DialogDescription>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="gap-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Fechar</p>
+            </TooltipContent>
+          </Tooltip>
         </DialogHeader>
 
-        {selectedUser && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">Email</Label>
-                <p className="flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4" />
-                  {selectedUser.email}
-                </p>
+        <div className="space-y-6 py-4">
+          {/* Informações básicas */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Email */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Mail className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">Email</span>
               </div>
-              <div>
-                <Label className="text-muted-foreground">Papel</Label>
-                <p className="mt-1">
-                  <Badge
-                    variant={
-                      getRoleBadgeVariant(selectedUser.role) as
-                        | 'destructive'
-                        | 'default'
-                        | 'secondary'
-                    }
-                  >
-                    {selectedUser.role}
-                  </Badge>
-                </p>
-              </div>
-              {selectedUser.profile?.name && (
-                <div>
-                  <Label className="text-muted-foreground">Nome</Label>
-                  <p className="mt-1">
-                    {selectedUser.profile.name} {selectedUser.profile.surname}
-                  </p>
-                </div>
-              )}
-              {selectedUser.lastLoginAt && (
-                <div>
-                  <Label className="text-muted-foreground">Último Acesso</Label>
-                  <p className="mt-1">
-                    {formatLastLoginDateTime(selectedUser.lastLoginAt)}
-                  </p>
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground">
+                {selectedUser.email}
+              </p>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  onOpenChange(false);
-                  onManageGroups(selectedUser);
-                }}
-              >
-                <Shield className="mr-2 h-4 w-4" />
-                Gerenciar Grupos
-              </Button>
-            </div>
+            {/* Nome completo */}
+            {selectedUser.profile?.name && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4 text-cyan-500" />
+                  <span className="text-sm font-medium">Nome Completo</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {selectedUser.profile.name}
+                  {selectedUser.profile.surname &&
+                    ` ${selectedUser.profile.surname}`}
+                </p>
+              </div>
+            )}
+
+            {/* Último acesso */}
+            {selectedUser.lastLoginAt && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium">Último Acesso</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {formatLastLoginDateTime(selectedUser.lastLoginAt)}
+                </p>
+              </div>
+            )}
           </div>
-        )}
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+          {/* Datas */}
+          {(selectedUser.createdAt || selectedUser.updatedAt) && (
+            <div className="border-t pt-4 grid grid-cols-2 gap-6">
+              {selectedUser.createdAt && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm font-medium">Criado em</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedUser.createdAt).toLocaleString('pt-BR')}
+                  </p>
+                </div>
+              )}
+              {selectedUser.updatedAt && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm font-medium">Atualizado em</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedUser.updatedAt).toLocaleString('pt-BR')}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Ações */}
+        <div className="flex gap-2 border-t pt-4 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => {
+              onOpenChange(false);
+              onManageGroups(selectedUser);
+            }}
+            className="gap-2"
+          >
+            <Shield className="h-4 w-4" />
+            Gerenciar Grupos de Permissões
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

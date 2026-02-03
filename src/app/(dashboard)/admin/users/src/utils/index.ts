@@ -3,13 +3,7 @@
  * Exportações centralizadas de utilitários
  */
 
-export {
-  createUser,
-  deleteUser,
-  getUser,
-  listUsers,
-  updateUserRole,
-} from './users.crud';
+export { createUser, deleteUser, getUser, listUsers } from './users.crud';
 export {
   formatLastLogin,
   formatLastLoginDateTime,

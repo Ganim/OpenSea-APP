@@ -3,10 +3,15 @@
  * Exportações centralizadas de constantes
  */
 
-export {
-  getRoleBadgeVariant,
-  getRoleLabel,
-  ROLE_BADGE_VARIANTS,
-  ROLE_LABELS,
-  ROLE_OPTIONS,
-} from './role-constants';
+// Constantes de status do usuário
+export const USER_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  BLOCKED: 'blocked',
+} as const;
+
+export const USER_STATUS_LABELS: Record<string, string> = {
+  active: 'Ativo',
+  inactive: 'Inativo',
+  blocked: 'Bloqueado',
+};

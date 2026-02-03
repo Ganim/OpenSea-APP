@@ -34,10 +34,10 @@ export const categoriesConfig = defineEntityConfig<Category>()({
 
   // ======================== ROTAS ========================
   routes: {
-    list: '/admin/categories',
-    detail: '/admin/categories/:id',
-    create: '/admin/categories/new',
-    edit: '/admin/categories/:id/edit',
+    list: '/stock/product-categories',
+    detail: '/stock/product-categories/:id',
+    create: '/stock/product-categories/new',
+    edit: '/stock/product-categories/:id/edit',
   },
 
   // ======================== DISPLAY ========================

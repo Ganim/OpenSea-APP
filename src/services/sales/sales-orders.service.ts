@@ -40,7 +40,7 @@ export const salesOrdersService = {
     id: string,
     data: UpdateSalesOrderStatusRequest
   ): Promise<SalesOrderResponse> {
-    return apiClient.patch<SalesOrderResponse>(
+    return apiClient.put<SalesOrderResponse>(
       API_ENDPOINTS.SALES_ORDERS.UPDATE_STATUS(id),
       data
     );
@@ -78,7 +78,7 @@ export const commentsService = {
     commentId: string,
     data: UpdateCommentRequest
   ): Promise<CommentResponse> {
-    return apiClient.patch<CommentResponse>(
+    return apiClient.put<CommentResponse>(
       API_ENDPOINTS.COMMENTS.UPDATE(commentId),
       data
     );

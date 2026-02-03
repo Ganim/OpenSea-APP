@@ -5,22 +5,18 @@ import {
   tagsService,
   templatesService,
 } from '@/services/stock';
-import { locationsService } from '@/services/stock/locations.service';
+import { apiClient } from '@/lib/api-client';
 import type {
-  ApiLocation,
-  CreateLocationRequest,
   CreateManufacturerRequest,
   CreatePurchaseOrderRequest,
   CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
-  LocationType,
-  UpdateLocationRequest,
   UpdateManufacturerRequest,
-  UpdatePurchaseOrderStatusRequest,
   UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
+  LocationsResponse,
 } from '@/types/stock';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -29,14 +25,13 @@ const QUERY_KEYS = {
   MANUFACTURER: (id: string) => ['manufacturers', id],
   SUPPLIERS: ['suppliers'],
   SUPPLIER: (id: string) => ['suppliers', id],
-  LOCATIONS: ['locations'],
-  LOCATION: (id: string) => ['locations', id],
   TAGS: ['tags'],
   TAG: (id: string) => ['tags', id],
   TEMPLATES: ['templates'],
   TEMPLATE: (id: string) => ['templates', id],
   PURCHASE_ORDERS: ['purchase-orders'],
   PURCHASE_ORDER: (id: string) => ['purchase-orders', id],
+  LOCATIONS: ['locations'],
 } as const;
 
 // ==================== MANUFACTURERS ====================
@@ -150,134 +145,6 @@ export function useDeleteSupplier() {
     mutationFn: (id: string) => suppliersService.deleteSupplier(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUPPLIERS });
-    },
-  });
-}
-
-// ==================== LOCATIONS ====================
-
-export function useLocations(query?: {
-  type?: string;
-  parentId?: string;
-  isActive?: boolean;
-  search?: string;
-}) {
-  return useQuery({
-    queryKey: ['locations', query],
-    queryFn: async () => {
-      const response = await locationsService.listLocations(query);
-      // Mapear campos da API para manter consistência com o tipo Location
-      return response.locations.map((location: ApiLocation) => ({
-        ...location,
-        name: location.titulo, // Mapear titulo da API para name do frontend
-        type: location.type as LocationType, // Mapear type da API para type do frontend
-        locationType: location.type, // Manter o campo original também
-      }));
-    },
-    enabled:
-      typeof window !== 'undefined' && !!localStorage.getItem('auth_token'),
-    retry: (failureCount, error) => {
-      // Não tentar novamente se for erro de autenticação
-      if (
-        error instanceof Error &&
-        error.message.includes('User not authorized')
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
-}
-
-export function useLocation(id: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.LOCATION(id),
-    queryFn: async () => {
-      const response = await locationsService.getLocation(id);
-      // Mapear campos da API para manter consistência com o tipo Location
-      const location: ApiLocation = response.location;
-      return {
-        ...location,
-        name: location.titulo, // Mapear titulo da API para name do frontend
-        type: location.type as LocationType, // Mapear type da API para type do frontend
-        locationType: location.type, // Manter o campo original também
-      };
-    },
-    enabled:
-      !!id &&
-      typeof window !== 'undefined' &&
-      !!localStorage.getItem('auth_token'),
-    retry: (failureCount, error) => {
-      // Não tentar novamente se for erro de autenticação
-      if (
-        error instanceof Error &&
-        error.message.includes('User not authorized')
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
-}
-
-export function useCreateLocation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: CreateLocationRequest) => {
-      const response = await locationsService.createLocation(data);
-      // Mapear campos da API para manter consistência com o tipo Location
-      const location: ApiLocation = response.location;
-      return {
-        ...location,
-        name: location.titulo, // Mapear titulo da API para name do frontend
-        type: location.type as LocationType,
-        locationType: location.type,
-      };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOCATIONS });
-    },
-  });
-}
-
-export function useUpdateLocation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateLocationRequest;
-    }) => {
-      const response = await locationsService.updateLocation(id, data);
-      // Mapear campos da API para manter consistência com o tipo Location
-      const location: ApiLocation = response.location;
-      return {
-        ...location,
-        name: location.titulo, // Mapear titulo da API para name do frontend
-        type: location.type as LocationType,
-        locationType: location.type,
-      };
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOCATIONS });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.LOCATION(variables.id),
-      });
-    },
-  });
-}
-
-export function useDeleteLocation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => locationsService.deleteLocation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOCATIONS });
     },
   });
 }
@@ -412,14 +279,14 @@ export function useDeleteTemplate() {
 export function usePurchaseOrders() {
   return useQuery({
     queryKey: QUERY_KEYS.PURCHASE_ORDERS,
-    queryFn: () => purchaseOrdersService.listPurchaseOrders(),
+    queryFn: () => purchaseOrdersService.listAll(),
   });
 }
 
 export function usePurchaseOrder(id: string) {
   return useQuery({
     queryKey: QUERY_KEYS.PURCHASE_ORDER(id),
-    queryFn: () => purchaseOrdersService.getPurchaseOrder(id),
+    queryFn: () => purchaseOrdersService.get(id),
     enabled: !!id,
   });
 }
@@ -429,7 +296,7 @@ export function useCreatePurchaseOrder() {
 
   return useMutation({
     mutationFn: (data: CreatePurchaseOrderRequest) =>
-      purchaseOrdersService.createPurchaseOrder(data),
+      purchaseOrdersService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PURCHASE_ORDERS });
     },
@@ -442,16 +309,29 @@ export function useUpdatePurchaseOrderStatus() {
   return useMutation({
     mutationFn: ({
       id,
-      data,
+      status,
     }: {
       id: string;
-      data: UpdatePurchaseOrderStatusRequest;
-    }) => purchaseOrdersService.updatePurchaseOrderStatus(id, data),
+      status: import('@/types/stock').PurchaseOrderStatus;
+    }) => purchaseOrdersService.updateStatus(id, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PURCHASE_ORDERS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.PURCHASE_ORDER(variables.id),
       });
     },
+  });
+}
+
+// ==================== LOCATIONS ====================
+
+export function useLocations() {
+  return useQuery({
+    queryKey: QUERY_KEYS.LOCATIONS,
+    queryFn: async () => {
+      const response = await apiClient.get<LocationsResponse>('/v1/locations');
+      return response;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

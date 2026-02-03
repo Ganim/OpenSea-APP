@@ -7,7 +7,6 @@
 
 import { UniversalCard } from '@/core';
 import { Calendar, UserCircle } from 'lucide-react';
-import { getRoleBadgeVariant } from '../constants';
 import type { UserListCardProps } from '../types/users.types';
 import { formatLastLogin, getFullName } from '../utils';
 
@@ -27,13 +26,7 @@ export function UserListCard({
       title={user.username}
       subtitle={user.email}
       icon={UserCircle}
-      iconBgColor="bg-gradient-to-br from-green-500 to-teal-600"
-      badges={[
-        {
-          label: user.role,
-          variant: getRoleBadgeVariant(user.role),
-        },
-      ]}
+      iconBgColor="bg-linear-to-br from-green-500 to-teal-600"
       metadata={
         <div className="flex items-center gap-4 text-xs">
           {fullName && <span>{fullName}</span>}
@@ -51,7 +44,7 @@ export function UserListCard({
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       createdAt={user.createdAt}
-      updatedAt={user.updatedAt}
+      updatedAt={user.updatedAt ?? undefined}
       showStatusBadges={false}
     />
   );

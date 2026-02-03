@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Stock Types
 
-// Enums
+import type { PaginationMeta, PaginatedQuery } from './pagination';
+
+// ============================================
+// ENUMS
+// ============================================
+
 export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 export type UnitOfMeasure =
   | 'UNITS'
@@ -49,6 +54,39 @@ export type LocationType =
   | 'SHELF'
   | 'BIN'
   | 'OTHER';
+
+// New enums for extended features
+export type MovementStatus =
+  | 'PENDING_APPROVAL'
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'CANCELLED';
+export type VolumeStatus = 'OPEN' | 'CLOSED' | 'DELIVERED' | 'RETURNED';
+export type SerializedLabelStatus = 'AVAILABLE' | 'USED' | 'VOIDED';
+export type InventoryCycleStatus =
+  | 'DRAFT'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED';
+export type InventoryCountStatus =
+  | 'PENDING'
+  | 'COUNTED'
+  | 'ADJUSTED'
+  | 'VERIFIED';
+export type ScanEntityType =
+  | 'ITEM'
+  | 'VARIANT'
+  | 'PRODUCT'
+  | 'LOCATION'
+  | 'VOLUME'
+  | 'LABEL';
+export type ImportStatus =
+  | 'VALIDATING'
+  | 'VALIDATED'
+  | 'IMPORTING'
+  | 'COMPLETED'
+  | 'FAILED';
+export type CompanyType = 'MANUFACTURER' | 'SUPPLIER' | 'BOTH';
 
 // Care Instructions Types (Etiquetas de Conservação - NBR 16365:2015)
 export type WashingInstruction =
@@ -119,18 +157,113 @@ export interface CareInstructions {
   customSymbols?: CustomSymbol[];
 }
 
-// Product Types
+// ============================================
+// SUPPLIER TYPE
+// ============================================
+
+export interface Supplier {
+  id: string;
+  name: string;
+  sequentialCode?: number;
+  cnpj?: string;
+  taxId?: string;
+  contact?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  paymentTerms?: string;
+  rating?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// PRODUCT CATEGORY TYPE
+// ============================================
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+// ============================================
+// PRODUCT TAG TYPE
+// ============================================
+
+export interface ProductTag {
+  id: string;
+  name: string;
+  slug: string;
+  color?: string | null;
+  description?: string | null;
+}
+
+// ============================================
+// PRODUCT TYPE
+// ============================================
+
+/**
+ * Product - Tipo principal que retorna do backend JÁ COM DADOS EXPANDIDOS
+ * O backend retorna todas as relações: template, supplier, manufacturer, variants, categories, tags
+ */
 export interface Product {
   id: string;
   name: string;
-  code?: string; // Opcional - auto-gerado pelo backend
+  /** Codigo completo gerado pelo backend (read-only) */
+  fullCode?: string;
+  /** Codigo sequencial auto-incrementado por tenant (read-only) */
+  sequentialCode?: number;
   description?: string;
   status: ProductStatus;
-  // unitOfMeasure removido - agora está no Template
+  outOfLine: boolean;
   attributes: Record<string, any>;
+  careInstructionIds: string[];
   templateId: string;
+  template?: {
+    id: string;
+    name: string;
+    unitOfMeasure: string;
+    sequentialCode?: number;
+    productAttributes?: TemplateAttributes;
+    variantAttributes?: TemplateAttributes;
+    itemAttributes?: TemplateAttributes;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt?: Date;
+  };
   supplierId?: string;
+  supplier?: Supplier | null;
   manufacturerId?: string;
+  manufacturer?: Manufacturer | null;
+  /** @deprecated Mapped to tenantId on backend - do not use */
+  organizationId?: string;
+  variants?: Array<{
+    id: string;
+    sku?: string;
+    fullCode?: string;
+    sequentialCode?: number;
+    name: string;
+    price: number;
+    costPrice?: number;
+    profitMargin?: number;
+    imageUrl?: string;
+    barcode?: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt?: Date;
+  }>;
+  productCategories?: ProductCategory[];
+  productTags?: ProductTag[];
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -138,9 +271,9 @@ export interface Product {
 
 export interface CreateProductRequest {
   name: string;
-  code?: string; // Opcional - será auto-gerado se não fornecido
+  // fullCode e sequentialCode sao gerados pelo backend (nao enviar)
   description?: string;
-  // status omitido - será ACTIVE por padrão no backend
+  // status omitido - sera ACTIVE por padrao no backend
   // unitOfMeasure removido - vem do Template
   attributes?: Record<string, any>;
   templateId: string;
@@ -150,14 +283,15 @@ export interface CreateProductRequest {
 
 export interface UpdateProductRequest {
   name?: string;
-  code?: string;
+  // code e fullCode são IMUTÁVEIS após criação
   description?: string;
   status?: ProductStatus;
+  outOfLine?: boolean;
   // unitOfMeasure removido
   attributes?: Record<string, any>;
-  templateId?: string;
   supplierId?: string;
   manufacturerId?: string;
+  categoryIds?: string[];
 }
 
 export interface ProductsResponse {
@@ -172,7 +306,9 @@ export interface ProductResponse {
 export interface Variant {
   id: string;
   productId: string;
-  sku?: string; // Opcional - auto-gerado pelo backend
+  sku?: string;
+  fullCode?: string;
+  sequentialCode?: number;
   name: string;
   price: number;
   imageUrl?: string;
@@ -183,10 +319,16 @@ export interface Variant {
   qrCode?: string;
   eanCode?: string;
   upcCode?: string;
+  colorHex?: string;
+  colorPantone?: string;
   minStock?: number;
   maxStock?: number;
   reorderPoint?: number;
   reorderQuantity?: number;
+  reference?: string;
+  similars?: unknown[];
+  outOfLine: boolean;
+  isActive: boolean;
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -194,39 +336,51 @@ export interface Variant {
 
 export interface CreateVariantRequest {
   productId: string;
-  sku?: string; // Opcional - será auto-gerado se não fornecido
-  name: string;
-  price: number; // Obrigatório para controle financeiro
+  sku?: string; // Opcional - será auto-gerado se não fornecido (max: 100)
+  name: string; // Obrigatório (1-255 chars)
+  price?: number; // Opcional, default 0 (nonnegative)
   imageUrl?: string;
   attributes?: Record<string, unknown>;
-  costPrice?: number;
+  costPrice?: number; // Positive
   profitMargin?: number;
-  barcode?: string;
-  qrCode?: string;
-  eanCode?: string;
-  upcCode?: string;
-  minStock?: number;
-  maxStock?: number;
-  reorderPoint?: number;
-  reorderQuantity?: number;
+  barcode?: string; // Max: 100
+  qrCode?: string; // Max: 100
+  eanCode?: string; // Max: 100
+  upcCode?: string; // Max: 100
+  reference?: string; // Max: 128
+  colorHex?: string; // Max: 7 (hex color)
+  colorPantone?: string; // Max: 50
+  minStock?: number; // Int, min: 0
+  maxStock?: number; // Int, min: 0
+  reorderPoint?: number; // Int, min: 0
+  reorderQuantity?: number; // Int, min: 0
+  outOfLine?: boolean; // Optional, default false
+  isActive?: boolean; // Optional, default true
+  similars?: unknown[]; // Array of unknown
 }
 
 export interface UpdateVariantRequest {
-  sku?: string;
-  name?: string;
-  price?: number;
+  sku?: string; // Max: 100
+  name?: string; // 1-255 chars
+  price?: number; // Nonnegative
   imageUrl?: string;
   attributes?: Record<string, unknown>;
-  costPrice?: number;
+  costPrice?: number; // Positive
   profitMargin?: number;
-  barcode?: string;
-  qrCode?: string;
-  eanCode?: string;
-  upcCode?: string;
-  minStock?: number;
-  maxStock?: number;
-  reorderPoint?: number;
-  reorderQuantity?: number;
+  barcode?: string; // Max: 100
+  qrCode?: string; // Max: 100
+  eanCode?: string; // Max: 100
+  upcCode?: string; // Max: 100
+  colorHex?: string; // Max: 7
+  colorPantone?: string; // Max: 50
+  minStock?: number; // Int, min: 0
+  maxStock?: number; // Int, min: 0
+  reorderPoint?: number; // Int, min: 0
+  reorderQuantity?: number; // Int, min: 0
+  reference?: string; // Max: 128
+  similars?: unknown[];
+  outOfLine?: boolean; // Optional, default false
+  isActive?: boolean; // Optional, default true
 }
 
 export interface VariantsResponse {
@@ -241,10 +395,16 @@ export interface VariantResponse {
 export interface Item {
   id: string;
   variantId: string;
-  locationId: string;
-  uniqueCode: string;
+  binId?: string; // ID da bin onde o item está armazenado
+  locationId?: string; // @deprecated - use binId (mantido para retrocompatibilidade)
+  resolvedAddress?: string; // Endereço resolvido da bin (ex: "FAB-EST-102-B")
+  uniqueCode?: string;
+  fullCode?: string;
+  sequentialCode?: number;
   initialQuantity: number;
   currentQuantity: number;
+  unitCost?: number;
+  totalCost?: number;
   status: ItemStatus;
   entryDate: Date;
   attributes: Record<string, unknown>;
@@ -254,13 +414,30 @@ export interface Item {
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+  // Campos desnormalizados do produto/variante
+  productCode?: string;
+  productName?: string;
+  variantSku?: string;
+  variantName?: string;
+  // Relação expandida (opcional)
+  bin?: {
+    id: string;
+    address: string;
+    zone?: {
+      id: string;
+      warehouseId: string;
+      code: string;
+      name: string;
+    };
+  };
 }
 
 export interface RegisterItemEntryRequest {
-  uniqueCode: string;
   variantId: string;
-  locationId: string;
+  binId?: string;
   quantity: number;
+  uniqueCode?: string;
+  unitCost?: number;
   attributes?: Record<string, unknown>;
   batchNumber?: string;
   manufacturingDate?: Date;
@@ -279,7 +456,7 @@ export interface RegisterItemExitRequest {
 
 export interface TransferItemRequest {
   itemId: string;
-  destinationLocationId: string;
+  destinationBinId: string;
   reasonCode?: string;
   notes?: string;
 }
@@ -344,9 +521,12 @@ export interface Category {
   name: string;
   slug?: string;
   description?: string;
+  iconUrl?: string | null;
   parentId?: string;
   displayOrder?: number;
   isActive: boolean;
+  childrenCount?: number;
+  productCount?: number;
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -356,6 +536,7 @@ export interface CreateCategoryRequest {
   name: string;
   slug?: string;
   description?: string;
+  iconUrl?: string;
   parentId?: string;
   displayOrder?: number;
   isActive?: boolean;
@@ -365,6 +546,7 @@ export interface UpdateCategoryRequest {
   name?: string;
   slug?: string;
   description?: string;
+  iconUrl?: string | null;
   parentId?: string;
   displayOrder?: number;
   isActive?: boolean;
@@ -381,7 +563,12 @@ export interface CategoryResponse {
 // Manufacturer Types
 export interface Manufacturer {
   id: string;
+  code: string; // Código hierárquico auto-gerado (3 dígitos: 001)
+  sequentialCode?: number;
   name: string;
+  legalName?: string; // Razão Social
+  tradeName?: string; // Nome Fantasia
+  cnpj?: string;
   country: string;
   email?: string;
   phone?: string;
@@ -401,7 +588,10 @@ export interface Manufacturer {
 
 export interface CreateManufacturerRequest {
   name: string;
-  country: string;
+  legalName?: string;
+  tradeName?: string;
+  cnpj?: string;
+  country?: string;
   email?: string;
   phone?: string;
   website?: string;
@@ -417,6 +607,9 @@ export interface CreateManufacturerRequest {
 
 export interface UpdateManufacturerRequest {
   name?: string;
+  legalName?: string;
+  tradeName?: string;
+  cnpj?: string;
   country?: string;
   email?: string;
   phone?: string;
@@ -507,6 +700,7 @@ export interface SupplierResponse {
 }
 
 // Location Types
+/** @deprecated Use Warehouse -> Zone -> Bin hierarchy instead */
 export interface Location {
   id: string;
   code: string;
@@ -522,7 +716,7 @@ export interface Location {
   deletedAt?: Date;
 }
 
-// Tipo para resposta da API (campos diferentes)
+/** @deprecated Use Warehouse -> Zone -> Bin hierarchy instead */
 export interface ApiLocation {
   id: string;
   code: string;
@@ -537,6 +731,7 @@ export interface ApiLocation {
   deletedAt?: Date;
 }
 
+/** @deprecated Use Warehouse -> Zone -> Bin hierarchy instead */
 export interface CreateLocationRequest {
   titulo?: string;
   type?: LocationType;
@@ -546,6 +741,7 @@ export interface CreateLocationRequest {
   isActive?: boolean;
 }
 
+/** @deprecated Use Warehouse -> Zone -> Bin hierarchy instead */
 export interface UpdateLocationRequest {
   titulo?: string;
   type?: LocationType;
@@ -595,15 +791,67 @@ export interface TagResponse {
 }
 
 // Template Types
+
+/**
+ * Tipo do atributo de template
+ */
+export type TemplateAttributeType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'date'
+  | 'select';
+
+/**
+ * Definição de um atributo de template
+ * Usado em productAttributes, variantAttributes e itemAttributes
+ */
+export interface TemplateAttribute {
+  /** Tipo do dado */
+  type: TemplateAttributeType;
+  /** Label exibido no formulário (opcional - se não informado, usa a key) */
+  label?: string;
+  /** Se é obrigatório */
+  required?: boolean;
+  /** Valor padrão */
+  defaultValue?: unknown;
+  /** Unidade de medida (ex: "kg", "cm", "m²") */
+  unitOfMeasure?: string;
+  /** Máscara do input (ex: "###.###.###-##" para CPF) */
+  mask?: string;
+  /** Placeholder do input */
+  placeholder?: string;
+  /** Habilitar impressão na etiqueta */
+  enablePrint?: boolean;
+  /** Habilitar visualização */
+  enableView?: boolean;
+  /** Opções para tipo select */
+  options?: string[];
+  /** Descrição do atributo */
+  description?: string;
+}
+
+/**
+ * Mapa de atributos de template
+ * Chave é o slug do atributo, valor é a definição
+ */
+export type TemplateAttributes = Record<string, TemplateAttribute>;
+
+/**
+ * Template de produto
+ */
 export interface Template {
   id: string;
+  code?: string; // Código hierárquico (3 dígitos: 001)
+  sequentialCode?: number;
   name: string;
-  code?: string; // Opcional - auto-gerado pelo backend
-  unitOfMeasure: UnitOfMeasure; // NOVO: Movido de Product para cá
-  productAttributes?: Record<string, unknown>;
-  variantAttributes?: Record<string, unknown>;
-  itemAttributes?: Record<string, unknown>;
-  careInstructions?: CareInstructions; // NOVO: Etiquetas de conservação
+  /** URL do ícone SVG do template */
+  iconUrl?: string;
+  unitOfMeasure: UnitOfMeasure;
+  productAttributes?: TemplateAttributes;
+  variantAttributes?: TemplateAttributes;
+  itemAttributes?: TemplateAttributes;
+  careInstructions?: CareInstructions;
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -611,21 +859,23 @@ export interface Template {
 
 export interface CreateTemplateRequest {
   name: string;
-  code?: string; // Opcional - será auto-gerado se não fornecido
-  unitOfMeasure: UnitOfMeasure; // OBRIGATÓRIO
-  productAttributes?: Record<string, unknown>;
-  variantAttributes?: Record<string, unknown>;
-  itemAttributes?: Record<string, unknown>;
-  careInstructions?: CareInstructions; // Opcional
+  code?: string;
+  iconUrl?: string;
+  unitOfMeasure: UnitOfMeasure;
+  productAttributes?: TemplateAttributes;
+  variantAttributes?: TemplateAttributes;
+  itemAttributes?: TemplateAttributes;
+  careInstructions?: CareInstructions;
 }
 
 export interface UpdateTemplateRequest {
   name?: string;
   code?: string;
+  iconUrl?: string;
   unitOfMeasure?: UnitOfMeasure;
-  productAttributes?: Record<string, unknown>;
-  variantAttributes?: Record<string, unknown>;
-  itemAttributes?: Record<string, unknown>;
+  productAttributes?: TemplateAttributes;
+  variantAttributes?: TemplateAttributes;
+  itemAttributes?: TemplateAttributes;
   careInstructions?: CareInstructions;
 }
 
@@ -732,4 +982,631 @@ export interface TemplateRequestsResponse {
 
 export interface TemplateRequestResponse {
   request: TemplateRequest;
+}
+
+// ============================================
+// EXTENDED VARIANT TYPES (Cost Management)
+// ============================================
+
+export interface VariantWithCost extends Variant {
+  averageCost?: number;
+  lastCost?: number;
+  totalCostValue?: number;
+  totalQuantity?: number;
+}
+
+export interface VariantStockSummary {
+  variantId: string;
+  totalQuantity: number;
+  availableQuantity: number;
+  reservedQuantity: number;
+  averageCost?: number;
+  totalValue?: number;
+}
+
+// ============================================
+// EXTENDED ITEM TYPES
+// ============================================
+
+export interface ItemExtended extends Item {
+  volumeId?: string;
+  categoryId?: string;
+  lastMovementAt?: Date;
+  variant?: Variant;
+  location?: Location;
+}
+
+// ============================================
+// EXTENDED MOVEMENT TYPES (Approval Workflow)
+// ============================================
+
+export interface ItemMovementExtended extends ItemMovement {
+  status: MovementStatus;
+  approvedBy?: string;
+  approvedAt?: Date;
+  rejectedBy?: string;
+  rejectedAt?: Date;
+  rejectionReason?: string;
+  unitCost?: number;
+  unitPrice?: number;
+  volumeId?: string;
+  periodKey?: string; // YYYY-MM format for analytics
+  // Invoice fields (Nota Fiscal)
+  invoiceNumber?: string;
+  invoiceAccessKey?: string;
+  invoiceSeries?: string;
+  invoiceDate?: Date;
+  invoiceDescription?: string;
+  // Relations
+  item?: Item;
+  user?: { id: string; name: string };
+  approver?: { id: string; name: string };
+}
+
+export interface RegisterItemEntryExtendedRequest
+  extends RegisterItemEntryRequest {
+  unitCost?: number;
+  purchaseOrderId?: string;
+  generateLabel?: boolean;
+  // Invoice fields
+  invoiceNumber?: string;
+  invoiceAccessKey?: string;
+  invoiceSeries?: string;
+  invoiceDate?: Date;
+  invoiceDescription?: string;
+}
+
+export interface RegisterItemExitExtendedRequest
+  extends RegisterItemExitRequest {
+  unitPrice?: number;
+  volumeId?: string;
+  requiresApproval?: boolean;
+}
+
+export interface BatchEntryRequest {
+  items: RegisterItemEntryExtendedRequest[];
+  commonData?: {
+    locationId?: string;
+    purchaseOrderId?: string;
+    invoiceNumber?: string;
+    invoiceAccessKey?: string;
+    invoiceSeries?: string;
+    invoiceDate?: Date;
+  };
+}
+
+export interface BatchTransferRequest {
+  items: Array<{
+    itemId: string;
+    destinationLocationId: string;
+  }>;
+  notes?: string;
+}
+
+export interface MovementApprovalRequest {
+  movementId: string;
+  notes?: string;
+}
+
+export interface MovementRejectionRequest {
+  movementId: string;
+  reason: string;
+}
+
+export interface BatchApprovalRequest {
+  movementIds: string[];
+  notes?: string;
+}
+
+export interface MovementHistoryQuery {
+  productId?: string;
+  variantId?: string;
+  itemId?: string;
+  locationId?: string;
+  movementType?: MovementType;
+  status?: MovementStatus;
+  startDate?: string;
+  endDate?: string;
+  userId?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface MovementHistoryResponse {
+  movements: ItemMovementExtended[];
+  pagination: PaginationMeta;
+}
+
+export interface PendingApprovalsResponse {
+  movements: ItemMovementExtended[];
+  total: number;
+}
+
+// ============================================
+// VOLUME TYPES (Shipping Containers)
+// ============================================
+
+export interface Volume {
+  id: string;
+  code: string;
+  name?: string;
+  status: VolumeStatus;
+  serializedLabelId?: string;
+  serializedLabel?: SerializedLabel;
+  destinationRef?: string;
+  notes?: string;
+  closedAt?: Date;
+  closedBy?: string;
+  deliveredAt?: Date;
+  deliveredBy?: string;
+  returnedAt?: Date;
+  returnedBy?: string;
+  itemCount?: number;
+  items?: VolumeItem[];
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface VolumeItem {
+  id: string;
+  volumeId: string;
+  itemId: string;
+  addedAt: Date;
+  addedBy: string;
+  item?: Item;
+}
+
+export interface CreateVolumeRequest {
+  name?: string;
+  serializedLabelCode?: string;
+  destinationRef?: string;
+  notes?: string;
+}
+
+export interface UpdateVolumeRequest {
+  name?: string;
+  destinationRef?: string;
+  notes?: string;
+}
+
+export interface AddItemToVolumeRequest {
+  itemId: string;
+}
+
+export interface VolumeActionRequest {
+  notes?: string;
+}
+
+export interface VolumesResponse {
+  volumes: Volume[];
+  pagination?: PaginationMeta;
+}
+
+export interface VolumeResponse {
+  volume: Volume;
+}
+
+export interface VolumeRomaneio {
+  volume: Volume;
+  items: Array<{
+    item: Item;
+    variant: Variant;
+    product: Product;
+  }>;
+  generatedAt: Date;
+}
+
+// ============================================
+// SERIALIZED LABEL TYPES
+// ============================================
+
+export interface SerializedLabel {
+  id: string;
+  code: string;
+  status: SerializedLabelStatus;
+  linkedEntityType?: ScanEntityType;
+  linkedEntityId?: string;
+  printedAt?: Date;
+  printedBy?: string;
+  usedAt?: Date;
+  usedBy?: string;
+  voidedAt?: Date;
+  voidedBy?: string;
+  createdAt: Date;
+}
+
+export interface GenerateSerializedLabelsRequest {
+  quantity: number;
+  prefix?: string;
+  startSequence?: number;
+}
+
+export interface LinkLabelRequest {
+  entityType: ScanEntityType;
+  entityId: string;
+}
+
+export interface SerializedLabelsResponse {
+  labels: SerializedLabel[];
+  pagination?: PaginationMeta;
+}
+
+export interface SerializedLabelResponse {
+  label: SerializedLabel;
+}
+
+// ============================================
+// SCAN TYPES
+// ============================================
+
+export interface ScanRequest {
+  code: string;
+  context?: 'ENTRY' | 'EXIT' | 'TRANSFER' | 'INFO' | 'INVENTORY';
+}
+
+export interface ScanResult {
+  entityType: ScanEntityType;
+  entityId: string;
+  entity: Item | Variant | Product | Location | Volume | SerializedLabel;
+  suggestions?: ScanSuggestion[];
+}
+
+export interface ScanSuggestion {
+  action: string;
+  label: string;
+  endpoint: string;
+  method: string;
+}
+
+export interface BatchScanRequest {
+  codes: string[];
+  context?: 'ENTRY' | 'EXIT' | 'TRANSFER' | 'INFO' | 'INVENTORY';
+}
+
+export interface BatchScanResponse {
+  results: Array<{
+    code: string;
+    success: boolean;
+    result?: ScanResult;
+    error?: string;
+  }>;
+}
+
+// ============================================
+// INVENTORY CYCLE TYPES
+// ============================================
+
+export interface InventoryCycle {
+  id: string;
+  name: string;
+  description?: string;
+  status: InventoryCycleStatus;
+  warehouseId?: string;
+  zoneIds?: string[];
+  startedAt?: Date;
+  startedBy?: string;
+  completedAt?: Date;
+  completedBy?: string;
+  totalBins?: number;
+  countedBins?: number;
+  adjustedBins?: number;
+  counts?: InventoryCount[];
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface InventoryCount {
+  id: string;
+  cycleId: string;
+  binId: string;
+  bin?: Location;
+  status: InventoryCountStatus;
+  expectedQuantity?: number;
+  countedQuantity?: number;
+  adjustedQuantity?: number;
+  variance?: number;
+  countedAt?: Date;
+  countedBy?: string;
+  adjustedAt?: Date;
+  adjustedBy?: string;
+  notes?: string;
+  items?: Array<{
+    itemId: string;
+    expectedQuantity: number;
+    countedQuantity?: number;
+    variance?: number;
+  }>;
+}
+
+export interface CreateInventoryCycleRequest {
+  name: string;
+  description?: string;
+  warehouseId?: string;
+  zoneIds?: string[];
+  binIds?: string[];
+}
+
+export interface StartCycleRequest {
+  notes?: string;
+}
+
+export interface CompleteCycleRequest {
+  notes?: string;
+  autoAdjust?: boolean;
+}
+
+export interface SubmitCountRequest {
+  countedQuantity: number;
+  itemCounts?: Array<{
+    itemId: string;
+    countedQuantity: number;
+  }>;
+  notes?: string;
+}
+
+export interface AdjustCountRequest {
+  adjustedQuantity: number;
+  reason: string;
+}
+
+export interface InventoryCyclesResponse {
+  cycles: InventoryCycle[];
+  pagination?: PaginationMeta;
+}
+
+export interface InventoryCycleResponse {
+  cycle: InventoryCycle;
+}
+
+export interface InventoryCountsResponse {
+  counts: InventoryCount[];
+}
+
+// ============================================
+// IMPORT TYPES
+// ============================================
+
+export interface ImportValidationRequest {
+  type: 'PRODUCTS' | 'VARIANTS' | 'ITEMS';
+  data: Record<string, unknown>[];
+}
+
+export interface ImportValidationResult {
+  valid: boolean;
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  errors: Array<{
+    row: number;
+    field: string;
+    message: string;
+    value?: unknown;
+  }>;
+  warnings: Array<{
+    row: number;
+    field: string;
+    message: string;
+  }>;
+  preview?: Record<string, unknown>[];
+}
+
+export interface ImportRequest {
+  type: 'PRODUCTS' | 'VARIANTS' | 'ITEMS';
+  data: Record<string, unknown>[];
+  options?: {
+    skipDuplicates?: boolean;
+    updateExisting?: boolean;
+    dryRun?: boolean;
+  };
+}
+
+export interface ImportResult {
+  success: boolean;
+  totalRows: number;
+  importedRows: number;
+  skippedRows: number;
+  failedRows: number;
+  errors: Array<{
+    row: number;
+    message: string;
+  }>;
+  createdIds?: string[];
+}
+
+export interface ImportTemplateResponse {
+  headers: string[];
+  requiredFields: string[];
+  optionalFields: string[];
+  sampleData: Record<string, unknown>[];
+  instructions: string;
+}
+
+// ============================================
+// ANALYTICS TYPES
+// ============================================
+
+export interface StockSummary {
+  totalProducts: number;
+  totalVariants: number;
+  totalItems: number;
+  totalValue: number;
+  byWarehouse: Array<{
+    warehouseId: string;
+    warehouseName: string;
+    itemCount: number;
+    value: number;
+  }>;
+  byCategory: Array<{
+    categoryId: string;
+    categoryName: string;
+    itemCount: number;
+    value: number;
+  }>;
+  lowStockAlerts: Array<{
+    variantId: string;
+    variantName: string;
+    currentStock: number;
+    minStock: number;
+    reorderPoint: number;
+  }>;
+}
+
+export interface MovementsSummary {
+  period: string;
+  totalEntries: number;
+  totalExits: number;
+  totalTransfers: number;
+  totalAdjustments: number;
+  entriesValue: number;
+  exitsValue: number;
+  netChange: number;
+  pendingApprovals: number;
+  byDay: Array<{
+    date: string;
+    entries: number;
+    exits: number;
+    transfers: number;
+  }>;
+}
+
+export interface DashboardData {
+  stockSummary: StockSummary;
+  movementsSummary: MovementsSummary;
+  recentMovements: ItemMovementExtended[];
+  pendingApprovals: ItemMovementExtended[];
+  alerts: Array<{
+    type: 'LOW_STOCK' | 'EXPIRED' | 'PENDING_APPROVAL' | 'INVENTORY_VARIANCE';
+    severity: 'INFO' | 'WARNING' | 'CRITICAL';
+    message: string;
+    entityType?: string;
+    entityId?: string;
+  }>;
+}
+
+// ============================================
+// LABEL GENERATION TYPES
+// ============================================
+
+export interface GenerateLabelRequest {
+  entityType: 'ITEM' | 'VARIANT' | 'PRODUCT' | 'VOLUME' | 'LOCATION';
+  entityIds: string[];
+  labelType: 'QR' | 'BARCODE' | 'COMBINED';
+  format?: 'PDF' | 'PNG' | 'ZPL';
+  template?: string;
+  options?: {
+    includePrice?: boolean;
+    includeName?: boolean;
+    includeLocation?: boolean;
+    copies?: number;
+  };
+}
+
+export interface GenerateLabelResponse {
+  labels: Array<{
+    entityId: string;
+    labelUrl?: string;
+    labelData?: string; // Base64 or ZPL
+  }>;
+}
+
+// ============================================
+// PAGINATION & COMMON TYPES
+// ============================================
+
+// PaginationMeta and PaginatedQuery are imported from '@/types/pagination'
+export type { PaginationMeta, PaginatedQuery } from './pagination';
+
+export interface ProductsQuery extends PaginatedQuery {
+  templateId?: string;
+  categoryId?: string;
+  status?: ProductStatus;
+  search?: string;
+  manufacturerId?: string;
+  supplierId?: string;
+}
+
+export interface VariantsQuery extends PaginatedQuery {
+  productId?: string;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  hasStock?: boolean;
+}
+
+export interface ItemsQuery extends PaginatedQuery {
+  variantId?: string;
+  locationId?: string;
+  warehouseId?: string;
+  status?: ItemStatus;
+  volumeId?: string;
+  search?: string;
+}
+
+export interface VolumesQuery extends PaginatedQuery {
+  status?: VolumeStatus;
+  search?: string;
+}
+
+export interface LabelsQuery extends PaginatedQuery {
+  status?: SerializedLabelStatus;
+  search?: string;
+}
+
+// ============================================
+// CARE INSTRUCTIONS TYPES (ISO 3758)
+// ============================================
+
+export type CareCategory = 'WASH' | 'BLEACH' | 'DRY' | 'IRON' | 'PROFESSIONAL';
+
+export interface CareOption {
+  id: string;
+  code: string;
+  category: CareCategory;
+  assetPath: string;
+  label: string;
+}
+
+export interface CareOptionsResponse {
+  options: {
+    WASH: CareOption[];
+    BLEACH: CareOption[];
+    DRY: CareOption[];
+    IRON: CareOption[];
+    PROFESSIONAL: CareOption[];
+  };
+}
+
+export interface SetProductCareRequest {
+  careInstructionIds: string[];
+}
+
+export interface SetProductCareResponse {
+  careInstructionIds: string[];
+  careInstructions: CareOption[];
+}
+
+export interface CategoryMeta {
+  key: CareCategory;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+// ============================================
+// API RESPONSE WRAPPERS (Paginated)
+// ============================================
+
+export interface PaginatedProductsResponse {
+  products: Product[];
+  pagination: PaginationMeta;
+}
+
+export interface PaginatedVariantsResponse {
+  variants: VariantWithCost[];
+  pagination: PaginationMeta;
+}
+
+export interface PaginatedItemsResponse {
+  items: ItemExtended[];
+  pagination: PaginationMeta;
 }

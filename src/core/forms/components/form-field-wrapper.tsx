@@ -90,7 +90,7 @@ export function FormFieldWrapper({
         {/* Erro */}
         {error && (
           <div className="flex items-start gap-2 text-xs text-[rgb(var(--color-destructive))]">
-            <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}

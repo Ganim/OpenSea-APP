@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
+import { TenantProvider } from '@/contexts/tenant-context';
 import { QueryProvider } from '@/providers/query-provider';
 import type { Metadata } from 'next';
 import Script from 'next/script';
@@ -63,7 +64,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <TenantProvider>{children}</TenantProvider>
+            </AuthProvider>
           </QueryProvider>
           <Toaster position="top-right" richColors />
         </ThemeProvider>

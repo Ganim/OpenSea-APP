@@ -3,6 +3,7 @@
  * Configuração completa da entidade de produtos
  */
 
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Product } from '@/types/stock';
 import { Copy, Edit, Eye, Package, Plus, Trash2 } from 'lucide-react';
@@ -34,10 +35,10 @@ export const productsConfig = defineEntityConfig<Product>()({
 
   // ======================== ROTAS ========================
   routes: {
-    list: '/stock/assets/products',
-    detail: '/stock/assets/products/:id',
-    create: '/stock/assets/products/new',
-    edit: '/stock/assets/products/:id/edit',
+    list: '/stock/products',
+    detail: '/stock/products/:id',
+    create: '/stock/products/new',
+    edit: '/stock/products/:id/edit',
   },
 
   // ======================== DISPLAY ========================
@@ -46,7 +47,7 @@ export const productsConfig = defineEntityConfig<Product>()({
     color: 'blue',
     gradient: 'from-blue-500 to-cyan-600',
     titleField: 'name',
-    subtitleField: 'code',
+    subtitleField: 'fullCode',
     imageField: undefined,
     labels: {
       singular: 'Produto',
@@ -97,7 +98,7 @@ export const productsConfig = defineEntityConfig<Product>()({
     showViewToggle: true,
     enableDragSelection: true,
     selectable: true,
-    searchableFields: ['name', 'code', 'description'],
+    searchableFields: ['name', 'fullCode', 'description'],
     defaultSort: {
       field: 'name',
       direction: 'asc',
@@ -112,7 +113,8 @@ export const productsConfig = defineEntityConfig<Product>()({
       {
         id: 'basic',
         title: 'Informações Básicas',
-        description: 'Apenas template e nome são obrigatórios para criar o produto',
+        description:
+          'Apenas template e nome são obrigatórios para criar o produto',
         fields: [
           {
             name: 'templateId',
@@ -204,12 +206,12 @@ export const productsConfig = defineEntityConfig<Product>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'products.view',
-    create: 'products.create',
-    update: 'products.update',
-    delete: 'products.delete',
-    export: 'products.export',
-    import: 'products.import',
+    view: STOCK_PERMISSIONS.PRODUCTS.READ,
+    create: STOCK_PERMISSIONS.PRODUCTS.CREATE,
+    update: STOCK_PERMISSIONS.PRODUCTS.UPDATE,
+    delete: STOCK_PERMISSIONS.PRODUCTS.DELETE,
+    export: STOCK_PERMISSIONS.PRODUCTS.MANAGE, // Export uses manage permission
+    import: STOCK_PERMISSIONS.PRODUCTS.MANAGE, // Import uses manage permission
   },
 
   // ======================== FEATURES ========================
@@ -243,7 +245,7 @@ export const productsConfig = defineEntityConfig<Product>()({
         label: 'Novo Produto',
         icon: Plus,
         variant: 'default',
-        permission: 'products.create',
+        permission: STOCK_PERMISSIONS.PRODUCTS.CREATE,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -253,28 +255,28 @@ export const productsConfig = defineEntityConfig<Product>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'products.view',
+        permission: STOCK_PERMISSIONS.PRODUCTS.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'products.update',
+        permission: STOCK_PERMISSIONS.PRODUCTS.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'products.create',
+        permission: STOCK_PERMISSIONS.PRODUCTS.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'products.delete',
+        permission: STOCK_PERMISSIONS.PRODUCTS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Produto',
         confirmMessage: 'Tem certeza que deseja excluir este produto?',
@@ -287,7 +289,7 @@ export const productsConfig = defineEntityConfig<Product>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'products.delete',
+        permission: STOCK_PERMISSIONS.PRODUCTS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Produtos',
         confirmMessage:

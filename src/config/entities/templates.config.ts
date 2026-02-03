@@ -3,6 +3,7 @@
  * Configuração completa da entidade de templates
  */
 
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Template } from '@/types/stock';
 import { Copy, Edit, Eye, FileText, Plus, Trash2 } from 'lucide-react';
@@ -34,10 +35,10 @@ export const templatesConfig = defineEntityConfig<Template>()({
 
   // ======================== ROTAS ========================
   routes: {
-    list: '/stock/assets/templates',
-    detail: '/stock/assets/templates/:id',
-    create: '/stock/assets/templates/new',
-    edit: '/stock/assets/templates/:id/edit',
+    list: '/stock/templates',
+    detail: '/stock/templates/:id',
+    create: '/stock/templates/new',
+    edit: '/stock/templates/:id/edit',
   },
 
   // ======================== DISPLAY ========================
@@ -130,12 +131,12 @@ export const templatesConfig = defineEntityConfig<Template>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'templates.view',
-    create: 'templates.create',
-    update: 'templates.update',
-    delete: 'templates.delete',
-    export: 'templates.export',
-    import: 'templates.import',
+    view: STOCK_PERMISSIONS.TEMPLATES.READ,
+    create: STOCK_PERMISSIONS.TEMPLATES.CREATE,
+    update: STOCK_PERMISSIONS.TEMPLATES.UPDATE,
+    delete: STOCK_PERMISSIONS.TEMPLATES.DELETE,
+    export: STOCK_PERMISSIONS.TEMPLATES.MANAGE, // Export uses manage permission
+    import: STOCK_PERMISSIONS.TEMPLATES.MANAGE, // Import uses manage permission
   },
 
   // ======================== FEATURES ========================
@@ -169,7 +170,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
         label: 'Novo Template',
         icon: Plus,
         variant: 'default',
-        permission: 'templates.create',
+        permission: STOCK_PERMISSIONS.TEMPLATES.CREATE,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -179,28 +180,28 @@ export const templatesConfig = defineEntityConfig<Template>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'templates.view',
+        permission: STOCK_PERMISSIONS.TEMPLATES.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'templates.update',
+        permission: STOCK_PERMISSIONS.TEMPLATES.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'templates.create',
+        permission: STOCK_PERMISSIONS.TEMPLATES.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'templates.delete',
+        permission: STOCK_PERMISSIONS.TEMPLATES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Template',
         confirmMessage: 'Tem certeza que deseja excluir este template?',
@@ -213,7 +214,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'templates.delete',
+        permission: STOCK_PERMISSIONS.TEMPLATES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Templates',
         confirmMessage:

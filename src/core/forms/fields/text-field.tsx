@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Text Field
- * Campo de texto genérico
+ * Campo de texto genérico com suporte a máscaras
  */
 
 'use client';
@@ -8,7 +8,9 @@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { FieldConfig } from '@/core/types';
+import { useCallback } from 'react';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
+import { applySmartMask, getMaskMaxLength } from '../utils/masks';
 
 export interface TextFieldProps<T = unknown> {
   field: FieldConfig<T>;
@@ -48,6 +50,33 @@ export function TextField<T = unknown>({
         : false
       : field.disabled);
 
+  // Handler com suporte a máscara
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      let newValue = e.target.value;
+
+      // Aplica máscara se configurada
+      if (field.mask && !isTextarea) {
+        newValue = applySmartMask(newValue, field.mask);
+      }
+
+      onChange(newValue);
+    },
+    [field.mask, isTextarea, onChange]
+  );
+
+  // Valor formatado (aplica máscara no valor inicial se necessário)
+  const displayValue = useCallback(() => {
+    if (!value) return '';
+    if (field.mask && !isTextarea) {
+      return applySmartMask(value, field.mask);
+    }
+    return value;
+  }, [value, field.mask, isTextarea]);
+
+  // Comprimento máximo baseado na máscara
+  const maxLength = field.mask ? getMaskMaxLength(field.mask) : undefined;
+
   return (
     <FormFieldWrapper
       id={String(field.name)}
@@ -63,7 +92,7 @@ export function TextField<T = unknown>({
         <Textarea
           id={String(field.name)}
           value={value || ''}
-          onChange={e => onChange(e.target.value)}
+          onChange={handleChange}
           placeholder={field.placeholder}
           disabled={isDisabled}
           readOnly={field.readOnly}
@@ -74,11 +103,12 @@ export function TextField<T = unknown>({
         <Input
           id={String(field.name)}
           type={inputType}
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
+          value={displayValue()}
+          onChange={handleChange}
           placeholder={field.placeholder}
           disabled={isDisabled}
           readOnly={field.readOnly}
+          maxLength={maxLength}
           aria-invalid={!!error}
         />
       )}

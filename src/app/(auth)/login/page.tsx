@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
+import { useTenant } from '@/contexts/tenant-context';
 import { translateError } from '@/lib/error-messages';
 import { useForm } from '@tanstack/react-form';
 import { ChevronLeft, ChevronRight, Lock, User } from 'lucide-react';
@@ -23,6 +24,7 @@ interface LoginFormData {
 
 export default function LoginPage() {
   const { login, isLoading } = useAuth();
+  const { refreshTenants, selectTenant } = useTenant();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<LoginStep>('identifier');
   const [error, setError] = useState('');
@@ -37,8 +39,29 @@ export default function LoginPage() {
       setError('');
 
       try {
-        await login({ email: value.identifier, password: value.password });
-        router.push('/');
+        const result = await login({
+          email: value.identifier,
+          password: value.password,
+        });
+        if (!result.redirected) {
+          // Super admins vão direto para o dashboard
+          if (result.isSuperAdmin) {
+            router.push('/');
+            return;
+          }
+
+          // Busca os tenants do usuário
+          const tenantsList = await refreshTenants();
+
+          if (tenantsList.length === 1) {
+            // Se só tem um tenant, seleciona automaticamente
+            await selectTenant(tenantsList[0].id);
+            router.push('/');
+          } else {
+            // Se tem 0 ou 2+ tenants, vai para a página de seleção
+            router.push('/select-tenant');
+          }
+        }
       } catch (err: unknown) {
         setError(translateError(err));
         console.error('Erro no login:', err);

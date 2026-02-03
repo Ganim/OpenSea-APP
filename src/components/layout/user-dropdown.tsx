@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/shared/user-avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -42,30 +42,25 @@ export function UserDropdown() {
     [theme, setTheme]
   );
 
-  const userName = useMemo(
-    () => user?.profile?.name || user?.username || 'Usuário',
-    [user]
-  );
+  const userName = useMemo(() => {
+    if (user?.profile?.name) {
+      const surname = user?.profile?.surname || '';
+      return surname ? `${user.profile.name} ${surname}` : user.profile.name;
+    }
+    return user?.username || 'Usuário';
+  }, [user]);
 
-  const userEmail = useMemo(
-    () => user?.email || 'email@example.com',
-    [user]
-  );
-
-  const userInitial = useMemo(
-    () =>
-      user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || 'U',
-    [user]
-  );
+  const userEmail = useMemo(() => user?.email || 'email@example.com', [user]);
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="rounded-xl h-10 px-2 gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>{userInitial}</AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={user?.profile?.name || user?.username || 'U'}
+            surname={user?.profile?.surname}
+            size="sm"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

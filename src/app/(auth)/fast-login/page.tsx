@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
+import { useTenant } from '@/contexts/tenant-context';
 import { translateError } from '@/lib/error-messages';
 import {
   getSavedAccounts,
@@ -28,23 +29,37 @@ import { useEffect, useState } from 'react';
 
 export default function FastLoginPage() {
   const { login, isLoading } = useAuth();
+  const { refreshTenants, selectTenant } = useTenant();
   const router = useRouter();
-  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>(() => {
-    // Inicializa com as contas salvas (só executa uma vez)
-    return getSavedAccounts();
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<SavedAccount | null>(
     null
   );
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Redireciona se não há contas salvas
+  // Carrega contas após hidratação e redireciona se não há
   useEffect(() => {
-    if (savedAccounts.length === 0) {
+    setIsMounted(true);
+    const accounts = getSavedAccounts();
+    setSavedAccounts(accounts);
+
+    // Verifica se veio de uma sessão expirada
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('session') === 'expired') {
+        setSessionExpired(true);
+        // Remove o parâmetro da URL
+        window.history.replaceState({}, '', '/fast-login');
+      }
+    }
+
+    if (accounts.length === 0) {
       router.replace('/login');
     }
-  }, [savedAccounts.length, router]);
+  }, [router]);
 
   const handleSelectAccount = (account: SavedAccount) => {
     setSelectedAccount(account);
@@ -82,8 +97,29 @@ export default function FastLoginPage() {
     setError('');
 
     try {
-      await login({ email: selectedAccount.identifier, password });
-      router.push('/');
+      const result = await login({
+        email: selectedAccount.identifier,
+        password,
+      });
+      if (!result.redirected) {
+        // Super admins vão direto para o dashboard
+        if (result.isSuperAdmin) {
+          router.push('/');
+          return;
+        }
+
+        // Busca os tenants do usuário
+        const tenantsList = await refreshTenants();
+
+        if (tenantsList.length === 1) {
+          // Se só tem um tenant, seleciona automaticamente
+          await selectTenant(tenantsList[0].id);
+          router.push('/');
+        } else {
+          // Se tem 0 ou 2+ tenants, vai para a página de seleção
+          router.push('/select-tenant');
+        }
+      }
     } catch (err: unknown) {
       setError(translateError(err));
       console.error('Erro no login:', err);
@@ -112,13 +148,8 @@ export default function FastLoginPage() {
     return date.toLocaleDateString('pt-BR');
   };
 
-  // Evita renderização no servidor
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
   // Se não há contas, mostra loading (vai redirecionar)
-  if (savedAccounts.length === 0) {
+  if (!isMounted || savedAccounts.length === 0) {
     return (
       <AuthBackground>
         <div className="min-h-screen flex items-center justify-center">
@@ -152,6 +183,15 @@ export default function FastLoginPage() {
           {/* Card */}
           <Card className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
             <CardContent className="p-6 sm:p-8">
+              {/* Session expired message */}
+              {sessionExpired && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 animate-in fade-in slide-in-from-top-2 duration-200 mb-6">
+                  <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
+                    Sua sessão expirou. Por favor, faça login novamente.
+                  </p>
+                </div>
+              )}
+
               {/* Error message */}
               {error && (
                 <div className="p-4 rounded-2xl bg-red-500/10 dark:bg-red-500/20 border border-red-500/30 animate-in fade-in slide-in-from-top-2 duration-200 mb-6">
@@ -191,16 +231,34 @@ export default function FastLoginPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
+                        <span
+                          role="button"
+                          tabIndex={0}
                           onClick={e =>
-                            handleRemoveAccount(e, account.identifier)
+                            handleRemoveAccount(
+                              e as React.MouseEvent,
+                              account.identifier
+                            )
                           }
-                          className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              // Call remove without the event parameter for keyboard
+                              const mockEvent = {
+                                preventDefault: () => {},
+                              } as React.MouseEvent;
+                              handleRemoveAccount(
+                                mockEvent,
+                                account.identifier
+                              );
+                            }
+                          }}
+                          className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                           title="Remover conta"
+                          aria-label="Remover conta"
                         >
                           <X className="w-4 h-4" />
-                        </button>
+                        </span>
                         <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
                       </div>
                     </button>

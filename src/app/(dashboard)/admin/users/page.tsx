@@ -1,15 +1,26 @@
 /**
  * OpenSea OS - Users Page
- * Página de gerenciamento de usuários seguindo o padrão do OS
+ * Página de gerenciamento de usuários seguindo o padrão padronizado do OS
  */
 
 'use client';
 
+import { ADMIN_PERMISSIONS } from '@/app/(dashboard)/admin/_shared/constants';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { SearchBar } from '@/components/layout/search-bar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { ForcePasswordResetModal } from '@/components/modals/force-password-reset-modal';
 import { AccessDenied } from '@/components/rbac/access-denied';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/contexts/auth-context';
 import {
   CoreProvider,
   EntityContextMenu,
@@ -18,31 +29,43 @@ import {
   UniversalCard,
   useEntityCrud,
   useEntityPage,
+  type ContextMenuAction,
 } from '@/core';
+import { usePermissions } from '@/hooks/use-permissions';
 import { usersService } from '@/services/auth/users.service';
 import * as rbacService from '@/services/rbac/rbac.service';
 import type { User } from '@/types/auth';
 import type { GroupWithExpiration, PermissionGroup } from '@/types/rbac';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Search, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Lock,
+  Plus,
+  Upload,
+  Users,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
 import {
   CreateModal,
   createUser,
   deleteUser,
   DetailModal,
-  getRoleBadgeVariant,
   listUsers,
   ManageGroupsModal,
-  updateUserRole,
   usersConfig,
 } from './src';
 
 export default function UsersPage() {
-  const { user: currentUser } = useAuth();
+  const router = useRouter();
+  const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
-  // Verificar se o usuário é ADMIN
-  const isAdmin = currentUser?.role === 'ADMIN';
+  // Verificar se o usuário tem permissão para gerenciar usuários
+  const canManageUsers =
+    hasPermission(ADMIN_PERMISSIONS.USERS.MANAGE) ||
+    hasPermission(ADMIN_PERMISSIONS.USERS.LIST);
 
   // ============================================================================
   // STATE
@@ -50,6 +73,19 @@ export default function UsersPage() {
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [manageGroupsOpen, setManageGroupsOpen] = useState(false);
+  const [forcePasswordResetOpen, setForcePasswordResetOpen] = useState(false);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+    null
+  );
+  const [newUser, setNewUser] = useState<{
+    username: string;
+    email: string;
+    password: string;
+  }>({
+    username: '',
+    email: '',
+    password: '',
+  });
 
   // ============================================================================
   // CRUD SETUP
@@ -68,12 +104,8 @@ export default function UsersPage() {
     createFn: async (data: Record<string, unknown>) => {
       return createUser(data as Parameters<typeof createUser>[0]);
     },
-    updateFn: async (id, data: Record<string, unknown>) => {
-      // Update role if changed
-      if (data.role) {
-        return updateUserRole(id, data.role as 'USER' | 'MANAGER' | 'ADMIN');
-      }
-      // Return existing for now
+    updateFn: async id => {
+      // Profile updates handled separately
       const response = await usersService.getUser(id);
       return response.user;
     },
@@ -119,10 +151,9 @@ export default function UsersPage() {
   const { data: availableGroups = [] } = useQuery<PermissionGroup[]>({
     queryKey: ['available-groups'],
     queryFn: async () => {
-      const response = await rbacService.listPermissionGroups({
+      return await rbacService.listPermissionGroups({
         isActive: true,
       });
-      return response.data;
     },
     enabled: manageGroupsOpen,
   });
@@ -131,7 +162,6 @@ export default function UsersPage() {
   // HANDLERS
   // ============================================================================
 
-  // Context menu handlers
   const handleContextView = (ids: string[]) => {
     page.handlers.handleItemsView(ids);
   };
@@ -143,6 +173,15 @@ export default function UsersPage() {
   const handleContextDelete = (ids: string[]) => {
     page.modals.setItemsToDelete(ids);
     page.modals.open('delete');
+  };
+
+  const handleForcePasswordReset = (user: User) => {
+    setUserToResetPassword(user);
+    setForcePasswordResetOpen(true);
+  };
+
+  const handleDoubleClick = (itemId: string) => {
+    router.push(`/admin/users/${itemId}`);
   };
 
   const handleManageGroups = (user: User) => {
@@ -170,18 +209,94 @@ export default function UsersPage() {
     }
   };
 
+  const handleCreateUser = async () => {
+    try {
+      await crud.create(newUser);
+      // Reset form
+      setNewUser({
+        username: '',
+        email: '',
+        password: '',
+      });
+      page.modals.close('create');
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+    }
+  };
+
+  // ============================================================================
+  // CUSTOM ACTIONS
+  // ============================================================================
+
+  const customActions: ContextMenuAction[] = [
+    {
+      id: 'force-password-reset',
+      label: 'Resetar Senha',
+      icon: Lock,
+      onClick: (ids: string[]) => {
+        // Pegar o primeiro usuário (já que ação é por item)
+        const user = page.items?.find(u => u.id === ids[0]);
+        if (user) {
+          handleForcePasswordReset(user);
+        }
+      },
+      variant: 'default',
+      separator: 'before',
+    },
+  ];
+
+  // ============================================================================
+  // SORT OPTIONS
+  // ============================================================================
+
+  const sortOptions = useMemo(
+    () => [
+      {
+        field: 'name' as const,
+        direction: 'asc' as const,
+        label: 'Nome (A-Z)',
+        icon: Users,
+      },
+      {
+        field: 'name' as const,
+        direction: 'desc' as const,
+        label: 'Nome (Z-A)',
+        icon: Users,
+      },
+      {
+        field: 'createdAt' as const,
+        direction: 'desc' as const,
+        label: 'Mais recentes',
+        icon: Calendar,
+      },
+      {
+        field: 'createdAt' as const,
+        direction: 'asc' as const,
+        label: 'Mais antigos',
+        icon: Calendar,
+      },
+      {
+        field: 'updatedAt' as const,
+        direction: 'desc' as const,
+        label: 'Última atualização',
+        icon: Clock,
+      },
+    ],
+    []
+  );
+
   // ============================================================================
   // RENDER FUNCTIONS
   // ============================================================================
 
   const renderGridCard = (item: User, isSelected: boolean) => {
-    const roleLabel = getRoleBadgeVariant(item.role);
     return (
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
+        actions={customActions}
       >
         <UniversalCard
           id={item.id}
@@ -189,24 +304,24 @@ export default function UsersPage() {
           title={item.username || 'N/A'}
           subtitle={item.email || 'sem email'}
           icon={Users}
-          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
-          badges={[
-            {
-              label:
-                roleLabel === 'destructive'
-                  ? 'Admin'
-                  : roleLabel === 'default'
-                    ? 'Gerente'
-                    : 'Usuário',
-              variant: roleLabel as 'destructive' | 'default' | 'secondary',
-            },
-          ]}
+          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           metadata={
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {item.profile?.name && (
-                <span className="truncate text-muted-foreground">
+                <span className="truncate">
                   {item.profile.name}
                   {item.profile.surname && ` ${item.profile.surname}`}
+                </span>
+              )}
+              {item.lastLoginAt && (
+                <span>
+                  Último acesso:{' '}
+                  {new Date(item.lastLoginAt).toLocaleDateString()}
+                </span>
+              )}
+              {item.createdAt && (
+                <span>
+                  Criado: {new Date(item.createdAt).toLocaleDateString()}
                 </span>
               )}
             </div>
@@ -214,21 +329,23 @@ export default function UsersPage() {
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
+          onDoubleClick={() => handleDoubleClick(item.id)}
           createdAt={item.createdAt}
-          updatedAt={item.updatedAt}
+          updatedAt={item.updatedAt ?? undefined}
+          showStatusBadges={true}
         />
       </EntityContextMenu>
     );
   };
 
   const renderListCard = (item: User, isSelected: boolean) => {
-    const roleLabel = getRoleBadgeVariant(item.role);
     return (
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
+        actions={customActions}
       >
         <UniversalCard
           id={item.id}
@@ -236,24 +353,24 @@ export default function UsersPage() {
           title={item.username || 'N/A'}
           subtitle={item.email || 'sem email'}
           icon={Users}
-          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
-          badges={[
-            {
-              label:
-                roleLabel === 'destructive'
-                  ? 'Admin'
-                  : roleLabel === 'default'
-                    ? 'Gerente'
-                    : 'Usuário',
-              variant: roleLabel as 'destructive' | 'default' | 'secondary',
-            },
-          ]}
+          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           metadata={
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {item.profile?.name && (
-                <span className="truncate text-muted-foreground">
+                <span className="truncate">
                   {item.profile.name}
                   {item.profile.surname && ` ${item.profile.surname}`}
+                </span>
+              )}
+              {item.lastLoginAt && (
+                <span>
+                  Último acesso:{' '}
+                  {new Date(item.lastLoginAt).toLocaleDateString()}
+                </span>
+              )}
+              {item.createdAt && (
+                <span>
+                  Criado: {new Date(item.createdAt).toLocaleDateString()}
                 </span>
               )}
             </div>
@@ -261,8 +378,10 @@ export default function UsersPage() {
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
+          onDoubleClick={() => handleDoubleClick(item.id)}
           createdAt={item.createdAt}
-          updatedAt={item.updatedAt}
+          updatedAt={item.updatedAt ?? undefined}
+          showStatusBadges={true}
         />
       </EntityContextMenu>
     );
@@ -281,14 +400,53 @@ export default function UsersPage() {
   );
 
   // ============================================================================
+  // HEADER BUTTONS CONFIGURATION
+  // ============================================================================
+
+  const handleCreate = useCallback(() => {
+    page.modals.open('create');
+  }, [page.modals]);
+
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+
+    if (hasPermission(ADMIN_PERMISSIONS.USERS.CREATE)) {
+      buttons.push({
+        id: 'import-users',
+        title: 'Importar',
+        icon: Upload,
+        onClick: () => router.push('/import/admin/users'),
+        variant: 'outline',
+      });
+      buttons.push({
+        id: 'create-user',
+        title: 'Novo Usuário',
+        icon: Plus,
+        onClick: handleCreate,
+        variant: 'default',
+      });
+    }
+
+    return buttons;
+  }, [hasPermission, handleCreate, router]);
+
+  // ============================================================================
   // LOADING / ACCESS CHECK
   // ============================================================================
 
-  if (!isAdmin) {
+  if (isLoadingPermissions) {
+    return (
+      <PageLayout>
+        <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
+      </PageLayout>
+    );
+  }
+
+  if (!canManageUsers) {
     return (
       <AccessDenied
         title="Acesso Restrito"
-        message="Apenas administradores podem gerenciar usuários."
+        message="Você não tem permissão para gerenciar usuários."
       />
     );
   }
@@ -304,50 +462,45 @@ export default function UsersPage() {
         initialIds,
       }}
     >
-      <div className="min-h-screen from-blue-50 via-gray-50 to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
-        <div className="max-w-8xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Usuários
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Gerencie usuários e suas permissões
-              </p>
-            </div>
-            <Button
-              onClick={() => page.modals.open('create')}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Usuário
-            </Button>
-          </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            buttons={actionButtons}
+            onBack={() => router.back()}
+            backLabel="Administração"
+            backIcon={ArrowLeft}
+          />
 
+          <Header
+            title="Usuários"
+            description="Gerencie usuários e suas permissões"
+          />
+        </PageHeader>
+
+        <PageBody>
           {/* Search Bar */}
-          <Card className="p-4 backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-              <Input
-                type="text"
-                placeholder="Buscar usuários por nome, email ou username..."
-                value={page.searchQuery}
-                onChange={e => page.handlers.handleSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </Card>
+          <SearchBar
+            value={page.searchQuery}
+            placeholder={usersConfig.display.labels.searchPlaceholder}
+            onSearch={value => page.handlers.handleSearch(value)}
+            onClear={() => page.handlers.handleSearch('')}
+            showClear={true}
+            size="md"
+          />
 
           {/* Grid */}
           {page.isLoading ? (
-            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-              <p className="text-gray-600 dark:text-white/60">Carregando...</p>
-            </Card>
+            <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
           ) : page.error ? (
-            <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-              <p className="text-destructive">Erro ao carregar usuários</p>
-            </Card>
+            <GridError
+              type="server"
+              title="Erro ao carregar usuários"
+              message="Ocorreu um erro ao tentar carregar os usuários. Por favor, tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => crud.refetch(),
+              }}
+            />
           ) : (
             <EntityGrid
               config={usersConfig}
@@ -360,7 +513,10 @@ export default function UsersPage() {
               onItemDoubleClick={item =>
                 page.handlers.handleItemDoubleClick(item)
               }
-              showSorting={false}
+              showSorting={true}
+              defaultSortField="name"
+              defaultSortDirection="asc"
+              customSortOptions={sortOptions}
             />
           )}
 
@@ -373,8 +529,8 @@ export default function UsersPage() {
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{
                 view: true,
-                edit: true,
-                delete: true,
+                edit: hasPermission(ADMIN_PERMISSIONS.USERS.UPDATE),
+                delete: hasPermission(ADMIN_PERMISSIONS.USERS.DELETE),
               }}
               handlers={{
                 onView: page.handlers.handleItemsView,
@@ -392,27 +548,24 @@ export default function UsersPage() {
             }}
             selectedUser={page.modals.viewingItem}
             onManageGroups={handleManageGroups}
-            getRoleBadgeVariant={getRoleBadgeVariant}
           />
 
           {/* Create Modal */}
           <CreateModal
             isOpen={page.modals.isOpen('create')}
             onOpenChange={open => {
-              if (!open) page.modals.close('create');
+              if (!open) {
+                page.modals.close('create');
+                setNewUser({
+                  username: '',
+                  email: '',
+                  password: '',
+                });
+              }
             }}
-            onCreateUser={async () => {
-              // This will be handled by the page.modals system
-            }}
-            newUser={{
-              username: '',
-              email: '',
-              password: '',
-              role: 'USER' as const,
-            }}
-            setNewUser={() => {
-              // State is managed by page.modals
-            }}
+            onCreateUser={handleCreateUser}
+            newUser={newUser}
+            setNewUser={setNewUser}
           />
 
           {/* Edit Modal */}
@@ -423,7 +576,6 @@ export default function UsersPage() {
             }}
             selectedUser={page.modals.editingItem}
             onManageGroups={handleManageGroups}
-            getRoleBadgeVariant={getRoleBadgeVariant}
           />
 
           {/* Delete Confirmation */}
@@ -467,8 +619,18 @@ export default function UsersPage() {
             onAssignGroup={handleAssignGroup}
             onRemoveGroup={handleRemoveGroup}
           />
-        </div>
-      </div>
+
+          {/* Force Password Reset Modal */}
+          <ForcePasswordResetModal
+            isOpen={forcePasswordResetOpen}
+            onClose={() => {
+              setForcePasswordResetOpen(false);
+              setUserToResetPassword(null);
+            }}
+            user={userToResetPassword}
+          />
+        </PageBody>
+      </PageLayout>
     </CoreProvider>
   );
 }

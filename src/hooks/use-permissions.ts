@@ -5,15 +5,15 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/auth-context';
 import {
-  listUserPermissions,
   createPermissionMap,
   isPermissionAllowed,
   isPermissionDenied,
+  listMyPermissions,
 } from '@/services/rbac/rbac.service';
 import type { EffectivePermission } from '@/types/rbac';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 interface UsePermissionsReturn {
@@ -54,22 +54,26 @@ interface UsePermissionsReturn {
 export function usePermissions(): UsePermissionsReturn {
   const { user } = useAuth();
 
-  // Buscar permissões do usuário
+  // Buscar permissões do usuário usando /v1/me/permissions
+  // Essa rota não requer permissão especial - qualquer usuário autenticado pode acessar
   const {
     data: effectivePermissions = [],
     isLoading,
     error,
     refetch,
   } = useQuery<EffectivePermission[], Error>({
-    queryKey: ['user-permissions', user?.id],
+    queryKey: ['my-permissions', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
-      return listUserPermissions(user.id);
+      if (!user?.id) {
+        return [];
+      }
+      return await listMyPermissions();
     },
     enabled: !!user?.id,
     staleTime: 15 * 60 * 1000, // 15 minutos
     gcTime: 30 * 60 * 1000, // 30 minutos (antes era cacheTime)
     retry: 2,
+    throwOnError: false,
   });
 
   // Criar mapa de permissões para verificação rápida
@@ -153,7 +157,7 @@ export function useMultiplePermissions<T extends Record<string, string>>(
   const { hasPermission, isLoading } = usePermissions();
 
   return useMemo(() => {
-    const result: any = {};
+    const result: Record<string, boolean> = {};
 
     for (const [key, code] of Object.entries(permissionMap)) {
       // Durante carregamento, negamos acesso por segurança

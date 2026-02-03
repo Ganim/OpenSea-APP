@@ -31,15 +31,13 @@ export function AccessDenied({
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
           <ShieldX className="h-8 w-8 text-red-600 dark:text-red-400" />
         </div>
-        
+
         <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
           {title}
         </h2>
-        
-        <p className="mb-6 text-gray-600 dark:text-gray-400">
-          {message}
-        </p>
-        
+
+        <p className="mb-6 text-gray-600 dark:text-gray-400">{message}</p>
+
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           {showBackButton && (
             <Button
@@ -51,7 +49,7 @@ export function AccessDenied({
               Voltar
             </Button>
           )}
-          
+
           {showHomeButton && (
             <Button
               onClick={() => router.push('/')}

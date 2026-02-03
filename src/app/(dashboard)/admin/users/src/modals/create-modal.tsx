@@ -16,14 +16,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ROLE_OPTIONS } from '../constants';
 import type { CreateModalProps } from '../types/users.types';
 import { isNewUserValid } from '../utils';
 
@@ -40,7 +32,8 @@ export function CreateModal({
         <DialogHeader>
           <DialogTitle>Novo Usuário</DialogTitle>
           <DialogDescription>
-            Preencha os dados para criar um novo usuário.
+            Preencha os dados para criar um novo usuário. As permissões serão
+            gerenciadas através de grupos de permissões após a criação.
           </DialogDescription>
         </DialogHeader>
 
@@ -79,30 +72,6 @@ export function CreateModal({
                 setNewUser({ ...newUser, password: e.target.value })
               }
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Papel</Label>
-            <Select
-              value={newUser.role}
-              onValueChange={value =>
-                setNewUser({
-                  ...newUser,
-                  role: value as 'USER' | 'MANAGER' | 'ADMIN',
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </div>
 

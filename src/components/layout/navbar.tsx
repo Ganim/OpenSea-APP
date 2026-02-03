@@ -5,11 +5,13 @@
 
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Grid3x3 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 import { NotificationsPanel } from '@/components/shared/notifications-panel';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/auth-context';
+import { PrintQueuePanel } from '@/core/print-queue';
+import { motion } from 'framer-motion';
+import { Crown, Grid3x3, LayoutDashboard } from 'lucide-react';
+import Link from 'next/link';
 import { UserDropdown } from './user-dropdown';
 
 interface NavbarProps {
@@ -17,6 +19,8 @@ interface NavbarProps {
 }
 
 export function Navbar({ onMenuOpen }: NavbarProps) {
+  const { isSuperAdmin } = useAuth();
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -37,6 +41,19 @@ export function Navbar({ onMenuOpen }: NavbarProps) {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {isSuperAdmin && (
+              <Link href="/central">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+                >
+                  <Crown className="w-4 h-4" />
+                  Central
+                </Button>
+              </Link>
+            )}
+            <PrintQueuePanel />
             <NotificationsPanel />
 
             <Button

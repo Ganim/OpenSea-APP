@@ -80,12 +80,8 @@ export function PermissionGuard({
   showLoadingSkeleton = true,
   skeletonHeight = '40px',
 }: PermissionGuardProps) {
-  const {
-    hasPermission,
-    hasAnyPermission,
-    hasAllPermissions,
-    isLoading,
-  } = usePermissions();
+  const { hasPermission, hasAnyPermission, hasAllPermissions, isLoading } =
+    usePermissions();
 
   // Validação: pelo menos um tipo de permissão deve ser fornecido
   if (!permission && !anyPermission && !allPermissions) {

@@ -1,12 +1,15 @@
-import { meService } from '@/services';
+import { meService, type EmployeeResponse } from '@/services';
 import type {
-    MessageResponse,
-    ProfileResponse,
-    UpdateEmailRequest,
-    UpdatePasswordRequest,
-    UpdateProfileRequest,
-    UpdateUsernameRequest,
-    UserResponse,
+  AuditLogsQuery,
+  AuditLogsResponse,
+  GroupsResponse,
+  MessageResponse,
+  PermissionsResponse,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
+  UpdateProfileRequest,
+  UpdateUsernameRequest,
+  UserResponse,
 } from '@/types/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -15,6 +18,11 @@ export const meKeys = {
   all: ['me'] as const,
   detail: () => [...meKeys.all, 'detail'] as const,
   profile: () => [...meKeys.all, 'profile'] as const,
+  employee: () => [...meKeys.all, 'employee'] as const,
+  auditLogs: (query?: AuditLogsQuery) =>
+    [...meKeys.all, 'audit-logs', query] as const,
+  permissions: () => [...meKeys.all, 'permissions'] as const,
+  groups: () => [...meKeys.all, 'groups'] as const,
 };
 
 // Queries
@@ -29,6 +37,61 @@ export function useMe(enabled = true) {
     queryFn: () => meService.getMe(),
     enabled,
     retry: false, // Não tentar novamente em caso de erro (ex: token inválido)
+    staleTime: 2 * 60 * 1000, // 2 minutos - reduzido para detectar problemas mais rápido
+    refetchOnWindowFocus: true, // Revalida quando o usuário volta para a aba
+    refetchInterval: 5 * 60 * 1000, // Revalida a cada 5 minutos em background
+  });
+}
+
+/**
+ * Hook para obter dados do funcionário vinculado ao usuário
+ * GET /v1/me/employee
+ */
+export function useMyEmployee(enabled = true) {
+  return useQuery<EmployeeResponse, Error>({
+    queryKey: meKeys.employee(),
+    queryFn: () => meService.getMyEmployee(),
+    enabled,
+    retry: false, // Não tentar novamente se não houver funcionário vinculado
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+}
+
+/**
+ * Hook para obter logs de auditoria do usuário
+ * GET /v1/me/audit-logs
+ */
+export function useMyAuditLogs(query?: AuditLogsQuery, enabled = true) {
+  return useQuery<AuditLogsResponse, Error>({
+    queryKey: meKeys.auditLogs(query),
+    queryFn: () => meService.getMyAuditLogs(query),
+    enabled,
+    staleTime: 1 * 60 * 1000, // 1 minuto
+  });
+}
+
+/**
+ * Hook para obter permissões do usuário
+ * GET /v1/me/permissions
+ */
+export function useMyPermissions(enabled = true) {
+  return useQuery<PermissionsResponse, Error>({
+    queryKey: meKeys.permissions(),
+    queryFn: () => meService.getMyPermissions(),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+}
+
+/**
+ * Hook para obter grupos de permissão do usuário
+ * GET /v1/me/groups
+ */
+export function useMyGroups(enabled = true) {
+  return useQuery<GroupsResponse, Error>({
+    queryKey: meKeys.groups(),
+    queryFn: () => meService.getMyGroups(),
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
@@ -37,12 +100,12 @@ export function useMe(enabled = true) {
 
 /**
  * Hook para atualizar perfil do usuário
- * PATCH /v1/me
+ * PATCH /v1/me/profile
  */
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
-  return useMutation<ProfileResponse, Error, UpdateProfileRequest>({
+  return useMutation<UserResponse, Error, UpdateProfileRequest>({
     mutationFn: data => meService.updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: meKeys.all });

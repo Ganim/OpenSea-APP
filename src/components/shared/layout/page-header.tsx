@@ -1,3 +1,8 @@
+/**
+ * @deprecated Use os componentes PageLayout, PageHeader, PageActionBar e Header
+ * de '@/components/layout' no lugar. Este componente será removido em versão futura.
+ * Referência: stock/templates/page.tsx
+ */
 'use client';
 
 import { Button } from '@/components/ui/button';

@@ -1,142 +1,206 @@
-/**
- * Profile Page
- * Página de perfil do usuário
- */
-
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
+import { useMyEmployee } from '@/hooks/use-me';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Camera, Mail, User } from 'lucide-react';
+import { Activity, Briefcase, ChevronRight, Shield, User } from 'lucide-react';
+import { useState } from 'react';
+
+import { ActivityTab } from './_components/activity-tab';
+import { EmployeeTab } from './_components/employee-tab';
+import { ProfileTab } from './_components/profile-tab';
+import { SecurityTab } from './_components/security-tab';
+
+type TabId = 'profile' | 'security' | 'employee' | 'activity';
+
+interface TabItem {
+  id: TabId;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+  requiresEmployee?: boolean;
+}
+
+const tabs: TabItem[] = [
+  {
+    id: 'profile',
+    label: 'Perfil',
+    icon: <User className="w-5 h-5" />,
+    description: 'Informações pessoais',
+  },
+  {
+    id: 'security',
+    label: 'Segurança',
+    icon: <Shield className="w-5 h-5" />,
+    description: 'Senha e sessões',
+  },
+  {
+    id: 'employee',
+    label: 'Funcionário',
+    icon: <Briefcase className="w-5 h-5" />,
+    description: 'Dados profissionais',
+    requiresEmployee: true,
+  },
+  {
+    id: 'activity',
+    label: 'Atividade',
+    icon: <Activity className="w-5 h-5" />,
+    description: 'Histórico de ações',
+  },
+];
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabId>('profile');
+
+  // Verifica se o usuário tem um funcionário vinculado
+  const { data: employeeData, isLoading: employeeLoading } = useMyEmployee();
+  const hasEmployee = !!employeeData?.employee;
+
+  // Filtra as tabs disponíveis
+  const availableTabs = tabs.filter(
+    tab => !tab.requiresEmployee || hasEmployee
+  );
+
+  if (authLoading) {
+    return <ProfilePageSkeleton />;
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Meu Perfil
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+          Minha Conta
         </h1>
-        <p className="text-lg text-gray-600 dark:text-white/60">
-          Gerencie suas informações pessoais
+        <p className="text-gray-600 dark:text-white/60">
+          Gerencie suas informações pessoais, segurança e preferências
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Avatar Section */}
+      {/* Main Content - Sidebar + Content */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar Navigation */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
+          className="lg:w-64 flex-shrink-0"
         >
-          <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback className="text-2xl">
-                    {user?.profile?.name?.charAt(0) ||
-                      user?.username?.charAt(0) ||
-                      'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="icon"
-                  className="absolute bottom-0 right-0 rounded-full w-10 h-10 bg-blue-500 hover:bg-blue-600"
+          <Card className="p-2 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+            <nav className="space-y-1">
+              {availableTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200',
+                    'text-left group',
+                    activeTab === tab.id
+                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'
+                  )}
                 >
-                  <Camera className="w-5 h-5 text-white" />
-                </Button>
-              </div>
-
-              <div className="text-center">
-                <h3 className="font-semibold text-xl text-gray-900 dark:text-white">
-                  {user?.profile?.name || user?.username || 'Usuário'}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-white/60">
-                  {user?.email || 'email@example.com'}
-                </p>
-              </div>
-
-              <Button variant="outline" className="w-full">
-                Alterar Foto
-              </Button>
-            </div>
+                  <div
+                    className={cn(
+                      'p-2 rounded-lg transition-colors',
+                      activeTab === tab.id
+                        ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                        : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 group-hover:bg-gray-200 dark:group-hover:bg-white/15'
+                    )}
+                  >
+                    {tab.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={cn(
+                        'font-medium text-sm',
+                        activeTab === tab.id
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-900 dark:text-white'
+                      )}
+                    >
+                      {tab.label}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-white/40 truncate">
+                      {tab.description}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    className={cn(
+                      'w-4 h-4 transition-transform',
+                      activeTab === tab.id
+                        ? 'text-blue-500 translate-x-0'
+                        : 'text-gray-400 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                    )}
+                  />
+                </button>
+              ))}
+            </nav>
           </Card>
         </motion.div>
 
-        {/* Profile Form */}
+        {/* Content Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-2"
+          className="flex-1 min-w-0"
         >
-          <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              Informações Pessoais
-            </h2>
-
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="name"
-                      defaultValue={user?.profile?.name || ''}
-                      className="pl-10"
-                      placeholder="Seu nome completo"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      defaultValue={user?.email || ''}
-                      className="pl-10"
-                      placeholder="seu@email.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Biografia</Label>
-                <textarea
-                  id="bio"
-                  rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Conte um pouco sobre você..."
-                  defaultValue=""
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline">Cancelar</Button>
-                <Button className="bg-linear-to-r from-blue-500 to-purple-600 text-white">
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
-          </Card>
+          {activeTab === 'profile' && <ProfileTab user={user} />}
+          {activeTab === 'security' && <SecurityTab />}
+          {activeTab === 'employee' && hasEmployee && (
+            <EmployeeTab
+              employee={employeeData.employee}
+              isLoading={employeeLoading}
+            />
+          )}
+          {activeTab === 'activity' && <ActivityTab />}
         </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function ProfilePageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-9 w-48 mb-2" />
+        <Skeleton className="h-5 w-96" />
+      </div>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-64">
+          <Card className="p-2">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex items-center gap-3 px-3 py-3">
+                <Skeleton className="h-9 w-9 rounded-lg" />
+                <div className="flex-1">
+                  <Skeleton className="h-4 w-20 mb-1" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+              </div>
+            ))}
+          </Card>
+        </div>
+        <div className="flex-1">
+          <Card className="p-6">
+            <Skeleton className="h-6 w-40 mb-6" />
+            <div className="space-y-4">
+              <Skeleton className="h-24 w-24 rounded-full mx-auto" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

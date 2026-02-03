@@ -1,25 +1,39 @@
 /**
  * Protected Route Component
- * Protege rotas que requerem autenticação
+ * Protege rotas que requerem autenticação e/ou permissões específicas
  */
 
 'use client';
 
 import { LoadingSpinner } from '@/components/shared/loading-spinner';
 import { useAuth } from '@/contexts/auth-context';
+import { usePermissions } from '@/hooks/use-permissions';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'USER' | 'MANAGER' | 'ADMIN';
+  /** Permissão única necessária para acessar a rota */
+  requiredPermission?: string;
+  /** Múltiplas permissões (OR - precisa de pelo menos uma) */
+  requiredPermissions?: string[];
+  /** Se true, requer TODAS as permissões (AND) */
+  requireAll?: boolean;
 }
 
 export function ProtectedRoute({
   children,
-  requiredRole,
+  requiredPermission,
+  requiredPermissions,
+  requireAll = false,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const {
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
+    isLoading: isPermissionsLoading,
+  } = usePermissions();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -32,27 +46,56 @@ export function ProtectedRoute({
   useEffect(() => {
     if (!mounted) return;
 
-    if (!isLoading && !isAuthenticated) {
+    // E2E bypass: se estivermos num teste E2E e o parametro `e2e=1` estiver presente,
+    // permitir acesso direto aos componentes protegidos.
+    const isE2EBypass = process.env.NEXT_PUBLIC_E2E_TEST_BYPASS === 'true';
+
+    if (isE2EBypass) {
+      console.log('🔓 E2E bypass active — skipping auth redirect');
+      return;
+    }
+
+    if (!isAuthLoading && !isAuthenticated) {
       console.log('🔒 Usuário não autenticado, redirecionando para /login');
       router.push('/fast-login');
       return;
     }
 
-    // Verificar permissões de role
-    if (!isLoading && isAuthenticated && requiredRole && user) {
-      const roleHierarchy = { USER: 0, MANAGER: 1, ADMIN: 2 };
-      const userRoleLevel = roleHierarchy[user.role];
-      const requiredRoleLevel = roleHierarchy[requiredRole];
+    // Verificar permissões (se especificadas)
+    if (!isAuthLoading && !isPermissionsLoading && isAuthenticated) {
+      const permissionsToCheck = requiredPermission
+        ? [requiredPermission]
+        : requiredPermissions || [];
 
-      if (userRoleLevel < requiredRoleLevel) {
-        console.log('🔒 Usuário sem permissão, redirecionando para dashboard');
-        router.push('/dashboard');
+      if (permissionsToCheck.length > 0) {
+        const hasAccess = requireAll
+          ? hasAllPermissions(...permissionsToCheck)
+          : hasAnyPermission(...permissionsToCheck);
+
+        if (!hasAccess) {
+          console.log(
+            '🔒 Usuário sem permissão, redirecionando para dashboard'
+          );
+          router.push('/dashboard');
+        }
       }
     }
-  }, [isAuthenticated, isLoading, router, mounted, requiredRole, user]);
+  }, [
+    isAuthenticated,
+    isAuthLoading,
+    isPermissionsLoading,
+    router,
+    mounted,
+    requiredPermission,
+    requiredPermissions,
+    requireAll,
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
+  ]);
 
   // Evitar hydration mismatch
-  if (!mounted || isLoading) {
+  if (!mounted || isAuthLoading || isPermissionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner className="w-16 h-16" />
@@ -64,13 +107,17 @@ export function ProtectedRoute({
     return null;
   }
 
-  // Verificar role
-  if (requiredRole && user) {
-    const roleHierarchy = { USER: 0, MANAGER: 1, ADMIN: 2 };
-    const userRoleLevel = roleHierarchy[user.role];
-    const requiredRoleLevel = roleHierarchy[requiredRole];
+  // Verificar permissões (se especificadas)
+  const permissionsToCheck = requiredPermission
+    ? [requiredPermission]
+    : requiredPermissions || [];
 
-    if (userRoleLevel < requiredRoleLevel) {
+  if (permissionsToCheck.length > 0) {
+    const hasAccess = requireAll
+      ? hasAllPermissions(...permissionsToCheck)
+      : hasAnyPermission(...permissionsToCheck);
+
+    if (!hasAccess) {
       return null;
     }
   }

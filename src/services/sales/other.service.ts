@@ -46,7 +46,7 @@ export const variantPromotionsService = {
     id: string,
     data: UpdateVariantPromotionRequest
   ): Promise<VariantPromotionResponse> {
-    return apiClient.patch<VariantPromotionResponse>(
+    return apiClient.put<VariantPromotionResponse>(
       API_ENDPOINTS.VARIANT_PROMOTIONS.UPDATE(id),
       data
     );
@@ -89,7 +89,7 @@ export const itemReservationsService = {
     id: string,
     data: ReleaseItemReservationRequest
   ): Promise<ItemReservationResponse> {
-    return apiClient.patch<ItemReservationResponse>(
+    return apiClient.put<ItemReservationResponse>(
       API_ENDPOINTS.ITEM_RESERVATIONS.RELEASE(id),
       data
     );
@@ -127,7 +127,7 @@ export const notificationPreferencesService = {
     id: string,
     data: UpdateNotificationPreferenceRequest
   ): Promise<NotificationPreferenceResponse> {
-    return apiClient.patch<NotificationPreferenceResponse>(
+    return apiClient.put<NotificationPreferenceResponse>(
       API_ENDPOINTS.NOTIFICATION_PREFERENCES.UPDATE(id),
       data
     );

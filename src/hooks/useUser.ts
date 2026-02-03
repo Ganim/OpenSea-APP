@@ -29,9 +29,9 @@ export function useUser(): UseUserReturn {
           id: '1',
           username: 'joaosilva',
           email: 'joao@example.com',
-          role: 'USER',
           createdAt: new Date(),
           lastLoginAt: new Date(),
+          isSuperAdmin: false,
         };
 
         setUser(mockUser);

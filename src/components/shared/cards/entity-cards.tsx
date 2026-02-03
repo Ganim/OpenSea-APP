@@ -1327,7 +1327,7 @@ export function TagListCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div
-            className="w-4 h-4 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+            className="w-4 h-4 rounded-full border-2 border-white shadow-sm shrink-0"
             style={{ backgroundColor: color || '#6b7280' }}
           />
           <div className="flex-1 min-w-0">

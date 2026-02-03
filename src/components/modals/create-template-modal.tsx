@@ -7,33 +7,36 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import type { CreateTemplateRequest } from '@/types/stock';
+import type {
+  CreateTemplateRequest,
+  TemplateAttribute,
+  TemplateAttributes,
+  TemplateAttributeType,
+} from '@/types/stock';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-
-type AttributeType = 'string' | 'number' | 'boolean' | 'date' | 'select';
 
 interface Attribute {
   key: string;
   label: string;
-  type: AttributeType;
+  type: TemplateAttributeType;
   required: boolean;
   options?: string[];
 }
@@ -67,12 +70,7 @@ export function CreateTemplateModal({
 
   function parseAttributes(attrs: Record<string, unknown>): Attribute[] {
     return Object.entries(attrs).map(([key, value]) => {
-      const attr = value as {
-        label?: string;
-        type?: AttributeType;
-        required?: boolean;
-        options?: string[];
-      };
+      const attr = value as TemplateAttribute;
       return {
         key,
         label: attr.label || key,
@@ -83,17 +81,19 @@ export function CreateTemplateModal({
     });
   }
 
-  function formatAttributes(attrs: Attribute[]): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
+  function formatAttributes(attrs: Attribute[]): TemplateAttributes {
+    const result: TemplateAttributes = {};
     attrs.forEach(attr => {
-      result[attr.key] = {
-        label: attr.label,
-        type: attr.type,
-        required: attr.required,
-        ...(attr.options && attr.options.length > 0
-          ? { options: attr.options }
-          : {}),
-      };
+      if (attr.key) {
+        result[attr.key] = {
+          label: attr.label,
+          type: attr.type,
+          required: attr.required,
+          ...(attr.options && attr.options.length > 0
+            ? { options: attr.options }
+            : {}),
+        };
+      }
     });
     return result;
   }

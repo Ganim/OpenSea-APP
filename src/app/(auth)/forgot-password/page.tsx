@@ -9,11 +9,11 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useResetPassword, useSendPasswordReset } from '@/hooks/use-auth';
 import { useForm } from '@tanstack/react-form';
 import {
-    CheckCircle2,
-    ChevronLeft,
-    Lock,
-    Mail,
-    ShieldCheck,
+  CheckCircle2,
+  ChevronLeft,
+  Lock,
+  Mail,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';

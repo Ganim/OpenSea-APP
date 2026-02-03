@@ -26,10 +26,10 @@ export interface FormFieldConfig {
     min?: number;
     max?: number;
     pattern?: RegExp;
-    custom?: (value: any) => boolean | string;
+    custom?: (value: unknown) => boolean | string;
   };
   description?: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
   className?: string;
 }
 
@@ -74,8 +74,8 @@ export interface EntityFormConfig {
   entity: string; // "Template", "Produto", etc.
   tabs?: FormTab[]; // Se usar abas
   sections?: FormSection[]; // Se não usar abas
-  onSubmit: (data: any) => Promise<void>;
-  defaultValues?: any;
+  onSubmit: (data: Record<string, unknown>) => Promise<void>;
+  defaultValues?: Record<string, unknown>;
   submitLabel?: string;
   cancelLabel?: string;
   onCancel?: () => void;
@@ -87,9 +87,9 @@ export interface EntityFormConfig {
  */
 export interface EntityFormRef {
   submit: () => Promise<void>;
-  getData: () => any;
+  getData: () => Record<string, unknown>;
   reset: () => void;
-  setFieldValue: (name: string, value: any) => void;
+  setFieldValue: (name: string, value: unknown) => void;
 }
 
 // ==================== VIEWER TYPES ====================
@@ -99,9 +99,9 @@ export interface EntityFormRef {
  */
 export interface ViewFieldConfig {
   label: string;
-  value: any;
+  value: unknown;
   type?: 'text' | 'date' | 'badge' | 'list' | 'custom';
-  render?: (value: any) => ReactNode;
+  render?: (value: unknown) => ReactNode;
   className?: string;
 }
 
@@ -128,7 +128,7 @@ export interface ViewTab {
  */
 export interface EntityViewerConfig {
   entity: string;
-  data: any;
+  data: Record<string, unknown>;
   tabs?: ViewTab[];
   sections?: ViewSection[];
   layout?: 'card' | 'list' | 'grid';
@@ -172,7 +172,7 @@ export interface MultiViewModalConfig<T = any> {
   };
 
   // Callbacks
-  onSave?: (id: string, data: any) => Promise<void>;
+  onSave?: (id: string, data: Record<string, unknown>) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
 }
 
@@ -181,7 +181,7 @@ export interface MultiViewModalConfig<T = any> {
 /**
  * Configuração de card de entidade
  */
-export interface EntityCardConfig<T = any> {
+export interface EntityCardConfig<T = unknown> {
   entity: T;
   title: string;
   subtitle?: string;
@@ -201,7 +201,7 @@ export interface EntityCardConfig<T = any> {
 /**
  * Configuração de grid de entidades
  */
-export interface EntityGridConfig<T = any> {
+export interface EntityGridConfig<T = unknown> {
   entities: T[];
   loading?: boolean;
   error?: string;
@@ -246,6 +246,6 @@ export interface SearchSectionConfig {
     type: 'select' | 'checkbox' | 'date-range';
     options?: Array<{ label: string; value: string }>;
   }>;
-  onFilterChange?: (filters: Record<string, any>) => void;
+  onFilterChange?: (filters: Record<string, unknown>) => void;
   showAdvanced?: boolean;
 }

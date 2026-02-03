@@ -2,14 +2,11 @@ import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
   CreateManufacturerRequest,
-  CreatePurchaseOrderRequest,
   CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
   ManufacturerResponse,
   ManufacturersResponse,
-  PurchaseOrderResponse,
-  PurchaseOrdersResponse,
   SupplierResponse,
   SuppliersResponse,
   TagResponse,
@@ -17,7 +14,6 @@ import type {
   TemplateResponse,
   TemplatesResponse,
   UpdateManufacturerRequest,
-  UpdatePurchaseOrderStatusRequest,
   UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
@@ -50,7 +46,7 @@ export const manufacturersService = {
     id: string,
     data: UpdateManufacturerRequest
   ): Promise<ManufacturerResponse> {
-    return apiClient.patch<ManufacturerResponse>(
+    return apiClient.put<ManufacturerResponse>(
       API_ENDPOINTS.MANUFACTURERS.UPDATE(id),
       data
     );
@@ -82,7 +78,7 @@ export const suppliersService = {
     id: string,
     data: UpdateSupplierRequest
   ): Promise<SupplierResponse> {
-    return apiClient.patch<SupplierResponse>(
+    return apiClient.put<SupplierResponse>(
       API_ENDPOINTS.SUPPLIERS.UPDATE(id),
       data
     );
@@ -92,8 +88,6 @@ export const suppliersService = {
     return apiClient.delete<void>(API_ENDPOINTS.SUPPLIERS.DELETE(id));
   },
 };
-
-// Locations Service foi movido para locations.service.ts
 
 // Tags Service
 export const tagsService = {
@@ -110,7 +104,7 @@ export const tagsService = {
   },
 
   async updateTag(id: string, data: UpdateTagRequest): Promise<TagResponse> {
-    return apiClient.patch<TagResponse>(API_ENDPOINTS.TAGS.UPDATE(id), data);
+    return apiClient.put<TagResponse>(API_ENDPOINTS.TAGS.UPDATE(id), data);
   },
 
   async deleteTag(id: string): Promise<void> {
@@ -153,36 +147,4 @@ export const templatesService = {
   },
 };
 
-// Purchase Orders Service
-export const purchaseOrdersService = {
-  async listPurchaseOrders(): Promise<PurchaseOrdersResponse> {
-    return apiClient.get<PurchaseOrdersResponse>(
-      API_ENDPOINTS.PURCHASE_ORDERS.LIST
-    );
-  },
-
-  async getPurchaseOrder(id: string): Promise<PurchaseOrderResponse> {
-    return apiClient.get<PurchaseOrderResponse>(
-      API_ENDPOINTS.PURCHASE_ORDERS.GET(id)
-    );
-  },
-
-  async createPurchaseOrder(
-    data: CreatePurchaseOrderRequest
-  ): Promise<PurchaseOrderResponse> {
-    return apiClient.post<PurchaseOrderResponse>(
-      API_ENDPOINTS.PURCHASE_ORDERS.CREATE,
-      data
-    );
-  },
-
-  async updatePurchaseOrderStatus(
-    id: string,
-    data: UpdatePurchaseOrderStatusRequest
-  ): Promise<PurchaseOrderResponse> {
-    return apiClient.patch<PurchaseOrderResponse>(
-      API_ENDPOINTS.PURCHASE_ORDERS.UPDATE_STATUS(id),
-      data
-    );
-  },
-};
+// Note: Purchase Orders Service is in purchase-orders.service.ts

@@ -33,7 +33,7 @@ export const customersService = {
     customerId: string,
     data: UpdateCustomerRequest
   ): Promise<CustomerResponse> {
-    return apiClient.patch<CustomerResponse>(
+    return apiClient.put<CustomerResponse>(
       API_ENDPOINTS.CUSTOMERS.UPDATE(customerId),
       data
     );

@@ -1,269 +1,504 @@
+/**
+ * OpenSea OS - Permission Groups Page
+ * Página de gerenciamento de grupos de permissões usando o novo sistema OpenSea OS
+ */
+
 'use client';
 
-import { Badge } from '@/components/ui/badge';
+import { ADMIN_PERMISSIONS } from '@/app/(dashboard)/admin/_shared/constants';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { SearchBar } from '@/components/layout/search-bar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { AccessDenied } from '@/components/rbac/access-denied';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import * as rbacService from '@/services/rbac/rbac.service';
-import type {
-    PermissionGroup,
-    PermissionWithEffect,
-    UserInGroup,
-} from '@/types/rbac';
-import { useQuery } from '@tanstack/react-query';
-import { Plus, Search, Shield, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+  CoreProvider,
+  EntityContextMenu,
+  EntityGrid,
+  SelectionToolbar,
+  UniversalCard,
+  useEntityCrud,
+  useEntityPage,
+} from '@/core';
+import { usePermissions } from '@/hooks/use-permissions';
+import type { PermissionGroup } from '@/types/rbac';
+import { ArrowLeft, Calendar, Clock, Plus, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
+import {
+  CreateModal,
+  createPermissionGroup,
+  deletePermissionGroup,
+  DetailModal,
+  getPermissionGroup,
+  getStatusBadgeVariant,
+  getStatusLabel,
+  getTypeBadgeVariant,
+  getTypeLabel,
+  listPermissionGroups,
+  permissionGroupsConfig,
+  updatePermissionGroup,
+} from './src';
 
 export default function PermissionGroupsPage() {
-  const [groups, setGroups] = useState<PermissionGroup[]>([]);
-  const [filteredGroups, setFilteredGroups] = useState<PermissionGroup[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isManagePermissionsOpen, setIsManagePermissionsOpen] = useState(false);
-  const [selectedGroupForPermissions, setSelectedGroupForPermissions] =
-    useState<PermissionGroup | null>(null);
+  const router = useRouter();
+  const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
-  useEffect(() => {
-    const loadGroups = async () => {
-      try {
-        console.log('[PermissionGroups] Carregando grupos...');
-        const response = await rbacService.listPermissionGroups();
-        console.log('[PermissionGroups] Resposta da API:', response);
-        
-        // A API pode retornar { data: [...] } ou diretamente um array ou { groups: [...] }
-        let groupsData: PermissionGroup[] = [];
-        const rawResponse = response as unknown as Record<string, unknown>;
-        
-        if (Array.isArray(response)) {
-          groupsData = response;
-        } else if (response?.data && Array.isArray(response.data)) {
-          groupsData = response.data;
-        } else if (rawResponse?.groups && Array.isArray(rawResponse.groups)) {
-          // Caso o backend retorne { groups: [...] }
-          groupsData = rawResponse.groups as PermissionGroup[];
-        }
-        
-        console.log('[PermissionGroups] Grupos processados:', groupsData);
-        setGroups(groupsData);
-        setFilteredGroups(groupsData);
-      } catch (error) {
-        console.error('[PermissionGroups] Erro ao carregar grupos:', error);
-        setGroups([]);
-        setFilteredGroups([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Verificar se o usuário tem permissão para gerenciar grupos de permissões
+  const canManageGroups =
+    hasPermission(ADMIN_PERMISSIONS.PERMISSION_GROUPS.MANAGE) ||
+    hasPermission(ADMIN_PERMISSIONS.PERMISSION_GROUPS.LIST);
 
-    loadGroups();
-  }, []);
+  // ============================================================================
+  // CRUD SETUP
+  // ============================================================================
 
-  useEffect(() => {
-    const q = searchQuery.toLowerCase();
-    const filtered = (groups ?? []).filter(
-      group =>
-        group.name?.toLowerCase().includes(q) ||
-        group.slug?.toLowerCase().includes(q) ||
-        group.description?.toLowerCase().includes(q)
-    );
-    setFilteredGroups(filtered);
-  }, [searchQuery, groups]);
+  const crud = useEntityCrud<PermissionGroup>({
+    entityName: 'Grupo de Permissões',
+    entityNamePlural: 'Grupos de Permissões',
+    queryKey: ['permission-groups'],
+    baseUrl: '/v1/rbac/permission-groups',
+    listFn: listPermissionGroups,
+    getFn: getPermissionGroup,
+    createFn: async (data: Record<string, unknown>) => {
+      return createPermissionGroup(data as Partial<PermissionGroup>);
+    },
+    updateFn: async (id, data: Record<string, unknown>) => {
+      return updatePermissionGroup(id, data as Partial<PermissionGroup>);
+    },
+    deleteFn: deletePermissionGroup,
+  });
 
-  const handleManagePermissions = (group: PermissionGroup) => {
-    setSelectedGroupForPermissions(group);
-    setIsManagePermissionsOpen(true);
+  // ============================================================================
+  // PAGE SETUP
+  // ============================================================================
+
+  const page = useEntityPage<PermissionGroup>({
+    entityName: 'Grupo de Permissões',
+    entityNamePlural: 'Grupos de Permissões',
+    queryKey: ['permission-groups'],
+    crud,
+    viewRoute: id => `/admin/permission-groups/${id}`,
+    filterFn: (item, query) => {
+      const q = query.toLowerCase();
+      return Boolean(
+        item.name?.toLowerCase().includes(q) ||
+          item.slug?.toLowerCase().includes(q) ||
+          item.description?.toLowerCase().includes(q)
+      );
+    },
+  });
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleContextView = (ids: string[]) => {
+    page.handlers.handleItemsView(ids);
   };
 
-  const { data: groupPermissions = [] } = useQuery<PermissionWithEffect[]>({
-    queryKey: ['group-permissions', selectedGroupForPermissions?.id],
-    queryFn: () =>
-      selectedGroupForPermissions
-        ? rbacService.listGroupPermissions(selectedGroupForPermissions.id)
-        : Promise.resolve([]),
-    enabled: !!selectedGroupForPermissions,
-  });
+  const handleContextEdit = (ids: string[]) => {
+    page.handlers.handleItemsEdit(ids);
+  };
 
-  const { data: groupUsers = [] } = useQuery<UserInGroup[]>({
-    queryKey: ['group-users', selectedGroupForPermissions?.id],
-    queryFn: () =>
-      selectedGroupForPermissions
-        ? rbacService.listUsersByGroup(selectedGroupForPermissions.id)
-        : Promise.resolve([]),
-    enabled: !!selectedGroupForPermissions,
-  });
+  const handleContextDuplicate = async (ids: string[]) => {
+    if (ids.length === 0) return;
+
+    try {
+      for (const id of ids) {
+        const original = page.filteredItems.find(item => item.id === id);
+        if (original) {
+          await createPermissionGroup({
+            name: `${original.name} (cópia)`,
+            description: original.description,
+            priority: original.priority,
+            color: original.color,
+            parentId: original.parentId,
+          });
+        }
+      }
+      page.crud.refetch();
+    } catch (error) {
+      console.error('Erro ao duplicar grupo:', error);
+    }
+  };
+
+  const handleContextDelete = (ids: string[]) => {
+    page.modals.setItemsToDelete(ids);
+    page.modals.close('view');
+    page.modals.open('delete');
+  };
+
+  const handleDoubleClick = (itemId: string) => {
+    router.push(`/admin/permission-groups/${itemId}`);
+  };
+
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
+
+  const renderGridCard = (item: PermissionGroup, isSelected: boolean) => {
+    const usersCount = item.usersCount || 0;
+    const permissionsCount = item.permissionsCount || 0;
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleContextView}
+        onEdit={handleContextEdit}
+        onDuplicate={handleContextDuplicate}
+        onDelete={handleContextDelete}
+      >
+        <UniversalCard
+          id={item.id}
+          variant="grid"
+          title={item.name || 'N/A'}
+          subtitle={item.description || 'Sem descrição'}
+          icon={Shield}
+          iconBgColor={
+            item.color || 'bg-linear-to-br from-purple-500 to-pink-600'
+          }
+          badges={[
+            {
+              label: getTypeLabel(item.isSystem),
+              variant: getTypeBadgeVariant(item.isSystem),
+            },
+            {
+              label: getStatusLabel(item.isActive),
+              variant: getStatusBadgeVariant(item.isActive),
+            },
+          ]}
+          metadata={
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span>
+                {usersCount} usuário{usersCount !== 1 ? 's' : ''}
+              </span>
+              <span>
+                {permissionsCount} permiss
+                {permissionsCount !== 1 ? 'ões' : 'ão'}
+              </span>
+              {item.updatedAt && (
+                <span>
+                  Atualizado: {new Date(item.updatedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          }
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          onDoubleClick={() => handleDoubleClick(item.id)}
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          showStatusBadges={true}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  const renderListCard = (item: PermissionGroup, isSelected: boolean) => {
+    const usersCount = item.usersCount || 0;
+    const permissionsCount = item.permissionsCount || 0;
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleContextView}
+        onEdit={handleContextEdit}
+        onDuplicate={handleContextDuplicate}
+        onDelete={handleContextDelete}
+      >
+        <UniversalCard
+          id={item.id}
+          variant="list"
+          title={item.name || 'N/A'}
+          subtitle={item.description || 'Sem descrição'}
+          icon={Shield}
+          iconBgColor={
+            item.color || 'bg-linear-to-br from-purple-500 to-pink-600'
+          }
+          badges={[
+            {
+              label: getTypeLabel(item.isSystem),
+              variant: getTypeBadgeVariant(item.isSystem),
+            },
+            {
+              label: getStatusLabel(item.isActive),
+              variant: getStatusBadgeVariant(item.isActive),
+            },
+          ]}
+          metadata={
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span>
+                {usersCount} usuário{usersCount !== 1 ? 's' : ''}
+              </span>
+              <span>
+                {permissionsCount} permiss
+                {permissionsCount !== 1 ? 'ões' : 'ão'}
+              </span>
+              {item.updatedAt && (
+                <span>
+                  Atualizado: {new Date(item.updatedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          }
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          onDoubleClick={() => handleDoubleClick(item.id)}
+          createdAt={item.createdAt}
+          updatedAt={item.updatedAt}
+          showStatusBadges={true}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
+  const hasSelection = selectedIds.length > 0;
+
+  const initialIds = useMemo(
+    () => page.filteredItems.map(i => i.id),
+    [page.filteredItems]
+  );
+
+  const sortOptions = useMemo(
+    () => [
+      {
+        field: 'name' as const,
+        direction: 'asc' as const,
+        label: 'Nome (A-Z)',
+        icon: Shield,
+      },
+      {
+        field: 'name' as const,
+        direction: 'desc' as const,
+        label: 'Nome (Z-A)',
+        icon: Shield,
+      },
+      {
+        field: 'createdAt' as const,
+        direction: 'desc' as const,
+        label: 'Mais recentes',
+        icon: Calendar,
+      },
+      {
+        field: 'createdAt' as const,
+        direction: 'asc' as const,
+        label: 'Mais antigos',
+        icon: Calendar,
+      },
+      {
+        field: 'updatedAt' as const,
+        direction: 'desc' as const,
+        label: 'Última atualização',
+        icon: Clock,
+      },
+    ],
+    []
+  );
+
+  // ============================================================================
+  // HEADER BUTTONS CONFIGURATION
+  // ============================================================================
+
+  const handleCreate = useCallback(() => {
+    page.modals.open('create');
+  }, [page.modals]);
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () =>
+      hasPermission(ADMIN_PERMISSIONS.PERMISSION_GROUPS.CREATE)
+        ? [
+            {
+              id: 'create-group',
+              title: 'Novo Grupo',
+              icon: Plus,
+              onClick: handleCreate,
+              variant: 'default',
+            },
+          ]
+        : [],
+    [handleCreate, hasPermission]
+  );
+
+  // ============================================================================
+  // LOADING / ACCESS CHECK
+  // ============================================================================
+
+  if (isLoadingPermissions) {
+    return (
+      <PageLayout>
+        <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
+      </PageLayout>
+    );
+  }
+
+  if (!canManageGroups) {
+    return (
+      <AccessDenied
+        title="Acesso Restrito"
+        message="Você não tem permissão para gerenciar grupos de permissões."
+      />
+    );
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-linear-to-br from-purple-500 to-pink-600">
-            <Users className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Grupos de Permissões</h1>
-            <p className="text-sm text-muted-foreground">
-              Gerencie grupos e suas permissões
-            </p>
-          </div>
-        </div>
+    <CoreProvider
+      selection={{
+        namespace: 'permission-groups',
+        initialIds,
+      }}
+    >
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            buttons={actionButtons}
+            onBack={() => router.back()}
+            backLabel="Administração"
+            backIcon={ArrowLeft}
+          />
 
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Grupo
-        </Button>
-      </div>
+          <Header
+            title="Grupos de Permissões"
+            description="Gerencie grupos de permissões e suas atribuições"
+          />
+        </PageHeader>
 
-      <Card className="p-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar grupos por nome ou descrição..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pl-10"
+        <PageBody>
+          {/* Search Bar */}
+          <SearchBar
+            value={page.searchQuery}
+            placeholder={
+              permissionGroupsConfig.display.labels.searchPlaceholder
+            }
+            onSearch={value => page.handlers.handleSearch(value)}
+            onClear={() => page.handlers.handleSearch('')}
+            showClear={true}
+            size="md"
+          />
+
+          {/* Grid */}
+          {page.isLoading ? (
+            <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
+          ) : page.error ? (
+            <GridError
+              type="server"
+              title="Erro ao carregar grupos"
+              message="Ocorreu um erro ao tentar carregar os grupos de permissões. Por favor, tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => crud.refetch(),
+              }}
             />
-          </div>
-        </div>
-      </Card>
+          ) : (
+            <EntityGrid
+              config={permissionGroupsConfig}
+              items={page.filteredItems}
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={page.isLoading}
+              isSearching={!!page.searchQuery}
+              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
+              onItemDoubleClick={item =>
+                page.handlers.handleItemDoubleClick(item)
+              }
+              showSorting={true}
+              defaultSortField="name"
+              defaultSortDirection="asc"
+              customSortOptions={sortOptions}
+            />
+          )}
 
-      <div className="space-y-4">
-        {(filteredGroups ?? []).length > 0 ? (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {(filteredGroups ?? []).map(group => (
-              <Card key={group.id} className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">{group.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {group.slug}
-                      </p>
-                    </div>
-                    <Badge variant="secondary">
-                      Prioridade: {group.priority}
-                    </Badge>
-                  </div>
+          {/* Selection Toolbar */}
+          {hasSelection && (
+            <SelectionToolbar
+              selectedIds={selectedIds}
+              totalItems={page.filteredItems.length}
+              onClear={() => page.selection?.actions.clear()}
+              onSelectAll={() => page.selection?.actions.selectAll()}
+              defaultActions={{
+                view: true,
+                edit: hasPermission(ADMIN_PERMISSIONS.PERMISSION_GROUPS.UPDATE),
+                delete: hasPermission(
+                  ADMIN_PERMISSIONS.PERMISSION_GROUPS.DELETE
+                ),
+              }}
+              handlers={{
+                onView: page.handlers.handleItemsView,
+                onEdit: page.handlers.handleItemsEdit,
+                onDelete: page.handlers.handleItemsDelete,
+              }}
+            />
+          )}
 
-                  {group.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {group.description}
-                    </p>
-                  )}
+          {/* Detail Modal */}
+          <DetailModal
+            group={page.modals.viewingItem}
+            open={page.modals.isOpen('view')}
+            onOpenChange={open => {
+              if (!open) page.modals.close('view');
+            }}
+          />
 
+          {/* Create Modal */}
+          <CreateModal
+            open={page.modals.isOpen('create')}
+            onOpenChange={() => page.modals.close('create')}
+            onSuccess={() => {
+              page.crud.refetch();
+              page.modals.close('create');
+            }}
+          />
+
+          {/* Delete Confirmation */}
+          {page.modals.isOpen('delete') && (
+            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+              <Card className="w-full max-w-md p-6">
+                <h2 className="text-lg font-semibold mb-2">Excluir Grupo(s)</h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  {`Tem certeza de que deseja excluir ${page.modals.itemsToDelete.length} grupo(s)? Esta ação não pode ser desfeita.`}
+                </p>
+                <div className="flex gap-4 justify-end">
                   <Button
-                    size="sm"
                     variant="outline"
-                    className="w-full"
-                    onClick={() => handleManagePermissions(group)}
+                    onClick={() => page.modals.close('delete')}
                   >
-                    <Shield className="mr-2 h-3 w-3" />
-                    Gerenciar Permissões
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      page.handlers.handleDeleteConfirm();
+                    }}
+                    disabled={crud.isDeleting}
+                  >
+                    {crud.isDeleting ? 'Excluindo...' : 'Excluir'}
                   </Button>
                 </div>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-64 rounded-lg border border-dashed">
-            <p className="text-muted-foreground">
-              {isLoading ? 'Carregando grupos...' : 'Nenhum grupo encontrado'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      <Dialog
-        open={isManagePermissionsOpen}
-        onOpenChange={setIsManagePermissionsOpen}
-      >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Gerenciar Permissões - {selectedGroupForPermissions?.name}
-            </DialogTitle>
-          </DialogHeader>
-
-          <Tabs defaultValue="permissions" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="permissions">
-                Permissões ({groupPermissions.length})
-              </TabsTrigger>
-              <TabsTrigger value="users">
-                Usuários ({groupUsers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="permissions" className="space-y-4">
-              {groupPermissions.length > 0 ? (
-                <div className="space-y-2">
-                  {groupPermissions.map(perm => (
-                    <div
-                      key={perm.id}
-                      className="flex items-center justify-between rounded-md border p-3"
-                    >
-                      <div>
-                        <p className="font-medium">{perm.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {perm.description}
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        {perm.effect === 'allow' ? '✓' : '✗'}{' '}
-                        {perm.effect.toUpperCase()}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Nenhuma permissão atribuída
-                </p>
-              )}
-            </TabsContent>
-
-            <TabsContent value="users" className="space-y-4">
-              {groupUsers.length > 0 ? (
-                <div className="space-y-2">
-                  {groupUsers.map(user => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between rounded-md border p-3"
-                    >
-                      <div>
-                        <p className="font-medium">{user.username}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum usuário neste grupo
-                </p>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsManagePermissionsOpen(false)}
-            >
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+            </div>
+          )}
+        </PageBody>
+      </PageLayout>
+    </CoreProvider>
   );
 }

@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { LucideIcon, RefreshCw, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import React, { ComponentType, ReactNode, forwardRef } from 'react';
 
 // =============================================================================
@@ -159,7 +160,7 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
       subtitle,
       metadata,
       icon: Icon,
-      iconBgColor = 'bg-gradient-to-br from-blue-500 to-purple-600',
+      iconBgColor = 'bg-linear-to-br from-blue-500 to-purple-600',
       thumbnail,
       thumbnailFallback,
       badges = [],
@@ -221,13 +222,17 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
           <div
             className={cn(
               iconSizeClasses[variant],
-              'overflow-hidden flex-shrink-0'
+              'flex items-center justify-center text-white shrink-0',
+              isSelected ? 'bg-blue-600' : iconBgColor
             )}
           >
-            <img
+            <Image
               src={thumbnail}
               alt={title}
-              className="w-full h-full object-cover"
+              className=" object-cover text-white" // Adicione a classe text-white
+              width={32}
+              height={32}
+              style={{ filter: 'invert(1)' }} // Inverte as cores do SVG
             />
           </div>
         );
@@ -238,7 +243,7 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
           <div
             className={cn(
               iconSizeClasses[variant],
-              'flex items-center justify-center text-white flex-shrink-0',
+              'flex items-center justify-center text-white shrink-0',
               isSelected ? 'bg-blue-600' : iconBgColor
             )}
           >
@@ -252,7 +257,7 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
           <div
             className={cn(
               iconSizeClasses[variant],
-              'flex items-center justify-center flex-shrink-0',
+              'flex items-center justify-center shrink-0',
               isSelected ? 'bg-blue-600' : iconBgColor
             )}
           >
@@ -273,7 +278,6 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
             className="bg-cyan-400 dark:bg-cyan-500/70 text-white shadow-md shadow-cyan-400/50 dark:shadow-cyan-500/20"
           >
             <Sparkles className="w-3 h-3" />
-            {!isUpdated && <span className="ml-1">Novo</span>}
           </Badge>
         )}
         {isUpdated && (
@@ -282,7 +286,6 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
             className="bg-amber-400 dark:bg-amber-500/70 text-white flex items-center gap-1 shadow-md shadow-amber-400/50 dark:shadow-amber-500/20"
           >
             <RefreshCw className="w-3 h-3" />
-            <span>Atualizado</span>
           </Badge>
         )}
       </div>
@@ -340,24 +343,30 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
         >
           {/* Header: Icon + Status Badges */}
           <div className="flex items-start justify-between ">
-            <div className="flex items-center gap-3">
-              {renderCheckbox()}
-              {renderIcon()}
+            <div className="flex gap-4">
+              <div className="flex items-center gap-3">
+                {renderCheckbox()}
+                {renderIcon()}
+              </div>
+              {/* Title */}
+              <div className="flex flex-col">
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white  truncate">
+                  {title}
+                </h3>
+                {/* Subtitle */}
+                {subtitle && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400  line-clamp-2">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
             </div>
+
             {renderStatusBadges()}
           </div>
 
-          {/* Title */}
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white  truncate">
-            {title}
-          </h3>
-
-          {/* Subtitle */}
-          {subtitle && (
-            <p className="text-sm text-gray-600 dark:text-gray-400  line-clamp-2">
-              {subtitle}
-            </p>
-          )}
+          {/* Children */}
+          {children}
 
           {/* Badges */}
           {badges.length > 0 && <div className="">{renderBadges()}</div>}
@@ -368,9 +377,6 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
               {metadata}
             </div>
           )}
-
-          {/* Children */}
-          {children}
 
           {/* Footer */}
           {footer}
@@ -395,7 +401,7 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
             className
           )}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               {renderCheckbox()}
               {renderIcon()}
@@ -405,14 +411,20 @@ export const UniversalCard = forwardRef<HTMLDivElement, UniversalCardProps>(
                     {title}
                   </h3>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                  {subtitle && <span>{subtitle}</span>}
-                  {metadata}
-                </div>
+                {subtitle && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {subtitle}
+                  </p>
+                )}
+                {metadata && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {metadata}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ml-2 flex-shrink-0">
+            <div className="flex items-center gap-3 ml-2 shrink-0">
               {badges.length > 0 && renderBadges()}
               {renderStatusBadges()}
               {children}

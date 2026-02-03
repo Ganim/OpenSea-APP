@@ -12,6 +12,10 @@ export {
   meKeys,
   useDeleteAccount,
   useMe,
+  useMyAuditLogs,
+  useMyEmployee,
+  useMyGroups,
+  useMyPermissions,
   useUpdateEmail,
   useUpdatePassword,
   useUpdateProfile,
@@ -40,13 +44,11 @@ export {
   useUpdateUserEmail,
   useUpdateUserPassword,
   useUpdateUserProfile,
-  useUpdateUserRole,
   useUpdateUserUsername,
   useUser,
   useUserByEmail,
   useUserByUsername,
   useUsers,
-  useUsersByRole,
 } from './use-users';
 
 // Stock hooks
@@ -54,3 +56,6 @@ export * from './stock';
 
 // Sales hooks
 export * from './sales';
+
+// Utility hooks
+export { useMediaQuery } from './use-media-query';

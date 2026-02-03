@@ -230,7 +230,7 @@ export function MultiViewModal<T extends { id: string }>({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b dark:border-gray-800 bg-gradient-to-r from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-blue-950/20 dark:to-gray-900 rounded-t-2xl shrink-0">
+        <div className="px-4 py-3 border-b dark:border-gray-800 bg-linear-to-r from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-blue-950/20 dark:to-gray-900 rounded-t-2xl shrink-0">
           <div className="flex items-center justify-between gap-4">
             {/* Lista de itens */}
             <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">

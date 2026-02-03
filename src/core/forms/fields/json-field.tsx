@@ -5,13 +5,13 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Check, X, Wand2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { cn } from '@/lib/utils';
+import { Check, Wand2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface JsonFieldProps<T = unknown> {
   field: FieldConfig<T>;
@@ -43,20 +43,6 @@ export function JsonField<T = unknown>({
         : false
       : field.disabled);
 
-  // Initialize internal value from prop
-  useEffect(() => {
-    if (typeof value === 'object' && value !== null) {
-      setInternalValue(JSON.stringify(value, null, 2));
-      setIsValid(true);
-      setValidationError(null);
-    } else if (typeof value === 'string') {
-      setInternalValue(value);
-      validateJson(value);
-    } else {
-      setInternalValue('');
-    }
-  }, [value]);
-
   // Validate JSON
   const validateJson = (jsonString: string) => {
     if (!jsonString.trim()) {
@@ -76,6 +62,20 @@ export function JsonField<T = unknown>({
       return false;
     }
   };
+
+  // Initialize internal value from prop
+  useEffect(() => {
+    if (typeof value === 'object' && value !== null) {
+      setInternalValue(JSON.stringify(value, null, 2));
+      setIsValid(true);
+      setValidationError(null);
+    } else if (typeof value === 'string') {
+      setInternalValue(value);
+      validateJson(value);
+    } else {
+      setInternalValue('');
+    }
+  }, [value]);
 
   // Handle change
   const handleChange = (newValue: string) => {

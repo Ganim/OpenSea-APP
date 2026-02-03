@@ -6,11 +6,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Trash2 } from 'lucide-react';
-import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import type { FieldConfig } from '@/core/types';
+import { Plus, Trash2 } from 'lucide-react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface ObjectFieldProps<T = unknown> {
   field: FieldConfig<T>;
@@ -127,7 +127,7 @@ export function ObjectField<T = unknown>({
                     size="sm"
                     onClick={() => handleRemove(key)}
                     disabled={isDisabled}
-                    className="flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                     title="Remover propriedade"
                   >
                     <Trash2 className="w-4 h-4" />

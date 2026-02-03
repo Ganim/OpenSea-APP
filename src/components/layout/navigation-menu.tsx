@@ -8,8 +8,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/contexts/auth-context';
-import type { MenuItem, UserRole } from '@/types/menu';
+import { usePermissions } from '@/hooks/use-permissions';
+import type { MenuItem } from '@/types/menu';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ChevronRight, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -27,31 +27,62 @@ export function NavigationMenu({
   menuItems,
 }: NavigationMenuProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { hasPermission, hasAnyPermission, isLoading } = usePermissions();
   const [menuHistory, setMenuHistory] = useState<MenuItem[][]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Função para verificar se o usuário tem permissão
-  const hasPermission = (requiredRole?: UserRole): boolean => {
-    if (!requiredRole || !user) return true;
-    const roleHierarchy = { USER: 0, MANAGER: 1, ADMIN: 2 };
-    return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+  // Função para verificar se o usuário tem permissão para ver o item
+  const hasMenuPermission = (item: MenuItem): boolean => {
+    // Durante carregamento, mostrar todos os itens (será filtrado depois)
+    if (isLoading) {
+      return true;
+    }
+
+    // Se não tem requisito de permissão, permite acesso
+    if (!item.requiredPermission && !item.requiredPermissions) {
+      return true;
+    }
+
+    // Verifica permissão única
+    if (item.requiredPermission) {
+      return hasPermission(item.requiredPermission);
+    }
+
+    // Verifica múltiplas permissões (OR - precisa de pelo menos uma)
+    if (item.requiredPermissions && item.requiredPermissions.length > 0) {
+      return hasAnyPermission(...item.requiredPermissions);
+    }
+
+    return true;
   };
 
-  // Filtrar itens do menu baseado na role
-  const filterMenuByRole = (items: MenuItem[]): MenuItem[] => {
+  // Filtrar itens do menu baseado nas permissões
+  const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
     return items
-      .filter(item => hasPermission(item.requiredRole))
+      .filter(item => {
+        const canAccessItem = hasMenuPermission(item);
+        // Se tem submenu, verificar se algum filho é acessível
+        if (item.submenu && item.submenu.length > 0) {
+          const filteredSubmenu = item.submenu.filter(sub =>
+            hasMenuPermission(sub)
+          );
+          // Manter o item pai se tiver pelo menos um filho acessível
+          return filteredSubmenu.length > 0;
+        }
+        return canAccessItem;
+      })
       .map(item => ({
         ...item,
-        submenu: item.submenu ? filterMenuByRole(item.submenu) : undefined,
+        submenu: item.submenu
+          ? filterMenuByPermissions(item.submenu)
+          : undefined,
       }));
   };
 
   const currentMenu =
     menuHistory.length > 0
-      ? filterMenuByRole(menuHistory[menuHistory.length - 1])
-      : filterMenuByRole(menuItems);
+      ? filterMenuByPermissions(menuHistory[menuHistory.length - 1])
+      : filterMenuByPermissions(menuItems);
 
   const filteredMenu = searchQuery
     ? currentMenu.filter(
@@ -73,12 +104,7 @@ export function NavigationMenu({
       setMenuHistory([...menuHistory, item.submenu]);
       setSearchQuery('');
     } else if (item.href) {
-      // Redirecionamento especial para templates quando usuário é USER
-      if (item.id === 'templates' && user?.role === 'USER') {
-        router.push('/stock/assets/templates/request');
-      } else {
-        router.push(item.href);
-      }
+      router.push(item.href);
       handleClose();
     }
   };
@@ -208,7 +234,7 @@ export function NavigationMenu({
               </div>
 
               {/* Menu Grid */}
-              <div className="p-8 max-h-[60vh] overflow-y-auto">
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
                 {filteredMenu.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
@@ -219,7 +245,7 @@ export function NavigationMenu({
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {filteredMenu.map((item, index) => {
                       const variant = item.variant || 'primary';
                       const styles = getVariantStyles(variant);

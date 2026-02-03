@@ -5,8 +5,6 @@
 
 export type MenuItemVariant = 'primary' | 'alert' | 'new' | 'inactive';
 
-export type UserRole = 'USER' | 'MANAGER' | 'ADMIN';
-
 export interface MenuItem {
   id: string;
   label: string;
@@ -15,5 +13,6 @@ export interface MenuItem {
   href?: string;
   submenu?: MenuItem[];
   variant?: MenuItemVariant;
-  requiredRole?: UserRole; // Role mínima necessária para ver este item
+  requiredPermission?: string; // Permissão necessária para ver este item
+  requiredPermissions?: string[]; // Múltiplas permissões (OR - precisa de pelo menos uma)
 }

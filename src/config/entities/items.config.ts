@@ -34,10 +34,10 @@ export const itemsConfig = defineEntityConfig<Item>()({
 
   // ======================== ROTAS ========================
   routes: {
-    list: '/stock/assets/items',
-    detail: '/stock/assets/items/:id',
-    create: '/stock/assets/items/new',
-    edit: '/stock/assets/items/:id/edit',
+    list: '/stock/items',
+    detail: '/stock/items/:id',
+    create: '/stock/items/new',
+    edit: '/stock/items/:id/edit',
   },
 
   // ======================== DISPLAY ========================

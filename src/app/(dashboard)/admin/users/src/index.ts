@@ -3,17 +3,14 @@
  * Exportações centralizadas de todo o módulo de usuários
  */
 
+// API (queries, mutations, keys)
+export * from './api';
+
 // Components
 export { UserGridCard, UserListCard } from './components';
 
 // Constants
-export {
-  getRoleBadgeVariant,
-  getRoleLabel,
-  ROLE_BADGE_VARIANTS,
-  ROLE_LABELS,
-  ROLE_OPTIONS,
-} from './constants';
+export { USER_STATUS, USER_STATUS_LABELS } from './constants';
 
 // Config
 export { usersConfig } from './config/users.config';
@@ -27,7 +24,6 @@ export {
   type DetailModalProps,
   type ManageGroupsModalProps,
   type NewUserData,
-  type RoleBadgeVariantMap,
   type UserGridCardProps,
   type UserListCardProps,
 } from './types';
@@ -47,5 +43,4 @@ export {
   isValidPassword,
   isValidUsername,
   listUsers,
-  updateUserRole,
 } from './utils';

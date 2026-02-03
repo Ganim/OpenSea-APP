@@ -63,6 +63,15 @@ export interface PermissionGroup {
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string | null;
+  usersCount?: number; // Novo campo da API
+  permissionsCount?: number; // Novo campo da API
+}
+
+export interface PermissionGroupWithDetails extends PermissionGroup {
+  users: UserInGroup[];
+  usersCount: number;
+  permissions: PermissionWithEffect[];
+  permissionsCount: number;
 }
 
 export interface CreatePermissionGroupDTO {
@@ -128,7 +137,6 @@ export interface UserInGroup {
   id: string;
   username: string;
   email: string;
-  role: 'USER' | 'MANAGER' | 'ADMIN';
   assignedAt: string;
   expiresAt: string | null;
 }
@@ -171,7 +179,21 @@ export interface SuccessResponse {
 
 export type PermissionEffect = 'allow' | 'deny';
 
-export type PermissionModule = 'core' | 'stock' | 'sales';
+export type PermissionModule =
+  | 'core'
+  | 'stock'
+  | 'sales'
+  | 'hr'
+  | 'rbac'
+  | 'audit'
+  | 'admin'
+  | 'self'
+  | 'requests'
+  | 'notifications'
+  | 'settings'
+  | 'reports'
+  | 'data'
+  | 'ui';
 
 export type PermissionAction =
   | 'create'
@@ -189,11 +211,43 @@ export type PermissionAction =
 export interface PermissionGroupWithChildren extends PermissionGroup {
   children?: PermissionGroup[];
   permissions?: PermissionWithEffect[];
+  users?: UserInGroup[];
   userCount?: number;
+}
+
+export interface PermissionGroupDetailResponse {
+  group: PermissionGroup;
+  permissions: PermissionWithEffect[];
+  users: UserInGroup[];
 }
 
 export interface PermissionsByModule {
   [module: string]: {
     [resource: string]: Permission[];
   };
+}
+
+export interface AllPermissionsResponse {
+  permissions: PermissionModuleGroup[];
+  total: number;
+  modules: string[];
+}
+
+export interface PermissionModuleGroup {
+  module: string;
+  description: string;
+  resources: Record<string, PermissionResourceGroup>;
+}
+
+export interface PermissionResourceGroup {
+  description: string;
+  permissions: PermissionItemSimple[];
+}
+
+export interface PermissionItemSimple {
+  id: string;
+  code: string;
+  name: string;
+  action: string;
+  isDeprecated: boolean;
 }

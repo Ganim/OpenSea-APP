@@ -28,7 +28,6 @@ export interface DetailModalProps {
   onOpenChange: (open: boolean) => void;
   selectedUser: User | null;
   onManageGroups: (user: User) => void;
-  getRoleBadgeVariant: (role: string) => string;
 }
 
 export interface CreateModalProps {
@@ -54,9 +53,4 @@ export interface NewUserData {
   username: string;
   email: string;
   password: string;
-  role: 'USER' | 'MANAGER' | 'ADMIN';
-}
-
-export interface RoleBadgeVariantMap {
-  [key: string]: 'destructive' | 'default' | 'secondary';
 }

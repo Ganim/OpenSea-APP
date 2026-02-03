@@ -6,7 +6,7 @@
 
 'use client';
 
-import { TemplateViewer } from '@/app/(dashboard)/stock/assets/templates/src/components';
+import { TemplateViewer } from '@/app/(dashboard)/stock/templates/src/components';
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
 import { cn } from '@/lib/utils';
@@ -155,6 +155,7 @@ export function MultiViewModal({
   // Função para salvar edições do template
   const handleSaveTemplate = async (data: {
     name: string;
+    iconUrl?: string;
     unitOfMeasure: UnitOfMeasure;
     productAttributes: Record<string, unknown>;
     variantAttributes: Record<string, unknown>;
@@ -191,13 +192,30 @@ export function MultiViewModal({
     try {
       await updateTemplateMutation.mutateAsync({
         id: currentTemplate.id,
-        data,
+        data: {
+          name: data.name,
+          iconUrl: data.iconUrl,
+          unitOfMeasure: data.unitOfMeasure,
+          productAttributes: data.productAttributes as any,
+          variantAttributes: data.variantAttributes as any,
+          itemAttributes: data.itemAttributes as any,
+        },
       });
       toast.success('Template atualizado com sucesso!');
 
       // Atualizar o template na lista local
       const updatedTemplates = templates.map(t =>
-        t.id === currentTemplate.id ? { ...t, ...data } : t
+        t.id === currentTemplate.id
+          ? ({
+              ...t,
+              name: data.name,
+              iconUrl: data.iconUrl,
+              unitOfMeasure: data.unitOfMeasure,
+              productAttributes: data.productAttributes as any,
+              variantAttributes: data.variantAttributes as any,
+              itemAttributes: data.itemAttributes as any,
+            } as Template)
+          : t
       );
       setTemplates(updatedTemplates);
     } catch (error) {
@@ -322,7 +340,7 @@ export function MultiViewModal({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b dark:border-gray-800 bg-gradient-to-r from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-blue-950/20 dark:to-gray-900 rounded-t-2xl shrink-0">
+        <div className="px-4 py-3 border-b dark:border-gray-800 bg-linear-to-r from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-blue-950/20 dark:to-gray-900 rounded-t-2xl shrink-0">
           <div className="flex items-center justify-between gap-4">
             {/* Lista de Templates */}
             <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide">

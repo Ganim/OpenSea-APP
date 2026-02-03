@@ -90,6 +90,18 @@ export interface FieldConfig<T = unknown> {
   /** Mensagem de erro customizada */
   errorMessage?: string;
 
+  // ======================== MÁSCARAS ========================
+  /**
+   * Máscara de entrada para o campo
+   * Máscaras predefinidas: 'cnpj', 'cpf', 'phone', 'cep', 'date'
+   * Ou máscara customizada usando:
+   * - '9' para dígitos
+   * - 'A' para letras
+   * - '*' para alfanumérico
+   * Exemplo: '99.999.999/9999-99' para CNPJ
+   */
+  mask?: 'cnpj' | 'cpf' | 'phone' | 'cep' | 'date' | string;
+
   // ======================== UI ========================
   /** Placeholder */
   placeholder?: string;

@@ -1,25 +1,22 @@
 /**
- * Locations Page
- * Página de gestão de localizações de estoque
+ * OpenSea OS - Locations Page
+ * Pagina de gerenciamento de localizacoes (armazens, zonas, nichos)
+ * usando o sistema padronizado de layout OpenSea OS
  */
 
 'use client';
 
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import { BatchCreateLocationModal } from '@/components/modals/batch-create-location-modal';
-import { CreateEditLocationModal } from '@/components/modals/create-edit-location-modal';
-import { HelpModal } from '@/components/modals/help-modal';
-import { ImportLocationsModal } from '@/components/modals/import-locations-modal';
-import { QuickCreateLocationModal } from '@/components/modals/quick-create-location-modal';
-import { BatchProgressDialog } from '@/components/stock/batch-progress-dialog';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
-  ItemsGrid,
-  LocationGridCard,
-  LocationListCard,
-} from '@/components/stock/items-grid';
-import { PageHeader } from '@/components/stock/page-header';
-import { SearchSection } from '@/components/stock/search-section';
-import { StatsSection } from '@/components/stock/stats-section';
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { SearchBar } from '@/components/layout/search-bar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,652 +27,478 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useAuth } from '@/contexts/auth-context';
-import { SelectionProvider, useSelection } from '@/contexts/selection-context';
+import { Button } from '@/components/ui/button';
 import {
-  useCreateLocation,
-  useDeleteLocation,
-  useLocations,
-} from '@/hooks/stock/use-stock-other';
-import { useBatchOperation } from '@/hooks/use-batch-operation-v2';
-import type { CreateLocationRequest } from '@/types/stock';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  AlertTriangle,
-  CheckCircle,
-  HelpCircle,
-  MapPin,
-  Plus,
-  Upload,
-  Warehouse,
-  Zap,
-} from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Plus, Tag, Warehouse } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
-// Query key para locations
-const LOCATIONS_QUERY_KEY = ['locations'];
+import {
+  useCreateWarehouse,
+  useDeleteWarehouse,
+  useUpdateWarehouse,
+  useWarehouses,
+  WarehouseCard,
+  PLACEHOLDERS,
+  SUCCESS_MESSAGES,
+  defaultWarehouseFormData,
+  normalizeCode,
+  validateWarehouseForm,
+} from './src';
+import type { WarehouseFormData, Warehouse as WarehouseType } from './src';
 
 export default function LocationsPage() {
-  return (
-    <ProtectedRoute requiredRole="MANAGER">
-      <SelectionProvider>
-        <LocationsPageContent />
-      </SelectionProvider>
-    </ProtectedRoute>
-  );
-}
-
-function LocationsPageContent() {
   const router = useRouter();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
+  const { data: warehouses, isLoading, error, refetch } = useWarehouses();
+
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [isQuickCreateModalOpen, setIsQuickCreateModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isBatchCreateModalOpen, setIsBatchCreateModalOpen] = useState(false);
-  const [isCreateEditModalOpen, setIsCreateEditModalOpen] = useState(false);
-  const [editingLocation, setEditingLocation] = useState<{
-    id: string;
-    name: string;
-    code: string;
-    type: string;
-    parentId?: string;
-    isActive: boolean;
-  } | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
-  const [itemsToDuplicate, setItemsToDuplicate] = useState<string[]>([]);
-  const [activeOperation, setActiveOperation] = useState<
-    'delete' | 'duplicate' | null
-  >(null);
-
-  // Selection context
-  const {
-    selectedIds,
-    lastSelectedId,
-    selectItem,
-    selectRange,
-    clearSelection,
-  } = useSelection();
-
-  const {
-    data: locations = [],
-    isLoading,
-    error,
-  } = useLocations({ type: 'WAREHOUSE' });
-  const createLocationMutation = useCreateLocation();
-  const deleteLocationMutation = useDeleteLocation();
-
-  // Filtrar apenas locations que não têm parent (locations raiz)
-  const rootLocations = useMemo(() => {
-    return locations.filter(location => !location.parentId);
-  }, [locations]);
-
-  // Batch delete operation
-  const batchDelete = useBatchOperation(
-    (id: string) => deleteLocationMutation.mutateAsync(id),
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onItemComplete: result => {
-        // Invalida o cache após cada item deletado com sucesso
-        if (result.status === 'success') {
-          queryClient.invalidateQueries({ queryKey: LOCATIONS_QUERY_KEY });
-        }
-      },
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
-
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Localização excluída com sucesso!'
-              : `${succeeded} localizações excluídas com sucesso!`
-          );
-        } else if (succeeded > 0) {
-          toast.warning(
-            `${succeeded} localizações excluídas, mas ${failed} falharam.`
-          );
-        } else {
-          toast.error('Erro ao excluir localizações');
-        }
-
-        clearSelection();
-      },
-    }
+  const [selectedWarehouse, setSelectedWarehouse] =
+    useState<WarehouseType | null>(null);
+  const [formData, setFormData] = useState<WarehouseFormData>(
+    defaultWarehouseFormData
   );
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Batch duplicate operation
-  const batchDuplicate = useBatchOperation(
-    async (id: string) => {
-      const location = locations.find(l => l.id === id);
-      if (!location) throw new Error('Localização não encontrada');
+  // ============================================================================
+  // MUTATIONS
+  // ============================================================================
 
-      const data: CreateLocationRequest = {
-        titulo: `${location.name} (cópia)`,
-        type: location.type,
-        isActive: location.isActive,
-      };
-      return createLocationMutation.mutateAsync(data);
-    },
-    {
-      batchSize: 3,
-      delayBetweenItems: 500,
-      delayBetweenBatches: 2000,
-      maxRetries: 3,
-      onItemComplete: result => {
-        // Invalida o cache após cada item duplicado com sucesso
-        if (result.status === 'success') {
-          queryClient.invalidateQueries({ queryKey: LOCATIONS_QUERY_KEY });
-        }
-      },
-      onComplete: results => {
-        const succeeded = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'failed').length;
+  const createWarehouse = useCreateWarehouse();
+  const updateWarehouse = useUpdateWarehouse();
+  const deleteWarehouse = useDeleteWarehouse();
 
-        if (failed === 0) {
-          toast.success(
-            succeeded === 1
-              ? 'Localização duplicada com sucesso!'
-              : `${succeeded} localizações duplicadas com sucesso!`
-          );
-        } else if (succeeded > 0) {
-          toast.warning(
-            `${succeeded} localizações duplicadas, mas ${failed} falharam.`
-          );
-        } else {
-          toast.error('Erro ao duplicar localizações');
-        }
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
 
-        clearSelection();
-      },
-    }
-  );
+  const filteredWarehouses = useMemo(() => {
+    if (!warehouses) return [];
+    if (!searchQuery.trim()) return warehouses;
 
-  // Filtrar locations com base na busca
-  const filteredLocations = useMemo(() => {
-    if (!searchQuery.trim()) return rootLocations;
-    return rootLocations.filter(
-      location =>
-        (location.name?.toLowerCase().includes(searchQuery.toLowerCase()) ??
-          false) ||
-        location.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        location.type?.toLowerCase().includes(searchQuery.toLowerCase())
+    const normalizedQuery = searchQuery.toLowerCase();
+    return warehouses.filter(
+      warehouse =>
+        warehouse.code.toLowerCase().includes(normalizedQuery) ||
+        warehouse.name.toLowerCase().includes(normalizedQuery) ||
+        warehouse.description?.toLowerCase().includes(normalizedQuery)
     );
-  }, [rootLocations, searchQuery]);
+  }, [warehouses, searchQuery]);
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleOpenCreate = useCallback(() => {
+    setFormData(defaultWarehouseFormData);
+    setFormErrors({});
+    setIsCreateModalOpen(true);
   }, []);
 
-  const handleQuickCreate = async (code: string, name?: string) => {
-    try {
-      const data: CreateLocationRequest = {
-        titulo: name || code, // Usa o nome se fornecido, senão usa o código como descrição
-        type: 'WAREHOUSE',
-        isActive: true,
-      };
-      await createLocationMutation.mutateAsync(data);
-      toast.success('Localização criada com sucesso!');
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-      const errorDetails = JSON.stringify(
-        {
-          error: message,
-          locationCode: code,
-          locationName: name,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        2
-      );
-
-      toast.error('Erro ao criar localização', {
-        description: message,
-        action: {
-          label: 'Copiar erro',
-          onClick: () => {
-            navigator.clipboard.writeText(errorDetails);
-            toast.success('Erro copiado para área de transferência');
-          },
-        },
-      });
-      throw error;
-    }
+  const handleOpenEdit = (warehouse: WarehouseType) => {
+    setSelectedWarehouse(warehouse);
+    setFormData({
+      code: warehouse.code,
+      name: warehouse.name,
+      description: warehouse.description || '',
+      address: warehouse.address || '',
+      isActive: warehouse.isActive,
+    });
+    setFormErrors({});
+    setIsEditModalOpen(true);
   };
 
-  const handleNavigateToNew = () => {
-    setIsBatchCreateModalOpen(true);
-  };
-
-  const handleImportLocations = async (file: File) => {
-    // TODO: Implementar importação de localizações
-    console.log('Importando arquivo:', file.name);
-  };
-
-  const handleLocationClick = (id: string, event: React.MouseEvent) => {
-    if (event.shiftKey && lastSelectedId) {
-      // Shift+Click: seleção em range
-      const allIds = filteredLocations.map(l => l.id);
-      selectRange(lastSelectedId, id, allIds);
-    } else {
-      // Click normal ou Ctrl+Click
-      selectItem(id, event);
-    }
-  };
-
-  const handleLocationDoubleClick = (id: string) => {
-    router.push(`/stock/locations/${id}`);
-  };
-
-  const handleLocationsView = (ids: string[]) => {
-    if (ids.length === 1) {
-      router.push(`/stock/locations/${ids[0]}`);
-    } else {
-      toast.info(
-        `Visualização múltipla não disponível. Selecione apenas uma localização.`
-      );
-    }
-  };
-
-  const handleLocationsEdit = (ids: string[]) => {
-    if (ids.length === 1) {
-      const locationToEdit = locations.find(l => l.id === ids[0]);
-      if (locationToEdit) {
-        setEditingLocation({
-          id: locationToEdit.id,
-          name: locationToEdit.name || '',
-          code: locationToEdit.code,
-          type: locationToEdit.type,
-          parentId: locationToEdit.parentId,
-          isActive: locationToEdit.isActive,
-        });
-        setIsCreateEditModalOpen(true);
-      }
-    } else {
-      toast.info(
-        `Edição múltipla não disponível. Selecione apenas uma localização.`
-      );
-    }
-  };
-
-  const handleCreateEditSuccess = () => {
-    // Recarregar dados após criação/edição
-    queryClient.invalidateQueries({ queryKey: LOCATIONS_QUERY_KEY });
-  };
-
-  const handleLocationsDuplicate = (ids: string[]) => {
-    setItemsToDuplicate(ids);
-    setIsDuplicateDialogOpen(true);
-  };
-
-  const handleDuplicateConfirm = async () => {
-    setIsDuplicateDialogOpen(false);
-    setActiveOperation('duplicate');
-    await batchDuplicate.start(itemsToDuplicate);
-  };
-
-  const handleLocationsDelete = (ids: string[]) => {
-    setItemsToDelete(ids);
+  const handleOpenDelete = (warehouse: WarehouseType) => {
+    setSelectedWarehouse(warehouse);
     setIsDeleteDialogOpen(true);
   };
 
+  const handleCreateSubmit = async () => {
+    const validation = validateWarehouseForm(formData);
+    if (!validation.isValid) {
+      setFormErrors(validation.errors);
+      return;
+    }
+
+    try {
+      await createWarehouse.mutateAsync({
+        code: normalizeCode(formData.code),
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        address: formData.address.trim() || undefined,
+        isActive: formData.isActive,
+      });
+
+      toast.success(SUCCESS_MESSAGES.WAREHOUSE_CREATED);
+      setIsCreateModalOpen(false);
+      setFormData(defaultWarehouseFormData);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao criar armazém');
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (!selectedWarehouse) return;
+
+    const validation = validateWarehouseForm(formData);
+    if (!validation.isValid) {
+      setFormErrors(validation.errors);
+      return;
+    }
+
+    try {
+      await updateWarehouse.mutateAsync({
+        id: selectedWarehouse.id,
+        data: {
+          code: normalizeCode(formData.code),
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          address: formData.address.trim() || undefined,
+          isActive: formData.isActive,
+        },
+      });
+
+      toast.success(SUCCESS_MESSAGES.WAREHOUSE_UPDATED);
+      setIsEditModalOpen(false);
+      setSelectedWarehouse(null);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Erro ao atualizar armazém'
+      );
+    }
+  };
+
   const handleDeleteConfirm = async () => {
-    setIsDeleteDialogOpen(false);
-    setActiveOperation('delete');
-    await batchDelete.start(itemsToDelete);
+    if (!selectedWarehouse) return;
+
+    try {
+      await deleteWarehouse.mutateAsync(selectedWarehouse.id);
+      toast.success(SUCCESS_MESSAGES.WAREHOUSE_DELETED);
+      setIsDeleteDialogOpen(false);
+      setSelectedWarehouse(null);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Erro ao excluir armazém'
+      );
+    }
   };
 
-  const handleSelectRange = (startId: string, endId: string) => {
-    const allIds = filteredLocations.map(l => l.id);
-    selectRange(startId, endId, allIds);
+  const handleInputChange = (
+    field: keyof WarehouseFormData,
+    value: string | boolean
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
-  const stats = [
-    {
-      label: 'Total de Localizações',
-      value: rootLocations.length,
-      icon: <Warehouse className="w-5 h-5" />,
-      trend: 5,
-    },
-    {
-      label: 'Ativas',
-      value: rootLocations.filter(l => l.isActive).length,
-      icon: <CheckCircle className="w-5 h-5" />,
-    },
-    {
-      label: 'Com Sublocalizações',
-      value: rootLocations.filter(l => {
-        const sublocations = locations.filter(sub => sub.parentId === l.id);
-        return sublocations.length > 0;
-      }).length,
-      icon: <MapPin className="w-5 h-5" />,
-    },
-    {
-      label: 'Tipos Diferentes',
-      value: new Set(rootLocations.map(l => l.type)).size,
-      icon: <Warehouse className="w-5 h-5" />,
-    },
-  ];
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
 
-  const faqs = [
-    {
-      question: 'O que são localizações?',
-      answer:
-        'Localizações são os lugares físicos onde os itens do estoque são armazenados. Elas podem ser organizadas hierarquicamente, com localizações principais e sublocalizações.',
-    },
-    {
-      question: 'Como criar uma nova localização?',
-      answer:
-        'Clique no botão "Nova Localização", defina um nome e código único. Você pode especificar o tipo (armazém, prateleira, etc.) e adicionar notas descritivas.',
-    },
-    {
-      question: 'Posso importar localizações em massa?',
-      answer:
-        'Sim! Use o botão "Importar" para fazer upload de um arquivo CSV ou Excel com múltiplas localizações. Baixe nosso modelo para garantir a formatação correta.',
-    },
-    {
-      question: 'Como organizar localizações hierarquicamente?',
-      answer:
-        'Ao editar uma localização, você pode definir uma localização pai. Isso cria uma estrutura hierárquica onde uma localização principal pode ter múltiplas sublocalizações.',
-    },
-  ];
+  const renderWarehouseGrid = () => (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {filteredWarehouses.map(warehouse => (
+        <WarehouseCard
+          key={warehouse.id}
+          warehouse={warehouse}
+          onEdit={handleOpenEdit}
+          onDelete={handleOpenDelete}
+        />
+      ))}
+    </div>
+  );
 
-  if (isLoading) {
-    return (
-      <ProtectedRoute requiredRole="MANAGER">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
-              Carregando localizações...
-            </p>
-          </div>
+  const renderEmptyState = () => (
+    <div className="flex flex-col items-center justify-center min-h-[300px] rounded-lg border border-dashed">
+      <Warehouse className="h-12 w-12 text-muted-foreground/50 mb-4" />
+      {searchQuery ? (
+        <>
+          <p className="text-lg font-medium">Nenhum armazém encontrado</p>
+          <p className="text-sm text-muted-foreground">
+            Tente buscar por outro termo
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-lg font-medium">Nenhum armazém cadastrado</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Comece criando seu primeiro armazém
+          </p>
+          <Button onClick={handleOpenCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Criar Armazém
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
+  const renderWarehouseFormFields = (idPrefix: string) => (
+    <div className="space-y-4 py-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor={`${idPrefix}-code`}>
+            Código <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id={`${idPrefix}-code`}
+            placeholder={PLACEHOLDERS.WAREHOUSE_CODE}
+            value={formData.code}
+            onChange={e =>
+              handleInputChange('code', e.target.value.toUpperCase())
+            }
+            maxLength={5}
+            className={formErrors.code ? 'border-destructive' : ''}
+          />
+          {formErrors.code && (
+            <p className="text-xs text-destructive">{formErrors.code}</p>
+          )}
         </div>
-      </ProtectedRoute>
-    );
-  }
-
-  if (error) {
-    const isAuthError =
-      error.message?.includes('401') ||
-      error.message?.includes('Unauthorized') ||
-      error.message?.includes('autenticação');
-    return (
-      <ProtectedRoute requiredRole="MANAGER">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center max-w-md mx-auto p-6">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {isAuthError
-                ? 'Autenticação Necessária'
-                : 'Erro ao Carregar Localizações'}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {isAuthError
-                ? 'Você precisa estar logado para acessar as localizações. Faça login e tente novamente.'
-                : 'Ocorreu um erro ao carregar as localizações. Tente recarregar a página ou entre em contato com o suporte se o problema persistir.'}
-            </p>
-            {isAuthError ? (
-              <button
-                onClick={() => router.push('/auth/login')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-              >
-                Fazer Login
-              </button>
-            ) : (
-              <button
-                onClick={() => window.location.reload()}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-              >
-                Recarregar Página
-              </button>
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor={`${idPrefix}-name`}>
+            Nome <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id={`${idPrefix}-name`}
+            placeholder={PLACEHOLDERS.WAREHOUSE_NAME}
+            value={formData.name}
+            onChange={e => handleInputChange('name', e.target.value)}
+            className={formErrors.name ? 'border-destructive' : ''}
+          />
+          {formErrors.name && (
+            <p className="text-xs text-destructive">{formErrors.name}</p>
+          )}
         </div>
-      </ProtectedRoute>
-    );
-  }
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-description`}>Descrição</Label>
+        <Textarea
+          id={`${idPrefix}-description`}
+          placeholder={PLACEHOLDERS.WAREHOUSE_DESCRIPTION}
+          value={formData.description}
+          onChange={e => handleInputChange('description', e.target.value)}
+          rows={2}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-address`}>Endereço</Label>
+        <Input
+          id={`${idPrefix}-address`}
+          placeholder={PLACEHOLDERS.WAREHOUSE_ADDRESS}
+          value={formData.address}
+          onChange={e => handleInputChange('address', e.target.value)}
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor={`${idPrefix}-isActive`}>Ativo</Label>
+          <p className="text-xs text-muted-foreground">
+            Armazéns inativos não aparecem em buscas
+          </p>
+        </div>
+        <Switch
+          id={`${idPrefix}-isActive`}
+          checked={formData.isActive}
+          onCheckedChange={checked => handleInputChange('isActive', checked)}
+        />
+      </div>
+    </div>
+  );
+
+  // ============================================================================
+  // HEADER BUTTONS CONFIGURATION
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'labels-link',
+        title: 'Etiquetas',
+        icon: Tag,
+        onClick: () => router.push('/stock/locations/labels'),
+        variant: 'outline',
+      },
+      {
+        id: 'create-warehouse',
+        title: 'Novo Armazém',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
+      },
+    ],
+    [handleOpenCreate, router]
+  );
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <ProtectedRoute requiredRole="MANAGER">
-      <div className="flex-col flex gap-4">
-        <PageHeader
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          buttons={actionButtons}
+          onBack={() => router.back()}
+          backLabel="Estoque"
+          backIcon={ArrowLeft}
+        />
+
+        <Header
           title="Localizações"
-          description="Gerencie os locais físicos de armazenamento do seu estoque."
-          buttons={[
-            {
-              icon: HelpCircle,
-              onClick: () => setIsHelpModalOpen(true),
-              variant: 'ghost',
-            },
-            {
-              icon: Zap,
-              text: 'Rápido',
-              onClick: () => setIsQuickCreateModalOpen(true),
-              variant: 'outline',
-              style: { iconColor: 'text-yellow-500' },
-            },
-            {
-              icon: Upload,
-              text: 'Importar',
-              onClick: () => setIsImportModalOpen(true),
-              variant: 'outline',
-            },
-            {
-              icon: Plus,
-              text: 'Nova Localização',
-              onClick: handleNavigateToNew,
-              variant: 'default',
-            },
-          ]}
+          description="Gerencie armazéns, zonas, corredores, prateleiras e nichos"
+        />
+      </PageHeader>
+
+      <PageBody>
+        {/* Search Bar */}
+        <SearchBar
+          value={searchQuery}
+          placeholder="Buscar armazéns..."
+          onSearch={value => setSearchQuery(value)}
+          onClear={() => setSearchQuery('')}
+          showClear={true}
+          size="md"
         />
 
-        <SearchSection
-          searchPlaceholder="Buscar localizações..."
-          onSearch={handleSearch}
-        />
+        {/* Grid */}
+        {isLoading ? (
+          <GridLoading count={8} layout="grid" size="md" gap="gap-4" />
+        ) : error ? (
+          <GridError
+            type="server"
+            title="Erro ao carregar armazéns"
+            message="Ocorreu um erro ao tentar carregar os armazéns. Por favor, tente novamente."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        ) : filteredWarehouses.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          renderWarehouseGrid()
+        )}
 
-        <StatsSection stats={stats} defaultExpanded />
+        {/* Create Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Armazém</DialogTitle>
+              <DialogDescription>
+                Crie um novo armazém para organizar suas localizações
+              </DialogDescription>
+            </DialogHeader>
 
-        <ItemsGrid
-          items={filteredLocations}
-          isSearching={!!searchQuery.trim()}
-          selectedIds={selectedIds}
-          onItemClick={handleLocationClick}
-          onItemDoubleClick={handleLocationDoubleClick}
-          onItemsView={handleLocationsView}
-          onItemsEdit={handleLocationsEdit}
-          onItemsDuplicate={handleLocationsDuplicate}
-          onItemsDelete={handleLocationsDelete}
-          onClearSelection={clearSelection}
-          onSelectRange={handleSelectRange}
-          renderGridItem={(location, isSelected) => (
-            <LocationGridCard
-              code={location.code}
-              name={location.name}
-              type={location.type}
-              capacity={location.capacity}
-              currentOccupancy={location.currentOccupancy}
-              isActive={location.isActive}
-              createdAt={location.createdAt}
-              updatedAt={location.updatedAt}
-              isSelected={isSelected}
-            />
-          )}
-          renderListItem={(location, isSelected) => (
-            <LocationListCard
-              code={location.code}
-              name={location.name}
-              type={location.type}
-              capacity={location.capacity}
-              currentOccupancy={location.currentOccupancy}
-              isActive={location.isActive}
-              createdAt={location.createdAt}
-              updatedAt={location.updatedAt}
-              isSelected={isSelected}
-            />
-          )}
-          emptyMessage="Nenhuma localização encontrada"
-        />
+            {renderWarehouseFormFields('create')}
 
-        <QuickCreateLocationModal
-          isOpen={isQuickCreateModalOpen}
-          onClose={() => setIsQuickCreateModalOpen(false)}
-          onSubmit={handleQuickCreate}
-        />
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleCreateSubmit}
+                disabled={createWarehouse.isPending}
+              >
+                {createWarehouse.isPending ? 'Criando...' : 'Criar Armazém'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-        <ImportLocationsModal
-          isOpen={isImportModalOpen}
-          onClose={() => setIsImportModalOpen(false)}
-          onImport={handleImportLocations}
-        />
+        {/* Edit Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Armazém</DialogTitle>
+              <DialogDescription>
+                Atualize as informações do armazém {selectedWarehouse?.code}
+              </DialogDescription>
+            </DialogHeader>
 
-        <HelpModal
-          isOpen={isHelpModalOpen}
-          onClose={() => setIsHelpModalOpen(false)}
-          title="Localizações"
-          faqs={faqs}
-        />
+            {renderWarehouseFormFields('edit')}
 
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleEditSubmit}
+                disabled={updateWarehouse.isPending}
+              >
+                {updateWarehouse.isPending
+                  ? 'Salvando...'
+                  : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation */}
         <AlertDialog
           open={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogTitle>Excluir Armazém?</AlertDialogTitle>
               <AlertDialogDescription>
-                {itemsToDelete.length === 1
-                  ? 'Tem certeza que deseja excluir esta localização? Esta ação não pode ser desfeita.'
-                  : `Tem certeza que deseja excluir ${itemsToDelete.length} localizações? Esta ação não pode ser desfeita.`}
+                Tem certeza que deseja excluir o armazém{' '}
+                <strong>{selectedWarehouse?.code}</strong>?
+                <br />
+                <br />
+                Esta ação não pode ser desfeita e irá excluir todas as zonas,
+                corredores, prateleiras e nichos associados.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteConfirm}
-                disabled={deleteLocationMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {deleteLocationMutation.isPending ? 'Excluindo...' : 'Excluir'}
+                {deleteWarehouse.isPending ? 'Excluindo...' : 'Excluir'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        <AlertDialog
-          open={isDuplicateDialogOpen}
-          onOpenChange={setIsDuplicateDialogOpen}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar duplicação</AlertDialogTitle>
-              <AlertDialogDescription>
-                {itemsToDuplicate.length === 1
-                  ? 'Tem certeza que deseja duplicar esta localização?'
-                  : `Tem certeza que deseja duplicar ${itemsToDuplicate.length} localizações? Isso criará ${itemsToDuplicate.length} novas localizações.`}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDuplicateConfirm}
-                disabled={createLocationMutation.isPending}
-              >
-                {createLocationMutation.isPending
-                  ? 'Duplicando...'
-                  : 'Duplicar'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Dialog de progresso para exclusão */}
-        <BatchProgressDialog
-          open={activeOperation === 'delete' && !batchDelete.isIdle}
-          status={batchDelete.status}
-          total={batchDelete.total}
-          processed={batchDelete.processed}
-          succeeded={batchDelete.succeeded}
-          failed={batchDelete.failed}
-          progress={batchDelete.progress}
-          operationType="delete"
-          itemName="localizações"
-          onClose={() => {
-            batchDelete.reset();
-            setActiveOperation(null);
-          }}
-          onPause={batchDelete.pause}
-          onResume={batchDelete.resume}
-          onCancel={batchDelete.cancel}
-        />
-
-        {/* Dialog de progresso para duplicação */}
-        <BatchProgressDialog
-          open={activeOperation === 'duplicate' && !batchDuplicate.isIdle}
-          status={batchDuplicate.status}
-          total={batchDuplicate.total}
-          processed={batchDuplicate.processed}
-          succeeded={batchDuplicate.succeeded}
-          failed={batchDuplicate.failed}
-          progress={batchDuplicate.progress}
-          operationType="duplicate"
-          itemName="localizações"
-          onClose={() => {
-            batchDuplicate.reset();
-            setActiveOperation(null);
-          }}
-          onPause={batchDuplicate.pause}
-          onResume={batchDuplicate.resume}
-          onCancel={batchDuplicate.cancel}
-        />
-
-        <CreateEditLocationModal
-          isOpen={isCreateEditModalOpen}
-          onClose={() => {
-            setIsCreateEditModalOpen(false);
-            setEditingLocation(null);
-          }}
-          onSuccess={handleCreateEditSuccess}
-          editLocation={editingLocation || undefined}
-        />
-
-        <BatchCreateLocationModal
-          isOpen={isBatchCreateModalOpen}
-          onClose={() => setIsBatchCreateModalOpen(false)}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: LOCATIONS_QUERY_KEY });
-            setIsBatchCreateModalOpen(false);
-          }}
-        />
-
-        {/* Modal de visualização múltipla - TODO: Implementar */}
-        {/* <MultiViewModal
-          isOpen={isMultiViewModalOpen}
-          onClose={() => {
-            setIsMultiViewModalOpen(false);
-            setMultiViewLocationIds([]);
-          }}
-          locations={locations.filter(l => multiViewLocationIds.includes(l.id))}
-          availableLocations={locations}
-          onAddLocation={locationId => {
-            if (multiViewLocationIds.length < 5) {
-              setMultiViewLocationIds([...multiViewLocationIds, locationId]);
-            }
-          }}
-        /> */}
-      </div>
-    </ProtectedRoute>
+      </PageBody>
+    </PageLayout>
   );
 }

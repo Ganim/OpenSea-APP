@@ -67,3 +67,16 @@ export function useDeleteCategory() {
     },
   });
 }
+
+// PATCH /v1/categories/reorder - Reordena categorias em batch
+export function useReorderCategories() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (items: Array<{ id: string; displayOrder: number }>) =>
+      categoriesService.reorderCategories(items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CATEGORIES });
+    },
+  });
+}

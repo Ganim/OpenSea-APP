@@ -2,12 +2,13 @@ import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
   CreateUserRequest,
+  ForcePasswordResetRequest,
+  ForcePasswordResetResponse,
   MessageResponse,
   ProfileResponse,
   UpdateUserEmailRequest,
   UpdateUserPasswordRequest,
   UpdateUserProfileRequest,
-  UpdateUserRoleRequest,
   UpdateUserUsernameRequest,
   UserResponse,
   UsersResponse,
@@ -34,13 +35,6 @@ export const usersService = {
     return apiClient.get<UserResponse>(
       API_ENDPOINTS.USERS.GET_BY_USERNAME(username)
     );
-  },
-
-  // GET /v1/users/role/:role
-  async getUsersByRole(
-    role: 'USER' | 'MANAGER' | 'ADMIN'
-  ): Promise<UsersResponse> {
-    return apiClient.get<UsersResponse>(API_ENDPOINTS.USERS.GET_BY_ROLE(role));
   },
 
   // GET /v1/users/online
@@ -86,17 +80,6 @@ export const usersService = {
     );
   },
 
-  // PATCH /v1/users/:userId/role
-  async updateUserRole(
-    userId: string,
-    data: UpdateUserRoleRequest
-  ): Promise<UserResponse> {
-    return apiClient.patch<UserResponse>(
-      API_ENDPOINTS.USERS.UPDATE_ROLE(userId),
-      data
-    );
-  },
-
   // PATCH /v1/users/:userId
   async updateUserProfile(
     userId: string,
@@ -111,5 +94,16 @@ export const usersService = {
   // DELETE /v1/users/:userId
   async deleteUser(userId: string): Promise<void> {
     return apiClient.delete<void>(API_ENDPOINTS.USERS.DELETE(userId));
+  },
+
+  // POST /v1/users/:userId/force-password-reset
+  async forcePasswordReset(
+    userId: string,
+    data: ForcePasswordResetRequest
+  ): Promise<ForcePasswordResetResponse> {
+    return apiClient.post<ForcePasswordResetResponse>(
+      API_ENDPOINTS.FORCE_PASSWORD_RESET.REQUEST(userId),
+      data
+    );
   },
 };

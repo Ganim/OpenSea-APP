@@ -29,20 +29,8 @@ export async function createUser(data: {
   username: string;
   email: string;
   password: string;
-  role?: 'USER' | 'MANAGER' | 'ADMIN';
 }): Promise<User> {
   const response = await usersService.createUser(data);
-  return response.user;
-}
-
-/**
- * Atualizar papel do usuário
- */
-export async function updateUserRole(
-  id: string,
-  role: 'USER' | 'MANAGER' | 'ADMIN'
-): Promise<User> {
-  const response = await usersService.updateUserRole(id, { role });
   return response.user;
 }
 
