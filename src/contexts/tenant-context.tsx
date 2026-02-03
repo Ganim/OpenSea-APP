@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { API_ENDPOINTS, authConfig } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import { queryClient } from '@/providers/query-provider';
@@ -106,7 +107,10 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        console.error('Erro ao selecionar tenant:', error);
+        logger.error('Erro ao selecionar tenant', error as Error, { 
+          tenantId,
+          action: 'selectTenant'
+        });
         throw error;
       } finally {
         setIsLoading(false);

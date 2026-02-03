@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { BaseEntity, EntityFormConfig } from '@/core/types';
@@ -181,7 +182,9 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
 
         await onSubmit(data);
       } catch (error) {
-        console.error('Erro ao submeter formulário:', error);
+        logger.error('Erro ao submeter formulário', error as Error, { 
+          component: 'entity-form'
+        });
       }
     };
 
