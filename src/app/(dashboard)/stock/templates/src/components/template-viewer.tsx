@@ -6,6 +6,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { InfoField } from '@/components/shared/info-field';
 import { Button } from '@/components/ui/button';
@@ -121,7 +122,9 @@ export function TemplateViewer({
         });
         setIsEditMode(false);
       } catch (error) {
-        console.error('Erro ao salvar:', error);
+        logger.error('Failed to save template', error instanceof Error ? error : new Error(String(error)), {
+          templateId: template?.id
+        });
       } finally {
         setIsSaving(false);
       }

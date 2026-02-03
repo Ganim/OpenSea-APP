@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -66,7 +67,9 @@ export default function TemplateEditPage() {
       toast.success('Template atualizado com sucesso!');
       router.push(`/stock/templates/${templateId}`);
     } catch (error) {
-      console.error('Erro ao salvar template:', error);
+      logger.error('Failed to save template', error instanceof Error ? error : new Error(String(error)), {
+        templateId
+      });
       toast.error('Erro ao salvar template');
       throw error;
     } finally {

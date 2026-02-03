@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { PageHeader } from '@/components/stock/page-header';
 import {
@@ -88,7 +89,9 @@ export default function EditTagPage({
       toast.success('Tag atualizada com sucesso!');
       router.push(`/stock/tags/${tagId}`);
     } catch (error) {
-      console.error('Erro ao atualizar tag:', error);
+      logger.error('Failed to update tag', error instanceof Error ? error : new Error(String(error)), {
+        tagId
+      });
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar tag', { description: message });
@@ -108,7 +111,9 @@ export default function EditTagPage({
       toast.success('Tag excluída com sucesso!');
       router.push('/stock/tags');
     } catch (error) {
-      console.error('Erro ao deletar tag:', error);
+      logger.error('Failed to delete tag', error instanceof Error ? error : new Error(String(error)), {
+        tagId
+      });
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar tag', { description: message });

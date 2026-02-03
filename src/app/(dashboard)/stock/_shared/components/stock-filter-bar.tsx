@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -49,7 +50,9 @@ export function ProductsFilterBar({
         const response = await templatesService.listTemplates();
         return response?.templates ?? [];
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        logger.error('Failed to fetch templates', error instanceof Error ? error : new Error(String(error)), {
+          context: 'stock-filter-bar'
+        });
         return [];
       }
     },
@@ -64,7 +67,9 @@ export function ProductsFilterBar({
         const response = await categoriesService.listCategories();
         return response?.categories ?? [];
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        logger.error('Failed to fetch categories', error instanceof Error ? error : new Error(String(error)), {
+          context: 'stock-filter-bar'
+        });
         return [];
       }
     },

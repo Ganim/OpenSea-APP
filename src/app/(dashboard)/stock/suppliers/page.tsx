@@ -73,7 +73,6 @@ export default function SuppliersPage() {
     listFn: async () => {
       try {
         const response = await suppliersApi.list();
-        console.log('[Suppliers] API response:', response);
 
         let suppliers = Array.isArray(response)
           ? response
@@ -83,13 +82,8 @@ export default function SuppliersPage() {
           (supplier: Supplier) => !supplier.deletedAt
         );
 
-        console.log(
-          '[Suppliers] Total suppliers (after filter):',
-          suppliers.length
-        );
         return suppliers;
       } catch (error) {
-        console.error('[Suppliers] Error fetching suppliers:', error);
         throw error;
       }
     },
@@ -98,8 +92,8 @@ export default function SuppliersPage() {
     updateFn: updateSupplier,
     deleteFn: deleteSupplier,
     duplicateFn: duplicateSupplier,
-    onDeleteSuccess: id => {
-      console.log('[Suppliers CRUD] Delete success callback for ID:', id);
+    onDeleteSuccess: () => {
+      // Deleted successfully
     },
   });
 
