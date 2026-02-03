@@ -55,7 +55,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log do erro
     logger.error('React component error', error, {
-      componentStack: errorInfo.componentStack.substring(0, 500), // Truncar para evitar logs muito grandes
+      componentStack: errorInfo.componentStack?.substring(0, 500), // Truncar para evitar logs muito grandes
     });
 
     // Callback customizado se fornecido
