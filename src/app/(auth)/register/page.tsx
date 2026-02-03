@@ -1,123 +1,279 @@
 'use client';
 
-import { useState } from 'react';
+import { AuthBackground } from '@/components/ui/auth-background';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useAuth } from '@/contexts/auth-context';
+import { translateError } from '@/lib/error-messages';
+import { useForm } from '@tanstack/react-form';
+import {
+  CheckCircle2,
+  ChevronRight,
+  Hash,
+  Info,
+  Lock,
+  Mail,
+  User,
+} from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/services/auth.service';
-import type { RegisterData } from '@/types/auth';
+import { useState } from 'react';
+
+interface RegisterFormData {
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export default function RegisterPage() {
+  const { register, isLoading } = useAuth();
   const router = useRouter();
-  const [data, setData] = useState<RegisterData>({
-    email: '',
-    password: '',
-    name: '',
+  const [error, setError] = useState('');
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      username: '',
+      password: '',
+      confirmPassword: '',
+    } as RegisterFormData,
+    onSubmit: async ({ value }: { value: RegisterFormData }) => {
+      setError('');
+
+      // Validations
+      if (value.password !== value.confirmPassword) {
+        setError('As senhas não coincidem');
+        return;
+      }
+
+      if (value.password.length < 6) {
+        setError('A senha deve ter pelo menos 6 caracteres');
+        return;
+      }
+
+      if (value.username.length < 3) {
+        setError('O nome de usuário deve ter pelo menos 3 caracteres');
+        return;
+      }
+
+      try {
+        await register({
+          email: value.email,
+          password: value.password,
+          username: value.username,
+          profile: {
+            name: value.name,
+          },
+        });
+        router.push('/');
+      } catch (err: unknown) {
+        setError(translateError(err));
+        console.error('Erro no registro:', err);
+      }
+    },
   });
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      await authService.register(data);
-      router.push('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg border border-border">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">Register</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Create a new account to get started
-          </p>
-        </div>
+    <AuthBackground>
+      <ThemeToggle />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-destructive-foreground bg-destructive/10 border border-destructive rounded-md">
-              {error}
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 shadow-2xl shadow-blue-600/40 mb-4">
+              <span className="text-3xl">🌊</span>
             </div>
-          )}
-
-          <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="text-sm font-medium text-foreground"
-            >
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={data.name}
-              onChange={e => setData({ ...data, name: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Your name"
-            />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Criar Conta
+            </h1>
+            <p className="text-gray-600 dark:text-white/60">
+              Comece sua jornada no OpenSea
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-foreground"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={data.email}
-              onChange={e => setData({ ...data, email: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="your@email.com"
-            />
+          {/* Register Card */}
+          <Card className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+            <CardContent className="p-6 sm:p-8">
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+                className="space-y-5"
+              >
+                {/* Error message */}
+                {error && (
+                  <div className="p-4 rounded-2xl bg-red-500/10 dark:bg-red-500/20 border border-red-500/30 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <p className="text-sm text-red-600 dark:text-red-400 text-center">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                {/* Name */}
+                <form.Field name="name">
+                  {field => (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Completo</Label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40  z-10 pointer-events-none" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="João Silva"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          autoFocus
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Username */}
+                <form.Field name="username">
+                  {field => (
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Nome de Usuário</Label>
+                      <div className="relative">
+                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none " />
+                        <Input
+                          id="username"
+                          type="text"
+                          placeholder="joaosilva"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Email */}
+                <form.Field name="email">
+                  {field => (
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="joao@email.com"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Password */}
+                <form.Field name="password">
+                  {field => (
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Senha</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Confirm Password */}
+                <form.Field name="confirmPassword">
+                  {field => (
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                      <div className="relative">
+                        <CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="••••••••"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Terms */}
+                <div className="flex items-start gap-3 p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/50">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Ao criar uma conta, você concorda com nossos{' '}
+                    <Link
+                      href="/terms"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
+                    >
+                      Termos de Serviço
+                    </Link>{' '}
+                    e{' '}
+                    <Link
+                      href="/privacy"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
+                    >
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                  size="lg"
+                >
+                  {isLoading ? 'Criando conta...' : 'Criar Conta'}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Login link */}
+          <div className="mt-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+            <p className="text-gray-600 dark:text-white/60">
+              Já tem uma conta?{' '}
+              <Link
+                href="/fast-login"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                Entrar
+              </Link>
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-foreground"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={data.password}
-              onChange={e => setData({ ...data, password: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Creating account...' : 'Register'}
-          </button>
-        </form>
-
-        <div className="text-center text-sm">
-          <span className="text-muted-foreground">
-            Already have an account?{' '}
-          </span>
-          <a href="/login" className="text-primary hover:underline font-medium">
-            Login
-          </a>
         </div>
       </div>
-    </div>
+    </AuthBackground>
   );
 }

@@ -1,112 +1,242 @@
+/**
+ * Dashboard Page
+ * Página principal do dashboard
+ */
+
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { authService } from '@/services/auth.service';
-import type { User } from '@/types/auth';
+import { StatsCard } from '@/components/shared/stats-card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  BarChart3,
+  DollarSign,
+  Package,
+  Plus,
+  ShoppingCart,
+  Users,
+} from 'lucide-react';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (!authService.isAuthenticated()) {
-        router.push('/login');
-        return;
-      }
-
-      try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Failed to fetch user:', error);
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  const handleLogout = async () => {
-    await authService.logout();
-    router.push('/login');
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-foreground">Loading...</div>
-      </div>
-    );
-  }
+  const stats = [
+    {
+      label: 'Total de Produtos',
+      value: '1,234',
+      icon: <Package className="w-6 h-6" />,
+      trend: { value: 12, isPositive: true },
+      gradient: 'from-blue-500 to-blue-600',
+    },
+    {
+      label: 'Vendas do Mês',
+      value: 'R$ 45.2k',
+      icon: <ShoppingCart className="w-6 h-6" />,
+      trend: { value: 23, isPositive: true },
+      gradient: 'from-purple-500 to-purple-600',
+    },
+    {
+      label: 'Clientes',
+      value: '856',
+      icon: <Users className="w-6 h-6" />,
+      trend: { value: 8, isPositive: true },
+      gradient: 'from-green-500 to-green-600',
+    },
+    {
+      label: 'Receita Total',
+      value: 'R$ 123.4k',
+      icon: <DollarSign className="w-6 h-6" />,
+      trend: { value: 18, isPositive: true },
+      gradient: 'from-orange-500 to-orange-600',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-foreground">
-                OpenSea Dashboard
-              </h1>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          Bem-vindo de volta! 👋
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-white/60">
+          Aqui está o resumo do seu negócio hoje
+        </p>
+      </motion.div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <StatsCard {...stat} />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                Ações Rápidas
+              </h2>
+              <p className="text-gray-600 dark:text-white/60">
+                Acesse funcionalidades frequentes
+              </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">
-                {user?.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-3 hover:bg-blue-50 dark:hover:bg-white/5"
+            >
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <Plus className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  Novo Produto
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-white/60">
+                  Adicionar item ao estoque
+                </p>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-3 hover:bg-purple-50 dark:hover:bg-white/5"
+            >
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <ShoppingCart className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  Nova Venda
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-white/60">
+                  Registrar pedido
+                </p>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-3 hover:bg-green-50 dark:hover:bg-white/5"
+            >
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  Relatórios
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-white/60">
+                  Ver análises
+                </p>
+              </div>
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                Atividades Recentes
+              </h2>
+              <p className="text-gray-600 dark:text-white/60">
+                Últimas movimentações do sistema
+              </p>
+            </div>
+            <Button variant="ghost" className="gap-2">
+              Ver todas
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                title: 'Novo pedido recebido',
+                description: 'Pedido #12345 de João Silva',
+                time: '5 min atrás',
+                type: 'success',
+              },
+              {
+                title: 'Estoque baixo',
+                description: 'Produto XYZ-123 com apenas 5 unidades',
+                time: '15 min atrás',
+                type: 'warning',
+              },
+              {
+                title: 'Pagamento confirmado',
+                description: 'Pedido #12344 - R$ 1.250,00',
+                time: '1 hora atrás',
+                type: 'success',
+              },
+            ].map((activity, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 + index * 0.1 }}
+                className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
               >
-                Logout
-              </button>
-            </div>
+                <div
+                  className={`w-2 h-2 rounded-full mt-2 ${
+                    activity.type === 'success'
+                      ? 'bg-green-500'
+                      : activity.type === 'warning'
+                        ? 'bg-orange-500'
+                        : 'bg-blue-500'
+                  }`}
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                    {activity.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-white/60">
+                    {activity.description}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-white/40 mt-1">
+                    {activity.time}
+                  </p>
+                </div>
+                <Badge
+                  variant={
+                    activity.type === 'success' ? 'default' : 'secondary'
+                  }
+                >
+                  {activity.type === 'success' ? 'Sucesso' : 'Alerta'}
+                </Badge>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-foreground mb-4">
-            Welcome, {user?.name || user?.email}!
-          </h2>
-          <p className="text-muted-foreground">
-            This is your dashboard. You can add more features and components
-            here.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              API Status
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              Connected to OpenSea API
-            </p>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              User Info
-            </h3>
-            <p className="text-muted-foreground text-sm">ID: {user?.id}</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Settings
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              Manage your account settings
-            </p>
-          </div>
-        </div>
-      </main>
+        </Card>
+      </motion.div>
     </div>
   );
 }

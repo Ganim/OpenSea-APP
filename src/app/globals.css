@@ -1,52 +1,1159 @@
 @import 'tailwindcss';
 
-@theme inline {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(0 0% 3.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(0 0% 3.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(0 0% 3.9%);
-  --color-primary: hsl(0 0% 9%);
-  --color-primary-foreground: hsl(0 0% 98%);
-  --color-secondary: hsl(0 0% 96.1%);
-  --color-secondary-foreground: hsl(0 0% 9%);
-  --color-muted: hsl(0 0% 96.1%);
-  --color-muted-foreground: hsl(0 0% 45.1%);
-  --color-accent: hsl(0 0% 96.1%);
-  --color-accent-foreground: hsl(0 0% 9%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(0 0% 89.8%);
-  --color-input: hsl(0 0% 89.8%);
-  --color-ring: hsl(0 0% 3.9%);
+@custom-variant dark (&:is(.dark *));
+
+/* ===========================================
+   OPENSEA OS - DESIGN SYSTEM v1.0
+   Token-Based Component Theming
+   =========================================== */
+
+/* ===========================================
+   1. PRIMITIVE TOKENS (Base Colors)
+   =========================================== */
+
+:root {
+  /* === CORE PALETTE === */
+  --os-white: 255 255 255;
+  --os-black: 0 0 0;
+
+  /* Gray Scale */
+  --os-gray-50: 249 250 251;
+  --os-gray-100: 243 244 246;
+  --os-gray-200: 229 231 235;
+  --os-gray-300: 209 213 219;
+  --os-gray-400: 156 163 175;
+  --os-gray-500: 107 114 128;
+  --os-gray-600: 75 85 99;
+  --os-gray-700: 55 65 81;
+  --os-gray-800: 31 41 55;
+  --os-gray-900: 17 24 39;
+  --os-gray-950: 3 7 18;
+
+  /* Slate Scale (Blue-tinted grays) */
+  --os-slate-50: 248 250 252;
+  --os-slate-100: 241 245 249;
+  --os-slate-200: 226 232 240;
+  --os-slate-300: 203 213 225;
+  --os-slate-400: 148 163 184;
+  --os-slate-500: 100 116 139;
+  --os-slate-600: 71 85 105;
+  --os-slate-700: 51 65 85;
+  --os-slate-800: 30 41 59;
+  --os-slate-900: 15 23 42;
+  --os-slate-950: 2 6 23;
+
+  /* Blue (Primary) */
+  --os-blue-50: 239 246 255;
+  --os-blue-100: 219 234 254;
+  --os-blue-200: 191 219 254;
+  --os-blue-300: 147 197 253;
+  --os-blue-400: 96 165 250;
+  --os-blue-500: 59 130 246;
+  --os-blue-600: 37 99 235;
+  --os-blue-700: 29 78 216;
+  --os-blue-800: 30 64 175;
+  --os-blue-900: 30 58 138;
+
+  /* Red (Destructive) */
+  --os-red-50: 254 242 242;
+  --os-red-100: 254 226 226;
+  --os-red-200: 254 202 202;
+  --os-red-300: 252 165 165;
+  --os-red-400: 248 113 113;
+  --os-red-500: 239 68 68;
+  --os-red-600: 220 38 38;
+  --os-red-700: 185 28 28;
+  --os-red-800: 153 27 27;
+  --os-red-900: 127 29 29;
+
+  /* Green (Success) */
+  --os-green-50: 240 253 244;
+  --os-green-100: 220 252 231;
+  --os-green-200: 187 247 208;
+  --os-green-300: 134 239 172;
+  --os-green-400: 74 222 128;
+  --os-green-500: 34 197 94;
+  --os-green-600: 22 163 74;
+  --os-green-700: 21 128 61;
+  --os-green-800: 22 101 52;
+  --os-green-900: 20 83 45;
+
+  /* Yellow/Orange (Warning) */
+  --os-yellow-50: 254 252 232;
+  --os-yellow-100: 254 249 195;
+  --os-yellow-200: 254 240 138;
+  --os-yellow-300: 253 224 71;
+  --os-yellow-400: 250 204 21;
+  --os-yellow-500: 234 179 8;
+  --os-orange-400: 251 146 60;
+  --os-orange-500: 249 115 22;
+
+  /* Purple (Accent) */
+  --os-purple-50: 250 245 255;
+  --os-purple-100: 243 232 255;
+  --os-purple-300: 216 180 254;
+  --os-purple-400: 192 132 252;
+  --os-purple-500: 168 85 247;
+  --os-purple-600: 147 51 234;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme inline {
-    --color-background: hsl(0 0% 3.9%);
-    --color-foreground: hsl(0 0% 98%);
-    --color-card: hsl(0 0% 3.9%);
-    --color-card-foreground: hsl(0 0% 98%);
-    --color-popover: hsl(0 0% 3.9%);
-    --color-popover-foreground: hsl(0 0% 98%);
-    --color-primary: hsl(0 0% 98%);
-    --color-primary-foreground: hsl(0 0% 9%);
-    --color-secondary: hsl(0 0% 14.9%);
-    --color-secondary-foreground: hsl(0 0% 98%);
-    --color-muted: hsl(0 0% 14.9%);
-    --color-muted-foreground: hsl(0 0% 63.9%);
-    --color-accent: hsl(0 0% 14.9%);
-    --color-accent-foreground: hsl(0 0% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(0 0% 14.9%);
-    --color-input: hsl(0 0% 14.9%);
-    --color-ring: hsl(0 0% 83.1%);
-  }
+/* ===========================================
+   2. SEMANTIC TOKENS (Light Theme)
+   =========================================== */
+
+:root {
+  /* === BACKGROUND === */
+  --color-background: var(--os-gray-50);
+  --color-background-subtle: var(--os-white);
+  --color-background-muted: var(--os-slate-100);
+  --color-background-elevated: var(--os-white);
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: var(--os-slate-700);
+  --color-foreground-muted: var(--os-slate-500);
+  --color-foreground-subtle: var(--os-slate-400);
+  --color-foreground-inverted: var(--os-white);
+
+  /* === PRIMARY (Actions, Links) === */
+  --color-primary: var(--os-blue-500);
+  --color-primary-hover: var(--os-blue-600);
+  --color-primary-active: var(--os-blue-700);
+  --color-primary-subtle: var(--os-blue-50);
+  --color-primary-foreground: var(--os-white);
+
+  /* === SECONDARY === */
+  --color-secondary: var(--os-slate-100);
+  --color-secondary-hover: var(--os-slate-200);
+  --color-secondary-foreground: var(--os-slate-700);
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: var(--os-red-500);
+  --color-destructive-hover: var(--os-red-600);
+  --color-destructive-subtle: var(--os-red-50);
+  --color-destructive-foreground: var(--os-white);
+
+  /* === SUCCESS === */
+  --color-success: var(--os-green-500);
+  --color-success-hover: var(--os-green-600);
+  --color-success-subtle: var(--os-green-50);
+  --color-success-foreground: var(--os-white);
+
+  /* === WARNING === */
+  --color-warning: var(--os-orange-500);
+  --color-warning-hover: var(--os-orange-400);
+  --color-warning-subtle: var(--os-yellow-50);
+  --color-warning-foreground: var(--os-black);
+
+  /* === BORDERS === */
+  --color-border: var(--os-gray-200);
+  --color-border-muted: var(--os-gray-100);
+  --color-border-focus: var(--os-blue-500);
+  --color-border-error: var(--os-red-500);
+
+  /* === RING (Focus) === */
+  --color-ring: var(--os-blue-500);
+  --color-ring-offset: var(--os-white);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: var(--os-white);
+  --glass-bg-opacity: 0.9;
+  --glass-border: var(--os-gray-200);
+  --glass-border-opacity: 0.5;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: var(--os-slate-900);
+  --shadow-opacity-sm: 0.05;
+  --shadow-opacity-md: 0.1;
+  --shadow-opacity-lg: 0.15;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: var(--os-blue-50);
+  --bg-via: var(--os-gray-50);
+  --bg-to: var(--os-purple-50);
+  --sphere-1: var(--os-blue-400);
+  --sphere-1-opacity: 0.3;
+  --sphere-2: var(--os-purple-400);
+  --sphere-2-opacity: 0.3;
+  --sphere-3: var(--os-blue-300);
+  --sphere-3-opacity: 0.2;
+}
+
+/* ===========================================
+   2.5 LIGHT THEME (Explicit Class)
+   =========================================== */
+
+.light {
+  /* === BACKGROUND === */
+  --color-background: var(--os-gray-50);
+  --color-background-subtle: var(--os-white);
+  --color-background-muted: var(--os-slate-100);
+  --color-background-elevated: var(--os-white);
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: var(--os-slate-700);
+  --color-foreground-muted: var(--os-slate-500);
+  --color-foreground-subtle: var(--os-slate-400);
+  --color-foreground-inverted: var(--os-white);
+
+  /* === PRIMARY (Actions, Links) === */
+  --color-primary: var(--os-blue-500);
+  --color-primary-hover: var(--os-blue-600);
+  --color-primary-active: var(--os-blue-700);
+  --color-primary-subtle: var(--os-blue-50);
+  --color-primary-foreground: var(--os-white);
+
+  /* === SECONDARY === */
+  --color-secondary: var(--os-slate-100);
+  --color-secondary-hover: var(--os-slate-200);
+  --color-secondary-foreground: var(--os-slate-700);
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: var(--os-red-500);
+  --color-destructive-hover: var(--os-red-600);
+  --color-destructive-subtle: var(--os-red-50);
+  --color-destructive-foreground: var(--os-white);
+
+  /* === SUCCESS === */
+  --color-success: var(--os-green-500);
+  --color-success-hover: var(--os-green-600);
+  --color-success-subtle: var(--os-green-50);
+  --color-success-foreground: var(--os-white);
+
+  /* === WARNING === */
+  --color-warning: var(--os-orange-500);
+  --color-warning-hover: var(--os-orange-400);
+  --color-warning-subtle: var(--os-yellow-50);
+  --color-warning-foreground: var(--os-black);
+
+  /* === BORDERS === */
+  --color-border: var(--os-gray-200);
+  --color-border-muted: var(--os-gray-100);
+  --color-border-focus: var(--os-blue-500);
+  --color-border-error: var(--os-red-500);
+
+  /* === RING (Focus) === */
+  --color-ring: var(--os-blue-500);
+  --color-ring-offset: var(--os-white);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: var(--os-white);
+  --glass-bg-opacity: 0.9;
+  --glass-border: var(--os-gray-200);
+  --glass-border-opacity: 0.5;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: var(--os-slate-900);
+  --shadow-opacity-sm: 0.05;
+  --shadow-opacity-md: 0.1;
+  --shadow-opacity-lg: 0.15;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: var(--os-blue-50);
+  --bg-via: var(--os-gray-50);
+  --bg-to: var(--os-purple-50);
+  --sphere-1: var(--os-blue-400);
+  --sphere-1-opacity: 0.3;
+  --sphere-2: var(--os-purple-400);
+  --sphere-2-opacity: 0.3;
+  --sphere-3: var(--os-blue-300);
+  --sphere-3-opacity: 0.2;
+}
+
+/* ===========================================
+   3. SEMANTIC TOKENS (Dark Theme)
+   =========================================== */
+
+.dark {
+  /* === BACKGROUND === */
+  --color-background: var(--os-slate-900);
+  --color-background-subtle: var(--os-slate-800);
+  --color-background-muted: var(--os-slate-700);
+  --color-background-elevated: var(--os-slate-800);
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: var(--os-slate-50);
+  --color-foreground-muted: var(--os-slate-400);
+  --color-foreground-subtle: var(--os-slate-500);
+  --color-foreground-inverted: var(--os-slate-900);
+
+  /* === PRIMARY === */
+  --color-primary: var(--os-blue-500);
+  --color-primary-hover: var(--os-blue-400);
+  --color-primary-active: var(--os-blue-300);
+  --color-primary-subtle: var(--os-blue-900);
+  --color-primary-foreground: var(--os-white);
+
+  /* === SECONDARY === */
+  --color-secondary: var(--os-slate-700);
+  --color-secondary-hover: var(--os-slate-600);
+  --color-secondary-foreground: var(--os-slate-50);
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: var(--os-red-600);
+  --color-destructive-hover: var(--os-red-500);
+  --color-destructive-subtle: var(--os-red-900);
+  --color-destructive-foreground: var(--os-white);
+
+  /* === SUCCESS === */
+  --color-success: var(--os-green-600);
+  --color-success-hover: var(--os-green-500);
+  --color-success-subtle: var(--os-green-900);
+  --color-success-foreground: var(--os-white);
+
+  /* === WARNING === */
+  --color-warning: var(--os-orange-500);
+  --color-warning-hover: var(--os-orange-400);
+  --color-warning-subtle: var(--os-yellow-900);
+  --color-warning-foreground: var(--os-white);
+
+  /* === BORDERS === */
+  --color-border: var(--os-slate-700);
+  --color-border-muted: var(--os-slate-800);
+  --color-border-focus: var(--os-blue-500);
+  --color-border-error: var(--os-red-500);
+
+  /* === RING (Focus) === */
+  --color-ring: var(--os-blue-500);
+  --color-ring-offset: var(--os-slate-900);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: var(--os-slate-800);
+  --glass-bg-opacity: 0.7;
+  --glass-border: var(--os-white);
+  --glass-border-opacity: 0.1;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: var(--os-black);
+  --shadow-opacity-sm: 0.2;
+  --shadow-opacity-md: 0.3;
+  --shadow-opacity-lg: 0.4;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: var(--os-gray-900);
+  --bg-via: var(--os-slate-900);
+  --bg-to: var(--os-slate-800);
+  --sphere-1: var(--os-blue-400);
+  --sphere-1-opacity: 0.1;
+  --sphere-2: var(--os-purple-400);
+  --sphere-2-opacity: 0.1;
+  --sphere-3: var(--os-blue-500);
+  --sphere-3-opacity: 0.05;
+}
+
+/* ===========================================
+   3.5 CENTRAL DARK BLUE THEME
+   =========================================== */
+
+.dark-blue {
+  /* === BACKGROUND === */
+  --color-background: 13 20 38; /* #0d1426 */
+  --color-background-subtle: 19 32 56; /* #132038 */
+  --color-background-muted: 26 40 71; /* #1a2847 */
+  --color-background-elevated: 22 42 72; /* #162a48 */
+
+  /* === FOREGROUND (Text) === */
+  --color-foreground: 241 245 249; /* #f1f5f9 */
+  --color-foreground-muted: 148 163 184; /* #94a3b8 */
+  --color-foreground-subtle: 100 116 139; /* #64748b */
+  --color-foreground-inverted: 13 20 38; /* #0d1426 */
+
+  /* === PRIMARY === */
+  --color-primary: 59 130 246; /* #3b82f6 */
+  --color-primary-hover: 37 99 235; /* #2563eb */
+  --color-primary-active: 29 78 216; /* #1d4ed8 */
+  --color-primary-subtle: 30 58 95; /* #1e3a5f */
+  --color-primary-foreground: 255 255 255;
+
+  /* === SECONDARY === */
+  --color-secondary: 30 58 95; /* #1e3a5f */
+  --color-secondary-hover: 15 40 71; /* #0f2847 */
+  --color-secondary-foreground: 241 245 249;
+
+  /* === DESTRUCTIVE === */
+  --color-destructive: 239 68 68; /* #ef4444 */
+  --color-destructive-hover: 220 38 38; /* #dc2626 */
+  --color-destructive-subtle: 63 28 28; /* #3f1c1c */
+  --color-destructive-foreground: 255 255 255;
+
+  /* === SUCCESS === */
+  --color-success: 16 185 129; /* #10b981 */
+  --color-success-hover: 5 150 105; /* #059669 */
+  --color-success-subtle: 28 58 46; /* #1c3a2e */
+  --color-success-foreground: 255 255 255;
+
+  /* === WARNING === */
+  --color-warning: 249 115 22; /* #f97316 */
+  --color-warning-hover: 234 88 12; /* #ea580c */
+  --color-warning-subtle: 58 39 20; /* #3a2714 */
+  --color-warning-foreground: 255 255 255;
+
+  /* === BORDERS === */
+  --color-border: 30 58 95; /* #1e3a5f */
+  --color-border-muted: 19 32 56; /* #132038 */
+  --color-border-focus: 59 130 246; /* #3b82f6 */
+  --color-border-error: 239 68 68; /* #ef4444 */
+
+  /* === RING (Focus) === */
+  --color-ring: 59 130 246; /* #3b82f6 */
+  --color-ring-offset: 13 20 38; /* #0d1426 */
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: 19 32 56; /* #132038 */
+  --glass-bg-opacity: 0.6;
+  --glass-border: 255 255 255;
+  --glass-border-opacity: 0.08;
+  --glass-blur: 20px;
+
+  /* === SHADOWS === */
+  --shadow-color: 0 0 0;
+  --shadow-opacity-sm: 0.3;
+  --shadow-opacity-md: 0.4;
+  --shadow-opacity-lg: 0.5;
+
+  /* === ANIMATED BACKGROUND === */
+  --bg-from: 10 15 30; /* #0a0f1e */
+  --bg-via: 13 20 38; /* #0d1426 */
+  --bg-to: 19 32 56; /* #132038 */
+  --sphere-1: 59 130 246; /* #3b82f6 */
+  --sphere-1-opacity: 0.08;
+  --sphere-2: 96 165 250; /* #60a5fa */
+  --sphere-2-opacity: 0.06;
+  --sphere-3: 37 99 235; /* #2563eb */
+  --sphere-3-opacity: 0.04;
+}
+
+/* ===========================================
+   4. COMPONENT TOKENS
+   =========================================== */
+
+:root {
+  /* ==================== BUTTON ==================== */
+
+  /* Button - Default/Primary */
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-bg-hover: var(--color-primary-hover);
+  --btn-primary-text: var(--color-primary-foreground);
+  --btn-primary-border: transparent;
+  --btn-primary-shadow: rgb(var(--shadow-color) / var(--shadow-opacity-md));
+
+  /* Button - Secondary */
+  --btn-secondary-bg: var(--color-secondary);
+  --btn-secondary-bg-hover: var(--color-secondary-hover);
+  --btn-secondary-text: var(--color-secondary-foreground);
+  --btn-secondary-border: var(--color-border);
+
+  /* Button - Destructive */
+  --btn-destructive-bg: var(--color-destructive);
+  --btn-destructive-bg-hover: var(--color-destructive-hover);
+  --btn-destructive-text: var(--color-destructive-foreground);
+  --btn-destructive-border: transparent;
+
+  /* Button - Outline */
+  --btn-outline-bg: transparent;
+  --btn-outline-bg-hover: var(--color-background-muted);
+  --btn-outline-text: var(--color-foreground);
+  --btn-outline-border: var(--color-border);
+
+  /* Button - Ghost */
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: var(--color-background-muted);
+  --btn-ghost-text: var(--color-foreground);
+
+  /* Button - Link */
+  --btn-link-text: var(--color-primary);
+  --btn-link-text-hover: var(--color-primary-hover);
+
+  /* Button - Text */
+  --btn-text-text: var(--color-foreground);
+  --btn-text-text-hover: var(--color-background-muted);
+
+  /* Button - States */
+  --btn-disabled-opacity: 0.5;
+  --btn-loading-opacity: 0.7;
+
+  /* ==================== CARD ==================== */
+  --card-bg: rgb(var(--glass-bg) / var(--glass-bg-opacity));
+  --card-text: var(--color-foreground);
+  --card-text-muted: var(--color-foreground-muted);
+  --card-border: rgb(var(--glass-border) / var(--glass-border-opacity));
+  --card-shadow: rgb(var(--shadow-color) / var(--shadow-opacity-md));
+  --card-shadow-hover: rgb(var(--shadow-color) / var(--shadow-opacity-lg));
+  --card-radius: 1rem;
+
+  /* Card - Selected State */
+  --card-selected-border: var(--color-primary);
+  --card-selected-bg: var(--color-primary-subtle);
+
+  /* ==================== INPUT ==================== */
+  --input-bg: rgb(var(--color-background-subtle));
+  --input-text: var(--color-foreground);
+  --input-placeholder: var(--color-foreground-subtle);
+  --input-border: var(--color-border);
+  --input-border-hover: var(--color-foreground-subtle);
+  --input-border-focus: var(--color-border-focus);
+  --input-ring: var(--color-ring);
+  --input-radius: 0.75rem;
+
+  /* Input - States */
+  --input-disabled-bg: var(--color-background-muted);
+  --input-disabled-opacity: 0.5;
+  --input-error-border: var(--color-border-error);
+  --input-error-text: var(--color-destructive);
+  --input-success-border: var(--color-success);
+
+  /* ==================== SELECT ==================== */
+  --select-bg: rgb(var(--color-background-subtle));
+  --select-text: var(--color-foreground);
+  --select-border: var(--color-border);
+  --select-border-focus: var(--color-border-focus);
+  --select-placeholder: var(--color-foreground-subtle);
+  --select-icon: var(--color-foreground-muted);
+
+  /* Select - Dropdown */
+  --select-content-bg: rgb(var(--color-background-elevated));
+  --select-content-border: var(--color-border);
+  --select-content-shadow: rgb(var(--shadow-color) / var(--shadow-opacity-md));
+  --select-item-hover: var(--color-background-muted);
+  --select-item-selected-bg: var(--color-primary-subtle);
+  --select-item-selected-text: var(--color-primary);
+
+  /* ==================== BADGE ==================== */
+  --badge-default-bg: rgb(var(--os-blue-500) / 0.2);
+  --badge-default-text: rgb(var(--os-blue-400));
+  --badge-default-border: rgb(var(--os-blue-500) / 0.3);
+
+  --badge-secondary-bg: rgb(var(--os-gray-500) / 0.2);
+  --badge-secondary-text: rgb(var(--os-gray-400));
+  --badge-secondary-border: rgb(var(--os-gray-500) / 0.3);
+
+  --badge-destructive-bg: rgb(var(--os-red-500) / 0.2);
+  --badge-destructive-text: rgb(var(--os-red-400));
+  --badge-destructive-border: rgb(var(--os-red-500) / 0.3);
+
+  --badge-success-bg: rgb(var(--os-green-500) / 0.2);
+  --badge-success-text: rgb(var(--os-green-400));
+  --badge-success-border: rgb(var(--os-green-500) / 0.3);
+
+  --badge-warning-bg: rgb(var(--os-orange-500) / 0.2);
+  --badge-warning-text: rgb(var(--os-orange-400));
+  --badge-warning-border: rgb(var(--os-orange-500) / 0.3);
+
+  --badge-outline-bg: transparent;
+  --badge-outline-text: var(--color-foreground);
+  --badge-outline-border: var(--color-border);
+
+  /* ==================== MODAL / DIALOG ==================== */
+  --modal-bg: rgb(var(--color-background-elevated));
+  --modal-text: var(--color-foreground);
+  --modal-border: var(--color-border);
+  --modal-shadow: rgb(var(--shadow-color) / var(--shadow-opacity-lg));
+  --modal-overlay: rgb(var(--os-black) / 0.5);
+  --modal-radius: 0.75rem;
+
+  /* ==================== TABLE ==================== */
+  --table-bg: transparent;
+  --table-header-bg: var(--color-background-muted);
+  --table-header-text: var(--color-foreground);
+  --table-row-bg: transparent;
+  --table-row-hover: var(--color-background-muted);
+  --table-row-selected: var(--color-primary-subtle);
+  --table-border: var(--color-border);
+  --table-cell-text: var(--color-foreground);
+  --table-cell-text-muted: var(--color-foreground-muted);
+
+  /* ==================== DROPDOWN MENU ==================== */
+  --dropdown-bg: rgb(var(--color-background-elevated));
+  --dropdown-text: var(--color-foreground);
+  --dropdown-border: var(--color-border);
+  --dropdown-shadow: rgb(var(--shadow-color) / var(--shadow-opacity-md));
+  --dropdown-item-hover: var(--color-background-muted);
+  --dropdown-item-active: var(--color-primary-subtle);
+  --dropdown-separator: var(--color-border);
+  --dropdown-shortcut: var(--color-foreground-muted);
+
+  /* ==================== TABS ==================== */
+  --tabs-list-bg: rgb(var(--os-gray-100) / 0.8);
+  --tabs-trigger-text: var(--color-foreground-muted);
+  --tabs-trigger-hover: rgb(var(--os-white) / 0.5);
+  --tabs-trigger-active-bg: rgb(var(--os-white));
+  --tabs-trigger-active-text: var(--color-foreground);
+  --tabs-trigger-active-shadow: rgb(var(--shadow-color) / 0.05);
+
+  /* ==================== TOOLTIP ==================== */
+  --tooltip-bg: var(--color-foreground);
+  --tooltip-text: var(--color-foreground-inverted);
+  --tooltip-radius: 0.375rem;
+
+  /* ==================== PROGRESS ==================== */
+  --progress-bg: var(--color-background-muted);
+  --progress-fill: var(--color-primary);
+  --progress-success: var(--color-success);
+  --progress-warning: var(--color-warning);
+  --progress-error: var(--color-destructive);
+
+  /* ==================== SWITCH ==================== */
+  --switch-bg: var(--color-border);
+  --switch-bg-checked: var(--color-primary);
+  --switch-thumb: var(--color-foreground-inverted);
+  --switch-thumb-checked: var(--color-primary-foreground);
+
+  /* ==================== CHECKBOX ==================== */
+  --checkbox-bg: transparent;
+  --checkbox-bg-checked: var(--color-primary);
+  --checkbox-border: var(--color-border);
+  --checkbox-border-checked: var(--color-primary);
+  --checkbox-check: var(--color-primary-foreground);
+
+  /* ==================== ALERT ==================== */
+  --alert-default-bg: rgb(var(--color-background-elevated));
+  --alert-default-border: var(--color-border);
+  --alert-default-text: var(--color-foreground);
+
+  --alert-destructive-bg: var(--color-destructive-subtle);
+  --alert-destructive-border: var(--color-destructive);
+  --alert-destructive-text: var(--color-destructive);
+
+  --alert-success-bg: var(--color-success-subtle);
+  --alert-success-border: var(--color-success);
+  --alert-success-text: var(--color-success);
+
+  --alert-warning-bg: var(--color-warning-subtle);
+  --alert-warning-border: var(--color-warning);
+  --alert-warning-text: var(--color-warning);
+
+  /* ==================== SKELETON ==================== */
+  --skeleton-bg: var(--color-background-muted);
+  --skeleton-shimmer: rgb(var(--os-white) / 0.5);
+
+  /* ==================== SIDEBAR ==================== */
+  --sidebar-bg: rgb(var(--color-background-elevated));
+  --sidebar-text: var(--color-foreground);
+  --sidebar-text-muted: var(--color-foreground-muted);
+  --sidebar-border: var(--color-border);
+  --sidebar-item-hover: var(--color-background-muted);
+  --sidebar-item-active-bg: var(--color-primary);
+  --sidebar-item-active-text: var(--color-primary-foreground);
+
+  /* ==================== SCROLLBAR ==================== */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgb(var(--os-slate-400) / 0.4);
+  --scrollbar-thumb-hover: rgb(var(--os-slate-400) / 0.6);
+}
+
+/* Dark theme component overrides */
+.dark {
+  /* Tabs */
+  --tabs-list-bg: rgb(var(--os-gray-900) / 0.8);
+  --tabs-trigger-hover: rgb(var(--os-slate-800) / 0.5);
+  --tabs-trigger-active-bg: rgb(var(--os-slate-800));
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgb(var(--os-slate-600) / 0.4);
+  --scrollbar-thumb-hover: rgb(var(--os-slate-600) / 0.6);
+
+  /* Modal overlay */
+  --modal-overlay: rgb(var(--os-black) / 0.8);
+}
+
+/* ===========================================
+   5. STATE TOKENS
+   =========================================== */
+
+:root {
+  /* === DISABLED === */
+  --state-disabled-opacity: 0.5;
+  --state-disabled-cursor: not-allowed;
+
+  /* === LOADING === */
+  --state-loading-opacity: 0.7;
+
+  /* === FOCUS === */
+  --state-focus-ring-width: 3px;
+  --state-focus-ring-color: rgb(var(--color-ring) / 0.5);
+  --state-focus-ring-offset: 2px;
+
+  /* === HOVER === */
+  --state-hover-transition: 150ms;
+
+  /* === ACTIVE === */
+  --state-active-scale: 0.98;
+
+  /* === ERROR === */
+  --state-error-ring: rgb(var(--color-destructive) / 0.2);
+
+  /* === SELECTED === */
+  --state-selected-bg: var(--color-primary-subtle);
+  --state-selected-border: var(--color-primary);
+}
+
+/* ===========================================
+   6. SPACING & SIZING TOKENS
+   =========================================== */
+
+:root {
+  /* === RADIUS === */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* === TRANSITION === */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+
+  /* === Z-INDEX === */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal: 200;
+  --z-popover: 300;
+  --z-tooltip: 400;
+  --z-toast: 500;
+}
+
+/* ===========================================
+   7. LEGACY COMPATIBILITY (Manter por enquanto)
+   =========================================== */
+
+:root {
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  /* Muted compatibility */
+  --color-muted: rgb(var(--os-slate-100));
+  --color-muted-foreground: rgb(var(--os-slate-500));
+
+  /* Accent compatibility */
+  --color-accent: rgb(var(--os-blue-50));
+  --color-accent-foreground: rgb(var(--os-blue-800));
+
+  /* Card compatibility */
+  --color-card: rgb(var(--os-white));
+  --color-card-foreground: rgb(var(--os-slate-700));
+
+  /* Popover compatibility */
+  --color-popover: rgb(var(--os-white));
+  --color-popover-foreground: rgb(var(--os-slate-700));
+
+  /* Input compatibility */
+  --color-input: rgb(var(--os-slate-100));
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  /* Muted compatibility */
+  --color-muted: rgb(var(--os-slate-700));
+  --color-muted-foreground: rgb(var(--os-slate-400));
+
+  /* Accent compatibility */
+  --color-accent: rgb(var(--os-slate-700));
+  --color-accent-foreground: rgb(var(--os-blue-300));
+
+  /* Card compatibility */
+  --color-card: rgb(var(--os-slate-800));
+  --color-card-foreground: rgb(var(--os-slate-50));
+
+  /* Popover compatibility */
+  --color-popover: rgb(var(--os-slate-800));
+  --color-popover-foreground: rgb(var(--os-slate-50));
+
+  /* Input compatibility */
+  --color-input: rgb(var(--os-slate-700));
+}
+
+/* ===========================================
+   8. BASE STYLES
+   =========================================== */
+
+* {
+  border-color: rgb(var(--color-border) / 0.2);
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  font-feature-settings:
+    'rlig' 1,
+    'calt' 1;
+  transition:
+    background-color var(--transition-normal) ease,
+    color var(--transition-normal) ease;
+}
+
+@theme {
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Background */
+  --color-background: var(--color-background);
+
+  /* Foreground */
+  --color-foreground: var(--color-foreground);
+  --color-foreground-muted: var(--color-foreground-muted);
+  --color-text-muted-foreground: var(--os-slate-500);
+
+  /* Primary */
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+
+  /* Secondary */
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+
+  /* Destructive */
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+
+  /* Popover */
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+
+  /* Muted */
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+
+  /* Accent */
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+
+  /* Card */
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+
+  /* Input */
+  --color-input: var(--color-input);
+
+  /* Border */
+  --color-border: var(--color-border);
+  --color-border-input: var(--color-border);
+
+  /* Ring */
+  --color-ring: var(--color-ring);
+}
+
+/* ===========================================
+   9. GLASSMORPHISM UTILITIES
+   =========================================== */
+
+.glass {
+  background: rgb(var(--glass-bg) / var(--glass-bg-opacity));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgb(var(--glass-border) / var(--glass-border-opacity));
+}
+
+.glass-strong {
+  background: rgb(var(--glass-bg) / 0.95);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgb(var(--glass-border) / 0.4);
+}
+
+.dark .glass-strong {
+  background: rgb(var(--glass-bg) / 0.9);
+  border: 1px solid rgb(var(--glass-border) / 0.15);
+}
+
+/* ===========================================
+   10. ANIMATIONS
+   =========================================== */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ===========================================
+   11. SCROLLBAR
+   =========================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ===========================================
+   SELECT VALUE - Placeholder Color Styling
+   =========================================== */
+
+[data-slot='select-value'] {
+  color: rgb(var(--color-foreground-subtle));
+}
+
+[data-slot='select-trigger'] {
+  color: rgb(var(--color-foreground));
+}
+
+/* Quando há valor selecionado no select, o texto fica com cor normal */
+[data-slot='select-trigger']:has([data-slot='select-value']:not(:empty)) {
+  [data-slot='select-value'] {
+    color: rgb(var(--color-foreground));
+  }
+}
+
+/* ===========================================
+   12. REACT-SPREADSHEET CUSTOM STYLES
+   Dark mode using slate-800 tones
+   =========================================== */
+
+/* Light mode base */
+.Spreadsheet {
+  --spreadsheet-bg: rgb(var(--os-white));
+  --spreadsheet-header-bg: rgb(var(--os-slate-100));
+  --spreadsheet-cell-bg: rgb(var(--os-white));
+  --spreadsheet-cell-text: rgb(var(--os-slate-900));
+  --spreadsheet-border: rgb(var(--os-slate-200));
+  --spreadsheet-selected-bg: rgb(var(--os-blue-100));
+  --spreadsheet-selected-border: rgb(var(--os-blue-500));
+  --spreadsheet-active-bg: rgb(var(--os-blue-50));
+}
+
+/* Dark mode overrides using slate-800 tones */
+.dark .Spreadsheet,
+.Spreadsheet--dark-mode {
+  --spreadsheet-bg: rgb(var(--os-slate-900));
+  --spreadsheet-header-bg: rgb(var(--os-slate-800));
+  --spreadsheet-cell-bg: rgb(var(--os-slate-900));
+  --spreadsheet-cell-text: rgb(var(--os-slate-100));
+  --spreadsheet-border: rgb(var(--os-slate-700));
+  --spreadsheet-selected-bg: rgb(var(--os-slate-700));
+  --spreadsheet-selected-border: rgb(var(--os-blue-500));
+  --spreadsheet-active-bg: rgb(var(--os-slate-800));
+}
+
+/* Apply variables to spreadsheet elements */
+.Spreadsheet {
+  background-color: var(--spreadsheet-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  font-size: 0.875rem;
+}
+
+.Spreadsheet table {
+  background-color: var(--spreadsheet-bg) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Header cells (column labels) */
+.Spreadsheet__header {
+  background-color: var(--spreadsheet-header-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  font-weight: 600 !important;
+}
+
+/* Row indicators */
+.Spreadsheet__header--row {
+  background-color: var(--spreadsheet-header-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+  min-width: 40px !important;
+}
+
+/* Regular cells */
+.Spreadsheet__cell {
+  background-color: var(--spreadsheet-cell-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Selected cells */
+.Spreadsheet__cell--selected {
+  background-color: var(--spreadsheet-selected-bg) !important;
+  box-shadow: inset 0 0 0 1px var(--spreadsheet-selected-border) !important;
+}
+
+/* Active/editing cell */
+.Spreadsheet__cell--active {
+  background-color: var(--spreadsheet-active-bg) !important;
+  box-shadow: inset 0 0 0 2px var(--spreadsheet-selected-border) !important;
+}
+
+/* Cell input (editing) */
+.Spreadsheet__cell input,
+.Spreadsheet__data-editor input {
+  background-color: var(--spreadsheet-cell-bg) !important;
+  color: var(--spreadsheet-cell-text) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Data viewer */
+.Spreadsheet__data-viewer {
+  color: var(--spreadsheet-cell-text) !important;
+}
+
+/* Copied cell indicator */
+.Spreadsheet__cell--copied {
+  background-color: var(--spreadsheet-selected-bg) !important;
+  border: 2px dashed var(--spreadsheet-selected-border) !important;
+}
+
+/* Corner button (select all) */
+.Spreadsheet__corner-indicator {
+  background-color: var(--spreadsheet-header-bg) !important;
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Table borders */
+.Spreadsheet table,
+.Spreadsheet th,
+.Spreadsheet td {
+  border-color: var(--spreadsheet-border) !important;
+}
+
+/* Consistent cell height */
+.Spreadsheet__cell,
+.Spreadsheet__header {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  padding: 0 8px !important;
+  vertical-align: middle !important;
+  font-size: 13px !important;
+  line-height: 32px !important;
+}
+
+.Spreadsheet__data-viewer {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.Spreadsheet__cell input,
+.Spreadsheet__data-editor input {
+  height: 100% !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+}
+
+/* Error cell */
+.Spreadsheet__cell.cell-error {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .Spreadsheet__cell.cell-error,
+.Spreadsheet--dark-mode .Spreadsheet__cell.cell-error {
+  background-color: rgba(185, 28, 28, 0.3) !important;
+}
+
+/* Column minimum width */
+.Spreadsheet__header,
+.Spreadsheet__cell {
+  min-width: 120px !important;
+}
+
+/* Row header width */
+.Spreadsheet__header--row {
+  min-width: 50px !important;
+  max-width: 50px !important;
+  width: 50px !important;
+}
+
+/* Import spreadsheet container */
+.import-spreadsheet-container .Spreadsheet {
+  width: 100% !important;
+}
+
+.import-spreadsheet-container .Spreadsheet table {
+  width: 100% !important;
 }
