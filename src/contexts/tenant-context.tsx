@@ -11,12 +11,14 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 
 interface TenantContextType {
   currentTenant: UserTenant | null;
   tenants: UserTenant[];
   isLoading: boolean;
+  isInitialized: boolean;
   selectTenant: (tenantId: string) => Promise<void>;
   clearTenant: () => void;
   refreshTenants: () => Promise<UserTenant[]>;
@@ -28,6 +30,8 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   const [currentTenant, setCurrentTenant] = useState<UserTenant | null>(null);
   const [tenants, setTenants] = useState<UserTenant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const initAttempted = useRef(false);
 
   const refreshTenants = useCallback(async (): Promise<UserTenant[]> => {
     try {
@@ -126,6 +130,46 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
   }, []);
 
+  // Auto-hydrate tenant on app initialization
+  // This runs once when the provider mounts to restore the saved tenant
+  useEffect(() => {
+    if (initAttempted.current) return;
+    initAttempted.current = true;
+
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem(authConfig.tokenKey)
+        : null;
+    const savedTenantId =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('selected_tenant_id')
+        : null;
+
+    // If we have a token and a saved tenant, auto-hydrate
+    if (token && savedTenantId) {
+      setIsLoading(true);
+      apiClient
+        .get<{ tenants: UserTenant[] }>(API_ENDPOINTS.TENANTS.LIST_MY)
+        .then(data => {
+          setTenants(data.tenants);
+          const saved = data.tenants.find(t => t.id === savedTenantId);
+          if (saved) {
+            setCurrentTenant(saved);
+          }
+        })
+        .catch(() => {
+          // Silently fail - user may not have tenants yet or token expired
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setIsInitialized(true);
+        });
+    } else {
+      // No token or no saved tenant - mark as initialized immediately
+      setIsInitialized(true);
+    }
+  }, []);
+
   // Listen for auth changes to refresh tenants
   useEffect(() => {
     const handleAuthChange = () => {
@@ -144,6 +188,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     currentTenant,
     tenants,
     isLoading,
+    isInitialized,
     selectTenant,
     clearTenant,
     refreshTenants,

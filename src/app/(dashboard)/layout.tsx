@@ -16,20 +16,32 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentTenant, isLoading: isTenantLoading } = useTenant();
+  const {
+    currentTenant,
+    isLoading: isTenantLoading,
+    isInitialized: isTenantInitialized,
+  } = useTenant();
   const { isAuthenticated, isSuperAdmin } = useAuth();
   const router = useRouter();
 
   // Redirecionar para select-tenant se autenticado mas sem tenant selecionado
+  // Aguarda a inicialização do TenantProvider para evitar redirecionamentos prematuros
   useEffect(() => {
-    if (!isAuthenticated || isTenantLoading) return;
+    if (!isAuthenticated || isTenantLoading || !isTenantInitialized) return;
 
     // Super admins podem acessar sem tenant selecionado
     // (ex: ao navegar entre /central e /dashboard)
     if (!currentTenant && !isSuperAdmin) {
       router.push('/select-tenant');
     }
-  }, [currentTenant, isAuthenticated, isTenantLoading, isSuperAdmin, router]);
+  }, [
+    currentTenant,
+    isAuthenticated,
+    isTenantLoading,
+    isTenantInitialized,
+    isSuperAdmin,
+    router,
+  ]);
 
   return (
     <ProtectedRoute>

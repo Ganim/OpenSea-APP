@@ -113,8 +113,8 @@ export default function DashboardWelcomePage() {
             </h1>
 
             <p className="text-lg text-gray-600 dark:text-white/60 mb-6">
-              Gerencie seu estoque, produtos e operações de forma eficiente.
-              Use o menu acima para navegar entre os módulos do sistema.
+              Gerencie seu estoque, produtos e operações de forma eficiente. Use
+              o menu acima para navegar entre os módulos do sistema.
             </p>
 
             <div className="flex flex-wrap gap-3">

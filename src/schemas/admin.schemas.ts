@@ -1,7 +1,4 @@
-import type {
-    FeatureFlagMetadata,
-    TenantSettings
-} from '@/types/settings';
+import type { FeatureFlagMetadata, TenantSettings } from '@/types/settings';
 import { z } from 'zod';
 
 /**

@@ -184,7 +184,9 @@ export default function CommandCenterPage() {
           <LowStockAlerts
             items={dashboard?.stockSummary?.lowStockAlerts || []}
             onItemClick={item =>
-              router.push(`/stock/overview/list?search=${encodeURIComponent(item.variantName)}`)
+              router.push(
+                `/stock/overview/list?search=${encodeURIComponent(item.variantName)}`
+              )
             }
           />
         </div>
