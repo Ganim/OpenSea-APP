@@ -1,7 +1,7 @@
 /**
  * OpenSea - Sanitização de Dados para Logging
  * Remove informações sensíveis antes de logar
- * 
+ *
  * Uso:
  * logger.debug('User data:', sanitizeForLogging(userData));
  */
@@ -42,14 +42,16 @@ const SENSITIVE_KEYS = [
  */
 function isSensitiveKey(key: string): boolean {
   const lowerKey = key.toLowerCase();
-  
+
   // Normalize: remove underscores and check both forms
   const normalizedKey = lowerKey.replace(/_/g, '');
-  
+
   return SENSITIVE_KEYS.some(sensitiveKey => {
     const normalizedSensitive = sensitiveKey.toLowerCase().replace(/_/g, '');
-    return lowerKey.includes(sensitiveKey.toLowerCase()) || 
-           normalizedKey.includes(normalizedSensitive);
+    return (
+      lowerKey.includes(sensitiveKey.toLowerCase()) ||
+      normalizedKey.includes(normalizedSensitive)
+    );
   });
 }
 
@@ -91,7 +93,7 @@ export function sanitizeErrorMessage(error: Error | string): string {
   const message = typeof error === 'string' ? error : error.message;
 
   // Remover padrões comuns de dados sensíveis
-  let sanitized = message
+  const sanitized = message
     .replace(/password=\S+/gi, 'password=[REDACTED]')
     .replace(/token=\S+/gi, 'token=[REDACTED]')
     .replace(/api[_-]?key=\S+/gi, 'api_key=[REDACTED]')
@@ -106,7 +108,7 @@ export function sanitizeErrorMessage(error: Error | string): string {
 /**
  * Extrai apenas as chaves (sem valores sensíveis) de um objeto
  * Útil para logar que uma operação foi feita sem expor dados
- * 
+ *
  * @example
  * logger.debug('User created', extractKeys(userData));
  * // Output: { firstName: true, lastName: true, email: true }

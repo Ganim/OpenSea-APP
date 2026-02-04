@@ -17,8 +17,8 @@ import React from 'react';
 
 interface DynamicFormFieldProps {
   config: FormFieldConfig;
-  value: any;
-  onChange: (value: any) => void;
+  value: unknown;
+  onChange: (value: unknown) => void;
   error?: string;
 }
 
@@ -53,7 +53,7 @@ export const DynamicFormField: React.FC<DynamicFormFieldProps> = ({
           <Input
             id={name}
             type={type}
-            value={value || ''}
+            value={(value as string | number | undefined) || ''}
             onChange={e =>
               onChange(
                 type === 'number' ? Number(e.target.value) : e.target.value
@@ -69,7 +69,7 @@ export const DynamicFormField: React.FC<DynamicFormFieldProps> = ({
         return (
           <Textarea
             id={name}
-            value={value || ''}
+            value={(value as string | undefined) || ''}
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
@@ -83,7 +83,7 @@ export const DynamicFormField: React.FC<DynamicFormFieldProps> = ({
           <Input
             id={name}
             type="date"
-            value={value || ''}
+            value={(value as string | undefined) || ''}
             onChange={e => onChange(e.target.value)}
             disabled={disabled}
             className={className}
@@ -150,14 +150,14 @@ export const DynamicFormField: React.FC<DynamicFormFieldProps> = ({
             <Input
               id={name}
               type="color"
-              value={value || '#000000'}
+              value={(value as string | undefined) || '#000000'}
               onChange={e => onChange(e.target.value)}
               disabled={disabled}
               className={`w-20 h-10 cursor-pointer ${className}`}
             />
             <Input
               type="text"
-              value={value || ''}
+              value={(value as string | undefined) || ''}
               onChange={e => onChange(e.target.value)}
               placeholder="#000000"
               disabled={disabled}
@@ -185,7 +185,7 @@ export const DynamicFormField: React.FC<DynamicFormFieldProps> = ({
           <Input
             id={name}
             type="text"
-            value={value || ''}
+            value={(value as string | undefined) || ''}
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}

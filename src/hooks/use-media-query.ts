@@ -26,9 +26,6 @@ export function useMediaQuery(query: string): boolean {
   useEffect(() => {
     const mediaQuery = window.matchMedia(query);
 
-    // Set initial value
-    setMatches(mediaQuery.matches);
-
     // Handler for changes
     const handleChange = (event: MediaQueryListEvent) => {
       setMatches(event.matches);

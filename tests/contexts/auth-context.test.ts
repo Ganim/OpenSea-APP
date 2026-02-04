@@ -3,8 +3,8 @@
  * Tests para validar o comportamento do contexto de autenticação
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { logger } from '@/lib/logger';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock do logger
 vi.mock('@/lib/logger', () => ({
@@ -47,7 +47,7 @@ describe('AuthContext', () => {
     it('should log login error with proper context', () => {
       const error = new Error('Invalid credentials');
       const email = 'test@example.com';
-      logger.error('Erro no login', error, { 
+      logger.error('Erro no login', error, {
         action: 'login',
         email,
       });
@@ -80,7 +80,7 @@ describe('AuthContext', () => {
     it('should log logout errors with user context', () => {
       const error = new Error('Logout failed');
       const userId = 'user-789';
-      logger.error('Erro ao fazer logout', error, { 
+      logger.error('Erro ao fazer logout', error, {
         action: 'logout',
         userId,
       });
@@ -125,7 +125,7 @@ describe('AuthContext', () => {
 
   describe('Session Management', () => {
     it('should log token save operations', () => {
-      logger.debug('💾 Tokens salvos no localStorage', { 
+      logger.debug('💾 Tokens salvos no localStorage', {
         keys: ['token', 'refreshToken'],
       });
 
@@ -139,7 +139,7 @@ describe('AuthContext', () => {
     });
 
     it('should log account save for fast login', () => {
-      logger.debug('💾 Conta salva para Fast Login', { 
+      logger.debug('💾 Conta salva para Fast Login', {
         userId: 'user-123',
         email: 'user@example.com',
       });
@@ -153,7 +153,7 @@ describe('AuthContext', () => {
     it('should not expose sensitive data in logs', () => {
       const password = 'secret123'; // SHOULD NOT BE LOGGED
       const userId = 'user-123'; // OK to log
-      
+
       // Correct way - only log userId, not password
       logger.info('✅ Usuário autenticado', { userId });
 

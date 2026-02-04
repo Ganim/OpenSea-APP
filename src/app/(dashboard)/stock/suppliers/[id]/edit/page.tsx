@@ -136,9 +136,13 @@ export default function EditSupplierPage({
       toast.success('Fornecedor atualizado com sucesso!');
       router.push(`/stock/suppliers/${supplierId}`);
     } catch (error) {
-      logger.error('Failed to update supplier', error instanceof Error ? error : new Error(String(error)), {
-        supplierId
-      });
+      logger.error(
+        'Failed to update supplier',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          supplierId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar fornecedor', { description: message });
@@ -158,9 +162,13 @@ export default function EditSupplierPage({
       toast.success('Fornecedor excluído com sucesso!');
       router.push('/stock/suppliers');
     } catch (error) {
-      logger.error('Failed to delete supplier', error instanceof Error ? error : new Error(String(error)), {
-        supplierId
-      });
+      logger.error(
+        'Failed to delete supplier',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          supplierId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar fornecedor', { description: message });

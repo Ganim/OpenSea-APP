@@ -53,24 +53,13 @@ interface PrintQueueProviderProps {
 }
 
 export function PrintQueueProvider({ children }: PrintQueueProviderProps) {
-  const [state, setState] = useState<PrintQueueState>(
-    DEFAULT_PRINT_QUEUE_STATE
-  );
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Hidratar do localStorage no mount
-  useEffect(() => {
-    const stored = loadFromStorage();
-    setState(stored);
-    setIsHydrated(true);
-  }, []);
+  const [state, setState] = useState<PrintQueueState>(() => loadFromStorage());
+  const [isHydrated, setIsHydrated] = useState(true);
 
   // Persistir no localStorage quando o estado mudar
   useEffect(() => {
-    if (isHydrated) {
-      saveToStorage(state);
-    }
-  }, [state, isHydrated]);
+    saveToStorage(state);
+  }, [state]);
 
   // ============================================
   // COMPUTED VALUES

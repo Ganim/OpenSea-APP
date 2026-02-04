@@ -14,6 +14,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   useAdminPlan,
   useDeletePlan,
   useSetPlanModules,
@@ -33,6 +39,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { PlanTier } from '@/types/enums';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -57,9 +64,18 @@ export default function EditPlanPage() {
   const setModules = useSetPlanModules();
   const deletePlan = useDeletePlan();
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    tier: PlanTier;
+    description: string;
+    price: number;
+    isActive: boolean;
+    maxUsers: number;
+    maxWarehouses: number;
+    maxProducts: number;
+  }>({
     name: '',
-    tier: 'FREE',
+    tier: PlanTier.FREE,
     description: '',
     price: 0,
     isActive: true,
@@ -73,7 +89,7 @@ export default function EditPlanPage() {
     if (data?.plan) {
       setForm({
         name: data.plan.name,
-        tier: data.plan.tier,
+        tier: data.plan.tier as PlanTier,
         description: data.plan.description ?? '',
         price: data.plan.price,
         isActive: data.plan.isActive,
@@ -81,7 +97,9 @@ export default function EditPlanPage() {
         maxWarehouses: data.plan.maxWarehouses,
         maxProducts: data.plan.maxProducts,
       });
-      setSelectedModules(data.modules.map(m => m.module));
+      setSelectedModules(
+        data.modules.map((m: Record<string, unknown>) => m.module as string)
+      );
     }
   }, [data]);
 
@@ -221,7 +239,9 @@ export default function EditPlanPage() {
               </Label>
               <Select
                 value={form.tier}
-                onValueChange={v => setForm(f => ({ ...f, tier: v }))}
+                onValueChange={v =>
+                  setForm(f => ({ ...f, tier: v as PlanTier }))
+                }
               >
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue />
@@ -407,7 +427,7 @@ export default function EditPlanPage() {
             <div>
               <h3 className="text-lg font-bold text-white">Módulos</h3>
               <p className="text-white/60 text-sm">
-                {selectedModules.length}/{ALL_MODULES.length} ativados
+                {selectedModules.length}/{ALL_MODULES.length - 1} ativados
               </p>
             </div>
           </div>
@@ -416,26 +436,50 @@ export default function EditPlanPage() {
             {ALL_MODULES.map(mod => (
               <div
                 key={mod}
-                onClick={() => toggleModule(mod)}
-                className="cursor-pointer p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
+                onClick={() => mod !== 'NOTIFICATIONS' && toggleModule(mod)}
+                className={`p-3 rounded-lg border border-white/10 flex items-center gap-3 transition-all ${
+                  mod === 'NOTIFICATIONS'
+                    ? 'opacity-60 cursor-not-allowed bg-white/5'
+                    : 'cursor-pointer bg-white/5 hover:bg-white/10'
+                }`}
               >
                 <div className="relative">
-                  <input
-                    type="checkbox"
-                    id={mod}
-                    checked={selectedModules.includes(mod)}
-                    onChange={() => {}}
-                    className="sr-only"
-                  />
-                  <div className="w-5 h-5 rounded border border-white/30 bg-white/5 flex items-center justify-center">
-                    {selectedModules.includes(mod) && (
-                      <Check className="h-3 w-3 text-green-400" />
-                    )}
-                  </div>
+                  {mod === 'NOTIFICATIONS' ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-5 h-5 rounded border border-white/30 bg-white/5 flex items-center justify-center cursor-not-allowed">
+                            <AlertCircle className="h-3 w-3 text-orange-400" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">
+                            Notificações em breve. Será implementado em uma
+                            próxima versão.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <>
+                      <input
+                        type="checkbox"
+                        id={mod}
+                        checked={selectedModules.includes(mod)}
+                        onChange={() => {}}
+                        className="sr-only"
+                      />
+                      <div className="w-5 h-5 rounded border border-white/30 bg-white/5 flex items-center justify-center">
+                        {selectedModules.includes(mod) && (
+                          <Check className="h-3 w-3 text-green-400" />
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <Label
                   htmlFor={mod}
-                  className="text-white/90 cursor-pointer text-sm"
+                  className="text-white/90 text-sm cursor-pointer"
                 >
                   {mod}
                 </Label>

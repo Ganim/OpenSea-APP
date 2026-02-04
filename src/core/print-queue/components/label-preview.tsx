@@ -345,9 +345,9 @@ function BarcodeImage({ value, height = 30, width = 1 }: BarcodeImageProps) {
           background: 'transparent',
         });
       } catch (error) {
-        logger.error('Erro ao gerar barcode', error as Error, { 
+        logger.error('Erro ao gerar barcode', error as Error, {
           component: 'label-preview',
-          value: value.substring(0, 10) + '...' 
+          value: value.substring(0, 10) + '...',
         });
       }
     }

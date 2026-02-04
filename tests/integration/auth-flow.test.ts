@@ -3,9 +3,8 @@
  * Tests que validam o fluxo completo de autenticação com logging
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { logger } from '@/lib/logger';
-import { sanitizeData } from '@/lib/sanitize';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock do logger
 vi.mock('@/lib/logger', () => ({
@@ -19,7 +18,7 @@ vi.mock('@/lib/logger', () => ({
 
 // Mock do sanitize
 vi.mock('@/lib/sanitize', () => ({
-  sanitizeData: vi.fn((data) => {
+  sanitizeData: vi.fn(data => {
     // Mock implementation - just return the data
     return data;
   }),
@@ -211,7 +210,9 @@ describe('Authentication Flow Integration', () => {
       // All calls should have the same sessionId
       (logger.debug as any).mock.calls.forEach((call: any) => {
         if (call[1]) {
-          expect(call[1].sessionId || call[1] === sessionId || true).toBeTruthy();
+          expect(
+            call[1].sessionId || call[1] === sessionId || true
+          ).toBeTruthy();
         }
       });
     });

@@ -1,7 +1,7 @@
 /**
  * OpenSea - Logger Centralizado
  * Sistema de logging seguro e estruturado para toda a aplicação
- * 
+ *
  * Uso:
  * logger.debug('Message', { data });
  * logger.info('Message', { data });

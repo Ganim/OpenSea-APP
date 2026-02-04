@@ -122,9 +122,13 @@ export function TemplateViewer({
         });
         setIsEditMode(false);
       } catch (error) {
-        logger.error('Failed to save template', error instanceof Error ? error : new Error(String(error)), {
-          templateId: template?.id
-        });
+        logger.error(
+          'Failed to save template',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            templateId: template?.id,
+          }
+        );
       } finally {
         setIsSaving(false);
       }

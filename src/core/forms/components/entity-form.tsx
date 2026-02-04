@@ -66,6 +66,7 @@ export interface EntityFormProps<T extends BaseEntity> {
 // COMPONENT
 // =============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
   function EntityForm<T extends BaseEntity>(
     {
@@ -182,8 +183,8 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
 
         await onSubmit(data);
       } catch (error) {
-        logger.error('Erro ao submeter formulário', error as Error, { 
-          component: 'entity-form'
+        logger.error('Erro ao submeter formulário', error as Error, {
+          component: 'entity-form',
         });
       }
     };

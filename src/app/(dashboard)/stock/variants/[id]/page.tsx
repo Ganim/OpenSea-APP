@@ -144,9 +144,13 @@ export default function VariantDetailPage() {
       toast.success('Variante excluída com sucesso!');
       router.push('/stock/products');
     } catch (error) {
-      logger.error('Failed to delete variant', error instanceof Error ? error : new Error(String(error)), {
-        variantId
-      });
+      logger.error(
+        'Failed to delete variant',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          variantId,
+        }
+      );
       toast.error('Erro ao excluir variante');
     }
   };
@@ -175,9 +179,13 @@ export default function VariantDetailPage() {
         nameInputRef.current?.focus();
       }, 0);
     } catch (error) {
-      logger.error('Failed to create item', error instanceof Error ? error : new Error(String(error)), {
-        variantId
-      });
+      logger.error(
+        'Failed to create item',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          variantId,
+        }
+      );
       toast.error('Erro ao criar item');
     } finally {
       setIsCreatingItem(false);

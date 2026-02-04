@@ -20,10 +20,14 @@ export function CentralThemeProvider({
   children: React.ReactNode;
 }) {
   const [theme, setThemeState] = useState<Theme>('dark-blue');
-  const [mounted, setMounted] = useState(false);
+
+  const applyTheme = (newTheme: Theme) => {
+    const root = document.documentElement;
+    root.classList.remove('dark-blue', 'light');
+    root.classList.add(newTheme);
+  };
 
   useEffect(() => {
-    setMounted(true);
     const stored = localStorage.getItem('central-theme') as Theme | null;
     if (stored) {
       setThemeState(stored);
@@ -32,12 +36,6 @@ export function CentralThemeProvider({
       applyTheme('dark-blue');
     }
   }, []);
-
-  const applyTheme = (newTheme: Theme) => {
-    const root = document.documentElement;
-    root.classList.remove('dark-blue', 'light');
-    root.classList.add(newTheme);
-  };
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

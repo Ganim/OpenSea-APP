@@ -6,7 +6,6 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import React from 'react';
 
 interface GridLoadingProps {
   count?: number;
@@ -76,7 +75,10 @@ export function TableLoading({ rows = 8, columns = 5 }: TableLoadingProps) {
 
       {/* Linhas */}
       {Array.from({ length: rows }).map((_, rowIdx) => (
-        <div key={`row-${rowIdx}`} className="flex border-b border-gray-200 p-4">
+        <div
+          key={`row-${rowIdx}`}
+          className="flex border-b border-gray-200 p-4"
+        >
           {Array.from({ length: columns }).map((_, colIdx) => (
             <Skeleton
               key={`cell-${rowIdx}-${colIdx}`}

@@ -54,9 +54,13 @@ export function EditModal({ isOpen, onClose, tag, onSubmit }: EditModalProps) {
       await onSubmit(tag.id, formData);
       onClose();
     } catch (error) {
-      logger.error('Failed to update tag', error instanceof Error ? error : new Error(String(error)), {
-        tagId: tag.id
-      });
+      logger.error(
+        'Failed to update tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          tagId: tag.id,
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -46,7 +46,9 @@ async function setupPermissions(): Promise<{
     } catch (error: unknown) {
       const errorMsg = `Erro ao criar ${permission.code}: ${(error as Error).message}`;
       errors.push(errorMsg);
-      logger.error(`Erro ao criar permissão`, error as Error, { code: permission.code });
+      logger.error(`Erro ao criar permissão`, error as Error, {
+        code: permission.code,
+      });
     }
   }
 
@@ -83,13 +85,18 @@ async function setupGroups(): Promise<{ created: number; errors: string[] }> {
         } catch (error: unknown) {
           const errorMsg = `Erro ao adicionar permissão ${perm.code} ao grupo ${group.name}: ${(error as Error).message}`;
           errors.push(errorMsg);
-          logger.error('Erro ao adicionar permissão ao grupo', error as Error, { groupName: group.name, permCode: perm.code });
+          logger.error('Erro ao adicionar permissão ao grupo', error as Error, {
+            groupName: group.name,
+            permCode: perm.code,
+          });
         }
       }
     } catch (error: unknown) {
       const errorMsg = `Erro ao criar grupo ${groupDef.name}: ${(error as Error).message}`;
       errors.push(errorMsg);
-      logger.error('Erro ao criar grupo', error as Error, { groupName: groupDef.name });
+      logger.error('Erro ao criar grupo', error as Error, {
+        groupName: groupDef.name,
+      });
     }
   }
 
@@ -130,7 +137,11 @@ export async function setupRBAC(): Promise<SetupResult> {
       logger.warn('Setup concluído com alguns erros');
       logger.info(`📝 ${result.permissionsCreated} permissões criadas`);
       logger.info(`👥 ${result.groupsCreated} grupos criados`);
-      logger.error(`${result.errors.length} erros durante setup`, new Error('Setup incompleto'), { errorCount: result.errors.length });
+      logger.error(
+        `${result.errors.length} erros durante setup`,
+        new Error('Setup incompleto'),
+        { errorCount: result.errors.length }
+      );
     }
   } catch (error: unknown) {
     result.errors.push(`Erro fatal no setup: ${(error as Error).message}`);

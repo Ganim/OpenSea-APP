@@ -67,9 +67,13 @@ export default function TemplateEditPage() {
       toast.success('Template atualizado com sucesso!');
       router.push(`/stock/templates/${templateId}`);
     } catch (error) {
-      logger.error('Failed to save template', error instanceof Error ? error : new Error(String(error)), {
-        templateId
-      });
+      logger.error(
+        'Failed to save template',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          templateId,
+        }
+      );
       toast.error('Erro ao salvar template');
       throw error;
     } finally {
@@ -134,8 +138,8 @@ export default function TemplateEditPage() {
 
       {/* Form */}
       <div className="max-w-8xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 shadow-lg">
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 shadow-lg">
             {template.iconUrl ? (
               <img
                 src={template.iconUrl}

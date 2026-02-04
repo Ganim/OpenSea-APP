@@ -3,8 +3,8 @@
  * Configuração global para testes
  */
 
-import { expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom';
+import { afterEach, vi } from 'vitest';
 
 // Set NODE_ENV to development for tests
 process.env.NODE_ENV = 'development';

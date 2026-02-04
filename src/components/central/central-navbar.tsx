@@ -3,7 +3,15 @@
 import { GlassButton } from './glass-button';
 import { useAuth } from '@/contexts/auth-context';
 import { useCentralTheme } from '@/contexts/central-theme-context';
-import { Crown, LogOut, ArrowLeft, User, ChevronDown, Moon, Sun } from 'lucide-react';
+import {
+  Crown,
+  LogOut,
+  ArrowLeft,
+  User,
+  ChevronDown,
+  Moon,
+  Sun,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';

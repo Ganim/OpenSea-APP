@@ -6,6 +6,11 @@
 import { describe, it, expect } from 'vitest';
 import { sanitizeForLogging } from '@/lib/sanitize';
 
+type Sanitized = Record<string, any>;
+
+const sanitize = (value: unknown): Sanitized =>
+  sanitizeForLogging(value) as Sanitized;
+
 describe('Data Sanitization', () => {
   describe('Sensitive Key Detection', () => {
     it('should detect and redact password keys', () => {
@@ -13,7 +18,7 @@ describe('Data Sanitization', () => {
         password: 'secret123',
         userPassword: 'pass456',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.password).toBe('[REDACTED]');
       expect(sanitized.userPassword).toBe('[REDACTED]');
     });
@@ -25,7 +30,7 @@ describe('Data Sanitization', () => {
         refreshToken: 'refresh123',
         apiKey: 'key-secret',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.token).toBe('[REDACTED]');
       expect(sanitized.accessToken).toBe('[REDACTED]');
       expect(sanitized.refreshToken).toBe('[REDACTED]');
@@ -38,7 +43,7 @@ describe('Data Sanitization', () => {
         userEmail: 'test@test.com',
         contactEmail: 'contact@company.com',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.email).toBe('[REDACTED]');
       expect(sanitized.userEmail).toBe('[REDACTED]');
       expect(sanitized.contactEmail).toBe('[REDACTED]');
@@ -50,7 +55,7 @@ describe('Data Sanitization', () => {
         cardNumber: '1234-5678-9012-3456',
         ssn: '123-45-6789',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.creditCard).toBe('[REDACTED]');
       expect(sanitized.cardNumber).toBe('[REDACTED]');
       expect(sanitized.ssn).toBe('[REDACTED]');
@@ -64,7 +69,7 @@ describe('Data Sanitization', () => {
         message: 'Hello world',
         status: 'active',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.username).toBe('john_doe');
       expect(sanitized.message).toBe('Hello world');
       expect(sanitized.status).toBe('active');
@@ -76,7 +81,7 @@ describe('Data Sanitization', () => {
         count: 100,
         timestamp: 1638360000,
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.userId).toBe(12345);
       expect(sanitized.count).toBe(100);
       expect(sanitized.timestamp).toBe(1638360000);
@@ -88,7 +93,7 @@ describe('Data Sanitization', () => {
         isAdmin: false,
         verified: true,
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.isActive).toBe(true);
       expect(sanitized.isAdmin).toBe(false);
       expect(sanitized.verified).toBe(true);
@@ -108,7 +113,7 @@ describe('Data Sanitization', () => {
           },
         },
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.user.id).toBe('123');
       expect(sanitized.user.name).toBe('John');
       expect(sanitized.user.email).toBe('[REDACTED]');
@@ -123,7 +128,7 @@ describe('Data Sanitization', () => {
           { id: '2', password: 'pass2' },
         ],
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.users[0].id).toBe('1');
       expect(sanitized.users[0].password).toBe('[REDACTED]');
       expect(sanitized.users[1].id).toBe('2');
@@ -136,7 +141,7 @@ describe('Data Sanitization', () => {
         Token: 'token123',
         EMAIL: 'test@test.com',
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.PASSWORD).toBe('[REDACTED]');
       expect(sanitized.Token).toBe('[REDACTED]');
       expect(sanitized.EMAIL).toBe('[REDACTED]');
@@ -149,7 +154,7 @@ describe('Data Sanitization', () => {
         value: null,
         password: null,
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.value).toBeNull();
       expect(sanitized.password).toBe('[REDACTED]');
     });
@@ -159,14 +164,14 @@ describe('Data Sanitization', () => {
         value: undefined,
         password: undefined,
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.value).toBeUndefined();
       // Password still gets redacted even if undefined
     });
 
     it('should handle empty objects', () => {
       const data = {};
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized).toEqual({});
     });
 
@@ -181,7 +186,7 @@ describe('Data Sanitization', () => {
           },
         },
       };
-      const sanitized = sanitizeForLogging(data);
+      const sanitized = sanitize(data);
       expect(sanitized.level1.level2.level3.password).toBe('[REDACTED]');
       expect(sanitized.level1.level2.level3.userId).toBe('123');
     });

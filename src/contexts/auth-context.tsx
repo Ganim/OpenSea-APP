@@ -192,7 +192,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Aguarda os dados do usuário serem carregados
       logger.debug('🔄 Buscando dados do usuário...');
       const userResult = await refetchUser();
-      logger.info('✅ Dados do usuário carregados', { userId: userResult.data?.user?.id });
+      logger.info('✅ Dados do usuário carregados', {
+        userId: userResult.data?.user?.id,
+      });
 
       // Salva a conta para Fast Login
       if (userResult.data?.user) {
@@ -237,7 +239,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      logger.error('Erro no login', error as Error, { action: 'login', email: credentials.email });
+      logger.error('Erro no login', error as Error, {
+        action: 'login',
+        email: credentials.email,
+      });
       throw error;
     }
   };
@@ -254,7 +259,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password: data.password,
       });
     } catch (error) {
-      logger.error('Erro no registro', error as Error, { action: 'register', email: data.email });
+      logger.error('Erro no registro', error as Error, {
+        action: 'register',
+        email: data.email,
+      });
       throw error;
     }
   };
@@ -264,7 +272,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      logger.error('Erro ao fazer logout', error as Error, { action: 'logout', userId: user?.id });
+      logger.error('Erro ao fazer logout', error as Error, {
+        action: 'logout',
+        userId: user?.id,
+      });
     } finally {
       // Limpa os tokens independentemente do resultado
       localStorage.removeItem(authConfig.tokenKey);

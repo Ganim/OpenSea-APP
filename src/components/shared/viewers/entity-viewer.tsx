@@ -17,7 +17,7 @@ interface EntityViewerProps {
   mode?: 'view' | 'edit';
   onModeChange?: (mode: 'view' | 'edit') => void;
   formConfig?: EntityFormConfig;
-  onSave?: (data: any) => Promise<void>;
+  onSave?: (data: Record<string, unknown>) => Promise<void>;
 }
 
 /**
@@ -77,27 +77,29 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
   };
 
   // Renderiza valor do campo
-  const renderFieldValue = (field: any) => {
+  const renderFieldValue = (field: Record<string, unknown>) => {
     const { value, type, render, className } = field;
 
     // Renderização customizada
-    if (render) {
+    if (render && typeof render === 'function') {
       return render(value);
     }
 
     // Renderização por tipo
     switch (type) {
       case 'date':
-        return new Date(value).toLocaleDateString('pt-BR');
+        return new Date(value as string | number | Date).toLocaleDateString(
+          'pt-BR'
+        );
 
       case 'badge':
-        return <Badge variant="outline">{value}</Badge>;
+        return <Badge variant="outline">{value as React.ReactNode}</Badge>;
 
       case 'list':
         if (Array.isArray(value)) {
           return (
             <ul className="list-disc list-inside space-y-1">
-              {value.map((item, i) => (
+              {(value as Array<React.ReactNode>).map((item, i) => (
                 <li key={i} className="text-sm">
                   {item}
                 </li>
@@ -105,36 +107,49 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
             </ul>
           );
         }
-        return value;
+        return value as React.ReactNode;
 
       case 'text':
       default:
-        return <span className={className}>{value || '-'}</span>;
+        return (
+          <span className={className as string | undefined}>
+            {(value as React.ReactNode) || '-'}
+          </span>
+        );
     }
   };
 
   // Renderiza seção
-  const renderSection = (section: any) => (
-    <div key={section.title} className="space-y-3">
-      {section.title && (
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          {section.title}
-        </h3>
-      )}
-      <div
-        className={layout === 'grid' ? 'grid grid-cols-2 gap-4' : 'space-y-3'}
-      >
-        {section.fields.map((field: any, index: number) => (
-          <div key={index} className="space-y-1">
-            <p className="text-sm font-medium">{field.label}</p>
-            <div className="text-sm text-muted-foreground">
-              {renderFieldValue(field)}
-            </div>
-          </div>
-        ))}
+  const renderSection = (section: Record<string, unknown>) => {
+    const title = section.title;
+    const showTitle = Boolean(title);
+
+    return (
+      <div key={section.title as string} className="space-y-3">
+        {showTitle && (
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {String(title)}
+          </h3>
+        )}
+        <div
+          className={layout === 'grid' ? 'grid grid-cols-2 gap-4' : 'space-y-3'}
+        >
+          {(section.fields as Array<Record<string, unknown>>).map(
+            (field, index: number) => (
+              <div key={index} className="space-y-1">
+                <p className="text-sm font-medium">
+                  {field.label as React.ReactNode}
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  {renderFieldValue(field)}
+                </div>
+              </div>
+            )
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Modo de edição
   if (mode === 'edit' && formConfig) {
@@ -173,7 +188,9 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
           </div>
         )}
 
-        {sections?.map(section => renderSection(section))}
+        {sections?.map(section =>
+          renderSection(section as unknown as Record<string, unknown>)
+        )}
       </div>
     );
   }
@@ -210,7 +227,9 @@ export const EntityViewer: React.FC<EntityViewerProps> = ({
 
         {tabs.map(tab => (
           <TabsContent key={tab.id} value={tab.id} className="space-y-6">
-            {tab.sections.map(section => renderSection(section))}
+            {tab.sections.map(section =>
+              renderSection(section as unknown as Record<string, unknown>)
+            )}
           </TabsContent>
         ))}
       </Tabs>

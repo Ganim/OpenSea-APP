@@ -107,9 +107,9 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        logger.error('Erro ao selecionar tenant', error as Error, { 
+        logger.error('Erro ao selecionar tenant', error as Error, {
           tenantId,
-          action: 'selectTenant'
+          action: 'selectTenant',
         });
         throw error;
       } finally {

@@ -89,9 +89,13 @@ export default function EditTagPage({
       toast.success('Tag atualizada com sucesso!');
       router.push(`/stock/tags/${tagId}`);
     } catch (error) {
-      logger.error('Failed to update tag', error instanceof Error ? error : new Error(String(error)), {
-        tagId
-      });
+      logger.error(
+        'Failed to update tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          tagId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar tag', { description: message });
@@ -111,9 +115,13 @@ export default function EditTagPage({
       toast.success('Tag excluída com sucesso!');
       router.push('/stock/tags');
     } catch (error) {
-      logger.error('Failed to delete tag', error instanceof Error ? error : new Error(String(error)), {
-        tagId
-      });
+      logger.error(
+        'Failed to delete tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          tagId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar tag', { description: message });

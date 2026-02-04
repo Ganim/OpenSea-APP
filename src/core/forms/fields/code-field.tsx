@@ -49,9 +49,9 @@ export function CodeField<T = unknown>({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      logger.error('Failed to copy code to clipboard', err as Error, { 
+      logger.error('Failed to copy code to clipboard', err as Error, {
         component: 'code-field',
-        action: 'copy'
+        action: 'copy',
       });
     }
   };

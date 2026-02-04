@@ -3,12 +3,11 @@
  * Tests para validar o comportamento do ErrorBoundary
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { logger } from '@/lib/logger';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock do logger
 vi.mock('@/lib/logger', () => ({
@@ -148,7 +147,9 @@ describe('ErrorBoundary Component', () => {
 
       // Look for retry button or similar recovery mechanism
       const buttons = screen.queryAllByRole('button');
-      expect(buttons.length > 0 || screen.queryByText(/retry|tentar novamente/i)).toBeTruthy();
+      expect(
+        buttons.length > 0 || screen.queryByText(/retry|tentar novamente/i)
+      ).toBeTruthy();
 
       consoleErrorSpy.mockRestore();
     });
@@ -183,11 +184,13 @@ describe('ErrorBoundary Component', () => {
         .mockImplementation(() => {});
 
       render(
-        React.createElement(
-          ErrorBoundary,
-          { fallback: (error: Error, reset: () => void) => React.createElement('div', null, 'Custom error UI') },
-          React.createElement(ThrowError, { shouldThrow: true })
-        )
+        <ErrorBoundary
+          fallback={(error: Error, reset: () => void) => (
+            <div>Custom error UI</div>
+          )}
+        >
+          <ThrowError shouldThrow />
+        </ErrorBoundary>
       );
 
       expect(logger.error).toHaveBeenCalled();

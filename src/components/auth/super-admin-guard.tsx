@@ -3,16 +3,12 @@
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   const { isLoading, isAuthenticated, isSuperAdmin } = useAuth();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [mounted] = useState(typeof window !== 'undefined');
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && !isSuperAdmin) {

@@ -64,9 +64,13 @@ export async function listPermissions(
       return parts.length >= 3;
     });
   } catch (error) {
-    logger.error('Failed to fetch permissions', error instanceof Error ? error : new Error(String(error)), {
-      context: 'listPermissions'
-    });
+    logger.error(
+      'Failed to fetch permissions',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        context: 'listPermissions',
+      }
+    );
     return [];
   }
 }
@@ -80,9 +84,13 @@ export async function listAllPermissions(): Promise<
     >(API_ENDPOINTS.RBAC.PERMISSIONS.LIST_ALL);
     return response;
   } catch (error) {
-    logger.error('Failed to fetch all permissions', error instanceof Error ? error : new Error(String(error)), {
-      context: 'listAllPermissions'
-    });
+    logger.error(
+      'Failed to fetch all permissions',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        context: 'listAllPermissions',
+      }
+    );
     return {
       permissions: [],
       total: 0,
@@ -264,9 +272,13 @@ export async function listGroupPermissions(
 
     return response?.permissions || [];
   } catch (error) {
-    logger.error('Failed to fetch group permissions', error instanceof Error ? error : new Error(String(error)), {
-      groupId
-    });
+    logger.error(
+      'Failed to fetch group permissions',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        groupId,
+      }
+    );
     return [];
   }
 }
@@ -331,13 +343,17 @@ export async function listUserPermissions(
     if (err.status === 403) {
       logger.debug('User lacks permission to read their own permissions', {
         userId,
-        permissionCode: 'rbac.associations.read'
+        permissionCode: 'rbac.associations.read',
       });
       return [];
     }
-    logger.error('Failed to fetch user permissions', error instanceof Error ? error : new Error(String(error)), {
-      userId
-    });
+    logger.error(
+      'Failed to fetch user permissions',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        userId,
+      }
+    );
     return [];
   }
 }
@@ -373,16 +389,20 @@ export async function listMyPermissions(): Promise<EffectivePermission[]> {
       if (parts.length < 2 || parts.length > 4) {
         logger.debug('Ignoring invalid permission code', {
           code,
-          parts: parts.length
+          parts: parts.length,
         });
         return false;
       }
       return true;
     });
   } catch (error) {
-    logger.error('Failed to fetch my permissions', error instanceof Error ? error : new Error(String(error)), {
-      context: 'listMyPermissions'
-    });
+    logger.error(
+      'Failed to fetch my permissions',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        context: 'listMyPermissions',
+      }
+    );
     return [];
   }
 }
@@ -427,9 +447,13 @@ export async function listUsersByGroup(
               expiresAt: null,
             } as UserInGroup;
           } catch (error) {
-            logger.error('Failed to fetch user details', error instanceof Error ? error : new Error(String(error)), {
-              userId
-            });
+            logger.error(
+              'Failed to fetch user details',
+              error instanceof Error ? error : new Error(String(error)),
+              {
+                userId,
+              }
+            );
             return null;
           }
         }
@@ -457,13 +481,17 @@ export async function listUsersByGroup(
     }
 
     logger.debug('Unexpected response format from listUsersByGroup', {
-      responseKeys: response ? Object.keys(response) : null
+      responseKeys: response ? Object.keys(response) : null,
     });
     return [];
   } catch (error) {
-    logger.error('Failed to fetch users for group', error instanceof Error ? error : new Error(String(error)), {
-      groupId
-    });
+    logger.error(
+      'Failed to fetch users for group',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        groupId,
+      }
+    );
     throw error;
   }
 }
@@ -611,9 +639,13 @@ export async function listAllUsers() {
       (response as { users?: unknown[] }).users || (response as unknown[]) || []
     );
   } catch (error) {
-    logger.error('Failed to list all users', error instanceof Error ? error : new Error(String(error)), {
-      context: 'listAllUsers'
-    });
+    logger.error(
+      'Failed to list all users',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        context: 'listAllUsers',
+      }
+    );
     throw error;
   }
 }

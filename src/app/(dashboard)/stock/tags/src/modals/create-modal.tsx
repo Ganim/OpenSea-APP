@@ -46,9 +46,13 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       });
       onClose();
     } catch (error) {
-      logger.error('Failed to create tag', error instanceof Error ? error : new Error(String(error)), {
-        context: 'create-tag'
-      });
+      logger.error(
+        'Failed to create tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          context: 'create-tag',
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }

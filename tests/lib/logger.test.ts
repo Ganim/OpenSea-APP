@@ -100,12 +100,11 @@ describe('Logger Utility', () => {
     });
 
     it('should handle error-like objects', () => {
-      const errorLike = {
-        message: 'Custom error',
+      const errorLike = Object.assign(new Error('Custom error'), {
         code: 'ERR_001',
-      };
+      });
       expect(() => {
-        logger.error('Custom error', errorLike as Error);
+        logger.error('Custom error', errorLike);
       }).not.toThrow();
     });
 

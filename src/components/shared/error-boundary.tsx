@@ -5,10 +5,10 @@
 
 'use client';
 
-import React, { ErrorInfo, ReactNode } from 'react';
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import { AlertCircle, Home, RotateCcw } from 'lucide-react';
+import React, { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -89,7 +89,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
       // UI padrão
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-red-50 to-white p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-b from-red-50 to-white p-4">
           <div className="bg-white rounded-lg shadow-2xl p-8 max-w-2xl w-full border border-red-200">
             {/* Ícone */}
             <div className="flex justify-center mb-6">
@@ -116,13 +116,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
                     Detalhes do Erro (Desenvolvimento)
                   </summary>
                   <div className="mt-3 space-y-2">
-                    <p className="text-sm font-mono text-red-800 break-words">
+                    <p className="text-sm font-mono text-red-800 wrap-break-word">
                       {this.state.error.message}
                     </p>
                     {this.state.errorInfo?.componentStack && (
                       <div className="mt-3 bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
                         <pre className="whitespace-pre-wrap">
-                          {this.state.errorInfo.componentStack.substring(0, 500)}
+                          {this.state.errorInfo.componentStack.substring(
+                            0,
+                            500
+                          )}
                         </pre>
                       </div>
                     )}
@@ -141,11 +144,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
             {/* Botões de ação */}
             <div className="flex gap-3 justify-center">
-              <Button
-                onClick={this.handleReset}
-                className="gap-2"
-                size="lg"
-              >
+              <Button onClick={this.handleReset} className="gap-2" size="lg">
                 <RotateCcw className="w-4 h-4" />
                 Tentar Novamente
               </Button>
@@ -169,7 +168,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 <p className="font-semibold mb-1">💡 Modo Desenvolvimento</p>
                 <p>
                   Os detalhes do erro acima aparecem apenas neste ambiente. Em
-                  produção, os usuários verão apenas a mensagem de erro amigável.
+                  produção, os usuários verão apenas a mensagem de erro
+                  amigável.
                 </p>
               </div>
             )}
@@ -186,10 +186,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
    */
   private generateErrorId(): string {
     const timestamp = new Date().toISOString();
-    const errorHash = this.state.error
-      ?.message.substring(0, 20)
-      .replace(/\s+/g, '_')
-      .toUpperCase() || 'UNKNOWN';
+    const errorHash =
+      this.state.error?.message
+        .substring(0, 20)
+        .replace(/\s+/g, '_')
+        .toUpperCase() || 'UNKNOWN';
 
     return `ERR_${errorHash}_${Date.now()}`;
   }

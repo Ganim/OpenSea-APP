@@ -1,6 +1,5 @@
 'use client';
 
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -9,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { templatesService, categoriesService } from '@/services/stock';
-import type { Template, Category, ProductStatus } from '@/types/stock';
+import { logger } from '@/lib/logger';
+import { categoriesService, templatesService } from '@/services/stock';
+import type { Category, ProductStatus, Template } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
 import { Boxes, Folder, LayoutTemplate, X } from 'lucide-react';
 import { useMemo } from 'react';
@@ -50,9 +50,13 @@ export function ProductsFilterBar({
         const response = await templatesService.listTemplates();
         return response?.templates ?? [];
       } catch (error) {
-        logger.error('Failed to fetch templates', error instanceof Error ? error : new Error(String(error)), {
-          context: 'stock-filter-bar'
-        });
+        logger.error(
+          'Failed to fetch templates',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            context: 'stock-filter-bar',
+          }
+        );
         return [];
       }
     },
@@ -67,9 +71,13 @@ export function ProductsFilterBar({
         const response = await categoriesService.listCategories();
         return response?.categories ?? [];
       } catch (error) {
-        logger.error('Failed to fetch categories', error instanceof Error ? error : new Error(String(error)), {
-          context: 'stock-filter-bar'
-        });
+        logger.error(
+          'Failed to fetch categories',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            context: 'stock-filter-bar',
+          }
+        );
         return [];
       }
     },
@@ -160,7 +168,7 @@ export function ProductsFilterBar({
             value={filters.status || 'all'}
             onValueChange={handleStatusChange}
           >
-            <SelectTrigger className="w-[160px] h-10">
+            <SelectTrigger className="w-40 h-10">
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
             <SelectContent>
@@ -321,7 +329,7 @@ export function ItemsFilterBar({
             value={filters.status || 'all'}
             onValueChange={handleStatusChange}
           >
-            <SelectTrigger className="w-[160px] h-10">
+            <SelectTrigger className="w-40 h-10">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

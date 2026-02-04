@@ -64,9 +64,13 @@ export default function TemplateDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ['templates'] });
       toast.success('Template atualizado com sucesso!');
     } catch (error) {
-      logger.error('Failed to save template', error instanceof Error ? error : new Error(String(error)), {
-        templateId: params.id
-      });
+      logger.error(
+        'Failed to save template',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          templateId: params.id,
+        }
+      );
       toast.error('Erro ao salvar template');
       throw error;
     }

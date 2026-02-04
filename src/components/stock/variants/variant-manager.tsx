@@ -47,14 +47,11 @@ export function VariantManager({ productId }: VariantManagerProps) {
 
   // Debug
   useEffect(() => {
-    logger.debug(
-      '🔍 VariantManager iniciado',
-      { 
-        productId,
-        variantsLoaded: variants.length,
-        isLoading: isLoadingVariants 
-      }
-    );
+    logger.debug('🔍 VariantManager iniciado', {
+      productId,
+      variantsLoaded: variants.length,
+      isLoading: isLoadingVariants,
+    });
   }, [productId, variants.length, isLoadingVariants]);
 
   const { data: product } = useQuery<Product>({

@@ -50,7 +50,9 @@ export interface AttributeConfig {
 /**
  * Seção de formulário com campos
  */
-export interface FormSection {
+export interface FormSection<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
   title?: string;
   description?: string;
   fields: FormFieldConfig[];
@@ -70,12 +72,14 @@ export interface FormTab {
 /**
  * Configuração completa do formulário de entidade
  */
-export interface EntityFormConfig {
+export interface EntityFormConfig<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
   entity: string; // "Template", "Produto", etc.
   tabs?: FormTab[]; // Se usar abas
-  sections?: FormSection[]; // Se não usar abas
-  onSubmit: (data: Record<string, unknown>) => Promise<void>;
-  defaultValues?: Record<string, unknown>;
+  sections?: FormSection<T>[]; // Se não usar abas
+  onSubmit: (data: T) => Promise<void>;
+  defaultValues?: T;
   submitLabel?: string;
   cancelLabel?: string;
   onCancel?: () => void;

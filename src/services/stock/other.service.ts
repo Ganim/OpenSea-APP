@@ -134,7 +134,10 @@ export const templatesService = {
     id: string,
     data: UpdateTemplateRequest
   ): Promise<TemplateResponse> {
-    logger.debug('Updating template', { id, dataKeys: Object.keys(data || {}) });
+    logger.debug('Updating template', {
+      id,
+      dataKeys: Object.keys(data || {}),
+    });
     const result = await apiClient.put<TemplateResponse>(
       API_ENDPOINTS.TEMPLATES.UPDATE(id),
       data
