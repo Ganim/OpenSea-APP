@@ -6,15 +6,10 @@
 import {
   STOCK_PERMISSIONS,
   DATA_PERMISSIONS,
-  REPORTS_PERMISSIONS,
 } from '@/config/rbac/permission-codes';
 import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { MenuItem } from '@/types/menu';
 import {
-  BarChart3,
-  Box,
-  Building2,
-  ClipboardCheck,
   Factory,
   FileText,
   Folder,
@@ -25,8 +20,6 @@ import {
   List,
   MapPin,
   Package,
-  PackageOpen,
-  Palette,
   ShoppingCart,
   TagIcon,
   Upload,
@@ -65,13 +58,6 @@ export const stockMenu: MenuItem = {
           requiredPermission: STOCK_PERMISSIONS.PRODUCTS.LIST,
         },
         {
-          id: 'stock-items',
-          label: 'Itens',
-          icon: <Box className="w-6 h-6" />,
-          href: '/stock/items',
-          requiredPermission: STOCK_PERMISSIONS.ITEMS.LIST,
-        },
-        {
           id: 'stock-movements',
           label: 'Movimentações',
           icon: <History className="w-6 h-6" />,
@@ -93,32 +79,11 @@ export const stockMenu: MenuItem = {
           requiredPermission: STOCK_PERMISSIONS.PURCHASE_ORDERS.LIST,
         },
         {
-          id: 'stock-inventory',
-          label: 'Inventário',
-          icon: <ClipboardCheck className="w-6 h-6" />,
-          href: '/stock/inventory',
-          requiredPermission: STOCK_PERMISSIONS.ITEMS.LIST,
-        },
-        {
-          id: 'stock-analytics',
-          label: 'Analytics',
-          icon: <BarChart3 className="w-6 h-6" />,
-          href: '/stock/analytics',
-          requiredPermission: REPORTS_PERMISSIONS.STOCK.VIEW,
-        },
-        {
           id: 'stock-import',
           label: 'Importação',
           icon: <Upload className="w-6 h-6" />,
-          href: '/stock/import',
+          href: '/import',
           requiredPermission: DATA_PERMISSIONS.IMPORT.PRODUCTS,
-        },
-        {
-          id: 'stock-volumes',
-          label: 'Volumes/Romaneio',
-          icon: <PackageOpen className="w-6 h-6" />,
-          href: '/stock/volumes',
-          requiredPermission: STOCK_PERMISSIONS.ITEMS.LIST,
         },
       ],
     },
@@ -142,25 +107,11 @@ export const stockMenu: MenuItem = {
           requiredPermission: STOCK_PERMISSIONS.PRODUCTS.LIST,
         },
         {
-          id: 'variants',
-          label: 'Variantes',
-          icon: <Palette className="w-6 h-6" />,
-          href: '/stock/variants',
-          requiredPermission: STOCK_PERMISSIONS.VARIANTS.LIST,
-        },
-        {
           id: 'locations',
           label: 'Localizações',
           icon: <MapPin className="w-6 h-6" />,
           href: '/stock/locations',
           requiredPermission: STOCK_PERMISSIONS.LOCATIONS.LIST,
-        },
-        {
-          id: 'suppliers',
-          label: 'Fornecedores',
-          icon: <Building2 className="w-6 h-6" />,
-          href: '/stock/suppliers',
-          requiredPermission: STOCK_PERMISSIONS.SUPPLIERS.LIST,
         },
         {
           id: 'manufacturers',

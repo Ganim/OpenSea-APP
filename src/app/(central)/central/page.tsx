@@ -1,180 +1,170 @@
 'use client';
 
+import { GlassButton } from '@/components/central/glass-button';
 import { GlassCard } from '@/components/central/glass-card';
-import { StatCard } from '@/components/central/stat-card';
-import { useDashboardStats } from '@/hooks/admin/use-admin';
+import { useAuth } from '@/contexts/auth-context';
 import {
-  Activity,
+  ArrowRight,
   Building2,
   CreditCard,
-  Package,
-  TrendingUp,
+  Crown,
+  Settings,
+  Shield,
+  Sparkles,
 } from 'lucide-react';
+import Link from 'next/link';
 
-export default function CentralDashboardPage() {
-  const { data, isLoading } = useDashboardStats();
+const quickLinks = [
+  {
+    title: 'Empresas',
+    description: 'Gerencie tenants, usuários e configurações de cada empresa',
+    icon: Building2,
+    href: '/central/tenants',
+    accent: 'central-accent-blue',
+  },
+  {
+    title: 'Planos',
+    description: 'Configure planos de assinatura, módulos e limites',
+    icon: CreditCard,
+    href: '/central/plans',
+    accent: 'central-accent-purple',
+  },
+];
 
-  const mainStats = [
-    {
-      label: 'Total de Empresas',
-      value: data?.totalTenants ?? 0,
-      icon: Building2,
-      color: 'blue' as const,
-      trend: { value: 12, isPositive: true },
-    },
-    {
-      label: 'Total de Planos',
-      value: data?.totalPlans ?? 0,
-      icon: CreditCard,
-      color: 'purple' as const,
-      trend: { value: 5, isPositive: true },
-    },
-    {
-      label: 'Planos Ativos',
-      value: data?.activePlans ?? 0,
-      icon: Activity,
-      color: 'green' as const,
-      trend: { value: 8, isPositive: true },
-    },
-  ];
+const features = [
+  {
+    icon: Shield,
+    title: 'Controle Total',
+    description: 'Gerencie todas as empresas do sistema em um único lugar',
+  },
+  {
+    icon: Settings,
+    title: 'Configurações',
+    description: 'Ajuste planos, módulos e feature flags por tenant',
+  },
+  {
+    icon: Sparkles,
+    title: 'Monitoramento',
+    description: 'Acompanhe o status e atividade de cada empresa',
+  },
+];
+
+export default function CentralWelcomePage() {
+  const { user } = useAuth();
+
+  const firstName = user?.email?.split('@')[0] ?? 'Admin';
 
   return (
     <div className="space-y-8 pb-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight text-white">
-          Dashboard Central
-        </h1>
-        <p className="text-white/60 text-lg">Visão geral do sistema OpenSea</p>
-      </div>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl">
+        <GlassCard variant="gradient" className="p-8 md:p-12 central-accent-amber">
+          {/* Background decorations */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[rgb(var(--os-amber-500)/0.1)] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[rgb(var(--os-purple-500)/0.1)] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-      {/* Main Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {mainStats.map(stat => (
-          <StatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            icon={stat.icon}
-            color={stat.color}
-            trend={stat.trend}
-            isLoading={isLoading}
-          />
-        ))}
-      </div>
-
-      {/* Secondary Stats - Two Columns */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Activity Overview */}
-        <GlassCard variant="gradient" className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/20">
-              <TrendingUp className="h-5 w-5 text-cyan-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                Atividade Recente
-              </h3>
-              <p className="text-sm text-white/60">Últimas 24 horas</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-white/90 text-sm">Novos cadastros</span>
+          <div className="relative z-10 max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-xl central-accent-gradient">
+                <Crown className="h-6 w-6 central-accent-text" />
               </div>
-              <span className="text-white font-semibold">
-                +{data?.totalTenants ?? 0}
+              <span className="text-sm font-medium central-text-muted">
+                Painel Administrativo
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-white/90 text-sm">
-                  Planos contratados
-                </span>
-              </div>
-              <span className="text-white font-semibold">
-                +{data?.activePlans ?? 0}
-              </span>
-            </div>
-          </div>
-        </GlassCard>
+            <h1 className="text-3xl md:text-4xl font-bold central-text mb-3">
+              Bem-vindo, {firstName}!
+            </h1>
 
-        {/* Quick Stats */}
-        <GlassCard variant="gradient" className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-pink-500/20 to-pink-600/20">
-              <Package className="h-5 w-5 text-pink-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                Métricas Rápidas
-              </h3>
-              <p className="text-sm text-white/60">Visão geral do sistema</p>
-            </div>
-          </div>
+            <p className="text-lg central-text-muted mb-6">
+              Este é o painel central do OpenSea. Aqui você pode gerenciar todas
+              as empresas, planos de assinatura e configurações do sistema.
+            </p>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-2xl font-bold text-white mb-1">
-                {isLoading ? '...' : (data?.totalTenants ?? 0)}
-              </div>
-              <div className="text-xs text-white/60">Empresas</div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-2xl font-bold text-white mb-1">
-                {isLoading ? '...' : (data?.totalPlans ?? 0)}
-              </div>
-              <div className="text-xs text-white/60">Planos</div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-2xl font-bold text-white mb-1">
-                {isLoading ? '...' : (data?.activePlans ?? 0)}
-              </div>
-              <div className="text-xs text-white/60">Ativos</div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-2xl font-bold text-white mb-1">
-                {isLoading
-                  ? '...'
-                  : (data?.totalTenants ?? 0) - (data?.activePlans ?? 0)}
-              </div>
-              <div className="text-xs text-white/60">Inativos</div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/central/tenants">
+                <GlassButton variant="primary" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Ver Empresas
+                </GlassButton>
+              </Link>
+              <Link href="/central/plans">
+                <GlassButton variant="secondary" className="gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Ver Planos
+                </GlassButton>
+              </Link>
             </div>
           </div>
         </GlassCard>
       </div>
 
-      {/* Full Width Chart Card */}
-      <GlassCard variant="gradient" className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/20">
-              <TrendingUp className="h-5 w-5 text-amber-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">Crescimento</h3>
-              <p className="text-sm text-white/60">Evolução mensal</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-white">+24%</div>
-            <div className="text-xs text-green-400">vs. mês anterior</div>
-          </div>
+      {/* Quick Links */}
+      <div>
+        <h2 className="text-xl font-semibold central-text mb-4">Acesso Rápido</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {quickLinks.map(link => (
+            <Link key={link.href} href={link.href}>
+              <GlassCard
+                variant="gradient"
+                hover
+                className={`p-6 h-full group ${link.accent}`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl central-accent-gradient shrink-0">
+                    <link.icon className="h-5 w-5 central-accent-text" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold central-text mb-1 flex items-center gap-2">
+                      {link.title}
+                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </h3>
+                    <p className="text-sm central-text-muted">{link.description}</p>
+                  </div>
+                </div>
+              </GlassCard>
+            </Link>
+          ))}
         </div>
+      </div>
 
-        {/* Placeholder para gráfico */}
-        <div className="h-48 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-          <p className="text-white/40 text-sm">
-            Gráfico de crescimento (em desenvolvimento)
-          </p>
+      {/* Features Grid */}
+      <div>
+        <h2 className="text-xl font-semibold central-text mb-4">
+          O que você pode fazer
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {features.map(feature => (
+            <GlassCard key={feature.title} className="p-6">
+              <div className="p-2 rounded-lg central-glass-subtle w-fit mb-4">
+                <feature.icon className="h-5 w-5 central-text-muted" />
+              </div>
+              <h3 className="font-semibold central-text mb-2">{feature.title}</h3>
+              <p className="text-sm central-text-muted">{feature.description}</p>
+            </GlassCard>
+          ))}
+        </div>
+      </div>
+
+      {/* Help Card */}
+      <GlassCard className="p-6 central-accent-cyan">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex-1">
+            <h3 className="font-semibold central-text mb-1">
+              Precisa de ajuda?
+            </h3>
+            <p className="text-sm central-text-muted">
+              Use o menu lateral para navegar entre as seções. Cada área possui
+              funcionalidades específicas para gerenciar o sistema.
+            </p>
+          </div>
+          <Link href="/central/tenants">
+            <GlassButton variant="ghost" className="gap-2 shrink-0">
+              Começar
+              <ArrowRight className="h-4 w-4" />
+            </GlassButton>
+          </Link>
         </div>
       </GlassCard>
     </div>

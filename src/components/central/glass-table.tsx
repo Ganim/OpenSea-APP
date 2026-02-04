@@ -8,6 +8,7 @@ export interface GlassTableProps {
 
 /**
  * Tabela com efeito glassmorphism
+ * Usa design tokens CSS para adaptar automaticamente ao tema (light/dark-blue)
  */
 export function GlassTable({ children, className }: GlassTableProps) {
   return (
@@ -30,7 +31,12 @@ export function GlassTableHeader({
   className?: string;
 }) {
   return (
-    <thead className={cn('border-b border-white/10', className)}>
+    <thead
+      className={cn(
+        'border-b border-[rgb(var(--glass-border)/var(--glass-border-opacity))]',
+        className
+      )}
+    >
       {children}
     </thead>
   );
@@ -54,8 +60,9 @@ export function GlassTableRow({
   return (
     <tr
       className={cn(
-        'border-b border-white/5 transition-colors',
-        'hover:bg-white/5',
+        'border-b central-transition',
+        'border-[rgb(var(--glass-border)/calc(var(--glass-border-opacity)*0.5))]',
+        'hover:bg-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
         className
       )}
       {...props}
@@ -75,7 +82,8 @@ export function GlassTableHead({
   return (
     <th
       className={cn(
-        'px-6 py-4 text-left text-xs font-semibold text-white/80 uppercase tracking-wider',
+        'px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider',
+        'central-text-muted',
         className
       )}
     >
@@ -96,7 +104,7 @@ export function GlassTableCell({
   return (
     <td
       colSpan={colSpan}
-      className={cn('px-6 py-4 text-sm text-white/90', className)}
+      className={cn('px-6 py-4 text-sm central-text', className)}
     >
       {children}
     </td>

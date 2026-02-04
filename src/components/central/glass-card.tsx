@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { HTMLAttributes, forwardRef } from 'react';
 
 export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'darker' | 'lighter' | 'gradient';
+  variant?: 'default' | 'subtle' | 'strong' | 'gradient';
   blur?: 'sm' | 'md' | 'lg' | 'xl';
   hover?: boolean;
 }
@@ -10,6 +10,7 @@ export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
 /**
  * Card com efeito glassmorphism
  * Variações de transparência e blur configuráveis
+ * Usa design tokens CSS para adaptar automaticamente ao tema (light/dark-blue)
  */
 export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
   (
@@ -24,10 +25,11 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
     ref
   ) => {
     const variants = {
-      default: 'bg-white/10 dark:bg-white/5 border-white/20',
-      darker: 'bg-black/20 dark:bg-black/30 border-white/10',
-      lighter: 'bg-white/20 dark:bg-white/10 border-white/30',
-      gradient: 'bg-gradient-to-br from-white/15 to-white/5 border-white/20',
+      default: 'central-glass',
+      subtle: 'central-glass-subtle',
+      strong: 'central-glass-strong',
+      gradient:
+        'central-glass bg-gradient-to-br from-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*1.5))] to-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
     };
 
     const blurs = {
@@ -41,12 +43,10 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl border shadow-xl',
-          'backdrop-saturate-150',
+          'rounded-2xl shadow-xl backdrop-saturate-150 central-transition',
           variants[variant],
           blurs[blur],
-          hover &&
-            'transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:bg-white/15',
+          hover && 'central-glass-hover hover:scale-[1.02] hover:shadow-2xl',
           className
         )}
         {...props}

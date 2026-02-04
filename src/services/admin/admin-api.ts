@@ -1,43 +1,35 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import {
-  AdminTenantSchema,
-  AdminTenantsListResponseSchema,
-  TenantDetailSchema,
-  AdminPlanSchema,
-  AdminPlansListResponseSchema,
-  AdminPlanDetailSchema,
-  AdminPlanModuleSchema,
-  AdminTenantUserSchema,
-  AdminTenantUsersListResponseSchema,
-  AdminFeatureFlagSchema,
-  DashboardStatsSchema,
-  type AdminTenant,
-  type AdminTenantsListResponse,
-  type TenantDetail,
-  type AdminPlan,
-  type AdminPlansListResponse,
-  type AdminPlanDetail,
-  type AdminPlanModule,
-  type AdminTenantUser,
-  type AdminTenantUsersListResponse,
-  type AdminFeatureFlag,
-  type DashboardStats,
+    AdminFeatureFlagSchema,
+    AdminPlanDetailSchema,
+    AdminPlanSchema,
+    AdminPlansListResponseSchema,
+    AdminTenantSchema,
+    AdminTenantsListResponseSchema,
+    AdminTenantUserSchema,
+    AdminTenantUsersListResponseSchema,
+    DashboardStatsSchema,
+    TenantDetailSchema,
+    type AdminFeatureFlag,
+    type AdminPlan,
+    type AdminPlanDetail,
+    type AdminPlanModule,
+    type AdminPlansListResponse,
+    type AdminTenant,
+    type AdminTenantsListResponse,
+    type AdminTenantUser,
+    type AdminTenantUsersListResponse,
+    type DashboardStats,
+    type TenantDetail
 } from '@/schemas/admin.schemas';
 
 // Re-export types for backward compatibility
 export type {
-  AdminTenant,
-  AdminTenantsListResponse,
-  TenantDetail,
-  AdminPlan,
-  AdminPlansListResponse,
-  AdminPlanDetail,
-  AdminPlanModule,
-  AdminTenantUser,
-  AdminTenantUsersListResponse,
-  AdminFeatureFlag,
-  DashboardStats,
+    AdminFeatureFlag, AdminPlan, AdminPlanDetail,
+    AdminPlanModule, AdminPlansListResponse, AdminTenant,
+    AdminTenantsListResponse, AdminTenantUser,
+    AdminTenantUsersListResponse, DashboardStats, TenantDetail
 };
 
 // API functions
@@ -76,7 +68,7 @@ export const adminApi = {
   },
 
   changeTenantPlan: async (id: string, planId: string) => {
-    const response = await apiClient.patch<unknown>(
+    const response = await apiClient.put<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.CHANGE_PLAN(id),
       { planId }
     );

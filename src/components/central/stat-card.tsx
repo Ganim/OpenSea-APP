@@ -1,6 +1,6 @@
-import { GlassCard } from './glass-card';
-import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
+import { GlassCard } from './glass-card';
 
 export interface StatCardProps {
   label: string;
@@ -14,17 +14,18 @@ export interface StatCardProps {
   isLoading?: boolean;
 }
 
-const colorClasses = {
-  blue: 'from-blue-500/20 to-blue-600/20 text-blue-400',
-  purple: 'from-purple-500/20 to-purple-600/20 text-purple-400',
-  pink: 'from-pink-500/20 to-pink-600/20 text-pink-400',
-  amber: 'from-amber-500/20 to-amber-600/20 text-amber-400',
-  green: 'from-green-500/20 to-green-600/20 text-green-400',
-  cyan: 'from-cyan-500/20 to-cyan-600/20 text-cyan-400',
+const accentClasses = {
+  blue: 'central-accent-blue',
+  purple: 'central-accent-purple',
+  pink: 'central-accent-pink',
+  amber: 'central-accent-amber',
+  green: 'central-accent-green',
+  cyan: 'central-accent-cyan',
 };
 
 /**
  * Card de estatística com glassmorphism
+ * Usa design tokens CSS para adaptar automaticamente ao tema (light/dark-blue)
  * Usado no dashboard para exibir métricas importantes
  */
 export function StatCard({
@@ -39,29 +40,26 @@ export function StatCard({
     <GlassCard
       variant="gradient"
       hover
-      className="p-6 relative overflow-hidden group"
+      className={cn('p-6 relative overflow-hidden group', accentClasses[color])}
     >
       {/* Background gradient animado no hover */}
-      <div
-        className={cn(
-          'absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500',
-          colorClasses[color]
-        )}
-      />
+      <div className="absolute inset-0 central-accent-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative z-10 flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-white/70 mb-1">{label}</p>
+          <p className="text-sm font-medium mb-1 central-text-muted">{label}</p>
           {isLoading ? (
-            <div className="h-8 w-24 bg-white/10 rounded animate-pulse" />
+            <div className="h-8 w-24 rounded animate-pulse central-glass-subtle" />
           ) : (
-            <p className="text-3xl font-bold text-white">{value}</p>
+            <p className="text-3xl font-bold central-text">{value}</p>
           )}
           {trend && (
             <p
               className={cn(
                 'text-xs mt-2 font-medium',
-                trend.isPositive ? 'text-green-400' : 'text-red-400'
+                trend.isPositive
+                  ? 'text-[rgb(var(--color-success))]'
+                  : 'text-[rgb(var(--color-destructive))]'
               )}
             >
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
@@ -69,12 +67,7 @@ export function StatCard({
           )}
         </div>
 
-        <div
-          className={cn(
-            'p-3 rounded-xl bg-gradient-to-br shadow-lg',
-            colorClasses[color]
-          )}
-        >
+        <div className="p-3 rounded-xl shadow-lg central-accent-gradient central-accent-text">
           <Icon className="h-6 w-6" />
         </div>
       </div>

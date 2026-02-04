@@ -37,10 +37,10 @@ export default function PlansListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-white">
+          <h1 className="text-4xl font-bold tracking-tight central-text">
             Planos
           </h1>
-          <p className="text-white/60 text-lg mt-1">
+          <p className="central-text-muted text-lg mt-1">
             Gerencie os planos de assinatura do sistema
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function PlansListPage() {
           {[1, 2, 3, 4].map(i => (
             <div
               key={i}
-              className="h-80 rounded-2xl bg-white/5 animate-pulse"
+              className="h-80 rounded-2xl central-glass-subtle animate-pulse"
             />
           ))}
         </div>
@@ -83,7 +83,7 @@ export default function PlansListPage() {
                     <div
                       className={`p-2 rounded-lg bg-linear-to-br ${tierGradients[plan.tier]}`}
                     >
-                      <CreditCard className="h-5 w-5 text-white" />
+                      <CreditCard className="h-5 w-5 central-text" />
                     </div>
                   </div>
                   <GlassBadge variant={tierColors[plan.tier] ?? 'default'}>
@@ -92,23 +92,23 @@ export default function PlansListPage() {
                 </div>
 
                 {/* Plan Name */}
-                <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                <h3 className="text-xl font-bold central-text">{plan.name}</h3>
 
                 {/* Price */}
                 <div>
-                  <p className="text-3xl font-bold text-white">
+                  <p className="text-3xl font-bold central-text">
                     {plan.price === 0
                       ? 'Grátis'
                       : `R$ ${plan.price.toFixed(2)}`}
                   </p>
                   {plan.price > 0 && (
-                    <p className="text-sm text-white/60">/mês</p>
+                    <p className="text-sm central-text-muted">/mês</p>
                   )}
                 </div>
 
                 {/* Description */}
                 {plan.description && (
-                  <p className="text-sm text-white/70 line-clamp-2">
+                  <p className="text-sm central-text-muted line-clamp-2">
                     {plan.description}
                   </p>
                 )}
@@ -116,19 +116,19 @@ export default function PlansListPage() {
                 {/* Features */}
                 <div className="space-y-2.5 pt-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-1 rounded bg-white/10">
-                      <Users className="h-3.5 w-3.5 text-white/80" />
+                    <div className="p-1 rounded central-glass-subtle">
+                      <Users className="h-3.5 w-3.5 central-text-muted" />
                     </div>
-                    <span className="text-sm text-white/90">
+                    <span className="text-sm central-text">
                       {plan.maxUsers >= 999999 ? 'Ilimitado' : plan.maxUsers}{' '}
                       usuários
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <div className="p-1 rounded bg-white/10">
-                      <Warehouse className="h-3.5 w-3.5 text-white/80" />
+                    <div className="p-1 rounded central-glass-subtle">
+                      <Warehouse className="h-3.5 w-3.5 central-text-muted" />
                     </div>
-                    <span className="text-sm text-white/90">
+                    <span className="text-sm central-text">
                       {plan.maxWarehouses >= 999999
                         ? 'Ilimitado'
                         : plan.maxWarehouses}{' '}
@@ -136,10 +136,10 @@ export default function PlansListPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <div className="p-1 rounded bg-white/10">
-                      <Package className="h-3.5 w-3.5 text-white/80" />
+                    <div className="p-1 rounded central-glass-subtle">
+                      <Package className="h-3.5 w-3.5 central-text-muted" />
                     </div>
-                    <span className="text-sm text-white/90">
+                    <span className="text-sm central-text">
                       {plan.maxProducts >= 999999
                         ? 'Ilimitado'
                         : plan.maxProducts}{' '}
@@ -150,7 +150,7 @@ export default function PlansListPage() {
               </div>
 
               {/* Footer */}
-              <div className="relative z-10 flex items-center justify-between pt-4 mt-4 border-t border-white/10">
+              <div className="relative z-10 flex items-center justify-between pt-4 mt-4 border-t central-divider">
                 {plan.isActive ? (
                   <GlassBadge variant="success" className="gap-1">
                     <Check className="h-3 w-3" />
@@ -175,11 +175,11 @@ export default function PlansListPage() {
       {!isLoading && data?.plans.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16">
           <GlassCard variant="gradient" className="p-12 max-w-md text-center">
-            <CreditCard className="h-16 w-16 text-white/20 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <CreditCard className="h-16 w-16 central-text-subtle mx-auto mb-4" />
+            <h3 className="text-xl font-semibold central-text mb-2">
               Nenhum plano cadastrado
             </h3>
-            <p className="text-white/60 mb-6">
+            <p className="central-text-muted mb-6">
               Comece criando o primeiro plano de assinatura do sistema
             </p>
             <Link href="/central/plans/new">

@@ -1,7 +1,7 @@
 'use client';
 
 import { GlassBadge, GlassButton, GlassCard } from '@/components/central';
-import { Input } from '@/components/ui/input';
+import { GlassInput } from '@/components/central/glass-input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -14,17 +14,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   useAdminPlan,
   useDeletePlan,
   useSetPlanModules,
   useUpdatePlan,
 } from '@/hooks/admin/use-admin';
+import { cn } from '@/lib/utils';
+import { PlanTier } from '@/types/enums';
 import {
   AlertCircle,
   ArrowLeft,
@@ -39,7 +35,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { PlanTier } from '@/types/enums';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -59,7 +54,8 @@ const TIERS = ['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'];
 export default function EditPlanPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data, isLoading } = useAdminPlan(id);
+
+  const { data, isLoading, error } = useAdminPlan(id);
   const updatePlan = useUpdatePlan();
   const setModules = useSetPlanModules();
   const deletePlan = useDeletePlan();
@@ -142,11 +138,19 @@ export default function EditPlanPage() {
     );
   }
 
-  if (!data) {
+  if (error || !data) {
     return (
       <GlassCard className="p-8 text-center">
-        <AlertCircle className="h-12 w-12 text-white/40 mx-auto mb-4" />
-        <p className="text-white/60">Plano não encontrado</p>
+        <AlertCircle className="h-12 w-12 mx-auto mb-4 central-text-subtle" />
+        <p className="central-text-muted">
+          {error instanceof Error ? error.message : 'Plano não encontrado'}
+        </p>
+        <Link href="/central/plans" className="mt-4 inline-block">
+          <GlassButton variant="secondary" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para lista
+          </GlassButton>
+        </Link>
       </GlassCard>
     );
   }
@@ -177,8 +181,8 @@ export default function EditPlanPage() {
             </GlassButton>
           </Link>
           <div>
-            <h1 className="text-4xl font-bold text-white">Editar Plano</h1>
-            <p className="text-white/60 text-lg mt-1">{form.name}</p>
+            <h1 className="text-4xl font-bold central-text">Editar Plano</h1>
+            <p className="central-text-muted text-lg mt-1">{form.name}</p>
           </div>
         </div>
         <GlassBadge
@@ -190,7 +194,10 @@ export default function EditPlanPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Informações Principais */}
-        <GlassCard variant="gradient" className="p-6 lg:col-span-2">
+        <GlassCard
+          variant="gradient"
+          className="p-6 lg:col-span-2 central-accent-blue"
+        >
           <div className="flex items-center gap-3 mb-6">
             <div
               className={`p-3 rounded-xl bg-linear-to-br ${tierColors[form.tier as keyof typeof tierColors]}`}
@@ -198,29 +205,28 @@ export default function EditPlanPage() {
               <CreditCard className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Informações</h2>
-              <p className="text-white/60 text-sm">Dados do plano</p>
+              <h2 className="text-xl font-bold central-text">Informações</h2>
+              <p className="central-text-muted text-sm">Dados do plano</p>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-white/90">
+                <Label htmlFor="name" className="central-text">
                   Nome do Plano
                 </Label>
-                <Input
+                <GlassInput
                   id="name"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-white/90">
+                <Label htmlFor="price" className="central-text">
                   Preço Mensal (R$)
                 </Label>
-                <Input
+                <GlassInput
                   id="price"
                   type="number"
                   step="0.01"
@@ -228,13 +234,12 @@ export default function EditPlanPage() {
                   onChange={e =>
                     setForm(f => ({ ...f, price: Number(e.target.value) }))
                   }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tier" className="text-white/90">
+              <Label htmlFor="tier" className="central-text">
                 Tier
               </Label>
               <Select
@@ -243,7 +248,7 @@ export default function EditPlanPage() {
                   setForm(f => ({ ...f, tier: v as PlanTier }))
                 }
               >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="central-glass central-text border-[rgb(var(--glass-border)/var(--glass-border-opacity))]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -257,7 +262,7 @@ export default function EditPlanPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-white/90">
+              <Label htmlFor="description" className="central-text">
                 Descrição
               </Label>
               <Textarea
@@ -266,21 +271,21 @@ export default function EditPlanPage() {
                 onChange={e =>
                   setForm(f => ({ ...f, description: e.target.value }))
                 }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                className="central-glass central-text border-[rgb(var(--glass-border)/var(--glass-border-opacity))] placeholder:central-text-subtle"
                 rows={4}
               />
             </div>
 
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3 p-4 rounded-lg central-glass-subtle">
               <Switch
                 checked={form.isActive}
                 onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))}
               />
               <div>
-                <Label className="text-white/90 cursor-pointer">
+                <Label className="central-text cursor-pointer">
                   Plano Ativo
                 </Label>
-                <p className="text-xs text-white/60">
+                <p className="text-xs central-text-muted">
                   {form.isActive
                     ? 'Disponível para contratação'
                     : 'Oculto de clientes'}
@@ -294,30 +299,30 @@ export default function EditPlanPage() {
         <GlassCard className="p-6 h-fit">
           <div className="space-y-4">
             <div>
-              <p className="text-white/70 text-sm">Valor Mensal</p>
-              <p className="text-3xl font-bold text-white mt-1">
+              <p className="central-text-muted text-sm">Valor Mensal</p>
+              <p className="text-3xl font-bold central-text mt-1">
                 R$ {form.price.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-white/70 text-xs">Status</p>
+            <div className="p-3 rounded-lg central-glass-subtle">
+              <p className="central-text-muted text-xs">Status</p>
               <div className="flex items-center gap-2 mt-2">
                 {form.isActive ? (
                   <>
-                    <div className="w-2 h-2 rounded-full bg-green-400" />
-                    <p className="text-white font-medium text-sm">Ativo</p>
+                    <div className="w-2 h-2 rounded-full bg-[rgb(var(--color-success))]" />
+                    <p className="central-text font-medium text-sm">Ativo</p>
                   </>
                 ) : (
                   <>
-                    <div className="w-2 h-2 rounded-full bg-red-400" />
-                    <p className="text-white font-medium text-sm">Inativo</p>
+                    <div className="w-2 h-2 rounded-full bg-[rgb(var(--color-destructive))]" />
+                    <p className="central-text font-medium text-sm">Inativo</p>
                   </>
                 )}
               </div>
             </div>
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-white/70 text-xs">Tier</p>
-              <p className="text-white font-bold mt-2">{form.tier}</p>
+            <div className="p-3 rounded-lg central-glass-subtle">
+              <p className="central-text-muted text-xs">Tier</p>
+              <p className="central-text font-bold mt-2">{form.tier}</p>
             </div>
           </div>
         </GlassCard>
@@ -326,23 +331,23 @@ export default function EditPlanPage() {
       {/* Limites e Módulos */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Limites */}
-        <GlassCard variant="gradient" className="p-6">
+        <GlassCard variant="gradient" className="p-6 central-accent-cyan">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-linear-to-br from-cyan-500/20 to-cyan-600/20">
-              <Package className="h-5 w-5 text-cyan-400" />
+            <div className="p-3 rounded-xl central-accent-gradient">
+              <Package className="h-5 w-5 central-accent-text" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Limites</h3>
-              <p className="text-white/60 text-sm">Restrições do plano</p>
+              <h3 className="text-lg font-bold central-text">Limites</h3>
+              <p className="central-text-muted text-sm">Restrições do plano</p>
             </div>
           </div>
 
           <div className="grid gap-4">
             <div className="space-y-2">
-              <Label htmlFor="maxUsers" className="text-white/90">
+              <Label htmlFor="maxUsers" className="central-text">
                 Máximo de Usuários
               </Label>
-              <Input
+              <GlassInput
                 id="maxUsers"
                 type="number"
                 value={form.maxUsers}
@@ -352,15 +357,16 @@ export default function EditPlanPage() {
                     maxUsers: Number(e.target.value),
                   }))
                 }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
-              <p className="text-xs text-white/50">999999 para ilimitado</p>
+              <p className="text-xs central-text-subtle">
+                999999 para ilimitado
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxWarehouses" className="text-white/90">
+              <Label htmlFor="maxWarehouses" className="central-text">
                 Máximo de Armazéns
               </Label>
-              <Input
+              <GlassInput
                 id="maxWarehouses"
                 type="number"
                 value={form.maxWarehouses}
@@ -370,14 +376,13 @@ export default function EditPlanPage() {
                     maxWarehouses: Number(e.target.value),
                   }))
                 }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxProducts" className="text-white/90">
+              <Label htmlFor="maxProducts" className="central-text">
                 Máximo de Produtos
               </Label>
-              <Input
+              <GlassInput
                 id="maxProducts"
                 type="number"
                 value={form.maxProducts}
@@ -387,31 +392,30 @@ export default function EditPlanPage() {
                     maxProducts: Number(e.target.value),
                   }))
                 }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-white/10">
+          <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t central-divider">
             <div className="text-center">
-              <Users className="h-5 w-5 text-blue-400 mx-auto mb-1" />
-              <p className="text-xs text-white/60">Usuários</p>
-              <p className="text-sm font-bold text-white">
+              <Users className="h-5 w-5 text-[rgb(var(--os-blue-500))] mx-auto mb-1" />
+              <p className="text-xs central-text-muted">Usuários</p>
+              <p className="text-sm font-bold central-text">
                 {form.maxUsers >= 999999 ? '∞' : form.maxUsers}
               </p>
             </div>
             <div className="text-center">
-              <Warehouse className="h-5 w-5 text-purple-400 mx-auto mb-1" />
-              <p className="text-xs text-white/60">Armazéns</p>
-              <p className="text-sm font-bold text-white">
+              <Warehouse className="h-5 w-5 text-[rgb(var(--os-purple-500))] mx-auto mb-1" />
+              <p className="text-xs central-text-muted">Armazéns</p>
+              <p className="text-sm font-bold central-text">
                 {form.maxWarehouses >= 999999 ? '∞' : form.maxWarehouses}
               </p>
             </div>
             <div className="text-center">
-              <Package className="h-5 w-5 text-pink-400 mx-auto mb-1" />
-              <p className="text-xs text-white/60">Produtos</p>
-              <p className="text-sm font-bold text-white">
+              <Package className="h-5 w-5 text-[rgb(var(--os-pink-500))] mx-auto mb-1" />
+              <p className="text-xs central-text-muted">Produtos</p>
+              <p className="text-sm font-bold central-text">
                 {form.maxProducts >= 999999 ? '∞' : form.maxProducts}
               </p>
             </div>
@@ -419,15 +423,15 @@ export default function EditPlanPage() {
         </GlassCard>
 
         {/* Módulos */}
-        <GlassCard variant="gradient" className="p-6">
+        <GlassCard variant="gradient" className="p-6 central-accent-amber">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-linear-to-br from-amber-500/20 to-amber-600/20">
-              <Zap className="h-5 w-5 text-amber-400" />
+            <div className="p-3 rounded-xl central-accent-gradient">
+              <Zap className="h-5 w-5 central-accent-text" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Módulos</h3>
-              <p className="text-white/60 text-sm">
-                {selectedModules.length}/{ALL_MODULES.length - 1} ativados
+              <h3 className="text-lg font-bold central-text">Módulos</h3>
+              <p className="central-text-muted text-sm">
+                {selectedModules.length}/{ALL_MODULES.length} ativados
               </p>
             </div>
           </div>
@@ -436,50 +440,34 @@ export default function EditPlanPage() {
             {ALL_MODULES.map(mod => (
               <div
                 key={mod}
-                onClick={() => mod !== 'NOTIFICATIONS' && toggleModule(mod)}
-                className={`p-3 rounded-lg border border-white/10 flex items-center gap-3 transition-all ${
-                  mod === 'NOTIFICATIONS'
-                    ? 'opacity-60 cursor-not-allowed bg-white/5'
-                    : 'cursor-pointer bg-white/5 hover:bg-white/10'
-                }`}
+                onClick={() => toggleModule(mod)}
+                className={cn(
+                  'p-3 rounded-lg flex items-center gap-3 transition-all cursor-pointer central-glass-subtle hover:central-glass'
+                )}
               >
                 <div className="relative">
-                  {mod === 'NOTIFICATIONS' ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="w-5 h-5 rounded border border-white/30 bg-white/5 flex items-center justify-center cursor-not-allowed">
-                            <AlertCircle className="h-3 w-3 text-orange-400" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-sm">
-                            Notificações em breve. Será implementado em uma
-                            próxima versão.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <>
-                      <input
-                        type="checkbox"
-                        id={mod}
-                        checked={selectedModules.includes(mod)}
-                        onChange={() => {}}
-                        className="sr-only"
-                      />
-                      <div className="w-5 h-5 rounded border border-white/30 bg-white/5 flex items-center justify-center">
-                        {selectedModules.includes(mod) && (
-                          <Check className="h-3 w-3 text-green-400" />
-                        )}
-                      </div>
-                    </>
-                  )}
+                  <input
+                    type="checkbox"
+                    id={mod}
+                    checked={selectedModules.includes(mod)}
+                    onChange={() => toggleModule(mod)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={cn(
+                      'w-5 h-5 rounded border flex items-center justify-center central-glass-subtle',
+                      selectedModules.includes(mod) &&
+                        'bg-[rgb(var(--color-success)/0.2)] border-[rgb(var(--color-success))]'
+                    )}
+                  >
+                    {selectedModules.includes(mod) && (
+                      <Check className="h-3 w-3 text-[rgb(var(--color-success))]" />
+                    )}
+                  </div>
                 </div>
                 <Label
                   htmlFor={mod}
-                  className="text-white/90 text-sm cursor-pointer"
+                  className="text-sm cursor-pointer central-text"
                 >
                   {mod}
                 </Label>
@@ -490,7 +478,7 @@ export default function EditPlanPage() {
       </div>
 
       {/* Ações */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/10">
+      <div className="flex items-center justify-between pt-4 border-t central-divider">
         <GlassButton variant="danger" onClick={handleDelete} className="gap-2">
           <Trash2 className="h-4 w-4" />
           Desativar Plano

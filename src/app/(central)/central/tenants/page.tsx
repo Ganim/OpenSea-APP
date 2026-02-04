@@ -49,10 +49,10 @@ export default function TenantsListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-white">
+          <h1 className="text-4xl font-bold tracking-tight central-text">
             Empresas
           </h1>
-          <p className="text-white/60 text-lg mt-1">
+          <p className="central-text-muted text-lg mt-1">
             Gerencie todas as empresas do sistema
           </p>
         </div>
@@ -78,7 +78,10 @@ export default function TenantsListPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+            <div
+              key={i}
+              className="h-16 rounded-xl central-glass-subtle animate-pulse"
+            />
           ))}
         </div>
       ) : (
@@ -97,16 +100,16 @@ export default function TenantsListPage() {
               <GlassTableRow key={tenant.id}>
                 <GlassTableCell>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30">
-                      <Building2 className="h-5 w-5 text-blue-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl central-accent-blue central-accent-gradient border border-[rgb(var(--os-blue-500)/0.3)]">
+                      <Building2 className="h-5 w-5 central-accent-text" />
                     </div>
-                    <span className="font-medium text-white">
+                    <span className="font-medium central-text">
                       {tenant.name}
                     </span>
                   </div>
                 </GlassTableCell>
                 <GlassTableCell>
-                  <span className="text-white/60 font-mono text-sm">
+                  <span className="central-text-muted font-mono text-sm">
                     {tenant.slug}
                   </span>
                 </GlassTableCell>
@@ -118,7 +121,7 @@ export default function TenantsListPage() {
                   </GlassBadge>
                 </GlassTableCell>
                 <GlassTableCell>
-                  <span className="text-white/70">
+                  <span className="central-text-muted">
                     {new Date(tenant.createdAt).toLocaleDateString('pt-BR')}
                   </span>
                 </GlassTableCell>
@@ -135,8 +138,10 @@ export default function TenantsListPage() {
               <GlassTableRow>
                 <GlassTableCell colSpan={5} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
-                    <Building2 className="h-12 w-12 text-white/20" />
-                    <p className="text-white/40">Nenhuma empresa encontrada</p>
+                    <Building2 className="h-12 w-12 central-text-subtle" />
+                    <p className="central-text-subtle">
+                      Nenhuma empresa encontrada
+                    </p>
                   </div>
                 </GlassTableCell>
               </GlassTableRow>
@@ -148,7 +153,7 @@ export default function TenantsListPage() {
       {/* Pagination */}
       {data?.meta && data.meta.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-white/60">
+          <p className="text-sm central-text-muted">
             {data.meta.total} empresas no total
           </p>
           <div className="flex gap-2">

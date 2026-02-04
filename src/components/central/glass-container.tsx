@@ -7,20 +7,21 @@ export interface GlassContainerProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * Container com efeito glassmorphism para agrupar conteúdo
+ * Usa design tokens CSS para adaptar automaticamente ao tema (light/dark-blue)
  */
 export const GlassContainer = forwardRef<HTMLDivElement, GlassContainerProps>(
   ({ className, variant = 'medium', children, ...props }, ref) => {
     const variants = {
-      subtle: 'bg-white/5 backdrop-blur-sm border-white/10',
-      medium: 'bg-white/10 backdrop-blur-md border-white/20',
-      strong: 'bg-white/15 backdrop-blur-lg border-white/30',
+      subtle: 'central-glass-subtle',
+      medium: 'central-glass',
+      strong: 'central-glass-strong',
     };
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-xl border shadow-lg backdrop-saturate-150',
+          'rounded-xl shadow-lg backdrop-saturate-150 central-transition',
           variants[variant],
           className
         )}

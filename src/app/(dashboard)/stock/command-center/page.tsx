@@ -62,7 +62,7 @@ export default function CommandCenterPage() {
           subtitle="un."
           icon={Package}
           variant="info"
-          onClick={() => router.push('/stock/items')}
+          onClick={() => router.push('/stock/overview/list')}
         />
         <KpiCard
           title="Estoque Baixo"
@@ -74,7 +74,7 @@ export default function CommandCenterPage() {
               ? 'warning'
               : 'default'
           }
-          onClick={() => router.push('/stock/items?filter=low-stock')}
+          onClick={() => router.push('/stock/overview/list?filter=low-stock')}
         />
         <PermissionGate permission={STOCK_PERMISSIONS.MOVEMENTS.APPROVE}>
           <KpiCard
@@ -184,7 +184,7 @@ export default function CommandCenterPage() {
           <LowStockAlerts
             items={dashboard?.stockSummary?.lowStockAlerts || []}
             onItemClick={item =>
-              router.push(`/stock/variants/${item.variantId}`)
+              router.push(`/stock/overview/list?search=${encodeURIComponent(item.variantName)}`)
             }
           />
         </div>

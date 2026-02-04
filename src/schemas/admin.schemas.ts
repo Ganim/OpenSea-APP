@@ -1,9 +1,8 @@
-import { z } from 'zod';
 import type {
-  TenantSettings,
-  FeatureFlagMetadata,
-  PlanSettings,
+    FeatureFlagMetadata,
+    TenantSettings
 } from '@/types/settings';
+import { z } from 'zod';
 
 /**
  * Schemas para validação de responses da API Admin
@@ -31,6 +30,7 @@ export const AdminModulesEnum = z.enum([
   'REPORTS',
   'AUDIT',
   'REQUESTS',
+  'NOTIFICATIONS',
 ]);
 
 // =====================================
@@ -64,48 +64,11 @@ export type AdminTenantsListResponse = z.infer<
   typeof AdminTenantsListResponseSchema
 >;
 
+// Schema para GET /v1/admin/tenants/:id
+// Retorna apenas tenant, sem plan/users/featureFlags
 export const TenantDetailSchema = z.object({
   tenant: AdminTenantSchema,
-  plan: z
-    .object({
-      id: z.string().uuid(),
-      name: z.string(),
-      tier: PlanTierEnum,
-      description: z.string().nullable(),
-      price: z.number().nonnegative(),
-      isActive: z.boolean(),
-      maxUsers: z.number().int().positive(),
-      maxWarehouses: z.number().int().positive(),
-      maxProducts: z.number().int().positive(),
-      createdAt: z.coerce.date(),
-      updatedAt: z.coerce.date(),
-    })
-    .nullable(),
-  users: z.array(
-    z.object({
-      id: z.string().uuid(),
-      tenantId: z.string().uuid(),
-      userId: z.string().uuid(),
-      role: z.string(),
-      joinedAt: z.coerce.date(),
-      user: z
-        .object({
-          id: z.string().uuid(),
-          email: z.string().email(),
-          username: z.string().optional(),
-        })
-        .optional(),
-    })
-  ),
-  featureFlags: z.array(
-    z.object({
-      id: z.string().uuid(),
-      tenantId: z.string().uuid(),
-      flag: z.string(),
-      enabled: z.boolean(),
-      metadata: z.custom<FeatureFlagMetadata>().optional().default({}),
-    })
-  ),
+  currentPlanId: z.string().uuid().nullable(),
 });
 
 export type TenantDetail = z.infer<typeof TenantDetailSchema>;
@@ -177,7 +140,7 @@ export const AdminTenantUserSchema = z.object({
 export type AdminTenantUser = z.infer<typeof AdminTenantUserSchema>;
 
 export const AdminTenantUsersListResponseSchema = z.object({
-  tenantUsers: z.array(AdminTenantUserSchema),
+  users: z.array(AdminTenantUserSchema),
 });
 
 export type AdminTenantUsersListResponse = z.infer<

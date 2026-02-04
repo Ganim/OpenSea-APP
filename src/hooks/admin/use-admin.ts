@@ -1,7 +1,7 @@
 'use client';
 
 import { adminApi } from '@/services/admin/admin-api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const adminKeys = {
   all: ['admin'] as const,
@@ -64,6 +64,7 @@ export function useChangeTenantPlan() {
       adminApi.changeTenantPlan(id, planId),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.tenant(id) });
+      queryClient.invalidateQueries({ queryKey: adminKeys.tenants() });
     },
   });
 }
