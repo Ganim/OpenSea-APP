@@ -137,7 +137,7 @@ export const stockMenu: MenuItem = {
         },
         {
           id: 'label-templates',
-          label: 'Templates de Etiquetas',
+          label: 'Etiquetas',
           icon: <Printer className="w-6 h-6" />,
           href: '/stock/label-templates',
           requiredPermission: STOCK_PERMISSIONS.TEMPLATES.LIST,
