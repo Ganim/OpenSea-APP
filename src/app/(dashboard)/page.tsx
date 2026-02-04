@@ -82,7 +82,12 @@ export default function DashboardWelcomePage() {
   const { user } = useAuth();
   const { currentTenant } = useTenant();
 
-  const firstName = user?.username || user?.email?.split('@')[0] || 'Usuário';
+  // Usa o primeiro nome do perfil, ou fallback para username/email
+  const firstName =
+    user?.profile?.name ||
+    user?.username ||
+    user?.email?.split('@')[0] ||
+    'Usuário';
   const tenantName = currentTenant?.name || 'Sua Empresa';
 
   return (
