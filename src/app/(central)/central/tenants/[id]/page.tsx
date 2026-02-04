@@ -121,7 +121,7 @@ export default function TenantDetailPage() {
   }
 
   const { tenant, plan, featureFlags } = data;
-  const users = usersData?.users ?? [];
+  const users = usersData?.tenantUsers ?? [];
 
   const statusColor = {
     ACTIVE: 'success',
@@ -572,7 +572,7 @@ export default function TenantDetailPage() {
               {users.map(u => (
                 <GlassCard
                   key={u.id}
-                  className="p-5 flex items-center justify-between hover:bg-white/[0.15] transition-all"
+                  className="p-5 flex items-center justify-between hover:bg-white/15 transition-all"
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div className="p-3 rounded-xl bg-white/10 border border-white/20">
@@ -730,7 +730,7 @@ export default function TenantDetailPage() {
               {featureFlags.map(ff => (
                 <GlassCard
                   key={ff.id}
-                  className="p-5 flex items-center justify-between hover:bg-white/[0.15] transition-all"
+                  className="p-5 flex items-center justify-between hover:bg-white/15 transition-all"
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div className="p-3 rounded-xl bg-white/10 border border-white/20">

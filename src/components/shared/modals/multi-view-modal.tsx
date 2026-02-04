@@ -83,7 +83,7 @@ export function MultiViewModal<T extends { id: string }>({
   };
 
   // Salva entidade
-  const handleSave = async (itemId: string, data: any) => {
+  const handleSave = async (itemId: string, data: Record<string, unknown>) => {
     if (!onSave) return;
 
     try {

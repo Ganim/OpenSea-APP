@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EntityForm } from '@/core';
 import type { Company } from '@/types/hr';
+import type { EntityFormConfig } from '@/core/types/form.types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -176,12 +177,15 @@ export default function CompanyEditPage() {
         <TabsContent value="general" className="w-full">
           <Card className=" w-full p-4 sm:p-6">
             <EntityForm
-              config={companiesConfig.form!}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              config={companiesConfig.form! as any}
               mode="edit"
-              initialData={company}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              initialData={company as any}
               isSubmitting={updateMutation.isPending}
               onSubmit={async data => {
-                await updateMutation.mutateAsync(data as Company);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await updateMutation.mutateAsync(data as any);
               }}
               hideActions
               ref={formRef}

@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
@@ -57,19 +58,21 @@ export default function RootLayout({
             `,
           }}
         />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <AuthProvider>
-              <TenantProvider>{children}</TenantProvider>
-            </AuthProvider>
-          </QueryProvider>
-          <Toaster position="top-right" richColors />
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <AuthProvider>
+                <TenantProvider>{children}</TenantProvider>
+              </AuthProvider>
+            </QueryProvider>
+            <Toaster position="top-right" richColors />
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

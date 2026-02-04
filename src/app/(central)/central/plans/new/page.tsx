@@ -12,10 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlan, useSetPlanModules } from '@/hooks/admin/use-admin';
-import { ArrowLeft, Save } from 'lucide-react';
+import { PlanTier } from '@/types/enums';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -39,9 +46,18 @@ export default function NewPlanPage() {
   const createPlan = useCreatePlan();
   const setModules = useSetPlanModules();
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    tier: PlanTier;
+    description: string;
+    price: number;
+    isActive: boolean;
+    maxUsers: number;
+    maxWarehouses: number;
+    maxProducts: number;
+  }>({
     name: '',
-    tier: 'FREE',
+    tier: PlanTier.FREE,
     description: '',
     price: 0,
     isActive: true,
@@ -60,9 +76,9 @@ export default function NewPlanPage() {
   const handleCreate = async () => {
     try {
       const result = await createPlan.mutateAsync(form);
-      if (selectedModules.length > 0 && result.plan?.id) {
+      if (selectedModules.length > 0 && result?.id) {
         await setModules.mutateAsync({
-          id: result.plan.id,
+          id: result.id,
           modules: selectedModules,
         });
       }
@@ -100,7 +116,9 @@ export default function NewPlanPage() {
               <Label htmlFor="tier">Tier</Label>
               <Select
                 value={form.tier}
-                onValueChange={v => setForm(f => ({ ...f, tier: v }))}
+                onValueChange={v =>
+                  setForm(f => ({ ...f, tier: v as PlanTier }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -196,15 +214,51 @@ export default function NewPlanPage() {
             <h2 className="text-lg font-semibold">Modulos</h2>
             <div className="space-y-3">
               {ALL_MODULES.map(mod => (
-                <div key={mod} className="flex items-center gap-3">
-                  <Checkbox
-                    id={`new-${mod}`}
-                    checked={selectedModules.includes(mod)}
-                    onCheckedChange={() => toggleModule(mod)}
-                  />
-                  <Label htmlFor={`new-${mod}`} className="cursor-pointer">
-                    {mod}
-                  </Label>
+                <div
+                  key={mod}
+                  className={`flex items-center gap-3 ${
+                    mod === 'NOTIFICATIONS' ? 'opacity-60' : ''
+                  }`}
+                >
+                  {mod === 'NOTIFICATIONS' ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-3">
+                            <Checkbox
+                              id={`new-${mod}`}
+                              disabled
+                              checked={false}
+                            />
+                            <Label
+                              htmlFor={`new-${mod}`}
+                              className="cursor-not-allowed flex items-center gap-2"
+                            >
+                              {mod}
+                              <AlertCircle className="h-4 w-4 text-orange-500" />
+                            </Label>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">
+                            Notificações em breve. Será implementado em uma
+                            próxima versão.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <>
+                      <Checkbox
+                        id={`new-${mod}`}
+                        checked={selectedModules.includes(mod)}
+                        onCheckedChange={() => toggleModule(mod)}
+                      />
+                      <Label htmlFor={`new-${mod}`} className="cursor-pointer">
+                        {mod}
+                      </Label>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

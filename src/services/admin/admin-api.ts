@@ -1,123 +1,114 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import {
+  AdminTenantSchema,
+  AdminTenantsListResponseSchema,
+  TenantDetailSchema,
+  AdminPlanSchema,
+  AdminPlansListResponseSchema,
+  AdminPlanDetailSchema,
+  AdminPlanModuleSchema,
+  AdminTenantUserSchema,
+  AdminTenantUsersListResponseSchema,
+  AdminFeatureFlagSchema,
+  DashboardStatsSchema,
+  type AdminTenant,
+  type AdminTenantsListResponse,
+  type TenantDetail,
+  type AdminPlan,
+  type AdminPlansListResponse,
+  type AdminPlanDetail,
+  type AdminPlanModule,
+  type AdminTenantUser,
+  type AdminTenantUsersListResponse,
+  type AdminFeatureFlag,
+  type DashboardStats,
+} from '@/schemas/admin.schemas';
 
-// Types
-export interface DashboardStats {
-  totalTenants: number;
-  totalPlans: number;
-  activePlans: number;
-}
-
-export interface AdminTenant {
-  id: string;
-  name: string;
-  slug: string;
-  logoUrl: string | null;
-  status: string;
-  settings: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface TenantDetail {
-  tenant: AdminTenant;
-  plan: AdminPlan | null;
-  users: AdminTenantUser[];
-  featureFlags: AdminFeatureFlag[];
-}
-
-export interface AdminPlan {
-  id: string;
-  name: string;
-  tier: string;
-  description: string | null;
-  price: number;
-  isActive: boolean;
-  maxUsers: number;
-  maxWarehouses: number;
-  maxProducts: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface AdminPlanModule {
-  id: string;
-  planId: string;
-  module: string;
-}
-
-export interface AdminTenantUser {
-  id: string;
-  tenantId: string;
-  userId: string;
-  role: string;
-  joinedAt: Date;
-  user?: {
-    id: string;
-    email: string;
-    username: string;
-  };
-}
-
-export interface AdminFeatureFlag {
-  id: string;
-  tenantId: string;
-  flag: string;
-  enabled: boolean;
-  metadata: Record<string, unknown>;
-}
+// Re-export types for backward compatibility
+export type {
+  AdminTenant,
+  AdminTenantsListResponse,
+  TenantDetail,
+  AdminPlan,
+  AdminPlansListResponse,
+  AdminPlanDetail,
+  AdminPlanModule,
+  AdminTenantUser,
+  AdminTenantUsersListResponse,
+  AdminFeatureFlag,
+  DashboardStats,
+};
 
 // API functions
 export const adminApi = {
   // Dashboard
-  getDashboardStats: () =>
-    apiClient.get<DashboardStats>(API_ENDPOINTS.ADMIN.DASHBOARD),
+  getDashboardStats: async () => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.DASHBOARD
+    );
+    return DashboardStatsSchema.parse(response);
+  },
 
   // Tenants
-  listTenants: (page = 1, limit = 20) =>
-    apiClient.get<{
-      tenants: AdminTenant[];
-      meta: {
-        total: number;
-        page: number;
-        perPage: number;
-        totalPages: number;
-      };
-    }>(`${API_ENDPOINTS.ADMIN.TENANTS.LIST}?page=${page}&limit=${limit}`),
+  listTenants: async (page = 1, limit = 20) => {
+    const response = await apiClient.get<unknown>(
+      `${API_ENDPOINTS.ADMIN.TENANTS.LIST}?page=${page}&limit=${limit}`
+    );
+    return AdminTenantsListResponseSchema.parse(response);
+  },
 
-  getTenantDetails: (id: string) =>
-    apiClient.get<TenantDetail>(API_ENDPOINTS.ADMIN.TENANTS.GET(id)),
+  getTenantDetails: async (id: string) => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.TENANTS.GET(id)
+    );
+    return TenantDetailSchema.parse(response);
+  },
 
-  changeTenantStatus: (id: string, status: string) =>
-    apiClient.patch<{ tenant: AdminTenant }>(
+  changeTenantStatus: async (id: string, status: string) => {
+    const response = await apiClient.patch<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.CHANGE_STATUS(id),
       { status }
-    ),
+    );
+    return AdminTenantSchema.parse(
+      (response as Record<string, unknown>).tenant
+    );
+  },
 
-  changeTenantPlan: (id: string, planId: string) =>
-    apiClient.patch<{ tenantPlan: unknown }>(
+  changeTenantPlan: async (id: string, planId: string) => {
+    const response = await apiClient.patch<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.CHANGE_PLAN(id),
       { planId }
-    ),
+    );
+    return response;
+  },
 
-  manageFeatureFlags: (id: string, flag: string, enabled: boolean) =>
-    apiClient.patch<{ featureFlag: AdminFeatureFlag }>(
+  manageFeatureFlags: async (id: string, flag: string, enabled: boolean) => {
+    const response = await apiClient.patch<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.FEATURE_FLAGS(id),
       { flag, enabled }
-    ),
+    );
+    return AdminFeatureFlagSchema.parse(
+      (response as Record<string, unknown>).featureFlag
+    );
+  },
 
-  createTenant: (data: {
+  createTenant: async (data: {
     name: string;
     slug?: string;
     logoUrl?: string | null;
     status?: string;
-  }) =>
-    apiClient.post<{ tenant: AdminTenant }>(
+  }) => {
+    const response = await apiClient.post<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.CREATE,
       data
-    ),
+    );
+    return AdminTenantSchema.parse(
+      (response as Record<string, unknown>).tenant
+    );
+  },
 
-  updateTenant: (
+  updateTenant: async (
     id: string,
     data: {
       name?: string;
@@ -125,58 +116,100 @@ export const adminApi = {
       logoUrl?: string | null;
       settings?: Record<string, unknown>;
     }
-  ) =>
-    apiClient.put<{ tenant: AdminTenant }>(
+  ) => {
+    const response = await apiClient.put<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.UPDATE(id),
       data
-    ),
+    );
+    return AdminTenantSchema.parse(
+      (response as Record<string, unknown>).tenant
+    );
+  },
 
-  deleteTenant: (id: string) =>
-    apiClient.delete<{ tenant: AdminTenant }>(
+  deleteTenant: async (id: string) => {
+    const response = await apiClient.delete<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.DELETE(id)
-    ),
+    );
+    return AdminTenantSchema.parse(
+      (response as Record<string, unknown>).tenant
+    );
+  },
 
-  listTenantUsers: (id: string) =>
-    apiClient.get<{ users: AdminTenantUser[] }>(
+  listTenantUsers: async (id: string) => {
+    const response = await apiClient.get<unknown>(
       API_ENDPOINTS.ADMIN.TENANTS.USERS(id)
-    ),
+    );
+    return AdminTenantUsersListResponseSchema.parse(response);
+  },
 
-  createTenantUser: (
+  createTenantUser: async (
     id: string,
     data: { email: string; password: string; username?: string; role?: string }
-  ) =>
-    apiClient.post<{
-      user: { id: string; email: string; username: string; createdAt: Date };
-      tenantUser: AdminTenantUser;
-    }>(API_ENDPOINTS.ADMIN.TENANTS.CREATE_USER(id), data),
+  ) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.TENANTS.CREATE_USER(id),
+      data
+    );
+    return {
+      user: (response as Record<string, unknown>).user as Record<
+        string,
+        unknown
+      >,
+      tenantUser: AdminTenantUserSchema.parse(
+        (response as Record<string, unknown>).tenantUser
+      ),
+    };
+  },
 
-  removeTenantUser: (id: string, userId: string) =>
-    apiClient.delete<void>(API_ENDPOINTS.ADMIN.TENANTS.REMOVE_USER(id, userId)),
+  removeTenantUser: async (id: string, userId: string) => {
+    await apiClient.delete<void>(
+      API_ENDPOINTS.ADMIN.TENANTS.REMOVE_USER(id, userId)
+    );
+  },
 
   // Plans
-  listPlans: () =>
-    apiClient.get<{ plans: AdminPlan[] }>(API_ENDPOINTS.ADMIN.PLANS.LIST),
+  listPlans: async () => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.PLANS.LIST
+    );
+    return AdminPlansListResponseSchema.parse(response);
+  },
 
-  getPlan: (id: string) =>
-    apiClient.get<{ plan: AdminPlan; modules: AdminPlanModule[] }>(
+  getPlan: async (id: string) => {
+    const response = await apiClient.get<unknown>(
       API_ENDPOINTS.ADMIN.PLANS.GET(id)
-    ),
+    );
+    return AdminPlanDetailSchema.parse(response);
+  },
 
-  createPlan: (data: Partial<AdminPlan>) =>
-    apiClient.post<{ plan: AdminPlan }>(API_ENDPOINTS.ADMIN.PLANS.CREATE, data),
+  createPlan: async (data: Partial<AdminPlan>) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.PLANS.CREATE,
+      data
+    );
+    return AdminPlanSchema.parse((response as Record<string, unknown>).plan);
+  },
 
-  updatePlan: (id: string, data: Partial<AdminPlan>) =>
-    apiClient.put<{ plan: AdminPlan }>(
+  updatePlan: async (id: string, data: Partial<AdminPlan>) => {
+    const response = await apiClient.put<unknown>(
       API_ENDPOINTS.ADMIN.PLANS.UPDATE(id),
       data
-    ),
+    );
+    return AdminPlanSchema.parse((response as Record<string, unknown>).plan);
+  },
 
-  deletePlan: (id: string) =>
-    apiClient.delete<{ plan: AdminPlan }>(API_ENDPOINTS.ADMIN.PLANS.DELETE(id)),
+  deletePlan: async (id: string) => {
+    const response = await apiClient.delete<unknown>(
+      API_ENDPOINTS.ADMIN.PLANS.DELETE(id)
+    );
+    return AdminPlanSchema.parse((response as Record<string, unknown>).plan);
+  },
 
-  setPlanModules: (id: string, modules: string[]) =>
-    apiClient.put<{ modules: AdminPlanModule[] }>(
+  setPlanModules: async (id: string, modules: string[]) => {
+    const response = await apiClient.put<unknown>(
       API_ENDPOINTS.ADMIN.PLANS.SET_MODULES(id),
       { modules }
-    ),
+    );
+    return (response as Record<string, unknown>).modules as AdminPlanModule[];
+  },
 };

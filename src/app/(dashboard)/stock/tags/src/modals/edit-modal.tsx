@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -53,7 +54,13 @@ export function EditModal({ isOpen, onClose, tag, onSubmit }: EditModalProps) {
       await onSubmit(tag.id, formData);
       onClose();
     } catch (error) {
-      console.error('Erro ao atualizar tag:', error);
+      logger.error(
+        'Failed to update tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          tagId: tag.id,
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }

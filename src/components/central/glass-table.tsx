@@ -94,7 +94,10 @@ export function GlassTableCell({
   colSpan?: number;
 }) {
   return (
-    <td colSpan={colSpan} className={cn('px-6 py-4 text-sm text-white/90', className)}>
+    <td
+      colSpan={colSpan}
+      className={cn('px-6 py-4 text-sm text-white/90', className)}
+    >
       {children}
     </td>
   );

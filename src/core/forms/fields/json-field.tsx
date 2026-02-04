@@ -66,7 +66,8 @@ export function JsonField<T = unknown>({
   // Initialize internal value from prop
   useEffect(() => {
     if (typeof value === 'object' && value !== null) {
-      setInternalValue(JSON.stringify(value, null, 2));
+      const stringified = JSON.stringify(value, null, 2);
+      setInternalValue(stringified);
       setIsValid(true);
       setValidationError(null);
     } else if (typeof value === 'string') {
@@ -75,7 +76,7 @@ export function JsonField<T = unknown>({
     } else {
       setInternalValue('');
     }
-  }, [value]);
+  }, [value, validateJson]);
 
   // Handle change
   const handleChange = (newValue: string) => {

@@ -84,7 +84,7 @@ export function SimpleLabelEditor({
       setHeight(initialTemplate.height);
       setHtmlContent(initialTemplate.html);
     }
-  }, [initialTemplate]);
+  }, [initialTemplate, setHtmlContent]);
 
   // Atualizar iframe quando conteúdo muda
   useEffect(() => {

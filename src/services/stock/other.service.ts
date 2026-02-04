@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import { logger } from '@/lib/logger';
 import type {
   CreateManufacturerRequest,
   CreateSupplierRequest,
@@ -133,12 +134,15 @@ export const templatesService = {
     id: string,
     data: UpdateTemplateRequest
   ): Promise<TemplateResponse> {
-    console.log('[SERVICE] updateTemplate chamado:', { id, data });
+    logger.debug('Updating template', {
+      id,
+      dataKeys: Object.keys(data || {}),
+    });
     const result = await apiClient.put<TemplateResponse>(
       API_ENDPOINTS.TEMPLATES.UPDATE(id),
       data
     );
-    console.log('[SERVICE] updateTemplate resposta:', result);
+    logger.info('Template updated successfully', { id });
     return result;
   },
 

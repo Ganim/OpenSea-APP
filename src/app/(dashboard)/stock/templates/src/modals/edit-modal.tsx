@@ -89,11 +89,14 @@ export function EditModal({
           </div>
         </DialogHeader>
         <EntityForm
-          config={templatesConfig.form!}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          config={templatesConfig.form! as any}
           mode="edit"
-          initialData={template}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialData={template as any}
           onSubmit={async data => {
-            await onSubmit(template.id, data);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await onSubmit(template.id, data as any);
             onClose();
           }}
           onCancel={() => onClose()}

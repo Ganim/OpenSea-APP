@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
@@ -48,7 +49,10 @@ export function CodeField<T = unknown>({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      logger.error('Failed to copy code to clipboard', err as Error, {
+        component: 'code-field',
+        action: 'copy',
+      });
     }
   };
 

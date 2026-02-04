@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -63,7 +64,13 @@ export default function TemplateDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ['templates'] });
       toast.success('Template atualizado com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar template:', error);
+      logger.error(
+        'Failed to save template',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          templateId: params.id,
+        }
+      );
       toast.error('Erro ao salvar template');
       throw error;
     }

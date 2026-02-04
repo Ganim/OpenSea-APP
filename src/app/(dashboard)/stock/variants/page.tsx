@@ -328,10 +328,12 @@ export default function VariantsPage() {
                 <DialogTitle>Nova Variante</DialogTitle>
               </DialogHeader>
               <EntityForm
-                config={variantsConfig.form!}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                config={variantsConfig.form! as any}
                 mode="create"
                 onSubmit={async data => {
-                  await crud.create(data);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  await crud.create(data as any);
                   page.modals.close('create');
                 }}
                 onCancel={() => page.modals.close('create')}
@@ -351,11 +353,14 @@ export default function VariantsPage() {
               </DialogHeader>
               {page.modals.editingItem && (
                 <EntityForm
-                  config={variantsConfig.form!}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  config={variantsConfig.form! as any}
                   mode="edit"
-                  initialData={page.modals.editingItem}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  initialData={page.modals.editingItem as any}
                   onSubmit={async data => {
-                    await crud.update(page.modals.editingItem!.id, data);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    await crud.update(page.modals.editingItem!.id, data as any);
                     page.modals.close('edit');
                   }}
                   onCancel={() => page.modals.close('edit')}

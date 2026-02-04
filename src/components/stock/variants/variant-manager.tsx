@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/logger';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -45,14 +47,11 @@ export function VariantManager({ productId }: VariantManagerProps) {
 
   // Debug
   useEffect(() => {
-    console.log(
-      '🔍 VariantManager - productId:',
+    logger.debug('🔍 VariantManager iniciado', {
       productId,
-      'variants loaded:',
-      variants.length,
-      'isLoading:',
-      isLoadingVariants
-    );
+      variantsLoaded: variants.length,
+      isLoading: isLoadingVariants,
+    });
   }, [productId, variants.length, isLoadingVariants]);
 
   const { data: product } = useQuery<Product>({

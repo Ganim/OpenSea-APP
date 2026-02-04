@@ -1,27 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 /**
  * Background animado com gradientes e esferas flutuantes
  * Inspirado em dashboards modernos com glassmorphism
  */
 export function AnimatedBackground() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [mounted] = useState(typeof window !== 'undefined');
 
   if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Gradiente base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
+      <div className="absolute inset-0 bg-linear-to-br from-slate-900 via-purple-900 to-slate-900" />
 
       {/* Gradiente overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-purple-900/20" />
+      <div className="absolute inset-0 bg-linear-to-tr from-blue-900/20 via-transparent to-purple-900/20" />
 
       {/* Esfera 1 - Top Left - Azul */}
       <div

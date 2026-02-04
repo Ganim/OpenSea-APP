@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -45,7 +46,13 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       });
       onClose();
     } catch (error) {
-      console.error('Erro ao criar tag:', error);
+      logger.error(
+        'Failed to create tag',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          context: 'create-tag',
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,7 +100,13 @@ export default function EditVariantPage() {
       });
       router.push(`/stock/variants/${variantId}`);
     } catch (error) {
-      console.error('Erro ao atualizar variante:', error);
+      logger.error(
+        'Failed to update variant',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          variantId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar variante', { description: message });
@@ -119,7 +126,13 @@ export default function EditVariantPage() {
       toast.success('Variante excluída com sucesso!');
       router.push('/stock/variants');
     } catch (error) {
-      console.error('Erro ao deletar variante:', error);
+      logger.error(
+        'Failed to delete variant',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          variantId,
+        }
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar variante', { description: message });

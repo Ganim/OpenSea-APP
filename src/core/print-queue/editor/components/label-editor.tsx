@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -505,7 +506,10 @@ export function LabelEditor({
         try {
           loadProject(editor, template.grapesJsData);
         } catch (error) {
-          console.error('Failed to load template:', error);
+          logger.error('Failed to load template', error as Error, {
+            component: 'label-editor',
+            templateId: template.id,
+          });
         }
       }
 

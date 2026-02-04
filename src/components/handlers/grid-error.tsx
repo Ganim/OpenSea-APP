@@ -52,7 +52,12 @@ export function GridError({
   // Configurações padrão por tipo de erro
   const errorConfig: Record<
     ErrorType,
-    { icon: any; title: string; message: string; color: string }
+    {
+      icon: React.ComponentType<{ className?: string }>;
+      title: string;
+      message: string;
+      color: string;
+    }
   > = {
     connection: {
       icon: Network,

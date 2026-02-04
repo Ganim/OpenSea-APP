@@ -5,13 +5,16 @@ Sistema de design exclusivo para o painel administrativo Central do OpenSea, imp
 ## 🎨 Características Visuais
 
 ### Background Animado
+
 - Gradientes dinâmicos com cores vibrantes
 - 5 esferas flutuantes com animação pulse
 - Cores: Azul, Roxo, Rosa, Ciano e Âmbar
 - Grid pattern sutil para profundidade
 
 ### Glassmorphism
+
 Todos os componentes seguem os princípios do glassmorphism:
+
 - **Transparência**: Fundos semi-transparentes (10-20% opacidade)
 - **Blur**: Efeito de desfoque no backdrop (backdrop-blur)
 - **Bordas**: Bordas sutis e translúcidas
@@ -23,6 +26,7 @@ Todos os componentes seguem os princípios do glassmorphism:
 ### Componentes Base
 
 #### `GlassCard`
+
 Card com efeito glassmorphism. Ideal para conteúdo destacado.
 
 ```tsx
@@ -30,29 +34,31 @@ import { GlassCard } from '@/components/central';
 
 <GlassCard variant="gradient" hover blur="md">
   {/* Conteúdo */}
-</GlassCard>
+</GlassCard>;
 ```
 
 **Props:**
+
 - `variant`: 'default' | 'darker' | 'lighter' | 'gradient'
 - `blur`: 'sm' | 'md' | 'lg' | 'xl'
 - `hover`: boolean (efeito de hover)
 
 #### `GlassContainer`
+
 Container para agrupar conteúdo com glassmorphism.
 
 ```tsx
 import { GlassContainer } from '@/components/central';
 
-<GlassContainer variant="medium">
-  {/* Conteúdo */}
-</GlassContainer>
+<GlassContainer variant="medium">{/* Conteúdo */}</GlassContainer>;
 ```
 
 **Props:**
+
 - `variant`: 'subtle' | 'medium' | 'strong'
 
 #### `GlassButton`
+
 Botão com efeito glassmorphism.
 
 ```tsx
@@ -60,41 +66,46 @@ import { GlassButton } from '@/components/central';
 
 <GlassButton variant="primary" size="md" isLoading={false}>
   Clique aqui
-</GlassButton>
+</GlassButton>;
 ```
 
 **Props:**
+
 - `variant`: 'primary' | 'secondary' | 'ghost' | 'danger'
 - `size`: 'sm' | 'md' | 'lg'
 - `isLoading`: boolean
 
 #### `GlassInput`
+
 Input com efeito glassmorphism.
 
 ```tsx
 import { GlassInput } from '@/components/central';
 
-<GlassInput 
-  placeholder="Digite algo..." 
+<GlassInput
+  placeholder="Digite algo..."
   icon={<Search className="h-4 w-4" />}
-/>
+/>;
 ```
 
 #### `GlassBadge`
+
 Badge com efeito glassmorphism.
 
 ```tsx
 import { GlassBadge } from '@/components/central';
 
-<GlassBadge variant="success">Ativo</GlassBadge>
+<GlassBadge variant="success">Ativo</GlassBadge>;
 ```
 
 **Props:**
+
 - `variant`: 'success' | 'warning' | 'error' | 'info' | 'default'
 
 ### Componentes Especializados
 
 #### `StatCard`
+
 Card de estatística com gradientes e animações.
 
 ```tsx
@@ -108,24 +119,26 @@ import { Building2 } from 'lucide-react';
   color="blue"
   trend={{ value: 12, isPositive: true }}
   isLoading={false}
-/>
+/>;
 ```
 
 **Props:**
+
 - `color`: 'blue' | 'purple' | 'pink' | 'amber' | 'green' | 'cyan'
 - `trend`: { value: number, isPositive: boolean } (opcional)
 
 #### `GlassTable`
+
 Sistema completo de tabelas com glassmorphism.
 
 ```tsx
-import { 
-  GlassTable, 
-  GlassTableHeader, 
+import {
+  GlassTable,
+  GlassTableHeader,
   GlassTableBody,
   GlassTableRow,
   GlassTableHead,
-  GlassTableCell
+  GlassTableCell,
 } from '@/components/central';
 
 <GlassTable>
@@ -141,29 +154,33 @@ import {
       <GlassTableCell>Ativo</GlassTableCell>
     </GlassTableRow>
   </GlassTableBody>
-</GlassTable>
+</GlassTable>;
 ```
 
 #### `AnimatedBackground`
+
 Background animado com esferas e gradientes.
 
 ```tsx
 import { AnimatedBackground } from '@/components/central';
 
-<AnimatedBackground />
+<AnimatedBackground />;
 ```
 
 ### Layout Components
 
 #### `CentralNavbar`
+
 Navbar com glassmorphism, dropdown e navegação.
 
 #### `CentralSidebar`
+
 Sidebar com glassmorphism e indicadores de página ativa.
 
 ## 🎨 Paleta de Cores
 
 ### Gradientes Principais
+
 - **Azul**: `from-blue-500/20 to-blue-600/20`
 - **Roxo**: `from-purple-500/20 to-purple-600/20`
 - **Rosa**: `from-pink-500/20 to-pink-600/20`
@@ -172,6 +189,7 @@ Sidebar com glassmorphism e indicadores de página ativa.
 - **Ciano**: `from-cyan-500/20 to-cyan-600/20`
 
 ### Background Base
+
 - Fundo: `bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900`
 - Overlays: Gradientes com 20% de opacidade
 
@@ -195,18 +213,21 @@ components/central/
 ## 🚀 Páginas Implementadas
 
 ### Dashboard (`/central`)
+
 - 3 cards principais de estatísticas
 - 2 cards de atividade e métricas rápidas
 - 1 card de gráfico de crescimento
 - Totalmente responsivo
 
 ### Empresas (`/central/tenants`)
+
 - Busca com glassmorphism
 - Tabela com efeito de vidro
 - Paginação estilizada
 - Estado vazio customizado
 
 ### Planos (`/central/plans`)
+
 - Grid responsivo de cards
 - Cards com gradientes por tier
 - Hover effects
@@ -228,15 +249,13 @@ components/central/
 // Em qualquer componente
 const myGradient = 'from-indigo-500/20 to-indigo-600/20';
 
-<div className={`bg-gradient-to-br ${myGradient}`}>
-  {/* Conteúdo */}
-</div>
+<div className={`bg-gradient-to-br ${myGradient}`}>{/* Conteúdo */}</div>;
 ```
 
 ### Criar Nova Variante de Card
 
 ```tsx
-<GlassCard 
+<GlassCard
   className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20"
   hover
 >
@@ -255,6 +274,7 @@ const myGradient = 'from-indigo-500/20 to-indigo-600/20';
 ## 🎨 Inspiração
 
 O design foi inspirado em dashboards modernos com glassmorphism:
+
 - Channel Analytics (métricas e gráficos)
 - Smart Home Dashboards (cards e controles)
 - Banking Dashboards (dados e visualizações)
@@ -262,6 +282,7 @@ O design foi inspirado em dashboards modernos com glassmorphism:
 ## ✅ Funcionalidades Mantidas
 
 Todas as funcionalidades existentes foram preservadas:
+
 - ✅ Autenticação e autorização
 - ✅ Listagem de empresas com busca e paginação
 - ✅ Listagem de planos com filtros

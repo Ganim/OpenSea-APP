@@ -282,14 +282,13 @@ export function useEntityCrud<T extends BaseEntity>(
     [deleteMutation]
   );
 
-  const duplicate = duplicateFn
-    ? useCallback(
-        async (id: string, data?: Partial<T>): Promise<T> => {
-          return duplicateMutation.mutateAsync({ id, data });
-        },
-        [duplicateMutation]
-      )
-    : undefined;
+  const duplicate = useCallback(
+    async (id: string, data?: Partial<T>): Promise<T> => {
+      if (!duplicateFn) throw new Error('Duplicate function not provided');
+      return duplicateMutation.mutateAsync({ id, data });
+    },
+    [duplicateMutation, duplicateFn]
+  );
 
   const getById = useCallback(
     async (id: string): Promise<T> => {

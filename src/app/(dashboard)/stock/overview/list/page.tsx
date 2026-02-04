@@ -105,9 +105,8 @@ export default function StockOverviewListPage() {
     [page, limit, search]
   );
 
-  const { data, isLoading, error, refetch, isFetching } = useItemsPaginated(
-    query
-  );
+  const { data, isLoading, error, refetch, isFetching } =
+    useItemsPaginated(query);
 
   const items = data?.items ?? [];
   const pagination = data?.pagination;
@@ -165,12 +164,10 @@ export default function StockOverviewListPage() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-gray-50/80 dark:bg-white/5">
-                        <TableHead className="w-[160px]">Código</TableHead>
+                        <TableHead className="w-40">Código</TableHead>
                         <TableHead>Item</TableHead>
                         <TableHead className="w-[180px]">Localização</TableHead>
-                        <TableHead className="w-[160px]">
-                          Quantidade
-                        </TableHead>
+                        <TableHead className="w-40">Quantidade</TableHead>
                         <TableHead>Atributos personalizados</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -212,7 +209,10 @@ export default function StockOverviewListPage() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="secondary" className="text-sm">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-sm"
+                                  >
                                     {quantityLabel}
                                   </Badge>
                                 </div>

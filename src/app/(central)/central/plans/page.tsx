@@ -73,7 +73,7 @@ export default function PlansListPage() {
             >
               {/* Gradient overlay on hover */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${tierGradients[plan.tier]}`}
+                className={`absolute inset-0 bg-linear-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${tierGradients[plan.tier]}`}
               />
 
               <div className="relative z-10 flex-1 space-y-4">
@@ -81,7 +81,7 @@ export default function PlansListPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`p-2 rounded-lg bg-gradient-to-br ${tierGradients[plan.tier]}`}
+                      className={`p-2 rounded-lg bg-linear-to-br ${tierGradients[plan.tier]}`}
                     >
                       <CreditCard className="h-5 w-5 text-white" />
                     </div>

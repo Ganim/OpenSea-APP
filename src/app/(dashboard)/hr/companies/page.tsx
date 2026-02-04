@@ -86,7 +86,6 @@ export default function CompaniesPage() {
           perPage: 100,
           includeDeleted: false,
         });
-        console.log('[Companies] API response:', response);
 
         // A resposta pode ser um array direto ou um objeto com propriedade 'companies'
         let companies = Array.isArray(response)
@@ -96,13 +95,8 @@ export default function CompaniesPage() {
         // Filtrar empresas deletadas no frontend como camada extra de seguranca
         companies = companies.filter((company: Company) => !company.deletedAt);
 
-        console.log(
-          '[Companies] Total companies (apos filtro):',
-          companies.length
-        );
         return companies;
       } catch (error) {
-        console.error('[Companies] Error fetching companies:', error);
         throw error;
       }
     },
@@ -111,8 +105,8 @@ export default function CompaniesPage() {
     updateFn: updateCompany,
     deleteFn: deleteCompany,
     duplicateFn: duplicateCompany,
-    onDeleteSuccess: id => {
-      console.log('[Companies CRUD] Delete success callback for ID:', id);
+    onDeleteSuccess: () => {
+      // Deleted successfully
     },
   });
 

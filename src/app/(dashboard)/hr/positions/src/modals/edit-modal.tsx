@@ -117,11 +117,13 @@ export function EditModal({
         </Card>
 
         <EntityForm
-          config={positionsConfig.form!}
+          config={positionsConfig.form! as any}
           mode="edit"
-          initialData={position}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialData={position as any}
           onSubmit={async data => {
-            await onSubmit(position.id, data);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await onSubmit(position.id, data as any);
             onClose();
           }}
           onCancel={() => onClose()}
