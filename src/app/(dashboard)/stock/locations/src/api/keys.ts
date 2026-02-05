@@ -16,6 +16,8 @@ export const QUERY_KEYS = {
   zoneLayout: (zoneId: string) => ['zones', zoneId, 'layout'] as const,
   zoneBins: (zoneId: string) => ['zones', zoneId, 'bins'] as const,
   zoneOccupancy: (zoneId: string) => ['zones', zoneId, 'occupancy'] as const,
+  zoneItemStats: (zoneId: string) => ['zones', zoneId, 'item-stats'] as const,
+  zoneReconfigPreview: (zoneId: string) => ['zones', zoneId, 'reconfig-preview'] as const,
 
   // Bins
   bins: ['bins'] as const,
@@ -57,6 +59,8 @@ export const API_ENDPOINTS = {
     structurePreview: (id: string) => `/v1/zones/${id}/structure/preview`,
     layout: (id: string) => `/v1/zones/${id}/layout`,
     layoutReset: (id: string) => `/v1/zones/${id}/layout/reset`,
+    reconfigPreview: (id: string) => `/v1/zones/${id}/reconfiguration-preview`,
+    itemStats: (id: string) => `/v1/zones/${id}/item-stats`,
   },
 
   // Bins

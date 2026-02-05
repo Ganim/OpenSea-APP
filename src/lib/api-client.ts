@@ -147,6 +147,11 @@ class ApiClient {
       const data = (await response.json()) as {
         token?: string;
         refreshToken?: string;
+        tenant?: {
+          id: string;
+          name: string;
+          slug: string;
+        };
       };
 
       if (data.token) {
@@ -157,6 +162,13 @@ class ApiClient {
         if (!data.refreshToken) {
           console.warn(
             '[API] ⚠️ Novo refresh token não retornado! Token antigo foi revogado.'
+          );
+        }
+
+        if (data.tenant?.id && typeof window !== 'undefined') {
+          localStorage.setItem('selected_tenant_id', data.tenant.id);
+          window.dispatchEvent(
+            new CustomEvent('tenant-refreshed', { detail: data.tenant })
           );
         }
 
@@ -274,6 +286,14 @@ class ApiClient {
           });
 
           if (!retryResponse.ok) {
+            if (retryResponse.status === 401 || retryResponse.status === 403) {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('selected_tenant_id');
+                localStorage.removeItem('user');
+              }
+              this.handleRefreshFailure(false);
+            }
+
             const retryError = await retryResponse
               .json()
               .catch(() => ({ message: 'An error occurred' }));

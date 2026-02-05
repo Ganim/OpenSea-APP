@@ -10,8 +10,10 @@ import {
   Hash,
   Loader2,
   MapPin,
+  MapPinOff,
   Package,
   QrCode,
+  RotateCcw,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -80,6 +82,11 @@ const MOVEMENT_CONFIG: Record<
     label: 'Ajuste',
     icon: Box,
     className: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20',
+  },
+  ZONE_RECONFIGURE: {
+    label: 'Reconfiguração',
+    icon: RotateCcw,
+    className: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20',
   },
 };
 
@@ -203,9 +210,22 @@ export function ItemDetailModal({
                 value={item.batchNumber || '-'}
               />
               <InfoField
-                icon={MapPin}
+                icon={item.bin ? MapPin : MapPinOff}
                 label="Localização"
-                value={item.location?.name || item.location?.code || '-'}
+                value={
+                  item.bin
+                    ? item.bin.address
+                    : item.lastKnownAddress
+                      ? `${item.lastKnownAddress} (desassociado)`
+                      : 'Sem localização'
+                }
+                className={
+                  !item.bin && item.lastKnownAddress
+                    ? 'text-amber-500'
+                    : !item.bin
+                      ? 'text-muted-foreground/50'
+                      : undefined
+                }
               />
               <InfoField
                 icon={Calendar}
@@ -405,6 +425,13 @@ function MovementCard({ movement }: MovementCardProps) {
                 </span>
               )}
           </div>
+          {(movement.originRef || movement.destinationRef) && (
+            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+              {movement.originRef && <span>{movement.originRef}</span>}
+              {movement.originRef && movement.destinationRef && <span>→</span>}
+              {movement.destinationRef && <span>{movement.destinationRef}</span>}
+            </div>
+          )}
           {movement.notes && (
             <p className="text-xs text-muted-foreground mt-1 truncate">
               {movement.notes}

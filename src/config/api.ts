@@ -103,6 +103,8 @@ export const API_ENDPOINTS = {
     ENTRY: '/v1/items/entry',
     EXIT: '/v1/items/exit',
     TRANSFER: '/v1/items/transfer',
+    BATCH_TRANSFER: '/v1/items/batch-transfer',
+    LOCATION_HISTORY: (itemId: string) => `/v1/items/${itemId}/location-history`,
   },
   // Stock - Item Movements
   ITEM_MOVEMENTS: {

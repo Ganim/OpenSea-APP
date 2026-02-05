@@ -9,15 +9,20 @@ import {
   Layers,
   Grid3X3,
   Box,
+  Loader2,
+  ShieldAlert,
+  ArrowRight,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import {
   BIN_DIRECTION_LABELS,
   SEPARATOR_LABELS,
   BIN_LABELING_LABELS,
 } from '../../constants';
-import type { ZoneStructureFormData } from '../../types';
+import type { ZoneStructureFormData, ReconfigurationPreviewResponse } from '../../types';
 
 interface StepConfirmProps {
   formData: ZoneStructureFormData;
@@ -28,6 +33,10 @@ interface StepConfirmProps {
   totalBins: number;
   firstAddress: string;
   lastAddress: string;
+  reconfigPreview?: ReconfigurationPreviewResponse | null;
+  isLoadingPreview?: boolean;
+  occupiedBinsAction?: 'block' | 'force';
+  onOccupiedBinsActionChange?: (action: 'block' | 'force') => void;
 }
 
 export function StepConfirm({
@@ -39,27 +48,156 @@ export function StepConfirm({
   totalBins,
   firstAddress,
   lastAddress,
+  reconfigPreview,
+  isLoadingPreview,
+  occupiedBinsAction = 'block',
+  onOccupiedBinsActionChange,
 }: StepConfirmProps) {
+  const isReconfiguration = reconfigPreview && !reconfigPreview.isFirstConfiguration;
+  const hasAffectedItems = isReconfiguration && reconfigPreview.totalAffectedItems > 0;
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Confirmar Configuração</h2>
         <p className="text-sm text-muted-foreground">
-          Revise as informações antes de criar as localizações
+          Revise as informações antes de {isReconfiguration ? 'reconfigurar' : 'criar'} as localizações
         </p>
       </div>
 
-      {/* Aviso */}
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Atenção</AlertTitle>
-        <AlertDescription>
-          Esta ação irá criar{' '}
-          <strong>{totalBins.toLocaleString()} nichos</strong> automaticamente.
-          Após a criação, você poderá visualizar e gerenciar cada nicho
-          individualmente.
-        </AlertDescription>
-      </Alert>
+      {/* Reconfiguration Preview */}
+      {isLoadingPreview && (
+        <Alert>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <AlertTitle>Calculando alterações...</AlertTitle>
+          <AlertDescription>
+            Comparando estrutura atual com a nova configuração.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isReconfiguration && !isLoadingPreview && (
+        <>
+          {/* Safe reconfiguration */}
+          {!hasAffectedItems && (
+            <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800 dark:text-green-300">
+                Reconfiguração Segura
+              </AlertTitle>
+              <AlertDescription className="text-green-700 dark:text-green-400">
+                Nenhum item será afetado por esta alteração.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Diff summary */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Resumo das Alterações</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="p-3 rounded-lg bg-muted/50 text-center">
+                  <p className="text-2xl font-bold">{reconfigPreview.binsToPreserve}</p>
+                  <p className="text-xs text-muted-foreground">Nichos mantidos</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                  <p className="text-2xl font-bold text-green-600">{reconfigPreview.binsToCreate}</p>
+                  <p className="text-xs text-muted-foreground">Novos nichos</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 text-center">
+                  <p className="text-2xl font-bold">{reconfigPreview.binsToDeleteEmpty}</p>
+                  <p className="text-xs text-muted-foreground">Nichos removidos (vazios)</p>
+                </div>
+                {reconfigPreview.addressUpdates > 0 && (
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
+                    <p className="text-2xl font-bold text-blue-600">{reconfigPreview.addressUpdates}</p>
+                    <p className="text-xs text-muted-foreground">Endereços atualizados</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Warning for affected items */}
+          {hasAffectedItems && (
+            <>
+              <Alert variant="destructive" className="border-amber-300 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200">
+                <ShieldAlert className="h-4 w-4 text-amber-600" />
+                <AlertTitle>
+                  {reconfigPreview.binsWithItems.length} nicho(s) com itens serão afetados
+                </AlertTitle>
+                <AlertDescription>
+                  <p className="mb-3">
+                    {reconfigPreview.totalAffectedItems} item(ns) estão em nichos que serão removidos pela nova estrutura.
+                  </p>
+                  <div className="space-y-1.5 mb-4">
+                    {reconfigPreview.binsWithItems.map((bin) => (
+                      <div
+                        key={bin.binId}
+                        className="flex items-center justify-between px-3 py-1.5 rounded bg-white/60 dark:bg-black/20 text-sm"
+                      >
+                        <span className="font-mono">{bin.address}</span>
+                        <span>{bin.itemCount} item(ns)</span>
+                      </div>
+                    ))}
+                  </div>
+                </AlertDescription>
+              </Alert>
+
+              {/* Choice for handling occupied bins */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Como tratar estes nichos?</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={occupiedBinsAction}
+                    onValueChange={(v) => onOccupiedBinsActionChange?.(v as 'block' | 'force')}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="block" id="block" className="mt-0.5" />
+                      <Label htmlFor="block" className="cursor-pointer flex-1">
+                        <div className="font-medium">Bloquear nichos para realocação manual</div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Os nichos ficam bloqueados e os itens permanecem vinculados. Você poderá
+                          realocar os itens individualmente pelo mapa da zona. <strong>Recomendado.</strong>
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="force" id="force" className="mt-0.5" />
+                      <Label htmlFor="force" className="cursor-pointer flex-1">
+                        <div className="font-medium">Desassociar itens imediatamente</div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Os itens perdem a localização atual e ficam com o último endereço
+                          conhecido registrado. As movimentações serão registradas no histórico.
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </>
+      )}
+
+      {/* Standard confirmation (first config) */}
+      {!isReconfiguration && !isLoadingPreview && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Atenção</AlertTitle>
+          <AlertDescription>
+            Esta ação irá criar{' '}
+            <strong>{totalBins.toLocaleString()} nichos</strong> automaticamente.
+            Após a criação, você poderá visualizar e gerenciar cada nicho
+            individualmente.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Resumo da Configuração */}
       <Card>
@@ -181,7 +319,7 @@ export function StepConfirm({
                   {firstAddress}
                 </p>
               </div>
-              <span className="text-muted-foreground">→</span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-center">
                 <p className="text-xs text-muted-foreground mb-1">Último</p>
                 <p className="font-mono font-bold text-amber-700 dark:text-amber-400">
@@ -195,43 +333,13 @@ export function StepConfirm({
           <div className="border-t pt-4">
             <div className="flex items-center justify-between p-4 rounded-lg bg-primary/10">
               <span className="text-lg font-medium">
-                Total de nichos a criar
+                Total de nichos {isReconfiguration ? 'na nova estrutura' : 'a criar'}
               </span>
               <span className="text-3xl font-bold text-primary">
                 {totalBins.toLocaleString()}
               </span>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* O que acontece depois */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Após a confirmação</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-              <span>
-                Todos os {totalBins.toLocaleString()} nichos serão criados
-                automaticamente
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-              <span>Você será redirecionado para o mapa 2D da zona</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-              <span>Poderá imprimir etiquetas para cada nicho</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-              <span>Poderá associar itens a cada localização</span>
-            </li>
-          </ul>
         </CardContent>
       </Card>
     </div>

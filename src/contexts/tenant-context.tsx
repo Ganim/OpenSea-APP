@@ -3,6 +3,7 @@
 import { logger } from '@/lib/logger';
 import { API_ENDPOINTS, authConfig } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import { decodeJWT, isJwt } from '@/lib/jwt-utils';
 import { queryClient } from '@/providers/query-provider';
 import type { UserTenant, SelectTenantResponse } from '@/types/tenant';
 import React, {
@@ -32,6 +33,17 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initAttempted = useRef(false);
+
+  const clearAuthAndTenant = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(authConfig.tokenKey);
+    localStorage.removeItem(authConfig.refreshTokenKey);
+    localStorage.removeItem('selected_tenant_id');
+    queryClient.clear();
+    setCurrentTenant(null);
+    setTenants([]);
+    window.dispatchEvent(new CustomEvent('auth-token-change'));
+  }, [queryClient]);
 
   const refreshTenants = useCallback(async (): Promise<UserTenant[]> => {
     try {
@@ -182,6 +194,71 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('auth-token-change', handleAuthChange);
     return () =>
       window.removeEventListener('auth-token-change', handleAuthChange);
+  }, []);
+
+  // Validate tenant context against JWT payload
+  useEffect(() => {
+    const validateTenantToken = () => {
+      if (typeof window === 'undefined') return;
+      const token = localStorage.getItem(authConfig.tokenKey);
+      if (!token || !isJwt(token)) return;
+
+      const payload = decodeJWT(token);
+      if (!payload) return;
+      if (payload.isSuperAdmin) return;
+
+      const storedTenantId = localStorage.getItem('selected_tenant_id');
+      if (storedTenantId && !payload.tenantId) {
+        clearAuthAndTenant();
+      }
+    };
+
+    validateTenantToken();
+    window.addEventListener('auth-token-change', validateTenantToken);
+    return () =>
+      window.removeEventListener('auth-token-change', validateTenantToken);
+  }, [clearAuthAndTenant]);
+
+  // Listener para tenant atualizado via refresh
+  useEffect(() => {
+    const handleTenantRefreshed = (event: Event) => {
+      const detail = (event as CustomEvent<UserTenant>).detail;
+      if (!detail?.id) return;
+
+      setCurrentTenant((prev) => {
+        if (prev?.id === detail.id) return prev;
+        return {
+          id: detail.id,
+          name: detail.name,
+          slug: detail.slug,
+          logoUrl: detail.logoUrl ?? null,
+          status: detail.status ?? 'ACTIVE',
+          role: detail.role ?? 'member',
+          joinedAt: detail.joinedAt ?? new Date(),
+        };
+      });
+
+      setTenants((prev) => {
+        const exists = prev.some((t) => t.id === detail.id);
+        if (exists) return prev;
+        return [
+          ...prev,
+          {
+            id: detail.id,
+            name: detail.name,
+            slug: detail.slug,
+            logoUrl: detail.logoUrl ?? null,
+            status: detail.status ?? 'ACTIVE',
+            role: detail.role ?? 'member',
+            joinedAt: detail.joinedAt ?? new Date(),
+          },
+        ];
+      });
+    };
+
+    window.addEventListener('tenant-refreshed', handleTenantRefreshed);
+    return () =>
+      window.removeEventListener('tenant-refreshed', handleTenantRefreshed);
   }, []);
 
   const value: TenantContextType = {

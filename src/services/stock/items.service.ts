@@ -2,6 +2,8 @@ import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
   BatchEntryRequest,
+  BatchTransferItemsRequest,
+  BatchTransferResponse,
   ItemEntryResponse,
   ItemExitResponse,
   ItemMovementsQuery,
@@ -10,6 +12,7 @@ import type {
   ItemsQuery,
   ItemsResponse,
   ItemTransferResponse,
+  LocationHistoryResponse,
   PaginatedItemsResponse,
   RegisterItemEntryExtendedRequest,
   RegisterItemEntryRequest,
@@ -89,6 +92,21 @@ export const itemsService = {
     return apiClient.post<ItemTransferResponse>(
       API_ENDPOINTS.ITEMS.TRANSFER,
       data
+    );
+  },
+
+  // POST /v1/items/batch-transfer
+  async batchTransfer(data: BatchTransferItemsRequest): Promise<BatchTransferResponse> {
+    return apiClient.post<BatchTransferResponse>(
+      API_ENDPOINTS.ITEMS.BATCH_TRANSFER,
+      data
+    );
+  },
+
+  // GET /v1/items/:itemId/location-history
+  async getLocationHistory(itemId: string): Promise<LocationHistoryResponse> {
+    return apiClient.get<LocationHistoryResponse>(
+      API_ENDPOINTS.ITEMS.LOCATION_HISTORY(itemId)
     );
   },
 

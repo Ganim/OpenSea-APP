@@ -12,7 +12,10 @@ import type {
   CreateZoneRequest,
   UpdateZoneRequest,
   ConfigureZoneStructureRequest,
+  ConfigureZoneStructureResponse,
   StructurePreviewResponse,
+  ReconfigurationPreviewResponse,
+  ZoneItemStatsResponse,
   ZoneLayout,
   LayoutResponse,
   SaveLayoutRequest,
@@ -105,6 +108,42 @@ export function useStructurePreview(
       return response;
     },
     enabled: !!zoneId && !!structure,
+  });
+}
+
+/**
+ * Hook para preview de reconfiguracao (diff)
+ */
+export function useReconfigurationPreview(
+  zoneId: string,
+  structure: ConfigureZoneStructureRequest['structure'] | null
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.zoneReconfigPreview(zoneId), structure],
+    queryFn: async () => {
+      const response = await apiClient.post<ReconfigurationPreviewResponse>(
+        API_ENDPOINTS.zones.reconfigPreview(zoneId),
+        { structure }
+      );
+      return response;
+    },
+    enabled: !!zoneId && !!structure,
+  });
+}
+
+/**
+ * Hook para obter estatisticas de itens de uma zona
+ */
+export function useZoneItemStats(zoneId: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.zoneItemStats(zoneId),
+    queryFn: async () => {
+      return apiClient.get<ZoneItemStatsResponse>(
+        API_ENDPOINTS.zones.itemStats(zoneId)
+      );
+    },
+    enabled: !!zoneId,
+    staleTime: 1000 * 30, // 30 seconds
   });
 }
 
@@ -211,17 +250,20 @@ export function useConfigureZoneStructure() {
     mutationFn: async ({
       zoneId,
       structure,
+      forceRemoveOccupiedBins,
     }: {
       zoneId: string;
       structure: ConfigureZoneStructureRequest;
+      forceRemoveOccupiedBins?: boolean;
     }) => {
-      const response = await apiClient.post<ZoneResponse>(
+      const response = await apiClient.post<ConfigureZoneStructureResponse>(
         API_ENDPOINTS.zones.structure(zoneId),
-        structure
+        { ...structure, forceRemoveOccupiedBins }
       );
-      return response.zone;
+      return response;
     },
-    onSuccess: zone => {
+    onSuccess: (result) => {
+      const zone = result.zone;
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zone(zone.id) });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.warehouseZones(zone.warehouseId),
@@ -229,6 +271,9 @@ export function useConfigureZoneStructure() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zoneBins(zone.id) });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.zoneOccupancy(zone.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.zoneItemStats(zone.id),
       });
     },
   });

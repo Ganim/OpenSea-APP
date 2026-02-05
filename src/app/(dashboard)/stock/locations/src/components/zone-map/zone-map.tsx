@@ -21,10 +21,11 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
-import type { BinItem, BinOccupancy, Zone } from '../../types';
+import type { Bin, BinItem, BinOccupancy, Zone } from '../../types';
 import { AisleRow } from './aisle-row';
 import { BinDetailModal } from './bin-detail-modal';
 import { MapLegend } from './map-legend';
+import { MoveItemModal } from '../../modals/move-item-modal';
 
 interface AisleConfig {
   aisleNumber: number;
@@ -39,6 +40,8 @@ export interface ZoneMapProps {
   onPrintLabels?: (binIds: string[]) => void;
   /** ID do bin a ser destacado (via URL param) */
   highlightBinId?: string;
+  /** Callback para mover item - recebe itemId, endereço destino e quantidade */
+  onMoveItem?: (itemId: string, targetBinAddress: string, quantity: number) => Promise<void>;
 }
 
 export type ZoomLevel = 'compact' | 'normal' | 'expanded' | 'detailed';
@@ -50,6 +53,7 @@ export function ZoneMap({
   isLoading,
   onPrintLabels,
   highlightBinId,
+  onMoveItem,
 }: ZoneMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const structure = zone.structure;
@@ -62,6 +66,7 @@ export function ZoneMap({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedBins, setSelectedBins] = useState<Set<string>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [moveItemData, setMoveItemData] = useState<{ item: BinItem; bin: BinOccupancy } | null>(null);
 
   // Agrupar bins por corredor e prateleira
   const binMatrix = useMemo(() => {
@@ -154,10 +159,14 @@ export function ZoneMap({
   }, []);
 
   const handleMoveItem = useCallback((item: BinItem) => {
-    // TODO: Implementar movimentação do item
-    toast.info(`Movimentar item ${item.itemCode}`);
-    console.log('Move item:', item);
-  }, []);
+    if (!selectedBin) return;
+    if (!onMoveItem) {
+      toast.info(`Movimentar item ${item.itemCode}`);
+      return;
+    }
+    setMoveItemData({ item, bin: selectedBin });
+    setIsDetailModalOpen(false);
+  }, [selectedBin, onMoveItem]);
 
   const handleZoomIn = useCallback(() => {
     setZoomLevel(prev => {
@@ -432,6 +441,32 @@ export function ZoneMap({
         onPrintItemLabel={handlePrintItemLabel}
         onMoveItem={handleMoveItem}
       />
+
+      {/* Modal de Mover Item */}
+      {moveItemData && onMoveItem && (
+        <MoveItemModal
+          open={!!moveItemData}
+          onOpenChange={(open) => {
+            if (!open) setMoveItemData(null);
+          }}
+          item={moveItemData.item}
+          currentBin={{
+            id: moveItemData.bin.id,
+            zoneId: zone.id,
+            address: moveItemData.bin.address,
+            aisle: moveItemData.bin.aisle,
+            shelf: moveItemData.bin.shelf,
+            position: moveItemData.bin.position,
+            currentOccupancy: moveItemData.bin.currentOccupancy,
+            capacity: moveItemData.bin.capacity,
+            isActive: true,
+            isBlocked: moveItemData.bin.isBlocked,
+            createdAt: '',
+            updatedAt: '',
+          } satisfies Bin}
+          onMove={onMoveItem}
+        />
+      )}
     </div>
   );
 }

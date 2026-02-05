@@ -3,6 +3,7 @@ import {
   ArrowRightLeft,
   ArrowUpFromLine,
   Box,
+  RotateCcw,
 } from 'lucide-react';
 
 import type { MovementType } from '@/types/stock';
@@ -43,6 +44,13 @@ export const MOVEMENT_CONFIG: Record<MovementType, MovementTypeConfig> = {
     bgClass:
       'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
   },
+  ZONE_RECONFIGURE: {
+    label: 'Reconfiguração',
+    icon: RotateCcw,
+    className: 'text-purple-600',
+    bgClass:
+      'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
+  },
 };
 
 /**
@@ -54,4 +62,5 @@ export const MOVEMENT_TYPE_OPTIONS: MovementTypeOption[] = [
   { value: 'EXIT', label: 'Saidas' },
   { value: 'TRANSFER', label: 'Transferencias' },
   { value: 'ADJUSTMENT', label: 'Ajustes' },
+  { value: 'ZONE_RECONFIGURE', label: 'Reconfigurações' },
 ];

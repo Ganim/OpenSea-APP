@@ -40,7 +40,7 @@ export type UnitOfMeasure =
   | 'TEASPOONS'
   | 'CUSTOM';
 export type ItemStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'DAMAGED';
-export type MovementType = 'ENTRY' | 'EXIT' | 'TRANSFER' | 'ADJUSTMENT';
+export type MovementType = 'ENTRY' | 'EXIT' | 'TRANSFER' | 'ADJUSTMENT' | 'ZONE_RECONFIGURE';
 export type ExitMovementType = 'SALE' | 'PRODUCTION' | 'SAMPLE' | 'LOSS';
 export type PurchaseOrderStatus =
   | 'PENDING'
@@ -398,6 +398,7 @@ export interface Item {
   binId?: string; // ID da bin onde o item está armazenado
   locationId?: string; // @deprecated - use binId (mantido para retrocompatibilidade)
   resolvedAddress?: string; // Endereço resolvido da bin (ex: "FAB-EST-102-B")
+  lastKnownAddress?: string; // Ultimo endereco conhecido (persistido mesmo quando bin e removido)
   uniqueCode?: string;
   fullCode?: string;
   sequentialCode?: number;
@@ -461,6 +462,31 @@ export interface TransferItemRequest {
   notes?: string;
 }
 
+export interface BatchTransferItemsRequest {
+  itemIds: string[];
+  destinationBinId: string;
+  notes?: string;
+}
+
+export interface BatchTransferResponse {
+  transferred: number;
+  movements: ItemMovement[];
+}
+
+export interface LocationHistoryEntry {
+  id: string;
+  date: Date;
+  type: string;
+  from: string | null;
+  to: string | null;
+  userId: string;
+  notes: string | null;
+}
+
+export interface LocationHistoryResponse {
+  data: LocationHistoryEntry[];
+}
+
 export interface ItemsResponse {
   items: Item[];
 }
@@ -494,6 +520,7 @@ export interface ItemMovement {
   quantityAfter?: number | null;
   movementType: MovementType;
   reasonCode?: string | null;
+  originRef?: string | null;
   destinationRef?: string | null;
   batchNumber?: string | null;
   notes?: string | null;

@@ -11,6 +11,7 @@ import {
   ArrowUpCircle,
   Clock,
   RefreshCcw,
+  RotateCcw,
   User,
 } from 'lucide-react';
 import { MovementStatusBadge, MovementTypeBadge } from './stock-badge';
@@ -29,6 +30,7 @@ const movementTypeIcons: Record<MovementType, React.ElementType> = {
   EXIT: ArrowUpCircle,
   TRANSFER: ArrowRightCircle,
   ADJUSTMENT: RefreshCcw,
+  ZONE_RECONFIGURE: RotateCcw,
 };
 
 const movementTypeColors: Record<MovementType, string> = {
@@ -36,6 +38,7 @@ const movementTypeColors: Record<MovementType, string> = {
   EXIT: 'text-red-500',
   TRANSFER: 'text-blue-500',
   ADJUSTMENT: 'text-yellow-500',
+  ZONE_RECONFIGURE: 'text-purple-500',
 };
 
 interface MovementFeedItemProps {

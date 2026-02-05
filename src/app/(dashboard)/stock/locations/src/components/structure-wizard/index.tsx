@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-import { useConfigureZoneStructure, useWarehouse, useZone } from '../../api';
+import {
+  useConfigureZoneStructure,
+  useReconfigurationPreview,
+  useWarehouse,
+  useZone,
+} from '../../api';
 import { generateSampleAddressesFromAisles } from '../../utils';
 import { WIZARD_STEP_LABELS, SUCCESS_MESSAGES } from '../../constants';
 import { PHYSICAL_DEFAULTS } from '../../constants';
@@ -61,6 +66,7 @@ export function StructureWizard({
     binDirection: 'BOTTOM_UP' as 'BOTTOM_UP' | 'TOP_DOWN',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [occupiedBinsAction, setOccupiedBinsAction] = useState<'block' | 'force'>('block');
 
   // Mutations
   const configureStructure = useConfigureZoneStructure();
@@ -94,6 +100,26 @@ export function StructureWizard({
       ...codePatternState,
     };
   }, [aisles, codePatternState]);
+
+  // Build structure for reconfiguration preview (only on confirm step)
+  const previewStructure = useMemo<ZoneStructure | null>(() => {
+    if (currentStep !== 'confirm') return null;
+    const maxShelves = Math.max(...aisles.map(a => a.shelvesCount));
+    const maxBins = Math.max(...aisles.map(a => a.binsPerShelf));
+    return {
+      aisles: aisles.length,
+      shelvesPerAisle: maxShelves,
+      binsPerShelf: maxBins,
+      aisleConfigs: aisles,
+      codePattern,
+      dimensions: { ...PHYSICAL_DEFAULTS },
+    };
+  }, [currentStep, aisles, codePattern]);
+
+  const {
+    data: reconfigPreview,
+    isLoading: isLoadingPreview,
+  } = useReconfigurationPreview(zoneId, previewStructure);
 
   const sampleAddresses = useMemo(() => {
     if (!warehouse || !zone) return [];
@@ -161,12 +187,24 @@ export function StructureWizard({
     };
 
     try {
-      await configureStructure.mutateAsync({
+      const result = await configureStructure.mutateAsync({
         zoneId: zone.id,
         structure: { structure },
+        forceRemoveOccupiedBins: occupiedBinsAction === 'force',
       });
 
-      toast.success(SUCCESS_MESSAGES.ZONE_STRUCTURE_CONFIGURED);
+      // Show appropriate success message
+      if (result.binsBlocked > 0) {
+        toast.success(
+          `Estrutura reconfigurada. ${result.binsBlocked} nicho(s) bloqueado(s) para realocação manual.`
+        );
+      } else if (result.binsPreserved > 0) {
+        toast.success(
+          `Estrutura reconfigurada. ${result.binsCreated} nicho(s) criado(s), ${result.binsPreserved} preservado(s).`
+        );
+      } else {
+        toast.success(SUCCESS_MESSAGES.ZONE_STRUCTURE_CONFIGURED);
+      }
 
       if (onComplete) {
         onComplete();
@@ -182,6 +220,7 @@ export function StructureWizard({
     zone,
     aisles,
     codePattern,
+    occupiedBinsAction,
     configureStructure,
     onComplete,
     router,
@@ -237,6 +276,10 @@ export function StructureWizard({
             totalBins={totalBins}
             firstAddress={sampleAddresses[0]}
             lastAddress={sampleAddresses[sampleAddresses.length - 1]}
+            reconfigPreview={reconfigPreview}
+            isLoadingPreview={isLoadingPreview}
+            occupiedBinsAction={occupiedBinsAction}
+            onOccupiedBinsActionChange={setOccupiedBinsAction}
           />
         );
       default:
@@ -309,17 +352,29 @@ export function StructureWizard({
         {isLastStep ? (
           <Button
             onClick={handleSubmit}
-            disabled={configureStructure.isPending}
+            disabled={configureStructure.isPending || isLoadingPreview}
+            variant={
+              reconfigPreview &&
+              !reconfigPreview.isFirstConfiguration &&
+              reconfigPreview.totalAffectedItems > 0 &&
+              occupiedBinsAction === 'force'
+                ? 'destructive'
+                : 'default'
+            }
           >
             {configureStructure.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Criando {totalBins.toLocaleString()} nichos...
+                {reconfigPreview && !reconfigPreview.isFirstConfiguration
+                  ? 'Reconfigurando...'
+                  : `Criando ${totalBins.toLocaleString()} nichos...`}
               </>
             ) : (
               <>
                 <Check className="mr-2 h-4 w-4" />
-                Confirmar e Criar
+                {reconfigPreview && !reconfigPreview.isFirstConfiguration
+                  ? 'Confirmar Reconfiguração'
+                  : 'Confirmar e Criar'}
               </>
             )}
           </Button>

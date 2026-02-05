@@ -12,6 +12,7 @@ import {
   Hash,
   Loader2,
   MapPin,
+  MapPinOff,
   MoreVertical,
   Package,
   Printer,
@@ -95,6 +96,11 @@ const MOVEMENT_CONFIG: Record<
     label: 'Ajuste',
     icon: Box,
     className: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20',
+  },
+  ZONE_RECONFIGURE: {
+    label: 'Reconfiguração',
+    icon: RefreshCw,
+    className: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20',
   },
 };
 
@@ -289,9 +295,15 @@ export default function ItemDetailPage({ params }: PageProps) {
                   value={item.batchNumber || 'Não informado'}
                 />
                 <InfoCard
-                  icon={MapPin}
+                  icon={item.bin ? MapPin : MapPinOff}
                   label="Localização"
-                  value={item.locationId || 'Não informada'}
+                  value={
+                    item.bin
+                      ? item.bin.address
+                      : item.lastKnownAddress
+                        ? `${item.lastKnownAddress} (desassociado)`
+                        : 'Não informada'
+                  }
                 />
                 <InfoCard
                   icon={Calendar}

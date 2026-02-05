@@ -110,6 +110,49 @@ export interface StructurePreviewResponse {
 }
 
 // ============================================
+// Reconfiguration Preview Types
+// ============================================
+
+export interface ReconfigurationPreviewResponse {
+  binsToPreserve: number;
+  binsToCreate: number;
+  binsToDeleteEmpty: number;
+  binsWithItems: Array<{
+    binId: string;
+    address: string;
+    itemCount: number;
+  }>;
+  totalAffectedItems: number;
+  addressUpdates: number;
+  isFirstConfiguration: boolean;
+  totalNewBins: number;
+}
+
+export interface ZoneItemStatsResponse {
+  totalBins: number;
+  activeBins: number;
+  blockedBins: number;
+  occupiedBins: number;
+  totalItems: number;
+  itemsInBlockedBins: number;
+}
+
+export interface ConfigureZoneStructureResponse {
+  zone: Zone;
+  binsCreated: number;
+  binsPreserved: number;
+  binsUpdated: number;
+  binsDeleted: number;
+  binsBlocked: number;
+  itemsDetached: number;
+  blockedBins: Array<{
+    binId: string;
+    address: string;
+    itemCount: number;
+  }>;
+}
+
+// ============================================
 // Form Types
 // ============================================
 

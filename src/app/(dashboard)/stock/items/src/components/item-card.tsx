@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ItemExtended, ItemStatus } from '@/types/stock';
-import { Box, Calendar, Hash, MapPin, Package } from 'lucide-react';
+import { Box, Calendar, Hash, MapPin, MapPinOff, Package } from 'lucide-react';
 
 const STATUS_CONFIG: Record<ItemStatus, { label: string; className: string }> =
   {
@@ -114,12 +114,20 @@ export function ItemGridCard({ item, isSelected = false }: ItemCardProps) {
           </div>
         )}
 
-        {item.location && (
+        {item.bin ? (
           <div className="flex items-center gap-1">
             <MapPin className="w-3 h-3" />
-            <span className="truncate">
-              {item.location.name || item.location.code}
-            </span>
+            <span className="truncate">{item.bin.address}</span>
+          </div>
+        ) : item.lastKnownAddress ? (
+          <div className="flex items-center gap-1 text-amber-500">
+            <MapPinOff className="w-3 h-3" />
+            <span className="truncate">{item.lastKnownAddress} (desassociado)</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-muted-foreground/50">
+            <MapPinOff className="w-3 h-3" />
+            <span>Sem localização</span>
           </div>
         )}
 
@@ -213,10 +221,20 @@ export function ItemListCard({ item, isSelected = false }: ItemCardProps) {
               </span>
             )}
             {item.batchNumber && <span>Lote: {item.batchNumber}</span>}
-            {item.location && (
+            {item.bin ? (
               <span className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                {item.location.name || item.location.code}
+                {item.bin.address}
+              </span>
+            ) : item.lastKnownAddress ? (
+              <span className="flex items-center gap-1 text-amber-500">
+                <MapPinOff className="w-3 h-3" />
+                {item.lastKnownAddress}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-muted-foreground/50">
+                <MapPinOff className="w-3 h-3" />
+                Sem local
               </span>
             )}
             <span>Entrada: {formatDate(item.entryDate)}</span>
