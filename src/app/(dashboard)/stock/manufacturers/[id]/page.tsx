@@ -137,7 +137,7 @@ export default function ManufacturerDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="products" className="gap-2">
             <NotebookText className="h-4 w-4 hidden sm:inline" />
-            <span>Produtos</span>
+            <span>Histórico de Pedidos</span>
           </TabsTrigger>
         </TabsList>
 
@@ -277,17 +277,17 @@ export default function ManufacturerDetailPage() {
           />
         </TabsContent>
 
-        {/* Aba Produtos */}
+        {/* Aba Histórico de Pedidos */}
         <TabsContent value="products" className="space-y-6 flex flex-col">
           <Card className="p-4 w-full sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
                 <Factory className="h-5 w-5" />
-                Produtos
+                Histórico de Pedidos
               </h3>
             </div>
             <p className="text-muted-foreground text-sm py-4">
-              Nenhum produto vinculado a este fabricante.
+              Funcionalidade em desenvolvimento.
             </p>
           </Card>
         </TabsContent>

@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { productsConfig } from '@/config/entities/products.config';
+import { cn } from '@/lib/utils';
 import {
   ConfirmDialog,
   CoreProvider,
@@ -30,17 +31,43 @@ import {
 } from '@/core';
 import ItemCard from '@/core/components/item-card';
 import { formatUnitOfMeasure } from '@/helpers/formatters';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { manufacturersService } from '@/services/stock/other.service';
 import { productsService } from '@/services/stock';
-import type { Item, Product } from '@/types/stock';
-import { ChevronRight, Grid3x3, Package, Plus, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Item, Manufacturer, Product } from '@/types/stock';
+import { useQuery } from '@tanstack/react-query';
+import { Check, ChevronRight, ChevronsUpDown, Factory, Grid3x3, Package, Plus, Upload, X } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateProductForm, EditProductForm } from './src/components';
 import { ProductVariantsItemsModal } from './src/modals';
 import type { ProductFormData } from './src/types';
 
 export default function ProductsPage() {
+  return (
+    <Suspense fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}>
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+
+function ProductsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const manufacturerIdParam = searchParams.get('manufacturer');
 
   // ============================================================================
   // STATE
@@ -50,16 +77,49 @@ export default function ProductsPage() {
   const [productModalOpen, setProductModalOpen] = useState(false);
 
   // ============================================================================
+  // MANUFACTURER FILTER
+  // ============================================================================
+
+  const [manufacturerFilterOpen, setManufacturerFilterOpen] = useState(false);
+
+  const { data: manufacturersList = [] } = useQuery<Manufacturer[]>({
+    queryKey: ['manufacturers-for-filter'],
+    queryFn: async () => {
+      const response = await manufacturersService.listManufacturers();
+      return (response.manufacturers || []).filter((m: Manufacturer) => m.isActive);
+    },
+  });
+
+  const filterManufacturer = useMemo(
+    () => manufacturersList.find(m => m.id === manufacturerIdParam) ?? null,
+    [manufacturersList, manufacturerIdParam],
+  );
+
+  const selectManufacturerFilter = useCallback((id: string) => {
+    if (id) {
+      router.push(`/stock/products?manufacturer=${id}`);
+    } else {
+      router.push('/stock/products');
+    }
+  }, [router]);
+
+  const clearManufacturerFilter = useCallback(() => {
+    router.push('/stock/products');
+  }, [router]);
+
+  // ============================================================================
   // CRUD SETUP
   // ============================================================================
 
   const crud = useEntityCrud<Product>({
     entityName: 'Produto',
     entityNamePlural: 'Produtos',
-    queryKey: ['products'],
+    queryKey: ['products', manufacturerIdParam ?? 'all'],
     baseUrl: '/api/v1/products',
     listFn: async () => {
-      const response = await productsService.listProducts();
+      const response = await productsService.listProducts(
+        manufacturerIdParam ? { manufacturerId: manufacturerIdParam } : undefined
+      );
       return response.products;
     },
     getFn: (id: string) => productsService.getProduct(id).then(r => r.product),
@@ -373,6 +433,72 @@ export default function ProductsPage() {
           showClear={true}
           size="md"
         />
+
+        {/* Manufacturer Filter */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Popover open={manufacturerFilterOpen} onOpenChange={setManufacturerFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'h-9 gap-2 text-sm',
+                  manufacturerIdParam && 'border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300'
+                )}
+              >
+                <Factory className="w-3.5 h-3.5" />
+                {manufacturerIdParam
+                  ? (filterManufacturer?.name || 'Carregando...')
+                  : 'Fabricante'}
+                <ChevronsUpDown className="w-3.5 h-3.5 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[250px] p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Buscar fabricante..." className="h-9" />
+                <CommandEmpty>Nenhum fabricante encontrado.</CommandEmpty>
+                <CommandList>
+                  <CommandGroup>
+                    {manufacturersList.map(m => (
+                      <CommandItem
+                        key={m.id}
+                        value={m.name}
+                        className="cursor-pointer"
+                        onSelect={() => {
+                          selectManufacturerFilter(m.id === manufacturerIdParam ? '' : m.id);
+                          setManufacturerFilterOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            manufacturerIdParam === m.id ? 'opacity-100' : 'opacity-0'
+                          )}
+                        />
+                        {m.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+
+          {manufacturerIdParam && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-sm font-medium">
+              <Factory className="w-3.5 h-3.5" />
+              <span>
+                {filterManufacturer?.name || 'Carregando...'}
+              </span>
+              <button
+                onClick={clearManufacturerFilter}
+                className="ml-1 p-0.5 rounded-full hover:bg-violet-200 dark:hover:bg-violet-800 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Grid */}
         {page.isLoading ? (

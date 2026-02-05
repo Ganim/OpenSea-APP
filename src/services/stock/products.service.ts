@@ -10,10 +10,19 @@ import type {
 } from '@/types/stock';
 
 export const productsService = {
-  // GET /v1/products or /v1/products?templateId=:templateId (legacy)
-  async listProducts(templateId?: string): Promise<ProductsResponse> {
-    const url = templateId
-      ? `${API_ENDPOINTS.PRODUCTS.LIST}?templateId=${templateId}`
+  // GET /v1/products with optional filters
+  // Accepts either a string (legacy templateId) or an object with optional filters
+  async listProducts(params?: string | { templateId?: string; manufacturerId?: string }): Promise<ProductsResponse> {
+    const searchParams = new URLSearchParams();
+    if (typeof params === 'string') {
+      searchParams.append('templateId', params);
+    } else if (params) {
+      if (params.templateId) searchParams.append('templateId', params.templateId);
+      if (params.manufacturerId) searchParams.append('manufacturerId', params.manufacturerId);
+    }
+    const query = searchParams.toString();
+    const url = query
+      ? `${API_ENDPOINTS.PRODUCTS.LIST}?${query}`
       : API_ENDPOINTS.PRODUCTS.LIST;
     return apiClient.get<ProductsResponse>(url);
   },

@@ -31,20 +31,27 @@ import {
   useEntityCrud,
   useEntityPage,
 } from '@/core';
+import ItemCard from '@/core/components/item-card';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Manufacturer } from '@/types/stock';
+import { productsService } from '@/services/stock';
+import type { Product } from '@/types/stock';
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowDownAZ,
   ArrowLeft,
   Calendar,
+  ChevronRight,
   Clock,
   Factory,
   Globe,
+  Package,
   Plus,
   RefreshCcwDot,
   Star,
   Upload,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -133,6 +140,28 @@ export default function ManufacturersPage() {
       console.log('[Manufacturers CRUD] Delete success callback for ID:', id);
     },
   });
+
+  // ============================================================================
+  // PRODUCT COUNTS
+  // ============================================================================
+
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ['products-for-manufacturer-counts'],
+    queryFn: async () => {
+      const response = await productsService.listProducts();
+      return response.products || [];
+    },
+  });
+
+  const productCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const product of products) {
+      if (product.manufacturerId) {
+        map.set(product.manufacturerId, (map.get(product.manufacturerId) || 0) + 1);
+      }
+    }
+    return map;
+  }, [products]);
 
   // ============================================================================
   // PAGE SETUP
@@ -264,6 +293,7 @@ export default function ManufacturersPage() {
 
   const renderGridCard = (item: Manufacturer, isSelected: boolean) => {
     const { displayName, fullName, isTruncated } = getDisplayName(item);
+    const productCount = productCountMap.get(item.id) || 0;
 
     const cardContent = (
       <EntityContextMenu
@@ -274,7 +304,7 @@ export default function ManufacturersPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="grid"
           title={displayName}
@@ -321,6 +351,17 @@ export default function ManufacturersPage() {
               )}
             </div>
           }
+          footer={
+            <Link href={`/stock/products?manufacturer=${item.id}`}>
+              <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer bg-emerald-600 hover:bg-emerald-700">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  <span>{productCount} {productCount === 1 ? 'produto' : 'produtos'}</span>
+                </div>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
+          }
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -350,6 +391,7 @@ export default function ManufacturersPage() {
 
   const renderListCard = (item: Manufacturer, isSelected: boolean) => {
     const { displayName, fullName, isTruncated } = getDisplayName(item);
+    const productCount = productCountMap.get(item.id) || 0;
 
     const cardContent = (
       <EntityContextMenu
@@ -406,6 +448,17 @@ export default function ManufacturersPage() {
                 </span>
               )}
             </div>
+          }
+          footer={
+            <Link href={`/stock/products?manufacturer=${item.id}`}>
+              <button className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950 rounded transition-colors cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  <span>{productCount} {productCount === 1 ? 'produto' : 'produtos'}</span>
+                </div>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
           }
           isSelected={isSelected}
           showSelection={false}
