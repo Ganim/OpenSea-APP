@@ -1,150 +1,297 @@
 /**
- * OpenSea OS - Manufacturer Detail Page
- * Página de detalhes de um fabricante específico
+ * Manufacturer Detail Page - Identical to Company Detail Page
  */
 
 'use client';
 
+import { InfoField } from '@/components/shared/info-field';
+import { MetadataSection } from '@/components/shared/metadata-section';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatCNPJ } from '@/lib/masks';
 import type { Manufacturer } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Factory } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit,
+  Factory,
+  MapPinHouse,
+  Notebook,
+  NotebookText,
+  Trash,
+} from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { manufacturersApi } from '../src';
 
 export default function ManufacturerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const manufacturerId = params.id as string;
 
+  const [activeTab, setActiveTab] = useState('general');
+
   const { data: manufacturer, isLoading } = useQuery<Manufacturer>({
     queryKey: ['manufacturers', manufacturerId],
-    queryFn: async () => {
-      const response = await fetch(`/api/v1/manufacturers/${manufacturerId}`);
-      const data = await response.json();
-      return data.manufacturer;
-    },
+    queryFn: () => manufacturersApi.get(manufacturerId),
+    enabled: !!manufacturerId,
   });
-
-  const handleBack = () => {
-    router.push('/stock/manufacturers');
-  };
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground">
+          Carregando dados do fabricante...
+        </p>
       </div>
     );
   }
 
   if (!manufacturer) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-12 text-center">
-          <Factory className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Fabricante não encontrado
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            O fabricante que você está procurando não existe ou foi removido.
-          </p>
-          <Button onClick={handleBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Fabricantes
-          </Button>
-        </Card>
+      <div className="flex items-center justify-center h-96">
+        <p className="text-destructive">Fabricante não encontrado.</p>
       </div>
     );
   }
 
+  const handleBack = () => {
+    router.push('/stock/manufacturers');
+  };
+  const handleDelete = (id: string) => {
+    router.push(`/stock/manufacturers/${id}`);
+  };
+  const handleEdit = (id: string) => {
+    router.push(`/stock/manufacturers/${id}/edit`);
+  };
+
   return (
-    <div className="min-h-screen from-purple-50 via-gray-50 to-pink-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
-      <div className="max-w-8xl flex items-center gap-4 mb-2">
-        <Button variant="ghost" size={'sm'} onClick={handleBack}>
-          <ArrowLeft className="h-5 w-5" />
-          Voltar para Fabricantes
-        </Button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="max-w-8xl  flex items-center gap-4  mb-2">
+          <Button variant="ghost" size={'sm'} onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
+            Voltar para fabricantes
+          </Button>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size={'sm'}
+            onClick={() => handleDelete(manufacturer.id)}
+            className="gap-2 self-start sm:self-auto"
+          >
+            <Trash className="h-4 w-4 text-red-800" />
+            Excluir
+          </Button>
+
+          <Button
+            variant="outline"
+            size={'sm'}
+            onClick={() => handleEdit(manufacturer.id)}
+            className="gap-2 self-start sm:self-auto"
+          >
+            <Edit className="h-4 w-4  text-sky-500" />
+            Editar
+          </Button>
+        </div>
       </div>
 
-      <div className="max-w-8xl mx-auto space-y-6">
-        <Card className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-linear-to-br from-orange-500 to-red-600">
-              <Factory className="h-7 w-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight">
+      {/* Manufacturer Info Card */}
+      <Card className="p-4 sm:p-6 ">
+        <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
+          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-violet-500 to-purple-600 shrink-0">
+            <Factory className="md:h-8 md:w-8 text-white" />
+          </div>
+          <div className="flex justify-between flex-1 gap-4 flex-row items-center">
+            <div>
+              <h1 className="text-lg sm:text-3xl font-bold tracking-tight">
                 {manufacturer.name}
               </h1>
-              <p className="text-muted-foreground text-sm">
-                {manufacturer.country}
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {manufacturer.legalName || 'Sem razão social definida'}
               </p>
             </div>
+            <div>
+              <Badge
+                variant={manufacturer.isActive ? 'success' : 'secondary'}
+                className="mt-1"
+              >
+                {manufacturer.isActive ? 'Ativo' : 'Inativo'}
+              </Badge>
+            </div>
           </div>
+        </div>
+      </Card>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Status
-                </h3>
-                <p className="mt-1 text-sm">
-                  {manufacturer.isActive ? 'Ativo' : 'Inativo'}
-                </p>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4 p-2 h-12 ">
+          <TabsTrigger value="general" className="gap-2">
+            <Factory className="h-4 w-4 hidden sm:inline" />
+            <span>Geral</span>
+          </TabsTrigger>
+          <TabsTrigger value="products" className="gap-2">
+            <NotebookText className="h-4 w-4 hidden sm:inline" />
+            <span>Produtos</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Aba Geral */}
+        <TabsContent value="general" className="flex flex-col gap-4">
+          <Card className="flex flex-col gap-10 sm:p-6">
+            <div>
+              <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
+                <NotebookText className="h-6 w-6" />
+                Dados do Fabricante
+              </h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <InfoField
+                  label="Nome"
+                  value={manufacturer.name}
+                  showCopyButton
+                  copyTooltip="Copiar Nome"
+                />
+                <InfoField
+                  label="CNPJ"
+                  value={
+                    manufacturer.cnpj
+                      ? formatCNPJ(manufacturer.cnpj)
+                      : undefined
+                  }
+                  showCopyButton
+                  copyTooltip="Copiar CNPJ"
+                />
+                <InfoField
+                  label="Código"
+                  value={manufacturer.code}
+                  showCopyButton
+                  copyTooltip="Copiar Código"
+                />
               </div>
-
-              {manufacturer.email && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    E-mail
-                  </h3>
-                  <p className="mt-1 text-sm">{manufacturer.email}</p>
-                </div>
-              )}
-
-              {manufacturer.phone && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Telefone
-                  </h3>
-                  <p className="mt-1 text-sm">{manufacturer.phone}</p>
-                </div>
-              )}
-
-              {manufacturer.website && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Website
-                  </h3>
-                  <p className="mt-1 text-sm">{manufacturer.website}</p>
+            </div>
+            <div>
+              <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
+                <Notebook className="h-6 w-6" />
+                Contatos
+              </h3>
+              {!manufacturer.email &&
+              !manufacturer.phone &&
+              !manufacturer.website ? (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum contato cadastrado.
+                </p>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-6">
+                  {manufacturer.email && (
+                    <InfoField
+                      label="E-mail"
+                      value={manufacturer.email}
+                      showCopyButton
+                      copyTooltip="Copiar E-mail"
+                    />
+                  )}
+                  {manufacturer.phone && (
+                    <InfoField
+                      label="Telefone"
+                      value={manufacturer.phone}
+                      showCopyButton
+                      copyTooltip="Copiar Telefone"
+                    />
+                  )}
+                  {manufacturer.website && (
+                    <InfoField
+                      label="Website"
+                      value={manufacturer.website}
+                      showCopyButton
+                      copyTooltip="Copiar Website"
+                    />
+                  )}
                 </div>
               )}
             </div>
-
+            <div>
+              <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
+                <MapPinHouse className="h-6 w-6" />
+                Endereço
+              </h3>
+              {!manufacturer.addressLine1 &&
+              !manufacturer.city &&
+              !manufacturer.state ? (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum endereço cadastrado.
+                </p>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-6">
+                  {manufacturer.addressLine1 && (
+                    <InfoField
+                      label="Endereço"
+                      value={`${manufacturer.addressLine1}${manufacturer.addressLine2 ? `, ${manufacturer.addressLine2}` : ''}`}
+                      showCopyButton
+                      copyTooltip="Copiar Endereço"
+                    />
+                  )}
+                  {manufacturer.city && (
+                    <InfoField
+                      label="Cidade - Estado - País"
+                      value={[
+                        manufacturer.city,
+                        manufacturer.state,
+                        manufacturer.country,
+                      ]
+                        .filter(Boolean)
+                        .join(' - ')}
+                    />
+                  )}
+                  {manufacturer.postalCode && (
+                    <InfoField
+                      label="CEP"
+                      value={manufacturer.postalCode}
+                      showCopyButton
+                      copyTooltip="Copiar CEP"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
             {manufacturer.notes && (
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground">
+                <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
+                  <NotebookText className="h-6 w-6" />
                   Observações
                 </h3>
-                <p className="mt-1 text-sm">{manufacturer.notes}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {manufacturer.notes}
+                </p>
               </div>
             )}
+          </Card>
 
-            <div className="flex gap-2 pt-4">
-              <Button
-                onClick={() =>
-                  router.push(`/stock/manufacturers/${manufacturerId}`)
-                }
-              >
-                Editar Fabricante
-              </Button>
+          <MetadataSection
+            createdAt={manufacturer.createdAt}
+            updatedAt={manufacturer.updatedAt}
+          />
+        </TabsContent>
+
+        {/* Aba Produtos */}
+        <TabsContent value="products" className="space-y-6 flex flex-col">
+          <Card className="p-4 w-full sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
+                <Factory className="h-5 w-5" />
+                Produtos
+              </h3>
             </div>
-          </div>
-        </Card>
-      </div>
+            <p className="text-muted-foreground text-sm py-4">
+              Nenhum produto vinculado a este fabricante.
+            </p>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -56,9 +56,9 @@ import {
   DeleteConfirmModal,
   duplicateManufacturer,
   DuplicateConfirmModal,
-  EditModal,
   manufacturersApi,
   manufacturersConfig,
+  RenameModal,
   updateManufacturer,
   ViewModal,
 } from './src';
@@ -67,7 +67,6 @@ const MAX_NAME_LENGTH = 18;
 
 /**
  * Get the display name for a manufacturer
- * Priority: tradeName > legalName > name
  * Returns uppercase and truncated version
  */
 function getDisplayName(manufacturer: Manufacturer): {
@@ -75,13 +74,7 @@ function getDisplayName(manufacturer: Manufacturer): {
   fullName: string;
   isTruncated: boolean;
 } {
-  // Priority: tradeName (Nome Fantasia) > legalName (Razão Social) > name
-  const fullName = (
-    manufacturer.tradeName ||
-    manufacturer.legalName ||
-    manufacturer.name ||
-    ''
-  ).toUpperCase();
+  const fullName = (manufacturer.name || '').toUpperCase();
   const isTruncated = fullName.length > MAX_NAME_LENGTH;
   const displayName = isTruncated
     ? `${fullName.slice(0, MAX_NAME_LENGTH)}...`
@@ -175,7 +168,7 @@ export default function ManufacturersPage() {
   const handleContextView = (ids: string[]) =>
     page.handlers.handleItemsView(ids);
 
-  const handleContextEdit = (ids: string[]) =>
+  const handleContextRename = (ids: string[]) =>
     page.handlers.handleItemsEdit(ids);
 
   const handleContextDuplicate = (ids: string[]) =>
@@ -193,9 +186,8 @@ export default function ManufacturersPage() {
         // Convert BrasilAPI data to Manufacturer format
         const manufacturerData: Partial<Manufacturer> = {
           name: data.nome_fantasia || data.razao_social,
-          tradeName: data.nome_fantasia || undefined,
           legalName: data.razao_social || undefined,
-          cnpj: data.cnpj,
+          cnpj: data.cnpj || undefined,
           email: data.email || undefined,
           phone: data.ddd_telefone_1 || undefined,
           website: undefined,
@@ -209,8 +201,7 @@ export default function ManufacturersPage() {
         };
 
         const manufacturer = await createManufacturer(manufacturerData);
-        const displayName =
-          manufacturer.tradeName || manufacturer.legalName || manufacturer.name;
+        const displayName = manufacturer.name;
         toast.success(`Fabricante "${displayName}" criado com sucesso!`);
 
         // Fechar modal e atualizar listagem
@@ -278,7 +269,8 @@ export default function ManufacturersPage() {
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
-        onEdit={handleContextEdit}
+        onEdit={handleContextRename}
+        labels={{ edit: 'Renomear' }}
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
@@ -363,7 +355,8 @@ export default function ManufacturersPage() {
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
-        onEdit={handleContextEdit}
+        onEdit={handleContextRename}
+        labels={{ edit: 'Renomear' }}
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
@@ -569,13 +562,11 @@ export default function ManufacturersPage() {
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{
                 view: true,
-                edit: true,
                 duplicate: true,
                 delete: true,
               }}
               handlers={{
                 onView: page.handlers.handleItemsView,
-                onEdit: page.handlers.handleItemsEdit,
                 onDuplicate: page.handlers.handleItemsDuplicate,
                 onDelete: page.handlers.handleItemsDelete,
               }}
@@ -607,8 +598,8 @@ export default function ManufacturersPage() {
             }}
           />
 
-          {/* Edit Modal */}
-          <EditModal
+          {/* Rename Modal */}
+          <RenameModal
             isOpen={page.modals.isOpen('edit')}
             onClose={() => page.modals.close('edit')}
             manufacturer={page.modals.editingItem}

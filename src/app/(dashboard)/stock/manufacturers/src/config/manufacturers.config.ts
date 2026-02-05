@@ -80,7 +80,18 @@ export const manufacturersConfig = defineEntityConfig<Manufacturer>()({
             type: 'text',
             required: true,
             placeholder: 'Nome do fabricante',
-            colSpan: 2,
+          },
+          {
+            name: 'legalName',
+            label: 'Razão Social',
+            type: 'text',
+            placeholder: 'Razão social completa',
+          },
+          {
+            name: 'cnpj',
+            label: 'CNPJ',
+            type: 'text',
+            placeholder: '00.000.000/0000-00',
           },
           {
             name: 'country',

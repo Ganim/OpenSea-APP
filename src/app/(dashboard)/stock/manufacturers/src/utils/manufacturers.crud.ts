@@ -10,6 +10,8 @@ export async function createManufacturer(
 ): Promise<Manufacturer> {
   const payload: CreateManufacturerRequest = {
     name: data.name || '',
+    legalName: data.legalName ?? undefined,
+    cnpj: data.cnpj ?? undefined,
     country: data.country || 'Brasil',
     email: data.email ?? undefined,
     phone: data.phone ?? undefined,
@@ -32,6 +34,8 @@ export async function updateManufacturer(
 ): Promise<Manufacturer> {
   const payload: UpdateManufacturerRequest = {
     name: data.name ?? undefined,
+    legalName: data.legalName ?? undefined,
+    cnpj: data.cnpj ?? undefined,
     country: data.country ?? undefined,
     email: data.email ?? undefined,
     phone: data.phone ?? undefined,
@@ -68,6 +72,8 @@ export async function duplicateManufacturer(
   const duplicatePayload: CreateManufacturerRequest = {
     name:
       override?.name || `${original.name} (Cópia)`.replace(/\s+/g, ' ').trim(),
+    legalName: original.legalName ?? undefined,
+    cnpj: original.cnpj ?? undefined,
     country: original.country ?? 'Brasil',
     email: original.email ?? undefined,
     phone: original.phone ?? undefined,

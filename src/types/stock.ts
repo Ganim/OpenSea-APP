@@ -566,8 +566,7 @@ export interface Manufacturer {
   code: string; // Código hierárquico auto-gerado (3 dígitos: 001)
   sequentialCode?: number;
   name: string;
-  legalName?: string; // Razão Social
-  tradeName?: string; // Nome Fantasia
+  legalName?: string;
   cnpj?: string;
   country: string;
   email?: string;
@@ -589,9 +588,8 @@ export interface Manufacturer {
 export interface CreateManufacturerRequest {
   name: string;
   legalName?: string;
-  tradeName?: string;
   cnpj?: string;
-  country?: string;
+  country: string;
   email?: string;
   phone?: string;
   website?: string;
@@ -608,7 +606,6 @@ export interface CreateManufacturerRequest {
 export interface UpdateManufacturerRequest {
   name?: string;
   legalName?: string;
-  tradeName?: string;
   cnpj?: string;
   country?: string;
   email?: string;
