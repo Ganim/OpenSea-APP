@@ -157,7 +157,10 @@ export default function ManufacturersPage() {
     const map = new Map<string, number>();
     for (const product of products) {
       if (product.manufacturerId) {
-        map.set(product.manufacturerId, (map.get(product.manufacturerId) || 0) + 1);
+        map.set(
+          product.manufacturerId,
+          (map.get(product.manufacturerId) || 0) + 1
+        );
       }
     }
     return map;
@@ -356,7 +359,9 @@ export default function ManufacturersPage() {
               <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer bg-emerald-600 hover:bg-emerald-700">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4" />
-                  <span>{productCount} {productCount === 1 ? 'produto' : 'produtos'}</span>
+                  <span>
+                    {productCount} {productCount === 1 ? 'produto' : 'produtos'}
+                  </span>
                 </div>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -454,7 +459,9 @@ export default function ManufacturersPage() {
               <button className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950 rounded transition-colors cursor-pointer">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4" />
-                  <span>{productCount} {productCount === 1 ? 'produto' : 'produtos'}</span>
+                  <span>
+                    {productCount} {productCount === 1 ? 'produto' : 'produtos'}
+                  </span>
                 </div>
                 <ChevronRight className="w-4 h-4" />
               </button>

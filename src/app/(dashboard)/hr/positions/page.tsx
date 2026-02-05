@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Positions Page
- * Página de gerenciamento de cargos usando o novo sistema OpenSea OS
+ * Pagina de gerenciamento de cargos usando o novo sistema OpenSea OS
  */
 
 'use client';
@@ -16,30 +16,31 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
-import { HRFilterBar, type HRFilters } from '@/components/shared/filters';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import ItemCard from '@/core/components/item-card';
 import type { Position } from '@/types/hr';
 import {
   ArrowLeft,
   Briefcase,
   Building2,
-  Calendar,
+  ChevronRight,
+  ExternalLink,
   Plus,
-  RefreshCcwDot,
   Upload,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useMemo } from 'react';
 import {
   CreateModal,
   createPosition,
@@ -53,30 +54,91 @@ import {
   updatePosition,
   ViewModal,
 } from './src';
+import { useListCompanies } from '../companies/src';
+import { useListDepartments } from '../departments/src';
 
 export default function PositionsPage() {
+  return (
+    <Suspense
+      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+    >
+      <PositionsPageContent />
+    </Suspense>
+  );
+}
+
+function PositionsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // ============================================================================
-  // STATE
+  // URL-BASED FILTERS
   // ============================================================================
-  const [filters, setFilters] = useState<HRFilters>({});
+
+  const companyIds = useMemo(() => {
+    const raw = searchParams.get('company');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  const departmentIds = useMemo(() => {
+    const raw = searchParams.get('department');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
 
   // ============================================================================
-  // CRUD SETUP
+  // FETCH REFERENCE DATA FOR FILTERS AND ENRICHMENT
+  // ============================================================================
+
+  const { data: companiesData } = useListCompanies({ perPage: 100 });
+  const { data: departmentsData } = useListDepartments({ perPage: 100 });
+
+  // Build lookup maps for enriching positions
+  const companyMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; tradeName: string | null; legalName: string }
+    >();
+    if (companiesData?.companies) {
+      for (const c of companiesData.companies) {
+        map.set(c.id, {
+          id: c.id,
+          tradeName: c.tradeName ?? null,
+          legalName: c.legalName,
+        });
+      }
+    }
+    return map;
+  }, [companiesData?.companies]);
+
+  const departmentMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; companyId: string | null }
+    >();
+    if (departmentsData?.departments) {
+      for (const d of departmentsData.departments) {
+        map.set(d.id, {
+          id: d.id,
+          name: d.name,
+          companyId: d.companyId ?? null,
+        });
+      }
+    }
+    return map;
+  }, [departmentsData?.departments]);
+
+  // ============================================================================
+  // CRUD SETUP (always fetches ALL positions - filtering is client-side)
   // ============================================================================
 
   const crud = useEntityCrud<Position>({
     entityName: 'Position',
     entityNamePlural: 'Positions',
-    queryKey: ['positions', JSON.stringify(filters)],
+    queryKey: ['positions'],
     baseUrl: '/api/v1/hr/positions',
     listFn: async () => {
-      const response = await positionsApi.list({
-        companyId: filters.companyId,
-        departmentId: filters.departmentId,
-      });
-      return response.positions;
+      const posResponse = await positionsApi.list({});
+      return posResponse.positions;
     },
     getFn: (id: string) => positionsApi.get(id),
     createFn: createPosition,
@@ -100,14 +162,13 @@ export default function PositionsPage() {
       return Boolean(
         item.name.toLowerCase().includes(q) ||
           item.code.toLowerCase().includes(q) ||
-          (item.description && item.description.toLowerCase().includes(q)) ||
-          (item.department && item.department.name.toLowerCase().includes(q))
+          (item.description && item.description.toLowerCase().includes(q))
       );
     },
     duplicateConfig: {
-      getNewName: item => `${item.name} (cópia)`,
+      getNewName: item => `${item.name} (copia)`,
       getData: item => ({
-        name: `${item.name} (cópia)`,
+        name: `${item.name} (copia)`,
         code: `${item.code}_COPY`,
         description: item.description,
         departmentId: item.departmentId,
@@ -118,6 +179,86 @@ export default function PositionsPage() {
       }),
     },
   });
+
+  // ============================================================================
+  // CLIENT-SIDE URL FILTERS
+  // ============================================================================
+
+  const displayedPositions = useMemo(() => {
+    let items = page.filteredItems || [];
+    if (companyIds.length > 0) {
+      const set = new Set(companyIds);
+      items = items.filter(p => {
+        const dept = p.departmentId ? departmentMap.get(p.departmentId) : null;
+        return dept?.companyId && set.has(dept.companyId);
+      });
+    }
+    if (departmentIds.length > 0) {
+      const set = new Set(departmentIds);
+      items = items.filter(p => p.departmentId && set.has(p.departmentId));
+    }
+    return items;
+  }, [page.filteredItems, companyIds, departmentIds, departmentMap]);
+
+  // Derive filter options from hook data
+  const availableCompanies = useMemo(() => {
+    if (!companiesData?.companies) return [];
+    return companiesData.companies.map(c => ({
+      id: c.id,
+      name: c.tradeName || c.legalName,
+    }));
+  }, [companiesData?.companies]);
+
+  const availableDepartments = useMemo(() => {
+    if (!departmentsData?.departments) return [];
+
+    // If no company filter, show all departments
+    if (companyIds.length === 0) {
+      return departmentsData.departments.map(d => ({
+        id: d.id,
+        name: d.name,
+      }));
+    }
+
+    // Narrow: only departments belonging to selected companies
+    const cmpSet = new Set(companyIds);
+    return departmentsData.departments
+      .filter(d => d.companyId && cmpSet.has(d.companyId))
+      .map(d => ({
+        id: d.id,
+        name: d.name,
+      }));
+  }, [departmentsData?.departments, companyIds]);
+
+  // Build URL preserving filter params
+  const buildFilterUrl = useCallback(
+    (params: { company?: string[]; department?: string[] }) => {
+      const cmp = params.company !== undefined ? params.company : companyIds;
+      const dept =
+        params.department !== undefined ? params.department : departmentIds;
+      const parts: string[] = [];
+      if (cmp.length > 0) parts.push(`company=${cmp.join(',')}`);
+      if (dept.length > 0) parts.push(`department=${dept.join(',')}`);
+      return parts.length > 0
+        ? `/hr/positions?${parts.join('&')}`
+        : '/hr/positions';
+    },
+    [companyIds, departmentIds]
+  );
+
+  const setCompanyFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ company: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  const setDepartmentFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ department: ids }));
+    },
+    [router, buildFilterUrl]
+  );
 
   // ============================================================================
   // HANDLERS
@@ -159,6 +300,19 @@ export default function PositionsPage() {
         ? `${formatSalary(item.minSalary) || '—'} - ${formatSalary(item.maxSalary) || '—'}`
         : null;
 
+    // Get department and company info from lookup maps
+    const deptInfo = item.departmentId
+      ? departmentMap.get(item.departmentId)
+      : null;
+    const companyInfo = deptInfo?.companyId
+      ? companyMap.get(deptInfo.companyId)
+      : null;
+    const deptLabel = deptInfo
+      ? companyInfo
+        ? `${deptInfo.name} - ${companyInfo.tradeName || companyInfo.legalName}`
+        : deptInfo.name
+      : null;
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -167,31 +321,20 @@ export default function PositionsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={item.description || `Código: ${item.code}`}
+          subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
           iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
-            ...(item.department
+            ...(deptLabel
               ? [
                   {
-                    label: item.department.company
-                      ? `${item.department.name} - ${item.department.company.tradeName || item.department.company.legalName}`
-                      : item.department.name,
+                    label: deptLabel,
                     variant: 'outline' as const,
                     icon: Building2,
-                  },
-                ]
-              : []),
-            ...(employeeCount > 0
-              ? [
-                  {
-                    label: `${employeeCount} funcionário${employeeCount > 1 ? 's' : ''}`,
-                    variant: 'secondary' as const,
-                    icon: Users,
                   },
                 ]
               : []),
@@ -203,28 +346,24 @@ export default function PositionsPage() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1 text-xs">
-              {salaryRange && (
-                <span className="text-muted-foreground">
-                  Faixa salarial: {salaryRange}
-                </span>
-              )}
-              <div className="flex items-center gap-4">
-                {item.createdAt && (
-                  <span className="flex items-center gap-1 ">
-                    <Calendar className="h-3 w-3 text-blue-500" />
-                    Criado em {new Date(item.createdAt).toLocaleDateString()}
+            salaryRange ? (
+              <span className="text-xs text-muted-foreground">
+                Faixa salarial: {salaryRange}
+              </span>
+            ) : undefined
+          }
+          footer={
+            <Link href={`/hr/employees?position=${item.id}`}>
+              <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span>
+                    {employeeCount} funcionario{employeeCount !== 1 ? 's' : ''}
                   </span>
-                )}
-                {item.updatedAt && item.updatedAt !== item.createdAt && (
-                  <span className="flex items-center gap-1 ">
-                    <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                    Atualizado em{' '}
-                    {new Date(item.updatedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </div>
+                </div>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
           }
           isSelected={isSelected}
           showSelection={false}
@@ -244,6 +383,19 @@ export default function PositionsPage() {
         ? `${formatSalary(item.minSalary) || '—'} - ${formatSalary(item.maxSalary) || '—'}`
         : null;
 
+    // Get department and company info from lookup maps
+    const deptInfo = item.departmentId
+      ? departmentMap.get(item.departmentId)
+      : null;
+    const companyInfo = deptInfo?.companyId
+      ? companyMap.get(deptInfo.companyId)
+      : null;
+    const deptLabel = deptInfo
+      ? companyInfo
+        ? `${deptInfo.name} - ${companyInfo.tradeName || companyInfo.legalName}`
+        : deptInfo.name
+      : null;
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -252,31 +404,20 @@ export default function PositionsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={item.description || `Código: ${item.code}`}
+          subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
           iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
-            ...(item.department
+            ...(deptLabel
               ? [
                   {
-                    label: item.department.company
-                      ? `${item.department.name} - ${item.department.company.tradeName || item.department.company.legalName}`
-                      : item.department.name,
+                    label: deptLabel,
                     variant: 'outline' as const,
                     icon: Building2,
-                  },
-                ]
-              : []),
-            ...(employeeCount > 0
-              ? [
-                  {
-                    label: `${employeeCount} funcionário${employeeCount > 1 ? 's' : ''}`,
-                    variant: 'secondary' as const,
-                    icon: Users,
                   },
                 ]
               : []),
@@ -288,28 +429,23 @@ export default function PositionsPage() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1 text-xs">
-              {salaryRange && (
-                <span className="text-muted-foreground">
-                  Faixa salarial: {salaryRange}
-                </span>
-              )}
-              <div className="flex items-center gap-4">
-                {item.createdAt && (
-                  <span className="flex items-center gap-1 ">
-                    <Calendar className="h-3 w-3 text-blue-500" />
-                    Criado em {new Date(item.createdAt).toLocaleDateString()}
-                  </span>
-                )}
-                {item.updatedAt && item.updatedAt !== item.createdAt && (
-                  <span className="flex items-center gap-1 ">
-                    <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                    Atualizado em{' '}
-                    {new Date(item.updatedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </div>
+            salaryRange ? (
+              <span className="text-xs text-muted-foreground">
+                Faixa salarial: {salaryRange}
+              </span>
+            ) : undefined
+          }
+          footer={
+            <Link
+              href={`/hr/employees?position=${item.id}`}
+              className="block mt-2"
+            >
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                <Users className="w-3.5 h-3.5" />
+                {employeeCount} funcionario{employeeCount !== 1 ? 's' : ''}
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
           }
           isSelected={isSelected}
           showSelection={false}
@@ -330,11 +466,11 @@ export default function PositionsPage() {
   const hasSelection = selectedIds.length > 0;
 
   const initialIds = useMemo(
-    () => page.filteredItems.map(i => i.id),
-    [page.filteredItems]
+    () => displayedPositions.map(i => i.id),
+    [displayedPositions]
   );
 
-  // Função de ordenação customizada por código
+  // Funcao de ordenacao customizada por codigo
   const customSortByCode = (
     a: Position,
     b: Position,
@@ -396,7 +532,7 @@ export default function PositionsPage() {
 
           <Header
             title="Cargos"
-            description="Gerencie os cargos da organização"
+            description="Gerencie os cargos da organizacao"
           />
         </PageHeader>
 
@@ -411,14 +547,47 @@ export default function PositionsPage() {
             size="md"
           />
 
-          {/* HR Filter Bar */}
-          <HRFilterBar
-            filters={filters}
-            onFiltersChange={setFilters}
-            showCompany={true}
-            showDepartment={true}
-            showPosition={false}
-          />
+          {/* Filters */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <FilterDropdown
+              label="Empresa"
+              icon={Building2}
+              options={availableCompanies.map(c => ({
+                id: c.id,
+                label: c.name,
+              }))}
+              selected={companyIds}
+              onSelectionChange={setCompanyFilter}
+              activeColor="emerald"
+              searchPlaceholder="Buscar empresa..."
+              emptyText="Nenhuma empresa encontrada."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todas as empresas',
+                onClick: () => router.push('/hr/companies'),
+                color: 'emerald',
+              }}
+            />
+            <FilterDropdown
+              label="Departamento"
+              icon={Building2}
+              options={availableDepartments.map(d => ({
+                id: d.id,
+                label: d.name,
+              }))}
+              selected={departmentIds}
+              onSelectionChange={setDepartmentFilter}
+              activeColor="blue"
+              searchPlaceholder="Buscar departamento..."
+              emptyText="Nenhum departamento encontrado."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todos os departamentos',
+                onClick: () => router.push('/hr/departments'),
+                color: 'blue',
+              }}
+            />
+          </div>
 
           {/* Grid */}
           {page.isLoading ? (
@@ -436,7 +605,7 @@ export default function PositionsPage() {
           ) : (
             <EntityGrid
               config={positionsConfig}
-              items={page.filteredItems}
+              items={displayedPositions}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}
@@ -447,7 +616,7 @@ export default function PositionsPage() {
               }
               showSorting={true}
               customSortFn={customSortByCode}
-              customSortLabel="Código"
+              customSortLabel="Codigo"
             />
           )}
 
@@ -455,7 +624,7 @@ export default function PositionsPage() {
           {hasSelection && (
             <SelectionToolbar
               selectedIds={selectedIds}
-              totalItems={page.filteredItems.length}
+              totalItems={displayedPositions.length}
               onClear={() => page.selection?.actions.clear()}
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{

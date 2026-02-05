@@ -4,13 +4,24 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface FilterOption {
   id: string;
   label: string;
+}
+
+export interface FilterFooterAction {
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+  color?: 'default' | 'violet' | 'cyan' | 'emerald' | 'blue';
 }
 
 export interface FilterDropdownProps {
@@ -23,16 +34,20 @@ export interface FilterDropdownProps {
   searchPlaceholder?: string;
   emptyText?: string;
   width?: number;
+  /** Optional footer action button */
+  footerAction?: FilterFooterAction;
 }
 
 const colorMap = {
   violet: {
     border: 'border-violet-500 dark:border-violet-400',
     text: 'text-violet-700 dark:text-violet-300',
-    badgeBg: 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
+    badgeBg:
+      'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
     itemBg: 'bg-violet-50 dark:bg-violet-500/10',
     check: 'text-violet-600 dark:text-violet-400',
-    clear: 'text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-200',
+    clear:
+      'text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-200',
   },
   cyan: {
     border: 'border-cyan-500 dark:border-cyan-400',
@@ -40,15 +55,18 @@ const colorMap = {
     badgeBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
     itemBg: 'bg-cyan-50 dark:bg-cyan-500/10',
     check: 'text-cyan-600 dark:text-cyan-400',
-    clear: 'text-cyan-600 hover:text-cyan-800 dark:text-cyan-400 dark:hover:text-cyan-200',
+    clear:
+      'text-cyan-600 hover:text-cyan-800 dark:text-cyan-400 dark:hover:text-cyan-200',
   },
   emerald: {
     border: 'border-emerald-500 dark:border-emerald-400',
     text: 'text-emerald-700 dark:text-emerald-300',
-    badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+    badgeBg:
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
     itemBg: 'bg-emerald-50 dark:bg-emerald-500/10',
     check: 'text-emerald-600 dark:text-emerald-400',
-    clear: 'text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200',
+    clear:
+      'text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200',
   },
   blue: {
     border: 'border-blue-500 dark:border-blue-400',
@@ -56,8 +74,21 @@ const colorMap = {
     badgeBg: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
     itemBg: 'bg-blue-50 dark:bg-blue-500/10',
     check: 'text-blue-600 dark:text-blue-400',
-    clear: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200',
+    clear:
+      'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200',
   },
+} as const;
+
+// Footer action button color map
+const footerColorMap = {
+  default:
+    'text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800',
+  violet:
+    'text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:text-violet-400 dark:hover:text-violet-300 dark:hover:bg-violet-500/10',
+  cyan: 'text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 dark:text-cyan-400 dark:hover:text-cyan-300 dark:hover:bg-cyan-500/10',
+  emerald:
+    'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-500/10',
+  blue: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10',
 } as const;
 
 export function FilterDropdown({
@@ -70,6 +101,7 @@ export function FilterDropdown({
   searchPlaceholder = 'Buscar...',
   emptyText = 'Nenhum encontrado.',
   width = 280,
+  footerAction,
 }: FilterDropdownProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +155,12 @@ export function FilterDropdown({
           <Icon className="w-3.5 h-3.5" />
           {label}
           {hasSelection && (
-            <span className={cn('text-[11px] font-semibold px-1.5 py-0.5 rounded-md', colors.badgeBg)}>
+            <span
+              className={cn(
+                'text-[11px] font-semibold px-1.5 py-0.5 rounded-md',
+                colors.badgeBg
+              )}
+            >
               {selected.length}
             </span>
           )}
@@ -134,7 +171,7 @@ export function FilterDropdown({
         className="glass shadow-xl rounded-xl p-0 border-0"
         style={{ width }}
         align="start"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={e => e.preventDefault()}
       >
         {/* Search input */}
         <div className="p-2">
@@ -143,7 +180,7 @@ export function FilterDropdown({
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
               className="w-full h-8 pl-8 pr-3 text-sm bg-white/50 dark:bg-white/5 rounded-lg outline-none placeholder:opacity-50"
             />
@@ -160,7 +197,10 @@ export function FilterDropdown({
               </span>
               <button
                 onClick={clearAll}
-                className={cn('flex items-center gap-1 text-xs font-medium cursor-pointer', colors.clear)}
+                className={cn(
+                  'flex items-center gap-1 text-xs font-medium cursor-pointer',
+                  colors.clear
+                )}
               >
                 Limpar
                 <X className="w-3 h-3" />
@@ -171,8 +211,8 @@ export function FilterDropdown({
 
         <hr className="border-[rgb(var(--glass-border)/0.15)]" />
 
-        {/* Options list */}
-        <div className="max-h-[240px] overflow-y-auto py-1">
+        {/* Options list - max 8 items visible (8 * 32px = 256px) */}
+        <div className="max-h-64 overflow-y-auto py-1">
           {totalFiltered === 0 ? (
             <div className="px-3 py-4 text-sm text-center opacity-50">
               {emptyText}
@@ -180,7 +220,7 @@ export function FilterDropdown({
           ) : (
             <>
               {/* Selected items first */}
-              {selectedOptions.map((option) => (
+              {selectedOptions.map(option => (
                 <button
                   key={option.id}
                   onClick={() => toggleOption(option.id)}
@@ -200,7 +240,7 @@ export function FilterDropdown({
               )}
 
               {/* Unselected items */}
-              {unselectedOptions.map((option) => (
+              {unselectedOptions.map(option => (
                 <button
                   key={option.id}
                   onClick={() => toggleOption(option.id)}
@@ -213,6 +253,28 @@ export function FilterDropdown({
             </>
           )}
         </div>
+
+        {/* Footer action button */}
+        {footerAction && (
+          <>
+            <hr className="border-[rgb(var(--glass-border)/0.15)]" />
+            <div className="p-1">
+              <button
+                onClick={() => {
+                  footerAction.onClick();
+                  setOpen(false);
+                }}
+                className={cn(
+                  'w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer',
+                  footerColorMap[footerAction.color || 'default']
+                )}
+              >
+                <footerAction.icon className="w-4 h-4" />
+                <span>{footerAction.label}</span>
+              </button>
+            </div>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   );

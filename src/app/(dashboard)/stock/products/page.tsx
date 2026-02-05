@@ -33,7 +33,16 @@ import { formatUnitOfMeasure } from '@/helpers/formatters';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
 import type { Item, Product } from '@/types/stock';
-import { ChevronRight, Factory, Grid3x3, Package, Plus, Tag, Upload } from 'lucide-react';
+import {
+  ChevronRight,
+  ExternalLink,
+  Factory,
+  Grid3x3,
+  Package,
+  Plus,
+  Tag,
+  Upload,
+} from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { CreateProductForm, EditProductForm } from './src/components';
@@ -42,7 +51,9 @@ import type { ProductFormData } from './src/types';
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}>
+    <Suspense
+      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+    >
       <ProductsPageContent />
     </Suspense>
   );
@@ -120,7 +131,9 @@ function ProductsPageContent() {
     let items = page.filteredItems || [];
     if (manufacturerIds.length > 0) {
       const set = new Set(manufacturerIds);
-      items = items.filter((p: Product) => p.manufacturerId && set.has(p.manufacturerId));
+      items = items.filter(
+        (p: Product) => p.manufacturerId && set.has(p.manufacturerId)
+      );
     }
     if (categoryIds.length > 0) {
       const set = new Set(categoryIds);
@@ -158,7 +171,9 @@ function ProductsPageContent() {
         if (product.manufacturerId) idsInCategory.add(product.manufacturerId);
       }
     }
-    return Array.from(manufacturerMap.values()).filter(m => idsInCategory.has(m.id));
+    return Array.from(manufacturerMap.values()).filter(m =>
+      idsInCategory.has(m.id)
+    );
   }, [allProducts, categoryIds]);
 
   // Extract unique categories from products data
@@ -182,26 +197,42 @@ function ProductsPageContent() {
         product.productCategories?.forEach(pc => idsForManufacturer.add(pc.id));
       }
     }
-    return Array.from(categoryMap.values()).filter(c => idsForManufacturer.has(c.id));
+    return Array.from(categoryMap.values()).filter(c =>
+      idsForManufacturer.has(c.id)
+    );
   }, [allProducts, manufacturerIds]);
 
   // Build URL preserving both filter params (comma-separated for multi-select)
-  const buildFilterUrl = useCallback((params: { manufacturer?: string[]; category?: string[] }) => {
-    const parts: string[] = [];
-    const mfr = params.manufacturer !== undefined ? params.manufacturer : manufacturerIds;
-    const cat = params.category !== undefined ? params.category : categoryIds;
-    if (mfr.length > 0) parts.push(`manufacturer=${mfr.join(',')}`);
-    if (cat.length > 0) parts.push(`category=${cat.join(',')}`);
-    return parts.length > 0 ? `/stock/products?${parts.join('&')}` : '/stock/products';
-  }, [manufacturerIds, categoryIds]);
+  const buildFilterUrl = useCallback(
+    (params: { manufacturer?: string[]; category?: string[] }) => {
+      const parts: string[] = [];
+      const mfr =
+        params.manufacturer !== undefined
+          ? params.manufacturer
+          : manufacturerIds;
+      const cat = params.category !== undefined ? params.category : categoryIds;
+      if (mfr.length > 0) parts.push(`manufacturer=${mfr.join(',')}`);
+      if (cat.length > 0) parts.push(`category=${cat.join(',')}`);
+      return parts.length > 0
+        ? `/stock/products?${parts.join('&')}`
+        : '/stock/products';
+    },
+    [manufacturerIds, categoryIds]
+  );
 
-  const setManufacturerFilter = useCallback((ids: string[]) => {
-    router.push(buildFilterUrl({ manufacturer: ids }));
-  }, [router, buildFilterUrl]);
+  const setManufacturerFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ manufacturer: ids }));
+    },
+    [router, buildFilterUrl]
+  );
 
-  const setCategoryFilter = useCallback((ids: string[]) => {
-    router.push(buildFilterUrl({ category: ids }));
-  }, [router, buildFilterUrl]);
+  const setCategoryFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ category: ids }));
+    },
+    [router, buildFilterUrl]
+  );
 
   // ============================================================================
   // HANDLERS
@@ -471,22 +502,40 @@ function ProductsPageContent() {
           <FilterDropdown
             label="Fabricante"
             icon={Factory}
-            options={availableManufacturers.map(m => ({ id: m.id, label: m.name }))}
+            options={availableManufacturers.map(m => ({
+              id: m.id,
+              label: m.name,
+            }))}
             selected={manufacturerIds}
             onSelectionChange={setManufacturerFilter}
             activeColor="violet"
             searchPlaceholder="Buscar fabricante..."
             emptyText="Nenhum fabricante encontrado."
+            footerAction={{
+              icon: ExternalLink,
+              label: 'Ver todos os fabricantes',
+              onClick: () => router.push('/stock/manufacturers'),
+              color: 'violet',
+            }}
           />
           <FilterDropdown
             label="Categoria"
             icon={Tag}
-            options={availableCategories.map(c => ({ id: c.id, label: c.name }))}
+            options={availableCategories.map(c => ({
+              id: c.id,
+              label: c.name,
+            }))}
             selected={categoryIds}
             onSelectionChange={setCategoryFilter}
             activeColor="cyan"
             searchPlaceholder="Buscar categoria..."
             emptyText="Nenhuma categoria encontrada."
+            footerAction={{
+              icon: ExternalLink,
+              label: 'Ver todas as categorias',
+              onClick: () => router.push('/stock/categories'),
+              color: 'cyan',
+            }}
           />
         </div>
 

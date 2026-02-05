@@ -12,14 +12,21 @@ import type {
 export const productsService = {
   // GET /v1/products with optional filters
   // Accepts either a string (legacy templateId) or an object with optional filters
-  async listProducts(params?: string | { templateId?: string; manufacturerId?: string; categoryId?: string }): Promise<ProductsResponse> {
+  async listProducts(
+    params?:
+      | string
+      | { templateId?: string; manufacturerId?: string; categoryId?: string }
+  ): Promise<ProductsResponse> {
     const searchParams = new URLSearchParams();
     if (typeof params === 'string') {
       searchParams.append('templateId', params);
     } else if (params) {
-      if (params.templateId) searchParams.append('templateId', params.templateId);
-      if (params.manufacturerId) searchParams.append('manufacturerId', params.manufacturerId);
-      if (params.categoryId) searchParams.append('categoryId', params.categoryId);
+      if (params.templateId)
+        searchParams.append('templateId', params.templateId);
+      if (params.manufacturerId)
+        searchParams.append('manufacturerId', params.manufacturerId);
+      if (params.categoryId)
+        searchParams.append('categoryId', params.categoryId);
     }
     const query = searchParams.toString();
     const url = query

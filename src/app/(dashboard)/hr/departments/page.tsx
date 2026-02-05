@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Departments Page
- * Página de gerenciamento de departamentos usando o novo sistema OpenSea OS
+ * Pagina de gerenciamento de departamentos usando o novo sistema OpenSea OS
  */
 
 'use client';
@@ -16,30 +16,31 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
-import { HRFilterBar, type HRFilters } from '@/components/shared/filters';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import ItemCard from '@/core/components/item-card';
 import type { Department } from '@/types/hr';
 import {
   ArrowLeft,
   Briefcase,
   Building2,
-  Calendar,
+  ChevronRight,
+  ExternalLink,
   Plus,
-  RefreshCcwDot,
   Upload,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useMemo } from 'react';
 import {
   createDepartment,
   CreateModal,
@@ -53,29 +54,67 @@ import {
   updateDepartment,
   ViewModal,
 } from './src';
+import { useListCompanies } from '../companies/src';
 
 export default function DepartmentsPage() {
+  return (
+    <Suspense
+      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+    >
+      <DepartmentsPageContent />
+    </Suspense>
+  );
+}
+
+function DepartmentsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // ============================================================================
-  // STATE
+  // URL-BASED FILTERS
   // ============================================================================
-  const [filters, setFilters] = useState<HRFilters>({});
+
+  const companyIds = useMemo(() => {
+    const raw = searchParams.get('company');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
 
   // ============================================================================
-  // CRUD SETUP
+  // FETCH COMPANIES FOR FILTER DROPDOWN
+  // ============================================================================
+
+  const { data: companiesData } = useListCompanies({ perPage: 100 });
+
+  // Build company lookup map for enriching departments
+  const companyMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; tradeName: string | null; legalName: string }
+    >();
+    if (companiesData?.companies) {
+      for (const c of companiesData.companies) {
+        map.set(c.id, {
+          id: c.id,
+          tradeName: c.tradeName ?? null,
+          legalName: c.legalName,
+        });
+      }
+    }
+    return map;
+  }, [companiesData?.companies]);
+
+  // ============================================================================
+  // CRUD SETUP (always fetches ALL departments - filtering is client-side)
   // ============================================================================
 
   const crud = useEntityCrud<Department>({
     entityName: 'Department',
     entityNamePlural: 'Departments',
-    queryKey: ['departments', JSON.stringify(filters)],
+    queryKey: ['departments'],
     baseUrl: '/api/v1/hr/departments',
     listFn: async () => {
-      const response = await departmentsApi.list({
-        companyId: filters.companyId,
-      });
-      return response.departments;
+      const deptResponse = await departmentsApi.list({});
+      return deptResponse.departments;
     },
     getFn: (id: string) => departmentsApi.get(id),
     createFn: createDepartment,
@@ -103,9 +142,9 @@ export default function DepartmentsPage() {
       );
     },
     duplicateConfig: {
-      getNewName: item => `${item.name} (cópia)`,
+      getNewName: item => `${item.name} (copia)`,
       getData: item => ({
-        name: `${item.name} (cópia)`,
+        name: `${item.name} (copia)`,
         code: `${item.code}_COPY`,
         description: item.description,
         parentId: item.parentId,
@@ -114,6 +153,48 @@ export default function DepartmentsPage() {
       }),
     },
   });
+
+  // ============================================================================
+  // CLIENT-SIDE URL FILTERS
+  // ============================================================================
+
+  const displayedDepartments = useMemo(() => {
+    let items = page.filteredItems || [];
+    if (companyIds.length > 0) {
+      const set = new Set(companyIds);
+      items = items.filter(d => d.companyId && set.has(d.companyId));
+    }
+    return items;
+  }, [page.filteredItems, companyIds]);
+
+  // Derive filter options from companies data (fetched via useListCompanies)
+  const availableCompanies = useMemo(() => {
+    if (!companiesData?.companies) return [];
+    return companiesData.companies.map(c => ({
+      id: c.id,
+      name: c.tradeName || c.legalName,
+    }));
+  }, [companiesData?.companies]);
+
+  // Build URL preserving filter params
+  const buildFilterUrl = useCallback(
+    (params: { company?: string[] }) => {
+      const cmp = params.company !== undefined ? params.company : companyIds;
+      const parts: string[] = [];
+      if (cmp.length > 0) parts.push(`company=${cmp.join(',')}`);
+      return parts.length > 0
+        ? `/hr/departments?${parts.join('&')}`
+        : '/hr/departments';
+    },
+    [companyIds]
+  );
+
+  const setCompanyFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ company: ids }));
+    },
+    [router, buildFilterUrl]
+  );
 
   // ============================================================================
   // HANDLERS
@@ -141,7 +222,8 @@ export default function DepartmentsPage() {
   // ============================================================================
 
   const renderGridCard = (item: Department, isSelected: boolean) => {
-    const companyName = item.company?.tradeName || item.company?.legalName;
+    const companyInfo = item.companyId ? companyMap.get(item.companyId) : null;
+    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
     const positionsCount = item._count?.positions ?? 0;
     const employeesCount = item._count?.employees ?? 0;
 
@@ -153,51 +235,48 @@ export default function DepartmentsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={companyName || item.description || `Código: ${item.code}`}
+          subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
-            ...(positionsCount > 0
-              ? [
-                  {
-                    label: `${positionsCount} cargo${positionsCount > 1 ? 's' : ''}`,
-                    variant: 'outline' as const,
-                    icon: Briefcase,
-                  },
-                ]
-              : []),
-            ...(employeesCount > 0
-              ? [
-                  {
-                    label: `${employeesCount} funcionário${employeesCount > 1 ? 's' : ''}`,
-                    variant: 'secondary' as const,
-                    icon: Users,
-                  },
-                ]
-              : []),
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
               variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
+          footer={
+            <div className="flex rounded-b-xl overflow-hidden">
+              <Link
+                href={`/hr/positions?department=${item.id}`}
+                className="flex-1"
+              >
+                <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    <span>
+                      {positionsCount} cargo{positionsCount !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </Link>
+              <div className="w-px bg-white/20" />
+              <Link
+                href={`/hr/employees?department=${item.id}`}
+                className="flex-1"
+              >
+                <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>{employeesCount} func.</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </Link>
             </div>
           }
           isSelected={isSelected}
@@ -212,7 +291,8 @@ export default function DepartmentsPage() {
   };
 
   const renderListCard = (item: Department, isSelected: boolean) => {
-    const companyName = item.company?.tradeName || item.company?.legalName;
+    const companyInfo = item.companyId ? companyMap.get(item.companyId) : null;
+    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
     const positionsCount = item._count?.positions ?? 0;
     const employeesCount = item._count?.employees ?? 0;
 
@@ -224,51 +304,36 @@ export default function DepartmentsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={companyName || item.description || `Código: ${item.code}`}
+          subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
-            ...(positionsCount > 0
-              ? [
-                  {
-                    label: `${positionsCount} cargo${positionsCount > 1 ? 's' : ''}`,
-                    variant: 'outline' as const,
-                    icon: Briefcase,
-                  },
-                ]
-              : []),
-            ...(employeesCount > 0
-              ? [
-                  {
-                    label: `${employeesCount} funcionário${employeesCount > 1 ? 's' : ''}`,
-                    variant: 'secondary' as const,
-                    icon: Users,
-                  },
-                ]
-              : []),
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
               variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
+          footer={
+            <div className="flex items-center gap-3 mt-2">
+              <Link href={`/hr/positions?department=${item.id}`}>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                  <Briefcase className="w-3.5 h-3.5" />
+                  {positionsCount} cargo{positionsCount !== 1 ? 's' : ''}
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
+              </Link>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <Link href={`/hr/employees?department=${item.id}`}>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                  <Users className="w-3.5 h-3.5" />
+                  {employeesCount} func.
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </span>
-              )}
+              </Link>
             </div>
           }
           isSelected={isSelected}
@@ -290,11 +355,11 @@ export default function DepartmentsPage() {
   const hasSelection = selectedIds.length > 0;
 
   const initialIds = useMemo(
-    () => page.filteredItems.map(i => i.id),
-    [page.filteredItems]
+    () => displayedDepartments.map(i => i.id),
+    [displayedDepartments]
   );
 
-  // Função de ordenação customizada por código
+  // Funcao de ordenacao customizada por codigo
   const customSortByCode = (
     a: Department,
     b: Department,
@@ -356,7 +421,7 @@ export default function DepartmentsPage() {
 
           <Header
             title="Departamentos"
-            description="Gerencie os departamentos da organização"
+            description="Gerencie os departamentos da organizacao"
           />
         </PageHeader>
 
@@ -371,14 +436,28 @@ export default function DepartmentsPage() {
             size="md"
           />
 
-          {/* HR Filters */}
-          <HRFilterBar
-            filters={filters}
-            onFiltersChange={setFilters}
-            showCompany={true}
-            showDepartment={false}
-            showPosition={false}
-          />
+          {/* Filters */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <FilterDropdown
+              label="Empresa"
+              icon={Building2}
+              options={availableCompanies.map(c => ({
+                id: c.id,
+                label: c.name,
+              }))}
+              selected={companyIds}
+              onSelectionChange={setCompanyFilter}
+              activeColor="emerald"
+              searchPlaceholder="Buscar empresa..."
+              emptyText="Nenhuma empresa encontrada."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todas as empresas',
+                onClick: () => router.push('/hr/companies'),
+                color: 'emerald',
+              }}
+            />
+          </div>
 
           {/* Grid */}
           {page.isLoading ? (
@@ -396,7 +475,7 @@ export default function DepartmentsPage() {
           ) : (
             <EntityGrid
               config={departmentsConfig}
-              items={page.filteredItems}
+              items={displayedDepartments}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}
@@ -409,7 +488,7 @@ export default function DepartmentsPage() {
               defaultSortField="name"
               defaultSortDirection="asc"
               customSortFn={customSortByCode}
-              customSortLabel="Código"
+              customSortLabel="Codigo"
             />
           )}
 
@@ -417,7 +496,7 @@ export default function DepartmentsPage() {
           {hasSelection && (
             <SelectionToolbar
               selectedIds={selectedIds}
-              totalItems={page.filteredItems.length}
+              totalItems={displayedDepartments.length}
               onClear={() => page.selection?.actions.clear()}
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{

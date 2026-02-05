@@ -21,10 +21,10 @@ import {
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
+import ItemCard from '@/core/components/item-card';
 import { formatCNPJ } from '@/helpers/formatters';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Company } from '@/types/hr';
@@ -33,12 +33,14 @@ import {
   ArrowLeft,
   Building2,
   Calendar,
+  ChevronRight,
   Clock,
   Plus,
   RefreshCcwDot,
   Upload,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -206,7 +208,7 @@ export default function CompaniesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="grid"
           title={truncateText(item.tradeName, 15)}
@@ -214,15 +216,6 @@ export default function CompaniesPage() {
           icon={Building2}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(departmentsCount > 0
-              ? [
-                  {
-                    label: `${departmentsCount} departamento${departmentsCount > 1 ? 's' : ''}`,
-                    variant: 'outline' as const,
-                    icon: Building2,
-                  },
-                ]
-              : []),
             ...(employeesCount > 0
               ? [
                   {
@@ -242,21 +235,19 @@ export default function CompaniesPage() {
               variant: item.status === 'ACTIVE' ? 'default' : 'secondary',
             },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criada em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizada em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
+          footer={
+            <Link href={`/hr/departments?company=${item.id}`}>
+              <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  <span>
+                    {departmentsCount} departamento
+                    {departmentsCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
           }
           isSelected={isSelected}
           showSelection={false}
@@ -270,7 +261,7 @@ export default function CompaniesPage() {
               {item.legalName}
             </p>
           )}
-        </UniversalCard>
+        </ItemCard>
       </EntityContextMenu>
     );
   };
@@ -287,7 +278,7 @@ export default function CompaniesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="list"
           title={item.tradeName || '—'}
@@ -295,15 +286,6 @@ export default function CompaniesPage() {
           icon={Building2}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(departmentsCount > 0
-              ? [
-                  {
-                    label: `${departmentsCount} departamento${departmentsCount > 1 ? 's' : ''}`,
-                    variant: 'outline' as const,
-                    icon: Building2,
-                  },
-                ]
-              : []),
             ...(employeesCount > 0
               ? [
                   {
@@ -323,21 +305,18 @@ export default function CompaniesPage() {
               variant: item.status === 'ACTIVE' ? 'default' : 'secondary',
             },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criada em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizada em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
+          footer={
+            <Link
+              href={`/hr/departments?company=${item.id}`}
+              className="block mt-2"
+            >
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                <Building2 className="w-3.5 h-3.5" />
+                {departmentsCount} departamento
+                {departmentsCount !== 1 ? 's' : ''}
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
           }
           isSelected={isSelected}
           showSelection={false}
@@ -351,7 +330,7 @@ export default function CompaniesPage() {
               {item.legalName}
             </p>
           )}
-        </UniversalCard>
+        </ItemCard>
       </EntityContextMenu>
     );
   };

@@ -49,7 +49,6 @@ export interface FieldCategory {
  */
 export interface LabelTemplate {
   id: string;
-  organizationId: string;
   name: string;
   description?: string;
   /** Se é um template do sistema (não editável) */

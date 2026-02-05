@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Employees Page
- * Página de gerenciamento de funcionários usando o novo sistema OpenSea OS
+ * Pagina de gerenciamento de funcionarios usando o novo sistema OpenSea OS
  */
 
 'use client';
@@ -16,31 +16,30 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
-import { HRFilterBar, type HRFilters } from '@/components/shared/filters';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import ItemCard from '@/core/components/item-card';
 import type { Employee } from '@/types/hr';
 import {
   ArrowLeft,
   Briefcase,
   Building2,
-  Calendar,
+  ExternalLink,
   Factory,
   Plus,
-  RefreshCcwDot,
   Upload,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
   createEmployee,
@@ -56,50 +55,127 @@ import {
   ViewModal,
   type CreateEmployeeWithUserRequest,
 } from './src';
+import { useListCompanies } from '../companies/src';
+import { useListDepartments } from '../departments/src';
+import { useListPositions } from '../positions/src';
 
 export default function EmployeesPage() {
+  return (
+    <Suspense
+      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+    >
+      <EmployeesPageContent />
+    </Suspense>
+  );
+}
+
+function EmployeesPageContent() {
   const router = useRouter();
-  const [filters, setFilters] = useState<HRFilters>({});
+  const searchParams = useSearchParams();
 
   // ============================================================================
-  // CRUD SETUP
+  // URL-BASED FILTERS
   // ============================================================================
 
-  const normalizeEmployees = (response: unknown): Employee[] => {
-    const maybeEmployees = response as {
-      employees?: Employee[];
-      data?: Employee[];
-    };
+  const companyIds = useMemo(() => {
+    const raw = searchParams.get('company');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
 
-    const items = (
-      Array.isArray(response)
-        ? response
-        : (maybeEmployees.employees ?? maybeEmployees.data ?? [])
-    ) as Employee[];
+  const departmentIds = useMemo(() => {
+    const raw = searchParams.get('department');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
 
-    return items
-      .filter(employee => !employee.deletedAt)
-      .map(employee => ({
-        ...employee,
-        company: employee.company || employee.department?.company || null,
-        department: employee.department || null,
-        position: employee.position || null,
-      }));
-  };
+  const positionIds = useMemo(() => {
+    const raw = searchParams.get('position');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  // ============================================================================
+  // FETCH REFERENCE DATA FOR FILTERS AND ENRICHMENT
+  // ============================================================================
+
+  const { data: companiesData } = useListCompanies({ perPage: 100 });
+  const { data: departmentsData } = useListDepartments({ perPage: 100 });
+  const { data: positionsData } = useListPositions({ perPage: 100 });
+
+  // Build lookup maps for enriching employees and displaying badges
+  const companyMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; tradeName: string | null; legalName: string }
+    >();
+    if (companiesData?.companies) {
+      for (const c of companiesData.companies) {
+        map.set(c.id, {
+          id: c.id,
+          tradeName: c.tradeName ?? null,
+          legalName: c.legalName,
+        });
+      }
+    }
+    return map;
+  }, [companiesData?.companies]);
+
+  const departmentMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; companyId: string | null }
+    >();
+    if (departmentsData?.departments) {
+      for (const d of departmentsData.departments) {
+        map.set(d.id, {
+          id: d.id,
+          name: d.name,
+          companyId: d.companyId ?? null,
+        });
+      }
+    }
+    return map;
+  }, [departmentsData?.departments]);
+
+  const positionMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; departmentId: string | null }
+    >();
+    if (positionsData?.positions) {
+      for (const p of positionsData.positions) {
+        map.set(p.id, {
+          id: p.id,
+          name: p.name,
+          departmentId: p.departmentId ?? null,
+        });
+      }
+    }
+    return map;
+  }, [positionsData?.positions]);
+
+  // ============================================================================
+  // CRUD SETUP (always fetches ALL employees - filtering is client-side)
+  // ============================================================================
 
   const crud = useEntityCrud<Employee>({
     entityName: 'Employee',
     entityNamePlural: 'Employees',
-    queryKey: ['employees', JSON.stringify(filters)],
+    queryKey: ['employees'],
     baseUrl: '/api/v1/hr/employees',
     listFn: async () => {
-      const response = await employeesApi.list({
-        companyId: filters.companyId,
-        departmentId: filters.departmentId,
-        positionId: filters.positionId,
-        includeDeleted: false,
-      });
-      return normalizeEmployees(response);
+      const empResponse = await employeesApi.list({ includeDeleted: false });
+
+      // Normalize employees
+      const maybeEmployees = empResponse as {
+        employees?: Employee[];
+        data?: Employee[];
+      };
+      const items = (
+        Array.isArray(empResponse)
+          ? empResponse
+          : (maybeEmployees.employees ?? maybeEmployees.data ?? [])
+      ) as Employee[];
+
+      return items.filter(employee => !employee.deletedAt);
     },
     getFn: (id: string) => employeesApi.get(id),
     createFn: createEmployee,
@@ -123,17 +199,13 @@ export default function EmployeesPage() {
       const fullName = item.fullName?.toLowerCase() || '';
       const registration = item.registrationNumber?.toLowerCase() || '';
       const cpf = item.cpf || '';
-      const department = item.department?.name?.toLowerCase() || '';
-      const position = item.position?.name?.toLowerCase() || '';
 
-      return [fullName, registration, cpf, department, position].some(value =>
-        value.includes(q)
-      );
+      return [fullName, registration, cpf].some(value => value.includes(q));
     },
     duplicateConfig: {
-      getNewName: item => `${item.fullName} (cópia)`,
+      getNewName: item => `${item.fullName} (copia)`,
       getData: item => ({
-        fullName: `${item.fullName} (cópia)`,
+        fullName: `${item.fullName} (copia)`,
         registrationNumber: `${item.registrationNumber}_COPY`,
         cpf: item.cpf,
         hireDate: new Date().toISOString(),
@@ -146,6 +218,132 @@ export default function EmployeesPage() {
       }),
     },
   });
+
+  // ============================================================================
+  // CLIENT-SIDE URL FILTERS
+  // ============================================================================
+
+  const displayedEmployees = useMemo(() => {
+    let items = page.filteredItems || [];
+    if (companyIds.length > 0) {
+      const set = new Set(companyIds);
+      items = items.filter(e => {
+        // Check direct companyId or department's company
+        if (e.companyId && set.has(e.companyId)) return true;
+        const dept = e.departmentId ? departmentMap.get(e.departmentId) : null;
+        return dept?.companyId && set.has(dept.companyId);
+      });
+    }
+    if (departmentIds.length > 0) {
+      const set = new Set(departmentIds);
+      items = items.filter(e => e.departmentId && set.has(e.departmentId));
+    }
+    if (positionIds.length > 0) {
+      const set = new Set(positionIds);
+      items = items.filter(e => e.positionId && set.has(e.positionId));
+    }
+    return items;
+  }, [
+    page.filteredItems,
+    companyIds,
+    departmentIds,
+    positionIds,
+    departmentMap,
+  ]);
+
+  // Derive filter options from hook data
+  const availableCompanies = useMemo(() => {
+    if (!companiesData?.companies) return [];
+    return companiesData.companies.map(c => ({
+      id: c.id,
+      name: c.tradeName || c.legalName,
+    }));
+  }, [companiesData?.companies]);
+
+  const availableDepartments = useMemo(() => {
+    if (!departmentsData?.departments) return [];
+
+    // If no company filter, show all departments
+    if (companyIds.length === 0) {
+      return departmentsData.departments.map(d => ({
+        id: d.id,
+        name: d.name,
+      }));
+    }
+
+    // Narrow: only departments belonging to selected companies
+    const cmpSet = new Set(companyIds);
+    return departmentsData.departments
+      .filter(d => d.companyId && cmpSet.has(d.companyId))
+      .map(d => ({
+        id: d.id,
+        name: d.name,
+      }));
+  }, [departmentsData?.departments, companyIds]);
+
+  const availablePositions = useMemo(() => {
+    if (!positionsData?.positions) return [];
+
+    // If no department filter, show all positions
+    if (departmentIds.length === 0) {
+      return positionsData.positions.map(p => ({
+        id: p.id,
+        name: p.name,
+      }));
+    }
+
+    // Narrow: only positions belonging to selected departments
+    const deptSet = new Set(departmentIds);
+    return positionsData.positions
+      .filter(p => p.departmentId && deptSet.has(p.departmentId))
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+      }));
+  }, [positionsData?.positions, departmentIds]);
+
+  // Build URL preserving all filter params
+  const buildFilterUrl = useCallback(
+    (params: {
+      company?: string[];
+      department?: string[];
+      position?: string[];
+    }) => {
+      const cmp = params.company !== undefined ? params.company : companyIds;
+      const dept =
+        params.department !== undefined ? params.department : departmentIds;
+      const pos = params.position !== undefined ? params.position : positionIds;
+      const parts: string[] = [];
+      if (cmp.length > 0) parts.push(`company=${cmp.join(',')}`);
+      if (dept.length > 0) parts.push(`department=${dept.join(',')}`);
+      if (pos.length > 0) parts.push(`position=${pos.join(',')}`);
+      return parts.length > 0
+        ? `/hr/employees?${parts.join('&')}`
+        : '/hr/employees';
+    },
+    [companyIds, departmentIds, positionIds]
+  );
+
+  const setCompanyFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ company: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  const setDepartmentFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ department: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  const setPositionFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ position: ids }));
+    },
+    [router, buildFilterUrl]
+  );
 
   // ============================================================================
   // HANDLERS
@@ -184,7 +382,17 @@ export default function EmployeesPage() {
   // ============================================================================
 
   const renderGridCard = (item: Employee, isSelected: boolean) => {
-    const companyName = item.company?.tradeName || item.company?.legalName;
+    // Get info from lookup maps
+    const posInfo = item.positionId ? positionMap.get(item.positionId) : null;
+    const deptInfo = item.departmentId
+      ? departmentMap.get(item.departmentId)
+      : null;
+    const companyInfo = item.companyId
+      ? companyMap.get(item.companyId)
+      : deptInfo?.companyId
+        ? companyMap.get(deptInfo.companyId)
+        : null;
+    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
 
     return (
       <EntityContextMenu
@@ -194,27 +402,27 @@ export default function EmployeesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="grid"
           title={item.fullName}
-          subtitle={item.position?.name || 'Sem cargo definido'}
+          subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(item.position
+            ...(posInfo
               ? [
                   {
-                    label: item.position.name,
+                    label: posInfo.name,
                     variant: 'outline' as const,
                     icon: Briefcase,
                   },
                 ]
               : []),
-            ...(item.department
+            ...(deptInfo
               ? [
                   {
-                    label: item.department.name,
+                    label: deptInfo.name,
                     variant: 'outline' as const,
                     icon: Building2,
                   },
@@ -230,22 +438,6 @@ export default function EmployeesPage() {
                 ]
               : []),
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          }
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -258,7 +450,17 @@ export default function EmployeesPage() {
   };
 
   const renderListCard = (item: Employee, isSelected: boolean) => {
-    const companyName = item.company?.tradeName || item.company?.legalName;
+    // Get info from lookup maps
+    const posInfo = item.positionId ? positionMap.get(item.positionId) : null;
+    const deptInfo = item.departmentId
+      ? departmentMap.get(item.departmentId)
+      : null;
+    const companyInfo = item.companyId
+      ? companyMap.get(item.companyId)
+      : deptInfo?.companyId
+        ? companyMap.get(deptInfo.companyId)
+        : null;
+    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
 
     return (
       <EntityContextMenu
@@ -268,27 +470,27 @@ export default function EmployeesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <ItemCard
           id={item.id}
           variant="list"
           title={item.fullName}
-          subtitle={item.position?.name || 'Sem cargo definido'}
+          subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(item.position
+            ...(posInfo
               ? [
                   {
-                    label: item.position.name,
+                    label: posInfo.name,
                     variant: 'outline' as const,
                     icon: Briefcase,
                   },
                 ]
               : []),
-            ...(item.department
+            ...(deptInfo
               ? [
                   {
-                    label: item.department.name,
+                    label: deptInfo.name,
                     variant: 'outline' as const,
                     icon: Building2,
                   },
@@ -304,22 +506,6 @@ export default function EmployeesPage() {
                 ]
               : []),
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          }
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -339,8 +525,8 @@ export default function EmployeesPage() {
   const hasSelection = selectedIds.length > 0;
 
   const initialIds = useMemo(
-    () => page.filteredItems.map(i => i.id),
-    [page.filteredItems]
+    () => displayedEmployees.map(i => i.id),
+    [displayedEmployees]
   );
 
   // ============================================================================
@@ -366,7 +552,7 @@ export default function EmployeesPage() {
       },
       {
         id: 'create-employee',
-        title: 'Novo Funcionário',
+        title: 'Novo Funcionario',
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
@@ -396,8 +582,8 @@ export default function EmployeesPage() {
           />
 
           <Header
-            title="Funcionários"
-            description="Gerencie os funcionários da organização"
+            title="Funcionarios"
+            description="Gerencie os funcionarios da organizacao"
           />
         </PageHeader>
 
@@ -411,14 +597,66 @@ export default function EmployeesPage() {
             size="md"
           />
 
-          {/* HR Filters */}
-          <HRFilterBar
-            filters={filters}
-            onFiltersChange={setFilters}
-            showCompany={true}
-            showDepartment={true}
-            showPosition={true}
-          />
+          {/* Filters */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <FilterDropdown
+              label="Empresa"
+              icon={Building2}
+              options={availableCompanies.map(c => ({
+                id: c.id,
+                label: c.name,
+              }))}
+              selected={companyIds}
+              onSelectionChange={setCompanyFilter}
+              activeColor="emerald"
+              searchPlaceholder="Buscar empresa..."
+              emptyText="Nenhuma empresa encontrada."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todas as empresas',
+                onClick: () => router.push('/hr/companies'),
+                color: 'emerald',
+              }}
+            />
+            <FilterDropdown
+              label="Departamento"
+              icon={Building2}
+              options={availableDepartments.map(d => ({
+                id: d.id,
+                label: d.name,
+              }))}
+              selected={departmentIds}
+              onSelectionChange={setDepartmentFilter}
+              activeColor="blue"
+              searchPlaceholder="Buscar departamento..."
+              emptyText="Nenhum departamento encontrado."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todos os departamentos',
+                onClick: () => router.push('/hr/departments'),
+                color: 'blue',
+              }}
+            />
+            <FilterDropdown
+              label="Cargo"
+              icon={Briefcase}
+              options={availablePositions.map(p => ({
+                id: p.id,
+                label: p.name,
+              }))}
+              selected={positionIds}
+              onSelectionChange={setPositionFilter}
+              activeColor="violet"
+              searchPlaceholder="Buscar cargo..."
+              emptyText="Nenhum cargo encontrado."
+              footerAction={{
+                icon: ExternalLink,
+                label: 'Ver todos os cargos',
+                onClick: () => router.push('/hr/positions'),
+                color: 'violet',
+              }}
+            />
+          </div>
 
           {/* Grid */}
           {page.isLoading ? (
@@ -426,8 +664,8 @@ export default function EmployeesPage() {
           ) : page.error ? (
             <GridError
               type="server"
-              title="Erro ao carregar funcionários"
-              message="Ocorreu um erro ao tentar carregar os funcionários. Por favor, tente novamente."
+              title="Erro ao carregar funcionarios"
+              message="Ocorreu um erro ao tentar carregar os funcionarios. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
                 onClick: () => crud.refetch(),
@@ -436,7 +674,7 @@ export default function EmployeesPage() {
           ) : (
             <EntityGrid
               config={employeesConfig}
-              items={page.filteredItems}
+              items={displayedEmployees}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}
@@ -447,7 +685,7 @@ export default function EmployeesPage() {
               }
               showSorting={true}
               customSortFn={customSortByRegistration}
-              customSortLabel="Matrícula"
+              customSortLabel="Matricula"
             />
           )}
 
@@ -455,7 +693,7 @@ export default function EmployeesPage() {
           {hasSelection && (
             <SelectionToolbar
               selectedIds={selectedIds}
-              totalItems={page.filteredItems.length}
+              totalItems={displayedEmployees.length}
               onClear={() => page.selection?.actions.clear()}
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{
@@ -487,7 +725,7 @@ export default function EmployeesPage() {
             isSubmitting={crud.isCreating}
             onSubmit={async data => {
               try {
-                // Extrair dados específicos do usuário
+                // Extrair dados especificos do usuario
                 const {
                   createUser,
                   permissionGroupId,
@@ -502,7 +740,7 @@ export default function EmployeesPage() {
                   userEmail &&
                   userPassword
                 ) {
-                  // Usar a nova rota que cria funcionário + usuário automaticamente
+                  // Usar a nova rota que cria funcionario + usuario automaticamente
                   await employeesApi.createWithUser({
                     ...(employeeData as CreateEmployeeWithUserRequest),
                     permissionGroupId,
@@ -510,19 +748,19 @@ export default function EmployeesPage() {
                     userPassword,
                   });
                   await crud.refetch();
-                  toast.success('Funcionário e usuário criados com sucesso!', {
+                  toast.success('Funcionario e usuario criados com sucesso!', {
                     description:
-                      'O usuário foi criado automaticamente com as permissões selecionadas.',
+                      'O usuario foi criado automaticamente com as permissoes selecionadas.',
                     duration: 5000,
                   });
                 } else {
-                  // Criar apenas o funcionário
+                  // Criar apenas o funcionario
                   await crud.create(employeeData);
-                  toast.success('Funcionário criado com sucesso!');
+                  toast.success('Funcionario criado com sucesso!');
                 }
               } catch (error) {
-                console.error('Erro ao criar funcionário:', error);
-                toast.error('Erro ao criar funcionário');
+                console.error('Erro ao criar funcionario:', error);
+                toast.error('Erro ao criar funcionario');
               }
             }}
           />
