@@ -18,7 +18,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { productsConfig } from '@/config/entities/products.config';
-import { cn } from '@/lib/utils';
 import {
   ConfirmDialog,
   CoreProvider,
@@ -31,23 +30,10 @@ import {
 } from '@/core';
 import ItemCard from '@/core/components/item-card';
 import { formatUnitOfMeasure } from '@/helpers/formatters';
-import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
 import type { Item, Product } from '@/types/stock';
-import { Check, ChevronRight, ChevronsUpDown, Factory, Grid3x3, Package, Plus, Tag, Upload, X } from 'lucide-react';
+import { ChevronRight, Factory, Grid3x3, Package, Plus, Tag, Upload } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { CreateProductForm, EditProductForm } from './src/components';
@@ -65,8 +51,15 @@ export default function ProductsPage() {
 function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const manufacturerIdParam = searchParams.get('manufacturer');
-  const categoryIdParam = searchParams.get('category');
+  const manufacturerIds = useMemo(() => {
+    const raw = searchParams.get('manufacturer');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  const categoryIds = useMemo(() => {
+    const raw = searchParams.get('category');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
 
   // ============================================================================
   // STATE
@@ -74,13 +67,6 @@ function ProductsPageContent() {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productModalOpen, setProductModalOpen] = useState(false);
-
-  // ============================================================================
-  // FILTERS (state)
-  // ============================================================================
-
-  const [manufacturerFilterOpen, setManufacturerFilterOpen] = useState(false);
-  const [categoryFilterOpen, setCategoryFilterOpen] = useState(false);
 
   // ============================================================================
   // CRUD SETUP (always fetches ALL products - filtering is client-side)
@@ -132,23 +118,24 @@ function ProductsPageContent() {
   // Apply URL-based filters on top of the text-search filtered items
   const displayedProducts = useMemo(() => {
     let items = page.filteredItems || [];
-    if (manufacturerIdParam) {
-      items = items.filter((p: Product) => p.manufacturerId === manufacturerIdParam);
+    if (manufacturerIds.length > 0) {
+      const set = new Set(manufacturerIds);
+      items = items.filter((p: Product) => p.manufacturerId && set.has(p.manufacturerId));
     }
-    if (categoryIdParam) {
+    if (categoryIds.length > 0) {
+      const set = new Set(categoryIds);
       items = items.filter((p: Product) =>
-        p.productCategories?.some(pc => pc.id === categoryIdParam)
+        p.productCategories?.some(pc => set.has(pc.id))
       );
     }
     return items;
-  }, [page.filteredItems, manufacturerIdParam, categoryIdParam]);
+  }, [page.filteredItems, manufacturerIds, categoryIds]);
 
   // Interdependent filter options: derive from ALL products (page.items = unfiltered)
   const allProducts = page.items || [];
 
   // Extract unique manufacturers from products data
   const availableManufacturers = useMemo(() => {
-    // Base list: all manufacturers found in products
     const manufacturerMap = new Map<string, { id: string; name: string }>();
     for (const product of allProducts) {
       if (product.manufacturerId && product.manufacturer) {
@@ -159,23 +146,23 @@ function ProductsPageContent() {
       }
     }
 
-    if (!categoryIdParam) {
+    if (categoryIds.length === 0) {
       return Array.from(manufacturerMap.values());
     }
 
-    // Narrow: only manufacturers with products in the selected category
+    // Narrow: only manufacturers with products in any of the selected categories
+    const catSet = new Set(categoryIds);
     const idsInCategory = new Set<string>();
     for (const product of allProducts) {
-      if (product.productCategories?.some(pc => pc.id === categoryIdParam)) {
+      if (product.productCategories?.some(pc => catSet.has(pc.id))) {
         if (product.manufacturerId) idsInCategory.add(product.manufacturerId);
       }
     }
     return Array.from(manufacturerMap.values()).filter(m => idsInCategory.has(m.id));
-  }, [allProducts, categoryIdParam]);
+  }, [allProducts, categoryIds]);
 
   // Extract unique categories from products data
   const availableCategories = useMemo(() => {
-    // Base list: all categories found in products
     const categoryMap = new Map<string, { id: string; name: string }>();
     for (const product of allProducts) {
       product.productCategories?.forEach(pc => {
@@ -183,54 +170,37 @@ function ProductsPageContent() {
       });
     }
 
-    if (!manufacturerIdParam) {
+    if (manufacturerIds.length === 0) {
       return Array.from(categoryMap.values());
     }
 
-    // Narrow: only categories with products from the selected manufacturer
+    // Narrow: only categories with products from any of the selected manufacturers
+    const mfrSet = new Set(manufacturerIds);
     const idsForManufacturer = new Set<string>();
     for (const product of allProducts) {
-      if (product.manufacturerId === manufacturerIdParam) {
+      if (product.manufacturerId && mfrSet.has(product.manufacturerId)) {
         product.productCategories?.forEach(pc => idsForManufacturer.add(pc.id));
       }
     }
     return Array.from(categoryMap.values()).filter(c => idsForManufacturer.has(c.id));
-  }, [allProducts, manufacturerIdParam]);
+  }, [allProducts, manufacturerIds]);
 
-  const filterManufacturer = useMemo(
-    () => availableManufacturers.find(m => m.id === manufacturerIdParam) ?? null,
-    [availableManufacturers, manufacturerIdParam],
-  );
-
-  const filterCategory = useMemo(
-    () => availableCategories.find(c => c.id === categoryIdParam) ?? null,
-    [availableCategories, categoryIdParam],
-  );
-
-  // Build URL preserving both filter params
-  const buildFilterUrl = useCallback((params: { manufacturer?: string | null; category?: string | null }) => {
+  // Build URL preserving both filter params (comma-separated for multi-select)
+  const buildFilterUrl = useCallback((params: { manufacturer?: string[]; category?: string[] }) => {
     const parts: string[] = [];
-    const mfr = params.manufacturer !== undefined ? params.manufacturer : manufacturerIdParam;
-    const cat = params.category !== undefined ? params.category : categoryIdParam;
-    if (mfr) parts.push(`manufacturer=${mfr}`);
-    if (cat) parts.push(`category=${cat}`);
+    const mfr = params.manufacturer !== undefined ? params.manufacturer : manufacturerIds;
+    const cat = params.category !== undefined ? params.category : categoryIds;
+    if (mfr.length > 0) parts.push(`manufacturer=${mfr.join(',')}`);
+    if (cat.length > 0) parts.push(`category=${cat.join(',')}`);
     return parts.length > 0 ? `/stock/products?${parts.join('&')}` : '/stock/products';
-  }, [manufacturerIdParam, categoryIdParam]);
+  }, [manufacturerIds, categoryIds]);
 
-  const selectManufacturerFilter = useCallback((id: string) => {
-    router.push(buildFilterUrl({ manufacturer: id || null }));
+  const setManufacturerFilter = useCallback((ids: string[]) => {
+    router.push(buildFilterUrl({ manufacturer: ids }));
   }, [router, buildFilterUrl]);
 
-  const clearManufacturerFilter = useCallback(() => {
-    router.push(buildFilterUrl({ manufacturer: null }));
-  }, [router, buildFilterUrl]);
-
-  const selectCategoryFilter = useCallback((id: string) => {
-    router.push(buildFilterUrl({ category: id || null }));
-  }, [router, buildFilterUrl]);
-
-  const clearCategoryFilter = useCallback(() => {
-    router.push(buildFilterUrl({ category: null }));
+  const setCategoryFilter = useCallback((ids: string[]) => {
+    router.push(buildFilterUrl({ category: ids }));
   }, [router, buildFilterUrl]);
 
   // ============================================================================
@@ -498,134 +468,26 @@ function ProductsPageContent() {
 
         {/* Filters */}
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Manufacturer Filter Combobox */}
-          <Popover open={manufacturerFilterOpen} onOpenChange={setManufacturerFilterOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  'h-9 gap-2 text-sm',
-                  manufacturerIdParam && 'border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300'
-                )}
-              >
-                <Factory className="w-3.5 h-3.5" />
-                {manufacturerIdParam
-                  ? (filterManufacturer?.name || 'Carregando...')
-                  : 'Fabricante'}
-                <ChevronsUpDown className="w-3.5 h-3.5 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Buscar fabricante..." className="h-9" />
-                <CommandEmpty>Nenhum fabricante encontrado.</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    {availableManufacturers.map(m => (
-                      <CommandItem
-                        key={m.id}
-                        value={m.name}
-                        className="cursor-pointer"
-                        onSelect={() => {
-                          selectManufacturerFilter(m.id === manufacturerIdParam ? '' : m.id);
-                          setManufacturerFilterOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            manufacturerIdParam === m.id ? 'opacity-100' : 'opacity-0'
-                          )}
-                        />
-                        {m.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {/* Category Filter Combobox */}
-          <Popover open={categoryFilterOpen} onOpenChange={setCategoryFilterOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  'h-9 gap-2 text-sm',
-                  categoryIdParam && 'border-cyan-500 dark:border-cyan-400 text-cyan-700 dark:text-cyan-300'
-                )}
-              >
-                <Tag className="w-3.5 h-3.5" />
-                {categoryIdParam
-                  ? (filterCategory?.name || 'Carregando...')
-                  : 'Categoria'}
-                <ChevronsUpDown className="w-3.5 h-3.5 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Buscar categoria..." className="h-9" />
-                <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    {availableCategories.map(c => (
-                      <CommandItem
-                        key={c.id}
-                        value={c.name}
-                        className="cursor-pointer"
-                        onSelect={() => {
-                          selectCategoryFilter(c.id === categoryIdParam ? '' : c.id);
-                          setCategoryFilterOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            categoryIdParam === c.id ? 'opacity-100' : 'opacity-0'
-                          )}
-                        />
-                        {c.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {/* Active Filter Chips */}
-          {manufacturerIdParam && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-sm font-medium">
-              <Factory className="w-3.5 h-3.5" />
-              <span>
-                {filterManufacturer?.name || 'Carregando...'}
-              </span>
-              <button
-                onClick={clearManufacturerFilter}
-                className="ml-1 p-0.5 rounded-full hover:bg-violet-200 dark:hover:bg-violet-800 transition-colors cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
-          {categoryIdParam && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-sm font-medium">
-              <Tag className="w-3.5 h-3.5" />
-              <span>
-                {filterCategory?.name || 'Carregando...'}
-              </span>
-              <button
-                onClick={clearCategoryFilter}
-                className="ml-1 p-0.5 rounded-full hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+          <FilterDropdown
+            label="Fabricante"
+            icon={Factory}
+            options={availableManufacturers.map(m => ({ id: m.id, label: m.name }))}
+            selected={manufacturerIds}
+            onSelectionChange={setManufacturerFilter}
+            activeColor="violet"
+            searchPlaceholder="Buscar fabricante..."
+            emptyText="Nenhum fabricante encontrado."
+          />
+          <FilterDropdown
+            label="Categoria"
+            icon={Tag}
+            options={availableCategories.map(c => ({ id: c.id, label: c.name }))}
+            selected={categoryIds}
+            onSelectionChange={setCategoryFilter}
+            activeColor="cyan"
+            searchPlaceholder="Buscar categoria..."
+            emptyText="Nenhuma categoria encontrada."
+          />
         </div>
 
         {/* Grid */}

@@ -1,0 +1,219 @@
+'use client';
+
+import * as React from 'react';
+import { useState, useMemo } from 'react';
+import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+export interface FilterOption {
+  id: string;
+  label: string;
+}
+
+export interface FilterDropdownProps {
+  label: string;
+  icon: LucideIcon;
+  options: FilterOption[];
+  selected: string[];
+  onSelectionChange: (ids: string[]) => void;
+  activeColor?: 'violet' | 'cyan' | 'emerald' | 'blue';
+  searchPlaceholder?: string;
+  emptyText?: string;
+  width?: number;
+}
+
+const colorMap = {
+  violet: {
+    border: 'border-violet-500 dark:border-violet-400',
+    text: 'text-violet-700 dark:text-violet-300',
+    badgeBg: 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
+    itemBg: 'bg-violet-50 dark:bg-violet-500/10',
+    check: 'text-violet-600 dark:text-violet-400',
+    clear: 'text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-200',
+  },
+  cyan: {
+    border: 'border-cyan-500 dark:border-cyan-400',
+    text: 'text-cyan-700 dark:text-cyan-300',
+    badgeBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
+    itemBg: 'bg-cyan-50 dark:bg-cyan-500/10',
+    check: 'text-cyan-600 dark:text-cyan-400',
+    clear: 'text-cyan-600 hover:text-cyan-800 dark:text-cyan-400 dark:hover:text-cyan-200',
+  },
+  emerald: {
+    border: 'border-emerald-500 dark:border-emerald-400',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+    itemBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    check: 'text-emerald-600 dark:text-emerald-400',
+    clear: 'text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200',
+  },
+  blue: {
+    border: 'border-blue-500 dark:border-blue-400',
+    text: 'text-blue-700 dark:text-blue-300',
+    badgeBg: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+    itemBg: 'bg-blue-50 dark:bg-blue-500/10',
+    check: 'text-blue-600 dark:text-blue-400',
+    clear: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200',
+  },
+} as const;
+
+export function FilterDropdown({
+  label,
+  icon: Icon,
+  options,
+  selected,
+  onSelectionChange,
+  activeColor = 'blue',
+  searchPlaceholder = 'Buscar...',
+  emptyText = 'Nenhum encontrado.',
+  width = 280,
+}: FilterDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const colors = colorMap[activeColor];
+  const hasSelection = selected.length > 0;
+  const selectedSet = useMemo(() => new Set(selected), [selected]);
+
+  const { selectedOptions, unselectedOptions } = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    const sel: FilterOption[] = [];
+    const unsel: FilterOption[] = [];
+
+    for (const option of options) {
+      if (query && !option.label.toLowerCase().includes(query)) continue;
+      if (selectedSet.has(option.id)) {
+        sel.push(option);
+      } else {
+        unsel.push(option);
+      }
+    }
+
+    return { selectedOptions: sel, unselectedOptions: unsel };
+  }, [options, selectedSet, searchQuery]);
+
+  const toggleOption = (id: string) => {
+    if (selectedSet.has(id)) {
+      onSelectionChange(selected.filter(s => s !== id));
+    } else {
+      onSelectionChange([...selected, id]);
+    }
+  };
+
+  const clearAll = () => {
+    onSelectionChange([]);
+  };
+
+  const totalFiltered = selectedOptions.length + unselectedOptions.length;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            'h-9 gap-2 text-sm',
+            hasSelection && [colors.border, colors.text]
+          )}
+        >
+          <Icon className="w-3.5 h-3.5" />
+          {label}
+          {hasSelection && (
+            <span className={cn('text-[11px] font-semibold px-1.5 py-0.5 rounded-md', colors.badgeBg)}>
+              {selected.length}
+            </span>
+          )}
+          <ChevronsUpDown className="w-3.5 h-3.5 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="glass shadow-xl rounded-xl p-0 border-0"
+        style={{ width }}
+        align="start"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        {/* Search input */}
+        <div className="p-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 opacity-40" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full h-8 pl-8 pr-3 text-sm bg-white/50 dark:bg-white/5 rounded-lg outline-none placeholder:opacity-50"
+            />
+          </div>
+        </div>
+
+        {/* Selection count + clear */}
+        {hasSelection && (
+          <>
+            <hr className="border-[rgb(var(--glass-border)/0.15)]" />
+            <div className="flex items-center justify-between px-3 py-1.5">
+              <span className="text-xs opacity-60">
+                {selected.length} selecionado{selected.length > 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={clearAll}
+                className={cn('flex items-center gap-1 text-xs font-medium cursor-pointer', colors.clear)}
+              >
+                Limpar
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </>
+        )}
+
+        <hr className="border-[rgb(var(--glass-border)/0.15)]" />
+
+        {/* Options list */}
+        <div className="max-h-[240px] overflow-y-auto py-1">
+          {totalFiltered === 0 ? (
+            <div className="px-3 py-4 text-sm text-center opacity-50">
+              {emptyText}
+            </div>
+          ) : (
+            <>
+              {/* Selected items first */}
+              {selectedOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => toggleOption(option.id)}
+                  className={cn(
+                    'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left cursor-pointer hover:opacity-80 transition-opacity',
+                    colors.itemBg
+                  )}
+                >
+                  <Check className={cn('w-4 h-4 shrink-0', colors.check)} />
+                  <span className="truncate">{option.label}</span>
+                </button>
+              ))}
+
+              {/* Visual gap between groups */}
+              {selectedOptions.length > 0 && unselectedOptions.length > 0 && (
+                <div className="my-1 mx-3 border-b border-dashed border-[rgb(var(--glass-border)/0.15)]" />
+              )}
+
+              {/* Unselected items */}
+              {unselectedOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => toggleOption(option.id)}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  <Check className="w-4 h-4 shrink-0 opacity-0" />
+                  <span className="truncate">{option.label}</span>
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
