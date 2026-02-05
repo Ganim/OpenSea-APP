@@ -40,7 +40,12 @@ export type UnitOfMeasure =
   | 'TEASPOONS'
   | 'CUSTOM';
 export type ItemStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'DAMAGED';
-export type MovementType = 'ENTRY' | 'EXIT' | 'TRANSFER' | 'ADJUSTMENT' | 'ZONE_RECONFIGURE';
+export type MovementType =
+  | 'ENTRY'
+  | 'EXIT'
+  | 'TRANSFER'
+  | 'ADJUSTMENT'
+  | 'ZONE_RECONFIGURE';
 export type ExitMovementType = 'SALE' | 'PRODUCTION' | 'SAMPLE' | 'LOSS';
 export type PurchaseOrderStatus =
   | 'PENDING'

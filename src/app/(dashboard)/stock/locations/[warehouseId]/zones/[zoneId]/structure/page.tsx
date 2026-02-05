@@ -79,7 +79,8 @@ export default function ZoneStructurePage({ params }: PageProps) {
               ) : (
                 <>
                   <h1 className="text-xl font-bold tracking-tight">
-                    Configurar Estrutura
+                    {zone?.structure?.aisles ? 'Reconfigurar' : 'Configurar'}{' '}
+                    Estrutura
                   </h1>
                   <p className="text-sm text-muted-foreground">
                     {zone?.code} - {zone?.name}
@@ -95,8 +96,9 @@ export default function ZoneStructurePage({ params }: PageProps) {
       <Card>
         <CardHeader className="border-b">
           <p className="text-sm text-muted-foreground">
-            Configure a quantidade de corredores, prateleiras e nichos desta
-            zona. Após confirmar, todos os nichos serão criados automaticamente.
+            {zone?.structure?.aisles
+              ? 'Ajuste a estrutura existente. Nichos com a mesma posição física serão preservados automaticamente.'
+              : 'Configure a quantidade de corredores, prateleiras e nichos desta zona. Após confirmar, todos os nichos serão criados automaticamente.'}
           </p>
         </CardHeader>
         <CardContent className="pt-6">

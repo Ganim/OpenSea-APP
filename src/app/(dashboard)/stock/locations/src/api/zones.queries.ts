@@ -262,7 +262,7 @@ export function useConfigureZoneStructure() {
       );
       return response;
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       const zone = result.zone;
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zone(zone.id) });
       queryClient.invalidateQueries({

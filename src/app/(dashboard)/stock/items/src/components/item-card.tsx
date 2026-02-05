@@ -122,7 +122,9 @@ export function ItemGridCard({ item, isSelected = false }: ItemCardProps) {
         ) : item.lastKnownAddress ? (
           <div className="flex items-center gap-1 text-amber-500">
             <MapPinOff className="w-3 h-3" />
-            <span className="truncate">{item.lastKnownAddress} (desassociado)</span>
+            <span className="truncate">
+              {item.lastKnownAddress} (desassociado)
+            </span>
           </div>
         ) : (
           <div className="flex items-center gap-1 text-muted-foreground/50">

@@ -96,7 +96,9 @@ export const itemsService = {
   },
 
   // POST /v1/items/batch-transfer
-  async batchTransfer(data: BatchTransferItemsRequest): Promise<BatchTransferResponse> {
+  async batchTransfer(
+    data: BatchTransferItemsRequest
+  ): Promise<BatchTransferResponse> {
     return apiClient.post<BatchTransferResponse>(
       API_ENDPOINTS.ITEMS.BATCH_TRANSFER,
       data

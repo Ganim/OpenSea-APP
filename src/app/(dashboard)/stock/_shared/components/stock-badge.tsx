@@ -197,7 +197,11 @@ const movementTypeConfig: Record<
   EXIT: { label: 'Saída', variant: 'destructive' },
   TRANSFER: { label: 'Transferência', variant: 'secondary' },
   ADJUSTMENT: { label: 'Ajuste', variant: 'outline' },
-  ZONE_RECONFIGURE: { label: 'Reconfiguração', variant: 'outline', className: 'border-purple-500 text-purple-500' },
+  ZONE_RECONFIGURE: {
+    label: 'Reconfiguração',
+    variant: 'outline',
+    className: 'border-purple-500 text-purple-500',
+  },
 };
 
 interface MovementTypeBadgeProps {

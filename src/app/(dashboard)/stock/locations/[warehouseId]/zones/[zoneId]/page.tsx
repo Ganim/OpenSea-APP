@@ -20,7 +20,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
-import { useWarehouse, useZone, useBinOccupancy, useZoneItemStats, API_ENDPOINTS, QUERY_KEYS } from '../../../src/api';
+import {
+  useWarehouse,
+  useZone,
+  useBinOccupancy,
+  useZoneItemStats,
+  API_ENDPOINTS,
+  QUERY_KEYS,
+} from '../../../src/api';
 import { ZoneMap } from '../../../src/components';
 import type { BinOccupancy, BinResponse } from '../../../src/types';
 import { apiClient } from '@/lib/api-client';
@@ -64,7 +71,11 @@ export default function ZoneMapPage({ params }: PageProps) {
   const { data: itemStats } = useZoneItemStats(isValidZoneId ? zoneId : '');
   const queryClient = useQueryClient();
 
-  const handleMoveItem = async (itemId: string, targetBinAddress: string, quantity: number) => {
+  const handleMoveItem = async (
+    itemId: string,
+    targetBinAddress: string,
+    quantity: number
+  ) => {
     // Resolve address to bin ID
     const binResponse = await apiClient.get<BinResponse>(
       API_ENDPOINTS.bins.getByAddress(targetBinAddress)
@@ -80,7 +91,9 @@ export default function ZoneMapPage({ params }: PageProps) {
 
     // Invalidate occupancy data to refresh the map
     refetch();
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zoneItemStats(zoneId) });
+    queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.zoneItemStats(zoneId),
+    });
   };
 
   const handlePrintLabels = (binIds: string[]) => {
@@ -335,20 +348,23 @@ export default function ZoneMapPage({ params }: PageProps) {
       )}
 
       {/* Blocked Bins Alert */}
-      {itemStats && itemStats.blockedBins > 0 && itemStats.itemsInBlockedBins > 0 && (
-        <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-900/20">
-          <Lock className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800 dark:text-amber-300">
-            {itemStats.blockedBins} nicho(s) bloqueado(s) com itens
-          </AlertTitle>
-          <AlertDescription className="text-amber-700 dark:text-amber-400">
-            <span>
-              {itemStats.itemsInBlockedBins} item(ns) precisam ser realocados.
-              Use o filtro &quot;Bloqueados&quot; no mapa para visualizá-los e mover os itens individualmente.
-            </span>
-          </AlertDescription>
-        </Alert>
-      )}
+      {itemStats &&
+        itemStats.blockedBins > 0 &&
+        itemStats.itemsInBlockedBins > 0 && (
+          <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-900/20">
+            <Lock className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800 dark:text-amber-300">
+              {itemStats.blockedBins} nicho(s) bloqueado(s) com itens
+            </AlertTitle>
+            <AlertDescription className="text-amber-700 dark:text-amber-400">
+              <span>
+                {itemStats.itemsInBlockedBins} item(ns) precisam ser realocados.
+                Use o filtro &quot;Bloqueados&quot; no mapa para visualizá-los e
+                mover os itens individualmente.
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
 
       {/* Zone Map */}
       <Card>

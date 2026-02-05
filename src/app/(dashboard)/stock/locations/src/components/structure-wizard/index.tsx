@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -66,7 +72,55 @@ export function StructureWizard({
     binDirection: 'BOTTOM_UP' as 'BOTTOM_UP' | 'TOP_DOWN',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [occupiedBinsAction, setOccupiedBinsAction] = useState<'block' | 'force'>('block');
+  const [occupiedBinsAction, setOccupiedBinsAction] = useState<
+    'block' | 'force'
+  >('block');
+
+  // Pre-populate from existing structure (when editing, not first config)
+  const hasLoadedStructure = useRef(false);
+  useEffect(() => {
+    if (!zone?.structure || hasLoadedStructure.current) return;
+
+    const structure = zone.structure;
+    const hasConfig =
+      (structure.aisleConfigs && structure.aisleConfigs.length > 0) ||
+      structure.aisles > 0;
+
+    if (!hasConfig) return;
+
+    hasLoadedStructure.current = true;
+
+    // Populate aisles
+    if (structure.aisleConfigs && structure.aisleConfigs.length > 0) {
+      setAisles(
+        structure.aisleConfigs.map(c => ({
+          aisleNumber: c.aisleNumber,
+          shelvesCount: c.shelvesCount,
+          binsPerShelf: c.binsPerShelf,
+        }))
+      );
+    } else if (structure.aisles > 0) {
+      // Legacy uniform mode - generate aisleConfigs from flat values
+      setAisles(
+        Array.from({ length: structure.aisles }, (_, i) => ({
+          aisleNumber: i + 1,
+          shelvesCount: structure.shelvesPerAisle,
+          binsPerShelf: structure.binsPerShelf,
+        }))
+      );
+    }
+
+    // Populate code pattern
+    if (structure.codePattern) {
+      setCodePatternState({
+        separator: structure.codePattern.separator,
+        aisleDigits: structure.codePattern.aisleDigits,
+        shelfDigits: structure.codePattern.shelfDigits,
+        binLabeling: structure.codePattern.binLabeling,
+        binDirection: structure.codePattern.binDirection,
+      });
+    }
+  }, [zone]);
 
   // Mutations
   const configureStructure = useConfigureZoneStructure();
@@ -75,6 +129,7 @@ export function StructureWizard({
   const currentStep = STEPS[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === STEPS.length - 1;
+  const isReconfiguration = hasLoadedStructure.current;
 
   const codePattern: CodePattern = codePatternState;
 
@@ -116,10 +171,8 @@ export function StructureWizard({
     };
   }, [currentStep, aisles, codePattern]);
 
-  const {
-    data: reconfigPreview,
-    isLoading: isLoadingPreview,
-  } = useReconfigurationPreview(zoneId, previewStructure);
+  const { data: reconfigPreview, isLoading: isLoadingPreview } =
+    useReconfigurationPreview(zoneId, previewStructure);
 
   const sampleAddresses = useMemo(() => {
     if (!warehouse || !zone) return [];

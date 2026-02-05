@@ -17,7 +17,8 @@ export const QUERY_KEYS = {
   zoneBins: (zoneId: string) => ['zones', zoneId, 'bins'] as const,
   zoneOccupancy: (zoneId: string) => ['zones', zoneId, 'occupancy'] as const,
   zoneItemStats: (zoneId: string) => ['zones', zoneId, 'item-stats'] as const,
-  zoneReconfigPreview: (zoneId: string) => ['zones', zoneId, 'reconfig-preview'] as const,
+  zoneReconfigPreview: (zoneId: string) =>
+    ['zones', zoneId, 'reconfig-preview'] as const,
 
   // Bins
   bins: ['bins'] as const,

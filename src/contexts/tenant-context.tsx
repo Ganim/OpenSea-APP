@@ -1,18 +1,18 @@
 'use client';
 
-import { logger } from '@/lib/logger';
 import { API_ENDPOINTS, authConfig } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import { decodeJWT, isJwt } from '@/lib/jwt-utils';
+import { logger } from '@/lib/logger';
 import { queryClient } from '@/providers/query-provider';
-import type { UserTenant, SelectTenantResponse } from '@/types/tenant';
+import type { SelectTenantResponse, UserTenant } from '@/types/tenant';
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
   useRef,
+  useState,
 } from 'react';
 
 interface TenantContextType {
@@ -225,7 +225,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
       const detail = (event as CustomEvent<UserTenant>).detail;
       if (!detail?.id) return;
 
-      setCurrentTenant((prev) => {
+      setCurrentTenant(prev => {
         if (prev?.id === detail.id) return prev;
         return {
           id: detail.id,
@@ -238,8 +238,8 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         };
       });
 
-      setTenants((prev) => {
-        const exists = prev.some((t) => t.id === detail.id);
+      setTenants(prev => {
+        const exists = prev.some(t => t.id === detail.id);
         if (exists) return prev;
         return [
           ...prev,

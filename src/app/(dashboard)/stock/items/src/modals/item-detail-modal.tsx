@@ -429,7 +429,9 @@ function MovementCard({ movement }: MovementCardProps) {
             <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               {movement.originRef && <span>{movement.originRef}</span>}
               {movement.originRef && movement.destinationRef && <span>→</span>}
-              {movement.destinationRef && <span>{movement.destinationRef}</span>}
+              {movement.destinationRef && (
+                <span>{movement.destinationRef}</span>
+              )}
             </div>
           )}
           {movement.notes && (
