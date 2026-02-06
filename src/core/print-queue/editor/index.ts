@@ -59,3 +59,54 @@ export type {
 
 // Simple Editor Types
 export type { SimpleLabelSaveData } from './components/simple-label-editor';
+
+// ============================================
+// LABEL STUDIO (novo editor)
+// ============================================
+
+// Components
+export { LabelStudioEditor, Canvas, Rulers } from './components';
+
+// Toolbar
+export { MainToolbar } from './toolbar';
+
+// Stores
+export { useEditorStore, editorSelectors } from './stores';
+
+// Utils
+export {
+  mmToPx,
+  pxToMm,
+  mmToPxRounded,
+  pxToMmRounded,
+  calculateFitZoom,
+  snapToGrid,
+  PAPER_SIZES,
+  ZOOM_LEVELS,
+} from './utils';
+
+// Types
+export type {
+  ElementType,
+  TextStyle,
+  BorderStyle,
+  LabelElementBase,
+  FieldElement,
+  TextElement,
+  ImageElement,
+  IconElement,
+  ArrowElement,
+  ShapeElement,
+  LineElement,
+  BarcodeElement,
+  QRCodeElement,
+  TableElement,
+  LabelElement,
+  LabelStudioTemplate,
+  CanvasConfig,
+  EditorState,
+  EditorActions,
+  EditorStore,
+  SnapGuide,
+  AlignmentType,
+} from './studio-types';
