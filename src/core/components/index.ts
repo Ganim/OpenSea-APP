@@ -3,7 +3,21 @@
  * Exporta todos os componentes core do sistema
  */
 
-// Cards
+// Cards - New unified component
+export {
+  EntityCard,
+  type EntityCardBadge,
+  type EntityCardFooter,
+  type EntityCardProps,
+  type EntityCardVariant,
+  type FooterButton,
+  type FooterButtonColor,
+  type NoFooter,
+  type SingleButtonFooter,
+  type SplitButtonFooter,
+} from './entity-card';
+
+// Cards - Legacy (use EntityCard for new code)
 export {
   UniversalCard,
   type CardAction,
@@ -11,6 +25,8 @@ export {
   type CardVariant,
   type UniversalCardProps,
 } from './universal-card';
+
+export { ItemCard, type ItemCardProps } from './item-card';
 
 // Grids
 export {

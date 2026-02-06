@@ -24,14 +24,13 @@ import {
 } from '@/components/ui/tooltip';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
-import ItemCard from '@/core/components/item-card';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Manufacturer } from '@/types/stock';
 import { productsService } from '@/services/stock';
@@ -41,7 +40,6 @@ import {
   ArrowDownAZ,
   ArrowLeft,
   Calendar,
-  ChevronRight,
   Clock,
   Factory,
   Globe,
@@ -51,7 +49,6 @@ import {
   Star,
   Upload,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -307,13 +304,13 @@ export default function ManufacturersPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={displayName}
           subtitle={item.country || '—'}
           icon={Factory}
-          iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
           badges={[
             ...(item.rating
               ? [
@@ -354,19 +351,15 @@ export default function ManufacturersPage() {
               )}
             </div>
           }
-          footer={
-            <Link href={`/stock/products?manufacturer=${item.id}`}>
-              <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer bg-emerald-600 hover:bg-emerald-700">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  <span>
-                    {productCount} {productCount === 1 ? 'produto' : 'produtos'}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </Link>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Package,
+              label: `${productCount} ${productCount === 1 ? 'produto' : 'produtos'}`,
+              href: `/stock/products?manufacturer=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -407,13 +400,13 @@ export default function ManufacturersPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={displayName}
           subtitle={item.country || '—'}
           icon={Factory}
-          iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
           badges={[
             ...(item.rating
               ? [
@@ -454,19 +447,15 @@ export default function ManufacturersPage() {
               )}
             </div>
           }
-          footer={
-            <Link href={`/stock/products?manufacturer=${item.id}`}>
-              <button className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950 rounded transition-colors cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  <span>
-                    {productCount} {productCount === 1 ? 'produto' : 'produtos'}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </Link>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Package,
+              label: `${productCount} ${productCount === 1 ? 'produto' : 'produtos'}`,
+              href: `/stock/products?manufacturer=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}

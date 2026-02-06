@@ -21,20 +21,18 @@ import { productsConfig } from '@/config/entities/products.config';
 import {
   ConfirmDialog,
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
-import ItemCard from '@/core/components/item-card';
 import { formatUnitOfMeasure } from '@/helpers/formatters';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
 import type { Item, Product } from '@/types/stock';
 import {
-  ChevronRight,
   ExternalLink,
   Factory,
   Grid3x3,
@@ -271,13 +269,14 @@ function ProductsPageContent() {
   // ============================================================================
 
   const renderGridCard = (item: Product, isSelected: boolean) => {
-    // Dados agora vêm expandidos do backend
-    // Mas template pode vir como undefined, então usar fallback seguro
     const templateName = item.template?.name || 'Template';
     const unitOfMeasure = formatUnitOfMeasure(
       item.template?.unitOfMeasure || 'UNITS'
     );
     const manufacturerName = item.manufacturer?.name;
+    const variantLabel = item.variants?.length
+      ? `${item.variants.length} variante${item.variants.length !== 1 ? 's' : ''}`
+      : 'Ver variantes';
 
     return (
       <EntityContextMenu
@@ -287,29 +286,18 @@ function ProductsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={manufacturerName || 'Fabricante não informado'}
           icon={Package}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           badges={[
-            {
-              label: templateName,
-              variant: 'default' as const,
-            },
-            {
-              label: unitOfMeasure,
-              variant: 'default' as const,
-            },
+            { label: templateName, variant: 'default' },
+            { label: unitOfMeasure, variant: 'default' },
             ...(item.outOfLine
-              ? [
-                  {
-                    label: 'Fora de Linha',
-                    variant: 'destructive' as const,
-                  },
-                ]
+              ? [{ label: 'Fora de Linha', variant: 'destructive' as const }]
               : []),
             ...(item.status !== 'ACTIVE'
               ? [
@@ -320,22 +308,15 @@ function ProductsPageContent() {
                 ]
               : []),
           ]}
-          footer={
-            <button
-              onClick={() => handleProductClick(item)}
-              className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer bg-emerald-600 hover:bg-emerald-700"
-            >
-              <div className="flex items-center gap-2">
-                <Grid3x3 className="w-4 h-4" />
-                <span>
-                  {item.variants?.length
-                    ? `${item.variants.length} variantes`
-                    : 'Ver variantes'}
-                </span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Grid3x3,
+              label: variantLabel,
+              onClick: () => handleProductClick(item),
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -348,13 +329,14 @@ function ProductsPageContent() {
   };
 
   const renderListCard = (item: Product, isSelected: boolean) => {
-    // Dados agora vêm expandidos do backend
-    // Mas template pode vir como undefined, então usar fallback seguro
     const templateName = item.template?.name || 'Template';
     const unitOfMeasure = formatUnitOfMeasure(
       item.template?.unitOfMeasure || 'UNITS'
     );
     const manufacturerName = item.manufacturer?.name;
+    const variantLabel = item.variants?.length
+      ? `${item.variants.length} variante${item.variants.length !== 1 ? 's' : ''}`
+      : 'Ver variantes';
 
     return (
       <EntityContextMenu
@@ -364,29 +346,18 @@ function ProductsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={manufacturerName || item.fullCode}
           icon={Package}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           badges={[
-            {
-              label: templateName,
-              variant: 'default' as const,
-            },
-            {
-              label: unitOfMeasure,
-              variant: 'default' as const,
-            },
+            { label: templateName, variant: 'default' },
+            { label: unitOfMeasure, variant: 'default' },
             ...(item.outOfLine
-              ? [
-                  {
-                    label: 'Fora de Linha',
-                    variant: 'destructive' as const,
-                  },
-                ]
+              ? [{ label: 'Fora de Linha', variant: 'destructive' as const }]
               : []),
             ...(item.status !== 'ACTIVE'
               ? [
@@ -398,28 +369,19 @@ function ProductsPageContent() {
               : []),
           ]}
           metadata={
-            <>
-              {item.description && (
-                <span className="text-xs truncate">{item.description}</span>
-              )}
-            </>
+            item.description ? (
+              <span className="text-xs truncate">{item.description}</span>
+            ) : undefined
           }
-          footer={
-            <button
-              onClick={() => handleProductClick(item)}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950 rounded transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Grid3x3 className="w-4 h-4" />
-                <span>
-                  {item.variants?.length
-                    ? `${item.variants.length} variantes`
-                    : 'Ver variantes'}
-                </span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Grid3x3,
+              label: variantLabel,
+              onClick: () => handleProductClick(item),
+              color: 'blue',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}

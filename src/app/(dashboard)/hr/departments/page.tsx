@@ -19,6 +19,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
@@ -26,19 +27,16 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
-import ItemCard from '@/core/components/item-card';
 import type { Department } from '@/types/hr';
 import {
   ArrowLeft,
   Briefcase,
   Building2,
-  ChevronRight,
   ExternalLink,
   Plus,
   Upload,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
 import {
@@ -235,50 +233,34 @@ function DepartmentsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           badges={[
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
               variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
-          footer={
-            <div className="flex rounded-b-xl overflow-hidden">
-              <Link
-                href={`/hr/positions?department=${item.id}`}
-                className="flex-1"
-              >
-                <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    <span>
-                      {positionsCount} cargo{positionsCount !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </Link>
-              <div className="w-px bg-white/20" />
-              <Link
-                href={`/hr/employees?department=${item.id}`}
-                className="flex-1"
-              >
-                <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>{employeesCount} func.</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </Link>
-            </div>
-          }
+          footer={{
+            type: 'split',
+            left: {
+              icon: Briefcase,
+              label: `${positionsCount} cargo${positionsCount !== 1 ? 's' : ''}`,
+              href: `/hr/positions?department=${item.id}`,
+              color: 'emerald',
+            },
+            right: {
+              icon: Users,
+              label: `${employeesCount} func.`,
+              href: `/hr/employees?department=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -304,38 +286,34 @@ function DepartmentsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           badges={[
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
               variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
-          footer={
-            <div className="flex items-center gap-3 mt-2">
-              <Link href={`/hr/positions?department=${item.id}`}>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                  <Briefcase className="w-3.5 h-3.5" />
-                  {positionsCount} cargo{positionsCount !== 1 ? 's' : ''}
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </Link>
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-              <Link href={`/hr/employees?department=${item.id}`}>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                  <Users className="w-3.5 h-3.5" />
-                  {employeesCount} func.
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </Link>
-            </div>
-          }
+          footer={{
+            type: 'split',
+            left: {
+              icon: Briefcase,
+              label: `${positionsCount} cargo${positionsCount !== 1 ? 's' : ''}`,
+              href: `/hr/positions?department=${item.id}`,
+              color: 'emerald',
+            },
+            right: {
+              icon: Users,
+              label: `${employeesCount} func.`,
+              href: `/hr/employees?department=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}

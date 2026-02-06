@@ -19,6 +19,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
@@ -26,7 +27,6 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
-import ItemCard from '@/core/components/item-card';
 import type { Employee } from '@/types/hr';
 import {
   ArrowLeft,
@@ -402,13 +402,13 @@ function EmployeesPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.fullName}
           subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
-          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(posInfo
               ? [
@@ -470,13 +470,13 @@ function EmployeesPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.fullName}
           subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
-          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(posInfo
               ? [

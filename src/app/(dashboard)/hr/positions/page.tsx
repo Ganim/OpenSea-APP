@@ -19,6 +19,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
@@ -26,19 +27,16 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
-import ItemCard from '@/core/components/item-card';
 import type { Position } from '@/types/hr';
 import {
   ArrowLeft,
   Briefcase,
   Building2,
-  ChevronRight,
   ExternalLink,
   Plus,
   Upload,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
 import {
@@ -321,13 +319,13 @@ function PositionsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
-          iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-indigo-500 to-purple-600"
           badges={[
             ...(deptLabel
               ? [
@@ -340,9 +338,7 @@ function PositionsPageContent() {
               : []),
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
-              variant: item.isActive
-                ? ('default' as const)
-                : ('secondary' as const),
+              variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
           metadata={
@@ -352,19 +348,15 @@ function PositionsPageContent() {
               </span>
             ) : undefined
           }
-          footer={
-            <Link href={`/hr/employees?position=${item.id}`}>
-              <button className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 rounded-b-xl transition-colors cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span>
-                    {employeeCount} funcionario{employeeCount !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </Link>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Users,
+              label: `${employeeCount} funcionario${employeeCount !== 1 ? 's' : ''}`,
+              href: `/hr/employees?position=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -404,13 +396,13 @@ function PositionsPageContent() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <ItemCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
-          iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-indigo-500 to-purple-600"
           badges={[
             ...(deptLabel
               ? [
@@ -423,9 +415,7 @@ function PositionsPageContent() {
               : []),
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
-              variant: item.isActive
-                ? ('default' as const)
-                : ('secondary' as const),
+              variant: item.isActive ? 'default' : 'secondary',
             },
           ]}
           metadata={
@@ -435,18 +425,15 @@ function PositionsPageContent() {
               </span>
             ) : undefined
           }
-          footer={
-            <Link
-              href={`/hr/employees?position=${item.id}`}
-              className="block mt-2"
-            >
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
-                <Users className="w-3.5 h-3.5" />
-                {employeeCount} funcionario{employeeCount !== 1 ? 's' : ''}
-                <ChevronRight className="w-3.5 h-3.5" />
-              </span>
-            </Link>
-          }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Users,
+              label: `${employeeCount} funcionario${employeeCount !== 1 ? 's' : ''}`,
+              href: `/hr/employees?position=${item.id}`,
+              color: 'emerald',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
