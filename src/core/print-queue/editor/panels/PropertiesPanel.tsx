@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { FieldConfigPanel } from './FieldConfigPanel';
 import { BarcodeConfigPanel } from './BarcodeConfigPanel';
 import { QRCodeConfigPanel } from './QRCodeConfigPanel';
+import { TableConfigPanel } from './TableConfigPanel';
 import {
   Lock,
   Unlock,
@@ -519,6 +520,10 @@ export function PropertiesPanel({ className }: PropertiesPanelProps) {
 
       {element.type === 'qrcode' && (
         <QRCodeConfigPanel element={element} onUpdate={handleUpdate} />
+      )}
+
+      {element.type === 'table' && (
+        <TableConfigPanel element={element} onUpdate={handleUpdate} />
       )}
 
       <Separator />

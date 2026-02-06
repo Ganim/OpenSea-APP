@@ -7,3 +7,4 @@ export { PropertiesPanel } from './PropertiesPanel';
 export { FieldConfigPanel } from './FieldConfigPanel';
 export { BarcodeConfigPanel } from './BarcodeConfigPanel';
 export { QRCodeConfigPanel } from './QRCodeConfigPanel';
+export { TableConfigPanel } from './TableConfigPanel';

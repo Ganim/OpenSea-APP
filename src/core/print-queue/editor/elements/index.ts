@@ -24,3 +24,4 @@ export {
 } from './FieldElementRenderer';
 export { BarcodeElementRenderer } from './BarcodeElementRenderer';
 export { QRCodeElementRenderer } from './QRCodeElementRenderer';
+export { TableElementRenderer } from './TableElementRenderer';

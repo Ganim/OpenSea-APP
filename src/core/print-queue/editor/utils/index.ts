@@ -35,3 +35,21 @@ export {
   DEFAULT_SNAP_CONFIG,
   type SnapConfig,
 } from './snapCalculator';
+
+export {
+  validateTemplate,
+  serializeTemplate,
+  deserializeTemplate,
+  createEmptyTemplate,
+  exportTemplateAsFile,
+  importTemplateFromFile,
+  LABEL_TEMPLATE_PRESETS_V2,
+  CURRENT_TEMPLATE_VERSION,
+} from './templateSerializer';
+
+export {
+  generatePrintHTML,
+  resolveFieldValue as resolveFieldValueV2,
+  mmToPrintPx,
+  PRINT_DPI,
+} from './printRenderer';

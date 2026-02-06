@@ -16,6 +16,7 @@ import { IconElementRenderer } from './IconElementRenderer';
 import { FieldElementRenderer } from './FieldElementRenderer';
 import { BarcodeElementRenderer } from './BarcodeElementRenderer';
 import { QRCodeElementRenderer } from './QRCodeElementRenderer';
+import { TableElementRenderer } from './TableElementRenderer';
 
 interface ElementRendererProps {
   element: LabelElement;
@@ -69,12 +70,7 @@ export function ElementRenderer({
       return <QRCodeElementRenderer element={element} zoom={zoom} />;
 
     case 'table':
-      // Table será implementado na Fase 6
-      return (
-        <div className="w-full h-full flex items-center justify-center bg-neutral-50 border border-neutral-300">
-          <div className="text-neutral-400 text-xs">Tabela</div>
-        </div>
-      );
+      return <TableElementRenderer element={element} zoom={zoom} />;
 
     default:
       return (

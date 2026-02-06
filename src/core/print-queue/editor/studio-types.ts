@@ -11,16 +11,16 @@
  * Tipos de elementos disponíveis no editor
  */
 export type ElementType =
-  | 'field'     // Campo de dados dinâmico
-  | 'text'      // Texto livre/estático
-  | 'image'     // Imagem/logo
-  | 'icon'      // Ícone vetorial
-  | 'arrow'     // Seta
-  | 'shape'     // Forma (retângulo, círculo, etc)
-  | 'line'      // Linha
-  | 'barcode'   // Código de barras
-  | 'qrcode'    // QR Code
-  | 'table';    // Tabela
+  | 'field' // Campo de dados dinâmico
+  | 'text' // Texto livre/estático
+  | 'image' // Imagem/logo
+  | 'icon' // Ícone vetorial
+  | 'arrow' // Seta
+  | 'shape' // Forma (retângulo, círculo, etc)
+  | 'line' // Linha
+  | 'barcode' // Código de barras
+  | 'qrcode' // QR Code
+  | 'table'; // Tabela
 
 /**
  * Estilo de texto
@@ -283,7 +283,11 @@ export interface TableConfig {
 export interface TableCell {
   row: number;
   col: number;
-  content: LabelElement | null;
+  type: 'text' | 'field';
+  content?: string;
+  dataPath?: string;
+  style?: Partial<TextStyle>;
+  backgroundColor?: string;
 }
 
 /**
@@ -452,7 +456,12 @@ export interface EditorState {
 export interface EditorActions {
   // Template
   newTemplate: (width: number, height: number) => void;
-  loadTemplate: (template: LabelStudioTemplate, id?: string, name?: string, description?: string) => void;
+  loadTemplate: (
+    template: LabelStudioTemplate,
+    id?: string,
+    name?: string,
+    description?: string
+  ) => void;
   setTemplateName: (name: string) => void;
   setTemplateDescription: (description: string) => void;
   setCanvasSize: (width: number, height: number) => void;
@@ -472,7 +481,12 @@ export interface EditorActions {
 
   // Movimento e redimensionamento
   moveElements: (ids: string[], deltaX: number, deltaY: number) => void;
-  resizeElement: (id: string, width: number, height: number, anchor?: string) => void;
+  resizeElement: (
+    id: string,
+    width: number,
+    height: number,
+    anchor?: string
+  ) => void;
 
   // Alinhamento
   alignElements: (alignment: AlignmentType) => void;
