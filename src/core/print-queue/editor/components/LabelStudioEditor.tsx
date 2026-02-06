@@ -9,7 +9,10 @@ import React, { useEffect, useCallback } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { Canvas } from './Canvas';
 import { Rulers } from './Rulers';
+import { ElementsLayer } from './ElementsLayer';
 import { MainToolbar } from '../toolbar/MainToolbar';
+import { ElementsPanel } from '../panels/ElementsPanel';
+import { PropertiesPanel } from '../panels/PropertiesPanel';
 import type { LabelStudioTemplate } from '../studio-types';
 import { cn } from '@/lib/utils';
 
@@ -27,7 +30,11 @@ interface LabelStudioEditorProps {
   /** Altura inicial em mm (para novo template) */
   initialHeight?: number;
   /** Callback ao salvar */
-  onSave?: (template: LabelStudioTemplate, name: string, description: string) => void;
+  onSave?: (
+    template: LabelStudioTemplate,
+    name: string,
+    description: string
+  ) => void;
   /** Callback ao cancelar */
   onCancel?: () => void;
   /** Modo somente leitura */
@@ -52,23 +59,26 @@ export function LabelStudioEditor({
   className,
 }: LabelStudioEditorProps) {
   // Store actions
-  const newTemplate = useEditorStore((s) => s.newTemplate);
-  const loadTemplate = useEditorStore((s) => s.loadTemplate);
-  const toJSON = useEditorStore((s) => s.toJSON);
-  const getName = useEditorStore((s) => s.templateName);
-  const getDescription = useEditorStore((s) => s.templateDescription);
-  const reset = useEditorStore((s) => s.reset);
+  const newTemplate = useEditorStore(s => s.newTemplate);
+  const loadTemplate = useEditorStore(s => s.loadTemplate);
+  const toJSON = useEditorStore(s => s.toJSON);
+  const getName = useEditorStore(s => s.templateName);
+  const getDescription = useEditorStore(s => s.templateDescription);
+  const reset = useEditorStore(s => s.reset);
+
+  // Store state
+  const zoom = useEditorStore(s => s.zoom);
+  const selectedIds = useEditorStore(s => s.selectedIds);
 
   // Undo/Redo actions
-  const undo = useEditorStore((s) => s.undo);
-  const redo = useEditorStore((s) => s.redo);
-  const copy = useEditorStore((s) => s.copy);
-  const paste = useEditorStore((s) => s.paste);
-  const cut = useEditorStore((s) => s.cut);
-  const selectAll = useEditorStore((s) => s.selectAll);
-  const deleteElements = useEditorStore((s) => s.deleteElements);
-  const selectedIds = useEditorStore((s) => s.selectedIds);
-  const duplicateElements = useEditorStore((s) => s.duplicateElements);
+  const undo = useEditorStore(s => s.undo);
+  const redo = useEditorStore(s => s.redo);
+  const copy = useEditorStore(s => s.copy);
+  const paste = useEditorStore(s => s.paste);
+  const cut = useEditorStore(s => s.cut);
+  const selectAll = useEditorStore(s => s.selectAll);
+  const deleteElements = useEditorStore(s => s.deleteElements);
+  const duplicateElements = useEditorStore(s => s.duplicateElements);
 
   // Initialize editor on mount
   useEffect(() => {
@@ -105,7 +115,10 @@ export function LabelStudioEditor({
       }
 
       // Redo: Ctrl+Y or Ctrl+Shift+Z
-      if ((isCtrl && e.key === 'y') || (isCtrl && e.shiftKey && e.key === 'z')) {
+      if (
+        (isCtrl && e.key === 'y') ||
+        (isCtrl && e.shiftKey && e.key === 'z')
+      ) {
         e.preventDefault();
         redo();
         return;
@@ -166,7 +179,18 @@ export function LabelStudioEditor({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [readOnly, selectedIds, undo, redo, copy, paste, cut, selectAll, deleteElements, duplicateElements]);
+  }, [
+    readOnly,
+    selectedIds,
+    undo,
+    redo,
+    copy,
+    paste,
+    cut,
+    selectAll,
+    deleteElements,
+    duplicateElements,
+  ]);
 
   // Handle save
   const handleSave = useCallback(() => {
@@ -183,69 +207,45 @@ export function LabelStudioEditor({
   }, [toJSON]);
 
   return (
-    <div className={cn('flex flex-col h-full bg-neutral-50 dark:bg-neutral-900', className)}>
+    <div
+      className={cn(
+        'flex flex-col h-full bg-neutral-50 dark:bg-neutral-900',
+        className
+      )}
+    >
       {/* Toolbar */}
       {!readOnly && (
-        <MainToolbar
-          onSave={handleSave}
-          onPreview={handlePreview}
-        />
+        <MainToolbar onSave={handleSave} onPreview={handlePreview} />
       )}
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel - Elements (placeholder) */}
+        {/* Left panel - Elements */}
         <div className="w-64 border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto">
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+          <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
+            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Elementos
             </h3>
-            <p className="text-xs text-neutral-500">
-              Arraste elementos para o canvas para criar sua etiqueta.
-            </p>
-            {/* TODO: ElementsPanel component */}
-            <div className="mt-4 space-y-2">
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                Campos de Dados
-              </div>
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                Texto
-              </div>
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                Imagem
-              </div>
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                Código de Barras
-              </div>
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                QR Code
-              </div>
-              <div className="p-2 border border-dashed border-neutral-300 dark:border-neutral-600 rounded text-xs text-center text-neutral-500">
-                Tabela
-              </div>
-            </div>
           </div>
+          <ElementsPanel />
         </div>
 
         {/* Center - Canvas with rulers */}
         <div className="flex-1 relative">
           <Rulers />
           <Canvas className="absolute inset-0 pt-5 pl-5">
-            {/* Elements will be rendered here */}
+            <ElementsLayer zoom={zoom} />
           </Canvas>
         </div>
 
-        {/* Right panel - Properties (placeholder) */}
+        {/* Right panel - Properties */}
         <div className="w-72 border-l border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto">
-          <div className="p-4">
-            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+          <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
+            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Propriedades
             </h3>
-            <p className="text-xs text-neutral-500">
-              Selecione um elemento para editar suas propriedades.
-            </p>
-            {/* TODO: PropertiesPanel component */}
           </div>
+          <PropertiesPanel />
         </div>
       </div>
     </div>

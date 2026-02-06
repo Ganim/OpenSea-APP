@@ -27,3 +27,11 @@ export {
   calculateFitZoom,
   snapToGrid,
 } from './unitConverter';
+
+export {
+  calculateSnap,
+  calculateResizeSnap,
+  calculateDistributionGuides,
+  DEFAULT_SNAP_CONFIG,
+  type SnapConfig,
+} from './snapCalculator';

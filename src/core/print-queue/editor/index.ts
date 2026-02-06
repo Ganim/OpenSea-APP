@@ -65,10 +65,35 @@ export type { SimpleLabelSaveData } from './components/simple-label-editor';
 // ============================================
 
 // Components
-export { LabelStudioEditor, Canvas, Rulers } from './components';
+export {
+  LabelStudioEditor,
+  Canvas,
+  Rulers,
+  SnapGuides,
+  SelectionBox,
+  ElementWrapper,
+  ElementsLayer,
+} from './components';
+
+// Element Renderers
+export {
+  ElementRenderer,
+  TextElementRenderer,
+  ShapeElementRenderer,
+  LineElementRenderer,
+  ArrowElementRenderer,
+  ImageElementRenderer,
+  IconElementRenderer,
+  ICON_CATEGORIES,
+  getAvailableIcons,
+  searchIcons,
+} from './elements';
 
 // Toolbar
 export { MainToolbar } from './toolbar';
+
+// Panels
+export { ElementsPanel, PropertiesPanel } from './panels';
 
 // Stores
 export { useEditorStore, editorSelectors } from './stores';
@@ -81,6 +106,9 @@ export {
   pxToMmRounded,
   calculateFitZoom,
   snapToGrid,
+  calculateSnap,
+  calculateResizeSnap,
+  DEFAULT_SNAP_CONFIG,
   PAPER_SIZES,
   ZOOM_LEVELS,
 } from './utils';

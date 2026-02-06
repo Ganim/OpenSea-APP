@@ -8,6 +8,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { mmToPx, pxToMm, calculateFitZoom } from '../utils/unitConverter';
+import { SnapGuides, CenterGuides } from './SnapGuides';
 import { cn } from '@/lib/utils';
 
 interface CanvasProps {
@@ -23,28 +24,30 @@ export function Canvas({ className, children }: CanvasProps) {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   // Store state
-  const canvasWidth = useEditorStore((s) => s.canvasWidth);
-  const canvasHeight = useEditorStore((s) => s.canvasHeight);
-  const canvasConfig = useEditorStore((s) => s.canvasConfig);
-  const zoom = useEditorStore((s) => s.zoom);
-  const panOffset = useEditorStore((s) => s.panOffset);
-  const showGrid = useEditorStore((s) => s.showGrid);
-  const gridSize = useEditorStore((s) => s.gridSize);
-  const isPanning = useEditorStore((s) => s.isPanning);
-  const selectedIds = useEditorStore((s) => s.selectedIds);
+  const canvasWidth = useEditorStore(s => s.canvasWidth);
+  const canvasHeight = useEditorStore(s => s.canvasHeight);
+  const canvasConfig = useEditorStore(s => s.canvasConfig);
+  const zoom = useEditorStore(s => s.zoom);
+  const panOffset = useEditorStore(s => s.panOffset);
+  const showGrid = useEditorStore(s => s.showGrid);
+  const gridSize = useEditorStore(s => s.gridSize);
+  const isPanning = useEditorStore(s => s.isPanning);
+  const selectedIds = useEditorStore(s => s.selectedIds);
+  const activeSnapGuides = useEditorStore(s => s.activeSnapGuides);
+  const snapEnabled = useEditorStore(s => s.snapEnabled);
 
   // Store actions
-  const setZoom = useEditorStore((s) => s.setZoom);
-  const setPanOffset = useEditorStore((s) => s.setPanOffset);
-  const setPanning = useEditorStore((s) => s.setPanning);
-  const clearSelection = useEditorStore((s) => s.clearSelection);
-  const fitToScreen = useEditorStore((s) => s.fitToScreen);
+  const setZoom = useEditorStore(s => s.setZoom);
+  const setPanOffset = useEditorStore(s => s.setPanOffset);
+  const setPanning = useEditorStore(s => s.setPanning);
+  const clearSelection = useEditorStore(s => s.clearSelection);
+  const fitToScreen = useEditorStore(s => s.fitToScreen);
 
   // Observe container size
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const observer = new ResizeObserver((entries) => {
+    const observer = new ResizeObserver(entries => {
       const entry = entries[0];
       if (entry) {
         setContainerSize({
@@ -229,6 +232,14 @@ export function Canvas({ className, children }: CanvasProps) {
           {/* Grid */}
           {renderGrid()}
 
+          {/* Guias de centro (sutis) */}
+          <CenterGuides
+            show={snapEnabled}
+            zoom={zoom}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+          />
+
           {/* Margins (if enabled) */}
           {canvasConfig.showMargins && canvasConfig.margins && (
             <div
@@ -243,15 +254,23 @@ export function Canvas({ className, children }: CanvasProps) {
           )}
 
           {/* Elements container */}
-          <div className="absolute inset-0">
-            {children}
-          </div>
+          <div className="absolute inset-0">{children}</div>
+
+          {/* Snap guides (renderiza por cima dos elementos) */}
+          <SnapGuides
+            guides={activeSnapGuides}
+            zoom={zoom}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+          />
         </div>
       </div>
 
       {/* Canvas info overlay */}
       <div className="absolute bottom-2 left-2 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 bg-white/80 dark:bg-neutral-800/80 px-2 py-1 rounded">
-        <span>{canvasWidth} × {canvasHeight} mm</span>
+        <span>
+          {canvasWidth} × {canvasHeight} mm
+        </span>
         <span className="text-neutral-300 dark:text-neutral-600">|</span>
         <span>{Math.round(zoom * 100)}%</span>
       </div>
