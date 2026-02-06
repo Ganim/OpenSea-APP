@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { itemsConfig } from '@/config/entities/items.config';
-import { EntityGrid, UniversalCard } from '@/core';
+import { EntityCard, EntityGrid } from '@/core';
 import { itemsService } from '@/services/stock';
 import type { Item, Variant } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
@@ -75,13 +75,13 @@ export function VariantDetailModal({
     };
 
     return (
-      <UniversalCard
+      <EntityCard
         id={item.id}
         variant="grid"
         title={item.uniqueCode || `Item ${item.id}`}
         subtitle={item.batchNumber || 'Sem lote'}
         icon={Box}
-        iconBgColor="bg-linear-to-br from-teal-500 to-cyan-600"
+        iconBgColor="bg-gradient-to-br from-teal-500 to-cyan-600"
         badges={[
           {
             label: statusLabels[item.status] || item.status,
@@ -119,13 +119,13 @@ export function VariantDetailModal({
     };
 
     return (
-      <UniversalCard
+      <EntityCard
         id={item.id}
         variant="list"
         title={item.uniqueCode || `Item ${item.id}`}
         subtitle={item.batchNumber || 'Sem lote'}
         icon={Box}
-        iconBgColor="bg-linear-to-br from-teal-500 to-cyan-600"
+        iconBgColor="bg-gradient-to-br from-teal-500 to-cyan-600"
         badges={[
           {
             label: statusLabels[item.status] || item.status,
@@ -153,7 +153,7 @@ export function VariantDetailModal({
       <DialogContent className=" max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-12 h-12 rounded-lg bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
               <Palette className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">

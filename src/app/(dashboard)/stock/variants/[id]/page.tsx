@@ -18,8 +18,8 @@ import { Input } from '@/components/ui/input';
 import { itemsConfig } from '@/config/entities/items.config';
 import {
   ConfirmDialog,
+  EntityCard,
   EntityGrid,
-  UniversalCard,
   useEntityCrud,
 } from '@/core';
 import { variantsService } from '@/services/stock';
@@ -197,13 +197,13 @@ export default function VariantDetailPage() {
   // ============================================================================
 
   const renderGridCard = (item: any, isSelected: boolean) => (
-    <UniversalCard
+    <EntityCard
       id={item.id}
       variant="grid"
       title={item.name}
       subtitle={item.code || 'Sem código'}
       icon={Box}
-      iconBgColor="bg-linear-to-br from-orange-500 to-amber-500"
+      iconBgColor="bg-gradient-to-br from-orange-500 to-amber-500"
       badges={[
         {
           label: item.barcode ? `${item.barcode}` : 'Sem código de barras',
@@ -223,13 +223,13 @@ export default function VariantDetailPage() {
   );
 
   const renderListCard = (item: any, isSelected: boolean) => (
-    <UniversalCard
+    <EntityCard
       id={item.id}
       variant="list"
       title={item.name}
       subtitle={item.code || 'Sem código'}
       icon={Box}
-      iconBgColor="bg-linear-to-br from-orange-500 to-amber-500"
+      iconBgColor="bg-gradient-to-br from-orange-500 to-amber-500"
       badges={[
         {
           label: item.barcode ? `${item.barcode}` : 'Sem código de barras',
@@ -327,7 +327,7 @@ export default function VariantDetailPage() {
       {/* Variant Metadata Card */}
       <Card className="p-6">
         <div className="flex items-start gap-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-linear-to-br from-purple-500 to-pink-500">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
             <Box className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -51,7 +51,7 @@ export function QueueItemCard({
       )}
 
       {/* Item Icon */}
-      <div className="w-12 h-12 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
+      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
         <Package className="w-6 h-6 text-white" />
       </div>
 

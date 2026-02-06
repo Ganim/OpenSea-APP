@@ -57,15 +57,6 @@ import {
 } from './src';
 import { createCompanyFromBrasilAPI } from './src/utils/create-from-brasilapi';
 
-// Funcao auxiliar para truncar texto
-const truncateText = (
-  text: string | null | undefined,
-  maxLength: number = 15
-): string => {
-  if (!text) return '—';
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-};
-
 export default function CompaniesPage() {
   const router = useRouter();
   const [isCnpjModalOpen, setIsCnpjModalOpen] = useState(false);
@@ -208,7 +199,7 @@ export default function CompaniesPage() {
         <EntityCard
           id={item.id}
           variant="grid"
-          title={truncateText(item.tradeName, 15)}
+          title={item.tradeName || '—'}
           subtitle={formatCNPJ(item.cnpj)}
           icon={Building2}
           iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"

@@ -23,10 +23,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
   type ContextMenuAction,
@@ -298,13 +298,13 @@ export default function UsersPage() {
         onDelete={handleContextDelete}
         actions={customActions}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.username || 'N/A'}
           subtitle={item.email || 'sem email'}
           icon={Users}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           metadata={
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {item.profile?.name && (
@@ -347,13 +347,13 @@ export default function UsersPage() {
         onDelete={handleContextDelete}
         actions={customActions}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.username || 'N/A'}
           subtitle={item.email || 'sem email'}
           icon={Users}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
           metadata={
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {item.profile?.name && (

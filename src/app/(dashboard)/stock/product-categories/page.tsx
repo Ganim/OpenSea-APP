@@ -14,10 +14,10 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { categoriesConfig } from '@/config/entities/categories.config';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
@@ -141,7 +141,7 @@ export default function ProductCategoriesPage() {
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
@@ -150,7 +150,7 @@ export default function ProductCategoriesPage() {
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-6 h-6 text-white" />
           }
-          iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-purple-600"
           badges={[
             {
               label: item.isActive ? 'Ativa' : 'Inativa',
@@ -171,7 +171,7 @@ export default function ProductCategoriesPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 h-10">
             {item.description || 'Sem descrição'}
           </p>
-        </UniversalCard>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -184,7 +184,7 @@ export default function ProductCategoriesPage() {
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
@@ -193,7 +193,7 @@ export default function ProductCategoriesPage() {
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-5 h-5 text-white" />
           }
-          iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-purple-600"
           badges={[
             {
               label: item.isActive ? 'Ativa' : 'Inativa',
@@ -214,7 +214,7 @@ export default function ProductCategoriesPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {item.description || 'Sem descrição'}
           </p>
-        </UniversalCard>
+        </EntityCard>
       </EntityContextMenu>
     );
   };

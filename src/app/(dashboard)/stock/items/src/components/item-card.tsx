@@ -62,7 +62,7 @@ export function ItemGridCard({ item, isSelected = false }: ItemCardProps) {
             'w-10 h-10 rounded-lg flex items-center justify-center text-white',
             isSelected
               ? 'bg-primary'
-              : 'bg-linear-to-br from-teal-500 to-cyan-600'
+              : 'bg-gradient-to-br from-teal-500 to-cyan-600'
           )}
         >
           <Box className="w-5 h-5" />
@@ -194,7 +194,7 @@ export function ItemListCard({ item, isSelected = false }: ItemCardProps) {
             'w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0',
             isSelected
               ? 'bg-primary'
-              : 'bg-linear-to-br from-teal-500 to-cyan-600'
+              : 'bg-gradient-to-br from-teal-500 to-cyan-600'
           )}
         >
           <Box className="w-5 h-5" />

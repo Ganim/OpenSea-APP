@@ -17,12 +17,6 @@ import {
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   CoreProvider,
   EntityCard,
   EntityContextMenu,
@@ -66,26 +60,6 @@ import {
   updateManufacturer,
   ViewModal,
 } from './src';
-
-const MAX_NAME_LENGTH = 18;
-
-/**
- * Get the display name for a manufacturer
- * Returns uppercase and truncated version
- */
-function getDisplayName(manufacturer: Manufacturer): {
-  displayName: string;
-  fullName: string;
-  isTruncated: boolean;
-} {
-  const fullName = (manufacturer.name || '').toUpperCase();
-  const isTruncated = fullName.length > MAX_NAME_LENGTH;
-  const displayName = isTruncated
-    ? `${fullName.slice(0, MAX_NAME_LENGTH)}...`
-    : fullName;
-
-  return { displayName, fullName, isTruncated };
-}
 
 export default function ManufacturersPage() {
   const router = useRouter();
@@ -292,10 +266,9 @@ export default function ManufacturersPage() {
   );
 
   const renderGridCard = (item: Manufacturer, isSelected: boolean) => {
-    const { displayName, fullName, isTruncated } = getDisplayName(item);
     const productCount = productCountMap.get(item.id) || 0;
 
-    const cardContent = (
+    return (
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
@@ -307,7 +280,7 @@ export default function ManufacturersPage() {
         <EntityCard
           id={item.id}
           variant="grid"
-          title={displayName}
+          title={(item.name || '').toUpperCase()}
           subtitle={item.country || '—'}
           icon={Factory}
           iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
@@ -369,29 +342,12 @@ export default function ManufacturersPage() {
         />
       </EntityContextMenu>
     );
-
-    // Wrap in tooltip if name is truncated
-    if (isTruncated) {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="font-medium">{fullName}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
-
-    return cardContent;
   };
 
   const renderListCard = (item: Manufacturer, isSelected: boolean) => {
-    const { displayName, fullName, isTruncated } = getDisplayName(item);
     const productCount = productCountMap.get(item.id) || 0;
 
-    const cardContent = (
+    return (
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
@@ -403,7 +359,7 @@ export default function ManufacturersPage() {
         <EntityCard
           id={item.id}
           variant="list"
-          title={displayName}
+          title={(item.name || '').toUpperCase()}
           subtitle={item.country || '—'}
           icon={Factory}
           iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
@@ -465,22 +421,6 @@ export default function ManufacturersPage() {
         />
       </EntityContextMenu>
     );
-
-    // Wrap in tooltip if name is truncated
-    if (isTruncated) {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="font-medium">{fullName}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
-
-    return cardContent;
   };
 
   // ============================================================================

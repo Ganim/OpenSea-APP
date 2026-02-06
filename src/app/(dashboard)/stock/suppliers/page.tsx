@@ -18,10 +18,10 @@ import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
@@ -225,13 +225,13 @@ export default function SuppliersPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={item.cnpj || '-'}
           icon={Truck}
-          iconBgColor="bg-linear-to-br from-amber-500 to-orange-600"
+          iconBgColor="bg-gradient-to-br from-amber-500 to-orange-600"
           badges={[
             ...(item.rating
               ? [
@@ -301,13 +301,13 @@ export default function SuppliersPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={item.cnpj || '-'}
           icon={Truck}
-          iconBgColor="bg-linear-to-br from-amber-500 to-orange-600"
+          iconBgColor="bg-gradient-to-br from-amber-500 to-orange-600"
           badges={[
             ...(item.rating
               ? [

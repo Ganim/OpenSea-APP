@@ -18,10 +18,10 @@ import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
@@ -138,13 +138,13 @@ export default function TagsPage() {
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={item.description || 'Sem descrição'}
           icon={TagIcon}
-          iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
           badges={[
             {
               label: isActive ? 'Ativa' : 'Inativa',
@@ -171,13 +171,13 @@ export default function TagsPage() {
         onEdit={handleContextEdit}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={item.description || 'Sem descrição'}
           icon={TagIcon}
-          iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
           badges={[
             {
               label: isActive ? 'Ativa' : 'Inativa',

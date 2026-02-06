@@ -25,10 +25,10 @@ import {
 import {
   ConfirmDialog,
   CoreProvider,
+  EntityCard,
   EntityForm,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
@@ -113,13 +113,13 @@ export default function VariantsPage() {
 
   const renderGridCard = (item: Variant, isSelected: boolean) => {
     return (
-      <UniversalCard
+      <EntityCard
         id={item.id}
         variant="grid"
         title={item.name}
         subtitle={item.sku}
         icon={Palette}
-        iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
         badges={[
           {
             label: `R$ ${Number(item.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -158,13 +158,13 @@ export default function VariantsPage() {
 
   const renderListCard = (item: Variant, isSelected: boolean) => {
     return (
-      <UniversalCard
+      <EntityCard
         id={item.id}
         variant="list"
         title={item.name}
         subtitle={item.sku}
         icon={Palette}
-        iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
         badges={[
           {
             label: `R$ ${Number(item.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,

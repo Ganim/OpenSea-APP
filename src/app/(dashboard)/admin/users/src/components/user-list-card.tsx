@@ -5,7 +5,7 @@
 
 'use client';
 
-import { UniversalCard } from '@/core';
+import { EntityCard } from '@/core';
 import { Calendar, UserCircle } from 'lucide-react';
 import type { UserListCardProps } from '../types/users.types';
 import { formatLastLogin, getFullName } from '../utils';
@@ -20,13 +20,13 @@ export function UserListCard({
   const fullName = getFullName(user);
 
   return (
-    <UniversalCard
+    <EntityCard
       id={user.id}
       variant="list"
       title={user.username}
       subtitle={user.email}
       icon={UserCircle}
-      iconBgColor="bg-linear-to-br from-green-500 to-teal-600"
+      iconBgColor="bg-gradient-to-br from-green-500 to-teal-600"
       metadata={
         <div className="flex items-center gap-4 text-xs">
           {fullName && <span>{fullName}</span>}

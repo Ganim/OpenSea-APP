@@ -13,6 +13,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { ChevronRight, LucideIcon, RefreshCw, Sparkles } from 'lucide-react';
 import Image from 'next/image';
@@ -253,7 +258,7 @@ function IconRenderer({
       <div
         className={cn(
           sizeClasses[variant],
-          'overflow-hidden shrink-0 flex items-center justify-center',
+          'overflow-hidden shrink-0 flex items-center justify-center p-2',
           bgColor
         )}
       >
@@ -262,7 +267,7 @@ function IconRenderer({
           alt={title}
           width={variant === 'grid' ? 48 : variant === 'list' ? 40 : 32}
           height={variant === 'grid' ? 48 : variant === 'list' ? 40 : 32}
-          className="object-cover"
+          className="w-full h-full object-contain brightness-0 invert"
         />
       </div>
     );
@@ -277,7 +282,9 @@ function IconRenderer({
           bgColor
         )}
       >
-        <Icon className={innerSizeClasses[variant]} />
+        <Icon
+          className={cn(innerSizeClasses[variant], 'brightness-0 invert')}
+        />
       </div>
     );
   }
@@ -291,7 +298,9 @@ function IconRenderer({
           bgColor
         )}
       >
-        {thumbnailFallback}
+        <div className="flex items-center justify-center brightness-0 invert">
+          {thumbnailFallback}
+        </div>
       </div>
     );
   }
@@ -573,13 +582,20 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
                   isSelected={isSelected}
                 />
                 <div className="min-w-0 flex-1">
-                  {/* Title - truncated to single line */}
-                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white truncate">
-                    {title}
-                  </h3>
-                  {/* Subtitle - max 2 lines */}
+                  {/* Title - truncated to single line, tooltip on hover */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white truncate">
+                        {title}
+                      </h3>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      {title}
+                    </TooltipContent>
+                  </Tooltip>
+                  {/* Subtitle - truncated */}
                   {subtitle && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                       {subtitle}
                     </p>
                   )}
@@ -633,10 +649,15 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
                 isSelected={isSelected}
               />
               <div className="flex-1 min-w-0">
-                {/* Title - truncated */}
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                  {title}
-                </h3>
+                {/* Title - truncated, tooltip on hover */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                      {title}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">{title}</TooltipContent>
+                </Tooltip>
                 {/* Subtitle - truncated */}
                 {subtitle && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
@@ -687,10 +708,15 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
             isSelected={isSelected}
           />
           <div className="flex-1 min-w-0">
-            {/* Title - truncated */}
-            <h3 className="font-medium text-gray-900 dark:text-white truncate">
-              {title}
-            </h3>
+            {/* Title - truncated, tooltip on hover */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                  {title}
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">{title}</TooltipContent>
+            </Tooltip>
             {/* Subtitle - truncated */}
             {subtitle && (
               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">

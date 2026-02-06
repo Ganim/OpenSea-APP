@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { variantsConfig } from '@/config/entities/variants.config';
-import { EntityGrid, UniversalCard } from '@/core';
+import { EntityCard, EntityGrid } from '@/core';
 import { variantsService } from '@/services/stock';
 import type { Product, Variant } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
@@ -72,13 +72,13 @@ export function ProductDetailModal({
 
   const renderVariantCard = (variant: Variant) => {
     return (
-      <UniversalCard
+      <EntityCard
         id={variant.id}
         variant="grid"
         title={variant.name}
         subtitle={variant.sku}
         icon={Palette}
-        iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
         badges={[
           {
             label: `R$ ${Number(variant.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -102,13 +102,13 @@ export function ProductDetailModal({
 
   const renderVariantListCard = (variant: Variant) => {
     return (
-      <UniversalCard
+      <EntityCard
         id={variant.id}
         variant="list"
         title={variant.name}
         subtitle={variant.sku}
         icon={Palette}
-        iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
+        iconBgColor="bg-gradient-to-br from-violet-500 to-purple-600"
         badges={[
           {
             label: `R$ ${Number(variant.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -145,7 +145,7 @@ export function ProductDetailModal({
       <DialogContent className=" max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-12 h-12 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <div className="shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">

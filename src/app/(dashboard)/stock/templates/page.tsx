@@ -19,10 +19,10 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { MultiViewModal } from '@/components/stock/multi-view-modal';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
   type SortDirection,
@@ -219,43 +219,30 @@ export default function TemplatesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
           subtitle={`${attributesCount} atributos definidos`}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-6 h-6 text-white" />}
-          iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
           badges={[
             { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                {productsCount} produtos usando este template
-              </span>
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          }
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        />
+        >
+          <div className="flex items-center gap-4 text-xs">
+            <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+              {productsCount} produtos usando este template
+            </span>
+          </div>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -275,43 +262,28 @@ export default function TemplatesPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
           subtitle={`${attributesCount} atributos definidos`}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-5 h-5 text-white" />}
-          iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
+          iconBgColor="bg-gradient-to-br from-purple-500 to-pink-600"
           badges={[
             { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
           ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                {productsCount} produtos usando este template
-              </span>
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          }
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        />
+        >
+          <span className="text-xs text-gray-600 dark:text-gray-400">
+            {productsCount} produtos usando este template
+          </span>
+        </EntityCard>
       </EntityContextMenu>
     );
   };

@@ -22,10 +22,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   CoreProvider,
+  EntityCard,
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  UniversalCard,
   useEntityCrud,
   useEntityPage,
 } from '@/core';
@@ -158,14 +158,14 @@ export default function PermissionGroupsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name || 'N/A'}
           subtitle={item.description || 'Sem descrição'}
           icon={Shield}
           iconBgColor={
-            item.color || 'bg-linear-to-br from-purple-500 to-pink-600'
+            item.color || 'bg-gradient-to-br from-purple-500 to-pink-600'
           }
           badges={[
             {
@@ -217,14 +217,14 @@ export default function PermissionGroupsPage() {
         onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name || 'N/A'}
           subtitle={item.description || 'Sem descrição'}
           icon={Shield}
           iconBgColor={
-            item.color || 'bg-linear-to-br from-purple-500 to-pink-600'
+            item.color || 'bg-gradient-to-br from-purple-500 to-pink-600'
           }
           badges={[
             {

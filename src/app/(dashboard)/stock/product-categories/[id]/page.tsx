@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EntityContextMenu, EntityGrid, UniversalCard } from '@/core';
+import { EntityCard, EntityContextMenu, EntityGrid } from '@/core';
 import { categoriesConfig } from '@/config/entities/categories.config';
 import { useCategories, useCategory } from '@/hooks/stock/use-categories';
 import type { Category } from '@/types/stock';
@@ -95,7 +95,7 @@ export default function ProductCategoryDetailPage() {
             router.push(`/stock/product-categories/${ids[0]}/edit`);
         }}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="grid"
           title={item.name}
@@ -104,7 +104,7 @@ export default function ProductCategoryDetailPage() {
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-6 h-6 text-white" />
           }
-          iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-purple-600"
           badges={[
             {
               label: item.isActive ? 'Ativa' : 'Inativa',
@@ -119,7 +119,7 @@ export default function ProductCategoryDetailPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 h-10">
             {item.description || 'Sem descrição'}
           </p>
-        </UniversalCard>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -137,7 +137,7 @@ export default function ProductCategoryDetailPage() {
             router.push(`/stock/product-categories/${ids[0]}/edit`);
         }}
       >
-        <UniversalCard
+        <EntityCard
           id={item.id}
           variant="list"
           title={item.name}
@@ -146,7 +146,7 @@ export default function ProductCategoryDetailPage() {
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-5 h-5 text-white" />
           }
-          iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
+          iconBgColor="bg-gradient-to-br from-blue-500 to-purple-600"
           badges={[
             {
               label: item.isActive ? 'Ativa' : 'Inativa',
@@ -161,7 +161,7 @@ export default function ProductCategoryDetailPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {item.description || 'Sem descrição'}
           </p>
-        </UniversalCard>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -232,7 +232,7 @@ export default function ProductCategoryDetailPage() {
       <div className="max-w-8xl mx-auto space-y-6">
         {/* Category Identity */}
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 overflow-hidden">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
             {category.iconUrl ? (
               <img
                 src={category.iconUrl}
@@ -342,7 +342,7 @@ export default function ProductCategoryDetailPage() {
                       Ícone
                     </h3>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 overflow-hidden">
                         <img
                           src={category.iconUrl}
                           alt="Ícone"
