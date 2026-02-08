@@ -135,7 +135,10 @@ export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
                   {previewMode === 'label' ? (
                     <LabelPreview
                       templateId={state.selectedTemplateId}
+                      dimensions={state.selectedTemplateDimensions}
                       scale={3}
+                      maxWidth={400}
+                      maxHeight={260}
                     />
                   ) : (
                     <PagePreview containerWidth={280} containerHeight={280} />

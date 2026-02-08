@@ -475,3 +475,28 @@ export interface CreateCompanyStakeholderData {
 
 export type UpdateCompanyStakeholderData =
   Partial<CreateCompanyStakeholderData>;
+
+// ----------------------------------------------------------------------------
+// Employee Label Data (for print queue / label system)
+// ----------------------------------------------------------------------------
+
+export interface EmployeeLabelData {
+  employee: {
+    id: string;
+    registrationNumber: string;
+    fullName: string;
+    socialName: string | null;
+    cpf: string;
+    hireDate: string;
+    status: string;
+    photoUrl: string | null;
+  };
+  department: { id: string; name: string } | null;
+  position: { id: string; name: string } | null;
+  company: { id: string; name: string; cnpj: string | null } | null;
+  tenant: { id: string; name: string };
+}
+
+export interface EmployeeLabelDataResponse {
+  labelData: EmployeeLabelData[];
+}

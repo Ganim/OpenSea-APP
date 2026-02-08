@@ -1,17 +1,25 @@
 /**
  * Use Queue Printing Hook
  * Hook para gerenciar a geração de PDF e impressão da fila
+ * Suporte multi-entidade: stock items e employees
  */
 
 'use client';
 
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { SYSTEM_LABEL_TEMPLATES } from '../constants';
+import { SYSTEM_LABEL_TEMPLATES, LABEL_AVAILABLE_FIELDS } from '../constants';
 import { usePrintQueue } from '../context/print-queue-context';
-import type { LabelData, PrintGenerationStatus } from '../types';
+import type { LabelData, LabelTemplateDefinition, PrintGenerationStatus, PrintQueueStockItem, PrintQueueEmployeeItem } from '../types';
 import { calculateLayout } from '../utils/page-layout-calculator';
-import { resolveLabelData } from '../utils/label-data-resolver';
+import { resolveLabelData, resolveLabelDataFromPresenter, labelDataToPreviewData, itemLabelDataToPreviewData, employeeLabelDataToPreviewData } from '../utils/label-data-resolver';
+import { parseStudioTemplate } from '../components/studio-label-renderer';
+import { renderStudioTemplateToPdf } from '../utils/studio-pdf-renderer';
+import { labelTemplatesService } from '@/services/stock/label-templates.service';
+import { itemsService } from '@/services/stock/items.service';
+import { employeesService } from '@/services/hr/employees.service';
+import type { ItemLabelData } from '@/types/stock';
+import type { EmployeeLabelData } from '@/types/hr';
 
 interface UseQueuePrintingResult {
   /** Status da geração */
@@ -51,9 +59,21 @@ export function useQueuePrinting(): UseQueuePrintingResult {
       return null;
     }
 
-    const template = SYSTEM_LABEL_TEMPLATES.find(
+    let template: LabelTemplateDefinition | undefined = SYSTEM_LABEL_TEMPLATES.find(
       t => t.id === state.selectedTemplateId
     );
+
+    // Fallback to stored dimensions for API templates
+    if (!template && state.selectedTemplateDimensions) {
+      template = {
+        id: state.selectedTemplateId,
+        name: '',
+        dimensions: state.selectedTemplateDimensions,
+        isSystem: false,
+        availableFields: LABEL_AVAILABLE_FIELDS,
+        createdAt: new Date(),
+      };
+    }
 
     if (!template) {
       toast.error('Template nao encontrado');
@@ -65,88 +85,294 @@ export function useQueuePrinting(): UseQueuePrintingResult {
     setError(null);
 
     try {
-      // 1. Resolver dados das etiquetas
+      // 1. Try to fetch Studio template from API (for non-system templates)
+      setProgress(5);
+      let studioTemplateData = null;
+      const isSystemTemplate = SYSTEM_LABEL_TEMPLATES.some(t => t.id === state.selectedTemplateId);
+
+      if (!isSystemTemplate) {
+        try {
+          const response = await labelTemplatesService.getTemplate(state.selectedTemplateId);
+          studioTemplateData = parseStudioTemplate(response.template.grapesJsData);
+        } catch (e) {
+          console.warn('Could not fetch template detail, using legacy renderer:', e);
+        }
+      }
+
+      // 2. Separar itens por tipo de entidade
       setProgress(10);
-      const labelDataList: LabelData[] = [];
+      const stockItems = state.items.filter((qi): qi is PrintQueueStockItem => qi.entityType === 'stock-item');
+      const employeeItems = state.items.filter((qi): qi is PrintQueueEmployeeItem => qi.entityType === 'employee');
 
-      for (const queueItem of state.items) {
-        const data = resolveLabelData(
-          queueItem.item,
-          queueItem.variant,
-          queueItem.product
-        );
-        // Adicionar cópias
-        for (let i = 0; i < queueItem.copies; i++) {
-          labelDataList.push(data);
+      // 3. Buscar dados do presenter para cada tipo
+      let stockLabelDataMap = new Map<string, ItemLabelData>();
+      let employeeLabelDataMap = new Map<string, EmployeeLabelData>();
+
+      // Fetch stock item label data
+      if (stockItems.length > 0) {
+        const stockIds = [...new Set(stockItems.map(qi => qi.item.id))];
+        try {
+          const response = await itemsService.getLabelData(stockIds);
+          for (const ld of response.labelData) {
+            stockLabelDataMap.set(ld.item.id, ld);
+          }
+        } catch (e) {
+          console.warn('[print] Stock label data presenter failed, falling back to legacy:', e);
         }
       }
 
-      setProgress(30);
-
-      // 2. Calcular layout
-      const layout = calculateLayout(
-        labelDataList,
-        template,
-        state.pageSettings
-      );
-
-      setProgress(50);
-
-      // 3. Gerar PDF usando jsPDF
-      const { jsPDF } = await import('jspdf');
-      const JsBarcode = (await import('jsbarcode')).default;
-      const QRCode = await import('qrcode');
-
-      const doc = new jsPDF({
-        orientation: state.pageSettings.orientation,
-        unit: 'mm',
-        format:
-          state.pageSettings.paperSize === 'CUSTOM'
-            ? [
-                state.pageSettings.customDimensions?.width || 210,
-                state.pageSettings.customDimensions?.height || 297,
-              ]
-            : state.pageSettings.paperSize.toLowerCase(),
-      });
-
-      setProgress(60);
-
-      // 4. Renderizar cada página
-      for (let pageIndex = 0; pageIndex < layout.pages.length; pageIndex++) {
-        if (pageIndex > 0) {
-          doc.addPage();
+      // Fetch employee label data
+      if (employeeItems.length > 0) {
+        const empIds = [...new Set(employeeItems.map(qi => qi.employee.id))];
+        try {
+          const response = await employeesService.getLabelData(empIds);
+          for (const ld of response.labelData) {
+            employeeLabelDataMap.set(ld.employee.id, ld);
+          }
+        } catch (e) {
+          console.warn('[print] Employee label data presenter failed:', e);
         }
-
-        const page = layout.pages[pageIndex];
-
-        for (const { position, data } of page.labels) {
-          // Desenhar borda da etiqueta (opcional, para debug)
-          // doc.rect(position.x, position.y, position.width, position.height);
-
-          // Desenhar conteúdo da etiqueta
-          await renderLabelToPdf(
-            doc,
-            data,
-            position,
-            template,
-            JsBarcode,
-            QRCode
-          );
-        }
-
-        // Atualizar progresso
-        setProgress(60 + Math.round((pageIndex / layout.pages.length) * 30));
       }
 
-      setProgress(95);
+      setProgress(20);
 
-      // 5. Converter para blob
-      const blob = doc.output('blob');
+      // 4. Montar previewData para todos os items (studio path)
+      if (studioTemplateData) {
+        const previewDataList: Array<{ previewData: Record<string, unknown>; copies: number; entityId: string }> = [];
 
-      setProgress(100);
-      setStatus('success');
+        // Stock items
+        for (const queueItem of stockItems) {
+          const ld = stockLabelDataMap.get(queueItem.item.id);
+          if (ld) {
+            previewDataList.push({
+              previewData: itemLabelDataToPreviewData(ld),
+              copies: queueItem.copies,
+              entityId: queueItem.item.id,
+            });
+          } else {
+            const data = resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+            previewDataList.push({
+              previewData: labelDataToPreviewData(data),
+              copies: queueItem.copies,
+              entityId: queueItem.item.id,
+            });
+          }
+        }
 
-      return blob;
+        // Employee items
+        for (const queueItem of employeeItems) {
+          const ld = employeeLabelDataMap.get(queueItem.employee.id);
+          if (ld) {
+            previewDataList.push({
+              previewData: employeeLabelDataToPreviewData(ld),
+              copies: queueItem.copies,
+              entityId: queueItem.employee.id,
+            });
+          }
+        }
+
+        // Build flat LabelData list for layout calculator (uses stock-item defaults for employees as placeholder)
+        const labelDataList: LabelData[] = [];
+        for (const queueItem of stockItems) {
+          const ld = stockLabelDataMap.get(queueItem.item.id);
+          const data = ld
+            ? resolveLabelDataFromPresenter(ld)
+            : resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+          for (let i = 0; i < queueItem.copies; i++) {
+            labelDataList.push(data);
+          }
+        }
+        // For employees, create placeholder LabelData for layout calculation
+        for (const queueItem of employeeItems) {
+          const ld = employeeLabelDataMap.get(queueItem.employee.id);
+          const placeholderData: LabelData = {
+            manufacturerName: '',
+            stockLocation: '',
+            productName: ld ? (ld.employee.socialName || ld.employee.fullName) : queueItem.employee.fullName,
+            productCode: '',
+            variantName: '',
+            variantCode: '',
+            itemCode: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            itemUid: queueItem.employee.id,
+            itemId: queueItem.employee.id,
+            itemQuantity: 0,
+            itemUnitOfMeasure: '',
+            productVariantName: '',
+            referenceVariantName: '',
+            productAttributes: {},
+            variantAttributes: {},
+            itemAttributes: {},
+            barcodeData: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            qrCodeData: queueItem.employee.id,
+          };
+          for (let i = 0; i < queueItem.copies; i++) {
+            labelDataList.push(placeholderData);
+          }
+        }
+
+        setProgress(30);
+
+        // 5. Calcular layout
+        const layout = calculateLayout(labelDataList, template, state.pageSettings);
+        setProgress(50);
+
+        // 6. Gerar PDF usando jsPDF
+        const { jsPDF } = await import('jspdf');
+        const JsBarcode = (await import('jsbarcode')).default;
+        const QRCode = await import('qrcode');
+
+        const doc = new jsPDF({
+          orientation: state.pageSettings.orientation,
+          unit: 'mm',
+          format:
+            state.pageSettings.paperSize === 'CUSTOM'
+              ? [
+                  state.pageSettings.customDimensions?.width || 210,
+                  state.pageSettings.customDimensions?.height || 297,
+                ]
+              : state.pageSettings.paperSize.toLowerCase(),
+        });
+
+        setProgress(60);
+
+        // Build a map from entity ID to previewData for quick lookup
+        const previewDataByEntityId = new Map<string, Record<string, unknown>>();
+        for (const { previewData, entityId } of previewDataList) {
+          previewDataByEntityId.set(entityId, previewData);
+        }
+
+        // 7. Renderizar cada página - studio path
+        for (let pageIndex = 0; pageIndex < layout.pages.length; pageIndex++) {
+          if (pageIndex > 0) doc.addPage();
+
+          const page = layout.pages[pageIndex];
+
+          for (const { position, data } of page.labels) {
+            // Find matching previewData by item ID (itemId stores entityId for employees too)
+            const previewData = previewDataByEntityId.get(data.itemId) || labelDataToPreviewData(data);
+
+            await renderStudioTemplateToPdf(
+              doc,
+              studioTemplateData,
+              previewData,
+              position.x,
+              position.y,
+              JsBarcode,
+              QRCode
+            );
+          }
+
+          setProgress(60 + Math.round((pageIndex / layout.pages.length) * 30));
+        }
+
+        setProgress(95);
+        const blob = doc.output('blob');
+
+        setProgress(100);
+        setStatus('success');
+        return blob;
+
+      } else {
+        // === LEGACY PATH (system templates or presenter failed) ===
+        // Note: Legacy path only handles stock items meaningfully
+        const labelDataList: LabelData[] = [];
+
+        for (const queueItem of stockItems) {
+          const ld = stockLabelDataMap.get(queueItem.item.id);
+          const data = ld
+            ? resolveLabelDataFromPresenter(ld)
+            : resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+          for (let i = 0; i < queueItem.copies; i++) {
+            labelDataList.push(data);
+          }
+        }
+
+        // Employees in legacy path: basic label with name and code
+        for (const queueItem of employeeItems) {
+          const ld = employeeLabelDataMap.get(queueItem.employee.id);
+          const placeholderData: LabelData = {
+            manufacturerName: '',
+            stockLocation: '',
+            productName: ld ? (ld.employee.socialName || ld.employee.fullName) : queueItem.employee.fullName,
+            productCode: '',
+            variantName: ld?.position?.name || '',
+            variantCode: '',
+            itemCode: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            itemUid: queueItem.employee.id,
+            itemId: queueItem.employee.id,
+            itemQuantity: 0,
+            itemUnitOfMeasure: '',
+            productVariantName: '',
+            referenceVariantName: '',
+            productAttributes: {},
+            variantAttributes: {},
+            itemAttributes: {},
+            barcodeData: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            qrCodeData: queueItem.employee.id,
+          };
+          for (let i = 0; i < queueItem.copies; i++) {
+            labelDataList.push(placeholderData);
+          }
+        }
+
+        setProgress(30);
+
+        // 4. Calcular layout
+        const layout = calculateLayout(labelDataList, template, state.pageSettings);
+        setProgress(50);
+
+        // 5. Gerar PDF usando jsPDF
+        const { jsPDF } = await import('jspdf');
+        const JsBarcode = (await import('jsbarcode')).default;
+        const QRCode = await import('qrcode');
+
+        const doc = new jsPDF({
+          orientation: state.pageSettings.orientation,
+          unit: 'mm',
+          format:
+            state.pageSettings.paperSize === 'CUSTOM'
+              ? [
+                  state.pageSettings.customDimensions?.width || 210,
+                  state.pageSettings.customDimensions?.height || 297,
+                ]
+              : state.pageSettings.paperSize.toLowerCase(),
+        });
+
+        setProgress(60);
+
+        // 6. Renderizar cada página - legacy path
+        for (let pageIndex = 0; pageIndex < layout.pages.length; pageIndex++) {
+          if (pageIndex > 0) doc.addPage();
+
+          const page = layout.pages[pageIndex];
+
+          for (const { position, data } of page.labels) {
+            if (studioTemplateData) {
+              const previewData = labelDataToPreviewData(data);
+              await renderStudioTemplateToPdf(
+                doc,
+                studioTemplateData,
+                previewData,
+                position.x,
+                position.y,
+                JsBarcode,
+                QRCode
+              );
+            } else {
+              await renderLabelToPdf(doc, data, position, template, JsBarcode, QRCode);
+            }
+          }
+
+          setProgress(60 + Math.round((pageIndex / layout.pages.length) * 30));
+        }
+
+        setProgress(95);
+        const blob = doc.output('blob');
+
+        setProgress(100);
+        setStatus('success');
+        return blob;
+      }
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
       setError(err as Error);
@@ -213,14 +439,14 @@ export function useQueuePrinting(): UseQueuePrintingResult {
 }
 
 // ============================================
-// HELPER: RENDER LABEL TO PDF
+// HELPER: RENDER LABEL TO PDF (legacy)
 // ============================================
 
 async function renderLabelToPdf(
   doc: import('jspdf').jsPDF,
   data: LabelData,
   position: { x: number; y: number; width: number; height: number },
-  template: (typeof SYSTEM_LABEL_TEMPLATES)[number],
+  _template: LabelTemplateDefinition,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   JsBarcode: any,
   QRCode: typeof import('qrcode')

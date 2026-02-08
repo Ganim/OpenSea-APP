@@ -110,8 +110,56 @@ export function PageSettingsPanel({ className }: PageSettingsPanelProps) {
           </Select>
         </div>
 
-        {/* Spacer */}
-        <div />
+        {/* Custom Dimensions (when CUSTOM is selected) */}
+        {settings.paperSize === 'CUSTOM' && (
+          <>
+            <div className="space-y-1.5">
+              <Label htmlFor="customWidth" className="text-xs">
+                Largura (mm)
+              </Label>
+              <Input
+                id="customWidth"
+                type="number"
+                min={10}
+                max={500}
+                value={settings.customDimensions?.width || ''}
+                onChange={e =>
+                  handleChange({
+                    customDimensions: {
+                      width: parseInt(e.target.value, 10) || 10,
+                      height: settings.customDimensions?.height || 297,
+                    },
+                  })
+                }
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="customHeight" className="text-xs">
+                Altura (mm)
+              </Label>
+              <Input
+                id="customHeight"
+                type="number"
+                min={10}
+                max={500}
+                value={settings.customDimensions?.height || ''}
+                onChange={e =>
+                  handleChange({
+                    customDimensions: {
+                      width: settings.customDimensions?.width || 210,
+                      height: parseInt(e.target.value, 10) || 10,
+                    },
+                  })
+                }
+                className="h-9 text-sm"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Spacer (only when not CUSTOM, since CUSTOM fills the row) */}
+        {settings.paperSize !== 'CUSTOM' && <div />}
       </div>
 
       {/* Margins */}

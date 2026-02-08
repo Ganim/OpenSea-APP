@@ -74,6 +74,7 @@ export {
   ElementWrapper,
   ElementsLayer,
 } from './components';
+export type { LabelStudioSaveData } from './components';
 
 // Element Renderers
 export {
@@ -87,7 +88,10 @@ export {
   ICON_CATEGORIES,
   getAvailableIcons,
   searchIcons,
+  buildSamplePreviewData,
+  ENTITY_FIELD_REGISTRIES,
 } from './elements';
+export type { EntityType, DataFieldCategory, DataField } from './elements';
 
 // Toolbar
 export { MainToolbar } from './toolbar';
@@ -129,6 +133,7 @@ export type {
   BarcodeElement,
   QRCodeElement,
   TableElement,
+  TableCell,
   LabelElement,
   LabelStudioTemplate,
   CanvasConfig,

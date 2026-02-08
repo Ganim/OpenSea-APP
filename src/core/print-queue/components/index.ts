@@ -2,6 +2,7 @@
  * Print Queue Components - Exports
  */
 
+export { AddEmployeeToQueueButton } from './add-employee-to-queue-button';
 export { AddToQueueButton, BatchAddToQueueButton } from './add-to-queue-button';
 export { LabelPreview } from './label-preview';
 export { PagePreview } from './page-preview';

@@ -5,16 +5,30 @@
  * Componente principal do editor de etiquetas
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { useEditorStore } from '../stores/editorStore';
-import { Canvas } from './Canvas';
-import { Rulers } from './Rulers';
-import { ElementsLayer } from './ElementsLayer';
-import { MainToolbar } from '../toolbar/MainToolbar';
+import { cn } from '@/lib/utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ElementsPanel } from '../panels/ElementsPanel';
 import { PropertiesPanel } from '../panels/PropertiesPanel';
+import { useEditorStore } from '../stores/editorStore';
 import type { LabelStudioTemplate } from '../studio-types';
-import { cn } from '@/lib/utils';
+import { MainToolbar } from '../toolbar/MainToolbar';
+import { calculateFitZoom } from '../utils/unitConverter';
+import { Canvas } from './Canvas';
+import { ElementsLayer } from './ElementsLayer';
+import { Rulers } from './Rulers';
+
+const RULER_SIZE = 20; // pixels, same as in Rulers.tsx
+
+/**
+ * Dados enviados pelo editor ao salvar
+ */
+export interface LabelStudioSaveData {
+  name: string;
+  description: string;
+  width: number;
+  height: number;
+  studioTemplate: LabelStudioTemplate;
+}
 
 interface LabelStudioEditorProps {
   /** Template para carregar (modo edição) */
@@ -30,11 +44,9 @@ interface LabelStudioEditorProps {
   /** Altura inicial em mm (para novo template) */
   initialHeight?: number;
   /** Callback ao salvar */
-  onSave?: (
-    template: LabelStudioTemplate,
-    name: string,
-    description: string
-  ) => void;
+  onSave?: (data: LabelStudioSaveData) => void;
+  /** Se está salvando */
+  isSaving?: boolean;
   /** Callback ao cancelar */
   onCancel?: () => void;
   /** Modo somente leitura */
@@ -54,6 +66,7 @@ export function LabelStudioEditor({
   initialWidth = 60,
   initialHeight = 40,
   onSave,
+  isSaving,
   onCancel,
   readOnly = false,
   className,
@@ -61,14 +74,66 @@ export function LabelStudioEditor({
   // Store actions
   const newTemplate = useEditorStore(s => s.newTemplate);
   const loadTemplate = useEditorStore(s => s.loadTemplate);
-  const toJSON = useEditorStore(s => s.toJSON);
-  const getName = useEditorStore(s => s.templateName);
-  const getDescription = useEditorStore(s => s.templateDescription);
   const reset = useEditorStore(s => s.reset);
 
   // Store state
   const zoom = useEditorStore(s => s.zoom);
   const selectedIds = useEditorStore(s => s.selectedIds);
+  const setZoom = useEditorStore(s => s.setZoom);
+  const setPanOffset = useEditorStore(s => s.setPanOffset);
+
+  // Elements panel collapse state
+  const [elementsPanelCollapsed, setElementsPanelCollapsed] = useState(false);
+  const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] =
+    useState(false);
+
+  // Workspace container ref and size (for Rulers + fitToScreen)
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [workspaceSize, setWorkspaceSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!workspaceRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      const entry = entries[0];
+      if (entry) {
+        setWorkspaceSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(workspaceRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Fit to screen: calculate proper zoom to fill workspace
+  const handleFitToScreen = useCallback(() => {
+    const state = useEditorStore.getState();
+    const availableWidth = workspaceSize.width - RULER_SIZE;
+    const availableHeight = workspaceSize.height - RULER_SIZE;
+    if (availableWidth <= 0 || availableHeight <= 0) return;
+    const newZoom = calculateFitZoom(
+      state.canvasWidth,
+      state.canvasHeight,
+      availableWidth,
+      availableHeight
+    );
+    setZoom(newZoom);
+    setPanOffset({ x: 0, y: 0 });
+  }, [workspaceSize, setZoom, setPanOffset]);
+
+  // Save handler
+  const handleSave = useCallback(() => {
+    if (!onSave) return;
+    const state = useEditorStore.getState();
+    onSave({
+      name: state.templateName,
+      description: state.templateDescription,
+      width: state.canvasWidth,
+      height: state.canvasHeight,
+      studioTemplate: state.toJSON(),
+    });
+  }, [onSave]);
 
   // Undo/Redo actions
   const undo = useEditorStore(s => s.undo);
@@ -94,6 +159,11 @@ export function LabelStudioEditor({
     };
   }, []); // Only run on mount
 
+  // Sync readOnly prop to store
+  useEffect(() => {
+    useEditorStore.getState().setReadOnly(readOnly);
+  }, [readOnly]);
+
   // Keyboard shortcuts
   useEffect(() => {
     if (readOnly) return;
@@ -104,6 +174,13 @@ export function LabelStudioEditor({
 
       // Ignore if typing in input/textarea
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Save: Ctrl+S
+      if (isCtrl && e.key === 's') {
+        e.preventDefault();
+        handleSave();
         return;
       }
 
@@ -170,9 +247,16 @@ export function LabelStudioEditor({
         return;
       }
 
-      // Escape: Clear selection
+      // Escape: clear selectedCell first, then exit inline editing, then clear selection
       if (e.key === 'Escape') {
-        useEditorStore.getState().clearSelection();
+        const state = useEditorStore.getState();
+        if (state.selectedCell) {
+          state.setSelectedCell(null);
+        } else if (state.editingId) {
+          state.setEditingId(null);
+        } else {
+          state.clearSelection();
+        }
         return;
       }
     };
@@ -190,63 +274,50 @@ export function LabelStudioEditor({
     selectAll,
     deleteElements,
     duplicateElements,
+    handleSave,
   ]);
 
-  // Handle save
-  const handleSave = useCallback(() => {
-    if (onSave) {
-      const templateData = toJSON();
-      onSave(templateData, getName, getDescription);
-    }
-  }, [onSave, toJSON, getName, getDescription]);
-
-  // Handle preview (placeholder for now)
-  const handlePreview = useCallback(() => {
-    // TODO: Implement preview modal
-    console.log('Preview:', toJSON());
-  }, [toJSON]);
-
   return (
-    <div
-      className={cn(
-        'flex flex-col h-full bg-neutral-50 dark:bg-neutral-900',
-        className
-      )}
-    >
+    <div className={cn('flex flex-col h-full', className)}>
       {/* Toolbar */}
       {!readOnly && (
-        <MainToolbar onSave={handleSave} onPreview={handlePreview} />
+        <MainToolbar onFitToScreen={handleFitToScreen} />
       )}
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel - Elements */}
-        <div className="w-64 border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto">
-          <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
-            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Elementos
-            </h3>
-          </div>
-          <ElementsPanel />
-        </div>
+        {/* Left panel - Elements (hidden in readOnly) */}
+        {!readOnly && (
+          <ElementsPanel
+            collapsed={elementsPanelCollapsed}
+            onToggleCollapse={() =>
+              setElementsPanelCollapsed(!elementsPanelCollapsed)
+            }
+          />
+        )}
 
         {/* Center - Canvas with rulers */}
-        <div className="flex-1 relative">
-          <Rulers />
-          <Canvas className="absolute inset-0 pt-5 pl-5">
+        <div ref={workspaceRef} className="flex-1 relative">
+          {!readOnly && (
+            <Rulers
+              containerWidth={workspaceSize.width}
+              containerHeight={workspaceSize.height}
+            />
+          )}
+          <Canvas className={cn('absolute inset-0', !readOnly && 'pt-5 pl-5')}>
             <ElementsLayer zoom={zoom} />
           </Canvas>
         </div>
 
-        {/* Right panel - Properties */}
-        <div className="w-72 border-l border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto">
-          <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
-            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Propriedades
-            </h3>
-          </div>
-          <PropertiesPanel />
-        </div>
+        {/* Right panel - Properties (hidden in readOnly) */}
+        {!readOnly && (
+          <PropertiesPanel
+            collapsed={propertiesPanelCollapsed}
+            onToggleCollapse={() =>
+              setPropertiesPanelCollapsed(!propertiesPanelCollapsed)
+            }
+          />
+        )}
       </div>
     </div>
   );

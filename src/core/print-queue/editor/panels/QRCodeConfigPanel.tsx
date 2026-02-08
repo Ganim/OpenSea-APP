@@ -5,11 +5,13 @@
  * Painel de configuração de QR Code
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { QRCodeElement, QRCodeConfig } from '../studio-types';
-import { DATA_PATHS } from '../elements/FieldElementRenderer';
+import { getFieldLabel } from '../elements/FieldElementRenderer';
+import { FieldPickerModal } from '../components/FieldPickerModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -17,9 +19,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from '@/components/ui/select';
+import { ChevronRight, Braces } from 'lucide-react';
 
 interface QRCodeConfigPanelProps {
   element: QRCodeElement;
@@ -28,6 +29,9 @@ interface QRCodeConfigPanelProps {
 
 export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps) {
   const { qrConfig } = element;
+  const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
+  const [urlParamPickerOpen, setUrlParamPickerOpen] = useState(false);
+  const [insertModalOpen, setInsertModalOpen] = useState(false);
 
   const updateConfig = (updates: Partial<QRCodeConfig>) => {
     onUpdate({ qrConfig: { ...qrConfig, ...updates } });
@@ -35,7 +39,7 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
 
   return (
     <div className="space-y-4">
-      <h4 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+      <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         QR Code
       </h4>
 
@@ -63,26 +67,25 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
       {qrConfig.contentType === 'field' && (
         <div>
           <Label className="text-xs">Campo</Label>
-          <Select
-            value={qrConfig.dataPath || ''}
-            onValueChange={v => updateConfig({ dataPath: v })}
+          <Button
+            variant="outline"
+            className="w-full justify-between h-8 font-normal"
+            onClick={() => setFieldPickerOpen(true)}
           >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Selecione um campo" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(DATA_PATHS).map(([key, category]) => (
-                <SelectGroup key={key}>
-                  <SelectLabel>{category.label}</SelectLabel>
-                  {category.fields.map(field => (
-                    <SelectItem key={field.path} value={field.path}>
-                      {field.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
+            <span className="truncate text-sm">
+              {qrConfig.dataPath ? getFieldLabel(qrConfig.dataPath) : 'Selecionar campo...'}
+            </span>
+            <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
+          </Button>
+          {qrConfig.dataPath && (
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{qrConfig.dataPath}</p>
+          )}
+          <FieldPickerModal
+            open={fieldPickerOpen}
+            onOpenChange={setFieldPickerOpen}
+            onSelect={v => updateConfig({ dataPath: v })}
+            currentValue={qrConfig.dataPath}
+          />
         </div>
       )}
 
@@ -94,6 +97,28 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
             onChange={e => updateConfig({ template: e.target.value })}
             placeholder="{product.code}-{variant.sku}"
             className="h-16 text-sm font-mono"
+          />
+          <div className="flex justify-end mt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 text-xs gap-1"
+              onClick={() => setInsertModalOpen(true)}
+            >
+              <Braces className="w-3 h-3" />
+              Inserir campo
+            </Button>
+          </div>
+          <FieldPickerModal
+            open={insertModalOpen}
+            onOpenChange={setInsertModalOpen}
+            onSelect={() => {}}
+            insertMode
+            onInsert={(text) => {
+              const current = qrConfig.template || '';
+              updateConfig({ template: current + text });
+            }}
+            title="Inserir Campo no Template"
           />
         </div>
       )}
@@ -111,26 +136,25 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
           </div>
           <div>
             <Label className="text-xs">Parâmetro (campo de dados)</Label>
-            <Select
-              value={qrConfig.urlParam || ''}
-              onValueChange={v => updateConfig({ urlParam: v })}
+            <Button
+              variant="outline"
+              className="w-full justify-between h-8 font-normal"
+              onClick={() => setUrlParamPickerOpen(true)}
             >
-              <SelectTrigger className="h-8">
-                <SelectValue placeholder="Selecione um campo" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(DATA_PATHS).map(([key, category]) => (
-                  <SelectGroup key={key}>
-                    <SelectLabel>{category.label}</SelectLabel>
-                    {category.fields.map(field => (
-                      <SelectItem key={field.path} value={field.path}>
-                        {field.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
+              <span className="truncate text-sm">
+                {qrConfig.urlParam ? getFieldLabel(qrConfig.urlParam) : 'Selecionar campo...'}
+              </span>
+              <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
+            </Button>
+            {qrConfig.urlParam && (
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">{qrConfig.urlParam}</p>
+            )}
+            <FieldPickerModal
+              open={urlParamPickerOpen}
+              onOpenChange={setUrlParamPickerOpen}
+              onSelect={v => updateConfig({ urlParam: v })}
+              currentValue={qrConfig.urlParam}
+            />
           </div>
         </div>
       )}
@@ -235,7 +259,7 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
               type="color"
               value={qrConfig.moduleColor}
               onChange={e => updateConfig({ moduleColor: e.target.value })}
-              className="w-8 h-8 rounded border border-neutral-200"
+              className="w-8 h-8 rounded border border-slate-200"
             />
           </div>
         </div>
@@ -246,7 +270,7 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
               type="color"
               value={qrConfig.backgroundColor}
               onChange={e => updateConfig({ backgroundColor: e.target.value })}
-              className="w-8 h-8 rounded border border-neutral-200"
+              className="w-8 h-8 rounded border border-slate-200"
             />
           </div>
         </div>

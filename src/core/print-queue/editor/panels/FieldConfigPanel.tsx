@@ -5,9 +5,10 @@
  * Painel de configuração de campos dinâmicos
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { FieldElement, FieldConfig, LabelConfig } from '../studio-types';
-import { DATA_PATHS, getFieldLabel } from '../elements/FieldElementRenderer';
+import { getFieldLabel } from '../elements/FieldElementRenderer';
+import { FieldPickerModal } from '../components/FieldPickerModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -20,19 +21,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from '@/components/ui/select';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
-  ChevronDown,
+  ChevronRight,
   Plus,
   Trash2,
-  Info,
+  Braces,
 } from 'lucide-react';
 
 interface FieldConfigPanelProps {
@@ -41,40 +35,43 @@ interface FieldConfigPanelProps {
 }
 
 /**
- * Seletor de DataPath com categorias
+ * Botão trigger para abrir o FieldPickerModal
  */
-function DataPathSelector({
+function DataPathTrigger({
   value,
   onChange,
   label: selectorLabel,
+  className,
 }: {
   value: string;
   onChange: (path: string) => void;
   label?: string;
+  className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div>
+    <div className={className}>
       {selectorLabel && <Label className="text-xs">{selectorLabel}</Label>}
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-8">
-          <SelectValue placeholder="Selecione um campo" />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.entries(DATA_PATHS).map(([key, category]) => (
-            <SelectGroup key={key}>
-              <SelectLabel>{category.label}</SelectLabel>
-              {category.fields.map(field => (
-                <SelectItem key={field.path} value={field.path}>
-                  <span className="flex items-center gap-2">
-                    <span>{field.label}</span>
-                    <span className="text-xs text-neutral-400">{field.path}</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          ))}
-        </SelectContent>
-      </Select>
+      <Button
+        variant="outline"
+        className="w-full justify-between h-8 font-normal"
+        onClick={() => setOpen(true)}
+      >
+        <span className="truncate text-sm">
+          {value ? getFieldLabel(value) : 'Selecionar campo...'}
+        </span>
+        <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
+      </Button>
+      {value && (
+        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{value}</p>
+      )}
+      <FieldPickerModal
+        open={open}
+        onOpenChange={setOpen}
+        onSelect={onChange}
+        currentValue={value}
+      />
     </div>
   );
 }
@@ -90,7 +87,7 @@ function SimpleFieldConfig({
   onUpdate: (updates: Partial<FieldConfig>) => void;
 }) {
   return (
-    <DataPathSelector
+    <DataPathTrigger
       value={config.dataPath || ''}
       onChange={path => onUpdate({ dataPath: path })}
       label="Campo de dados"
@@ -108,50 +105,47 @@ function CompositeFieldConfig({
   config: FieldConfig;
   onUpdate: (updates: Partial<FieldConfig>) => void;
 }) {
+  const [insertModalOpen, setInsertModalOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   return (
     <div className="space-y-2">
       <div>
         <Label className="text-xs">Template</Label>
         <Textarea
+          ref={textareaRef}
           value={config.template || ''}
           onChange={e => onUpdate({ template: e.target.value })}
           placeholder="{product.name} - {variant.sku}"
           className="h-20 text-sm font-mono"
         />
-        <p className="text-xs text-neutral-400 mt-1">
-          Use {'{campo}'} para inserir campos dinâmicos
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-slate-400">
+            Use {'{campo}'} para inserir campos dinâmicos
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-6 text-xs gap-1"
+            onClick={() => setInsertModalOpen(true)}
+          >
+            <Braces className="w-3 h-3" />
+            Inserir campo
+          </Button>
+        </div>
       </div>
 
-      {/* Preview dos campos disponíveis */}
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600">
-          <Info className="w-3 h-3" />
-          Campos disponíveis
-          <ChevronDown className="w-3 h-3" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
-            {Object.entries(DATA_PATHS).map(([key, category]) => (
-              <div key={key}>
-                <p className="text-xs font-medium text-neutral-500">{category.label}</p>
-                {category.fields.map(field => (
-                  <button
-                    key={field.path}
-                    className="text-xs text-blue-500 hover:underline block pl-2"
-                    onClick={() => {
-                      const current = config.template || '';
-                      onUpdate({ template: current + `{${field.path}}` });
-                    }}
-                  >
-                    {`{${field.path}}`}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <FieldPickerModal
+        open={insertModalOpen}
+        onOpenChange={setInsertModalOpen}
+        onSelect={() => {}}
+        insertMode
+        onInsert={(text) => {
+          const current = config.template || '';
+          onUpdate({ template: current + text });
+        }}
+        title="Inserir Campo no Template"
+      />
     </div>
   );
 }
@@ -174,7 +168,7 @@ function ConditionalFieldConfig({
 
   return (
     <div className="space-y-3">
-      <DataPathSelector
+      <DataPathTrigger
         value={conditions.primary}
         onChange={path => updateConditions({ primary: path })}
         label="Campo principal"
@@ -185,31 +179,17 @@ function ConditionalFieldConfig({
         <div className="space-y-2 mt-1">
           {conditions.fallbacks.map((fallback, index) => (
             <div key={index} className="flex items-center gap-1">
-              <span className="text-xs text-neutral-400 w-4">{index + 1}.</span>
-              <Select
-                value={fallback}
-                onValueChange={path => {
-                  const newFallbacks = [...conditions.fallbacks];
-                  newFallbacks[index] = path;
-                  updateConditions({ fallbacks: newFallbacks });
-                }}
-              >
-                <SelectTrigger className="h-8 flex-1">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(DATA_PATHS).map(([key, category]) => (
-                    <SelectGroup key={key}>
-                      <SelectLabel>{category.label}</SelectLabel>
-                      {category.fields.map(field => (
-                        <SelectItem key={field.path} value={field.path}>
-                          {field.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+              <span className="text-xs text-slate-400 w-4">{index + 1}.</span>
+              <div className="flex-1">
+                <DataPathTrigger
+                  value={fallback}
+                  onChange={path => {
+                    const newFallbacks = [...conditions.fallbacks];
+                    newFallbacks[index] = path;
+                    updateConditions({ fallbacks: newFallbacks });
+                  }}
+                />
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -237,7 +217,7 @@ function ConditionalFieldConfig({
         </div>
       </div>
 
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-slate-400">
         Se o campo principal estiver vazio, será usado o próximo fallback disponível.
       </p>
     </div>
@@ -254,6 +234,8 @@ function CalculatedFieldConfig({
   config: FieldConfig;
   onUpdate: (updates: Partial<FieldConfig>) => void;
 }) {
+  const [insertModalOpen, setInsertModalOpen] = useState(false);
+
   return (
     <div className="space-y-3">
       <div>
@@ -264,9 +246,20 @@ function CalculatedFieldConfig({
           placeholder="{variant.price} * 1.1"
           className="h-16 text-sm font-mono"
         />
-        <p className="text-xs text-neutral-400 mt-1">
-          Use {'{campo}'} para referências. Operadores: + - * / ( )
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-slate-400">
+            Use {'{campo}'} para referências. Operadores: + - * / ( )
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-6 text-xs gap-1"
+            onClick={() => setInsertModalOpen(true)}
+          >
+            <Braces className="w-3 h-3" />
+            Inserir campo
+          </Button>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
@@ -301,6 +294,18 @@ function CalculatedFieldConfig({
           />
         </div>
       </div>
+
+      <FieldPickerModal
+        open={insertModalOpen}
+        onOpenChange={setInsertModalOpen}
+        onSelect={() => {}}
+        insertMode
+        onInsert={(text) => {
+          const current = config.formula || '';
+          onUpdate({ formula: current + text });
+        }}
+        title="Inserir Campo na Fórmula"
+      />
     </div>
   );
 }
@@ -334,7 +339,7 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
     <div className="space-y-4">
       {/* Tipo de campo */}
       <div>
-        <h4 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2">
+        <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
           Configuração do Campo
         </h4>
         <div>
@@ -377,7 +382,7 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
       {/* Configuração de label */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <Label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+          <Label className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Rótulo (Label)
           </Label>
           <Switch
@@ -428,7 +433,7 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
                         style: { ...label.style, color: e.target.value },
                       })
                     }
-                    className="w-8 h-8 rounded border border-neutral-200"
+                    className="w-8 h-8 rounded border border-slate-200"
                   />
                 </div>
               </div>

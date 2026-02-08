@@ -17,9 +17,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Minus, Plus, Printer, Trash2, X } from 'lucide-react';
+import { Minus, Package, Plus, Printer, Sparkles, Trash2, User, X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { usePrintQueue } from '../context/print-queue-context';
+import type { PrintQueueItem } from '../types';
 import { PrintQueueModal } from './print-queue-modal';
 
 export function PrintQueuePanel() {
@@ -55,11 +57,22 @@ export function PrintQueuePanel() {
               <DropdownMenuLabel className="p-0 text-lg font-bold">
                 Fila de Impressao
               </DropdownMenuLabel>
-              {hasItems && (
-                <Badge variant="default" className="bg-blue-500 text-white">
-                  {totalLabels} etiqueta{totalLabels !== 1 && 's'}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                <Link href="/print/studio">
+                  <Button
+                    size="sm"
+                    className="h-7 px-3 text-xs font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
+                  >
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Studio
+                  </Button>
+                </Link>
+                {hasItems && (
+                  <Badge variant="default" className="bg-blue-500 text-white">
+                    {totalLabels} etiqueta{totalLabels !== 1 && 's'}
+                  </Badge>
+                )}
+              </div>
             </div>
             {hasItems && (
               <div className="flex gap-2">
@@ -116,22 +129,11 @@ export function PrintQueuePanel() {
                       >
                         <div className="flex gap-3 w-full">
                           {/* Icon */}
-                          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
-                            <Printer className="w-5 h-5 text-white" />
-                          </div>
+                          <QueueItemIcon entityType={queueItem.entityType} />
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                              {queueItem.item.productName ||
-                                queueItem.product?.name ||
-                                'Item'}
-                            </h4>
-                            <p className="text-xs text-gray-600 dark:text-white/60 truncate">
-                              {queueItem.item.variantName ||
-                                queueItem.variant?.name ||
-                                queueItem.item.uniqueCode}
-                            </p>
+                            <QueueItemInfo queueItem={queueItem} />
                             <div className="flex items-center justify-between mt-2">
                               {/* Quantity Controls */}
                               <div className="flex items-center gap-1">
@@ -217,6 +219,54 @@ export function PrintQueuePanel() {
 
       {/* Modal */}
       <PrintQueueModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+    </>
+  );
+}
+
+// ============================================
+// HELPER COMPONENTS
+// ============================================
+
+function QueueItemIcon({ entityType }: { entityType: PrintQueueItem['entityType'] }) {
+  const isEmployee = entityType === 'employee';
+  const Icon = isEmployee ? User : Package;
+  const gradient = isEmployee
+    ? 'from-emerald-500 to-teal-600'
+    : 'from-blue-500 to-blue-600';
+
+  return (
+    <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${gradient} flex items-center justify-center shrink-0`}>
+      <Icon className="w-5 h-5 text-white" />
+    </div>
+  );
+}
+
+function QueueItemInfo({ queueItem }: { queueItem: PrintQueueItem }) {
+  if (queueItem.entityType === 'employee') {
+    return (
+      <>
+        <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+          {queueItem.employee.fullName}
+        </h4>
+        <p className="text-xs text-gray-600 dark:text-white/60 truncate">
+          {queueItem.employee.position?.name || queueItem.employee.registrationNumber}
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+        {queueItem.item.productName ||
+          queueItem.product?.name ||
+          'Item'}
+      </h4>
+      <p className="text-xs text-gray-600 dark:text-white/60 truncate">
+        {queueItem.item.variantName ||
+          queueItem.variant?.name ||
+          queueItem.item.uniqueCode}
+      </p>
     </>
   );
 }

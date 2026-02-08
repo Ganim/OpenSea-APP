@@ -67,6 +67,15 @@ export const API_ENDPOINTS = {
     UPDATE_PROFILE: (userId: string) => `/v1/users/${userId}`,
     DELETE: (userId: string) => `/v1/users/${userId}`,
   },
+  // HR - Employees
+  EMPLOYEES: {
+    LIST: '/v1/hr/employees',
+    GET: (id: string) => `/v1/hr/employees/${id}`,
+    CREATE: '/v1/hr/employees',
+    UPDATE: (id: string) => `/v1/hr/employees/${id}`,
+    DELETE: (id: string) => `/v1/hr/employees/${id}`,
+    LABEL_DATA: '/v1/hr/employees/label-data',
+  },
   // HR - Companies
   COMPANIES: {
     LIST: '/v1/hr/companies',
@@ -106,6 +115,7 @@ export const API_ENDPOINTS = {
     BATCH_TRANSFER: '/v1/items/batch-transfer',
     LOCATION_HISTORY: (itemId: string) =>
       `/v1/items/${itemId}/location-history`,
+    LABEL_DATA: '/v1/items/label-data',
   },
   // Stock - Item Movements
   ITEM_MOVEMENTS: {

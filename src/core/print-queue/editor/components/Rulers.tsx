@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 
 interface RulersProps {
   className?: string;
+  containerWidth?: number;
+  containerHeight?: number;
 }
 
 const RULER_SIZE = 20; // pixels
@@ -21,12 +23,12 @@ const MINOR_TICK_INTERVAL = 5; // mm
 /**
  * Componente de Réguas do Label Studio
  */
-export function Rulers({ className }: RulersProps) {
-  const canvasWidth = useEditorStore((s) => s.canvasWidth);
-  const canvasHeight = useEditorStore((s) => s.canvasHeight);
-  const zoom = useEditorStore((s) => s.zoom);
-  const panOffset = useEditorStore((s) => s.panOffset);
-  const showRulers = useEditorStore((s) => s.showRulers);
+export function Rulers({ className, containerWidth = 0, containerHeight = 0 }: RulersProps) {
+  const canvasWidth = useEditorStore(s => s.canvasWidth);
+  const canvasHeight = useEditorStore(s => s.canvasHeight);
+  const zoom = useEditorStore(s => s.zoom);
+  const panOffset = useEditorStore(s => s.panOffset);
+  const showRulers = useEditorStore(s => s.showRulers);
 
   // Generate tick marks for horizontal ruler
   const horizontalTicks = useMemo(() => {
@@ -77,19 +79,19 @@ export function Rulers({ className }: RulersProps) {
       {/* Corner square */}
       <div
         className={cn(
-          'absolute top-0 left-0 bg-neutral-100 dark:bg-neutral-800 border-r border-b border-neutral-300 dark:border-neutral-600 z-20',
+          'absolute top-0 left-0 bg-gray-100 dark:bg-slate-800 border-r border-b border-gray-200 dark:border-slate-600 z-20',
           className
         )}
         style={{ width: RULER_SIZE, height: RULER_SIZE }}
       >
-        <span className="text-[8px] text-neutral-400 flex items-center justify-center h-full">
+        <span className="text-[8px] text-slate-400 flex items-center justify-center h-full">
           mm
         </span>
       </div>
 
       {/* Horizontal ruler */}
       <div
-        className="absolute top-0 left-0 h-5 bg-neutral-100 dark:bg-neutral-800 border-b border-neutral-300 dark:border-neutral-600 overflow-hidden z-10"
+        className="absolute top-0 left-0 h-5 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-600 overflow-hidden z-10"
         style={{
           left: RULER_SIZE,
           right: 0,
@@ -100,7 +102,7 @@ export function Rulers({ className }: RulersProps) {
           className="relative h-full"
           style={{
             width: canvasWidthPx,
-            transform: `translateX(${panOffset.x + (typeof window !== 'undefined' ? window.innerWidth / 2 - RULER_SIZE : 0) - canvasWidthPx / 2}px)`,
+            transform: `translateX(${panOffset.x + (containerWidth > 0 ? containerWidth / 2 - RULER_SIZE : 0) - canvasWidthPx / 2}px)`,
           }}
         >
           {horizontalTicks.map((tick, index) => (
@@ -111,13 +113,13 @@ export function Rulers({ className }: RulersProps) {
             >
               <div
                 className={cn(
-                  'w-px bg-neutral-400 dark:bg-neutral-500',
+                  'w-px bg-slate-400 dark:bg-slate-500',
                   tick.isMajor ? 'h-3' : 'h-1.5'
                 )}
               />
               {tick.label && (
                 <span
-                  className="absolute text-[9px] text-neutral-500 dark:text-neutral-400"
+                  className="absolute text-[9px] text-slate-500 dark:text-slate-400"
                   style={{
                     left: 2,
                     top: 0,
@@ -133,7 +135,7 @@ export function Rulers({ className }: RulersProps) {
 
       {/* Vertical ruler */}
       <div
-        className="absolute top-0 left-0 w-5 bg-neutral-100 dark:bg-neutral-800 border-r border-neutral-300 dark:border-neutral-600 overflow-hidden z-10"
+        className="absolute top-0 left-0 w-5 bg-gray-100 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-600 overflow-hidden z-10"
         style={{
           top: RULER_SIZE,
           bottom: 0,
@@ -144,7 +146,7 @@ export function Rulers({ className }: RulersProps) {
           className="relative w-full"
           style={{
             height: canvasHeightPx,
-            transform: `translateY(${panOffset.y + (typeof window !== 'undefined' ? window.innerHeight / 2 - RULER_SIZE : 0) - canvasHeightPx / 2}px)`,
+            transform: `translateY(${panOffset.y + (containerHeight > 0 ? containerHeight / 2 - RULER_SIZE : 0) - canvasHeightPx / 2}px)`,
           }}
         >
           {verticalTicks.map((tick, index) => (
@@ -155,13 +157,13 @@ export function Rulers({ className }: RulersProps) {
             >
               <div
                 className={cn(
-                  'h-px bg-neutral-400 dark:bg-neutral-500',
+                  'h-px bg-slate-400 dark:bg-slate-500',
                   tick.isMajor ? 'w-3' : 'w-1.5'
                 )}
               />
               {tick.label && (
                 <span
-                  className="absolute text-[9px] text-neutral-500 dark:text-neutral-400"
+                  className="absolute text-[9px] text-slate-500 dark:text-slate-400"
                   style={{
                     left: 1,
                     top: 2,

@@ -312,6 +312,16 @@ export function calculateResizeSnap(
     }
   }
 
+  // Grid lines
+  if (config.snapToGrid && config.gridSize > 0) {
+    for (let x = 0; x <= canvasWidth; x += config.gridSize) {
+      verticalTargets.push({ value: x, source: 'canvas' });
+    }
+    for (let y = 0; y <= canvasHeight; y += config.gridSize) {
+      horizontalTargets.push({ value: y, source: 'canvas' });
+    }
+  }
+
   // Determina quais bordas estão sendo ajustadas
   const adjustingLeft = anchor.includes('w');
   const adjustingRight = anchor.includes('e');

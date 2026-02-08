@@ -19,7 +19,7 @@ interface SelectionBoxProps {
   locked?: boolean;
   isMultiple?: boolean;
   onResizeStart?: (anchor: string, e: React.MouseEvent) => void;
-  onRotateStart?: (e: React.MouseEvent) => void;
+  onRotateStart?: (corner: string, e: React.MouseEvent) => void;
 }
 
 /**
@@ -88,10 +88,10 @@ export function SelectionBox({
         className={cn(
           'absolute inset-0 border-2',
           locked
-            ? 'border-neutral-400 border-dashed'
+            ? 'border-slate-400 border-dashed'
             : isMultiple
               ? 'border-purple-500'
-              : 'border-blue-500'
+              : 'border-blue-600 shadow-[0_0_0_1px_rgba(37,99,235,0.2)]'
         )}
       />
 
@@ -101,7 +101,7 @@ export function SelectionBox({
           {RESIZE_HANDLES.map(handle => (
             <div
               key={handle.id}
-              className="absolute w-2 h-2 bg-white border-2 border-blue-500 rounded-sm pointer-events-auto"
+              className="absolute w-2 h-2 bg-white border-2 border-blue-600 rounded-sm pointer-events-auto shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
               style={{
                 ...handle.position,
                 cursor: handle.cursor,
@@ -110,21 +110,35 @@ export function SelectionBox({
             />
           ))}
 
-          {/* Handle de rotação (acima do handle norte) */}
+          {/* Rotation zones at corners (invisible, outside resize handles) */}
           {onRotateStart && (
-            <div
-              className="absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-full pointer-events-auto cursor-crosshair"
-              style={{
-                top: -20,
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-              onMouseDown={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                onRotateStart(e);
-              }}
-            />
+            <>
+              {(['nw', 'ne', 'se', 'sw'] as const).map(corner => {
+                const posStyle: React.CSSProperties = {
+                  width: 16,
+                  height: 16,
+                  position: 'absolute',
+                  cursor: 'alias',
+                };
+                if (corner.includes('n')) posStyle.top = -22;
+                if (corner.includes('s')) posStyle.bottom = -22;
+                if (corner.includes('w')) posStyle.left = -22;
+                if (corner.includes('e')) posStyle.right = -22;
+
+                return (
+                  <div
+                    key={`rotate-${corner}`}
+                    className="pointer-events-auto"
+                    style={posStyle}
+                    onMouseDown={e => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      onRotateStart(corner, e);
+                    }}
+                  />
+                );
+              })}
+            </>
           )}
         </>
       )}
@@ -132,7 +146,7 @@ export function SelectionBox({
       {/* Indicador de bloqueio */}
       {locked && (
         <div
-          className="absolute top-1 right-1 w-4 h-4 bg-neutral-500 rounded-sm flex items-center justify-center"
+          className="absolute top-1 right-1 w-4 h-4 bg-slate-500 rounded-sm flex items-center justify-center"
           title="Elemento bloqueado"
         >
           <svg

@@ -74,7 +74,7 @@ export function TextElementRenderer({
 
   return (
     <div style={textStyle}>
-      <span>{content || 'Texto'}</span>
+      <span style={{ width: '100%', display: 'block', textAlign: style.textAlign }}>{content || 'Texto'}</span>
     </div>
   );
 }

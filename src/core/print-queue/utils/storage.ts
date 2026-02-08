@@ -1,6 +1,7 @@
 /**
  * Print Queue Storage Utilities
  * Funções para persistência da fila no LocalStorage
+ * v2: Suporte multi-entidade (entityType em cada item)
  */
 
 import {
@@ -9,6 +10,7 @@ import {
   PRINT_QUEUE_STORAGE_KEY,
 } from '../constants';
 import type { PrintQueueItem, PrintQueueState } from '../types';
+import { getEntityId } from '../types';
 
 /**
  * Estado padrão da fila de impressão
@@ -16,6 +18,7 @@ import type { PrintQueueItem, PrintQueueState } from '../types';
 export const DEFAULT_PRINT_QUEUE_STATE: PrintQueueState = {
   items: [],
   selectedTemplateId: DEFAULT_TEMPLATE_ID,
+  selectedTemplateDimensions: null,
   pageSettings: DEFAULT_PAGE_SETTINGS,
   updatedAt: new Date(),
 };
@@ -32,6 +35,7 @@ export function isBrowser(): boolean {
  */
 function serializeState(state: PrintQueueState): string {
   return JSON.stringify({
+    _storageVersion: 2,
     ...state,
     items: state.items.map(item => ({
       ...item,
@@ -42,19 +46,36 @@ function serializeState(state: PrintQueueState): string {
 }
 
 /**
+ * Migra items v1 (sem entityType) para v2 (com entityType: 'stock-item')
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateV1Items(items: any[]): PrintQueueItem[] {
+  return items.map(item => {
+    if (!item.entityType) {
+      return {
+        ...item,
+        entityType: 'stock-item' as const,
+        addedAt: new Date(item.addedAt),
+      };
+    }
+    return {
+      ...item,
+      addedAt: new Date(item.addedAt),
+    };
+  });
+}
+
+/**
  * Deserializa o estado do JSON
  */
 function deserializeState(json: string): PrintQueueState {
   const parsed = JSON.parse(json);
 
+  const items = migrateV1Items(parsed.items || []);
+
   return {
     ...parsed,
-    items: (parsed.items || []).map(
-      (item: PrintQueueItem & { addedAt: string }) => ({
-        ...item,
-        addedAt: new Date(item.addedAt),
-      })
-    ),
+    items,
     updatedAt: new Date(parsed.updatedAt),
     pageSettings: {
       ...DEFAULT_PAGE_SETTINGS,

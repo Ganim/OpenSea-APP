@@ -80,14 +80,15 @@ export const PAPER_SIZES = {
 /**
  * Níveis de zoom pré-definidos
  */
-export const ZOOM_LEVELS = [
-  0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4,
-] as const;
+export const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const;
 
 /**
  * Encontra o próximo nível de zoom
  */
-export function getNextZoomLevel(currentZoom: number, direction: 'in' | 'out'): number {
+export function getNextZoomLevel(
+  currentZoom: number,
+  direction: 'in' | 'out'
+): number {
   if (direction === 'in') {
     for (const level of ZOOM_LEVELS) {
       if (level > currentZoom + 0.001) {

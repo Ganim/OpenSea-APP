@@ -1,5 +1,5 @@
 /**
- * Label Templates Page
+ * Print Studio - Label Templates List
  * Página de gerenciamento de templates de etiquetas
  */
 
@@ -31,8 +31,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { LabelTemplate } from '@/core/print-queue/editor';
 import { LABEL_SIZE_PRESETS } from '@/core/print-queue/editor';
 import { useLabelTemplateCrud } from '@/hooks/stock/use-label-templates';
+import { labelTemplatesService } from '@/services/stock/label-templates.service';
 import {
   Copy,
+  Download,
   Edit,
   FileText,
   MoreVertical,
@@ -40,11 +42,13 @@ import {
   Printer,
   Tag,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-export default function LabelTemplatesPage() {
+export default function PrintStudioPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -52,7 +56,7 @@ export default function LabelTemplatesPage() {
   const [templateToDelete, setTemplateToDelete] =
     useState<LabelTemplate | null>(null);
 
-  // Debounce search para não fazer requisições a cada tecla
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -60,11 +64,13 @@ export default function LabelTemplatesPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { templates, isLoading, remove, duplicate, isDeleting, isDuplicating } =
+  const { templates, isLoading, remove, duplicate, create, isDeleting, isDuplicating, isCreating } =
     useLabelTemplateCrud({
       search: debouncedSearch || undefined,
       includeSystem: true,
     });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Separar templates do sistema e customizados
   const systemTemplates = useMemo(
@@ -77,19 +83,19 @@ export default function LabelTemplatesPage() {
   );
 
   const handleCreateNew = useCallback(() => {
-    router.push('/stock/label-templates/new');
+    router.push('/print/studio/label');
   }, [router]);
 
   const handleEdit = useCallback(
     (template: LabelTemplate) => {
-      router.push(`/stock/label-templates/${template.id}/edit`);
+      router.push(`/print/studio/label/${template.id}/edit`);
     },
     [router]
   );
 
   const handleView = useCallback(
     (template: LabelTemplate) => {
-      router.push(`/stock/label-templates/${template.id}`);
+      router.push(`/print/studio/label/${template.id}`);
     },
     [router]
   );
@@ -113,8 +119,83 @@ export default function LabelTemplatesPage() {
     setTemplateToDelete(null);
   }, [templateToDelete, remove]);
 
+  const handleExport = useCallback(async (template: LabelTemplate) => {
+    try {
+      const fullTemplate = await labelTemplatesService.getTemplate(template.id);
+      const exportData = {
+        exportVersion: 1,
+        exportedAt: new Date().toISOString(),
+        template: {
+          name: fullTemplate.template.name,
+          description: fullTemplate.template.description || '',
+          width: fullTemplate.template.width,
+          height: fullTemplate.template.height,
+          grapesJsData: fullTemplate.template.grapesJsData,
+        },
+      };
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${template.name}.label.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Template exportado com sucesso!');
+    } catch {
+      toast.error('Erro ao exportar template');
+    }
+  }, []);
+
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      if (!data.exportVersion || !data.template) {
+        toast.error('Arquivo JSON inválido. Formato de exportação não reconhecido.');
+        return;
+      }
+
+      const { name, description, width, height, grapesJsData } = data.template;
+      if (!name || !width || !height || !grapesJsData) {
+        toast.error('Arquivo JSON incompleto. Campos obrigatórios ausentes.');
+        return;
+      }
+
+      const result = await create({
+        name: `${name} (Importado)`,
+        description: description || '',
+        width,
+        height,
+        grapesJsData,
+      });
+
+      if (result?.template?.id) {
+        router.push(`/print/studio/label/${result.template.id}/edit`);
+      }
+    } catch {
+      toast.error('Erro ao importar template. Verifique se o arquivo é válido.');
+    } finally {
+      // Reset input so same file can be re-imported
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [create, router]);
+
   const headerButtons: HeaderButton[] = useMemo(
     () => [
+      {
+        id: 'import-template',
+        title: 'Importar',
+        icon: Upload,
+        onClick: () => fileInputRef.current?.click(),
+        variant: 'outline' as const,
+      },
       {
         id: 'create-template',
         title: 'Novo Template',
@@ -219,6 +300,15 @@ export default function LabelTemplatesPage() {
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicar
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleExport(template);
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar JSON
+                </DropdownMenuItem>
                 {!template.isSystem && (
                   <>
                     <DropdownMenuSeparator />
@@ -245,8 +335,8 @@ export default function LabelTemplatesPage() {
   return (
     <PageLayout backgroundVariant="none" maxWidth="full" spacing="gap-8">
       <Header
-        title="Templates de Etiqueta"
-        description="Gerencie os templates para impressão de etiquetas"
+        title="Label Studio"
+        description="Crie e gerencie templates de etiquetas"
         buttons={headerButtons}
       />
 
@@ -318,6 +408,15 @@ export default function LabelTemplatesPage() {
           </div>
         </div>
       )}
+
+      {/* Hidden file input for import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleImport}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

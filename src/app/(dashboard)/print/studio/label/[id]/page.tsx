@@ -1,5 +1,5 @@
 /**
- * View Label Template Page
+ * Print Studio - View Label Template
  * Página para visualizar um template de etiqueta
  */
 
@@ -9,15 +9,59 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import type { LabelEditorSaveData } from '@/core/print-queue/editor';
-import { LabelEditor, LABEL_SIZE_PRESETS } from '@/core/print-queue/editor';
+import {
+  LABEL_SIZE_PRESETS,
+  LabelStudioEditor,
+  buildSamplePreviewData,
+  useEditorStore,
+} from '@/core/print-queue/editor';
+import type { LabelStudioTemplate } from '@/core/print-queue/editor';
 import {
   useLabelTemplate,
   useDuplicateLabelTemplate,
 } from '@/hooks/stock/use-label-templates';
-import { ArrowLeft, Copy, Edit, Tag } from 'lucide-react';
+import { ArrowLeft, Copy, Download, Edit, Eye, EyeOff, Tag } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+
+/**
+ * Detecta se o template foi criado com o Label Studio
+ */
+function isLabelStudioTemplate(grapesJsData: string | undefined): boolean {
+  if (!grapesJsData) return false;
+  try {
+    const parsed = JSON.parse(grapesJsData);
+    return parsed.editorType === 'label-studio' || parsed.version === 2;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Extrai o template do Label Studio
+ */
+function extractLabelStudioTemplate(
+  grapesJsData: string
+): LabelStudioTemplate | null {
+  try {
+    const parsed = JSON.parse(grapesJsData);
+    if (parsed.editorType === 'label-studio' || parsed.version === 2) {
+      return {
+        version: 2,
+        width: parsed.width,
+        height: parsed.height,
+        canvas: parsed.canvas,
+        elements: parsed.elements,
+        category: parsed.category,
+        entityType: parsed.entityType,
+      };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+}
 
 export default function ViewLabelTemplatePage() {
   const router = useRouter();
@@ -28,14 +72,39 @@ export default function ViewLabelTemplatePage() {
   const { mutateAsync: duplicateTemplate, isPending: isDuplicating } =
     useDuplicateLabelTemplate();
 
+  const [showPreview, setShowPreview] = useState(true);
+
   const template = data?.template;
 
+  const isStudioTemplate = useMemo(() => {
+    return isLabelStudioTemplate(template?.grapesJsData);
+  }, [template?.grapesJsData]);
+
+  const studioTemplate = useMemo(() => {
+    if (!template || !isStudioTemplate) return null;
+    return extractLabelStudioTemplate(template.grapesJsData);
+  }, [template, isStudioTemplate]);
+
+  // Toggle preview data (mock data in field elements)
+  useEffect(() => {
+    if (!studioTemplate) return;
+    // Small delay to ensure store is initialized after LabelStudioEditor mounts
+    const timer = setTimeout(() => {
+      if (showPreview) {
+        useEditorStore.getState().setPreviewData(buildSamplePreviewData());
+      } else {
+        useEditorStore.getState().setPreviewData(null);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [showPreview, studioTemplate]);
+
   const handleBack = useCallback(() => {
-    router.push('/stock/label-templates');
+    router.push('/print/studio');
   }, [router]);
 
   const handleEdit = useCallback(() => {
-    router.push(`/stock/label-templates/${templateId}/edit`);
+    router.push(`/print/studio/label/${templateId}/edit`);
   }, [router, templateId]);
 
   const handleDuplicate = useCallback(async () => {
@@ -45,9 +114,37 @@ export default function ViewLabelTemplatePage() {
       newName: `${template.name} (Cópia)`,
     });
     if (result?.template?.id) {
-      router.push(`/stock/label-templates/${result.template.id}/edit`);
+      router.push(`/print/studio/label/${result.template.id}/edit`);
     }
   }, [duplicateTemplate, templateId, template, router]);
+
+  const handleExport = useCallback(() => {
+    if (!template) return;
+    try {
+      const exportData = {
+        exportVersion: 1,
+        exportedAt: new Date().toISOString(),
+        template: {
+          name: template.name,
+          description: template.description || '',
+          width: template.width,
+          height: template.height,
+          grapesJsData: template.grapesJsData,
+        },
+      };
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${template.name}.label.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Template exportado com sucesso!');
+    } catch {
+      toast.error('Erro ao exportar template');
+    }
+  }, [template]);
 
   if (isLoading) {
     return (
@@ -71,7 +168,7 @@ export default function ViewLabelTemplatePage() {
           </p>
           <Button onClick={handleBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Templates
+            Voltar para Studio
           </Button>
         </Card>
       </div>
@@ -102,6 +199,27 @@ export default function ViewLabelTemplatePage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {isStudioTemplate && (
+            <Button
+              variant={showPreview ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowPreview(!showPreview)}
+            >
+              {showPreview ? (
+                <EyeOff className="w-4 h-4 mr-2" />
+              ) : (
+                <Eye className="w-4 h-4 mr-2" />
+              )}
+              {showPreview ? 'Ocultar Preview' : 'Preview'}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={handleExport}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar
+          </Button>
           <Button
             variant="outline"
             onClick={handleDuplicate}
@@ -161,7 +279,18 @@ export default function ViewLabelTemplatePage() {
         </CardHeader>
         <CardContent>
           <div className="h-[500px]">
-            <LabelEditor template={template} readOnly />
+            {isStudioTemplate && studioTemplate ? (
+              <LabelStudioEditor
+                template={studioTemplate}
+                templateName={template.name}
+                className="h-full"
+                readOnly
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <p>Preview não disponível para este tipo de template</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

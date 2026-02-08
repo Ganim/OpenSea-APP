@@ -20,7 +20,15 @@ export {
 export {
   FieldElementRenderer,
   DATA_PATHS,
+  ENTITY_FIELD_REGISTRIES,
   getFieldLabel,
+  getExampleValue,
+  buildSamplePreviewData,
+} from './FieldElementRenderer';
+export type {
+  DataField,
+  DataFieldCategory,
+  EntityType,
 } from './FieldElementRenderer';
 export { BarcodeElementRenderer } from './BarcodeElementRenderer';
 export { QRCodeElementRenderer } from './QRCodeElementRenderer';

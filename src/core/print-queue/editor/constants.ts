@@ -47,6 +47,24 @@ export const LABEL_FIELDS: LabelFieldDefinition[] = [
     sampleValue: 'Vestuário',
     icon: 'FileText',
   },
+  {
+    id: 'product-unit',
+    label: 'Unidade (abrev.)',
+    category: 'product',
+    dataPath: 'product.unit',
+    type: 'text',
+    sampleValue: 'm',
+    icon: 'Ruler',
+  },
+  {
+    id: 'product-unit-full',
+    label: 'Unidade (completa)',
+    category: 'product',
+    dataPath: 'product.unitFull',
+    type: 'text',
+    sampleValue: 'metros',
+    icon: 'Ruler',
+  },
 
   // === VARIANTE ===
   {
@@ -106,6 +124,24 @@ export const LABEL_FIELDS: LabelFieldDefinition[] = [
     type: 'number',
     sampleValue: '10',
     icon: 'Hash',
+  },
+  {
+    id: 'item-quantity-unit',
+    label: 'Qtd + Unidade (abrev.)',
+    category: 'item',
+    dataPath: 'item.quantityWithUnit',
+    type: 'text',
+    sampleValue: '10 m',
+    icon: 'Ruler',
+  },
+  {
+    id: 'item-quantity-unit-full',
+    label: 'Qtd + Unidade (completa)',
+    category: 'item',
+    dataPath: 'item.quantityWithUnitFull',
+    type: 'text',
+    sampleValue: '10 metros',
+    icon: 'Ruler',
   },
   {
     id: 'item-batch',

@@ -5,11 +5,11 @@
  * Área de edição principal com zoom, pan e grid
  */
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { useEditorStore } from '../stores/editorStore';
-import { mmToPx, pxToMm, calculateFitZoom } from '../utils/unitConverter';
-import { SnapGuides, CenterGuides } from './SnapGuides';
 import { cn } from '@/lib/utils';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useEditorStore } from '../stores/editorStore';
+import { calculateFitZoom, mmToPx } from '../utils/unitConverter';
+import { CenterGuides, SnapGuides } from './SnapGuides';
 
 interface CanvasProps {
   className?: string;
@@ -35,6 +35,8 @@ export function Canvas({ className, children }: CanvasProps) {
   const selectedIds = useEditorStore(s => s.selectedIds);
   const activeSnapGuides = useEditorStore(s => s.activeSnapGuides);
   const snapEnabled = useEditorStore(s => s.snapEnabled);
+  const scrollLocked = useEditorStore(s => s.scrollLocked);
+  const readOnly = useEditorStore(s => s.readOnly);
 
   // Store actions
   const setZoom = useEditorStore(s => s.setZoom);
@@ -68,6 +70,9 @@ export function Canvas({ className, children }: CanvasProps) {
   // Handle wheel for zoom
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
+      // When scroll is locked, block zoom and pan via wheel
+      if (scrollLocked) return;
+
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         const delta = e.deltaY > 0 ? -0.1 : 0.1;
@@ -86,7 +91,7 @@ export function Canvas({ className, children }: CanvasProps) {
         });
       }
     },
-    [zoom, panOffset, setZoom, setPanOffset]
+    [scrollLocked, zoom, panOffset, setZoom, setPanOffset]
   );
 
   // Handle mouse down for panning
@@ -121,14 +126,21 @@ export function Canvas({ className, children }: CanvasProps) {
     }
   }, [isPanning, setPanning]);
 
-  // Click on canvas background clears selection
+  // Click on canvas background or workspace background clears selection
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget && selectedIds.length > 0) {
+      if (readOnly) return;
+      // Only clear if clicking directly on a background area (not on an element)
+      const target = e.target as HTMLElement;
+      const isBackground =
+        target === e.currentTarget || // workspace background
+        target === containerRef.current || // container
+        target.getAttribute('data-canvas-bg') === 'true'; // canvas background
+      if (isBackground && selectedIds.length > 0) {
         clearSelection();
       }
     },
-    [selectedIds, clearSelection]
+    [readOnly, selectedIds, clearSelection]
   );
 
   // Fit to screen on double click
@@ -172,7 +184,7 @@ export function Canvas({ className, children }: CanvasProps) {
               cx={gridSizePx / 2}
               cy={gridSizePx / 2}
               r={0.5}
-              fill="#d1d5db"
+              fill="oklch(70.4% 0.04 256.788)"
             />
           </pattern>
         </defs>
@@ -185,7 +197,7 @@ export function Canvas({ className, children }: CanvasProps) {
     <div
       ref={containerRef}
       className={cn(
-        'relative overflow-hidden bg-neutral-100 dark:bg-neutral-900',
+        'relative overflow-hidden bg-zinc-200/40 dark:bg-slate-800/40',
         isPanning && 'cursor-grabbing',
         className
       )}
@@ -194,6 +206,7 @@ export function Canvas({ className, children }: CanvasProps) {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onClick={handleCanvasClick}
     >
       {/* Workspace area (panned) */}
       <div
@@ -220,13 +233,13 @@ export function Canvas({ className, children }: CanvasProps) {
 
         {/* Canvas */}
         <div
-          className="relative border border-neutral-300 dark:border-neutral-600"
+          className="relative border border-gray-300 dark:border-slate-600 rounded-xl"
+          data-canvas-bg="true"
           style={{
             width: canvasWidthPx,
             height: canvasHeightPx,
             backgroundColor: canvasConfig.backgroundColor,
           }}
-          onClick={handleCanvasClick}
           onDoubleClick={handleDoubleClick}
         >
           {/* Grid */}
@@ -266,13 +279,15 @@ export function Canvas({ className, children }: CanvasProps) {
         </div>
       </div>
 
-      {/* Canvas info overlay */}
-      <div className="absolute bottom-2 left-2 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 bg-white/80 dark:bg-neutral-800/80 px-2 py-1 rounded">
-        <span>
-          {canvasWidth} × {canvasHeight} mm
-        </span>
-        <span className="text-neutral-300 dark:text-neutral-600">|</span>
-        <span>{Math.round(zoom * 100)}%</span>
+      {/* Canvas info overlay - centered in content area (accounting for ruler space) */}
+      <div className="absolute bottom-2 left-5 right-0 flex justify-center pointer-events-none z-20">
+        <div className="pointer-events-auto flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded shadow-sm">
+          <span>
+            {canvasWidth} × {canvasHeight} mm
+          </span>
+          <span className="text-slate-300 dark:text-slate-600">|</span>
+          <span>{Math.round(zoom * 100)}%</span>
+        </div>
       </div>
     </div>
   );

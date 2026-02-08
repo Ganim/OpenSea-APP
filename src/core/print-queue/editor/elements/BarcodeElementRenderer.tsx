@@ -16,7 +16,21 @@ interface BarcodeElementRendererProps {
 }
 
 /**
+ * Resolve um caminho em um objeto
+ */
+function resolvePath(obj: Record<string, unknown>, path: string): unknown {
+  return path.split('.').reduce<unknown>((current, key) => {
+    if (current && typeof current === 'object') {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
+}
+
+/**
  * Gera o valor do barcode baseado na configuração
+ * Sem previewData: retorna placeholder genérico
+ * Com previewData: resolve valores reais
  */
 function getBarcodeValue(
   config: BarcodeElement['barcodeConfig'],
@@ -28,40 +42,26 @@ function getBarcodeValue(
 
     case 'field':
       if (previewData && config.dataPath) {
-        const value = config.dataPath
-          .split('.')
-          .reduce<unknown>((obj, key) => {
-            if (obj && typeof obj === 'object') {
-              return (obj as Record<string, unknown>)[key];
-            }
-            return undefined;
-          }, previewData);
+        const value = resolvePath(previewData, config.dataPath);
         if (value) return String(value);
       }
-      return '7891234567890'; // Exemplo
+      // Sem previewData: valor genérico para renderizar um barcode válido
+      return '0000000000000';
 
     case 'composite':
       if (config.template) {
         return config.template.replace(/\{([^}]+)\}/g, (_, path: string) => {
           if (previewData) {
-            const value = path.split('.').reduce(
-              (obj: unknown, key: string): unknown => {
-                if (obj && typeof obj === 'object') {
-                  return (obj as Record<string, unknown>)[key];
-                }
-                return undefined;
-              },
-              previewData as unknown
-            );
+            const value = resolvePath(previewData, path);
             if (value) return String(value);
           }
           return '000';
         });
       }
-      return '123456789';
+      return '0000000000000';
 
     default:
-      return '123456789';
+      return '0000000000000';
   }
 }
 
@@ -84,6 +84,15 @@ export function BarcodeElementRenderer({
 
   const widthPx = mmToPx(width, zoom);
   const heightPx = mmToPx(height, zoom);
+
+  // Clear error when format changes to allow re-render attempt
+  const prevFormatRef = useRef(barcodeConfig.format);
+  useEffect(() => {
+    if (prevFormatRef.current !== barcodeConfig.format) {
+      setError(null);
+      prevFormatRef.current = barcodeConfig.format;
+    }
+  }, [barcodeConfig.format]);
 
   // Renderiza o barcode usando JsBarcode (lazy-loaded)
   useEffect(() => {

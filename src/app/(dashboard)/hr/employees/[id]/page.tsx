@@ -30,6 +30,7 @@ import { listPermissionGroups } from '@/services/rbac/rbac.service';
 import type { Employee } from '@/types/hr';
 import type { PermissionGroup } from '@/types/rbac';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AddEmployeeToQueueButton } from '@/core/print-queue';
 import {
   AlertCircle,
   ArrowLeft,
@@ -291,6 +292,15 @@ export default function EmployeeDetailPage() {
             <Trash className="h-4 w-4 text-red-800" />
             Excluir
           </Button>
+
+          {employee && (
+            <AddEmployeeToQueueButton
+              employee={employee}
+              variant="outline"
+              size="sm"
+              showLabel
+            />
+          )}
 
           <Button
             variant="outline"

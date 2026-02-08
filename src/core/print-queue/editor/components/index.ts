@@ -10,6 +10,7 @@ export { EditorRuler, RulerCorner } from './editor-ruler';
 export { Canvas } from './Canvas';
 export { Rulers } from './Rulers';
 export { LabelStudioEditor } from './LabelStudioEditor';
+export type { LabelStudioSaveData } from './LabelStudioEditor';
 export { SnapGuides, CenterGuides, MarginGuides } from './SnapGuides';
 export { SelectionBox, MultiSelectionBox } from './SelectionBox';
 export { ElementWrapper } from './ElementWrapper';

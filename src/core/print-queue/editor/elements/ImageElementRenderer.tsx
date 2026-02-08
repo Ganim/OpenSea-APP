@@ -32,7 +32,7 @@ export function ImageElementRenderer({
   if (!src || hasError) {
     return (
       <div
-        className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-800 text-neutral-400"
+        className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-600 text-slate-400"
         style={{
           borderRadius: borderRadiusPx,
         }}
@@ -57,8 +57,8 @@ export function ImageElementRenderer({
     >
       {/* Loading indicator */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800">
-          <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-500 rounded-full animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+          <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin" />
         </div>
       )}
 

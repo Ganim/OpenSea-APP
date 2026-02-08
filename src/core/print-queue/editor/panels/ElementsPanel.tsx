@@ -5,37 +5,50 @@
  * Painel lateral com elementos disponíveis para adicionar ao canvas
  */
 
-import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  Type,
-  Image,
-  Square,
-  Circle,
-  Minus,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import {
   ArrowRight,
   Barcode,
-  QrCode,
-  Table2,
+  ChevronRight,
+  Circle,
   FileText,
+  Image,
+  Minus,
+  PanelLeftClose,
+  PanelLeftOpen,
+  QrCode,
+  Square,
   Star,
+  Table2,
+  Type,
 } from 'lucide-react';
 import { useEditorStore } from '../stores/editorStore';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import type {
-  LabelElement,
-  TextElement,
-  ShapeElement,
-  LineElement,
   ArrowElement,
-  ImageElement,
-  IconElement,
-  FieldElement,
   BarcodeElement,
+  FieldElement,
+  IconElement,
+  ImageElement,
+  LabelElement,
+  LineElement,
   QRCodeElement,
+  ShapeElement,
   TableElement,
+  TextElement,
 } from '../studio-types';
-import { DEFAULT_TEXT_STYLE, DEFAULT_BORDER_STYLE } from '../studio-types';
+import { DEFAULT_BORDER_STYLE, DEFAULT_TEXT_STYLE } from '../studio-types';
 
 /**
  * Categorias de elementos
@@ -47,9 +60,9 @@ const ELEMENT_CATEGORIES = [
     elements: [
       {
         id: 'field',
-        name: 'Campo',
+        name: 'Dados',
         icon: FileText,
-        description: 'Campo dinâmico vinculado a dados',
+        description: 'Dados dinâmicos vinculados',
       },
     ],
   },
@@ -147,15 +160,14 @@ function createNewElement(
   canvasWidth: number,
   canvasHeight: number
 ): LabelElement | null {
-  // Posição central padrão
   const defaultX = canvasWidth / 2 - 10;
   const defaultY = canvasHeight / 2 - 5;
 
   const baseProps = {
-    id: '', // Será gerado pelo store
+    id: '',
     rotation: 0,
     opacity: 1,
-    zIndex: 0, // Será calculado pelo store
+    zIndex: 0,
     locked: false,
     visible: true,
   };
@@ -333,13 +345,19 @@ function createNewElement(
 }
 
 interface ElementsPanelProps {
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
   className?: string;
 }
 
 /**
- * Painel de elementos
+ * Painel de elementos com glassmorphism e grupos colapsáveis
  */
-export function ElementsPanel({ className }: ElementsPanelProps) {
+export function ElementsPanel({
+  collapsed,
+  onToggleCollapse,
+  className,
+}: ElementsPanelProps) {
   const addElement = useEditorStore(s => s.addElement);
   const canvasWidth = useEditorStore(s => s.canvasWidth);
   const canvasHeight = useEditorStore(s => s.canvasHeight);
@@ -351,41 +369,125 @@ export function ElementsPanel({ className }: ElementsPanelProps) {
     }
   };
 
-  return (
-    <div className={cn('p-4 space-y-4', className)}>
-      {ELEMENT_CATEGORIES.map(category => (
-        <div key={category.id}>
-          <h4 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2">
-            {category.name}
-          </h4>
-          <div className="grid grid-cols-2 gap-2">
-            {category.elements.map(element => {
-              const Icon = element.icon;
-              return (
-                <Button
-                  key={element.id}
-                  variant="outline"
-                  size="sm"
-                  className="h-auto py-2 px-2 flex flex-col items-center gap-1 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                  onClick={() => handleAddElement(element.id)}
-                  title={element.description}
-                >
-                  <Icon className="h-5 w-5 text-neutral-600 dark:text-neutral-300" />
-                  <span className="text-xs text-neutral-600 dark:text-neutral-300">
-                    {element.name}
-                  </span>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+  // Collapsed view - icon strip
+  if (collapsed) {
+    return (
+      <div
+        className={cn(
+          'w-12 flex flex-col items-center py-2 gap-1 bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-r border-slate-200/50 dark:border-slate-700/50',
+          className
+        )}
+      >
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="link"
+                size="icon"
+                className="h-8 w-8 mb-2"
+                onClick={onToggleCollapse}
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Expandir painel</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-      {/* Dica */}
-      <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
-        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-          Clique em um elemento para adicioná-lo ao canvas. Depois, arraste para
-          posicioná-lo.
+        {ELEMENT_CATEGORIES.flatMap(cat =>
+          cat.elements.map(element => {
+            const Icon = element.icon;
+            return (
+              <TooltipProvider key={element.id} delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleAddElement(element.id)}
+                    >
+                      <Icon className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">{element.name}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          })
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'w-64 flex flex-col bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-r border-slate-200/50 dark:border-slate-700/50 overflow-y-auto',
+        className
+      )}
+    >
+      {/* Panel header */}
+      <div className="flex items-center justify-between p-3 border-b border-slate-200/50 dark:border-slate-700/50">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          Elementos
+        </h3>
+        <Button
+          variant="link"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onToggleCollapse}
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Collapsible categories */}
+      <div className="p-3 space-y-2">
+        {ELEMENT_CATEGORIES.map(category => (
+          <Collapsible key={category.id} defaultOpen>
+            <CollapsibleTrigger className="flex items-center gap-1.5 w-full py-1.5 group">
+              <ChevronRight className="h-3 w-3 text-slate-400 transition-transform group-data-[state=open]:rotate-90" />
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {category.name}
+              </span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="grid grid-cols-2 gap-1.5 pt-1.5 pb-2">
+                {category.elements.map(element => {
+                  const Icon = element.icon;
+                  return (
+                    <button
+                      key={element.id}
+                      className={cn(
+                        'flex flex-col items-center gap-1 py-2.5 px-2 rounded-lg',
+                        'bg-linear-to-br from-slate-100/80 to-slate-50/60 dark:from-slate-600/60 dark:to-slate-700/40',
+                        'border border-slate-200/50 dark:border-slate-600/30',
+                        'hover:from-blue-100/80 hover:to-purple-100/60 dark:hover:from-blue-900/30 dark:hover:to-purple-700/40',
+                        'hover:border-blue-300/50 dark:hover:border-blue-600/30',
+                        'backdrop-blur-lg transition-all duration-200',
+                        'cursor-pointer'
+                      )}
+                      onClick={() => handleAddElement(element.id)}
+                      title={element.description}
+                    >
+                      <Icon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
+                        {element.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+      </div>
+
+      {/* Tip */}
+      <div className="mt-auto p-3 border-t border-slate-200/50 dark:border-slate-700/50">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          Clique em um elemento para adicioná-lo ao canvas.
         </p>
       </div>
     </div>

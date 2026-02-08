@@ -68,8 +68,20 @@ const initialState: EditorState = {
   isResizing: false,
   isPanning: false,
 
+  // Edição inline
+  editingId: null,
+
+  // Célula de tabela selecionada
+  selectedCell: null,
+
   // Preview
   previewData: null,
+
+  // Scroll lock
+  scrollLocked: true,
+
+  // Read-only
+  readOnly: false,
 };
 
 /**
@@ -77,13 +89,17 @@ const initialState: EditorState = {
  */
 function getNextZIndex(elements: LabelElement[]): number {
   if (elements.length === 0) return 1;
-  return Math.max(...elements.map((e) => e.zIndex)) + 1;
+  return Math.max(...elements.map(e => e.zIndex)) + 1;
 }
 
 /**
  * Clona um elemento com novo ID
  */
-function cloneElement(element: LabelElement, offsetX = 5, offsetY = 5): LabelElement {
+function cloneElement(
+  element: LabelElement,
+  offsetX = 5,
+  offsetY = 5
+): LabelElement {
   return {
     ...element,
     id: nanoid(),
@@ -113,7 +129,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     });
   },
 
-  loadTemplate: (template: LabelStudioTemplate, id?: string, name?: string, description?: string) => {
+  loadTemplate: (
+    template: LabelStudioTemplate,
+    id?: string,
+    name?: string,
+    description?: string
+  ) => {
     set({
       templateId: id ?? null,
       templateName: name ?? 'Etiqueta',
@@ -147,7 +168,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   },
 
   setCanvasConfig: (config: Partial<CanvasConfig>) => {
-    set((state) => ({
+    set(state => ({
       canvasConfig: { ...state.canvasConfig, ...config },
     }));
   },
@@ -174,7 +195,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   updateElement: (id: string, updates: Partial<LabelElement>) => {
     const state = get();
     set({
-      elements: state.elements.map((el) =>
+      elements: state.elements.map(el =>
         el.id === id ? ({ ...el, ...updates } as LabelElement) : el
       ),
     });
@@ -183,22 +204,24 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   deleteElements: (ids: string[]) => {
     const state = get();
     set({
-      elements: state.elements.filter((el) => !ids.includes(el.id)),
-      selectedIds: state.selectedIds.filter((id) => !ids.includes(id)),
+      elements: state.elements.filter(el => !ids.includes(el.id)),
+      selectedIds: state.selectedIds.filter(id => !ids.includes(id)),
     });
     state.saveToHistory();
   },
 
   duplicateElements: (ids: string[]) => {
     const state = get();
-    const elementsToDuplicate = state.elements.filter((el) => ids.includes(el.id));
-    const newElements = elementsToDuplicate.map((el) =>
+    const elementsToDuplicate = state.elements.filter(el =>
+      ids.includes(el.id)
+    );
+    const newElements = elementsToDuplicate.map(el =>
       cloneElement(el as LabelElement)
     );
 
     set({
       elements: [...state.elements, ...newElements],
-      selectedIds: newElements.map((el) => el.id),
+      selectedIds: newElements.map(el => el.id),
     });
     state.saveToHistory();
   },
@@ -208,21 +231,23 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // ============================================
 
   selectElements: (ids: string[], addToSelection = false) => {
-    set((state) => ({
+    set(state => ({
       selectedIds: addToSelection
         ? [...new Set([...state.selectedIds, ...ids])]
         : ids,
+      editingId: null,
+      selectedCell: null,
     }));
   },
 
   selectAll: () => {
-    set((state) => ({
-      selectedIds: state.elements.filter((el) => !el.locked).map((el) => el.id),
+    set(state => ({
+      selectedIds: state.elements.filter(el => !el.locked).map(el => el.id),
     }));
   },
 
   clearSelection: () => {
-    set({ selectedIds: [] });
+    set({ selectedIds: [], editingId: null, selectedCell: null });
   },
 
   setHoveredId: (id: string | null) => {
@@ -234,8 +259,8 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // ============================================
 
   moveElements: (ids: string[], deltaX: number, deltaY: number) => {
-    set((state) => ({
-      elements: state.elements.map((el) =>
+    set(state => ({
+      elements: state.elements.map(el =>
         ids.includes(el.id) && !el.locked
           ? { ...el, x: el.x + deltaX, y: el.y + deltaY }
           : el
@@ -243,9 +268,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }));
   },
 
-  resizeElement: (id: string, width: number, height: number, _anchor?: string) => {
-    set((state) => ({
-      elements: state.elements.map((el) =>
+  resizeElement: (
+    id: string,
+    width: number,
+    height: number,
+    _anchor?: string
+  ) => {
+    set(state => ({
+      elements: state.elements.map(el =>
         el.id === id && !el.locked ? { ...el, width, height } : el
       ),
     }));
@@ -257,24 +287,24 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   alignElements: (alignment: AlignmentType) => {
     const state = get();
-    const selectedElements = state.elements.filter((el) =>
+    const selectedElements = state.elements.filter(el =>
       state.selectedIds.includes(el.id)
     );
 
     if (selectedElements.length < 2) return;
 
     const bounds = {
-      minX: Math.min(...selectedElements.map((el) => el.x)),
-      maxX: Math.max(...selectedElements.map((el) => el.x + el.width)),
-      minY: Math.min(...selectedElements.map((el) => el.y)),
-      maxY: Math.max(...selectedElements.map((el) => el.y + el.height)),
+      minX: Math.min(...selectedElements.map(el => el.x)),
+      maxX: Math.max(...selectedElements.map(el => el.x + el.width)),
+      minY: Math.min(...selectedElements.map(el => el.y)),
+      maxY: Math.max(...selectedElements.map(el => el.y + el.height)),
     };
 
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
 
     set({
-      elements: state.elements.map((el) => {
+      elements: state.elements.map(el => {
         if (!state.selectedIds.includes(el.id) || el.locked) return el;
 
         switch (alignment) {
@@ -301,7 +331,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   distributeElements: (direction: DistributionDirection) => {
     const state = get();
     const selectedElements = state.elements
-      .filter((el) => state.selectedIds.includes(el.id))
+      .filter(el => state.selectedIds.includes(el.id))
       .sort((a, b) => (direction === 'horizontal' ? a.x - b.x : a.y - b.y));
 
     if (selectedElements.length < 3) return;
@@ -323,13 +353,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     let currentPos = isHorizontal ? first.x : first.y;
 
     const updatedPositions = new Map<string, number>();
-    selectedElements.forEach((el) => {
+    selectedElements.forEach(el => {
       updatedPositions.set(el.id, currentPos);
       currentPos += (isHorizontal ? el.width : el.height) + gap;
     });
 
     set({
-      elements: state.elements.map((el) => {
+      elements: state.elements.map(el => {
         if (!updatedPositions.has(el.id) || el.locked) return el;
         const newPos = updatedPositions.get(el.id)!;
         return isHorizontal ? { ...el, x: newPos } : { ...el, y: newPos };
@@ -346,7 +376,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const state = get();
     const maxZIndex = getNextZIndex(state.elements);
     set({
-      elements: state.elements.map((el) =>
+      elements: state.elements.map(el =>
         el.id === id ? { ...el, zIndex: maxZIndex } : el
       ),
     });
@@ -355,9 +385,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   sendToBack: (id: string) => {
     const state = get();
-    const minZIndex = Math.min(...state.elements.map((el) => el.zIndex));
+    const minZIndex = Math.min(...state.elements.map(el => el.zIndex));
     set({
-      elements: state.elements.map((el) =>
+      elements: state.elements.map(el =>
         el.id === id ? { ...el, zIndex: minZIndex - 1 } : el
       ),
     });
@@ -366,18 +396,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   moveForward: (id: string) => {
     const state = get();
-    const element = state.elements.find((el) => el.id === id);
+    const element = state.elements.find(el => el.id === id);
     if (!element) return;
 
     const higherElements = state.elements
-      .filter((el) => el.zIndex > element.zIndex)
+      .filter(el => el.zIndex > element.zIndex)
       .sort((a, b) => a.zIndex - b.zIndex);
 
     if (higherElements.length === 0) return;
 
     const swapWith = higherElements[0];
     set({
-      elements: state.elements.map((el) => {
+      elements: state.elements.map(el => {
         if (el.id === id) return { ...el, zIndex: swapWith.zIndex };
         if (el.id === swapWith.id) return { ...el, zIndex: element.zIndex };
         return el;
@@ -388,18 +418,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   moveBackward: (id: string) => {
     const state = get();
-    const element = state.elements.find((el) => el.id === id);
+    const element = state.elements.find(el => el.id === id);
     if (!element) return;
 
     const lowerElements = state.elements
-      .filter((el) => el.zIndex < element.zIndex)
+      .filter(el => el.zIndex < element.zIndex)
       .sort((a, b) => b.zIndex - a.zIndex);
 
     if (lowerElements.length === 0) return;
 
     const swapWith = lowerElements[0];
     set({
-      elements: state.elements.map((el) => {
+      elements: state.elements.map(el => {
         if (el.id === id) return { ...el, zIndex: swapWith.zIndex };
         if (el.id === swapWith.id) return { ...el, zIndex: element.zIndex };
         return el;
@@ -458,7 +488,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   copy: () => {
     const state = get();
-    const elementsToCopy = state.elements.filter((el) =>
+    const elementsToCopy = state.elements.filter(el =>
       state.selectedIds.includes(el.id)
     );
     set({ clipboard: elementsToCopy });
@@ -468,13 +498,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const state = get();
     if (state.clipboard.length === 0) return;
 
-    const newElements = state.clipboard.map((el) =>
+    const newElements = state.clipboard.map(el =>
       cloneElement(el as LabelElement, 10, 10)
     );
 
     set({
       elements: [...state.elements, ...newElements],
-      selectedIds: newElements.map((el) => el.id),
+      selectedIds: newElements.map(el => el.id),
     });
     state.saveToHistory();
   },
@@ -513,15 +543,19 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   },
 
   toggleGrid: () => {
-    set((state) => ({ showGrid: !state.showGrid }));
+    set(state => ({ showGrid: !state.showGrid }));
   },
 
   toggleRulers: () => {
-    set((state) => ({ showRulers: !state.showRulers }));
+    set(state => ({ showRulers: !state.showRulers }));
   },
 
   toggleSnap: () => {
-    set((state) => ({ snapEnabled: !state.snapEnabled }));
+    set(state => ({ snapEnabled: !state.snapEnabled }));
+  },
+
+  toggleScrollLock: () => {
+    set(state => ({ scrollLocked: !state.scrollLocked }));
   },
 
   setSnapGuides: (guides: SnapGuide[]) => {
@@ -550,12 +584,28 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     set({ isPanning });
   },
 
+  setEditingId: (id: string | null) => {
+    set({ editingId: id });
+  },
+
+  setSelectedCell: (cell: { row: number; col: number } | null) => {
+    set({ selectedCell: cell });
+  },
+
   // ============================================
   // PREVIEW
   // ============================================
 
   setPreviewData: (data: Record<string, unknown> | null) => {
     set({ previewData: data });
+  },
+
+  // ============================================
+  // READ-ONLY
+  // ============================================
+
+  setReadOnly: (readOnly: boolean) => {
+    set({ readOnly });
   },
 
   // ============================================
@@ -589,9 +639,10 @@ export const editorSelectors = {
   elements: (state: EditorStore) => state.elements,
   selectedIds: (state: EditorStore) => state.selectedIds,
   selectedElements: (state: EditorStore) =>
-    state.elements.filter((el) => state.selectedIds.includes(el.id)),
+    state.elements.filter(el => state.selectedIds.includes(el.id)),
   canUndo: (state: EditorStore) => state.historyIndex > 0,
-  canRedo: (state: EditorStore) => state.historyIndex < state.history.length - 1,
+  canRedo: (state: EditorStore) =>
+    state.historyIndex < state.history.length - 1,
   hasSelection: (state: EditorStore) => state.selectedIds.length > 0,
   zoom: (state: EditorStore) => state.zoom,
   canvasSize: (state: EditorStore) => ({

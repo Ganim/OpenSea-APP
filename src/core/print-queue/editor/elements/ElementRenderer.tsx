@@ -23,6 +23,9 @@ interface ElementRendererProps {
   zoom: number;
   isEditing?: boolean;
   onContentChange?: (content: string) => void;
+  selectedCell?: { row: number; col: number } | null;
+  onCellClick?: (row: number, col: number) => void;
+  previewData?: Record<string, unknown>;
 }
 
 /**
@@ -33,6 +36,9 @@ export function ElementRenderer({
   zoom,
   isEditing = false,
   onContentChange,
+  selectedCell,
+  onCellClick,
+  previewData,
 }: ElementRendererProps) {
   switch (element.type) {
     case 'text':
@@ -61,16 +67,24 @@ export function ElementRenderer({
       return <IconElementRenderer element={element} zoom={zoom} />;
 
     case 'field':
-      return <FieldElementRenderer element={element} zoom={zoom} />;
+      return <FieldElementRenderer element={element} zoom={zoom} previewData={previewData} />;
 
     case 'barcode':
-      return <BarcodeElementRenderer element={element} zoom={zoom} />;
+      return <BarcodeElementRenderer element={element} zoom={zoom} previewData={previewData} />;
 
     case 'qrcode':
-      return <QRCodeElementRenderer element={element} zoom={zoom} />;
+      return <QRCodeElementRenderer element={element} zoom={zoom} previewData={previewData} />;
 
     case 'table':
-      return <TableElementRenderer element={element} zoom={zoom} />;
+      return (
+        <TableElementRenderer
+          element={element}
+          zoom={zoom}
+          previewData={previewData}
+          selectedCell={selectedCell}
+          onCellClick={onCellClick}
+        />
+      );
 
     default:
       return (

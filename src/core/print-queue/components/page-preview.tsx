@@ -8,9 +8,9 @@
 import { cn } from '@/lib/utils';
 import { FileText, Layers } from 'lucide-react';
 import { useMemo } from 'react';
-import { SYSTEM_LABEL_TEMPLATES } from '../constants';
+import { SYSTEM_LABEL_TEMPLATES, LABEL_AVAILABLE_FIELDS } from '../constants';
 import { usePrintQueue } from '../context/print-queue-context';
-import type { LabelData } from '../types';
+import type { LabelData, LabelTemplateDefinition } from '../types';
 import {
   calculateLayoutInfo,
   getPaperDimensions,
@@ -32,11 +32,23 @@ export function PagePreview({
   showInfo = true,
 }: PagePreviewProps) {
   const { state, totalLabels } = usePrintQueue();
-  const { selectedTemplateId, pageSettings, items } = state;
+  const { selectedTemplateId, selectedTemplateDimensions, pageSettings, items } = state;
 
-  const template = SYSTEM_LABEL_TEMPLATES.find(
-    t => t.id === selectedTemplateId
-  );
+  const template: LabelTemplateDefinition | undefined = useMemo(() => {
+    const systemTemplate = SYSTEM_LABEL_TEMPLATES.find(t => t.id === selectedTemplateId);
+    if (systemTemplate) return systemTemplate;
+    if (selectedTemplateDimensions) {
+      return {
+        id: selectedTemplateId,
+        name: '',
+        dimensions: selectedTemplateDimensions,
+        isSystem: false,
+        availableFields: LABEL_AVAILABLE_FIELDS,
+        createdAt: new Date(),
+      };
+    }
+    return undefined;
+  }, [selectedTemplateId, selectedTemplateDimensions]);
 
   // Calcular layout
   const layoutInfo = useMemo(() => {
@@ -64,9 +76,33 @@ export function PagePreview({
     for (const queueItem of items) {
       for (let copy = 0; copy < queueItem.copies; copy++) {
         if (labelIndex >= layoutInfo.labelsPerPage) break;
-        labels.push(
-          resolveLabelData(queueItem.item, queueItem.variant, queueItem.product)
-        );
+        if (queueItem.entityType === 'employee') {
+          // Placeholder LabelData for employee items
+          labels.push({
+            manufacturerName: '',
+            stockLocation: '',
+            productName: queueItem.employee.fullName,
+            productCode: '',
+            variantName: queueItem.employee.position?.name || '',
+            variantCode: '',
+            itemCode: queueItem.employee.registrationNumber,
+            itemUid: queueItem.employee.id,
+            itemId: queueItem.employee.id,
+            itemQuantity: 0,
+            itemUnitOfMeasure: '',
+            productVariantName: queueItem.employee.fullName,
+            referenceVariantName: queueItem.employee.registrationNumber,
+            productAttributes: {},
+            variantAttributes: {},
+            itemAttributes: {},
+            barcodeData: queueItem.employee.registrationNumber,
+            qrCodeData: queueItem.employee.id,
+          });
+        } else {
+          labels.push(
+            resolveLabelData(queueItem.item, queueItem.variant, queueItem.product)
+          );
+        }
         labelIndex++;
       }
       if (labelIndex >= layoutInfo.labelsPerPage) break;

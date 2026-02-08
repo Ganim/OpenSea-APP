@@ -278,6 +278,27 @@ export interface TableConfig {
 }
 
 /**
+ * Bordas individuais por lado de uma célula
+ */
+export interface CellBorderStyle {
+  top?: BorderStyle;
+  right?: BorderStyle;
+  bottom?: BorderStyle;
+  left?: BorderStyle;
+}
+
+/**
+ * Configuração de label dentro de célula de tabela
+ */
+export interface CellLabelConfig {
+  enabled: boolean;
+  text: string;
+  position: 'above' | 'left';
+  style?: Partial<TextStyle>;
+  spacing?: number; // mm entre label e valor
+}
+
+/**
  * Conteúdo de célula da tabela
  */
 export interface TableCell {
@@ -285,9 +306,33 @@ export interface TableCell {
   col: number;
   type: 'text' | 'field';
   content?: string;
+
+  // Campo simples
   dataPath?: string;
+
+  // Tipo de campo (default: 'simple')
+  fieldType?: 'simple' | 'composite' | 'conditional' | 'calculated';
+
+  // Campo composto
+  template?: string;
+
+  // Campo condicional
+  conditions?: {
+    primary: string;
+    fallbacks: string[];
+  };
+
+  // Campo calculado
+  formula?: string;
+  format?: 'number' | 'currency' | 'percentage';
+  decimalPlaces?: number;
+
+  // Label/Rótulo
+  label?: CellLabelConfig;
+
   style?: Partial<TextStyle>;
   backgroundColor?: string;
+  borders?: CellBorderStyle;
 }
 
 /**
@@ -368,6 +413,9 @@ export interface LabelStudioTemplate {
 
   // Metadados
   category?: TemplateCategory;
+
+  // Tipo de entidade (default: 'item')
+  entityType?: 'item';
 }
 
 // ============================================
@@ -446,8 +494,20 @@ export interface EditorState {
   isResizing: boolean;
   isPanning: boolean;
 
+  // Edição inline
+  editingId: string | null;
+
+  // Célula de tabela selecionada
+  selectedCell: { row: number; col: number } | null;
+
   // Dados para preview
   previewData: Record<string, unknown> | null;
+
+  // Scroll lock
+  scrollLocked: boolean;
+
+  // Read-only mode
+  readOnly: boolean;
 }
 
 /**
@@ -508,6 +568,9 @@ export interface EditorActions {
   paste: () => void;
   cut: () => void;
 
+  // Scroll lock
+  toggleScrollLock: () => void;
+
   // Visualização
   setZoom: (zoom: number) => void;
   zoomIn: () => void;
@@ -523,9 +586,14 @@ export interface EditorActions {
   setDragging: (isDragging: boolean) => void;
   setResizing: (isResizing: boolean) => void;
   setPanning: (isPanning: boolean) => void;
+  setEditingId: (id: string | null) => void;
+  setSelectedCell: (cell: { row: number; col: number } | null) => void;
 
   // Preview
   setPreviewData: (data: Record<string, unknown> | null) => void;
+
+  // Read-only
+  setReadOnly: (readOnly: boolean) => void;
 
   // Serialização
   toJSON: () => LabelStudioTemplate;
@@ -575,7 +643,7 @@ export interface SnapResult {
  */
 export const DEFAULT_TEXT_STYLE: TextStyle = {
   fontFamily: 'Arial',
-  fontSize: 10,
+  fontSize: 6,
   fontWeight: 'normal',
   fontStyle: 'normal',
   textDecoration: 'none',

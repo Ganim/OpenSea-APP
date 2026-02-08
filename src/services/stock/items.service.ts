@@ -6,6 +6,7 @@ import type {
   BatchTransferResponse,
   ItemEntryResponse,
   ItemExitResponse,
+  ItemLabelDataResponse,
   ItemMovementsQuery,
   ItemMovementsResponse,
   ItemResponse,
@@ -109,6 +110,14 @@ export const itemsService = {
   async getLocationHistory(itemId: string): Promise<LocationHistoryResponse> {
     return apiClient.get<LocationHistoryResponse>(
       API_ENDPOINTS.ITEMS.LOCATION_HISTORY(itemId)
+    );
+  },
+
+  // POST /v1/items/label-data - Get label presenter data for multiple items
+  async getLabelData(itemIds: string[]): Promise<ItemLabelDataResponse> {
+    return apiClient.post<ItemLabelDataResponse>(
+      API_ENDPOINTS.ITEMS.LABEL_DATA,
+      { itemIds }
     );
   },
 

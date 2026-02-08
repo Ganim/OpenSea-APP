@@ -1,29 +1,27 @@
 /**
  * Print Queue Types
- * Sistema de fila de impressão de etiquetas
+ * Sistema de fila de impressão de etiquetas - Multi-Entidade
  */
 
+import type { Employee } from '@/types/hr';
 import type { Item, Product, Variant } from '@/types/stock';
 
 // ============================================
-// PRINT QUEUE ITEM
+// ENTITY TYPE
 // ============================================
 
-/**
- * Representa um item na fila de impressão
- */
-export interface PrintQueueItem {
+export type PrintQueueEntityType = 'stock-item' | 'employee';
+
+// ============================================
+// PRINT QUEUE ITEM (discriminated union)
+// ============================================
+
+interface PrintQueueItemBase {
   /** ID único do item na fila (gerado) */
   queueId: string;
 
-  /** Item do estoque sendo impresso */
-  item: Item;
-
-  /** Variante associada (para dados da etiqueta) */
-  variant?: Variant;
-
-  /** Produto associado (para dados da etiqueta) */
-  product?: Product;
+  /** Tipo da entidade */
+  entityType: PrintQueueEntityType;
 
   /** Número de cópias da etiqueta */
   copies: number;
@@ -33,6 +31,74 @@ export interface PrintQueueItem {
 
   /** Data/hora em que foi adicionado à fila */
   addedAt: Date;
+}
+
+export interface PrintQueueStockItem extends PrintQueueItemBase {
+  entityType: 'stock-item';
+
+  /** Item do estoque sendo impresso */
+  item: Item;
+
+  /** Variante associada (para dados da etiqueta) */
+  variant?: Variant;
+
+  /** Produto associado (para dados da etiqueta) */
+  product?: Product;
+}
+
+export interface PrintQueueEmployeeItem extends PrintQueueItemBase {
+  entityType: 'employee';
+
+  /** Funcionário sendo impresso */
+  employee: Employee;
+}
+
+/**
+ * Representa um item na fila de impressão (discriminated union)
+ */
+export type PrintQueueItem = PrintQueueStockItem | PrintQueueEmployeeItem;
+
+// ============================================
+// ADD TO QUEUE INPUT (discriminated union)
+// ============================================
+
+export interface AddStockItemInput {
+  entityType?: 'stock-item';
+  item: Item;
+  variant?: Variant;
+  product?: Product;
+  copies?: number;
+}
+
+export interface AddEmployeeInput {
+  entityType: 'employee';
+  employee: Employee;
+  copies?: number;
+}
+
+/**
+ * Input para adicionar item à fila
+ */
+export type AddToQueueInput = AddStockItemInput | AddEmployeeInput;
+
+// ============================================
+// HELPERS
+// ============================================
+
+/** Obtém o ID da entidade de um PrintQueueItem */
+export function getEntityId(item: PrintQueueItem): string {
+  if (item.entityType === 'employee') {
+    return item.employee.id;
+  }
+  return item.item.id;
+}
+
+/** Obtém o ID da entidade de um AddToQueueInput */
+export function getInputEntityId(input: AddToQueueInput): string {
+  if (input.entityType === 'employee') {
+    return input.employee.id;
+  }
+  return input.item.id;
 }
 
 // ============================================
@@ -86,6 +152,9 @@ export interface PrintQueueState {
 
   /** ID do template selecionado */
   selectedTemplateId: string;
+
+  /** Dimensões do template selecionado (para templates da API que não estão no SYSTEM_LABEL_TEMPLATES) */
+  selectedTemplateDimensions: { width: number; height: number } | null;
 
   /** Configurações de página */
   pageSettings: PageSettings;
@@ -209,6 +278,7 @@ export interface LabelData {
 
   // Informações do item
   itemCode: string;
+  itemUid: string;
   itemId: string;
   itemQuantity: number;
   itemUnitOfMeasure: string;
@@ -233,16 +303,6 @@ export interface LabelData {
 // ============================================
 
 /**
- * Input para adicionar item à fila
- */
-export interface AddToQueueInput {
-  item: Item;
-  variant?: Variant;
-  product?: Product;
-  copies?: number;
-}
-
-/**
  * Ações disponíveis na fila de impressão
  */
 export interface PrintQueueActions {
@@ -265,13 +325,13 @@ export interface PrintQueueActions {
   updatePageSettings: (settings: Partial<PageSettings>) => void;
 
   /** Selecionar template */
-  selectTemplate: (templateId: string) => void;
+  selectTemplate: (templateId: string, dimensions?: { width: number; height: number }) => void;
 
   /** Verificar se item está na fila */
-  isInQueue: (itemId: string) => boolean;
+  isInQueue: (entityId: string) => boolean;
 
-  /** Obter item da fila por ID do item de estoque */
-  getQueueItem: (itemId: string) => PrintQueueItem | undefined;
+  /** Obter item da fila por ID da entidade */
+  getQueueItem: (entityId: string) => PrintQueueItem | undefined;
 }
 
 /**

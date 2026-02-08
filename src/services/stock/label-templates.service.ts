@@ -73,13 +73,13 @@ async function createTemplate(
 
 /**
  * Atualiza um template existente
- * PUT /v1/label-templates/:id
+ * PATCH /v1/label-templates/:id
  */
 async function updateTemplate(
   id: string,
   data: UpdateLabelTemplateInput
 ): Promise<LabelTemplateResponse> {
-  return apiClient.put<LabelTemplateResponse>(`${BASE_URL}/${id}`, data);
+  return apiClient.patch<LabelTemplateResponse>(`${BASE_URL}/${id}`, data);
 }
 
 /**

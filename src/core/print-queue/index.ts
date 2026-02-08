@@ -14,6 +14,7 @@ export { useQueuePrinting } from './hooks/use-queue-printing';
 
 // Components
 export {
+  AddEmployeeToQueueButton,
   AddToQueueButton,
   BatchAddToQueueButton,
   LabelPreview,
@@ -37,6 +38,8 @@ export {
 
 // Types
 export type {
+  AddEmployeeInput,
+  AddStockItemInput,
   AddToQueueInput,
   CalculatedLayout,
   LabelData,
@@ -52,8 +55,11 @@ export type {
   PrintOptions,
   PrintQueueActions,
   PrintQueueContextValue,
+  PrintQueueEmployeeItem,
+  PrintQueueEntityType,
   PrintQueueItem,
   PrintQueueState,
+  PrintQueueStockItem,
 } from './types';
 
 // Constants

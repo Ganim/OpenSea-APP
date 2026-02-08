@@ -438,6 +438,86 @@ export interface Item {
   };
 }
 
+// Item Label Data (presenter endpoint response)
+export interface ItemLabelData {
+  item: {
+    id: string;
+    uniqueCode: string | null;
+    fullCode: string;
+    sequentialCode: number;
+    currentQuantity: number;
+    initialQuantity: number;
+    unitCost: number | null;
+    status: string;
+    entryDate: string;
+    resolvedAddress: string | null;
+    lastKnownAddress: string | null;
+    batchNumber: string | null;
+    manufacturingDate: string | null;
+    expiryDate: string | null;
+    barcode: string;
+    eanCode: string;
+    attributes: Record<string, unknown>;
+  };
+  variant: {
+    id: string;
+    name: string;
+    sku: string | null;
+    fullCode: string | null;
+    price: number;
+    costPrice: number | null;
+    barcode: string | null;
+    reference: string | null;
+    colorHex: string | null;
+    attributes: Record<string, unknown>;
+  };
+  product: {
+    id: string;
+    name: string;
+    fullCode: string | null;
+    description: string | null;
+    attributes: Record<string, unknown>;
+  };
+  manufacturer: {
+    id: string;
+    name: string;
+    legalName: string | null;
+    cnpj: string | null;
+    country: string;
+  } | null;
+  supplier: {
+    id: string;
+    name: string;
+    cnpj: string | null;
+  } | null;
+  template: {
+    id: string;
+    name: string;
+    unitOfMeasure: string;
+    productAttributes: Record<string, unknown> | null;
+    variantAttributes: Record<string, unknown> | null;
+    itemAttributes: Record<string, unknown> | null;
+  };
+  location: {
+    binId: string;
+    binAddress: string;
+    zoneId: string;
+    zoneCode: string;
+    zoneName: string;
+    warehouseId: string;
+    warehouseCode: string;
+    warehouseName: string;
+  } | null;
+  tenant: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ItemLabelDataResponse {
+  labelData: ItemLabelData[];
+}
+
 export interface RegisterItemEntryRequest {
   variantId: string;
   binId?: string;

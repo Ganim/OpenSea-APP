@@ -1,15 +1,19 @@
 /**
  * Template Selector
  * Seletor de templates de etiqueta com previews visuais
+ * Busca templates da API (Label Studio)
  */
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { LabelTemplate } from '@/core/print-queue/editor';
+import { useLabelTemplates } from '@/hooks/stock/use-label-templates';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
-import { SYSTEM_LABEL_TEMPLATES } from '../constants';
+import { Check, ExternalLink, Tag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { usePrintQueue } from '../context/print-queue-context';
-import type { LabelTemplateDefinition } from '../types';
 
 interface TemplateSelectorProps {
   className?: string;
@@ -18,10 +22,10 @@ interface TemplateSelectorProps {
 export function TemplateSelector({ className }: TemplateSelectorProps) {
   const { state, actions } = usePrintQueue();
   const selectedId = state.selectedTemplateId;
+  const router = useRouter();
 
-  // Por enquanto, usar apenas templates do sistema
-  // TODO: Carregar templates customizados da API
-  const templates = SYSTEM_LABEL_TEMPLATES;
+  const { data, isLoading } = useLabelTemplates({ limit: 100 });
+  const templates = data?.templates ?? [];
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -29,16 +33,39 @@ export function TemplateSelector({ className }: TemplateSelectorProps) {
         Modelo de Etiqueta
       </h3>
 
-      <div className="grid grid-cols-2 gap-2">
-        {templates.map(template => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            isSelected={selectedId === template.id}
-            onSelect={() => actions.selectTemplate(template.id)}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-2">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-lg" />
+          ))}
+        </div>
+      ) : templates.length === 0 ? (
+        <div className="text-center py-6 text-sm text-muted-foreground">
+          <Tag className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p>Nenhum template encontrado.</p>
+          <p className="text-xs mt-1">Crie um template no Studio.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {templates.map(template => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              isSelected={selectedId === template.id}
+              onSelect={() => actions.selectTemplate(template.id, { width: template.width, height: template.height })}
+            />
+          ))}
+        </div>
+      )}
+
+      <Button
+        size="sm"
+        className="w-full text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
+        onClick={() => router.push('/print/studio')}
+      >
+        <ExternalLink className="w-3.5 h-3.5 mr-2" />
+        Abrir Studio
+      </Button>
     </div>
   );
 }
@@ -48,7 +75,7 @@ export function TemplateSelector({ className }: TemplateSelectorProps) {
 // ============================================
 
 interface TemplateCardProps {
-  template: LabelTemplateDefinition;
+  template: LabelTemplate;
   isSelected: boolean;
   onSelect: () => void;
 }
@@ -75,7 +102,7 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
 
       {/* Template preview - visual thumbnail */}
       <div className="w-full aspect-[4/3] mb-2 rounded bg-gray-100 dark:bg-white/10 flex items-center justify-center overflow-hidden">
-        <TemplateThumbnail template={template} />
+        <TemplateThumbnail width={template.width} height={template.height} />
       </div>
 
       {/* Template info */}
@@ -83,7 +110,7 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
         {template.name}
       </h4>
       <p className="text-xs text-gray-500 dark:text-white/50">
-        {template.dimensions.width}x{template.dimensions.height}mm
+        {template.width}x{template.height}mm
       </p>
     </button>
   );
@@ -94,12 +121,11 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
 // ============================================
 
 interface TemplateThumbnailProps {
-  template: LabelTemplateDefinition;
+  width: number;
+  height: number;
 }
 
-function TemplateThumbnail({ template }: TemplateThumbnailProps) {
-  const { width, height } = template.dimensions;
-
+function TemplateThumbnail({ width, height }: TemplateThumbnailProps) {
   // Calculate scale to fit in container (max ~70px width or ~50px height)
   const maxWidth = 70;
   const maxHeight = 50;

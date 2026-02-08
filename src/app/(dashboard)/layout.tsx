@@ -4,11 +4,11 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Navbar } from '@/components/layout/navbar';
 import { NavigationMenu } from '@/components/layout/navigation-menu';
 import { menuItems } from '@/config/menu-items';
-import { useTenant } from '@/contexts/tenant-context';
 import { useAuth } from '@/contexts/auth-context';
+import { useTenant } from '@/contexts/tenant-context';
 import { PrintQueueProvider } from '@/core/print-queue';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function DashboardLayout({
   children,

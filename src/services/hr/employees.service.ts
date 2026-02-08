@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import type { Employee } from '@/types/hr';
+import type { Employee, EmployeeLabelDataResponse } from '@/types/hr';
 import type { PaginationMeta } from '@/types/pagination';
 
 export interface EmployeesResponse {
@@ -148,6 +148,16 @@ export const employeesService = {
   // DELETE /v1/hr/employees/:id
   async deleteEmployee(id: string): Promise<void> {
     return apiClient.delete<void>(`/v1/hr/employees/${id}`);
+  },
+
+  // POST /v1/hr/employees/label-data
+  async getLabelData(
+    employeeIds: string[]
+  ): Promise<EmployeeLabelDataResponse> {
+    return apiClient.post<EmployeeLabelDataResponse>(
+      '/v1/hr/employees/label-data',
+      { employeeIds }
+    );
   },
 
   // POST /v1/hr/employees/:id/create-user

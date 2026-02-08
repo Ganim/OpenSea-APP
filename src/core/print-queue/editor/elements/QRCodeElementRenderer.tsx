@@ -29,6 +29,8 @@ function resolvePath(obj: Record<string, unknown>, path: string): unknown {
 
 /**
  * Gera o conteúdo do QR Code baseado na configuração
+ * Sem previewData: retorna placeholder genérico
+ * Com previewData: resolve valores reais
  */
 function getQRContent(
   config: QRCodeElement['qrConfig'],
@@ -40,7 +42,8 @@ function getQRContent(
         const value = resolvePath(previewData, config.dataPath);
         if (value) return String(value);
       }
-      return 'ITM-2024-001'; // Exemplo
+      // Sem previewData: placeholder genérico
+      return previewData ? 'ITM-2024-001' : '{{campo}}';
 
     case 'composite':
       if (config.template) {
@@ -49,10 +52,10 @@ function getQRContent(
             const value = resolvePath(previewData, path);
             if (value) return String(value);
           }
-          return 'exemplo';
+          return previewData ? 'exemplo' : `{{${path.split('.').pop() || 'campo'}}}`;
         });
       }
-      return 'composição exemplo';
+      return previewData ? 'composição exemplo' : '{{composição}}';
 
     case 'url':
       if (config.urlBase) {

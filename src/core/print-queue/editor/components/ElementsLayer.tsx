@@ -22,6 +22,9 @@ export function ElementsLayer({ zoom }: ElementsLayerProps) {
   // Store state
   const elements = useEditorStore(s => s.elements);
   const selectedIds = useEditorStore(s => s.selectedIds);
+  const selectedCell = useEditorStore(s => s.selectedCell);
+  const setSelectedCell = useEditorStore(s => s.setSelectedCell);
+  const previewData = useEditorStore(s => s.previewData);
 
   // Ordena elementos por zIndex
   const sortedElements = [...elements].sort((a, b) => a.zIndex - b.zIndex);
@@ -34,7 +37,21 @@ export function ElementsLayer({ zoom }: ElementsLayerProps) {
       {/* Elementos */}
       {sortedElements.map(element => (
         <ElementWrapper key={element.id} element={element} zoom={zoom}>
-          <ElementRenderer element={element} zoom={zoom} />
+          <ElementRenderer
+            element={element}
+            zoom={zoom}
+            previewData={previewData ?? undefined}
+            selectedCell={
+              selectedIds.length === 1 && selectedIds[0] === element.id && element.type === 'table'
+                ? selectedCell
+                : undefined
+            }
+            onCellClick={
+              selectedIds.length === 1 && selectedIds[0] === element.id && element.type === 'table'
+                ? (row, col) => setSelectedCell({ row, col })
+                : undefined
+            }
+          />
         </ElementWrapper>
       ))}
 

@@ -681,6 +681,21 @@ export const UI_PERMISSIONS = {
 } as const;
 
 // =============================================================================
+// STUDIO - Editor de etiquetas
+// =============================================================================
+
+export const STUDIO_PERMISSIONS = {
+  LABELS: {
+    MANAGE: 'studio.labels.manage',
+    USE: 'studio.labels.use',
+    VIEW: 'studio.labels.view',
+    LIST: 'studio.labels.list',
+    EDIT: 'studio.labels.edit',
+    DELETE: 'studio.labels.delete',
+  },
+} as const;
+
+// =============================================================================
 // WILDCARD - Permissões especiais
 // =============================================================================
 
@@ -710,6 +725,7 @@ export const PermissionCodes = {
   REPORTS: REPORTS_PERMISSIONS,
   DATA: DATA_PERMISSIONS,
   UI: UI_PERMISSIONS,
+  STUDIO: STUDIO_PERMISSIONS,
   WILDCARD: WILDCARD_PERMISSIONS,
 } as const;
 

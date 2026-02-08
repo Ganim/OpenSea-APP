@@ -1,6 +1,7 @@
 /**
  * Queue Item Card
  * Card individual para um item na fila de impressão
+ * Suporte multi-entidade: stock items e employees
  */
 
 'use client';
@@ -8,7 +9,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { GripVertical, Minus, Package, Plus, Trash2 } from 'lucide-react';
+import { GripVertical, Minus, Package, Plus, Trash2, User } from 'lucide-react';
 import type { PrintQueueItem } from '../types';
 
 interface QueueItemCardProps {
@@ -26,10 +27,29 @@ export function QueueItemCard({
   dragHandleProps,
   isDragging = false,
 }: QueueItemCardProps) {
-  const productName = item.product?.name || item.item.productName || 'Produto';
-  const variantName = item.variant?.name || item.item.variantName || '';
-  const itemCode = item.item.uniqueCode || item.item.fullCode || item.item.id;
-  const location = item.item.resolvedAddress || '';
+  const isEmployee = item.entityType === 'employee';
+
+  // Dados exibidos dependem do tipo da entidade
+  let title: string;
+  let subtitle: string;
+  let code: string;
+  let detail: string;
+  const Icon = isEmployee ? User : Package;
+  const gradient = isEmployee
+    ? 'from-emerald-500 to-teal-600'
+    : 'from-blue-500 to-purple-600';
+
+  if (item.entityType === 'employee') {
+    title = item.employee.fullName;
+    subtitle = item.employee.position?.name || '';
+    code = item.employee.registrationNumber;
+    detail = item.employee.department?.name || '';
+  } else {
+    title = item.product?.name || item.item.productName || 'Produto';
+    subtitle = item.variant?.name || item.item.variantName || '';
+    code = item.item.uniqueCode || item.item.fullCode || item.item.id;
+    detail = item.item.resolvedAddress || '';
+  }
 
   return (
     <div
@@ -51,26 +71,29 @@ export function QueueItemCard({
       )}
 
       {/* Item Icon */}
-      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
-        <Package className="w-6 h-6 text-white" />
+      <div className={cn(
+        'w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0',
+        gradient
+      )}>
+        <Icon className="w-6 h-6 text-white" />
       </div>
 
       {/* Item Info */}
       <div className="flex-1 min-w-0">
         <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-          {productName}
+          {title}
         </h4>
-        {variantName && (
+        {subtitle && (
           <p className="text-xs text-gray-600 dark:text-white/60 truncate">
-            {variantName}
+            {subtitle}
           </p>
         )}
         <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-white/40">
-          <span className="font-mono">{itemCode}</span>
-          {location && (
+          <span className="font-mono">{code}</span>
+          {detail && (
             <>
               <span>•</span>
-              <span>{location}</span>
+              <span>{detail}</span>
             </>
           )}
         </div>

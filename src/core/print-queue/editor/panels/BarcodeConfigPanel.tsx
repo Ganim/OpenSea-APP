@@ -5,11 +5,13 @@
  * Painel de configuração de código de barras
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { BarcodeElement, BarcodeConfig } from '../studio-types';
-import { DATA_PATHS } from '../elements/FieldElementRenderer';
+import { getFieldLabel } from '../elements/FieldElementRenderer';
+import { FieldPickerModal } from '../components/FieldPickerModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -18,9 +20,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from '@/components/ui/select';
+import { ChevronRight, Braces } from 'lucide-react';
 
 interface BarcodeConfigPanelProps {
   element: BarcodeElement;
@@ -29,6 +30,8 @@ interface BarcodeConfigPanelProps {
 
 export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProps) {
   const { barcodeConfig } = element;
+  const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
+  const [insertModalOpen, setInsertModalOpen] = useState(false);
 
   const updateConfig = (updates: Partial<BarcodeConfig>) => {
     onUpdate({ barcodeConfig: { ...barcodeConfig, ...updates } });
@@ -36,7 +39,7 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
 
   return (
     <div className="space-y-4">
-      <h4 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+      <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         Código de Barras
       </h4>
 
@@ -62,26 +65,25 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
       {barcodeConfig.source === 'field' && (
         <div>
           <Label className="text-xs">Campo</Label>
-          <Select
-            value={barcodeConfig.dataPath || ''}
-            onValueChange={v => updateConfig({ dataPath: v })}
+          <Button
+            variant="outline"
+            className="w-full justify-between h-8 font-normal"
+            onClick={() => setFieldPickerOpen(true)}
           >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Selecione um campo" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(DATA_PATHS).map(([key, category]) => (
-                <SelectGroup key={key}>
-                  <SelectLabel>{category.label}</SelectLabel>
-                  {category.fields.map(field => (
-                    <SelectItem key={field.path} value={field.path}>
-                      {field.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
+            <span className="truncate text-sm">
+              {barcodeConfig.dataPath ? getFieldLabel(barcodeConfig.dataPath) : 'Selecionar campo...'}
+            </span>
+            <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
+          </Button>
+          {barcodeConfig.dataPath && (
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{barcodeConfig.dataPath}</p>
+          )}
+          <FieldPickerModal
+            open={fieldPickerOpen}
+            onOpenChange={setFieldPickerOpen}
+            onSelect={v => updateConfig({ dataPath: v })}
+            currentValue={barcodeConfig.dataPath}
+          />
         </div>
       )}
 
@@ -105,6 +107,28 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
             onChange={e => updateConfig({ template: e.target.value })}
             placeholder="{product.code}-{variant.sku}"
             className="h-16 text-sm font-mono"
+          />
+          <div className="flex justify-end mt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 text-xs gap-1"
+              onClick={() => setInsertModalOpen(true)}
+            >
+              <Braces className="w-3 h-3" />
+              Inserir campo
+            </Button>
+          </div>
+          <FieldPickerModal
+            open={insertModalOpen}
+            onOpenChange={setInsertModalOpen}
+            onSelect={() => {}}
+            insertMode
+            onInsert={(text) => {
+              const current = barcodeConfig.template || '';
+              updateConfig({ template: current + text });
+            }}
+            title="Inserir Campo no Template"
           />
         </div>
       )}
@@ -147,7 +171,7 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
               type="color"
               value={barcodeConfig.barColor}
               onChange={e => updateConfig({ barColor: e.target.value })}
-              className="w-8 h-8 rounded border border-neutral-200"
+              className="w-8 h-8 rounded border border-slate-200"
             />
           </div>
         </div>
@@ -158,7 +182,7 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
               type="color"
               value={barcodeConfig.backgroundColor}
               onChange={e => updateConfig({ backgroundColor: e.target.value })}
-              className="w-8 h-8 rounded border border-neutral-200"
+              className="w-8 h-8 rounded border border-slate-200"
             />
           </div>
         </div>
