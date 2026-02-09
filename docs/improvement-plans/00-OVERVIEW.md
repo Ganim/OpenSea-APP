@@ -9,7 +9,7 @@
 | ESLint / TypeScript   | A      | DONE   | `02-HIGH-eslint-typescript.md`   |
 | Componentes Grandes   | A-     | DONE   | `02-HIGH-component-splitting.md` |
 | Type Generation       | A-     | DONE   | `02-HIGH-type-generation.md`     |
-| Performance           | B      |        | `03-MEDIUM-performance.md`       |
+| Performance           | A-     | DONE   | `03-MEDIUM-performance.md`       |
 | Acessibilidade        | A-     | DONE   | `03-MEDIUM-accessibility.md`     |
 | CSS Organization      | B+     |        | `03-MEDIUM-css-organization.md`  |
 | Extras                | -      |        | `04-LOW-extras.md`               |
@@ -36,13 +36,17 @@ Concluido:
   [x] entity-form.tsx refatorado (663→196 linhas, 5 arquivos modulares)
   [x] api-client.ts refatorado (479→220 linhas, 4 arquivos modulares)
   [x] Hook factory CRUD criado (createCrudHooks + 3 hooks exemplo)
+  [x] Dynamic imports (LabelGenerator @react-pdf, LabelStudioEditor GrapesJS ~700KB lazy-loaded)
+  [x] Bundle analyzer configurado (npm run analyze)
+  [x] EntityForm + EntityFormField memoizados (React.memo)
+  [x] Token cache implementado (1s TTL, reduz acessos localStorage)
 
 Pendente - Alta prioridade:
   [ ] Iniciar testes do api-client e auth-context
   [ ] Continuar testes (hooks, forms)
 
 Pendente - Media prioridade:
-  [ ] Dynamic imports para libs pesadas
+  [ ] Organizar CSS (Tailwind utilities, componentes reutilizáveis)
 
 Pendente - Baixa prioridade:
   [ ] Organizar CSS

@@ -33,7 +33,7 @@ import {
 // COMPONENT
 // =============================================================================
 
-export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
+const EntityFormComponent = forwardRef<HTMLFormElement, EntityFormProps<any>>(
   function EntityForm<T extends BaseEntity>(
     {
       config,
@@ -191,6 +191,10 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
   }
 );
 
-EntityForm.displayName = 'EntityForm';
+EntityFormComponent.displayName = 'EntityForm';
+
+// Memoize component to prevent unnecessary re-renders
+// Compare props shallowly (default behavior)
+export const EntityForm = React.memo(EntityFormComponent);
 
 export default EntityForm;

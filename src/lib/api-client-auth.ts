@@ -14,6 +14,11 @@ import type { RefreshResponse } from './api-client.types';
 export class TokenManager {
   private refreshPromise: Promise<string> | null = null;
   private baseURL: string;
+  
+  // Token cache para evitar acessos repetidos ao localStorage
+  private tokenCache: string | null = null;
+  private tokenCacheTimestamp = 0;
+  private readonly CACHE_TTL = 1000; // 1 segundo
 
   constructor(baseURL = apiConfig.baseURL) {
     this.baseURL = baseURL;
@@ -25,7 +30,18 @@ export class TokenManager {
 
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(authConfig.tokenKey);
+    
+    // Verificar cache antes de acessar localStorage
+    const now = Date.now();
+    if (this.tokenCache !== null && now - this.tokenCacheTimestamp < this.CACHE_TTL) {
+      return this.tokenCache;
+    }
+    
+    // Cache expirado ou vazio, ler do localStorage
+    this.tokenCache = localStorage.getItem(authConfig.tokenKey);
+    this.tokenCacheTimestamp = now;
+    
+    return this.tokenCache;
   }
 
   getRefreshToken(): string | null {
@@ -35,7 +51,11 @@ export class TokenManager {
 
   setTokens(token: string | null, refreshToken?: string | null): void {
     if (typeof window === 'undefined') return;
-    
+
+    // Invalidar cache ao atualizar tokens
+    this.tokenCache = token;
+    this.tokenCacheTimestamp = token ? Date.now() : 0;
+
     if (token) {
       localStorage.setItem(authConfig.tokenKey, token);
     } else {
@@ -81,7 +101,7 @@ export class TokenManager {
     // - Token antigo é revogado após uso bem-sucedido
     // - Backend retorna novo access token E novo refresh token
     // - Sempre salvar ambos os tokens retornados
-    
+
     // Cria a promise de refresh e armazena para evitar chamadas simultâneas
     this.refreshPromise = this.performRefresh(refreshToken);
 

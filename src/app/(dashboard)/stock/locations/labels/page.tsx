@@ -4,10 +4,34 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, RefreshCw, Tags } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
 import { useWarehouses } from '../src/api';
 import { useAllZones } from '../src/api/zones.queries';
-import { LabelGenerator } from '../src/components';
+
+// Dynamic import para LabelGenerator (@react-pdf pesado ~400KB)
+const LabelGenerator = dynamic(
+  () =>
+    import('../src/components').then((mod) => ({
+      default: mod.LabelGenerator,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Skeleton className="h-[400px] rounded-lg" />
+          <Skeleton className="h-[300px] rounded-lg" />
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-[250px] rounded-lg" />
+          <Skeleton className="h-[120px] rounded-lg" />
+          <Skeleton className="h-[100px] rounded-lg" />
+        </div>
+      </div>
+    ),
+  }
+);
 
 export default function LabelsPage() {
   const {
