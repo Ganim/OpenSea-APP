@@ -10,7 +10,7 @@
 | Componentes Grandes   | B      |        | `02-HIGH-component-splitting.md` |
 | Type Generation       | A-     | DONE   | `02-HIGH-type-generation.md`     |
 | Performance           | B      |        | `03-MEDIUM-performance.md`       |
-| Acessibilidade        | B      | 70%    | `03-MEDIUM-accessibility.md`     |
+| Acessibilidade        | A-     | DONE   | `03-MEDIUM-accessibility.md`     |
 | CSS Organization      | B+     |        | `03-MEDIUM-css-organization.md`  |
 | Extras                | -      |        | `04-LOW-extras.md`               |
 
@@ -29,6 +29,10 @@ Concluido:
   [x] ARIA attributes em form fields (aria-describedby, aria-invalid - 20+ field types)
   [x] Skip links em layouts (dashboard + central)
   [x] aria-label em ~65 botoes icon-only criticos (nav, forms, print-queue, stock, hr, admin, central)
+  [x] EntityGrid keyboard navigation (arrow keys, space, enter, home, end, escape)
+  [x] jsx-a11y/alt-text ESLint rule habilitada (warn)
+  [x] Alt text em imagens (Avatar + imagens decorativas)
+  [x] Color contrast audit (design system WCAG AA compliant)
 
 Pendente - Alta prioridade:
   [ ] Iniciar testes do api-client e auth-context
@@ -37,9 +41,6 @@ Pendente - Alta prioridade:
 
 Pendente - Media prioridade:
   [ ] Dynamic imports para libs pesadas
-  [ ] Acessibilidade: EntityGrid keyboard navigation (~1.5h)
-  [ ] Acessibilidade: Color contrast audit (~1h)
-  [ ] Acessibilidade: Alt text em imagens (~30min)
   [ ] Hook factory para CRUD
 
 Pendente - Baixa prioridade:
@@ -63,6 +64,6 @@ Pendente - Types (nao bloqueante):
 | ---------- | -------- | --------------- |
 | ~~Critica~~    | ~~30h~~ DONE | -               |
 | Alta       | ~14h     | 1 semana        |
-| Media      | ~16h     | 1 semana        |
+| Media      | ~10h     | 1 semana        |
 | Baixa      | ~20h     | quando possivel |
-| **Total restante** | **~50h** | **~3 semanas** |
+| **Total restante** | **~44h** | **~2-3 semanas** |

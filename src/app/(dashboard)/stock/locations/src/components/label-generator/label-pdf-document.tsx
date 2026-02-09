@@ -108,6 +108,7 @@ function PDFLabel({ data, config, qrDataUrl, barcodeDataUrl }: PDFLabelProps) {
       {config.format === 'qr' && qrDataUrl && (
         <Image
           src={qrDataUrl}
+          alt=""
           style={[
             styles.codeImage,
             { width: imgSize.qr, height: imgSize.qr, marginBottom: 2 },
@@ -117,6 +118,7 @@ function PDFLabel({ data, config, qrDataUrl, barcodeDataUrl }: PDFLabelProps) {
       {config.format === 'barcode' && barcodeDataUrl && (
         <Image
           src={barcodeDataUrl}
+          alt=""
           style={[
             styles.codeImage,
             {

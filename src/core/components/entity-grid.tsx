@@ -163,6 +163,9 @@ export function EntityGrid<T extends BaseEntity>({
   const [sortDirection, setSortDirection] =
     useState<SortDirection>(defaultSortDirection);
 
+  // Keyboard navigation state
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+
   // Opções de ordenação padrão
   const defaultSortOptions: SortOption[] = useMemo(
     () => [
@@ -530,6 +533,92 @@ export function EntityGrid<T extends BaseEntity>({
     [onContextMenu, selectionActions, selectedIds]
   );
 
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (sortedItems.length === 0) return;
+
+      let newIndex = focusedIndex;
+      let shouldPreventDefault = false;
+
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown': {
+          shouldPreventDefault = true;
+          newIndex =
+            focusedIndex === -1
+              ? 0
+              : Math.min(focusedIndex + 1, sortedItems.length - 1);
+          break;
+        }
+        case 'ArrowLeft':
+        case 'ArrowUp': {
+          shouldPreventDefault = true;
+          newIndex = focusedIndex === -1 ? 0 : Math.max(focusedIndex - 1, 0);
+          break;
+        }
+        case 'Home': {
+          shouldPreventDefault = true;
+          newIndex = 0;
+          break;
+        }
+        case 'End': {
+          shouldPreventDefault = true;
+          newIndex = sortedItems.length - 1;
+          break;
+        }
+        case ' ':
+        case 'Enter': {
+          if (
+            focusedIndex >= 0 &&
+            focusedIndex < sortedItems.length &&
+            selectionActions
+          ) {
+            shouldPreventDefault = true;
+            const item = sortedItems[focusedIndex];
+            if (e.shiftKey && selectionContext?.state.lastSelectedId) {
+              selectionActions.selectRange(
+                selectionContext.state.lastSelectedId,
+                item.id
+              );
+            } else if (e.ctrlKey || e.metaKey) {
+              selectionActions.toggle(item.id);
+            } else {
+              selectionActions.select(item.id);
+            }
+          }
+          break;
+        }
+        case 'Escape': {
+          shouldPreventDefault = true;
+          if (selectionActions) {
+            selectionActions.clear();
+          }
+          setFocusedIndex(-1);
+          break;
+        }
+      }
+
+      if (shouldPreventDefault) {
+        e.preventDefault();
+      }
+
+      if (
+        newIndex !== focusedIndex &&
+        newIndex >= 0 &&
+        newIndex < sortedItems.length
+      ) {
+        setFocusedIndex(newIndex);
+        const item = sortedItems[newIndex];
+        const element = itemRefs.current.get(item.id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    },
+    [focusedIndex, sortedItems, selectionActions, selectionContext]
+  );
+
   const setItemRef = useCallback(
     (id: string, element: HTMLDivElement | null) => {
       if (element) {
@@ -610,6 +699,7 @@ export function EntityGrid<T extends BaseEntity>({
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode('grid')}
+                  aria-label="Visualização em grade"
                   className={cn(
                     'rounded-lg',
                     viewMode === 'grid'
@@ -623,6 +713,7 @@ export function EntityGrid<T extends BaseEntity>({
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  aria-label="Visualização em lista"
                   className={cn(
                     'rounded-lg',
                     viewMode === 'list'
@@ -645,8 +736,12 @@ export function EntityGrid<T extends BaseEntity>({
         onMouseDown={handleMouseDown}
         onClick={handleContainerClick}
         onDragStart={e => e.preventDefault()}
+        onKeyDown={handleKeyDown}
         className={cn('relative', itemsClassName)}
         style={{ userSelect: 'none' }}
+        tabIndex={0}
+        role="grid"
+        aria-label={`Grade de ${config.display.labels.plural}`}
       >
         {viewMode === 'grid' ? (
           <div className={cn('grid gap-4', gridColumns)}>
@@ -660,6 +755,7 @@ export function EntityGrid<T extends BaseEntity>({
                     transition: { delay: index * 0.05 },
                   };
               const isSelected = selectedIds.has(item.id);
+              const isFocused = index === focusedIndex;
 
               return (
                 <ItemWrapper
@@ -676,6 +772,9 @@ export function EntityGrid<T extends BaseEntity>({
                           handleContextMenu(item, e),
                       }
                     : {})}
+                  tabIndex={isFocused ? 0 : -1}
+                  role="gridcell"
+                  aria-selected={isSelected}
                   {...animationProps}
                 >
                   {renderGridItem(item, isSelected)}
@@ -695,6 +794,7 @@ export function EntityGrid<T extends BaseEntity>({
                     transition: { delay: index * 0.03 },
                   };
               const isSelected = selectedIds.has(item.id);
+              const isFocused = index === focusedIndex;
 
               return (
                 <ItemWrapper
@@ -711,6 +811,9 @@ export function EntityGrid<T extends BaseEntity>({
                           handleContextMenu(item, e),
                       }
                     : {})}
+                  tabIndex={isFocused ? 0 : -1}
+                  role="gridcell"
+                  aria-selected={isSelected}
                   {...animationProps}
                 >
                   {renderListItem(item, isSelected)}

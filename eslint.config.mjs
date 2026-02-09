@@ -36,7 +36,7 @@ const eslintConfig = defineConfig([
       'react-hooks/purity': 'off',
       'react-hooks/immutability': 'off',
       'react-hooks/preserve-manual-memoization': 'off',
-      'jsx-a11y/alt-text': 'off',
+      'jsx-a11y/alt-text': 'warn',
       'import/no-anonymous-default-export': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
