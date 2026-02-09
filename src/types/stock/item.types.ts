@@ -46,6 +46,15 @@ export interface Item {
   productName?: string;
   variantSku?: string;
   variantName?: string;
+  // Campos do template e atributos (para listagem enriquecida)
+  templateId?: string;
+  templateName?: string;
+  templateUnitOfMeasure?: string;
+  productAttributes?: Record<string, unknown>;
+  variantAttributes?: Record<string, unknown>;
+  variantColorHex?: string;
+  manufacturerName?: string;
+  productId?: string;
   // Relacao expandida (opcional)
   bin?: {
     id: string;

@@ -163,8 +163,8 @@ export function formatUnitOfMeasure(
 
   const unitMap: Record<string, string> = {
     // Unidades básicas
-    UNITS: 'Unidades',
-    PIECES: 'Peças',
+    UNITS: 'Unidades (un)',
+    PIECES: 'Peças (pç)',
 
     // Peso
     KILOGRAMS: 'Quilogramas (kg)',
@@ -178,7 +178,7 @@ export function formatUnitOfMeasure(
     GALLONS: 'Galões (gal)',
     QUARTS: 'Quartos (qt)',
     PINTS: 'Pintas (pt)',
-    CUPS: 'Xícaras',
+    CUPS: 'Xícaras (xíc)',
 
     // Comprimento
     METERS: 'Metros (m)',
@@ -192,26 +192,38 @@ export function formatUnitOfMeasure(
     CUBIC_METERS: 'Metros cúbicos (m³)',
 
     // Embalagens
-    BOXES: 'Caixas',
-    PACKAGES: 'Pacotes',
-    BAGS: 'Sacos',
-    BOTTLES: 'Garrafas',
-    CANS: 'Latas',
-    TUBES: 'Tubos',
-    ROLLS: 'Rolos',
-    SHEETS: 'Folhas',
-    BARS: 'Barras',
-    COILS: 'Bobinas',
+    BOXES: 'Caixas (cx)',
+    PACKAGES: 'Pacotes (pct)',
+    BAGS: 'Sacos (sc)',
+    BOTTLES: 'Garrafas (gf)',
+    CANS: 'Latas (lt)',
+    TUBES: 'Tubos (tb)',
+    ROLLS: 'Rolos (rl)',
+    SHEETS: 'Folhas (fl)',
+    BARS: 'Barras (br)',
+    COILS: 'Bobinas (bob)',
 
     // Utensílios
-    TABLESPOONS: 'Colheres de sopa',
-    TEASPOONS: 'Colheres de chá',
+    TABLESPOONS: 'Colheres de sopa (cs)',
+    TEASPOONS: 'Colheres de chá (cch)',
 
     // Customizado
     CUSTOM: 'Customizado',
   };
 
   return unitMap[unitOfMeasure] || unitOfMeasure;
+}
+
+/**
+ * Retorna a abreviação da unidade de medida (ex: "kg", "m", "L")
+ * Extrai o conteúdo entre parênteses do formatUnitOfMeasure()
+ * @param uom - Código da unidade de medida (ex: "METERS", "KILOGRAMS")
+ * @returns Abreviação ou string vazia se não encontrada
+ */
+export function getUnitAbbreviation(uom: string | null | undefined): string {
+  if (!uom) return '';
+  const formatted = formatUnitOfMeasure(uom);
+  return formatted.match(/\(([^)]+)\)/)?.[1] || '';
 }
 
 /**
