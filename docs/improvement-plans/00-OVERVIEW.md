@@ -49,18 +49,16 @@ Pendente - Media prioridade:
   [ ] Organizar CSS (Tailwind utilities, componentes reutilizáveis)
 
 Pendente - Baixa prioridade:
-  [ ] Organizar CSS
   [ ] Storage constants
-  [ ] Bundle analyzer
   [ ] Extras (Storybook, PWA, etc.)
-  [ ] ~90 botoes icon-only restantes (componentes shadcn/ui)
+  [ ] ~90 botões icon-only restantes (componentes shadcn/ui)
 
-Pendente - Types (nao bloqueante):
-  [ ] Sincronizar enums com backend (ProductStatus, UnitOfMeasure divergem)
+Pendente - Types (não bloqueante):
+  [x] Sincronizar enums com backend (ProductStatus, UnitOfMeasure divergem) - DOCUMENTADO em DIVERGENCIAS-ENUMS.md
   [ ] Normalizar datas (alguns types usam Date, backend retorna string ISO)
   [ ] Facades Swagger (quando backend migrar para $ref schemas)
-  [ ] Promover no-explicit-any de warn para error
-  [ ] Pre-commit hook (husky + lint-staged)
+  [x] Promover no-explicit-any de warn para error
+  [x] Pre-commit hook (husky + lint-staged)
 ```
 
 ## Estimativa Restante
