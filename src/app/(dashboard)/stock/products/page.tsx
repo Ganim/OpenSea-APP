@@ -35,6 +35,7 @@ import type { Item, Product } from '@/types/stock';
 import {
   ExternalLink,
   Factory,
+  FileText,
   Grid3x3,
   Package,
   Plus,
@@ -60,6 +61,11 @@ export default function ProductsPage() {
 function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const templateIds = useMemo(() => {
+    const raw = searchParams.get('template');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
   const manufacturerIds = useMemo(() => {
     const raw = searchParams.get('manufacturer');
     return raw ? raw.split(',').filter(Boolean) : [];
@@ -127,6 +133,12 @@ function ProductsPageContent() {
   // Apply URL-based filters on top of the text-search filtered items
   const displayedProducts = useMemo(() => {
     let items = page.filteredItems || [];
+    if (templateIds.length > 0) {
+      const set = new Set(templateIds);
+      items = items.filter(
+        (p: Product) => p.templateId && set.has(p.templateId)
+      );
+    }
     if (manufacturerIds.length > 0) {
       const set = new Set(manufacturerIds);
       items = items.filter(
@@ -140,10 +152,60 @@ function ProductsPageContent() {
       );
     }
     return items;
-  }, [page.filteredItems, manufacturerIds, categoryIds]);
+  }, [page.filteredItems, templateIds, manufacturerIds, categoryIds]);
 
   // Interdependent filter options: derive from ALL products (page.items = unfiltered)
   const allProducts = page.items || [];
+
+  // Helper: narrow products by other active filters (excluding the one being computed)
+  const narrowProducts = useCallback(
+    (exclude: 'template' | 'manufacturer' | 'category') => {
+      let filtered = allProducts;
+      if (exclude !== 'template' && templateIds.length > 0) {
+        const set = new Set(templateIds);
+        filtered = filtered.filter(p => p.templateId && set.has(p.templateId));
+      }
+      if (exclude !== 'manufacturer' && manufacturerIds.length > 0) {
+        const set = new Set(manufacturerIds);
+        filtered = filtered.filter(
+          p => p.manufacturerId && set.has(p.manufacturerId)
+        );
+      }
+      if (exclude !== 'category' && categoryIds.length > 0) {
+        const set = new Set(categoryIds);
+        filtered = filtered.filter(p =>
+          p.productCategories?.some(pc => set.has(pc.id))
+        );
+      }
+      return filtered;
+    },
+    [allProducts, templateIds, manufacturerIds, categoryIds]
+  );
+
+  // Extract unique templates from products data
+  const availableTemplates = useMemo(() => {
+    const templateMap = new Map<string, { id: string; name: string }>();
+    for (const product of allProducts) {
+      if (product.templateId && product.template) {
+        templateMap.set(product.templateId, {
+          id: product.templateId,
+          name: product.template.name,
+        });
+      }
+    }
+
+    if (manufacturerIds.length === 0 && categoryIds.length === 0) {
+      return Array.from(templateMap.values());
+    }
+
+    const filtered = narrowProducts('template');
+    const idsInFiltered = new Set(
+      filtered.map(p => p.templateId).filter(Boolean)
+    );
+    return Array.from(templateMap.values()).filter(t =>
+      idsInFiltered.has(t.id)
+    );
+  }, [allProducts, manufacturerIds, categoryIds, narrowProducts]);
 
   // Extract unique manufacturers from products data
   const availableManufacturers = useMemo(() => {
@@ -157,22 +219,18 @@ function ProductsPageContent() {
       }
     }
 
-    if (categoryIds.length === 0) {
+    if (templateIds.length === 0 && categoryIds.length === 0) {
       return Array.from(manufacturerMap.values());
     }
 
-    // Narrow: only manufacturers with products in any of the selected categories
-    const catSet = new Set(categoryIds);
-    const idsInCategory = new Set<string>();
-    for (const product of allProducts) {
-      if (product.productCategories?.some(pc => catSet.has(pc.id))) {
-        if (product.manufacturerId) idsInCategory.add(product.manufacturerId);
-      }
-    }
-    return Array.from(manufacturerMap.values()).filter(m =>
-      idsInCategory.has(m.id)
+    const filtered = narrowProducts('manufacturer');
+    const idsInFiltered = new Set(
+      filtered.map(p => p.manufacturerId).filter(Boolean)
     );
-  }, [allProducts, categoryIds]);
+    return Array.from(manufacturerMap.values()).filter(m =>
+      idsInFiltered.has(m.id)
+    );
+  }, [allProducts, templateIds, categoryIds, narrowProducts]);
 
   // Extract unique categories from products data
   const availableCategories = useMemo(() => {
@@ -183,39 +241,49 @@ function ProductsPageContent() {
       });
     }
 
-    if (manufacturerIds.length === 0) {
+    if (templateIds.length === 0 && manufacturerIds.length === 0) {
       return Array.from(categoryMap.values());
     }
 
-    // Narrow: only categories with products from any of the selected manufacturers
-    const mfrSet = new Set(manufacturerIds);
-    const idsForManufacturer = new Set<string>();
-    for (const product of allProducts) {
-      if (product.manufacturerId && mfrSet.has(product.manufacturerId)) {
-        product.productCategories?.forEach(pc => idsForManufacturer.add(pc.id));
-      }
+    const filtered = narrowProducts('category');
+    const idsInFiltered = new Set<string>();
+    for (const p of filtered) {
+      p.productCategories?.forEach(pc => idsInFiltered.add(pc.id));
     }
     return Array.from(categoryMap.values()).filter(c =>
-      idsForManufacturer.has(c.id)
+      idsInFiltered.has(c.id)
     );
-  }, [allProducts, manufacturerIds]);
+  }, [allProducts, templateIds, manufacturerIds, narrowProducts]);
 
-  // Build URL preserving both filter params (comma-separated for multi-select)
+  // Build URL preserving all filter params (comma-separated for multi-select)
   const buildFilterUrl = useCallback(
-    (params: { manufacturer?: string[]; category?: string[] }) => {
+    (params: {
+      template?: string[];
+      manufacturer?: string[];
+      category?: string[];
+    }) => {
       const parts: string[] = [];
+      const tpl = params.template !== undefined ? params.template : templateIds;
       const mfr =
         params.manufacturer !== undefined
           ? params.manufacturer
           : manufacturerIds;
       const cat = params.category !== undefined ? params.category : categoryIds;
+      if (tpl.length > 0) parts.push(`template=${tpl.join(',')}`);
       if (mfr.length > 0) parts.push(`manufacturer=${mfr.join(',')}`);
       if (cat.length > 0) parts.push(`category=${cat.join(',')}`);
       return parts.length > 0
         ? `/stock/products?${parts.join('&')}`
         : '/stock/products';
     },
-    [manufacturerIds, categoryIds]
+    [templateIds, manufacturerIds, categoryIds]
+  );
+
+  const setTemplateFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ template: ids }));
+    },
+    [router, buildFilterUrl]
   );
 
   const setManufacturerFilter = useCallback(
@@ -460,6 +528,25 @@ function ProductsPageContent() {
 
         {/* Filters */}
         <div className="flex items-center gap-3 flex-wrap">
+          <FilterDropdown
+            label="Template"
+            icon={FileText}
+            options={availableTemplates.map(t => ({
+              id: t.id,
+              label: t.name,
+            }))}
+            selected={templateIds}
+            onSelectionChange={setTemplateFilter}
+            activeColor="emerald"
+            searchPlaceholder="Buscar template..."
+            emptyText="Nenhum template encontrado."
+            footerAction={{
+              icon: ExternalLink,
+              label: 'Ver todos os templates',
+              onClick: () => router.push('/stock/templates'),
+              color: 'emerald',
+            }}
+          />
           <FilterDropdown
             label="Fabricante"
             icon={Factory}

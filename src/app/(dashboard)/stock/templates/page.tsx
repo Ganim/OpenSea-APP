@@ -29,7 +29,14 @@ import {
 } from '@/core';
 import { productsService, templatesService } from '@/services/stock';
 import type { Template } from '@/types/stock';
-import { ArrowLeft, Calendar, Import, Plus, RefreshCcwDot } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Import,
+  Package,
+  Plus,
+  RefreshCcwDot,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GrObjectGroup } from 'react-icons/gr';
@@ -230,19 +237,22 @@ export default function TemplatesPage() {
           badges={[
             { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
           ]}
+          footer={{
+            type: 'single',
+            button: {
+              icon: Package,
+              label: `${productsCount} produto${productsCount !== 1 ? 's' : ''}`,
+              href: `/stock/products?template=${item.id}`,
+              color: 'blue',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        >
-          <div className="flex items-center gap-4 text-xs">
-            <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-              {productsCount} produtos usando este template
-            </span>
-          </div>
-        </EntityCard>
+        />
       </EntityContextMenu>
     );
   };
@@ -273,17 +283,22 @@ export default function TemplatesPage() {
           badges={[
             { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
           ]}
+          footer={{
+            type: 'single',
+            button: {
+              icon: Package,
+              label: `${productsCount} produto${productsCount !== 1 ? 's' : ''}`,
+              href: `/stock/products?template=${item.id}`,
+              color: 'blue',
+            },
+          }}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        >
-          <span className="text-xs text-gray-600 dark:text-gray-400">
-            {productsCount} produtos usando este template
-          </span>
-        </EntityCard>
+        />
       </EntityContextMenu>
     );
   };
