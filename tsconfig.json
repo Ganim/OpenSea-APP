@@ -45,6 +45,7 @@
     "vitest.config.ts",
     "vitest.setup.ts",
     "swagger",
+    "src/types/generated",
     "tests/**/*",
     "**/*.test.ts",
     "**/*.test.tsx"

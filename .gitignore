@@ -137,6 +137,12 @@ dist
 !.yarn/sdks
 !.yarn/versions
 
+# Swagger generated files
+swagger/swagger.json
+
+# Generated API types
+src/types/generated/
+
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*

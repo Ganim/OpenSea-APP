@@ -14,7 +14,9 @@
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "api:update": "npx swagger-typescript-api generate --path ./swagger/swagger.json --output ./swagger/ --name api.ts --tanstack --default-as-successful-response --no-internal"
+    "api:export": "cd ../OpenSea-API && npx tsx scripts/export-swagger.ts",
+    "api:generate": "npx swagger-typescript-api generate --path ./swagger/swagger.json --output ./src/types/generated/ --name api-types.ts --default-as-successful-response --no-client",
+    "api:update": "npm run api:export && npm run api:generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
