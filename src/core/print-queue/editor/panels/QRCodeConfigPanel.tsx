@@ -154,7 +154,11 @@ export function QRCodeConfigPanel({
             >
               <span className="truncate text-sm">
                 {qrConfig.urlParam
-                  ? getFieldLabel(qrConfig.urlParam, undefined, dynamicCategories)
+                  ? getFieldLabel(
+                      qrConfig.urlParam,
+                      undefined,
+                      dynamicCategories
+                    )
                   : 'Selecionar campo...'}
               </span>
               <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />

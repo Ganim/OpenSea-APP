@@ -615,7 +615,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   // ATRIBUTOS DINÂMICOS
   // ============================================
 
-  setDynamicAttributeCategories: (categories) => {
+  setDynamicAttributeCategories: categories => {
     set({ dynamicAttributeCategories: categories });
   },
 

@@ -412,7 +412,11 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
               <Input
                 value={label.text || ''}
                 onChange={e => updateLabel({ text: e.target.value })}
-                placeholder={getFieldLabel(fieldConfig.dataPath || '', undefined, dynamicCategories)}
+                placeholder={getFieldLabel(
+                  fieldConfig.dataPath || '',
+                  undefined,
+                  dynamicCategories
+                )}
                 className="h-8"
               />
             </div>

@@ -79,7 +79,11 @@ export function BarcodeConfigPanel({
           >
             <span className="truncate text-sm">
               {barcodeConfig.dataPath
-                ? getFieldLabel(barcodeConfig.dataPath, undefined, dynamicCategories)
+                ? getFieldLabel(
+                    barcodeConfig.dataPath,
+                    undefined,
+                    dynamicCategories
+                  )
                 : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />

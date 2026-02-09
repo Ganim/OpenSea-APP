@@ -991,7 +991,9 @@ function CellConditionalConfig({
           onClick={() => setPrimaryPickerOpen(true)}
         >
           <span className="truncate">
-            {current.primary ? getFieldLabel(current.primary, undefined, dynamicCategories) : 'Selecionar...'}
+            {current.primary
+              ? getFieldLabel(current.primary, undefined, dynamicCategories)
+              : 'Selecionar...'}
           </span>
           <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
         </Button>
@@ -1072,7 +1074,9 @@ function CellConditionalFallback({
         onClick={() => setOpen(true)}
       >
         <span className="truncate">
-          {value ? getFieldLabel(value, undefined, dynamicCategories) : 'Selecionar...'}
+          {value
+            ? getFieldLabel(value, undefined, dynamicCategories)
+            : 'Selecionar...'}
         </span>
         <ChevronRight className="h-2.5 w-2.5 shrink-0 text-slate-400" />
       </Button>
@@ -1125,7 +1129,11 @@ function CellLabelEditor({
             <Input
               value={label.text || ''}
               onChange={e => onUpdate({ text: e.target.value })}
-              placeholder={getFieldLabel(dataPath || '', undefined, dynamicCategories)}
+              placeholder={getFieldLabel(
+                dataPath || '',
+                undefined,
+                dynamicCategories
+              )}
               className="h-7 text-xs"
             />
           </div>

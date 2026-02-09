@@ -4,7 +4,10 @@
  */
 
 import type { Template, TemplateAttributes } from '@/types/stock';
-import type { DataFieldCategory, DataField } from '../elements/FieldElementRenderer';
+import type {
+  DataFieldCategory,
+  DataField,
+} from '../elements/FieldElementRenderer';
 
 /**
  * Níveis de atributos suportados
