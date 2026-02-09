@@ -1,5 +1,5 @@
 /**
- * OpenSea OS - RBAC Types
+ * OpenSea OS - RBAC Permission Types
  * Tipos TypeScript para sistema de controle de acesso baseado em funções
  */
 
@@ -47,59 +47,6 @@ export interface ListPermissionsQuery {
 }
 
 // ============================================
-// PERMISSION GROUP
-// ============================================
-
-export interface PermissionGroup {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  color: string | null; // hex color (#RRGGBB)
-  priority: number;
-  isActive: boolean;
-  isSystem: boolean;
-  parentId: string | null;
-  createdAt: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
-  usersCount?: number; // Novo campo da API
-  permissionsCount?: number; // Novo campo da API
-}
-
-export interface PermissionGroupWithDetails extends PermissionGroup {
-  users: UserInGroup[];
-  usersCount: number;
-  permissions: PermissionWithEffect[];
-  permissionsCount: number;
-}
-
-export interface CreatePermissionGroupDTO {
-  name: string;
-  description?: string | null;
-  color?: string; // #RRGGBB
-  priority?: number; // default: 100
-  parentId?: string | null;
-}
-
-export interface UpdatePermissionGroupDTO {
-  name?: string;
-  description?: string | null;
-  color?: string | null;
-  priority?: number;
-  parentId?: string | null;
-  isActive?: boolean;
-}
-
-export interface ListPermissionGroupsQuery {
-  isActive?: boolean;
-  isSystem?: boolean;
-  includeDeleted?: boolean;
-  page?: number;
-  limit?: number;
-}
-
-// ============================================
 // ASSOCIATIONS
 // ============================================
 
@@ -114,63 +61,11 @@ export interface AddPermissionToGroupDTO {
   conditions?: Record<string, unknown> | null;
 }
 
-export interface AssignGroupToUserDTO {
-  groupId: string;
-  expiresAt?: string | null; // ISO 8601
-  grantedBy?: string | null;
-}
-
-export interface GroupWithExpiration {
-  group: PermissionGroup;
-  expiresAt: string | null;
-  grantedAt: string;
-}
-
 export interface EffectivePermission {
   permission: Permission;
   effect: 'allow' | 'deny';
   source: 'direct' | 'inherited';
   groupIds: string[];
-}
-
-export interface UserInGroup {
-  id: string;
-  username: string;
-  email: string;
-  assignedAt: string;
-  expiresAt: string | null;
-}
-
-// ============================================
-// API RESPONSES
-// ============================================
-
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-export interface PermissionResponse {
-  permission: Permission;
-}
-
-export interface PermissionGroupResponse {
-  group: PermissionGroup;
-}
-
-export interface SuccessResponse {
-  success: boolean;
 }
 
 // ============================================
@@ -208,19 +103,6 @@ export type PermissionAction =
 // UI HELPERS
 // ============================================
 
-export interface PermissionGroupWithChildren extends PermissionGroup {
-  children?: PermissionGroup[];
-  permissions?: PermissionWithEffect[];
-  users?: UserInGroup[];
-  userCount?: number;
-}
-
-export interface PermissionGroupDetailResponse {
-  group: PermissionGroup;
-  permissions: PermissionWithEffect[];
-  users: UserInGroup[];
-}
-
 export interface PermissionsByModule {
   [module: string]: {
     [resource: string]: Permission[];
@@ -250,4 +132,18 @@ export interface PermissionItemSimple {
   name: string;
   action: string;
   isDeprecated: boolean;
+}
+
+// ============================================
+// API RESPONSES
+// ============================================
+
+export interface PermissionResponse {
+  permission: Permission;
+}
+
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  message?: string;
 }
