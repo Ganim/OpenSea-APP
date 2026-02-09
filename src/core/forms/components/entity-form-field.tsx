@@ -5,10 +5,10 @@
 
 'use client';
 
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import type { BaseEntity } from '@/core/types';
 import { cn } from '@/lib/utils';
+import React from 'react';
 import { Controller } from 'react-hook-form';
 import { ArrayField } from '../fields/array-field';
 import { CheckboxField } from '../fields/checkbox-field';
@@ -388,4 +388,6 @@ function EntityFormFieldComponent<T extends BaseEntity>({
 
 // Memoize to prevent unnecessary re-renders when parent form updates
 // Only re-render when field props actually change
-export const EntityFormField = React.memo(EntityFormFieldComponent) as typeof EntityFormFieldComponent;
+export const EntityFormField = React.memo(
+  EntityFormFieldComponent
+) as typeof EntityFormFieldComponent;

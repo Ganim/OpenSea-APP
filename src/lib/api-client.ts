@@ -7,11 +7,11 @@ import { apiConfig } from '@/config/api';
 import { logger } from '@/lib/logger';
 import { TokenManager } from './api-client-auth';
 import {
-  createApiError,
-  extractErrorMessage,
-  handleNetworkError,
-  logErrorResponse,
-  parseErrorResponse,
+    createApiError,
+    extractErrorMessage,
+    handleNetworkError,
+    logErrorResponse,
+    parseErrorResponse,
 } from './api-client-error';
 import type { RequestOptions } from './api-client.types';
 

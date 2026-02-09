@@ -18,16 +18,22 @@ import type { BaseEntity } from '@/core/types';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { EntityFormField } from './entity-form-field';
 import { EntityFormSection } from './entity-form-section';
-import type { EntityFormProps } from './entity-form.types';
 import {
   buildDefaultValues,
   showValidationErrors,
   validateRequiredFields,
 } from './entity-form-validation';
+import type { EntityFormProps } from './entity-form.types';
 
 // =============================================================================
 // COMPONENT

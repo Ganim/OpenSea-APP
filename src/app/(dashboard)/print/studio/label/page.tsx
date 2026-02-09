@@ -6,21 +6,20 @@
  */
 
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { logger } from '@/lib/logger';
 import type { LabelStudioSaveData } from '@/core/print-queue/editor';
 import { useEditorStore } from '@/core/print-queue/editor';
 import { useCreateLabelTemplate } from '@/hooks/stock/use-label-templates';
+import { logger } from '@/lib/logger';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PiPencilSimpleLineDuotone } from 'react-icons/pi';
-import dynamic from 'next/dynamic';
 
 // Dynamic import para LabelStudioEditor (GrapesJS pesado ~300KB)
 const LabelStudioEditor = dynamic(
   () =>
-    import('@/core/print-queue/editor').then((mod) => ({
+    import('@/core/print-queue/editor').then(mod => ({
       default: mod.LabelStudioEditor,
     })),
   {
@@ -29,9 +28,7 @@ const LabelStudioEditor = dynamic(
       <div className="h-full flex items-center justify-center bg-muted/10">
         <div className="text-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Carregando editor...
-          </p>
+          <p className="text-sm text-muted-foreground">Carregando editor...</p>
         </div>
       </div>
     ),

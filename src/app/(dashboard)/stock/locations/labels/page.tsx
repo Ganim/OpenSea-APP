@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, RefreshCw, Tags } from 'lucide-react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 
 import { useWarehouses } from '../src/api';
 import { useAllZones } from '../src/api/zones.queries';
@@ -12,7 +12,7 @@ import { useAllZones } from '../src/api/zones.queries';
 // Dynamic import para LabelGenerator (@react-pdf pesado ~400KB)
 const LabelGenerator = dynamic(
   () =>
-    import('../src/components').then((mod) => ({
+    import('../src/components').then(mod => ({
       default: mod.LabelGenerator,
     })),
   {

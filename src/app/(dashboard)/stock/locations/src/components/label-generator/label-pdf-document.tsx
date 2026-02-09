@@ -1,14 +1,13 @@
 'use client';
 
-import React from 'react';
 import {
   Document,
-  Page,
-  View,
-  Text,
-  Image,
-  StyleSheet,
   Font,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
 } from '@react-pdf/renderer';
 import type {
   LabelConfig,

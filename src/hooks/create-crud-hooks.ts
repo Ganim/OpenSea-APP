@@ -7,8 +7,8 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  type UseQueryOptions,
   type UseMutationOptions,
+  type UseQueryOptions,
 } from '@tanstack/react-query';
 
 // =============================================================================
@@ -56,10 +56,7 @@ export interface CrudHooks<
 > {
   /** Hook para listar todas as entidades */
   useList: (
-    options?: Omit<
-      UseQueryOptions<TEntity[], Error>,
-      'queryKey' | 'queryFn'
-    >
+    options?: Omit<UseQueryOptions<TEntity[], Error>, 'queryKey' | 'queryFn'>
   ) => ReturnType<typeof useQuery<TEntity[], Error>>;
 
   /** Hook para buscar uma entidade por ID */
@@ -79,11 +76,7 @@ export interface CrudHooks<
   /** Hook para atualizar uma entidade */
   useUpdate: (
     options?: Omit<
-      UseMutationOptions<
-        TEntity,
-        Error,
-        { id: string; data: TUpdateRequest }
-      >,
+      UseMutationOptions<TEntity, Error, { id: string; data: TUpdateRequest }>,
       'mutationFn'
     >
   ) => ReturnType<
@@ -226,11 +219,7 @@ export function createCrudHooks<
 
   function useUpdate(
     options?: Omit<
-      UseMutationOptions<
-        TEntity,
-        Error,
-        { id: string; data: TUpdateRequest }
-      >,
+      UseMutationOptions<TEntity, Error, { id: string; data: TUpdateRequest }>,
       'mutationFn'
     >
   ) {

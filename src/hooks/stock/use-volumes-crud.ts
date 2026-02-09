@@ -5,9 +5,9 @@
 
 import { volumesService } from '@/services/stock';
 import type {
-  Volume,
   CreateVolumeRequest,
   UpdateVolumeRequest,
+  Volume,
 } from '@/types/stock';
 import { createCrudHooks } from '../create-crud-hooks';
 

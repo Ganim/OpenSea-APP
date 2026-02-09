@@ -3,12 +3,12 @@
  * Hooks React Query para gerenciar templates de etiquetas usando CRUD Factory
  */
 
-import { labelTemplatesService } from '@/services/stock';
 import type {
-  LabelTemplate,
   CreateLabelTemplateInput,
+  LabelTemplate,
   UpdateLabelTemplateInput,
 } from '@/core/print-queue/editor';
+import { labelTemplatesService } from '@/services/stock';
 import { createCrudHooks } from '../create-crud-hooks';
 
 // =============================================================================

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import type { BaseEntity } from '@/core/types';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import React from 'react';
 import type { RenderSectionProps } from './entity-form.types';
 
 // =============================================================================

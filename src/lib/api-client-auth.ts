@@ -14,7 +14,7 @@ import type { RefreshResponse } from './api-client.types';
 export class TokenManager {
   private refreshPromise: Promise<string> | null = null;
   private baseURL: string;
-  
+
   // Token cache para evitar acessos repetidos ao localStorage
   private tokenCache: string | null = null;
   private tokenCacheTimestamp = 0;
@@ -30,17 +30,20 @@ export class TokenManager {
 
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    
+
     // Verificar cache antes de acessar localStorage
     const now = Date.now();
-    if (this.tokenCache !== null && now - this.tokenCacheTimestamp < this.CACHE_TTL) {
+    if (
+      this.tokenCache !== null &&
+      now - this.tokenCacheTimestamp < this.CACHE_TTL
+    ) {
       return this.tokenCache;
     }
-    
+
     // Cache expirado ou vazio, ler do localStorage
     this.tokenCache = localStorage.getItem(authConfig.tokenKey);
     this.tokenCacheTimestamp = now;
-    
+
     return this.tokenCache;
   }
 
