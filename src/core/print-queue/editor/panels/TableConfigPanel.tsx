@@ -18,6 +18,7 @@ import type {
 } from '../studio-types';
 import { getFieldLabel } from '../elements/FieldElementRenderer';
 import { FieldPickerModal } from '../components/FieldPickerModal';
+import { useEditorStore } from '../stores/editorStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -782,6 +783,7 @@ function CellFieldConfig({
   const fieldType = cell?.fieldType || 'simple';
   const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
   const [insertModalOpen, setInsertModalOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   return (
     <div className="space-y-2">
@@ -813,7 +815,7 @@ function CellFieldConfig({
           >
             <span className="truncate">
               {cell?.dataPath
-                ? getFieldLabel(cell.dataPath)
+                ? getFieldLabel(cell.dataPath, undefined, dynamicCategories)
                 : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
@@ -977,6 +979,7 @@ function CellConditionalConfig({
 }) {
   const current = conditions || { primary: '', fallbacks: [] };
   const [primaryPickerOpen, setPrimaryPickerOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   return (
     <div className="space-y-2">
@@ -988,7 +991,7 @@ function CellConditionalConfig({
           onClick={() => setPrimaryPickerOpen(true)}
         >
           <span className="truncate">
-            {current.primary ? getFieldLabel(current.primary) : 'Selecionar...'}
+            {current.primary ? getFieldLabel(current.primary, undefined, dynamicCategories) : 'Selecionar...'}
           </span>
           <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
         </Button>
@@ -1058,6 +1061,7 @@ function CellConditionalFallback({
   onRemove: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   return (
     <div className="flex items-center gap-1">
@@ -1068,7 +1072,7 @@ function CellConditionalFallback({
         onClick={() => setOpen(true)}
       >
         <span className="truncate">
-          {value ? getFieldLabel(value) : 'Selecionar...'}
+          {value ? getFieldLabel(value, undefined, dynamicCategories) : 'Selecionar...'}
         </span>
         <ChevronRight className="h-2.5 w-2.5 shrink-0 text-slate-400" />
       </Button>
@@ -1102,6 +1106,7 @@ function CellLabelEditor({
   dataPath?: string;
   onUpdate: (updates: Partial<CellLabelConfig>) => void;
 }) {
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -1120,7 +1125,7 @@ function CellLabelEditor({
             <Input
               value={label.text || ''}
               onChange={e => onUpdate({ text: e.target.value })}
-              placeholder={getFieldLabel(dataPath || '')}
+              placeholder={getFieldLabel(dataPath || '', undefined, dynamicCategories)}
               className="h-7 text-xs"
             />
           </div>

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import type { QRCodeElement, QRCodeConfig } from '../studio-types';
 import { getFieldLabel } from '../elements/FieldElementRenderer';
 import { FieldPickerModal } from '../components/FieldPickerModal';
+import { useEditorStore } from '../stores/editorStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export function QRCodeConfigPanel({
   const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
   const [urlParamPickerOpen, setUrlParamPickerOpen] = useState(false);
   const [insertModalOpen, setInsertModalOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   const updateConfig = (updates: Partial<QRCodeConfig>) => {
     onUpdate({ qrConfig: { ...qrConfig, ...updates } });
@@ -79,7 +81,7 @@ export function QRCodeConfigPanel({
           >
             <span className="truncate text-sm">
               {qrConfig.dataPath
-                ? getFieldLabel(qrConfig.dataPath)
+                ? getFieldLabel(qrConfig.dataPath, undefined, dynamicCategories)
                 : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
@@ -152,7 +154,7 @@ export function QRCodeConfigPanel({
             >
               <span className="truncate text-sm">
                 {qrConfig.urlParam
-                  ? getFieldLabel(qrConfig.urlParam)
+                  ? getFieldLabel(qrConfig.urlParam, undefined, dynamicCategories)
                   : 'Selecionar campo...'}
               </span>
               <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />

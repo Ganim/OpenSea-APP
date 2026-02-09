@@ -17,20 +17,26 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import {
   ENTITY_FIELD_REGISTRIES,
+  getFieldRegistryWithDynamicAttributes,
   type EntityType,
   type DataFieldCategory,
   type DataField,
 } from '../elements/FieldElementRenderer';
+import { useEditorStore } from '../stores/editorStore';
 import {
   Building2,
+  FileText,
   MapPin,
   Package,
+  Palette,
   Hash,
   Layers,
   Box,
   Building,
+  DollarSign,
   Info,
   Search,
+  User,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -40,13 +46,17 @@ import {
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Building2,
+  DollarSign,
+  FileText,
   MapPin,
   Package,
+  Palette,
   Hash,
   Layers,
   Box,
   Building,
   Info,
+  User,
 };
 
 function CategoryIcon({
@@ -99,7 +109,13 @@ export function FieldPickerModal({
   );
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = ENTITY_FIELD_REGISTRIES[entityType];
+  const dynamicAttributeCategories = useEditorStore(
+    s => s.dynamicAttributeCategories
+  );
+  const categories = getFieldRegistryWithDynamicAttributes(
+    entityType,
+    dynamicAttributeCategories
+  );
 
   // Busca global: filtra campos por label ou path
   const filteredCategories = useMemo(() => {

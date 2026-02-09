@@ -6,9 +6,18 @@
  */
 
 import React from 'react';
-import type { FieldElement, TextStyle } from '../studio-types';
+import type {
+  FieldElement,
+  TextStyle,
+  DataField,
+  DataFieldCategory,
+  EntityType,
+} from '../studio-types';
 import { mmToPx } from '../utils/unitConverter';
 import { FileText, Braces, GitBranch, Calculator } from 'lucide-react';
+
+// Re-export types for backward compatibility
+export type { DataField, DataFieldCategory, EntityType } from '../studio-types';
 
 interface FieldElementRendererProps {
   element: FieldElement;
@@ -16,26 +25,6 @@ interface FieldElementRendererProps {
   /** Dados reais para preview (quando disponíveis) */
   previewData?: Record<string, unknown>;
 }
-
-// ============================================
-// TIPOS DO FIELD REGISTRY
-// ============================================
-
-export interface DataField {
-  path: string;
-  label: string;
-  example: string;
-  description?: string;
-}
-
-export interface DataFieldCategory {
-  id: string;
-  label: string;
-  icon: string;
-  fields: DataField[];
-}
-
-export type EntityType = 'item' | 'employee';
 
 // ============================================
 // ENTITY FIELD REGISTRIES
@@ -170,39 +159,6 @@ export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> =
             label: 'Preço de Custo',
             example: 'R$ 25,00',
           },
-        ],
-      },
-      {
-        id: 'attributes',
-        label: 'Atributos',
-        icon: 'FileText',
-        fields: [
-          {
-            path: 'variant.attributes.composicao',
-            label: 'Composição',
-            example: '100% Algodão',
-          },
-          {
-            path: 'variant.attributes.cor',
-            label: 'Cor',
-            example: '901 - Azul',
-          },
-          {
-            path: 'variant.attributes.gramatura',
-            label: 'Gramatura',
-            example: '260 g/m²',
-          },
-          {
-            path: 'variant.attributes.dimensoes',
-            label: 'Dimensões',
-            example: 'L: 1,62m',
-          },
-          {
-            path: 'variant.attributes.qualidade',
-            label: 'Qualidade',
-            example: 'Premium',
-          },
-          { path: 'variant.attributes.nuance', label: 'Nuance', example: '-' },
         ],
       },
       {
@@ -362,6 +318,33 @@ export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> =
   };
 
 // ============================================
+// DYNAMIC ATTRIBUTES MERGE
+// ============================================
+
+/**
+ * Retorna o registry de campos para um entityType,
+ * com categorias dinâmicas inseridas antes de 'meta'
+ */
+export function getFieldRegistryWithDynamicAttributes(
+  entityType: EntityType,
+  dynamicCategories: DataFieldCategory[]
+): DataFieldCategory[] {
+  const base = ENTITY_FIELD_REGISTRIES[entityType] || [];
+  if (dynamicCategories.length === 0) return base;
+
+  // Inserir categorias dinâmicas antes de 'meta'
+  const metaIndex = base.findIndex(c => c.id === 'meta');
+  if (metaIndex === -1) {
+    return [...base, ...dynamicCategories];
+  }
+  return [
+    ...base.slice(0, metaIndex),
+    ...dynamicCategories,
+    ...base.slice(metaIndex),
+  ];
+}
+
+// ============================================
 // BUILD SAMPLE PREVIEW DATA
 // ============================================
 
@@ -370,9 +353,13 @@ export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> =
  * para uso como previewData com dados de amostra
  */
 export function buildSamplePreviewData(
-  entityType: EntityType = 'item'
+  entityType: EntityType = 'item',
+  dynamicCategories: DataFieldCategory[] = []
 ): Record<string, unknown> {
-  const categories = ENTITY_FIELD_REGISTRIES[entityType] || [];
+  const categories = getFieldRegistryWithDynamicAttributes(
+    entityType,
+    dynamicCategories
+  );
   const data: Record<string, unknown> = {};
   for (const cat of categories) {
     for (const field of cat.fields) {
@@ -423,12 +410,28 @@ export const DATA_PATHS = buildDataPathsFromRegistry();
 // ============================================
 
 /**
+ * Capitaliza uma chave de atributo para exibição
+ * Ex: "composicao" → "Composicao", "corPrimaria" → "Cor Primaria"
+ */
+function capitalizeAttributeKey(key: string): string {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[_-]/g, ' ')
+    .trim()
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/**
  * Obtém o valor de exemplo para um dataPath
  */
 export function getExampleValue(
   dataPath: string,
-  entityType?: EntityType
+  entityType?: EntityType,
+  dynamicCategories?: DataFieldCategory[]
 ): string {
+  // Busca nas categorias estáticas
   const categories = ENTITY_FIELD_REGISTRIES[entityType || 'item'];
   for (const category of categories) {
     for (const field of category.fields) {
@@ -436,6 +439,21 @@ export function getExampleValue(
         return field.example;
       }
     }
+  }
+  // Busca nas categorias dinâmicas
+  if (dynamicCategories) {
+    for (const category of dynamicCategories) {
+      for (const field of category.fields) {
+        if (field.path === dataPath) {
+          return field.example;
+        }
+      }
+    }
+  }
+  // Fallback para paths de atributos
+  if (dataPath.includes('.attributes.')) {
+    const key = dataPath.split('.').pop() || '';
+    return capitalizeAttributeKey(key);
   }
   return dataPath || 'valor';
 }
@@ -445,8 +463,10 @@ export function getExampleValue(
  */
 export function getFieldLabel(
   dataPath: string,
-  entityType?: EntityType
+  entityType?: EntityType,
+  dynamicCategories?: DataFieldCategory[]
 ): string {
+  // Busca nas categorias estáticas
   const categories = ENTITY_FIELD_REGISTRIES[entityType || 'item'];
   for (const category of categories) {
     for (const field of category.fields) {
@@ -455,7 +475,22 @@ export function getFieldLabel(
       }
     }
   }
-  // Fallback: último segmento capitalizado
+  // Busca nas categorias dinâmicas
+  if (dynamicCategories) {
+    for (const category of dynamicCategories) {
+      for (const field of category.fields) {
+        if (field.path === dataPath) {
+          return field.label;
+        }
+      }
+    }
+  }
+  // Fallback melhorado para paths de atributos
+  if (dataPath.includes('.attributes.')) {
+    const key = dataPath.split('.').pop() || 'Campo';
+    return capitalizeAttributeKey(key);
+  }
+  // Fallback genérico: último segmento capitalizado
   const lastSegment = dataPath.split('.').pop() || 'Campo';
   return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
 }

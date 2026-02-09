@@ -90,6 +90,7 @@ export {
   searchIcons,
   buildSamplePreviewData,
   ENTITY_FIELD_REGISTRIES,
+  getFieldRegistryWithDynamicAttributes,
 } from './elements';
 export type { EntityType, DataFieldCategory, DataField } from './elements';
 

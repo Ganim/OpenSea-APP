@@ -24,6 +24,7 @@ export {
   getFieldLabel,
   getExampleValue,
   buildSamplePreviewData,
+  getFieldRegistryWithDynamicAttributes,
 } from './FieldElementRenderer';
 export type {
   DataField,

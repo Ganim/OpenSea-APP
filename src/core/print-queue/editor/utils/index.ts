@@ -53,3 +53,5 @@ export {
   mmToPrintPx,
   PRINT_DPI,
 } from './printRenderer';
+
+export { extractPrintableAttributes } from './extractPrintableAttributes';

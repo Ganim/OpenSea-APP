@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import type { BarcodeElement, BarcodeConfig } from '../studio-types';
 import { getFieldLabel } from '../elements/FieldElementRenderer';
 import { FieldPickerModal } from '../components/FieldPickerModal';
+import { useEditorStore } from '../stores/editorStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export function BarcodeConfigPanel({
   const { barcodeConfig } = element;
   const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
   const [insertModalOpen, setInsertModalOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   const updateConfig = (updates: Partial<BarcodeConfig>) => {
     onUpdate({ barcodeConfig: { ...barcodeConfig, ...updates } });
@@ -77,7 +79,7 @@ export function BarcodeConfigPanel({
           >
             <span className="truncate text-sm">
               {barcodeConfig.dataPath
-                ? getFieldLabel(barcodeConfig.dataPath)
+                ? getFieldLabel(barcodeConfig.dataPath, undefined, dynamicCategories)
                 : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />

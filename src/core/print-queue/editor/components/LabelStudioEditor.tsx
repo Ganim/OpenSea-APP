@@ -6,12 +6,14 @@
  */
 
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTemplates } from '@/hooks/stock/use-stock-other';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ElementsPanel } from '../panels/ElementsPanel';
 import { PropertiesPanel } from '../panels/PropertiesPanel';
 import { useEditorStore } from '../stores/editorStore';
 import type { LabelStudioTemplate } from '../studio-types';
 import { MainToolbar } from '../toolbar/MainToolbar';
+import { extractPrintableAttributes } from '../utils/extractPrintableAttributes';
 import { calculateFitZoom } from '../utils/unitConverter';
 import { Canvas } from './Canvas';
 import { ElementsLayer } from './ElementsLayer';
@@ -81,6 +83,24 @@ export function LabelStudioEditor({
   const selectedIds = useEditorStore(s => s.selectedIds);
   const setZoom = useEditorStore(s => s.setZoom);
   const setPanOffset = useEditorStore(s => s.setPanOffset);
+
+  // Fetch product templates for dynamic attributes
+  const { data: productTemplates } = useTemplates();
+  const setDynamicAttributeCategories = useEditorStore(
+    s => s.setDynamicAttributeCategories
+  );
+
+  // Extract printable attributes from templates
+  const dynamicCategories = useMemo(
+    () =>
+      productTemplates ? extractPrintableAttributes(productTemplates) : [],
+    [productTemplates]
+  );
+
+  // Populate store when dynamic categories change
+  useEffect(() => {
+    setDynamicAttributeCategories(dynamicCategories);
+  }, [dynamicCategories, setDynamicAttributeCategories]);
 
   // Elements panel collapse state
   const [elementsPanelCollapsed, setElementsPanelCollapsed] = useState(false);

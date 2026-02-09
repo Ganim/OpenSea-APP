@@ -419,6 +419,35 @@ export interface LabelStudioTemplate {
 }
 
 // ============================================
+// DATA FIELD TYPES
+// ============================================
+
+/**
+ * Campo de dados disponível para seleção
+ */
+export interface DataField {
+  path: string;
+  label: string;
+  example: string;
+  description?: string;
+}
+
+/**
+ * Categoria de campos de dados
+ */
+export interface DataFieldCategory {
+  id: string;
+  label: string;
+  icon: string;
+  fields: DataField[];
+}
+
+/**
+ * Tipo de entidade para o editor
+ */
+export type EntityType = 'item' | 'employee';
+
+// ============================================
 // EDITOR STATE TYPES
 // ============================================
 
@@ -508,6 +537,9 @@ export interface EditorState {
 
   // Read-only mode
   readOnly: boolean;
+
+  // Categorias de atributos dinâmicos (de templates de produto)
+  dynamicAttributeCategories: DataFieldCategory[];
 }
 
 /**
@@ -594,6 +626,9 @@ export interface EditorActions {
 
   // Read-only
   setReadOnly: (readOnly: boolean) => void;
+
+  // Atributos dinâmicos
+  setDynamicAttributeCategories: (categories: DataFieldCategory[]) => void;
 
   // Serialização
   toJSON: () => LabelStudioTemplate;

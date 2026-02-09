@@ -9,6 +9,7 @@ import React, { useState, useRef } from 'react';
 import type { FieldElement, FieldConfig, LabelConfig } from '../studio-types';
 import { getFieldLabel } from '../elements/FieldElementRenderer';
 import { FieldPickerModal } from '../components/FieldPickerModal';
+import { useEditorStore } from '../stores/editorStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ function DataPathTrigger({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   return (
     <div className={className}>
@@ -54,7 +56,9 @@ function DataPathTrigger({
         onClick={() => setOpen(true)}
       >
         <span className="truncate text-sm">
-          {value ? getFieldLabel(value) : 'Selecionar campo...'}
+          {value
+            ? getFieldLabel(value, undefined, dynamicCategories)
+            : 'Selecionar campo...'}
         </span>
         <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
       </Button>
@@ -314,6 +318,7 @@ function CalculatedFieldConfig({
 export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
   const { fieldConfig, label } = element;
   const [isLabelOpen, setIsLabelOpen] = useState(!!label?.enabled);
+  const dynamicCategories = useEditorStore(s => s.dynamicAttributeCategories);
 
   const updateFieldConfig = (updates: Partial<FieldConfig>) => {
     onUpdate({
@@ -407,7 +412,7 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
               <Input
                 value={label.text || ''}
                 onChange={e => updateLabel({ text: e.target.value })}
-                placeholder={getFieldLabel(fieldConfig.dataPath || '')}
+                placeholder={getFieldLabel(fieldConfig.dataPath || '', undefined, dynamicCategories)}
                 className="h-8"
               />
             </div>

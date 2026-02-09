@@ -407,6 +407,9 @@ export function MainToolbar({ onFitToScreen, className }: MainToolbarProps) {
   const selectedIds = useEditorStore(s => s.selectedIds);
   const previewData = useEditorStore(s => s.previewData);
   const setPreviewData = useEditorStore(s => s.setPreviewData);
+  const dynamicAttributeCategories = useEditorStore(
+    s => s.dynamicAttributeCategories
+  );
 
   // Store actions
   const setCanvasSize = useEditorStore(s => s.setCanvasSize);
@@ -484,9 +487,11 @@ export function MainToolbar({ onFitToScreen, className }: MainToolbarProps) {
     if (isPreviewActive) {
       setPreviewData(null);
     } else {
-      setPreviewData(buildSamplePreviewData());
+      setPreviewData(
+        buildSamplePreviewData('item', dynamicAttributeCategories)
+      );
     }
-  }, [isPreviewActive, setPreviewData]);
+  }, [isPreviewActive, setPreviewData, dynamicAttributeCategories]);
 
   return (
     <div

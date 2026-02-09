@@ -82,6 +82,9 @@ const initialState: EditorState = {
 
   // Read-only
   readOnly: false,
+
+  // Atributos dinâmicos
+  dynamicAttributeCategories: [],
 };
 
 /**
@@ -606,6 +609,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   setReadOnly: (readOnly: boolean) => {
     set({ readOnly });
+  },
+
+  // ============================================
+  // ATRIBUTOS DINÂMICOS
+  // ============================================
+
+  setDynamicAttributeCategories: (categories) => {
+    set({ dynamicAttributeCategories: categories });
   },
 
   // ============================================

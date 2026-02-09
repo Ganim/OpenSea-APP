@@ -345,12 +345,6 @@ export const FIELD_CATEGORIES: FieldCategory[] = [
     fields: LABEL_FIELDS.filter(f => f.category === 'location'),
   },
   {
-    id: 'attributes',
-    label: 'Atributos Têxteis',
-    icon: 'FileText',
-    fields: LABEL_FIELDS.filter(f => f.category === 'attributes'),
-  },
-  {
     id: 'codes',
     label: 'Códigos',
     icon: 'Barcode',
