@@ -169,13 +169,11 @@ export default function CommandCenterPage() {
             <PendingApprovalsFeed
               movements={pendingApprovals?.movements || []}
               onViewAll={() => router.push('/stock/movements/pending')}
-              onApprove={movement => {
+              onApprove={_movement => {
                 // TODO: Open approval modal
-                console.log('Approve', movement.id);
               }}
-              onReject={movement => {
+              onReject={_movement => {
                 // TODO: Open rejection modal
-                console.log('Reject', movement.id);
               }}
             />
           </PermissionGate>

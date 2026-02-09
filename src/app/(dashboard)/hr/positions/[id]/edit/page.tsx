@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { logger } from '@/lib/logger';
 import type { Department, Position } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -158,7 +159,10 @@ export default function PositionEditPage() {
       toast.success('Cargo atualizado com sucesso!');
       router.push(`/hr/positions/${positionId}`);
     } catch (error) {
-      console.error('Erro ao salvar cargo:', error);
+      logger.error(
+        'Erro ao salvar cargo',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao salvar cargo');
     } finally {
       setIsSaving(false);

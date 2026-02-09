@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -132,7 +133,7 @@ export function ExitModal({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Exit error:', error);
+      logger.error('Exit error', error instanceof Error ? error : undefined);
       toast.error(
         error instanceof Error ? error.message : 'Erro ao registrar saída'
       );

@@ -35,6 +35,7 @@ const eslintConfig = defineConfig([
       'react-hooks/preserve-manual-memoization': 'off',
       'jsx-a11y/alt-text': 'off',
       'import/no-anonymous-default-export': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
 ]);

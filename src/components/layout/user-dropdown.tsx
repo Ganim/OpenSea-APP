@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +31,10 @@ export function UserDropdown() {
     try {
       await logout();
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      logger.error(
+        'Erro ao fazer logout',
+        error instanceof Error ? error : undefined
+      );
     }
   }, [logout]);
 

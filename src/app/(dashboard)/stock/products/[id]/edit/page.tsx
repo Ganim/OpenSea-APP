@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { CareIcon, CareSelector } from '@/components/care';
 import { VariantManager } from '@/components/stock/variants';
 import {
@@ -112,7 +113,10 @@ export default function EditProductPage() {
         const response = await manufacturersService.listManufacturers();
         setManufacturers(response.manufacturers || []);
       } catch (error) {
-        console.error('Erro ao carregar fabricantes:', error);
+        logger.error(
+          'Erro ao carregar fabricantes',
+          error instanceof Error ? error : undefined
+        );
       }
     };
 
@@ -229,7 +233,10 @@ export default function EditProductPage() {
       });
       router.push(`/stock/products/${productId}`);
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
+      logger.error(
+        'Erro ao atualizar produto',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar produto', { description: message });
@@ -249,7 +256,10 @@ export default function EditProductPage() {
       toast.success('Produto excluído com sucesso!');
       router.push('/stock/products');
     } catch (error) {
-      console.error('Erro ao deletar produto:', error);
+      logger.error(
+        'Erro ao deletar produto',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar produto', { description: message });

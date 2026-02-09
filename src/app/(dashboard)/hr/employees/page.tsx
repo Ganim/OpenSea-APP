@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import {
   createEmployee,
@@ -759,7 +760,10 @@ function EmployeesPageContent() {
                   toast.success('Funcionario criado com sucesso!');
                 }
               } catch (error) {
-                console.error('Erro ao criar funcionario:', error);
+                logger.error(
+                  'Erro ao criar funcionario',
+                  error instanceof Error ? error : undefined
+                );
                 toast.error('Erro ao criar funcionario');
               }
             }}

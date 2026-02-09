@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useCallback, useState } from 'react';
 
 interface UseBatchDeleteOptions {
@@ -90,8 +91,8 @@ export function useBatchDelete(
           // Se for rate limit, aguarda e tenta novamente
           if (isRateLimitError(error) && retryCount < maxRetries) {
             const retryDelay = getRetryDelay(error);
-            console.log(
-              `Rate limit detectado. Aguardando ${retryDelay / 1000}s antes de tentar novamente...`
+            logger.warn(
+              `Rate limit detected, waiting ${retryDelay / 1000}s before retrying`
             );
             await new Promise(resolve => setTimeout(resolve, retryDelay));
             return deleteWithRetry(id, retryCount + 1);

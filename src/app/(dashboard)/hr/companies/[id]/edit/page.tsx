@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { logger } from '@/lib/logger';
 import { EntityForm } from '@/core';
 import type { Company } from '@/types/hr';
 import type { EntityFormConfig } from '@/core/types/form.types';
@@ -62,7 +63,10 @@ export default function CompanyEditPage() {
       router.push(`/hr/companies/${companyId}`);
     },
     onError: error => {
-      console.error(error);
+      logger.error(
+        'Erro ao atualizar empresa',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Não foi possível atualizar a empresa');
     },
   });

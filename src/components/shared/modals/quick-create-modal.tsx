@@ -7,6 +7,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -69,7 +70,7 @@ export function QuickCreateModal({
         inputRef.current?.focus();
       }, 100);
     } catch (error) {
-      console.error('Erro ao criar:', error);
+      logger.error('Erro ao criar', error instanceof Error ? error : undefined);
     } finally {
       setIsLoading(false);
     }

@@ -4,6 +4,7 @@
  */
 
 import { templatesService } from '@/services/stock';
+import { logger } from '@/lib/logger';
 import type { Template } from '@/types/stock';
 
 /**
@@ -84,12 +85,6 @@ export async function duplicateTemplate(
     duplicateData.careInstructions = original.careInstructions;
   }
 
-  console.log('[Templates] Duplicating template:', {
-    originalId: id,
-    originalTemplate: original,
-    duplicateData,
-  });
-
   try {
     const result = await templatesService.createTemplate(
       duplicateData as unknown as Parameters<
@@ -98,11 +93,13 @@ export async function duplicateTemplate(
     );
     return result.template;
   } catch (error) {
-    console.error('[Templates] Duplication failed:', {
-      error,
-      originalId: id,
-      duplicateData: JSON.stringify(duplicateData, null, 2),
-    });
+    logger.error(
+      '[Templates] Duplication failed',
+      error instanceof Error ? error : undefined,
+      {
+        originalId: id,
+      }
+    );
     throw error;
   }
 }

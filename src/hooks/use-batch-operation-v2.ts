@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useCallback, useRef, useState } from 'react';
 
 /**
@@ -122,9 +123,10 @@ export function useBatchOperation<T>(
       // Se for rate limit e ainda temos retries, aguarda e tenta novamente
       if (isRateLimitError(error) && retryCount < maxRetries) {
         const delay = getRetryDelay(error);
-        console.log(
-          `Rate limit detectado para ${id}. Aguardando ${delay / 1000}s...`
-        );
+        logger.warn(`Rate limit detected for item`, {
+          id,
+          retryDelay: delay / 1000,
+        });
         await new Promise(resolve => setTimeout(resolve, delay));
         return processItem(id, retryCount + 1);
       }
@@ -160,7 +162,7 @@ export function useBatchOperation<T>(
   const start = useCallback(
     async (ids: string[]) => {
       if (ids.length === 0) {
-        console.warn('Nenhum ID fornecido para processar');
+        logger.warn('No IDs provided for processing');
         return;
       }
 
@@ -191,7 +193,7 @@ export function useBatchOperation<T>(
       for (let batchNum = 0; batchNum < totalBatches; batchNum++) {
         // Verifica cancelamento
         if (controlRef.current.shouldCancel) {
-          console.log('Operação cancelada pelo usuário');
+          logger.debug('Operation cancelled by user');
           break;
         }
 

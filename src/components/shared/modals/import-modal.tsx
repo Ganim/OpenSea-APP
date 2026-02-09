@@ -7,6 +7,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -80,7 +81,10 @@ export function ImportModal({
       setSelectedFile(null);
       onClose();
     } catch (error) {
-      console.error('Erro ao importar:', error);
+      logger.error(
+        'Erro ao importar',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsImporting(false);
     }

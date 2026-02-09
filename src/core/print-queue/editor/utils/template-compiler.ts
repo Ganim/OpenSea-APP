@@ -4,6 +4,7 @@
  */
 
 import type { Editor } from 'grapesjs';
+import { logger } from '@/lib/logger';
 import type { LabelData } from '../../types';
 import { LABEL_FIELDS } from '../constants';
 
@@ -247,7 +248,10 @@ export function loadProject(editor: Editor, serializedData: string): void {
     const projectData = JSON.parse(serializedData);
     editor.loadProjectData(projectData);
   } catch (error) {
-    console.error('Failed to load project data:', error);
+    logger.error(
+      'Failed to load project data',
+      error instanceof Error ? error : undefined
+    );
     throw new Error('Invalid project data');
   }
 }

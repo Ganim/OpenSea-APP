@@ -17,7 +17,9 @@ interface LineElementRendererProps {
 /**
  * Converte strokeStyle para dasharray SVG
  */
-function getStrokeDasharray(style: LineElement['strokeStyle']): string | undefined {
+function getStrokeDasharray(
+  style: LineElement['strokeStyle']
+): string | undefined {
   switch (style) {
     case 'dashed':
       return '8,4';
@@ -37,7 +39,8 @@ export function LineElementRenderer({
   element,
   zoom,
 }: LineElementRendererProps) {
-  const { orientation, strokeWidth, strokeStyle, color, width, height } = element;
+  const { orientation, strokeWidth, strokeStyle, color, width, height } =
+    element;
 
   const widthPx = mmToPx(width, zoom);
   const heightPx = mmToPx(height, zoom);

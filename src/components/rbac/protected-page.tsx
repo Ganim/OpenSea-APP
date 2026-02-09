@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
+import { logger } from '@/lib/logger';
 import { usePermissions } from '@/hooks/use-permissions';
 import { ArrowLeft, Home, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -95,7 +96,7 @@ export function ProtectedPage({
 
   // Validação: pelo menos um tipo de permissão deve ser fornecido
   if (!permission && !anyPermission && !allPermissions) {
-    console.warn(
+    logger.warn(
       'ProtectedPage: Nenhuma permissão especificada. Use permission, anyPermission ou allPermissions.'
     );
     return <>{children}</>;

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -161,7 +162,10 @@ export default function ProductWizardPage() {
       // Navigate to product detail
       router.push(`/stock/products/${createdProduct.id}`);
     } catch (error) {
-      console.error('Wizard submit error:', error);
+      logger.error(
+        'Wizard submit error',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao cadastrar produto', {
         description:
           error instanceof Error ? error.message : 'Erro desconhecido',

@@ -6,6 +6,7 @@
  * Target: 2 clicks to create a variant
  */
 
+import { logger } from '@/lib/logger';
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -94,7 +95,10 @@ function CompactForm({
         form.reset();
         onCreated(response.variant);
       } catch (error) {
-        console.error('Error creating variant:', error);
+        logger.error(
+          'Error creating variant',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao criar variante');
       } finally {
         setIsSubmitting(false);
@@ -252,7 +256,10 @@ function ExpandedForm({
         form.reset();
         onCreated(response.variant);
       } catch (error) {
-        console.error('Error creating variant:', error);
+        logger.error(
+          'Error creating variant',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao criar variante');
       } finally {
         setIsSubmitting(false);

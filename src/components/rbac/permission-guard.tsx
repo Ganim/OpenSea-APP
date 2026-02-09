@@ -6,6 +6,7 @@
 'use client';
 
 import React from 'react';
+import { logger } from '@/lib/logger';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -85,7 +86,7 @@ export function PermissionGuard({
 
   // Validação: pelo menos um tipo de permissão deve ser fornecido
   if (!permission && !anyPermission && !allPermissions) {
-    console.warn(
+    logger.warn(
       'PermissionGuard: Nenhuma permissão especificada. Use permission, anyPermission ou allPermissions.'
     );
     return <>{children}</>;

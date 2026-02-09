@@ -20,7 +20,15 @@ import {
   useLabelTemplate,
   useDuplicateLabelTemplate,
 } from '@/hooks/stock/use-label-templates';
-import { ArrowLeft, Copy, Download, Edit, Eye, EyeOff, Tag } from 'lucide-react';
+import {
+  ArrowLeft,
+  Copy,
+  Download,
+  Edit,
+  Eye,
+  EyeOff,
+  Tag,
+} from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -213,10 +221,7 @@ export default function ViewLabelTemplatePage() {
               {showPreview ? 'Ocultar Preview' : 'Preview'}
             </Button>
           )}
-          <Button
-            variant="outline"
-            onClick={handleExport}
-          >
+          <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>

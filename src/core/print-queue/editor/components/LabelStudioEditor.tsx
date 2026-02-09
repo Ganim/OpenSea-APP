@@ -280,9 +280,7 @@ export function LabelStudioEditor({
   return (
     <div className={cn('flex flex-col h-full', className)}>
       {/* Toolbar */}
-      {!readOnly && (
-        <MainToolbar onFitToScreen={handleFitToScreen} />
-      )}
+      {!readOnly && <MainToolbar onFitToScreen={handleFitToScreen} />}
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">

@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -56,7 +57,10 @@ export function QuickCreateTemplateModal({
         inputRef.current?.focus();
       }, 100);
     } catch (error) {
-      console.error('Erro ao criar template:', error);
+      logger.error(
+        'Erro ao criar template',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsLoading(false);
     }

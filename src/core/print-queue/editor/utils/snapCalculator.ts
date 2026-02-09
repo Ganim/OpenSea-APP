@@ -3,7 +3,13 @@
  * Calcula posições de snap para elementos
  */
 
-import type { LabelElement, SnapGuide, SnapResult, Rect, Point } from '../studio-types';
+import type {
+  LabelElement,
+  SnapGuide,
+  SnapResult,
+  Rect,
+  Point,
+} from '../studio-types';
 
 /**
  * Configuração do sistema de snap
@@ -138,7 +144,8 @@ export function calculateSnap(
 
   // Coleta todos os alvos de snap horizontais e verticais
   const verticalTargets: { value: number; source: SnapGuide['source'] }[] = [];
-  const horizontalTargets: { value: number; source: SnapGuide['source'] }[] = [];
+  const horizontalTargets: { value: number; source: SnapGuide['source'] }[] =
+    [];
 
   // Snap ao canvas
   if (config.snapToCanvas) {
@@ -210,8 +217,16 @@ export function calculateSnap(
   ];
 
   for (const point of xPoints) {
-    const match = findBestSnap(point.value, verticalTargets, config.threshold, true);
-    if (match && (!bestVerticalMatch || match.distance < bestVerticalMatch.distance)) {
+    const match = findBestSnap(
+      point.value,
+      verticalTargets,
+      config.threshold,
+      true
+    );
+    if (
+      match &&
+      (!bestVerticalMatch || match.distance < bestVerticalMatch.distance)
+    ) {
       bestVerticalMatch = match;
       snappedX = match.value - point.offset;
     }
@@ -225,8 +240,16 @@ export function calculateSnap(
   ];
 
   for (const point of yPoints) {
-    const match = findBestSnap(point.value, horizontalTargets, config.threshold, false);
-    if (match && (!bestHorizontalMatch || match.distance < bestHorizontalMatch.distance)) {
+    const match = findBestSnap(
+      point.value,
+      horizontalTargets,
+      config.threshold,
+      false
+    );
+    if (
+      match &&
+      (!bestHorizontalMatch || match.distance < bestHorizontalMatch.distance)
+    ) {
       bestHorizontalMatch = match;
       snappedY = match.value - point.offset;
     }
@@ -275,7 +298,8 @@ export function calculateResizeSnap(
 
   // Coleta alvos de snap
   const verticalTargets: { value: number; source: SnapGuide['source'] }[] = [];
-  const horizontalTargets: { value: number; source: SnapGuide['source'] }[] = [];
+  const horizontalTargets: { value: number; source: SnapGuide['source'] }[] =
+    [];
 
   // Canvas edges
   if (config.snapToCanvas) {
@@ -330,7 +354,12 @@ export function calculateResizeSnap(
 
   // Snap bordas horizontais
   if (adjustingLeft) {
-    const match = findBestSnap(resizeRect.x, verticalTargets, config.threshold, true);
+    const match = findBestSnap(
+      resizeRect.x,
+      verticalTargets,
+      config.threshold,
+      true
+    );
     if (match) {
       snappedX = match.value;
       snappedWidth = resizeRect.width + (resizeRect.x - match.value);
@@ -339,7 +368,12 @@ export function calculateResizeSnap(
   }
   if (adjustingRight) {
     const rightEdge = resizeRect.x + resizeRect.width;
-    const match = findBestSnap(rightEdge, verticalTargets, config.threshold, true);
+    const match = findBestSnap(
+      rightEdge,
+      verticalTargets,
+      config.threshold,
+      true
+    );
     if (match) {
       snappedWidth = match.value - snappedX;
       guides.push(match.guide);
@@ -348,7 +382,12 @@ export function calculateResizeSnap(
 
   // Snap bordas verticais
   if (adjustingTop) {
-    const match = findBestSnap(resizeRect.y, horizontalTargets, config.threshold, false);
+    const match = findBestSnap(
+      resizeRect.y,
+      horizontalTargets,
+      config.threshold,
+      false
+    );
     if (match) {
       snappedY = match.value;
       snappedHeight = resizeRect.height + (resizeRect.y - match.value);
@@ -357,7 +396,12 @@ export function calculateResizeSnap(
   }
   if (adjustingBottom) {
     const bottomEdge = resizeRect.y + resizeRect.height;
-    const match = findBestSnap(bottomEdge, horizontalTargets, config.threshold, false);
+    const match = findBestSnap(
+      bottomEdge,
+      horizontalTargets,
+      config.threshold,
+      false
+    );
     if (match) {
       snappedHeight = match.value - snappedY;
       guides.push(match.guide);

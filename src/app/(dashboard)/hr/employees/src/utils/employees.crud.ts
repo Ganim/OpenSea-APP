@@ -3,6 +3,7 @@
  * Funções isoladas para operações de CRUD no módulo de funcionários
  */
 
+import { logger } from '@/lib/logger';
 import type { Employee } from '@/types/hr';
 import { employeesApi } from '../api';
 
@@ -94,20 +95,14 @@ export async function duplicateEmployee(
     supervisorId: original.supervisorId,
   };
 
-  console.log('[Employees] Duplicating employee:', {
-    originalId: id,
-    originalEmployee: original,
-    duplicateData,
-  });
-
   try {
     return employeesApi.create(duplicateData as any);
   } catch (error) {
-    console.error('[Employees] Duplication failed:', {
-      error,
-      originalId: id,
-      duplicateData: JSON.stringify(duplicateData, null, 2),
-    });
+    logger.error(
+      '[Employees] Duplication failed',
+      error instanceof Error ? error : undefined,
+      { originalId: id }
+    );
     throw error;
   }
 }

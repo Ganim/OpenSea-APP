@@ -241,9 +241,8 @@ function ProductsPageContent() {
     setProductModalOpen(true);
   }, []);
 
-  const handleMoveItem = useCallback((item: Item) => {
+  const handleMoveItem = useCallback((_item: Item) => {
     // TODO: Implement item movement modal
-    console.log('Move item:', item);
   }, []);
 
   // Context menu handlers

@@ -15,8 +15,14 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useMemo, useRef } from 'react';
 import { SYSTEM_LABEL_TEMPLATES } from '../constants';
 import type { LabelData, LabelTemplateDefinition } from '../types';
-import { getSampleLabelData, labelDataToPreviewData } from '../utils/label-data-resolver';
-import { StudioLabelRenderer, parseStudioTemplate } from './studio-label-renderer';
+import {
+  getSampleLabelData,
+  labelDataToPreviewData,
+} from '../utils/label-data-resolver';
+import {
+  StudioLabelRenderer,
+  parseStudioTemplate,
+} from './studio-label-renderer';
 import { buildSamplePreviewData } from '@/core/print-queue/editor';
 
 interface LabelPreviewProps {
@@ -67,9 +73,12 @@ export function LabelPreview({
   }, [data]);
 
   // Use system template dimensions, API template dimensions, or fallback
-  const templateDimensions = systemTemplate?.dimensions
-    ?? (apiTemplate ? { width: apiTemplate.width, height: apiTemplate.height } : null)
-    ?? dimensions;
+  const templateDimensions =
+    systemTemplate?.dimensions ??
+    (apiTemplate
+      ? { width: apiTemplate.width, height: apiTemplate.height }
+      : null) ??
+    dimensions;
 
   // Auto-calculate scale to fit within maxWidth/maxHeight constraints
   const MM_TO_PX = 96 / 25.4; // ~3.78 px/mm
@@ -96,7 +105,10 @@ export function LabelPreview({
   if (!isSystemTemplate && isLoading) {
     return (
       <div className={cn('flex items-center justify-center p-4', className)}>
-        <div className="animate-pulse bg-gray-200 dark:bg-white/10 rounded" style={{ width: 150, height: 100 }} />
+        <div
+          className="animate-pulse bg-gray-200 dark:bg-white/10 rounded"
+          style={{ width: 150, height: 100 }}
+        />
       </div>
     );
   }
@@ -148,7 +160,11 @@ export function LabelPreview({
           height: `${template.dimensions.height * effectiveScale}px`,
         }}
       >
-        <LabelContent template={template} data={labelData} scale={effectiveScale} />
+        <LabelContent
+          template={template}
+          data={labelData}
+          scale={effectiveScale}
+        />
       </div>
     </div>
   );

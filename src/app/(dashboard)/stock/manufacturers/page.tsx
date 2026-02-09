@@ -46,6 +46,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import {
   CNPJLookupModal,
   createManufacturer,
@@ -82,7 +83,6 @@ export default function ManufacturersPage() {
     listFn: async () => {
       try {
         const response = await manufacturersApi.list();
-        console.log('[Manufacturers] API response:', response);
 
         let manufacturers = Array.isArray(response)
           ? response
@@ -92,13 +92,12 @@ export default function ManufacturersPage() {
           (manufacturer: Manufacturer) => !manufacturer.deletedAt
         );
 
-        console.log(
-          '[Manufacturers] Total manufacturers (after filter):',
-          manufacturers.length
-        );
         return manufacturers;
       } catch (error) {
-        console.error('[Manufacturers] Error fetching manufacturers:', error);
+        logger.error(
+          '[Manufacturers] Error fetching manufacturers',
+          error instanceof Error ? error : undefined
+        );
         throw error;
       }
     },
@@ -107,8 +106,8 @@ export default function ManufacturersPage() {
     updateFn: updateManufacturer,
     deleteFn: deleteManufacturer,
     duplicateFn: duplicateManufacturer,
-    onDeleteSuccess: id => {
-      console.log('[Manufacturers CRUD] Delete success callback for ID:', id);
+    onDeleteSuccess: () => {
+      /* noop */
     },
   });
 

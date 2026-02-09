@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { logger } from '@/lib/logger';
 import { companiesService } from '@/services/hr/companies.service';
 import { departmentsService } from '@/services/hr/departments.service';
 import { positionsService } from '@/services/hr/positions.service';
@@ -60,7 +61,10 @@ export function HRFilterBar({
         const response = await companiesService.listCompanies({ perPage: 100 });
         return response ?? [];
       } catch (error) {
-        console.error('Erro ao buscar empresas:', error);
+        logger.error(
+          'Erro ao buscar empresas',
+          error instanceof Error ? error : undefined
+        );
         return [];
       }
     },
@@ -78,7 +82,10 @@ export function HRFilterBar({
         });
         return response ?? [];
       } catch (error) {
-        console.error('Erro ao buscar departamentos:', error);
+        logger.error(
+          'Erro ao buscar departamentos',
+          error instanceof Error ? error : undefined
+        );
         return [];
       }
     },
@@ -97,7 +104,10 @@ export function HRFilterBar({
         });
         return response ?? [];
       } catch (error) {
-        console.error('Erro ao buscar cargos:', error);
+        logger.error(
+          'Erro ao buscar cargos',
+          error instanceof Error ? error : undefined
+        );
         return [];
       }
     },

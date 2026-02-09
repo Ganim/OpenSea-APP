@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ArrowDownToLine,
@@ -145,7 +146,10 @@ export default function ItemDetailPage({ params }: PageProps) {
       router.push('/stock/items');
     } catch (err) {
       toast.error('Erro ao excluir item');
-      console.error(err);
+      logger.error(
+        'Erro ao excluir item',
+        err instanceof Error ? err : undefined
+      );
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);

@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { logger } from '@/lib/logger';
 import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
 import { useState } from 'react';
 import type { CreateModalProps } from '../types';
@@ -54,7 +55,10 @@ export function CreateModal({
         isActive: true,
       });
     } catch (error) {
-      console.error('Erro ao criar grupo:', error);
+      logger.error(
+        'Erro ao criar grupo',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao criar grupo',
         description:

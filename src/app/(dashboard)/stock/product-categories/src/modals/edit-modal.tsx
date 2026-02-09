@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -62,7 +63,10 @@ export function EditModal({
       await onSubmit(category.id, formData);
       onClose();
     } catch (error) {
-      console.error('Erro ao atualizar categoria:', error);
+      logger.error(
+        'Erro ao atualizar categoria',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

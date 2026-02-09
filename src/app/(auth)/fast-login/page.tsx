@@ -10,6 +10,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
 import { translateError } from '@/lib/error-messages';
+import { logger } from '@/lib/logger';
 import {
   getSavedAccounts,
   removeAccount,
@@ -122,7 +123,7 @@ export default function FastLoginPage() {
       }
     } catch (err: unknown) {
       setError(translateError(err));
-      console.error('Erro no login:', err);
+      logger.error('Erro no login', err instanceof Error ? err : undefined);
     }
   };
 

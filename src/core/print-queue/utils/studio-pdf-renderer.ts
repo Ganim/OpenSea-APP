@@ -3,6 +3,7 @@
  * Renderiza elementos de um LabelStudioTemplate diretamente no jsPDF
  */
 
+import { logger } from '@/lib/logger';
 import type {
   BarcodeElement,
   FieldElement,
@@ -20,7 +21,11 @@ import type {
 // HELPERS
 // ============================================
 
-function hexToRgb(hex: string | undefined | null): { r: number; g: number; b: number } {
+function hexToRgb(hex: string | undefined | null): {
+  r: number;
+  g: number;
+  b: number;
+} {
   if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
   const clean = hex.replace('#', '');
   const r = parseInt(clean.substring(0, 2), 16) || 0;
@@ -80,17 +85,23 @@ function resolveFieldValue(
 
     case 'composite':
       if (fieldConfig.template) {
-        return fieldConfig.template.replace(/\{([^}]+)\}/g, (_, path: string) => {
-          const value = resolvePath(previewData, path);
-          if (value != null) return String(value);
-          return '';
-        });
+        return fieldConfig.template.replace(
+          /\{([^}]+)\}/g,
+          (_, path: string) => {
+            const value = resolvePath(previewData, path);
+            if (value != null) return String(value);
+            return '';
+          }
+        );
       }
       return '';
 
     case 'conditional':
       if (fieldConfig.conditions) {
-        const primary = resolvePath(previewData, fieldConfig.conditions.primary);
+        const primary = resolvePath(
+          previewData,
+          fieldConfig.conditions.primary
+        );
         if (primary) return String(primary);
         for (const fallback of fieldConfig.conditions.fallbacks) {
           const value = resolvePath(previewData, fallback);
@@ -231,7 +242,9 @@ function resolveQRContent(
           phone ? `TEL:${phone}` : '',
           email ? `EMAIL:${email}` : '',
           'END:VCARD',
-        ].filter(Boolean).join('\n');
+        ]
+          .filter(Boolean)
+          .join('\n');
       }
       return 'QR Code';
     case 'custom':
@@ -285,7 +298,8 @@ function renderText(
   // Aplicar text transform
   let processedText = text;
   if (style.textTransform === 'uppercase') processedText = text.toUpperCase();
-  else if (style.textTransform === 'lowercase') processedText = text.toLowerCase();
+  else if (style.textTransform === 'lowercase')
+    processedText = text.toLowerCase();
   else if (style.textTransform === 'capitalize') {
     processedText = text.replace(/\b\w/g, c => c.toUpperCase());
   }
@@ -386,7 +400,12 @@ function calculateRowHeightsMm(
 function isCellHiddenByMerge(
   row: number,
   col: number,
-  mergedCells: Array<{ startRow: number; startCol: number; rowSpan: number; colSpan: number }>
+  mergedCells: Array<{
+    startRow: number;
+    startCol: number;
+    rowSpan: number;
+    colSpan: number;
+  }>
 ): boolean {
   for (const merge of mergedCells) {
     if (row === merge.startRow && col === merge.startCol) continue;
@@ -407,7 +426,10 @@ function isCellHiddenByMerge(
  */
 function drawBorderLine(
   doc: import('jspdf').jsPDF,
-  x1: number, y1: number, x2: number, y2: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
   border: { width: number; style: string; color: string } | undefined
 ) {
   if (!border || border.style === 'none' || border.width <= 0) return;
@@ -428,11 +450,25 @@ function renderTableToPdf(
   previewData: Record<string, unknown>
 ) {
   const { tableConfig, cells, width, height } = tableEl;
-  const { rows, columns, mergedCells: merges, borders, cellPadding } = tableConfig;
+  const {
+    rows,
+    columns,
+    mergedCells: merges,
+    borders,
+    cellPadding,
+  } = tableConfig;
   const mergedCells = merges || [];
 
-  const colWidths = calculateColumnWidthsMm(tableConfig.columnWidths, width, columns);
-  const rowHeights = calculateRowHeightsMm(tableConfig.rowHeights, height, rows);
+  const colWidths = calculateColumnWidthsMm(
+    tableConfig.columnWidths,
+    width,
+    columns
+  );
+  const rowHeights = calculateRowHeightsMm(
+    tableConfig.rowHeights,
+    height,
+    rows
+  );
 
   const padding = cellPadding || 0.5;
 
@@ -448,14 +484,18 @@ function renderTableToPdf(
 
   // Calcular tamanho real de cada célula visível (respeitando merges)
   function getCellBounds(row: number, col: number) {
-    const merge = mergedCells.find(m => m.startRow === row && m.startCol === col);
+    const merge = mergedCells.find(
+      m => m.startRow === row && m.startCol === col
+    );
     const rowSpan = merge?.rowSpan || 1;
     const colSpan = merge?.colSpan || 1;
 
     let cellWidth = 0;
-    for (let i = col; i < col + colSpan && i < columns; i++) cellWidth += colWidths[i];
+    for (let i = col; i < col + colSpan && i < columns; i++)
+      cellWidth += colWidths[i];
     let cellHeight = 0;
-    for (let i = row; i < row + rowSpan && i < rows; i++) cellHeight += rowHeights[i];
+    for (let i = row; i < row + rowSpan && i < rows; i++)
+      cellHeight += rowHeights[i];
 
     return {
       cellX: x + colPositions[col],
@@ -472,31 +512,48 @@ function renderTableToPdf(
     for (let col = 0; col < columns; col++) {
       if (isCellHiddenByMerge(row, col, mergedCells)) continue;
 
-      const { cellX, cellY, cellWidth, cellHeight, rowSpan, colSpan } = getCellBounds(row, col);
+      const { cellX, cellY, cellWidth, cellHeight, rowSpan, colSpan } =
+        getCellBounds(row, col);
 
       const isTopEdge = row === 0;
-      const isBottomEdge = (row + rowSpan) >= rows;
+      const isBottomEdge = row + rowSpan >= rows;
       const isLeftEdge = col === 0;
-      const isRightEdge = (col + colSpan) >= columns;
+      const isRightEdge = col + colSpan >= columns;
 
       // Top border
-      drawBorderLine(doc,
-        cellX, cellY, cellX + cellWidth, cellY,
+      drawBorderLine(
+        doc,
+        cellX,
+        cellY,
+        cellX + cellWidth,
+        cellY,
         isTopEdge ? borders?.external : borders?.internalHorizontal
       );
       // Bottom border
-      drawBorderLine(doc,
-        cellX, cellY + cellHeight, cellX + cellWidth, cellY + cellHeight,
+      drawBorderLine(
+        doc,
+        cellX,
+        cellY + cellHeight,
+        cellX + cellWidth,
+        cellY + cellHeight,
         isBottomEdge ? borders?.external : borders?.internalHorizontal
       );
       // Left border
-      drawBorderLine(doc,
-        cellX, cellY, cellX, cellY + cellHeight,
+      drawBorderLine(
+        doc,
+        cellX,
+        cellY,
+        cellX,
+        cellY + cellHeight,
         isLeftEdge ? borders?.external : borders?.internalVertical
       );
       // Right border
-      drawBorderLine(doc,
-        cellX + cellWidth, cellY, cellX + cellWidth, cellY + cellHeight,
+      drawBorderLine(
+        doc,
+        cellX + cellWidth,
+        cellY,
+        cellX + cellWidth,
+        cellY + cellHeight,
         isRightEdge ? borders?.external : borders?.internalVertical
       );
     }
@@ -536,28 +593,79 @@ function renderTableToPdf(
       if (cellData.label?.enabled && cellData.type === 'field') {
         const labelText = cellData.label.text || '';
         if (labelText) {
-          const labelFontSize = cellData.label.style?.fontSize || cellStyle.fontSize * 0.75;
+          const labelFontSize =
+            cellData.label.style?.fontSize || cellStyle.fontSize * 0.75;
           const labelStyle = safeStyle({
             fontSize: labelFontSize,
-            fontWeight: (cellData.label.style?.fontWeight as TextStyle['fontWeight']) || 'bold',
+            fontWeight:
+              (cellData.label.style?.fontWeight as TextStyle['fontWeight']) ||
+              'bold',
             color: cellData.label.style?.color || '#666666',
             textAlign: cellStyle.textAlign,
           });
 
           if (cellData.label.position !== 'left') {
             const labelH = labelFontSize * 1.5;
-            renderText(doc, labelText, contentX, cellY, contentW, labelH, labelStyle);
-            renderText(doc, content, contentX, cellY + labelH, contentW, cellHeight - labelH, cellStyle);
+            renderText(
+              doc,
+              labelText,
+              contentX,
+              cellY,
+              contentW,
+              labelH,
+              labelStyle
+            );
+            renderText(
+              doc,
+              content,
+              contentX,
+              cellY + labelH,
+              contentW,
+              cellHeight - labelH,
+              cellStyle
+            );
           } else {
             const labelW = contentW * 0.35;
-            renderText(doc, labelText, contentX, cellY, labelW, cellHeight, labelStyle);
-            renderText(doc, content, contentX + labelW, cellY, contentW - labelW, cellHeight, cellStyle);
+            renderText(
+              doc,
+              labelText,
+              contentX,
+              cellY,
+              labelW,
+              cellHeight,
+              labelStyle
+            );
+            renderText(
+              doc,
+              content,
+              contentX + labelW,
+              cellY,
+              contentW - labelW,
+              cellHeight,
+              cellStyle
+            );
           }
         } else {
-          renderText(doc, content, contentX, cellY, contentW, cellHeight, cellStyle);
+          renderText(
+            doc,
+            content,
+            contentX,
+            cellY,
+            contentW,
+            cellHeight,
+            cellStyle
+          );
         }
       } else {
-        renderText(doc, content, contentX, cellY, contentW, cellHeight, cellStyle);
+        renderText(
+          doc,
+          content,
+          contentX,
+          cellY,
+          contentW,
+          cellHeight,
+          cellStyle
+        );
       }
     }
   }
@@ -581,7 +689,10 @@ export async function renderStudioTemplateToPdf(
   QRCode: typeof import('qrcode')
 ) {
   // Desenhar fundo do canvas se não for branco
-  if (template.canvas?.backgroundColor && template.canvas.backgroundColor !== '#ffffff') {
+  if (
+    template.canvas?.backgroundColor &&
+    template.canvas.backgroundColor !== '#ffffff'
+  ) {
     const bg = hexToRgb(template.canvas.backgroundColor);
     doc.setFillColor(bg.r, bg.g, bg.b);
     doc.rect(offsetX, offsetY, template.width, template.height, 'F');
@@ -613,12 +724,18 @@ export async function renderStudioTemplateToPdf(
           if (fieldEl.label?.enabled) {
             const labelText = fieldEl.label.text || '';
 
-            const labelFontSize = fieldEl.label.style?.fontSize || valueStyle.fontSize * 0.75;
+            const labelFontSize =
+              fieldEl.label.style?.fontSize || valueStyle.fontSize * 0.75;
             const labelStyle = safeStyle({
-              fontFamily: fieldEl.label.style?.fontFamily || valueStyle.fontFamily,
+              fontFamily:
+                fieldEl.label.style?.fontFamily || valueStyle.fontFamily,
               fontSize: labelFontSize,
-              fontWeight: (fieldEl.label.style?.fontWeight as TextStyle['fontWeight']) || 'bold',
-              fontStyle: (fieldEl.label.style?.fontStyle as TextStyle['fontStyle']) || 'normal',
+              fontWeight:
+                (fieldEl.label.style?.fontWeight as TextStyle['fontWeight']) ||
+                'bold',
+              fontStyle:
+                (fieldEl.label.style?.fontStyle as TextStyle['fontStyle']) ||
+                'normal',
               color: fieldEl.label.style?.color || '#666666',
               textAlign: valueStyle.textAlign,
             });
@@ -628,14 +745,30 @@ export async function renderStudioTemplateToPdf(
               if (labelText) {
                 renderText(doc, labelText, x, y, w, labelH, labelStyle);
               }
-              renderText(doc, value, x, y + (labelText ? labelH : 0), w, h - (labelText ? labelH : 0), valueStyle);
+              renderText(
+                doc,
+                value,
+                x,
+                y + (labelText ? labelH : 0),
+                w,
+                h - (labelText ? labelH : 0),
+                valueStyle
+              );
             } else {
               // Label à esquerda
               const labelW = w * 0.35;
               if (labelText) {
                 renderText(doc, labelText, x, y, labelW, h, labelStyle);
               }
-              renderText(doc, value, x + (labelText ? labelW : 0), y, w - (labelText ? labelW : 0), h, valueStyle);
+              renderText(
+                doc,
+                value,
+                x + (labelText ? labelW : 0),
+                y,
+                w - (labelText ? labelW : 0),
+                h,
+                valueStyle
+              );
             }
           } else {
             renderText(doc, value, x, y, w, h, valueStyle);
@@ -645,7 +778,10 @@ export async function renderStudioTemplateToPdf(
 
         case 'barcode': {
           const barcodeEl = element as BarcodeElement;
-          const barcodeValue = resolveBarcodeValue(barcodeEl.barcodeConfig, previewData);
+          const barcodeValue = resolveBarcodeValue(
+            barcodeEl.barcodeConfig,
+            previewData
+          );
           const barcodeCanvas = document.createElement('canvas');
           JsBarcode(barcodeCanvas, barcodeValue, {
             format: barcodeEl.barcodeConfig.format || 'CODE128',
@@ -683,7 +819,10 @@ export async function renderStudioTemplateToPdf(
           const shapeEl = element as ShapeElement;
           const fill = shapeEl.fill || 'transparent';
           const hasFill = fill !== 'transparent' && fill !== 'none';
-          const hasStroke = shapeEl.stroke && shapeEl.stroke.width > 0 && shapeEl.stroke.style !== 'none';
+          const hasStroke =
+            shapeEl.stroke &&
+            shapeEl.stroke.width > 0 &&
+            shapeEl.stroke.style !== 'none';
 
           if (hasFill) {
             const color = hexToRgb(fill);
@@ -695,12 +834,22 @@ export async function renderStudioTemplateToPdf(
             doc.setLineWidth(shapeEl.stroke.width * 0.265);
           }
 
-          const drawMode = hasFill && hasStroke ? 'FD' : hasFill ? 'F' : hasStroke ? 'S' : undefined;
+          const drawMode =
+            hasFill && hasStroke
+              ? 'FD'
+              : hasFill
+                ? 'F'
+                : hasStroke
+                  ? 'S'
+                  : undefined;
 
           if (drawMode) {
             if (shapeEl.shapeType === 'rectangle') {
               doc.rect(x, y, w, h, drawMode);
-            } else if (shapeEl.shapeType === 'circle' || shapeEl.shapeType === 'ellipse') {
+            } else if (
+              shapeEl.shapeType === 'circle' ||
+              shapeEl.shapeType === 'ellipse'
+            ) {
               doc.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, drawMode);
             }
           }
@@ -732,7 +881,10 @@ export async function renderStudioTemplateToPdf(
         // image, icon, arrow - not rendered in PDF for now
       }
     } catch (e) {
-      console.error(`[studio-pdf] Erro ao renderizar elemento ${element.type} (id=${element.id}):`, e);
+      logger.error(
+        `[studio-pdf] Erro ao renderizar elemento ${element.type} (id=${element.id})`,
+        e instanceof Error ? e : undefined
+      );
     }
   }
 }

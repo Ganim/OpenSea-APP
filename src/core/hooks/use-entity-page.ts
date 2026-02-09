@@ -5,6 +5,7 @@
 
 import { useOptionalSelectionContext } from '@/core/selection';
 import type { BaseEntity } from '@/core/types';
+import { logger } from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
@@ -318,14 +319,14 @@ export function useEntityPage<T extends BaseEntity>(
     const ids = modals.itemsToDelete;
     if (ids.length === 0) return;
 
-    console.log('[handleDeleteConfirm] Iniciando deleção de IDs:', ids);
+    logger.debug('[handleDeleteConfirm] Starting deletion', { ids });
 
     try {
       // Deletar todos os itens em modo silencioso (sem toast individual)
       for (const id of ids) {
-        console.log('[handleDeleteConfirm] Deletando ID:', id);
+        logger.debug('[handleDeleteConfirm] Deleting item', { id });
         await crud.deleteItem(id, true);
-        console.log('[handleDeleteConfirm] ID deletado com sucesso:', id);
+        logger.debug('[handleDeleteConfirm] Item deleted successfully', { id });
       }
 
       // Invalidar cache para refetch
@@ -350,7 +351,10 @@ export function useEntityPage<T extends BaseEntity>(
       modals.close('delete');
       setActiveOperation(null);
     } catch (error) {
-      console.error('Erro ao deletar:', error);
+      logger.error(
+        'Erro ao deletar',
+        error instanceof Error ? error : undefined
+      );
       // Erro já é tratado no useEntityCrud
     }
   }, [modals, crud, onDeleteSuccess, selection, entityName, entityNamePlural]);
@@ -388,7 +392,10 @@ export function useEntityPage<T extends BaseEntity>(
       modals.close('duplicate');
       setActiveOperation(null);
     } catch (error) {
-      console.error('Erro ao duplicar:', error);
+      logger.error(
+        'Erro ao duplicar',
+        error instanceof Error ? error : undefined
+      );
       toast.error(`Erro ao duplicar ${entityName.toLowerCase()}`);
     }
   }, [
@@ -408,7 +415,10 @@ export function useEntityPage<T extends BaseEntity>(
         onCreateSuccess?.(created);
         modals.close('create');
       } catch (error) {
-        console.error('Erro ao criar:', error);
+        logger.error(
+          'Erro ao criar',
+          error instanceof Error ? error : undefined
+        );
         // Erro já é tratado pelo useEntityCrud
       }
     },

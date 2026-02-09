@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { MultiViewModalConfig } from '@/types/entity-config';
 import { Eye, Plus, SquareSplitHorizontal, X } from 'lucide-react';
@@ -65,7 +66,10 @@ export function MultiViewModal<T extends { id: string }>({
       const results = await searchConfig.onSearch(searchTerm);
       setSearchResults(results);
     } catch (error) {
-      console.error('Erro ao buscar:', error);
+      logger.error(
+        'Erro ao buscar',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao realizar busca');
     } finally {
       setIsSearching(false);
@@ -90,7 +94,10 @@ export function MultiViewModal<T extends { id: string }>({
       await onSave(itemId, data);
       toast.success(`${entity} atualizado com sucesso!`);
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      logger.error(
+        'Erro ao salvar',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error
           ? error.message

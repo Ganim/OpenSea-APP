@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/card';
 import { formatCNPJ } from '@/helpers';
 import { employeesService } from '@/services/hr/employees.service';
 import { positionsService } from '@/services/hr/positions.service';
+import { logger } from '@/lib/logger';
 import type { Company, Department, Employee, Position } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -126,7 +127,10 @@ export default function DepartmentDetailPage() {
       toast.success('Departamento excluído com sucesso!');
       router.push('/hr/departments');
     } catch (error) {
-      console.error('Erro ao excluir departamento:', error);
+      logger.error(
+        'Erro ao excluir departamento',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao excluir departamento');
     } finally {
       setIsDeleting(false);

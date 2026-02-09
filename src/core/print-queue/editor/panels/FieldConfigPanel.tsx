@@ -22,12 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  ChevronRight,
-  Plus,
-  Trash2,
-  Braces,
-} from 'lucide-react';
+import { ChevronRight, Plus, Trash2, Braces } from 'lucide-react';
 
 interface FieldConfigPanelProps {
   element: FieldElement;
@@ -140,7 +135,7 @@ function CompositeFieldConfig({
         onOpenChange={setInsertModalOpen}
         onSelect={() => {}}
         insertMode
-        onInsert={(text) => {
+        onInsert={text => {
           const current = config.template || '';
           onUpdate({ template: current + text });
         }}
@@ -195,7 +190,9 @@ function ConditionalFieldConfig({
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => {
-                  const newFallbacks = conditions.fallbacks.filter((_, i) => i !== index);
+                  const newFallbacks = conditions.fallbacks.filter(
+                    (_, i) => i !== index
+                  );
                   updateConditions({ fallbacks: newFallbacks });
                 }}
               >
@@ -218,7 +215,8 @@ function ConditionalFieldConfig({
       </div>
 
       <p className="text-xs text-slate-400">
-        Se o campo principal estiver vazio, será usado o próximo fallback disponível.
+        Se o campo principal estiver vazio, será usado o próximo fallback
+        disponível.
       </p>
     </div>
   );
@@ -300,7 +298,7 @@ function CalculatedFieldConfig({
         onOpenChange={setInsertModalOpen}
         onSelect={() => {}}
         insertMode
-        onInsert={(text) => {
+        onInsert={text => {
           const current = config.formula || '';
           onUpdate({ formula: current + text });
         }}
@@ -368,13 +366,22 @@ export function FieldConfigPanel({ element, onUpdate }: FieldConfigPanelProps) {
         <SimpleFieldConfig config={fieldConfig} onUpdate={updateFieldConfig} />
       )}
       {fieldConfig.type === 'composite' && (
-        <CompositeFieldConfig config={fieldConfig} onUpdate={updateFieldConfig} />
+        <CompositeFieldConfig
+          config={fieldConfig}
+          onUpdate={updateFieldConfig}
+        />
       )}
       {fieldConfig.type === 'conditional' && (
-        <ConditionalFieldConfig config={fieldConfig} onUpdate={updateFieldConfig} />
+        <ConditionalFieldConfig
+          config={fieldConfig}
+          onUpdate={updateFieldConfig}
+        />
       )}
       {fieldConfig.type === 'calculated' && (
-        <CalculatedFieldConfig config={fieldConfig} onUpdate={updateFieldConfig} />
+        <CalculatedFieldConfig
+          config={fieldConfig}
+          onUpdate={updateFieldConfig}
+        />
       )}
 
       <Separator />

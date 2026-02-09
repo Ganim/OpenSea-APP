@@ -6,6 +6,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { TemplateViewer } from '@/app/(dashboard)/stock/templates/src/components';
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
@@ -166,13 +167,6 @@ export function MultiViewModal({
         ? templates[activeIndex]
         : templates[compareSlots[0]]; // Salva o template do primeiro painel em modo compare
 
-    console.log('[MODAL] Salvando template:', {
-      id: currentTemplate.id,
-      name: data.name,
-      originalName: currentTemplate.name,
-      nameChanged: data.name !== currentTemplate.name,
-    });
-
     // Verificar se houve alguma mudança real
     const hasChanges =
       data.name.trim() !== currentTemplate.name ||
@@ -219,7 +213,10 @@ export function MultiViewModal({
       );
       setTemplates(updatedTemplates);
     } catch (error) {
-      console.error('[MODAL] Erro ao salvar template:', error);
+      logger.error(
+        '[MODAL] Erro ao salvar template',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error ? error.message : 'Erro ao atualizar template';
       toast.error('Erro ao salvar', { description: message });

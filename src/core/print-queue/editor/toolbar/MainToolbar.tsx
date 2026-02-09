@@ -818,7 +818,6 @@ export function MainToolbar({ onFitToScreen, className }: MainToolbarProps) {
           onClick={onFitToScreen ?? (() => setZoom(1))}
         />
       </div>
-
     </div>
   );
 }

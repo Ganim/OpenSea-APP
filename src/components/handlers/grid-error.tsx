@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -132,7 +133,10 @@ export function GridError({
         await result;
       }
     } catch (error) {
-      console.error('Error executing action:', error);
+      logger.error(
+        'Error executing action',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 

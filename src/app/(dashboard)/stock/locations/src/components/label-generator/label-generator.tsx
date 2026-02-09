@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useMemo, useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import {
@@ -300,7 +301,10 @@ export function LabelGenerator({
 
       setGenerationState({ isGenerating: false, progress: 100, error: null });
     } catch (err) {
-      console.error('Error generating PDF:', err);
+      logger.error(
+        'Error generating PDF',
+        err instanceof Error ? err : undefined
+      );
       setGenerationState({
         isGenerating: false,
         progress: 0,
@@ -342,7 +346,7 @@ export function LabelGenerator({
 
       setGenerationState({ isGenerating: false, progress: 100, error: null });
     } catch (err) {
-      console.error('Error printing:', err);
+      logger.error('Error printing', err instanceof Error ? err : undefined);
       setGenerationState({
         isGenerating: false,
         progress: 0,

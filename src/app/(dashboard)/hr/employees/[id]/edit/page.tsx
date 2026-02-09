@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { logger } from '@/lib/logger';
 import type { Company, Department, Employee, Position } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -262,7 +263,10 @@ export default function EmployeeEditPage() {
       toast.success('Funcionário atualizado com sucesso!');
       router.push(`/hr/employees/${employeeId}`);
     } catch (error) {
-      console.error('Erro ao salvar funcionário:', error);
+      logger.error(
+        'Erro ao salvar funcionario',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao salvar funcionário');
     } finally {
       setIsSaving(false);

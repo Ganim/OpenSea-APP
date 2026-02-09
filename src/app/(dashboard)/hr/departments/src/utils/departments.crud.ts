@@ -3,6 +3,7 @@
  * Funções isoladas para operações de CRUD no módulo de departamentos
  */
 
+import { logger } from '@/lib/logger';
 import type {
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
@@ -81,20 +82,14 @@ export async function duplicateDepartment(
     isActive: original.isActive,
   };
 
-  console.log('[Departments] Duplicating department:', {
-    originalId: id,
-    originalDepartment: original,
-    duplicateData,
-  });
-
   try {
     return departmentsApi.create(duplicateData);
   } catch (error) {
-    console.error('[Departments] Duplication failed:', {
-      error,
-      originalId: id,
-      duplicateData: JSON.stringify(duplicateData, null, 2),
-    });
+    logger.error(
+      '[Departments] Duplication failed',
+      error instanceof Error ? error : undefined,
+      { originalId: id }
+    );
     throw error;
   }
 }

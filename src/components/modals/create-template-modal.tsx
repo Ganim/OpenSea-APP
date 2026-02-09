@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -155,7 +156,10 @@ export function CreateTemplateModal({
       await onSubmit(data);
       handleClose();
     } catch (error) {
-      console.error('Erro ao salvar template:', error);
+      logger.error(
+        'Erro ao salvar template',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

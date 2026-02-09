@@ -3,6 +3,7 @@ import type {
   Supplier,
   UpdateSupplierRequest,
 } from '@/types/stock';
+import { logger } from '@/lib/logger';
 import { suppliersApi } from '../api';
 
 /**
@@ -113,11 +114,12 @@ export async function updateSupplier(
 
 export async function deleteSupplier(id: string): Promise<void> {
   try {
-    console.log('[deleteSupplier] Deletando fornecedor com ID:', id);
     await suppliersApi.delete(id);
-    console.log('[deleteSupplier] Fornecedor deletado com sucesso!');
   } catch (error) {
-    console.error('[deleteSupplier] Erro ao deletar fornecedor:', error);
+    logger.error(
+      '[deleteSupplier] Erro ao deletar fornecedor',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }

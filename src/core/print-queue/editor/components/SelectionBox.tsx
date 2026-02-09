@@ -27,13 +27,29 @@ interface SelectionBoxProps {
  */
 const RESIZE_HANDLES = [
   { id: 'nw', cursor: 'nwse-resize', position: { top: -4, left: -4 } },
-  { id: 'n', cursor: 'ns-resize', position: { top: -4, left: '50%', transform: 'translateX(-50%)' } },
+  {
+    id: 'n',
+    cursor: 'ns-resize',
+    position: { top: -4, left: '50%', transform: 'translateX(-50%)' },
+  },
   { id: 'ne', cursor: 'nesw-resize', position: { top: -4, right: -4 } },
-  { id: 'e', cursor: 'ew-resize', position: { top: '50%', right: -4, transform: 'translateY(-50%)' } },
+  {
+    id: 'e',
+    cursor: 'ew-resize',
+    position: { top: '50%', right: -4, transform: 'translateY(-50%)' },
+  },
   { id: 'se', cursor: 'nwse-resize', position: { bottom: -4, right: -4 } },
-  { id: 's', cursor: 'ns-resize', position: { bottom: -4, left: '50%', transform: 'translateX(-50%)' } },
+  {
+    id: 's',
+    cursor: 'ns-resize',
+    position: { bottom: -4, left: '50%', transform: 'translateX(-50%)' },
+  },
   { id: 'sw', cursor: 'nesw-resize', position: { bottom: -4, left: -4 } },
-  { id: 'w', cursor: 'ew-resize', position: { top: '50%', left: -4, transform: 'translateY(-50%)' } },
+  {
+    id: 'w',
+    cursor: 'ew-resize',
+    position: { top: '50%', left: -4, transform: 'translateY(-50%)' },
+  },
 ] as const;
 
 /**

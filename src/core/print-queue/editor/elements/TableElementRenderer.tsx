@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import type { TableElement, TableCell, MergedCell, BorderStyle } from '../studio-types';
+import type {
+  TableElement,
+  TableCell,
+  MergedCell,
+  BorderStyle,
+} from '../studio-types';
 import { mmToPx } from '../utils/unitConverter';
 
 interface TableElementRendererProps {
@@ -33,7 +38,7 @@ function resolveCellBorder(
     external: BorderStyle;
     internalHorizontal: BorderStyle;
     internalVertical: BorderStyle;
-  },
+  }
 ): BorderStyle | undefined {
   // Priority 1: per-cell border
   const cellBorder = cell?.borders?.[side];
@@ -42,13 +47,21 @@ function resolveCellBorder(
   // Priority 2: global border fallback
   switch (side) {
     case 'top':
-      return row === 0 ? globalBorders.external : globalBorders.internalHorizontal;
+      return row === 0
+        ? globalBorders.external
+        : globalBorders.internalHorizontal;
     case 'bottom':
-      return (row + rowSpan) >= rows ? globalBorders.external : globalBorders.internalHorizontal;
+      return row + rowSpan >= rows
+        ? globalBorders.external
+        : globalBorders.internalHorizontal;
     case 'left':
-      return col === 0 ? globalBorders.external : globalBorders.internalVertical;
+      return col === 0
+        ? globalBorders.external
+        : globalBorders.internalVertical;
     case 'right':
-      return (col + colSpan) >= columns ? globalBorders.external : globalBorders.internalVertical;
+      return col + colSpan >= columns
+        ? globalBorders.external
+        : globalBorders.internalVertical;
   }
 }
 
@@ -234,7 +247,8 @@ function calculateRowHeights(
     }
   }
 
-  const autoHeight = autoCount > 0 ? (totalHeightPx - fixedTotal) / autoCount : 0;
+  const autoHeight =
+    autoCount > 0 ? (totalHeightPx - fixedTotal) / autoCount : 0;
 
   for (let i = 0; i < rows; i++) {
     const h = heights[i] ?? 'auto';
@@ -318,17 +332,58 @@ export function TableElementRenderer({
             : mmToPx(4, zoom);
 
           // Resolve bordas per-cell com fallback para globais
-          const borderTop = resolveCellBorder(cellData, 'top', row, col, rows, columns, rowSpan, colSpan, borders);
-          const borderRight = resolveCellBorder(cellData, 'right', row, col, rows, columns, rowSpan, colSpan, borders);
-          const borderBottom = resolveCellBorder(cellData, 'bottom', row, col, rows, columns, rowSpan, colSpan, borders);
-          const borderLeft = resolveCellBorder(cellData, 'left', row, col, rows, columns, rowSpan, colSpan, borders);
+          const borderTop = resolveCellBorder(
+            cellData,
+            'top',
+            row,
+            col,
+            rows,
+            columns,
+            rowSpan,
+            colSpan,
+            borders
+          );
+          const borderRight = resolveCellBorder(
+            cellData,
+            'right',
+            row,
+            col,
+            rows,
+            columns,
+            rowSpan,
+            colSpan,
+            borders
+          );
+          const borderBottom = resolveCellBorder(
+            cellData,
+            'bottom',
+            row,
+            col,
+            rows,
+            columns,
+            rowSpan,
+            colSpan,
+            borders
+          );
+          const borderLeft = resolveCellBorder(
+            cellData,
+            'left',
+            row,
+            col,
+            rows,
+            columns,
+            rowSpan,
+            colSpan,
+            borders
+          );
 
           const makeBorderCss = (b: BorderStyle | undefined) => {
             if (!b || b.style === 'none') return 'none';
             return `${mmToPx(b.width, zoom)}px ${b.style} ${b.color}`;
           };
 
-          const isSelected = selectedCell?.row === row && selectedCell?.col === col;
+          const isSelected =
+            selectedCell?.row === row && selectedCell?.col === col;
 
           const cellStyle: React.CSSProperties = {
             position: 'absolute',
@@ -366,11 +421,13 @@ export function TableElementRenderer({
             borderBottom: makeBorderCss(borderBottom),
             borderLeft: makeBorderCss(borderLeft),
             // Selection highlight
-            ...(isSelected ? {
-              outline: '2px solid #3b82f6',
-              outlineOffset: '-1px',
-              zIndex: 1,
-            } : {}),
+            ...(isSelected
+              ? {
+                  outline: '2px solid #3b82f6',
+                  outlineOffset: '-1px',
+                  zIndex: 1,
+                }
+              : {}),
           };
 
           // Conteúdo da célula
@@ -389,17 +446,19 @@ export function TableElementRenderer({
           }
 
           // Label da célula
-          const hasLabel = cellData?.label?.enabled && cellData.type === 'field';
+          const hasLabel =
+            cellData?.label?.enabled && cellData.type === 'field';
           const labelText = hasLabel
-            ? (cellData!.label!.text || getFieldLabel(cellData!.dataPath || ''))
+            ? cellData!.label!.text || getFieldLabel(cellData!.dataPath || '')
             : '';
           const isLabelAbove = cellData?.label?.position !== 'left';
           const labelSpacingPx = hasLabel
             ? mmToPx(cellData!.label!.spacing ?? 0.5, zoom)
             : 0;
-          const labelFontSizePx = hasLabel && cellData!.label!.style?.fontSize
-            ? mmToPx(cellData!.label!.style.fontSize, zoom)
-            : fontSize * 0.75;
+          const labelFontSizePx =
+            hasLabel && cellData!.label!.style?.fontSize
+              ? mmToPx(cellData!.label!.style.fontSize, zoom)
+              : fontSize * 0.75;
 
           // Se tem label, mudar layout para column ou row
           if (hasLabel) {
@@ -412,10 +471,14 @@ export function TableElementRenderer({
             <div
               key={`cell-${row}-${col}`}
               style={cellStyle}
-              onClick={onCellClick ? (e) => {
-                e.stopPropagation();
-                onCellClick(row, col);
-              } : undefined}
+              onClick={
+                onCellClick
+                  ? e => {
+                      e.stopPropagation();
+                      onCellClick(row, col);
+                    }
+                  : undefined
+              }
             >
               {hasLabel && (
                 <span
@@ -423,7 +486,10 @@ export function TableElementRenderer({
                     fontSize: labelFontSizePx,
                     fontWeight: cellData!.label!.style?.fontWeight || 'bold',
                     color: cellData!.label!.style?.color || '#666666',
-                    fontFamily: cellData!.label!.style?.fontFamily || cellData?.style?.fontFamily || 'Arial',
+                    fontFamily:
+                      cellData!.label!.style?.fontFamily ||
+                      cellData?.style?.fontFamily ||
+                      'Arial',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

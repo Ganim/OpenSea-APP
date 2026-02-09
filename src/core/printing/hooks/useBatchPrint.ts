@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { BatchPrintConfig, PrintConfig, PrintOutputType } from '../types';
 import { combinePagesToPdf, downloadPdf, openPdfInNewTab } from '../utils';
@@ -45,7 +46,7 @@ export const useBatchPrint = () => {
         for (const item of config.items) {
           const element = batchRefsMap.current.get(item.id);
           if (!element) {
-            console.warn(`Elemento não encontrado para item ${item.id}`);
+            logger.warn(`Elemento não encontrado para item ${item.id}`);
             continue;
           }
 
@@ -85,7 +86,10 @@ export const useBatchPrint = () => {
 
         return { success: true, blob };
       } catch (error) {
-        console.error('Erro na impressão em lote:', error);
+        logger.error(
+          'Erro na impressão em lote',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao processar impressão em lote');
         return { success: false, error };
       } finally {

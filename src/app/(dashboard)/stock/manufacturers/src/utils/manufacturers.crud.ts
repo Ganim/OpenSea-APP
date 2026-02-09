@@ -3,6 +3,7 @@ import type {
   Manufacturer,
   UpdateManufacturerRequest,
 } from '@/types/stock';
+import { logger } from '@/lib/logger';
 import { manufacturersApi } from '../api';
 
 export async function createManufacturer(
@@ -54,11 +55,12 @@ export async function updateManufacturer(
 
 export async function deleteManufacturer(id: string): Promise<void> {
   try {
-    console.log('[deleteManufacturer] Deletando fabricante com ID:', id);
     await manufacturersApi.delete(id);
-    console.log('[deleteManufacturer] Fabricante deletado com sucesso!');
   } catch (error) {
-    console.error('[deleteManufacturer] Erro ao deletar fabricante:', error);
+    logger.error(
+      '[deleteManufacturer] Erro ao deletar fabricante',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }

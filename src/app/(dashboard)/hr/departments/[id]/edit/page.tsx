@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { logger } from '@/lib/logger';
 import type { Company, Department } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -148,7 +149,10 @@ export default function DepartmentEditPage() {
       toast.success('Departamento atualizado com sucesso!');
       router.push(`/hr/departments/${departmentId}`);
     } catch (error) {
-      console.error('Erro ao salvar departamento:', error);
+      logger.error(
+        'Erro ao salvar departamento',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao salvar departamento');
     } finally {
       setIsSaving(false);

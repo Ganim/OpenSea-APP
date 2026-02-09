@@ -22,6 +22,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/hr/companies.service';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 import { companyKeys } from './keys';
@@ -104,7 +105,10 @@ export function useDeleteCompany(options: DeleteCompanyOptions = {}) {
           await companiesService.deleteCompany(id);
           deleted.push(id);
         } catch (error) {
-          console.error(`[DeleteCompany] Falha ao excluir ${id}:`, error);
+          logger.error(
+            `[DeleteCompany] Falha ao excluir ${id}`,
+            error instanceof Error ? error : undefined
+          );
           failed.push(id);
         }
       }

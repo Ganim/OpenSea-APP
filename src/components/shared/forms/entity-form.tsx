@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { logger } from '@/lib/logger';
 import {
   EntityFormConfig,
   EntityFormRef,
@@ -140,7 +141,10 @@ export const EntityForm = forwardRef<
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error('Erro ao submeter formulário:', error);
+      logger.error(
+        'Erro ao submeter formulário',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

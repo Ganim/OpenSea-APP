@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import * as rbacService from '@/services/rbac/rbac.service';
 import type { AllPermissionsResponse, PermissionGroup } from '@/types/rbac';
@@ -60,11 +61,6 @@ export default function PermissionGroupEditPage() {
     queryFn: async () => {
       const permissions = await rbacService.listGroupPermissions(groupId);
       const codes = permissions.map(p => p.code);
-      console.log('📋 Group permissions loaded:', {
-        permissionsCount: permissions.length,
-        codes,
-        firstPermission: permissions[0],
-      });
       return codes;
     },
     enabled: !!groupId,
@@ -79,7 +75,10 @@ export default function PermissionGroupEditPage() {
           const result = await rbacService.listAllPermissions();
           return result;
         } catch (error) {
-          console.error('❌ Error fetching all permissions:', error);
+          logger.error(
+            'Error fetching all permissions',
+            error instanceof Error ? error : undefined
+          );
           return {
             permissions: [],
             total: 0,
@@ -192,20 +191,15 @@ export default function PermissionGroupEditPage() {
         code => !selectedPermissions.has(code)
       );
 
-      console.log('🔍 Permissions to add:', permissionsToAdd);
-      console.log('🔍 Permissions to remove:', permissionsToRemove);
-
       // Adicionar novas permissões em bulk (até 500 por requisição)
       if (permissionsToAdd.length > 0) {
-        console.log(
-          `📦 Adding ${permissionsToAdd.length} permissions in bulk...`
-        );
-
         // Validar formato de cada permissão
         for (const permissionCode of permissionsToAdd) {
           const parts = permissionCode.split('.');
           if (parts.length < 1 || parts.length > 4) {
-            console.error('❌ Invalid permission code format:', permissionCode);
+            logger.error('Invalid permission code format', undefined, {
+              permissionCode,
+            });
             throw new Error(
               `Código de permissão inválido: "${permissionCode}". Formato esperado: 1-4 partes separadas por ponto (ex: stock, stock.locations, stock.products.create, hr.employees.list.all)`
             );
@@ -221,14 +215,10 @@ export default function PermissionGroupEditPage() {
             effect: 'allow' as const,
           }));
 
-          console.log(
-            `🚀 Sending chunk ${i / chunkSize + 1} with ${permissionsData.length} permissions`
-          );
           const result = await rbacService.addPermissionsToGroupBulk(
             groupId,
             permissionsData
           );
-          console.log(`✅ Chunk result:`, result);
         }
       }
 
@@ -237,16 +227,14 @@ export default function PermissionGroupEditPage() {
         // Converter código para ID
         const permissionId = permissionCodeToId.get(permissionCode);
         if (!permissionId) {
-          console.error('❌ Permission ID not found for code:', permissionCode);
+          logger.error('Permission ID not found for code', undefined, {
+            permissionCode,
+          });
           throw new Error(
             `ID da permissão não encontrado para: "${permissionCode}"`
           );
         }
 
-        console.log('➖ Removing permission:', {
-          permissionCode,
-          permissionId,
-        });
         await rbacService.removePermissionFromGroup(groupId, permissionId);
       }
     },
@@ -296,12 +284,12 @@ export default function PermissionGroupEditPage() {
 
   const handleTogglePermission = useCallback(
     (permissionCode: string, isChecked: boolean) => {
-      console.log('🔄 Toggle permission:', { permissionCode, isChecked });
-
       // Validar formato antes de adicionar
       const parts = permissionCode.split('.');
       if (parts.length < 3) {
-        console.error('❌ Invalid permission code format:', permissionCode);
+        logger.error('Invalid permission code format', undefined, {
+          permissionCode,
+        });
         showErrorToast({
           title: 'Código de permissão inválido',
           description: `"${permissionCode}" não segue o formato module.resource.action`,

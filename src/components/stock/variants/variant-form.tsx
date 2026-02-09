@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -106,34 +107,19 @@ export function VariantForm({
 
   // Campos para os novos dados de variante
   const [reference, setReference] = useState(() => {
-    const value = (variant?.reference as string) || '';
-    console.log('🔵 useState reference:', value);
-    return value;
+    return (variant?.reference as string) || '';
   });
   const [colorHex, setColorHex] = useState(() => {
-    const value = (variant?.colorHex as string) || '';
-    console.log('🔵 useState colorHex:', value);
-    return value;
+    return (variant?.colorHex as string) || '';
   });
   const [colorPantone, setColorPantone] = useState(() => {
-    const value = (variant?.colorPantone as string) || '';
-    console.log('🔵 useState colorPantone:', value);
-    return value;
+    return (variant?.colorPantone as string) || '';
   });
   const [isDiscontinued, setIsDiscontinued] = useState(() => {
-    const value = variant?.outOfLine || false;
-    console.log(
-      '🔵 useState isDiscontinued (outOfLine):',
-      variant?.outOfLine,
-      '→',
-      value
-    );
-    return value;
+    return variant?.outOfLine || false;
   });
   const [isActive, setIsActive] = useState(() => {
-    const value = variant?.isActive ?? true;
-    console.log('🔵 useState isActive:', value);
-    return value;
+    return variant?.isActive ?? true;
   });
   const [similars, setSimilars] = useState<unknown[]>(
     (variant?.similars as unknown[]) || []
@@ -175,13 +161,6 @@ export function VariantForm({
   // Sincronizar estados quando variant.id mudar (para modo edit)
   useEffect(() => {
     if (variant) {
-      console.log('🟦 DEBUG variant recebido:', variant);
-      console.log(
-        '🔄 DEBUG isActive - variant:',
-        variant.isActive,
-        'tipo:',
-        typeof variant.isActive
-      );
       setReference(variant.reference || '');
       setColorHex(variant.colorHex || '');
       setColorPantone(variant.colorPantone || '');
@@ -248,7 +227,10 @@ export function VariantForm({
 
       await onSave(cleanData);
     } catch (err) {
-      console.error('Erro ao salvar variante:', err);
+      logger.error(
+        'Erro ao salvar variante',
+        err instanceof Error ? err : undefined
+      );
     }
   };
 

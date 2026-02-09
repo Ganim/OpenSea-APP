@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 import { translateError } from '@/lib/error-messages';
+import { logger } from '@/lib/logger';
 import { useForm } from '@tanstack/react-form';
 import {
   CheckCircle2,
@@ -74,7 +75,10 @@ export default function RegisterPage() {
         router.push('/');
       } catch (err: unknown) {
         setError(translateError(err));
-        console.error('Erro no registro:', err);
+        logger.error(
+          'Erro no registro',
+          err instanceof Error ? err : undefined
+        );
       }
     },
   });

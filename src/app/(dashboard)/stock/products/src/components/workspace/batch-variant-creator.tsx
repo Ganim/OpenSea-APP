@@ -6,6 +6,7 @@
  * Example: Colors (Red, Blue, Black) x Sizes (40, 41, 42) = 9 variants
  */
 
+import { logger } from '@/lib/logger';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -337,7 +338,10 @@ export function BatchVariantCreator({
         onCreated(response.variants);
         onOpenChange(false);
       } catch (error) {
-        console.error('Error creating variants:', error);
+        logger.error(
+          'Error creating variants',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao criar variantes', {
           description: 'Verifique os dados e tente novamente.',
         });

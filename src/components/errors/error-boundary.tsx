@@ -15,6 +15,7 @@
 'use client';
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
@@ -72,8 +73,7 @@ export class ErrorBoundary extends Component<
    */
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log para console em desenvolvimento
-    console.error('[ErrorBoundary] Erro capturado:', {
-      error,
+    logger.error('[ErrorBoundary] Erro capturado', error, {
       componentStack: errorInfo.componentStack,
     });
 

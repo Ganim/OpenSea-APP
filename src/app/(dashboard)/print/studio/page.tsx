@@ -64,11 +64,19 @@ export default function PrintStudioPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { templates, isLoading, remove, duplicate, create, isDeleting, isDuplicating, isCreating } =
-    useLabelTemplateCrud({
-      search: debouncedSearch || undefined,
-      includeSystem: true,
-    });
+  const {
+    templates,
+    isLoading,
+    remove,
+    duplicate,
+    create,
+    isDeleting,
+    isDuplicating,
+    isCreating,
+  } = useLabelTemplateCrud({
+    search: debouncedSearch || undefined,
+    includeSystem: true,
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,45 +155,53 @@ export default function PrintStudioPage() {
     }
   }, []);
 
-  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
 
-      if (!data.exportVersion || !data.template) {
-        toast.error('Arquivo JSON inválido. Formato de exportação não reconhecido.');
-        return;
+        if (!data.exportVersion || !data.template) {
+          toast.error(
+            'Arquivo JSON inválido. Formato de exportação não reconhecido.'
+          );
+          return;
+        }
+
+        const { name, description, width, height, grapesJsData } =
+          data.template;
+        if (!name || !width || !height || !grapesJsData) {
+          toast.error('Arquivo JSON incompleto. Campos obrigatórios ausentes.');
+          return;
+        }
+
+        const result = await create({
+          name: `${name} (Importado)`,
+          description: description || '',
+          width,
+          height,
+          grapesJsData,
+        });
+
+        if (result?.template?.id) {
+          router.push(`/print/studio/label/${result.template.id}/edit`);
+        }
+      } catch {
+        toast.error(
+          'Erro ao importar template. Verifique se o arquivo é válido.'
+        );
+      } finally {
+        // Reset input so same file can be re-imported
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
-
-      const { name, description, width, height, grapesJsData } = data.template;
-      if (!name || !width || !height || !grapesJsData) {
-        toast.error('Arquivo JSON incompleto. Campos obrigatórios ausentes.');
-        return;
-      }
-
-      const result = await create({
-        name: `${name} (Importado)`,
-        description: description || '',
-        width,
-        height,
-        grapesJsData,
-      });
-
-      if (result?.template?.id) {
-        router.push(`/print/studio/label/${result.template.id}/edit`);
-      }
-    } catch {
-      toast.error('Erro ao importar template. Verifique se o arquivo é válido.');
-    } finally {
-      // Reset input so same file can be re-imported
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [create, router]);
+    },
+    [create, router]
+  );
 
   const headerButtons: HeaderButton[] = useMemo(
     () => [

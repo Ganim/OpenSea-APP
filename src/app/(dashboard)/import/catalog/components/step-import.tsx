@@ -6,6 +6,7 @@
 // ============================================
 
 import { useCallback, useRef, useState } from 'react';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -128,7 +129,10 @@ export function StepImport({
             manufacturerIdMap.set(mfr.cnpj, result.manufacturer.id);
           }
         } catch (error) {
-          console.error('Error creating manufacturer:', error);
+          logger.error(
+            'Error creating manufacturer',
+            error instanceof Error ? error : undefined
+          );
         }
       }
     }

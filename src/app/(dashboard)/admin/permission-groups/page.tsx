@@ -30,6 +30,7 @@ import {
   useEntityPage,
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
+import { logger } from '@/lib/logger';
 import type { PermissionGroup } from '@/types/rbac';
 import { ArrowLeft, Calendar, Clock, Plus, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -128,7 +129,10 @@ export default function PermissionGroupsPage() {
       }
       page.crud.refetch();
     } catch (error) {
-      console.error('Erro ao duplicar grupo:', error);
+      logger.error(
+        'Erro ao duplicar grupo',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 

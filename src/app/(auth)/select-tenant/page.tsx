@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
+import { logger } from '@/lib/logger';
 import { Building2, Crown, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
@@ -34,7 +35,10 @@ export default function SelectTenantPage() {
       await selectTenant(tenantId);
       router.push('/');
     } catch (error) {
-      console.error('Erro ao selecionar tenant:', error);
+      logger.error(
+        'Erro ao selecionar tenant',
+        error instanceof Error ? error : undefined
+      );
       // Reset para permitir nova tentativa manual
       autoSelectAttempted.current = false;
     }

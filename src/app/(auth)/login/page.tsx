@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
 import { translateError } from '@/lib/error-messages';
+import { logger } from '@/lib/logger';
 import { useForm } from '@tanstack/react-form';
 import { ChevronLeft, ChevronRight, Lock, User } from 'lucide-react';
 import Link from 'next/link';
@@ -64,7 +65,7 @@ export default function LoginPage() {
         }
       } catch (err: unknown) {
         setError(translateError(err));
-        console.error('Erro no login:', err);
+        logger.error('Erro no login', err instanceof Error ? err : undefined);
       }
     },
   });

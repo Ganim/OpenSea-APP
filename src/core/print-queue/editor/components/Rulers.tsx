@@ -23,7 +23,11 @@ const MINOR_TICK_INTERVAL = 5; // mm
 /**
  * Componente de Réguas do Label Studio
  */
-export function Rulers({ className, containerWidth = 0, containerHeight = 0 }: RulersProps) {
+export function Rulers({
+  className,
+  containerWidth = 0,
+  containerHeight = 0,
+}: RulersProps) {
   const canvasWidth = useEditorStore(s => s.canvasWidth);
   const canvasHeight = useEditorStore(s => s.canvasHeight);
   const zoom = useEditorStore(s => s.zoom);

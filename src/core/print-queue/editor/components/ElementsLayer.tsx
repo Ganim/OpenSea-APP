@@ -42,12 +42,16 @@ export function ElementsLayer({ zoom }: ElementsLayerProps) {
             zoom={zoom}
             previewData={previewData ?? undefined}
             selectedCell={
-              selectedIds.length === 1 && selectedIds[0] === element.id && element.type === 'table'
+              selectedIds.length === 1 &&
+              selectedIds[0] === element.id &&
+              element.type === 'table'
                 ? selectedCell
                 : undefined
             }
             onCellClick={
-              selectedIds.length === 1 && selectedIds[0] === element.id && element.type === 'table'
+              selectedIds.length === 1 &&
+              selectedIds[0] === element.id &&
+              element.type === 'table'
                 ? (row, col) => setSelectedCell({ row, col })
                 : undefined
             }

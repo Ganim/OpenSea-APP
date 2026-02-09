@@ -7,12 +7,25 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { SYSTEM_LABEL_TEMPLATES, LABEL_AVAILABLE_FIELDS } from '../constants';
 import { usePrintQueue } from '../context/print-queue-context';
-import type { LabelData, LabelTemplateDefinition, PrintGenerationStatus, PrintQueueStockItem, PrintQueueEmployeeItem } from '../types';
+import type {
+  LabelData,
+  LabelTemplateDefinition,
+  PrintGenerationStatus,
+  PrintQueueStockItem,
+  PrintQueueEmployeeItem,
+} from '../types';
 import { calculateLayout } from '../utils/page-layout-calculator';
-import { resolveLabelData, resolveLabelDataFromPresenter, labelDataToPreviewData, itemLabelDataToPreviewData, employeeLabelDataToPreviewData } from '../utils/label-data-resolver';
+import {
+  resolveLabelData,
+  resolveLabelDataFromPresenter,
+  labelDataToPreviewData,
+  itemLabelDataToPreviewData,
+  employeeLabelDataToPreviewData,
+} from '../utils/label-data-resolver';
 import { parseStudioTemplate } from '../components/studio-label-renderer';
 import { renderStudioTemplateToPdf } from '../utils/studio-pdf-renderer';
 import { labelTemplatesService } from '@/services/stock/label-templates.service';
@@ -59,9 +72,8 @@ export function useQueuePrinting(): UseQueuePrintingResult {
       return null;
     }
 
-    let template: LabelTemplateDefinition | undefined = SYSTEM_LABEL_TEMPLATES.find(
-      t => t.id === state.selectedTemplateId
-    );
+    let template: LabelTemplateDefinition | undefined =
+      SYSTEM_LABEL_TEMPLATES.find(t => t.id === state.selectedTemplateId);
 
     // Fallback to stored dimensions for API templates
     if (!template && state.selectedTemplateDimensions) {
@@ -88,25 +100,38 @@ export function useQueuePrinting(): UseQueuePrintingResult {
       // 1. Try to fetch Studio template from API (for non-system templates)
       setProgress(5);
       let studioTemplateData = null;
-      const isSystemTemplate = SYSTEM_LABEL_TEMPLATES.some(t => t.id === state.selectedTemplateId);
+      const isSystemTemplate = SYSTEM_LABEL_TEMPLATES.some(
+        t => t.id === state.selectedTemplateId
+      );
 
       if (!isSystemTemplate) {
         try {
-          const response = await labelTemplatesService.getTemplate(state.selectedTemplateId);
-          studioTemplateData = parseStudioTemplate(response.template.grapesJsData);
+          const response = await labelTemplatesService.getTemplate(
+            state.selectedTemplateId
+          );
+          studioTemplateData = parseStudioTemplate(
+            response.template.grapesJsData
+          );
         } catch (e) {
-          console.warn('Could not fetch template detail, using legacy renderer:', e);
+          logger.warn(
+            'Could not fetch template detail, using legacy renderer',
+            { error: e }
+          );
         }
       }
 
       // 2. Separar itens por tipo de entidade
       setProgress(10);
-      const stockItems = state.items.filter((qi): qi is PrintQueueStockItem => qi.entityType === 'stock-item');
-      const employeeItems = state.items.filter((qi): qi is PrintQueueEmployeeItem => qi.entityType === 'employee');
+      const stockItems = state.items.filter(
+        (qi): qi is PrintQueueStockItem => qi.entityType === 'stock-item'
+      );
+      const employeeItems = state.items.filter(
+        (qi): qi is PrintQueueEmployeeItem => qi.entityType === 'employee'
+      );
 
       // 3. Buscar dados do presenter para cada tipo
-      let stockLabelDataMap = new Map<string, ItemLabelData>();
-      let employeeLabelDataMap = new Map<string, EmployeeLabelData>();
+      const stockLabelDataMap = new Map<string, ItemLabelData>();
+      const employeeLabelDataMap = new Map<string, EmployeeLabelData>();
 
       // Fetch stock item label data
       if (stockItems.length > 0) {
@@ -117,7 +142,10 @@ export function useQueuePrinting(): UseQueuePrintingResult {
             stockLabelDataMap.set(ld.item.id, ld);
           }
         } catch (e) {
-          console.warn('[print] Stock label data presenter failed, falling back to legacy:', e);
+          logger.warn(
+            '[print] Stock label data presenter failed, falling back to legacy',
+            { error: e }
+          );
         }
       }
 
@@ -130,7 +158,9 @@ export function useQueuePrinting(): UseQueuePrintingResult {
             employeeLabelDataMap.set(ld.employee.id, ld);
           }
         } catch (e) {
-          console.warn('[print] Employee label data presenter failed:', e);
+          logger.warn('[print] Employee label data presenter failed', {
+            error: e,
+          });
         }
       }
 
@@ -138,7 +168,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
 
       // 4. Montar previewData para todos os items (studio path)
       if (studioTemplateData) {
-        const previewDataList: Array<{ previewData: Record<string, unknown>; copies: number; entityId: string }> = [];
+        const previewDataList: Array<{
+          previewData: Record<string, unknown>;
+          copies: number;
+          entityId: string;
+        }> = [];
 
         // Stock items
         for (const queueItem of stockItems) {
@@ -150,7 +184,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
               entityId: queueItem.item.id,
             });
           } else {
-            const data = resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+            const data = resolveLabelData(
+              queueItem.item,
+              queueItem.variant,
+              queueItem.product
+            );
             previewDataList.push({
               previewData: labelDataToPreviewData(data),
               copies: queueItem.copies,
@@ -177,7 +215,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
           const ld = stockLabelDataMap.get(queueItem.item.id);
           const data = ld
             ? resolveLabelDataFromPresenter(ld)
-            : resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+            : resolveLabelData(
+                queueItem.item,
+                queueItem.variant,
+                queueItem.product
+              );
           for (let i = 0; i < queueItem.copies; i++) {
             labelDataList.push(data);
           }
@@ -188,11 +230,15 @@ export function useQueuePrinting(): UseQueuePrintingResult {
           const placeholderData: LabelData = {
             manufacturerName: '',
             stockLocation: '',
-            productName: ld ? (ld.employee.socialName || ld.employee.fullName) : queueItem.employee.fullName,
+            productName: ld
+              ? ld.employee.socialName || ld.employee.fullName
+              : queueItem.employee.fullName,
             productCode: '',
             variantName: '',
             variantCode: '',
-            itemCode: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            itemCode: ld
+              ? ld.employee.registrationNumber
+              : queueItem.employee.registrationNumber,
             itemUid: queueItem.employee.id,
             itemId: queueItem.employee.id,
             itemQuantity: 0,
@@ -202,7 +248,9 @@ export function useQueuePrinting(): UseQueuePrintingResult {
             productAttributes: {},
             variantAttributes: {},
             itemAttributes: {},
-            barcodeData: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            barcodeData: ld
+              ? ld.employee.registrationNumber
+              : queueItem.employee.registrationNumber,
             qrCodeData: queueItem.employee.id,
           };
           for (let i = 0; i < queueItem.copies; i++) {
@@ -213,7 +261,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
         setProgress(30);
 
         // 5. Calcular layout
-        const layout = calculateLayout(labelDataList, template, state.pageSettings);
+        const layout = calculateLayout(
+          labelDataList,
+          template,
+          state.pageSettings
+        );
         setProgress(50);
 
         // 6. Gerar PDF usando jsPDF
@@ -236,7 +288,10 @@ export function useQueuePrinting(): UseQueuePrintingResult {
         setProgress(60);
 
         // Build a map from entity ID to previewData for quick lookup
-        const previewDataByEntityId = new Map<string, Record<string, unknown>>();
+        const previewDataByEntityId = new Map<
+          string,
+          Record<string, unknown>
+        >();
         for (const { previewData, entityId } of previewDataList) {
           previewDataByEntityId.set(entityId, previewData);
         }
@@ -249,7 +304,9 @@ export function useQueuePrinting(): UseQueuePrintingResult {
 
           for (const { position, data } of page.labels) {
             // Find matching previewData by item ID (itemId stores entityId for employees too)
-            const previewData = previewDataByEntityId.get(data.itemId) || labelDataToPreviewData(data);
+            const previewData =
+              previewDataByEntityId.get(data.itemId) ||
+              labelDataToPreviewData(data);
 
             await renderStudioTemplateToPdf(
               doc,
@@ -271,7 +328,6 @@ export function useQueuePrinting(): UseQueuePrintingResult {
         setProgress(100);
         setStatus('success');
         return blob;
-
       } else {
         // === LEGACY PATH (system templates or presenter failed) ===
         // Note: Legacy path only handles stock items meaningfully
@@ -281,7 +337,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
           const ld = stockLabelDataMap.get(queueItem.item.id);
           const data = ld
             ? resolveLabelDataFromPresenter(ld)
-            : resolveLabelData(queueItem.item, queueItem.variant, queueItem.product);
+            : resolveLabelData(
+                queueItem.item,
+                queueItem.variant,
+                queueItem.product
+              );
           for (let i = 0; i < queueItem.copies; i++) {
             labelDataList.push(data);
           }
@@ -293,11 +353,15 @@ export function useQueuePrinting(): UseQueuePrintingResult {
           const placeholderData: LabelData = {
             manufacturerName: '',
             stockLocation: '',
-            productName: ld ? (ld.employee.socialName || ld.employee.fullName) : queueItem.employee.fullName,
+            productName: ld
+              ? ld.employee.socialName || ld.employee.fullName
+              : queueItem.employee.fullName,
             productCode: '',
             variantName: ld?.position?.name || '',
             variantCode: '',
-            itemCode: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            itemCode: ld
+              ? ld.employee.registrationNumber
+              : queueItem.employee.registrationNumber,
             itemUid: queueItem.employee.id,
             itemId: queueItem.employee.id,
             itemQuantity: 0,
@@ -307,7 +371,9 @@ export function useQueuePrinting(): UseQueuePrintingResult {
             productAttributes: {},
             variantAttributes: {},
             itemAttributes: {},
-            barcodeData: ld ? ld.employee.registrationNumber : queueItem.employee.registrationNumber,
+            barcodeData: ld
+              ? ld.employee.registrationNumber
+              : queueItem.employee.registrationNumber,
             qrCodeData: queueItem.employee.id,
           };
           for (let i = 0; i < queueItem.copies; i++) {
@@ -318,7 +384,11 @@ export function useQueuePrinting(): UseQueuePrintingResult {
         setProgress(30);
 
         // 4. Calcular layout
-        const layout = calculateLayout(labelDataList, template, state.pageSettings);
+        const layout = calculateLayout(
+          labelDataList,
+          template,
+          state.pageSettings
+        );
         setProgress(50);
 
         // 5. Gerar PDF usando jsPDF
@@ -359,7 +429,14 @@ export function useQueuePrinting(): UseQueuePrintingResult {
                 QRCode
               );
             } else {
-              await renderLabelToPdf(doc, data, position, template, JsBarcode, QRCode);
+              await renderLabelToPdf(
+                doc,
+                data,
+                position,
+                template,
+                JsBarcode,
+                QRCode
+              );
             }
           }
 
@@ -374,7 +451,7 @@ export function useQueuePrinting(): UseQueuePrintingResult {
         return blob;
       }
     } catch (err) {
-      console.error('Erro ao gerar PDF:', err);
+      logger.error('Erro ao gerar PDF', err instanceof Error ? err : undefined);
       setError(err as Error);
       setStatus('error');
       toast.error('Erro ao gerar PDF');
@@ -491,7 +568,7 @@ async function renderLabelToPdf(
         8
       );
     } catch (e) {
-      console.error('Erro ao gerar barcode:', e);
+      logger.error('Erro ao gerar barcode', e instanceof Error ? e : undefined);
     }
   } else if (isLarge) {
     // Layout grande
@@ -550,7 +627,7 @@ async function renderLabelToPdf(
         qrSize
       );
     } catch (e) {
-      console.error('Erro ao gerar QR code:', e);
+      logger.error('Erro ao gerar QR code', e instanceof Error ? e : undefined);
     }
 
     // Item code
@@ -604,7 +681,7 @@ async function renderLabelToPdf(
         10
       );
     } catch (e) {
-      console.error('Erro ao gerar barcode:', e);
+      logger.error('Erro ao gerar barcode', e instanceof Error ? e : undefined);
     }
 
     // Item code & Quantity

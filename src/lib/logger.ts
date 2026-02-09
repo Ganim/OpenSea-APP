@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * OpenSea - Logger Centralizado
  * Sistema de logging seguro e estruturado para toda a aplicação

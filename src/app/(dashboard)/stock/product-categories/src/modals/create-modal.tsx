@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { DialogHeader } from '@/components/shared/modals/dialog-header';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -44,7 +45,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       });
       onClose();
     } catch (error) {
-      console.error('Erro ao criar categoria:', error);
+      logger.error(
+        'Erro ao criar categoria',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

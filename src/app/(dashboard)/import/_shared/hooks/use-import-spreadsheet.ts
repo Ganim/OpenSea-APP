@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import type {
   ImportCellData,
   ImportSpreadsheetData,
@@ -577,10 +578,9 @@ export function useImportSpreadsheet(
       });
 
       if (missingRequired.length > 0) {
-        console.warn(
-          `Row ${rowIndex + 1} missing required fields:`,
-          missingRequired.map(f => f.key)
-        );
+        logger.warn(`Row ${rowIndex + 1} missing required fields`, {
+          fields: missingRequired.map(f => f.key),
+        });
         // Skip this row - validation should have caught this
         return;
       }

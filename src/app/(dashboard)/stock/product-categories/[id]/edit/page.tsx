@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -160,7 +161,10 @@ export default function EditCategoryPage({
       toast.success('Categoria atualizada com sucesso!');
       router.push(`/stock/product-categories/${categoryId}`);
     } catch (error) {
-      console.error('Erro ao atualizar categoria:', error);
+      logger.error(
+        'Erro ao atualizar categoria',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar categoria', { description: message });
@@ -180,7 +184,10 @@ export default function EditCategoryPage({
       toast.success('Categoria excluída com sucesso!');
       router.push('/stock/product-categories');
     } catch (error) {
-      console.error('Erro ao deletar categoria:', error);
+      logger.error(
+        'Erro ao deletar categoria',
+        error instanceof Error ? error : undefined
+      );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error('Erro ao deletar categoria', { description: message });

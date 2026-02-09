@@ -16,12 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { itemsConfig } from '@/config/entities/items.config';
-import {
-  ConfirmDialog,
-  EntityCard,
-  EntityGrid,
-  useEntityCrud,
-} from '@/core';
+import { ConfirmDialog, EntityCard, EntityGrid, useEntityCrud } from '@/core';
 import { variantsService } from '@/services/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {

@@ -5,7 +5,13 @@
  */
 
 import type { EmployeeLabelData } from '@/types/hr';
-import type { Item, ItemLabelData, Product, Variant, TemplateAttribute } from '@/types/stock';
+import type {
+  Item,
+  ItemLabelData,
+  Product,
+  Variant,
+  TemplateAttribute,
+} from '@/types/stock';
 import { UNIT_OF_MEASURE_LABELS } from '../constants';
 import type { LabelData } from '../types';
 
@@ -261,7 +267,9 @@ export function resolveLabelDataFromPresenter(ld: ItemLabelData): LabelData {
     itemUnitOfMeasure: unitAbrev,
     itemBatchNumber: ld.item.batchNumber || undefined,
     productVariantName: `${productName} - ${variantName}`,
-    referenceVariantName: variantRef ? `${variantRef} - ${variantName}` : variantName,
+    referenceVariantName: variantRef
+      ? `${variantRef} - ${variantName}`
+      : variantName,
     productAttributes: {},
     variantAttributes: ld.variant.attributes || {},
     itemAttributes: ld.item.attributes || {},
@@ -278,7 +286,9 @@ export function resolveLabelDataFromPresenter(ld: ItemLabelData): LabelData {
  * Converte LabelData (formato plano) para o formato nested de previewData
  * usado pelo FieldElementRenderer do Label Studio.
  */
-export function labelDataToPreviewData(data: LabelData): Record<string, unknown> {
+export function labelDataToPreviewData(
+  data: LabelData
+): Record<string, unknown> {
   return {
     manufacturer: {
       name: data.manufacturerName,
@@ -349,7 +359,10 @@ export function labelDataToPreviewData(data: LabelData): Record<string, unknown>
     },
     meta: {
       printDate: new Date().toLocaleDateString('pt-BR'),
-      printTime: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      printTime: new Date().toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       printedBy: '',
       sequenceNumber: '001',
     },
@@ -367,9 +380,12 @@ export function labelDataToPreviewData(data: LabelData): Record<string, unknown>
  * Todos os dataPaths usados no editor (constants.ts LABEL_FIELDS)
  * devem ser resolvíveis a partir deste objeto.
  */
-export function itemLabelDataToPreviewData(ld: ItemLabelData): Record<string, unknown> {
+export function itemLabelDataToPreviewData(
+  ld: ItemLabelData
+): Record<string, unknown> {
   const unitAbrev = UNIT_OF_MEASURE_LABELS[ld.template.unitOfMeasure] || 'un';
-  const unitFull = UNIT_OF_MEASURE_FULL_LABELS[ld.template.unitOfMeasure] || 'unidades';
+  const unitFull =
+    UNIT_OF_MEASURE_FULL_LABELS[ld.template.unitOfMeasure] || 'unidades';
 
   const productName = ld.product.name;
   const variantName = ld.variant.name;
@@ -439,7 +455,8 @@ export function itemLabelDataToPreviewData(ld: ItemLabelData): Record<string, un
       sequentialCode: ld.item.sequentialCode,
       currentQuantity: ld.item.currentQuantity,
       initialQuantity: ld.item.initialQuantity,
-      unitCost: ld.item.unitCost != null ? formatCurrency(ld.item.unitCost) : '',
+      unitCost:
+        ld.item.unitCost != null ? formatCurrency(ld.item.unitCost) : '',
       unitCostRaw: ld.item.unitCost,
       status: ld.item.status,
       entryDate: formatDate(ld.item.entryDate),
@@ -449,7 +466,8 @@ export function itemLabelDataToPreviewData(ld: ItemLabelData): Record<string, un
       barcode: ld.item.barcode,
       eanCode: ld.item.eanCode,
       barcodeData: barcodeData,
-      resolvedAddress: ld.item.resolvedAddress || ld.item.lastKnownAddress || '',
+      resolvedAddress:
+        ld.item.resolvedAddress || ld.item.lastKnownAddress || '',
       lastKnownAddress: ld.item.lastKnownAddress || '',
       quantityWithUnit: `${ld.item.currentQuantity} ${unitAbrev}`,
       quantityWithUnitFull: `${ld.item.currentQuantity} ${unitFull}`,
@@ -488,8 +506,12 @@ export function itemLabelDataToPreviewData(ld: ItemLabelData): Record<string, un
     combined: {
       productVariant: `${productName} - ${variantName}`,
       productVariantName: `${productName} - ${variantName}`,
-      referenceVariant: variantRef ? `${variantRef} - ${variantName}` : variantName,
-      referenceVariantName: variantRef ? `${variantRef} - ${variantName}` : variantName,
+      referenceVariant: variantRef
+        ? `${variantRef} - ${variantName}`
+        : variantName,
+      referenceVariantName: variantRef
+        ? `${variantRef} - ${variantName}`
+        : variantName,
       templateProductVariant: `${productName} - ${variantName}`,
     },
 
@@ -502,7 +524,10 @@ export function itemLabelDataToPreviewData(ld: ItemLabelData): Record<string, un
     // meta.* paths (runtime)
     meta: {
       printDate: new Date().toLocaleDateString('pt-BR'),
-      printTime: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      printTime: new Date().toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       printedBy: '',
       sequenceNumber: '001',
     },
@@ -573,7 +598,7 @@ export function getSamplePreviewData(): Record<string, unknown> {
       sequentialCode: 23,
       currentQuantity: 10,
       initialQuantity: 10,
-      unitCost: 15.50,
+      unitCost: 15.5,
       status: 'AVAILABLE',
       entryDate: '2024-06-15T00:00:00.000Z',
       resolvedAddress: 'FAB-EST-102-B',
@@ -590,8 +615,8 @@ export function getSamplePreviewData(): Record<string, unknown> {
       name: 'Azul M',
       sku: 'CAM-AZU-M-001',
       fullCode: '5.1.1.2.901',
-      price: 49.90,
-      costPrice: 25.00,
+      price: 49.9,
+      costPrice: 25.0,
       barcode: '7891234567890',
       reference: 'REF-2024-001',
       colorHex: '#2563eb',
@@ -658,7 +683,9 @@ export function getSamplePreviewData(): Record<string, unknown> {
  * Converte EmployeeLabelData (do endpoint /v1/hr/employees/label-data)
  * para o formato previewData do Label Studio.
  */
-export function employeeLabelDataToPreviewData(ld: EmployeeLabelData): Record<string, unknown> {
+export function employeeLabelDataToPreviewData(
+  ld: EmployeeLabelData
+): Record<string, unknown> {
   const nameParts = ld.employee.fullName.split(' ');
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
@@ -695,7 +722,10 @@ export function employeeLabelDataToPreviewData(ld: EmployeeLabelData): Record<st
     tenant: { id: ld.tenant.id, name: ld.tenant.name },
     meta: {
       printDate: new Date().toLocaleDateString('pt-BR'),
-      printTime: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      printTime: new Date().toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       printedBy: 'Sistema',
       sequenceNumber: '001',
     },

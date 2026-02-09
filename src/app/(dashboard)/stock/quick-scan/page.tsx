@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -327,7 +328,7 @@ export default function QuickScanPage() {
       try {
         await scan(code);
       } catch (err) {
-        console.error('Scan error:', err);
+        logger.error('Scan error', err instanceof Error ? err : undefined);
       }
     },
     [scan]
@@ -353,7 +354,7 @@ export default function QuickScanPage() {
           router.push(`/stock/items?action=transfer&id=${entityId}`);
           break;
         default:
-          console.log('Unknown action:', action);
+          break;
       }
     },
     [lastResult, router]

@@ -116,21 +116,6 @@ export function ProductVariantsItemsModal({
     queryFn: async () => {
       if (!selectedVariant?.id) return { items: [] };
       const response = await itemsService.listItems(selectedVariant.id);
-      // DEBUG: Log completo da resposta da API
-      console.log('🔍 [DEBUG] API Response:', response);
-      console.log('🔍 [DEBUG] First item:', response.items?.[0]);
-      if (response.items?.[0]) {
-        const item = response.items[0];
-        console.log('🔍 [DEBUG] Item fields:', {
-          id: item.id,
-          binId: item.binId,
-          locationId: item.locationId,
-          resolvedAddress: item.resolvedAddress,
-          bin: item.bin,
-          uniqueCode: item.uniqueCode,
-          fullCode: item.fullCode,
-        });
-      }
       return response;
     },
     enabled: !!selectedVariant?.id && open,

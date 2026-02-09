@@ -67,13 +67,31 @@ export function ElementRenderer({
       return <IconElementRenderer element={element} zoom={zoom} />;
 
     case 'field':
-      return <FieldElementRenderer element={element} zoom={zoom} previewData={previewData} />;
+      return (
+        <FieldElementRenderer
+          element={element}
+          zoom={zoom}
+          previewData={previewData}
+        />
+      );
 
     case 'barcode':
-      return <BarcodeElementRenderer element={element} zoom={zoom} previewData={previewData} />;
+      return (
+        <BarcodeElementRenderer
+          element={element}
+          zoom={zoom}
+          previewData={previewData}
+        />
+      );
 
     case 'qrcode':
-      return <QRCodeElementRenderer element={element} zoom={zoom} previewData={previewData} />;
+      return (
+        <QRCodeElementRenderer
+          element={element}
+          zoom={zoom}
+          previewData={previewData}
+        />
+      );
 
     case 'table':
       return (

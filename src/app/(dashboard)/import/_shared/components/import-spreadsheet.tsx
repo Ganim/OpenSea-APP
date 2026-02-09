@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import Spreadsheet, {
   type CellBase,
   type Matrix,
@@ -392,7 +393,10 @@ export function ImportSpreadsheet({
 
         toast.success(`${parsed.totalRows} linhas importadas do arquivo.`);
       } catch (error) {
-        console.error('Error parsing file:', error);
+        logger.error(
+          'Error parsing file',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao processar o arquivo. Verifique o formato.');
       }
 

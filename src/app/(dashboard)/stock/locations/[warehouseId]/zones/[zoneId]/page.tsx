@@ -99,7 +99,6 @@ export default function ZoneMapPage({ params }: PageProps) {
   const handlePrintLabels = (binIds: string[]) => {
     // TODO: Implementar impressão de etiquetas
     toast.info(`Gerando ${binIds.length} etiquetas...`);
-    console.log('Print labels for bins:', binIds);
   };
 
   const handleConfigure = () => {

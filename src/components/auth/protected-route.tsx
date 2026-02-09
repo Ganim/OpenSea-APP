@@ -51,12 +51,10 @@ export function ProtectedRoute({
     const isE2EBypass = process.env.NEXT_PUBLIC_E2E_TEST_BYPASS === 'true';
 
     if (isE2EBypass) {
-      console.log('🔓 E2E bypass active — skipping auth redirect');
       return;
     }
 
     if (!isAuthLoading && !isAuthenticated) {
-      console.log('🔒 Usuário não autenticado, redirecionando para /login');
       router.push('/fast-login');
       return;
     }
@@ -73,9 +71,6 @@ export function ProtectedRoute({
           : hasAnyPermission(...permissionsToCheck);
 
         if (!hasAccess) {
-          console.log(
-            '🔒 Usuário sem permissão, redirecionando para dashboard'
-          );
           router.push('/dashboard');
         }
       }

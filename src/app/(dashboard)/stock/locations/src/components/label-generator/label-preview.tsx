@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
@@ -56,7 +57,9 @@ export function LabelPreview({
         },
       })
         .then(url => setQrDataUrl(url))
-        .catch(err => console.error('QR Code error:', err));
+        .catch(err =>
+          logger.error('QR Code error', err instanceof Error ? err : undefined)
+        );
     }
   }, [config.format, sampleData.address, dimensions.width]);
 
@@ -72,7 +75,7 @@ export function LabelPreview({
           margin: 0,
         });
       } catch (err) {
-        console.error('Barcode error:', err);
+        logger.error('Barcode error', err instanceof Error ? err : undefined);
       }
     }
   }, [config.format, sampleData.address, dimensions.height]);
@@ -198,7 +201,7 @@ export function LabelForPDF({ data, config, qrDataUrl }: LabelForPDFProps) {
           margin: 0,
         });
       } catch (err) {
-        console.error('Barcode error:', err);
+        logger.error('Barcode error', err instanceof Error ? err : undefined);
       }
     }
   }, [config.format, data.address, dimensions.height]);

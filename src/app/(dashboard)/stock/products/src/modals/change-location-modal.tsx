@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -47,7 +48,10 @@ export function ChangeLocationModal({
       setNewBinId('');
       setReason('');
     } catch (error) {
-      console.error('Error changing location:', error);
+      logger.error(
+        'Error changing location',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -3,7 +3,11 @@
  * Funções de serialização/deserialização de templates
  */
 
-import type { LabelStudioTemplate, LabelElement, CanvasConfig } from '../studio-types';
+import type {
+  LabelStudioTemplate,
+  LabelElement,
+  CanvasConfig,
+} from '../studio-types';
 import { DEFAULT_TEXT_STYLE, DEFAULT_BORDER_STYLE } from '../studio-types';
 
 /**
@@ -22,14 +26,19 @@ export function validateTemplate(data: unknown): {
   const errors: string[] = [];
 
   if (!data || typeof data !== 'object') {
-    return { valid: false, errors: ['Template inválido: dados não são um objeto'] };
+    return {
+      valid: false,
+      errors: ['Template inválido: dados não são um objeto'],
+    };
   }
 
   const obj = data as Record<string, unknown>;
 
   // Verifica versão
   if (obj.version !== 2) {
-    errors.push(`Versão de template não suportada: ${obj.version}. Esperado: 2`);
+    errors.push(
+      `Versão de template não suportada: ${obj.version}. Esperado: 2`
+    );
   }
 
   // Verifica dimensões
@@ -154,7 +163,11 @@ export const LABEL_TEMPLATE_PRESETS_V2: Array<{
           visible: true,
           name: 'Nome do Produto',
           fieldConfig: { type: 'simple', dataPath: 'product.name' },
-          valueStyle: { ...DEFAULT_TEXT_STYLE, fontSize: 4, fontWeight: 'bold' },
+          valueStyle: {
+            ...DEFAULT_TEXT_STYLE,
+            fontSize: 4,
+            fontWeight: 'bold',
+          },
         },
         {
           id: 'prod-price',
@@ -176,7 +189,11 @@ export const LABEL_TEMPLATE_PRESETS_V2: Array<{
             position: 'above',
             style: { fontSize: 2, color: '#666666' },
           },
-          valueStyle: { ...DEFAULT_TEXT_STYLE, fontSize: 5, fontWeight: 'bold' },
+          valueStyle: {
+            ...DEFAULT_TEXT_STYLE,
+            fontSize: 5,
+            fontWeight: 'bold',
+          },
         },
         {
           id: 'prod-barcode',
@@ -252,7 +269,11 @@ export const LABEL_TEMPLATE_PRESETS_V2: Array<{
           visible: true,
           name: 'UID',
           fieldConfig: { type: 'simple', dataPath: 'item.uid' },
-          valueStyle: { ...DEFAULT_TEXT_STYLE, fontSize: 3, fontWeight: 'bold' },
+          valueStyle: {
+            ...DEFAULT_TEXT_STYLE,
+            fontSize: 3,
+            fontWeight: 'bold',
+          },
         },
         {
           id: 'item-product',
@@ -349,7 +370,10 @@ export const LABEL_TEMPLATE_PRESETS_V2: Array<{
 /**
  * Exporta template para download
  */
-export function exportTemplateAsFile(template: LabelStudioTemplate, filename: string): void {
+export function exportTemplateAsFile(
+  template: LabelStudioTemplate,
+  filename: string
+): void {
   const json = serializeTemplate(template);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

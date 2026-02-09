@@ -4,6 +4,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -68,7 +69,10 @@ export function ExitItemsModal({
       setSelectedType(null);
       setReason('');
     } catch (error) {
-      console.error('Error processing exit:', error);
+      logger.error(
+        'Error processing exit',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsSubmitting(false);
     }

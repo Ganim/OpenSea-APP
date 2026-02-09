@@ -117,7 +117,10 @@ export function VariantManager({ productId }: VariantManagerProps) {
         setViewMode('list');
         setSelectedVariant(undefined);
       } catch (error) {
-        console.error('Erro ao salvar variante:', error);
+        logger.error(
+          'Erro ao salvar variante',
+          error instanceof Error ? error : undefined
+        );
         const message =
           error instanceof Error ? error.message : 'Erro ao salvar variante';
         toast.error('Erro ao salvar', { description: message });
@@ -141,7 +144,10 @@ export function VariantManager({ productId }: VariantManagerProps) {
         await deleteMutation.mutateAsync({ id: variantId, productId });
         toast.success('Variante excluída com sucesso!');
       } catch (error) {
-        console.error('Erro ao excluir variante:', error);
+        logger.error(
+          'Erro ao excluir variante',
+          error instanceof Error ? error : undefined
+        );
         const message =
           error instanceof Error ? error.message : 'Erro ao excluir variante';
         setDeleteError(message);

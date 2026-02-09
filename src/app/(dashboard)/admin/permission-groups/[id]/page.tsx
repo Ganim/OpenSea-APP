@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ConfirmDialog } from '@/core/components/confirm-dialog';
 import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import * as rbacService from '@/services/rbac/rbac.service';
 import type { User } from '@/types/auth';
@@ -36,7 +37,7 @@ import {
   Users as UsersIcon,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   getStatusBadgeVariant,
   getStatusLabel,
@@ -83,7 +84,10 @@ export default function PermissionGroupDetailPage() {
       try {
         permissions = await rbacService.listGroupPermissions(groupId);
       } catch (error) {
-        console.error('Error fetching group permissions:', error);
+        logger.error(
+          'Error fetching group permissions',
+          error instanceof Error ? error : undefined
+        );
       }
 
       // Users serão buscados apenas quando necessário (no modal de adicionar)
@@ -103,26 +107,12 @@ export default function PermissionGroupDetailPage() {
     queryFn: async () => {
       try {
         const result = await rbacService.listAllPermissions();
-
-        console.log('📦 listAllPermissions - RAW RESPONSE:', result);
-        console.log('📦 Total permissions:', result.total);
-        console.log('📦 Modules array:', result.modules);
-        console.log('📦 Permissions array length:', result.permissions?.length);
-
-        if (result.permissions) {
-          result.permissions.forEach((moduleData, index) => {
-            console.log(`\n📂 Module ${index + 1}:`, {
-              module: moduleData.module,
-              description: moduleData.description,
-              resourcesCount: Object.keys(moduleData.resources || {}).length,
-              resources: Object.keys(moduleData.resources || {}),
-            });
-          });
-        }
-
         return result;
       } catch (error) {
-        console.error('❌ Error fetching all permissions:', error);
+        logger.error(
+          'Error fetching all permissions',
+          error instanceof Error ? error : undefined
+        );
         return {
           permissions: [],
           total: 0,
@@ -141,13 +131,7 @@ export default function PermissionGroupDetailPage() {
   } = useQuery({
     queryKey: ['permission-group-users', groupId],
     queryFn: async () => {
-      console.log('🔍 [Query] Fetching users for group:', groupId);
       const users = await rbacService.listUsersByGroup(groupId);
-      console.log(
-        '✅ [Query] Group users fetched:',
-        users?.length || 0,
-        'users'
-      );
       return users || [];
     },
     enabled: !!groupId,
@@ -176,36 +160,18 @@ export default function PermissionGroupDetailPage() {
     );
   }, [groupUsersData, searchUser]);
 
-  // Debug logs
-  useEffect(() => {
-    if (groupData) {
-      console.log('📊 Permission Group Details:', {
-        group: groupData.group,
-        usersCount: groupData.group?.usersCount,
-        usersDataLength: groupUsersData?.length || 0,
-        permissions: groupData.permissions?.length || 0,
-        allPermissionsModules: allPermissionsData?.modules.length || 0,
-        allPermissionsTotal: allPermissionsData?.total || 0,
-      });
-    }
-    if (groupError) {
-      console.error('❌ Error loading group details:', groupError);
-    }
-    if (usersError) {
-      console.error('❌ Error loading group users:', usersError);
-    }
-  }, [groupData, groupUsersData, allPermissionsData, groupError, usersError]);
-
   // Busca todos os usuários disponíveis para adicionar ao grupo
   const { data: allUsers = [] } = useQuery<User[]>({
     queryKey: ['all-users'],
     queryFn: async () => {
       try {
         const response = await rbacService.listAllUsers();
-        console.log('📥 All users fetched:', response);
         return response as User[];
       } catch (error) {
-        console.error('❌ Error fetching users:', error);
+        logger.error(
+          'Error fetching users',
+          error instanceof Error ? error : undefined
+        );
         return [];
       }
     },
@@ -233,11 +199,9 @@ export default function PermissionGroupDetailPage() {
 
   const addUserToGroupMutation = useMutation({
     mutationFn: async (userId: string) => {
-      console.log('➕ Adding user to group:', { userId, groupId });
       await rbacService.assignGroupToUser(userId, { groupId });
     },
     onSuccess: async () => {
-      console.log('✅ User added successfully, refetching...');
       // Invalidar queries primeiro
       await queryClient.invalidateQueries({
         queryKey: ['permission-group-details', groupId],
@@ -253,7 +217,10 @@ export default function PermissionGroupDetailPage() {
       setSearchAvailableUser('');
     },
     onError: error => {
-      console.error('❌ Error adding user:', error);
+      logger.error(
+        'Error adding user to group',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao adicionar usuário',
         description:
@@ -264,11 +231,9 @@ export default function PermissionGroupDetailPage() {
 
   const removeUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      console.log('➖ Removing user from group:', { userId, groupId });
       await rbacService.removeGroupFromUser(userId, groupId);
     },
     onSuccess: async () => {
-      console.log('✅ User removed successfully, refetching...');
       await queryClient.invalidateQueries({
         queryKey: ['permission-group-details', groupId],
       });
@@ -280,7 +245,10 @@ export default function PermissionGroupDetailPage() {
       setConfirmRemoveUserId(null);
     },
     onError: error => {
-      console.error('❌ Error removing user:', error);
+      logger.error(
+        'Error removing user from group',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao remover usuário',
         description:

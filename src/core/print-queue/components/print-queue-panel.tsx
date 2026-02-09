@@ -17,7 +17,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Minus, Package, Plus, Printer, Sparkles, Trash2, User, X } from 'lucide-react';
+import {
+  Minus,
+  Package,
+  Plus,
+  Printer,
+  Sparkles,
+  Trash2,
+  User,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePrintQueue } from '../context/print-queue-context';
@@ -227,7 +236,11 @@ export function PrintQueuePanel() {
 // HELPER COMPONENTS
 // ============================================
 
-function QueueItemIcon({ entityType }: { entityType: PrintQueueItem['entityType'] }) {
+function QueueItemIcon({
+  entityType,
+}: {
+  entityType: PrintQueueItem['entityType'];
+}) {
   const isEmployee = entityType === 'employee';
   const Icon = isEmployee ? User : Package;
   const gradient = isEmployee
@@ -235,7 +248,9 @@ function QueueItemIcon({ entityType }: { entityType: PrintQueueItem['entityType'
     : 'from-blue-500 to-blue-600';
 
   return (
-    <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${gradient} flex items-center justify-center shrink-0`}>
+    <div
+      className={`w-10 h-10 rounded-xl bg-linear-to-br ${gradient} flex items-center justify-center shrink-0`}
+    >
       <Icon className="w-5 h-5 text-white" />
     </div>
   );
@@ -249,7 +264,8 @@ function QueueItemInfo({ queueItem }: { queueItem: PrintQueueItem }) {
           {queueItem.employee.fullName}
         </h4>
         <p className="text-xs text-gray-600 dark:text-white/60 truncate">
-          {queueItem.employee.position?.name || queueItem.employee.registrationNumber}
+          {queueItem.employee.position?.name ||
+            queueItem.employee.registrationNumber}
         </p>
       </>
     );
@@ -258,9 +274,7 @@ function QueueItemInfo({ queueItem }: { queueItem: PrintQueueItem }) {
   return (
     <>
       <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-        {queueItem.item.productName ||
-          queueItem.product?.name ||
-          'Item'}
+        {queueItem.item.productName || queueItem.product?.name || 'Item'}
       </h4>
       <p className="text-xs text-gray-600 dark:text-white/60 truncate">
         {queueItem.item.variantName ||

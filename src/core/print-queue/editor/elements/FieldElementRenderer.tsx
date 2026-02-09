@@ -41,143 +41,325 @@ export type EntityType = 'item' | 'employee';
 // ENTITY FIELD REGISTRIES
 // ============================================
 
-export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> = {
-  item: [
-    {
-      id: 'codes',
-      label: 'Códigos',
-      icon: 'Hash',
-      fields: [
-        { path: 'product.fullCode', label: 'Código do Produto', example: '5.1.1' },
-        { path: 'variant.fullCode', label: 'Código da Variante', example: '5.1.1.2.901' },
-        { path: 'item.fullCode', label: 'Código do Item', example: '5.1.1.2.901.23' },
-        { path: 'item.barcode', label: 'Código de Barras (imagem)', example: '5112901230001', description: 'Renderiza como barcode' },
-        { path: 'item.barcodeData', label: 'QR Code (imagem)', example: 'sample-item-id', description: 'Renderiza como QR code' },
-      ],
-    },
-    {
-      id: 'products',
-      label: 'Produtos',
-      icon: 'Package',
-      fields: [
-        { path: 'combined.templateProductVariant', label: 'Produto Completo', example: 'Malha Camiseta Básica Azul M', description: 'Template + Produto + Variante' },
-        { path: 'combined.productVariant', label: 'Produto + Variante', example: 'Camiseta Básica Azul M' },
-        { path: 'product.name', label: 'Nome do Produto', example: 'Camiseta Básica' },
-        { path: 'variant.name', label: 'Nome da Variante', example: 'Azul M' },
-        { path: 'variant.reference', label: 'Referência', example: 'REF-2024-001' },
-        { path: 'combined.referenceVariant', label: 'Referência + Variante', example: 'REF-001 - Azul M' },
-        { path: 'product.category', label: 'Categoria', example: 'Vestuário' },
-        { path: 'product.manufacturer.name', label: 'Fabricante', example: 'Acme Corp' },
-        { path: 'product.manufacturer.cnpj', label: 'CNPJ Fabricante', example: '12.345.678/0001-90' },
-        { path: 'product.unit', label: 'Unidade (abrev.)', example: 'm' },
-        { path: 'product.unitFull', label: 'Unidade (completa)', example: 'metros' },
-      ],
-    },
-    {
-      id: 'quantities',
-      label: 'Quantidades',
-      icon: 'Layers',
-      fields: [
-        { path: 'item.currentQuantity', label: 'Quantidade do Item', example: '10' },
-        { path: 'item.quantityWithUnit', label: 'Qtd + Unidade (abrev.)', example: '10 m' },
-        { path: 'item.quantityWithUnitFull', label: 'Qtd + Unidade (completa)', example: '10 metros' },
-      ],
-    },
-    {
-      id: 'prices',
-      label: 'Preços',
-      icon: 'DollarSign',
-      fields: [
-        { path: 'variant.price', label: 'Preço', example: 'R$ 49,90' },
-        { path: 'variant.costPrice', label: 'Preço de Custo', example: 'R$ 25,00' },
-      ],
-    },
-    {
-      id: 'attributes',
-      label: 'Atributos',
-      icon: 'FileText',
-      fields: [
-        { path: 'variant.attributes.composicao', label: 'Composição', example: '100% Algodão' },
-        { path: 'variant.attributes.cor', label: 'Cor', example: '901 - Azul' },
-        { path: 'variant.attributes.gramatura', label: 'Gramatura', example: '260 g/m²' },
-        { path: 'variant.attributes.dimensoes', label: 'Dimensões', example: 'L: 1,62m' },
-        { path: 'variant.attributes.qualidade', label: 'Qualidade', example: 'Premium' },
-        { path: 'variant.attributes.nuance', label: 'Nuance', example: '-' },
-      ],
-    },
-    {
-      id: 'location',
-      label: 'Localização',
-      icon: 'MapPin',
-      fields: [
-        { path: 'item.resolvedAddress', label: 'Endereço BIN', example: 'FAB-EST-101-B' },
-        { path: 'item.bin.zone.name', label: 'Zona', example: 'Prateleira A' },
-        { path: 'item.bin.zone.warehouse.name', label: 'Armazém', example: 'Centro de Distribuição' },
-        { path: 'item.bin.aisle', label: 'Corredor', example: '1' },
-        { path: 'item.bin.shelf', label: 'Prateleira', example: '3' },
-        { path: 'item.bin.position', label: 'Posição', example: '2' },
-        { path: 'item.lastKnownAddress', label: 'Último Endereço', example: 'A-01-03-02' },
-      ],
-    },
-    {
-      id: 'meta',
-      label: 'Meta',
-      icon: 'Info',
-      fields: [
-        { path: 'meta.printDate', label: 'Data de Impressão', example: '08/02/2026' },
-        { path: 'meta.printTime', label: 'Hora de Impressão', example: '14:30' },
-        { path: 'meta.printedBy', label: 'Impresso por', example: 'Admin' },
-        { path: 'meta.sequenceNumber', label: 'Nº Sequencial', example: '001' },
-      ],
-    },
-  ],
-  employee: [
-    {
-      id: 'codes',
-      label: 'Códigos',
-      icon: 'Hash',
-      fields: [
-        { path: 'employee.fullCode', label: 'Matrícula', example: 'EMP-001' },
-        { path: 'employee.barcode', label: 'Código de Barras (imagem)', example: 'EMP-001', description: 'Renderiza como barcode' },
-        { path: 'employee.qrcode', label: 'QR Code (imagem)', example: 'sample-emp-id', description: 'Renderiza como QR code' },
-      ],
-    },
-    {
-      id: 'employee_info',
-      label: 'Funcionário',
-      icon: 'User',
-      fields: [
-        { path: 'employee.firstName', label: 'Primeiro Nome', example: 'João' },
-        { path: 'employee.lastName', label: 'Sobrenome', example: 'da Silva' },
-        { path: 'employee.fullName', label: 'Nome Completo', example: 'João da Silva' },
-        { path: 'employee.cpf', label: 'CPF', example: '123.456.789-00' },
-        { path: 'employee.position', label: 'Cargo', example: 'Analista de Estoque' },
-        { path: 'employee.department', label: 'Departamento', example: 'Logística' },
-        { path: 'employee.admission', label: 'Data de Admissão', example: '15/01/2024' },
-      ],
-    },
-    {
-      id: 'company',
-      label: 'Empresa',
-      icon: 'Building',
-      fields: [
-        { path: 'company.name', label: 'Nome da Empresa', example: 'Empresa Demo Ltda' },
-        { path: 'company.cnpj', label: 'CNPJ', example: '12.345.678/0001-90' },
-      ],
-    },
-    {
-      id: 'meta',
-      label: 'Meta',
-      icon: 'Info',
-      fields: [
-        { path: 'meta.printDate', label: 'Data de Impressão', example: '08/02/2026' },
-        { path: 'meta.printTime', label: 'Hora de Impressão', example: '14:30' },
-        { path: 'meta.printedBy', label: 'Impresso por', example: 'Admin' },
-        { path: 'meta.sequenceNumber', label: 'Nº Sequencial', example: '001' },
-      ],
-    },
-  ],
-};
+export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> =
+  {
+    item: [
+      {
+        id: 'codes',
+        label: 'Códigos',
+        icon: 'Hash',
+        fields: [
+          {
+            path: 'product.fullCode',
+            label: 'Código do Produto',
+            example: '5.1.1',
+          },
+          {
+            path: 'variant.fullCode',
+            label: 'Código da Variante',
+            example: '5.1.1.2.901',
+          },
+          {
+            path: 'item.fullCode',
+            label: 'Código do Item',
+            example: '5.1.1.2.901.23',
+          },
+          {
+            path: 'item.barcode',
+            label: 'Código de Barras (imagem)',
+            example: '5112901230001',
+            description: 'Renderiza como barcode',
+          },
+          {
+            path: 'item.barcodeData',
+            label: 'QR Code (imagem)',
+            example: 'sample-item-id',
+            description: 'Renderiza como QR code',
+          },
+        ],
+      },
+      {
+        id: 'products',
+        label: 'Produtos',
+        icon: 'Package',
+        fields: [
+          {
+            path: 'combined.templateProductVariant',
+            label: 'Produto Completo',
+            example: 'Malha Camiseta Básica Azul M',
+            description: 'Template + Produto + Variante',
+          },
+          {
+            path: 'combined.productVariant',
+            label: 'Produto + Variante',
+            example: 'Camiseta Básica Azul M',
+          },
+          {
+            path: 'product.name',
+            label: 'Nome do Produto',
+            example: 'Camiseta Básica',
+          },
+          {
+            path: 'variant.name',
+            label: 'Nome da Variante',
+            example: 'Azul M',
+          },
+          {
+            path: 'variant.reference',
+            label: 'Referência',
+            example: 'REF-2024-001',
+          },
+          {
+            path: 'combined.referenceVariant',
+            label: 'Referência + Variante',
+            example: 'REF-001 - Azul M',
+          },
+          {
+            path: 'product.category',
+            label: 'Categoria',
+            example: 'Vestuário',
+          },
+          {
+            path: 'product.manufacturer.name',
+            label: 'Fabricante',
+            example: 'Acme Corp',
+          },
+          {
+            path: 'product.manufacturer.cnpj',
+            label: 'CNPJ Fabricante',
+            example: '12.345.678/0001-90',
+          },
+          { path: 'product.unit', label: 'Unidade (abrev.)', example: 'm' },
+          {
+            path: 'product.unitFull',
+            label: 'Unidade (completa)',
+            example: 'metros',
+          },
+        ],
+      },
+      {
+        id: 'quantities',
+        label: 'Quantidades',
+        icon: 'Layers',
+        fields: [
+          {
+            path: 'item.currentQuantity',
+            label: 'Quantidade do Item',
+            example: '10',
+          },
+          {
+            path: 'item.quantityWithUnit',
+            label: 'Qtd + Unidade (abrev.)',
+            example: '10 m',
+          },
+          {
+            path: 'item.quantityWithUnitFull',
+            label: 'Qtd + Unidade (completa)',
+            example: '10 metros',
+          },
+        ],
+      },
+      {
+        id: 'prices',
+        label: 'Preços',
+        icon: 'DollarSign',
+        fields: [
+          { path: 'variant.price', label: 'Preço', example: 'R$ 49,90' },
+          {
+            path: 'variant.costPrice',
+            label: 'Preço de Custo',
+            example: 'R$ 25,00',
+          },
+        ],
+      },
+      {
+        id: 'attributes',
+        label: 'Atributos',
+        icon: 'FileText',
+        fields: [
+          {
+            path: 'variant.attributes.composicao',
+            label: 'Composição',
+            example: '100% Algodão',
+          },
+          {
+            path: 'variant.attributes.cor',
+            label: 'Cor',
+            example: '901 - Azul',
+          },
+          {
+            path: 'variant.attributes.gramatura',
+            label: 'Gramatura',
+            example: '260 g/m²',
+          },
+          {
+            path: 'variant.attributes.dimensoes',
+            label: 'Dimensões',
+            example: 'L: 1,62m',
+          },
+          {
+            path: 'variant.attributes.qualidade',
+            label: 'Qualidade',
+            example: 'Premium',
+          },
+          { path: 'variant.attributes.nuance', label: 'Nuance', example: '-' },
+        ],
+      },
+      {
+        id: 'location',
+        label: 'Localização',
+        icon: 'MapPin',
+        fields: [
+          {
+            path: 'item.resolvedAddress',
+            label: 'Endereço BIN',
+            example: 'FAB-EST-101-B',
+          },
+          {
+            path: 'item.bin.zone.name',
+            label: 'Zona',
+            example: 'Prateleira A',
+          },
+          {
+            path: 'item.bin.zone.warehouse.name',
+            label: 'Armazém',
+            example: 'Centro de Distribuição',
+          },
+          { path: 'item.bin.aisle', label: 'Corredor', example: '1' },
+          { path: 'item.bin.shelf', label: 'Prateleira', example: '3' },
+          { path: 'item.bin.position', label: 'Posição', example: '2' },
+          {
+            path: 'item.lastKnownAddress',
+            label: 'Último Endereço',
+            example: 'A-01-03-02',
+          },
+        ],
+      },
+      {
+        id: 'meta',
+        label: 'Meta',
+        icon: 'Info',
+        fields: [
+          {
+            path: 'meta.printDate',
+            label: 'Data de Impressão',
+            example: '08/02/2026',
+          },
+          {
+            path: 'meta.printTime',
+            label: 'Hora de Impressão',
+            example: '14:30',
+          },
+          { path: 'meta.printedBy', label: 'Impresso por', example: 'Admin' },
+          {
+            path: 'meta.sequenceNumber',
+            label: 'Nº Sequencial',
+            example: '001',
+          },
+        ],
+      },
+    ],
+    employee: [
+      {
+        id: 'codes',
+        label: 'Códigos',
+        icon: 'Hash',
+        fields: [
+          { path: 'employee.fullCode', label: 'Matrícula', example: 'EMP-001' },
+          {
+            path: 'employee.barcode',
+            label: 'Código de Barras (imagem)',
+            example: 'EMP-001',
+            description: 'Renderiza como barcode',
+          },
+          {
+            path: 'employee.qrcode',
+            label: 'QR Code (imagem)',
+            example: 'sample-emp-id',
+            description: 'Renderiza como QR code',
+          },
+        ],
+      },
+      {
+        id: 'employee_info',
+        label: 'Funcionário',
+        icon: 'User',
+        fields: [
+          {
+            path: 'employee.firstName',
+            label: 'Primeiro Nome',
+            example: 'João',
+          },
+          {
+            path: 'employee.lastName',
+            label: 'Sobrenome',
+            example: 'da Silva',
+          },
+          {
+            path: 'employee.fullName',
+            label: 'Nome Completo',
+            example: 'João da Silva',
+          },
+          { path: 'employee.cpf', label: 'CPF', example: '123.456.789-00' },
+          {
+            path: 'employee.position',
+            label: 'Cargo',
+            example: 'Analista de Estoque',
+          },
+          {
+            path: 'employee.department',
+            label: 'Departamento',
+            example: 'Logística',
+          },
+          {
+            path: 'employee.admission',
+            label: 'Data de Admissão',
+            example: '15/01/2024',
+          },
+        ],
+      },
+      {
+        id: 'company',
+        label: 'Empresa',
+        icon: 'Building',
+        fields: [
+          {
+            path: 'company.name',
+            label: 'Nome da Empresa',
+            example: 'Empresa Demo Ltda',
+          },
+          {
+            path: 'company.cnpj',
+            label: 'CNPJ',
+            example: '12.345.678/0001-90',
+          },
+        ],
+      },
+      {
+        id: 'meta',
+        label: 'Meta',
+        icon: 'Info',
+        fields: [
+          {
+            path: 'meta.printDate',
+            label: 'Data de Impressão',
+            example: '08/02/2026',
+          },
+          {
+            path: 'meta.printTime',
+            label: 'Hora de Impressão',
+            example: '14:30',
+          },
+          { path: 'meta.printedBy', label: 'Impresso por', example: 'Admin' },
+          {
+            path: 'meta.sequenceNumber',
+            label: 'Nº Sequencial',
+            example: '001',
+          },
+        ],
+      },
+    ],
+  };
 
 // ============================================
 // BUILD SAMPLE PREVIEW DATA
@@ -187,7 +369,9 @@ export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> = 
  * Constrói um objeto nested a partir do ENTITY_FIELD_REGISTRIES
  * para uso como previewData com dados de amostra
  */
-export function buildSamplePreviewData(entityType: EntityType = 'item'): Record<string, unknown> {
+export function buildSamplePreviewData(
+  entityType: EntityType = 'item'
+): Record<string, unknown> {
   const categories = ENTITY_FIELD_REGISTRIES[entityType] || [];
   const data: Record<string, unknown> = {};
   for (const cat of categories) {
@@ -209,11 +393,21 @@ export function buildSamplePreviewData(entityType: EntityType = 'item'): Record<
 // ============================================
 
 function buildDataPathsFromRegistry() {
-  const result: Record<string, { label: string; fields: { path: string; label: string; example: string }[] }> = {};
+  const result: Record<
+    string,
+    {
+      label: string;
+      fields: { path: string; label: string; example: string }[];
+    }
+  > = {};
   for (const category of ENTITY_FIELD_REGISTRIES.item) {
     result[category.id] = {
       label: category.label,
-      fields: category.fields.map(f => ({ path: f.path, label: f.label, example: f.example })),
+      fields: category.fields.map(f => ({
+        path: f.path,
+        label: f.label,
+        example: f.example,
+      })),
     };
   }
   return result;
@@ -231,7 +425,10 @@ export const DATA_PATHS = buildDataPathsFromRegistry();
 /**
  * Obtém o valor de exemplo para um dataPath
  */
-export function getExampleValue(dataPath: string, entityType?: EntityType): string {
+export function getExampleValue(
+  dataPath: string,
+  entityType?: EntityType
+): string {
   const categories = ENTITY_FIELD_REGISTRIES[entityType || 'item'];
   for (const category of categories) {
     for (const field of category.fields) {
@@ -246,7 +443,10 @@ export function getExampleValue(dataPath: string, entityType?: EntityType): stri
 /**
  * Obtém o label amigável para um dataPath
  */
-export function getFieldLabel(dataPath: string, entityType?: EntityType): string {
+export function getFieldLabel(
+  dataPath: string,
+  entityType?: EntityType
+): string {
   const categories = ENTITY_FIELD_REGISTRIES[entityType || 'item'];
   for (const category of categories) {
     for (const field of category.fields) {
@@ -295,7 +495,11 @@ function resolvePath(obj: Record<string, unknown>, path: string): unknown {
 /**
  * Ícone para o tipo de campo
  */
-function FieldTypeIcon({ type }: { type: FieldElement['fieldConfig']['type'] }) {
+function FieldTypeIcon({
+  type,
+}: {
+  type: FieldElement['fieldConfig']['type'];
+}) {
   const iconClass = 'w-3 h-3';
   switch (type) {
     case 'simple':
@@ -373,7 +577,10 @@ function getPreviewValue(
 
     case 'conditional':
       if (fieldConfig.conditions) {
-        const primary = resolvePath(previewData, fieldConfig.conditions.primary);
+        const primary = resolvePath(
+          previewData,
+          fieldConfig.conditions.primary
+        );
         if (primary) return String(primary);
         for (const fallback of fieldConfig.conditions.fallbacks) {
           const value = resolvePath(previewData, fallback);
@@ -454,7 +661,8 @@ export function FieldElementRenderer({
     : {};
 
   // Indicador do tipo (badge no canto)
-  const showTypeIndicator = !fieldConfig.dataPath && fieldConfig.type === 'simple';
+  const showTypeIndicator =
+    !fieldConfig.dataPath && fieldConfig.type === 'simple';
 
   return (
     <div
@@ -473,7 +681,15 @@ export function FieldElementRenderer({
 
       {/* Valor do campo */}
       <div style={valueStyleCSS}>
-        <span style={{ width: '100%', display: 'block', textAlign: valueStyle.textAlign }}>{previewValue}</span>
+        <span
+          style={{
+            width: '100%',
+            display: 'block',
+            textAlign: valueStyle.textAlign,
+          }}
+        >
+          {previewValue}
+        </span>
       </div>
 
       {/* Badge indicador de tipo (design time) */}

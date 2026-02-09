@@ -52,16 +52,19 @@ function getQRContent(
             const value = resolvePath(previewData, path);
             if (value) return String(value);
           }
-          return previewData ? 'exemplo' : `{{${path.split('.').pop() || 'campo'}}}`;
+          return previewData
+            ? 'exemplo'
+            : `{{${path.split('.').pop() || 'campo'}}}`;
         });
       }
       return previewData ? 'composição exemplo' : '{{composição}}';
 
     case 'url':
       if (config.urlBase) {
-        const param = config.urlParam && previewData
-          ? String(resolvePath(previewData, config.urlParam) || 'ITM-001')
-          : 'ITM-001';
+        const param =
+          config.urlParam && previewData
+            ? String(resolvePath(previewData, config.urlParam) || 'ITM-001')
+            : 'ITM-001';
         return `${config.urlBase}${param}`;
       }
       return 'https://example.com/item/ITM-001';

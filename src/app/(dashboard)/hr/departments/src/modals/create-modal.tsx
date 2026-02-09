@@ -71,18 +71,10 @@ export function CreateModal({
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies', 'list'],
     queryFn: async () => {
-      console.log('[CreateModal] Fetching companies...');
       const response = await companiesApi.list({
         perPage: 100,
         includeDeleted: false,
       });
-      console.log('[CreateModal] API response:', response);
-      console.log('[CreateModal] Response type:', typeof response);
-      console.log('[CreateModal] Is array:', Array.isArray(response));
-      console.log(
-        '[CreateModal] Has companies prop:',
-        response && 'companies' in response
-      );
 
       // A resposta pode ser um array direto ou um objeto com propriedade 'companies'
       let companies: Company[] = [];
@@ -96,11 +88,9 @@ export function CreateModal({
         companies = Array.isArray(data) ? data : [];
       }
 
-      console.log('[CreateModal] Extracted companies:', companies);
       const filtered = companies.filter(
         (company: Company) => !company.deletedAt
       );
-      console.log('[CreateModal] Filtered companies:', filtered);
       return filtered;
     },
     enabled: isOpen,

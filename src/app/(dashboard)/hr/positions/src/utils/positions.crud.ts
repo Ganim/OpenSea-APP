@@ -3,6 +3,7 @@
  * Funções isoladas para operações de CRUD no módulo de cargos
  */
 
+import { logger } from '@/lib/logger';
 import type { Position } from '@/types/hr';
 import { positionsApi } from '../api';
 
@@ -69,20 +70,14 @@ export async function duplicatePosition(
     isActive: original.isActive,
   };
 
-  console.log('[Positions] Duplicating position:', {
-    originalId: id,
-    originalPosition: original,
-    duplicateData,
-  });
-
   try {
     return positionsApi.create(duplicateData as any);
   } catch (error) {
-    console.error('[Positions] Duplication failed:', {
-      error,
-      originalId: id,
-      duplicateData: JSON.stringify(duplicateData, null, 2),
-    });
+    logger.error(
+      '[Positions] Duplication failed',
+      error instanceof Error ? error : undefined,
+      { originalId: id }
+    );
     throw error;
   }
 }

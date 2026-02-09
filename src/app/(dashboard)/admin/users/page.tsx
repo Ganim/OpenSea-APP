@@ -32,6 +32,7 @@ import {
   type ContextMenuAction,
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
+import { logger } from '@/lib/logger';
 import { usersService } from '@/services/auth/users.service';
 import * as rbacService from '@/services/rbac/rbac.service';
 import type { User } from '@/types/auth';
@@ -195,7 +196,10 @@ export default function UsersPage() {
       await rbacService.assignGroupToUser(selectedUser.id, { groupId });
       refetchGroups();
     } catch (error) {
-      console.error('Erro ao atribuir grupo:', error);
+      logger.error(
+        'Erro ao atribuir grupo',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 
@@ -205,7 +209,10 @@ export default function UsersPage() {
       await rbacService.removeGroupFromUser(selectedUser.id, groupId);
       refetchGroups();
     } catch (error) {
-      console.error('Erro ao remover grupo:', error);
+      logger.error(
+        'Erro ao remover grupo',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 
@@ -220,7 +227,10 @@ export default function UsersPage() {
       });
       page.modals.close('create');
     } catch (error) {
-      console.error('Erro ao criar usuário:', error);
+      logger.error(
+        'Erro ao criar usuário',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 

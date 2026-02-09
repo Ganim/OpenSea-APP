@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useResetPassword, useSendPasswordReset } from '@/hooks/use-auth';
+import { logger } from '@/lib/logger';
 import { useForm } from '@tanstack/react-form';
 import {
   CheckCircle2,
@@ -74,7 +75,10 @@ function ForgotPasswordForm() {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro ao redefinir senha';
         setError(errorMessage);
-        console.error('Erro:', err);
+        logger.error(
+          'Erro ao redefinir senha',
+          err instanceof Error ? err : undefined
+        );
       }
     },
   });

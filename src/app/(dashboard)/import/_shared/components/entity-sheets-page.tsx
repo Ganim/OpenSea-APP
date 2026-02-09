@@ -2,6 +2,7 @@
 
 import { Header } from '@/components/layout/header';
 import { PageLayout } from '@/components/layout/page-layout';
+import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -210,7 +211,10 @@ export function EntitySheetsPage({
         spreadsheet.applyPastedData(data);
         sessionStorage.removeItem(`import-${entityType}-data`);
       } catch (e) {
-        console.error('Failed to load CSV data:', e);
+        logger.error(
+          'Failed to load CSV data',
+          e instanceof Error ? e : undefined
+        );
       }
     }
   }, [entityType]);

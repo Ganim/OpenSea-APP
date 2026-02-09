@@ -6,6 +6,7 @@
  * Target: 3 clicks to add stock
  */
 
+import { logger } from '@/lib/logger';
 import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -104,7 +105,10 @@ export function QuickStockEntry({
         onSuccess(response.item);
         onOpenChange(false);
       } catch (error) {
-        console.error('Error adding stock:', error);
+        logger.error(
+          'Error adding stock',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao adicionar estoque');
       } finally {
         setIsSubmitting(false);

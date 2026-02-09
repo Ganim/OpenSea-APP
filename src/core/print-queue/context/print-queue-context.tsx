@@ -219,34 +219,37 @@ export function PrintQueueProvider({ children }: PrintQueueProviderProps) {
     }));
   }, []);
 
-  const selectTemplate = useCallback((templateId: string, dimensions?: { width: number; height: number }) => {
-    setState(prev => {
-      const updates: Partial<PrintQueueState> = {
-        selectedTemplateId: templateId,
-        selectedTemplateDimensions: dimensions ?? null,
-        updatedAt: new Date(),
-      };
-
-      // Auto-set paper size to CUSTOM with template dimensions
-      if (dimensions) {
-        updates.pageSettings = {
-          ...prev.pageSettings,
-          paperSize: 'CUSTOM' as const,
-          customDimensions: {
-            width: dimensions.width,
-            height: dimensions.height,
-          },
-          // Set 1 label per row since we're matching the template size
-          labelsPerRow: 1 as const,
-          // Reset margins to 0 for exact template size match
-          margins: { top: 0, right: 0, bottom: 0, left: 0 },
-          labelSpacing: { horizontal: 0, vertical: 0 },
+  const selectTemplate = useCallback(
+    (templateId: string, dimensions?: { width: number; height: number }) => {
+      setState(prev => {
+        const updates: Partial<PrintQueueState> = {
+          selectedTemplateId: templateId,
+          selectedTemplateDimensions: dimensions ?? null,
+          updatedAt: new Date(),
         };
-      }
 
-      return { ...prev, ...updates };
-    });
-  }, []);
+        // Auto-set paper size to CUSTOM with template dimensions
+        if (dimensions) {
+          updates.pageSettings = {
+            ...prev.pageSettings,
+            paperSize: 'CUSTOM' as const,
+            customDimensions: {
+              width: dimensions.width,
+              height: dimensions.height,
+            },
+            // Set 1 label per row since we're matching the template size
+            labelsPerRow: 1 as const,
+            // Reset margins to 0 for exact template size match
+            margins: { top: 0, right: 0, bottom: 0, left: 0 },
+            labelSpacing: { horizontal: 0, vertical: 0 },
+          };
+        }
+
+        return { ...prev, ...updates };
+      });
+    },
+    []
+  );
 
   const isInQueue = useCallback(
     (entityId: string): boolean => {

@@ -4,6 +4,7 @@
  * v2: Suporte multi-entidade (entityType em cada item)
  */
 
+import { logger } from '@/lib/logger';
 import {
   DEFAULT_PAGE_SETTINGS,
   DEFAULT_TEMPLATE_ID,
@@ -100,7 +101,10 @@ export function loadFromStorage(): PrintQueueState {
 
     return deserializeState(stored);
   } catch (error) {
-    console.error('[PrintQueue] Erro ao carregar do localStorage:', error);
+    logger.error(
+      '[PrintQueue] Erro ao carregar do localStorage',
+      error instanceof Error ? error : undefined
+    );
     return DEFAULT_PRINT_QUEUE_STATE;
   }
 }
@@ -117,14 +121,17 @@ export function saveToStorage(state: PrintQueueState): void {
     const serialized = serializeState(state);
     localStorage.setItem(PRINT_QUEUE_STORAGE_KEY, serialized);
   } catch (error) {
-    console.error('[PrintQueue] Erro ao salvar no localStorage:', error);
+    logger.error(
+      '[PrintQueue] Erro ao salvar no localStorage',
+      error instanceof Error ? error : undefined
+    );
 
     // Se o erro for de quota, tentar limpar itens antigos
     if (
       error instanceof DOMException &&
       (error.name === 'QuotaExceededError' || error.code === 22)
     ) {
-      console.warn(
+      logger.warn(
         '[PrintQueue] Quota excedida, tentando limpar itens antigos...'
       );
       tryCleanupAndSave(state);
@@ -149,12 +156,12 @@ function tryCleanupAndSave(state: PrintQueueState): void {
   try {
     const serialized = serializeState(cleanedState);
     localStorage.setItem(PRINT_QUEUE_STORAGE_KEY, serialized);
-    console.info(
+    logger.info(
       `[PrintQueue] Removidos ${halfLength} itens antigos para liberar espaço`
     );
   } catch {
     // Se ainda falhar, limpar tudo
-    console.error('[PrintQueue] Não foi possível salvar, limpando toda a fila');
+    logger.error('[PrintQueue] Não foi possível salvar, limpando toda a fila');
     clearStorage();
   }
 }
@@ -170,7 +177,10 @@ export function clearStorage(): void {
   try {
     localStorage.removeItem(PRINT_QUEUE_STORAGE_KEY);
   } catch (error) {
-    console.error('[PrintQueue] Erro ao limpar localStorage:', error);
+    logger.error(
+      '[PrintQueue] Erro ao limpar localStorage',
+      error instanceof Error ? error : undefined
+    );
   }
 }
 

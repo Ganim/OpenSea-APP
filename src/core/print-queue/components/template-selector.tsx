@@ -52,7 +52,12 @@ export function TemplateSelector({ className }: TemplateSelectorProps) {
               key={template.id}
               template={template}
               isSelected={selectedId === template.id}
-              onSelect={() => actions.selectTemplate(template.id, { width: template.width, height: template.height })}
+              onSelect={() =>
+                actions.selectTemplate(template.id, {
+                  width: template.width,
+                  height: template.height,
+                })
+              }
             />
           ))}
         </div>

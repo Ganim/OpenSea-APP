@@ -2,6 +2,7 @@
  * Utilitários para criar empresa com dados importados
  */
 
+import { logger } from '@/lib/logger';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Company } from '@/types/hr';
 import {
@@ -29,7 +30,7 @@ export async function createCompanyFromBrasilAPI(
 
       // Valida se temos pelo menos um ID
       if (!company || !company.id) {
-        console.warn(
+        logger.warn(
           '[CreateCompanyFromBrasilAPI] Empresa criada mas sem ID, tentando refetch...'
         );
         throw new Error(
@@ -57,10 +58,12 @@ export async function createCompanyFromBrasilAPI(
         try {
           await companyAddressesApi.create(company.id, primaryAddress);
         } catch (addressError) {
-          console.warn(
-            '[CreateCompanyFromBrasilAPI] Erro ao criar endereço:',
-            addressError
-          );
+          logger.warn('[CreateCompanyFromBrasilAPI] Erro ao criar endereço', {
+            error:
+              addressError instanceof Error
+                ? addressError.message
+                : String(addressError),
+          });
           // Continua mesmo se o endereço falhar
         }
       }
@@ -71,10 +74,12 @@ export async function createCompanyFromBrasilAPI(
           try {
             await companyCnaesApi.create(company.id, cnae);
           } catch (cnaeError) {
-            console.warn(
-              '[CreateCompanyFromBrasilAPI] Erro ao criar CNAE:',
-              cnaeError
-            );
+            logger.warn('[CreateCompanyFromBrasilAPI] Erro ao criar CNAE', {
+              error:
+                cnaeError instanceof Error
+                  ? cnaeError.message
+                  : String(cnaeError),
+            });
             // Continua mesmo se o CNAE falhar
           }
         }
@@ -86,9 +91,14 @@ export async function createCompanyFromBrasilAPI(
           try {
             await companyStakeholdersApi.create(company.id, stakeholder);
           } catch (stakeholderError) {
-            console.warn(
-              '[CreateCompanyFromBrasilAPI] Erro ao criar stakeholder:',
-              stakeholderError
+            logger.warn(
+              '[CreateCompanyFromBrasilAPI] Erro ao criar stakeholder',
+              {
+                error:
+                  stakeholderError instanceof Error
+                    ? stakeholderError.message
+                    : String(stakeholderError),
+              }
             );
             // Continua mesmo se o stakeholder falhar
           }
@@ -103,9 +113,14 @@ export async function createCompanyFromBrasilAPI(
             importedData.fiscalSettings
           );
         } catch (fiscalError) {
-          console.warn(
-            '[CreateCompanyFromBrasilAPI] Erro ao criar configurações fiscais:',
-            fiscalError
+          logger.warn(
+            '[CreateCompanyFromBrasilAPI] Erro ao criar configurações fiscais',
+            {
+              error:
+                fiscalError instanceof Error
+                  ? fiscalError.message
+                  : String(fiscalError),
+            }
           );
           // Continua mesmo se as configurações fiscais falharem
         }
@@ -113,16 +128,19 @@ export async function createCompanyFromBrasilAPI(
 
       return company;
     } catch (error) {
-      console.error(
-        '[CreateCompanyFromBrasilAPI] Erro crítico ao criar adjuntos:',
-        error
+      logger.error(
+        '[CreateCompanyFromBrasilAPI] Erro critico ao criar adjuntos',
+        error instanceof Error ? error : undefined
       );
       // Retorna a empresa criada mesmo que os adjuntos falharem
       // O usuário pode completar depois
       return company;
     }
   } catch (error) {
-    console.error('[CreateCompanyFromBrasilAPI] Erro ao criar empresa:', error);
+    logger.error(
+      '[CreateCompanyFromBrasilAPI] Erro ao criar empresa',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }

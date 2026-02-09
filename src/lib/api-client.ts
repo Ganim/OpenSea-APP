@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, apiConfig, authConfig } from '@/config/api';
+import { logger } from '@/lib/logger';
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
@@ -49,7 +50,7 @@ class ApiClient {
     // Sistema de lock: se já existe uma tentativa de refresh em andamento, reutiliza ela
     // Isso evita múltiplas chamadas simultâneas ao endpoint (rate limit: 10/min)
     if (this.refreshPromise) {
-      console.log('[API] Refresh já em andamento, aguardando...');
+      logger.debug('[API] Refresh já em andamento, aguardando...');
       return this.refreshPromise;
     }
 
@@ -77,11 +78,10 @@ class ApiClient {
   }
 
   private async performRefresh(refreshToken: string): Promise<string> {
-    console.log('[API] Iniciando refresh do token...');
-    console.log(
-      '[API] URL do refresh:',
-      `${this.baseURL}${API_ENDPOINTS.SESSIONS.REFRESH}`
-    );
+    logger.debug('[API] Iniciando refresh do token...');
+    logger.debug('[API] URL do refresh', {
+      url: `${this.baseURL}${API_ENDPOINTS.SESSIONS.REFRESH}`,
+    });
 
     try {
       const response = await fetch(
@@ -98,7 +98,12 @@ class ApiClient {
         }
       ).catch(networkError => {
         // Captura erros de rede antes do response
-        console.error('[API] Erro de rede no refresh:', networkError);
+        logger.error(
+          '[API] Erro de rede no refresh',
+          networkError instanceof Error
+            ? networkError
+            : new Error(String(networkError))
+        );
         throw new Error(
           `Falha de conexão com o servidor. Verifique se o backend está rodando em ${this.baseURL}`
         );
@@ -121,22 +126,24 @@ class ApiClient {
         // Log detalhado baseado no tipo de erro do backend
         if (response.status === 401) {
           if (errorDetails.includes('required')) {
-            console.error(
+            logger.error(
               '[API] Refresh falhou: Token não encontrado no header'
             );
           } else if (errorDetails.includes('Invalid')) {
-            console.error('[API] Refresh falhou: Refresh token inválido');
+            logger.error('[API] Refresh falhou: Refresh token inválido');
           } else if (errorDetails.includes('expired')) {
-            console.error('[API] Refresh falhou: Refresh token expirado');
+            logger.error('[API] Refresh falhou: Refresh token expirado');
           } else if (errorDetails.includes('revoked')) {
-            console.error('[API] Refresh falhou: Refresh token revogado');
+            logger.error('[API] Refresh falhou: Refresh token revogado');
           } else {
-            console.error('[API] Refresh falhou (401):', errorMessage);
+            logger.error('[API] Refresh falhou (401)', undefined, {
+              errorMessage,
+            });
           }
         } else if (response.status === 429) {
-          console.error('[API] Rate limit excedido - aguarde 1 minuto');
+          logger.error('[API] Rate limit excedido - aguarde 1 minuto');
         } else {
-          console.error('[API] Refresh falhou:', errorMessage);
+          logger.error('[API] Refresh falhou', undefined, { errorMessage });
         }
 
         // Erro de autenticação, não de rede - redireciona para login
@@ -155,13 +162,13 @@ class ApiClient {
       };
 
       if (data.token) {
-        console.log('[API] Refresh bem-sucedido, tokens atualizados');
+        logger.debug('[API] Refresh bem-sucedido, tokens atualizados');
 
         // CRÍTICO: Backend usa single-use tokens
         // Sempre salva o novo refresh token retornado
         if (!data.refreshToken) {
-          console.warn(
-            '[API] ⚠️ Novo refresh token não retornado! Token antigo foi revogado.'
+          logger.warn(
+            '[API] Novo refresh token não retornado! Token antigo foi revogado.'
           );
         }
 
@@ -176,7 +183,7 @@ class ApiClient {
         return data.token;
       }
 
-      console.error('[API] Refresh retornou sem token');
+      logger.error('[API] Refresh retornou sem token');
       // Resposta inesperada do backend, não de rede - redireciona para login
       this.handleRefreshFailure(false);
       throw new Error('Failed to refresh token');
@@ -200,7 +207,7 @@ class ApiClient {
   }
 
   private handleRefreshFailure(isNetworkError = false): void {
-    console.log('[API] Limpando tokens...');
+    logger.debug('[API] Limpando tokens...');
     this.setTokens(null, null);
 
     // Redirect para login apenas no browser
@@ -212,7 +219,7 @@ class ApiClient {
         currentPath === '/login' || currentPath === '/fast-login';
 
       if (!isLoginPage) {
-        console.log('[API] Redirecionando para login...');
+        logger.debug('[API] Redirecionando para login...');
         // Usa setTimeout para garantir que a limpeza de tokens aconteça primeiro
         setTimeout(() => {
           window.location.href = '/fast-login?session=expired';
@@ -254,21 +261,23 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (response.status === 401 && !options.skipRefresh) {
-        console.log('[API] Recebido 401, tentando refresh...');
+        logger.debug('[API] Recebido 401, tentando refresh...');
 
         // Primeiro tenta o refresh; se falhar, o próprio método já limpa tokens e redireciona
         let newToken: string;
         try {
           newToken = await this.refreshAccessToken();
         } catch (refreshError) {
-          console.error(
-            '[API] Falha no refresh, usuário será deslogado:',
-            refreshError
+          logger.error(
+            '[API] Falha no refresh, usuário será deslogado',
+            refreshError instanceof Error
+              ? refreshError
+              : new Error(String(refreshError))
           );
           throw refreshError;
         }
 
-        console.log('[API] Refresh bem-sucedido, repetindo request...');
+        logger.debug('[API] Refresh bem-sucedido, repetindo request...');
 
         // Depois repete a requisição; se falhar aqui, NÃO limpa tokens (pode ser CORS/offline)
         const retryHeaders = {
@@ -307,12 +316,14 @@ class ApiClient {
             return undefined as T;
           }
 
-          console.log('[API] Request repetido com sucesso');
+          logger.debug('[API] Request repetido com sucesso');
           return (await retryResponse.json()) as T;
         } catch (retryError) {
-          console.error(
-            '[API] Erro ao repetir request após refresh:',
-            retryError
+          logger.error(
+            '[API] Erro ao repetir request após refresh',
+            retryError instanceof Error
+              ? retryError
+              : new Error(String(retryError))
           );
           // Não limpamos tokens aqui; problema provavelmente é de rede/CORS
           throw retryError;
@@ -353,14 +364,14 @@ class ApiClient {
 
         if (!isResetRequired) {
           if (isNotFoundError) {
-            console.warn('[API] Resource not found:', {
+            logger.warn('[API] Resource not found', {
               status: response.status,
               statusText: response.statusText,
               url: response.url,
               error: errorData,
             });
           } else {
-            console.error('[API] Error response:', {
+            logger.error('[API] Error response', undefined, {
               status: response.status,
               statusText: response.statusText,
               url: response.url,
@@ -396,11 +407,15 @@ class ApiClient {
       }
 
       if (error instanceof Error && error.message === 'Failed to fetch') {
-        console.error('[API] Erro de conexão:', {
-          url: url.toString(),
-          baseURL: this.baseURL,
-          method: restOptions.method || 'GET',
-        });
+        logger.error(
+          '[API] Erro de conexão',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            url: url.toString(),
+            baseURL: this.baseURL,
+            method: restOptions.method || 'GET',
+          }
+        );
         throw new Error(
           'Falha na conexão - Possíveis causas:\n' +
             `1. Servidor backend não está rodando em ${this.baseURL}\n` +

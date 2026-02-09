@@ -216,19 +216,7 @@ export function generateAdvancedTextFromBasic(
   basicName?: string
 ): string {
   const validConfigs = configs.filter(c => c.name?.trim());
-  try {
-    console.log('[E2E-LOG] helper generateAdvancedTextFromBasic', {
-      configs,
-      basicName,
-      validCount: validConfigs.length,
-    });
-  } catch (_) {}
   if (validConfigs.length === 0) {
-    try {
-      console.log(
-        '[E2E-LOG] helper generateAdvancedTextFromBasic returning empty (no valid configs)'
-      );
-    } catch (_) {}
     return '';
   }
 

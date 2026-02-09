@@ -7,7 +7,10 @@
 
 'use client';
 
-import type { LabelElement, LabelStudioTemplate } from '@/core/print-queue/editor';
+import type {
+  LabelElement,
+  LabelStudioTemplate,
+} from '@/core/print-queue/editor';
 import { ElementRenderer, mmToPx } from '@/core/print-queue/editor';
 
 interface StudioLabelRendererProps {
@@ -55,7 +58,9 @@ export function StudioLabelRenderer({
             top: mmToPx(element.y, scale),
             width: mmToPx(element.width, scale),
             height: mmToPx(element.height, scale),
-            transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+            transform: element.rotation
+              ? `rotate(${element.rotation}deg)`
+              : undefined,
             opacity: element.opacity ?? 1,
             overflow: 'hidden',
           }}
@@ -75,7 +80,9 @@ export function StudioLabelRenderer({
  * Tenta parsear grapesJsData como LabelStudioTemplate (v2)
  * Retorna null se não for v2 ou se o parse falhar
  */
-export function parseStudioTemplate(grapesJsData: string | undefined | null): LabelStudioTemplate | null {
+export function parseStudioTemplate(
+  grapesJsData: string | undefined | null
+): LabelStudioTemplate | null {
   if (!grapesJsData) return null;
 
   try {

@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -67,7 +68,10 @@ export function ImportTemplatesModal({
       setSelectedFile(null);
       onClose();
     } catch (error) {
-      console.error('Erro ao importar templates:', error);
+      logger.error(
+        'Erro ao importar templates',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsImporting(false);
     }
@@ -75,7 +79,6 @@ export function ImportTemplatesModal({
 
   const handleDownloadTemplate = () => {
     // TODO: Implementar download do template CSV/Excel
-    console.log('Download template');
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/auth-context';
 import { usePermissions } from '@/hooks/use-permissions';
+import { logger } from '@/lib/logger';
 import {
   createPermissionMap,
   listMyPermissions,
@@ -53,7 +54,10 @@ export default function DebugPermissionsPage() {
         try {
           groups = await listUserGroups(user.id);
         } catch (e) {
-          console.error('Error fetching groups:', e);
+          logger.error(
+            'Error fetching groups',
+            e instanceof Error ? e : undefined
+          );
         }
 
         // Create permission map from raw API response

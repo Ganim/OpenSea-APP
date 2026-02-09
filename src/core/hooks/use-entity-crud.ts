@@ -4,6 +4,7 @@
  */
 
 import type { BaseEntity } from '@/core/types';
+import { logger } from '@/lib/logger';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
 import { toast } from 'sonner';
@@ -304,11 +305,11 @@ export function useEntityCrud<T extends BaseEntity>(
   );
 
   const invalidate = useCallback(async () => {
-    console.log('[invalidate] Invalidando cache para queryKey:', queryKey);
+    logger.debug('[invalidate] Invalidating cache', { queryKey });
     await queryClient.invalidateQueries({ queryKey, refetchType: 'all' });
-    console.log('[invalidate] Refetching data após invalidação...');
+    logger.debug('[invalidate] Refetching data after invalidation');
     await refetch();
-    console.log('[invalidate] Refetch completo!');
+    logger.debug('[invalidate] Refetch complete');
   }, [queryClient, queryKey, refetch]);
 
   const clearCache = useCallback(() => {

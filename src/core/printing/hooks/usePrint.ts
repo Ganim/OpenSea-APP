@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 import {
   PrintConfig,
@@ -41,7 +42,10 @@ export const usePrint = () => {
         const blob = await htmlToPdf(printRef.current, config, filename);
         return blob;
       } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
+        logger.error(
+          'Erro ao gerar PDF',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao gerar PDF');
         return null;
       } finally {
@@ -92,7 +96,10 @@ export const usePrint = () => {
       printElement(printRef.current);
       toast.success('Documento enviado para impressão');
     } catch (error) {
-      console.error('Erro ao imprimir:', error);
+      logger.error(
+        'Erro ao imprimir',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao imprimir documento');
     } finally {
       setIsProcessing(false);
@@ -141,7 +148,10 @@ export const usePrint = () => {
             };
         }
       } catch (error) {
-        console.error('Erro na impressão:', error);
+        logger.error(
+          'Erro na impressão',
+          error instanceof Error ? error : undefined
+        );
         return {
           success: false,
           error:

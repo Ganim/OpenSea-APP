@@ -26,6 +26,7 @@ import { ArrowLeft, Factory, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { manufacturersApi } from '../../src';
 
 export default function EditManufacturerPage() {
@@ -87,7 +88,10 @@ export default function EditManufacturerPage() {
       router.push(`/stock/manufacturers/${manufacturerId}`);
     },
     onError: error => {
-      console.error(error);
+      logger.error(
+        'Erro ao atualizar fabricante',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Não foi possível atualizar o fabricante');
     },
   });

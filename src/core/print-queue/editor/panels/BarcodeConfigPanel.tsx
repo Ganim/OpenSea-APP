@@ -28,7 +28,10 @@ interface BarcodeConfigPanelProps {
   onUpdate: (updates: Partial<BarcodeElement>) => void;
 }
 
-export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProps) {
+export function BarcodeConfigPanel({
+  element,
+  onUpdate,
+}: BarcodeConfigPanelProps) {
   const { barcodeConfig } = element;
   const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
   const [insertModalOpen, setInsertModalOpen] = useState(false);
@@ -48,7 +51,9 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
         <Label className="text-xs">Fonte do valor</Label>
         <Select
           value={barcodeConfig.source}
-          onValueChange={v => updateConfig({ source: v as BarcodeConfig['source'] })}
+          onValueChange={v =>
+            updateConfig({ source: v as BarcodeConfig['source'] })
+          }
         >
           <SelectTrigger className="h-8">
             <SelectValue />
@@ -71,12 +76,16 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
             onClick={() => setFieldPickerOpen(true)}
           >
             <span className="truncate text-sm">
-              {barcodeConfig.dataPath ? getFieldLabel(barcodeConfig.dataPath) : 'Selecionar campo...'}
+              {barcodeConfig.dataPath
+                ? getFieldLabel(barcodeConfig.dataPath)
+                : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
           </Button>
           {barcodeConfig.dataPath && (
-            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{barcodeConfig.dataPath}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+              {barcodeConfig.dataPath}
+            </p>
           )}
           <FieldPickerModal
             open={fieldPickerOpen}
@@ -124,7 +133,7 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
             onOpenChange={setInsertModalOpen}
             onSelect={() => {}}
             insertMode
-            onInsert={(text) => {
+            onInsert={text => {
               const current = barcodeConfig.template || '';
               updateConfig({ template: current + text });
             }}
@@ -138,7 +147,9 @@ export function BarcodeConfigPanel({ element, onUpdate }: BarcodeConfigPanelProp
         <Label className="text-xs">Formato</Label>
         <Select
           value={barcodeConfig.format}
-          onValueChange={v => updateConfig({ format: v as BarcodeConfig['format'] })}
+          onValueChange={v =>
+            updateConfig({ format: v as BarcodeConfig['format'] })
+          }
         >
           <SelectTrigger className="h-8">
             <SelectValue />

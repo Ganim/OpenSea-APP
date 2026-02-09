@@ -162,7 +162,6 @@ export function ZoneMap({
   const handlePrintItemLabel = useCallback((item: BinItem) => {
     // TODO: Implementar impressão de etiqueta do item
     toast.info(`Gerando etiqueta para ${item.itemCode}...`);
-    console.log('Print label for item:', item);
   }, []);
 
   const handleMoveItem = useCallback(

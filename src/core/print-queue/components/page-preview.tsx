@@ -32,10 +32,17 @@ export function PagePreview({
   showInfo = true,
 }: PagePreviewProps) {
   const { state, totalLabels } = usePrintQueue();
-  const { selectedTemplateId, selectedTemplateDimensions, pageSettings, items } = state;
+  const {
+    selectedTemplateId,
+    selectedTemplateDimensions,
+    pageSettings,
+    items,
+  } = state;
 
   const template: LabelTemplateDefinition | undefined = useMemo(() => {
-    const systemTemplate = SYSTEM_LABEL_TEMPLATES.find(t => t.id === selectedTemplateId);
+    const systemTemplate = SYSTEM_LABEL_TEMPLATES.find(
+      t => t.id === selectedTemplateId
+    );
     if (systemTemplate) return systemTemplate;
     if (selectedTemplateDimensions) {
       return {
@@ -100,7 +107,11 @@ export function PagePreview({
           });
         } else {
           labels.push(
-            resolveLabelData(queueItem.item, queueItem.variant, queueItem.product)
+            resolveLabelData(
+              queueItem.item,
+              queueItem.variant,
+              queueItem.product
+            )
           );
         }
         labelIndex++;

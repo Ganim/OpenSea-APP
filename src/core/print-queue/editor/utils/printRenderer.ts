@@ -3,7 +3,11 @@
  * Funções para renderizar templates para impressão
  */
 
-import type { LabelStudioTemplate, LabelElement, FieldConfig } from '../studio-types';
+import type {
+  LabelStudioTemplate,
+  LabelElement,
+  FieldConfig,
+} from '../studio-types';
 import { mmToPx } from './unitConverter';
 
 /**
@@ -22,10 +26,7 @@ export function mmToPrintPx(mm: number): number {
 /**
  * Resolve um dataPath em dados reais
  */
-function resolveDataPath(
-  data: Record<string, unknown>,
-  path: string
-): string {
+function resolveDataPath(data: Record<string, unknown>, path: string): string {
   const value = path.split('.').reduce<unknown>((obj, key) => {
     if (obj && typeof obj === 'object') {
       return (obj as Record<string, unknown>)[key];
@@ -68,10 +69,13 @@ export function resolveFieldValue(
       if (!fieldConfig.formula) return '';
       try {
         // Resolve campo references na fórmula
-        const resolvedFormula = fieldConfig.formula.replace(/\{([^}]+)\}/g, (_, path) => {
-          const val = resolveDataPath(data, path);
-          return val || '0';
-        });
+        const resolvedFormula = fieldConfig.formula.replace(
+          /\{([^}]+)\}/g,
+          (_, path) => {
+            const val = resolveDataPath(data, path);
+            return val || '0';
+          }
+        );
         // Calcula o resultado (apenas operações matemáticas simples)
         const result = Function(`'use strict'; return (${resolvedFormula})`)();
         const decimals = fieldConfig.decimalPlaces ?? 2;
@@ -178,7 +182,9 @@ function renderElementToHTML(
   const y = Math.round(element.y * scale);
   const w = Math.round(element.width * scale);
   const h = Math.round(element.height * scale);
-  const rotate = element.rotation ? `transform: rotate(${element.rotation}deg);` : '';
+  const rotate = element.rotation
+    ? `transform: rotate(${element.rotation}deg);`
+    : '';
   const opacity = element.opacity < 1 ? `opacity: ${element.opacity};` : '';
 
   const baseStyle = `
@@ -240,13 +246,17 @@ function renderElementToHTML(
     }
 
     case 'shape': {
-      const borderRadius = element.shapeType === 'circle' || element.shapeType === 'ellipse'
-        ? '50%'
-        : element.borderRadius ? `${Math.round(element.borderRadius * scale)}px` : '0';
+      const borderRadius =
+        element.shapeType === 'circle' || element.shapeType === 'ellipse'
+          ? '50%'
+          : element.borderRadius
+            ? `${Math.round(element.borderRadius * scale)}px`
+            : '0';
       const strokeW = Math.round(element.stroke.width * scale);
-      const border = element.stroke.style !== 'none'
-        ? `border: ${strokeW}px ${element.stroke.style} ${element.stroke.color};`
-        : '';
+      const border =
+        element.stroke.style !== 'none'
+          ? `border: ${strokeW}px ${element.stroke.style} ${element.stroke.color};`
+          : '';
       return `<div style="${baseStyle}
         background: ${element.fill};
         ${border}
@@ -282,9 +292,10 @@ function renderElementToHTML(
     case 'barcode': {
       // Barcode will be rendered client-side via JsBarcode
       // For print, we generate a placeholder that the print renderer should hydrate
-      const barcodeValue = element.barcodeConfig.source === 'custom'
-        ? element.barcodeConfig.customValue || ''
-        : resolveDataPath(data, element.barcodeConfig.dataPath || '');
+      const barcodeValue =
+        element.barcodeConfig.source === 'custom'
+          ? element.barcodeConfig.customValue || ''
+          : resolveDataPath(data, element.barcodeConfig.dataPath || '');
       return `<div style="${baseStyle}"
         data-barcode="${barcodeValue}"
         data-format="${element.barcodeConfig.format}"
@@ -296,9 +307,10 @@ function renderElementToHTML(
     }
 
     case 'qrcode': {
-      const qrValue = element.qrConfig.contentType === 'field'
-        ? resolveDataPath(data, element.qrConfig.dataPath || '')
-        : element.qrConfig.template || '';
+      const qrValue =
+        element.qrConfig.contentType === 'field'
+          ? resolveDataPath(data, element.qrConfig.dataPath || '')
+          : element.qrConfig.template || '';
       return `<div style="${baseStyle}"
         data-qr="${qrValue}"
         data-error-level="${element.qrConfig.errorCorrectionLevel}"

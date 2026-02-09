@@ -49,7 +49,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Info,
 };
 
-function CategoryIcon({ iconName, className }: { iconName: string; className?: string }) {
+function CategoryIcon({
+  iconName,
+  className,
+}: {
+  iconName: string;
+  className?: string;
+}) {
   const Icon = ICON_MAP[iconName];
   if (!Icon) return <Package className={className} />;
   return <Icon className={className} />;
@@ -88,7 +94,9 @@ export function FieldPickerModal({
   entityType = 'item',
   title,
 }: FieldPickerModalProps) {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ENTITY_FIELD_REGISTRIES[entityType];
@@ -149,7 +157,8 @@ export function FieldPickerModal({
       <DialogContent className="sm:max-w-2xl p-0 gap-0 max-h-[80vh] flex flex-col">
         <DialogHeader className="p-4 pb-2">
           <DialogTitle className="text-base">
-            {title || (insertMode ? 'Inserir Campo' : 'Selecionar Campo de Dados')}
+            {title ||
+              (insertMode ? 'Inserir Campo' : 'Selecionar Campo de Dados')}
           </DialogTitle>
         </DialogHeader>
 
@@ -177,7 +186,9 @@ export function FieldPickerModal({
                 <button
                   className={cn(
                     'w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-700/50',
-                    !selectedCategoryId && !searchQuery && 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                    !selectedCategoryId &&
+                      !searchQuery &&
+                      'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
                   )}
                   onClick={() => setSelectedCategoryId(null)}
                 >
@@ -190,16 +201,23 @@ export function FieldPickerModal({
                     key={category.id}
                     className={cn(
                       'w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-700/50',
-                      selectedCategoryId === category.id && !searchQuery && 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                      selectedCategoryId === category.id &&
+                        !searchQuery &&
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
                     )}
                     onClick={() => {
                       setSelectedCategoryId(category.id);
                       setSearchQuery('');
                     }}
                   >
-                    <CategoryIcon iconName={category.icon} className="w-3.5 h-3.5 shrink-0" />
+                    <CategoryIcon
+                      iconName={category.icon}
+                      className="w-3.5 h-3.5 shrink-0"
+                    />
                     <span className="truncate">{category.label}</span>
-                    <span className="ml-auto text-[10px] text-slate-400">{category.fields.length}</span>
+                    <span className="ml-auto text-[10px] text-slate-400">
+                      {category.fields.length}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -221,7 +239,10 @@ export function FieldPickerModal({
                     {/* Category header (only when showing multiple) */}
                     {displayCategories.length > 1 && (
                       <div className="flex items-center gap-1.5 mb-2">
-                        <CategoryIcon iconName={category.icon} className="w-3.5 h-3.5 text-slate-400" />
+                        <CategoryIcon
+                          iconName={category.icon}
+                          className="w-3.5 h-3.5 text-slate-400"
+                        />
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                           {category.label}
                         </span>
@@ -246,9 +267,17 @@ export function FieldPickerModal({
                             <div className="flex items-start justify-between gap-2">
                               <div className="min-w-0">
                                 <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                                  {insertMode && <span className="text-blue-500 mr-1">{'{'}</span>}
+                                  {insertMode && (
+                                    <span className="text-blue-500 mr-1">
+                                      {'{'}
+                                    </span>
+                                  )}
                                   {field.label}
-                                  {insertMode && <span className="text-blue-500 ml-1">{'}'}</span>}
+                                  {insertMode && (
+                                    <span className="text-blue-500 ml-1">
+                                      {'}'}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                                   {field.path}

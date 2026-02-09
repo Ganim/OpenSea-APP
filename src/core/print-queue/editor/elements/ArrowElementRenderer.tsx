@@ -70,7 +70,8 @@ export function ArrowElementRenderer({
 
   // Renderiza linha baseada no estilo
   const renderLine = () => {
-    const lineStartX = arrowStyle === 'double' && headStyle !== 'none' ? headSize : 0;
+    const lineStartX =
+      arrowStyle === 'double' && headStyle !== 'none' ? headSize : 0;
     const lineEndX = headStyle !== 'none' ? widthPx - headSize : widthPx;
 
     switch (arrowStyle) {
@@ -116,7 +117,9 @@ export function ArrowElementRenderer({
             stroke={color}
             strokeWidth={strokeWidthPx}
             markerEnd={headStyle !== 'none' ? `url(#${markerId})` : undefined}
-            markerStart={headStyle !== 'none' ? `url(#${markerStartId})` : undefined}
+            markerStart={
+              headStyle !== 'none' ? `url(#${markerStartId})` : undefined
+            }
           />
         );
 

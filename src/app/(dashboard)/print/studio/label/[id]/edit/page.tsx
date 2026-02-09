@@ -6,6 +6,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LabelStudioSaveData } from '@/core/print-queue/editor';
 import { LabelStudioEditor, useEditorStore } from '@/core/print-queue/editor';
@@ -16,7 +17,13 @@ import {
 } from '@/hooks/stock/use-label-templates';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { PiPencilSimpleLineDuotone } from 'react-icons/pi';
 
 /**
@@ -111,7 +118,10 @@ export default function EditLabelStudioPage() {
         });
         router.push('/print/studio');
       } catch (error) {
-        console.error('Failed to update template:', error);
+        logger.error(
+          'Failed to update template',
+          error instanceof Error ? error : undefined
+        );
       }
     },
     [updateTemplate, templateId, router]
@@ -166,10 +176,7 @@ export default function EditLabelStudioPage() {
           <p className="text-muted-foreground mb-4">
             O template que você está tentando editar não existe ou foi removido.
           </p>
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/print/studio')}
-          >
+          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Studio
           </Button>
@@ -187,10 +194,7 @@ export default function EditLabelStudioPage() {
             Templates do sistema não podem ser editados. Você pode duplicá-lo
             para criar uma versão customizada.
           </p>
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/print/studio')}
-          >
+          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Studio
           </Button>
@@ -204,16 +208,12 @@ export default function EditLabelStudioPage() {
     return (
       <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            Template incompatível
-          </h2>
+          <h2 className="text-xl font-semibold mb-2">Template incompatível</h2>
           <p className="text-muted-foreground mb-4">
-            Este template não foi criado com o Label Studio e não pode ser editado aqui.
+            Este template não foi criado com o Label Studio e não pode ser
+            editado aqui.
           </p>
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/print/studio')}
-          >
+          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Studio
           </Button>

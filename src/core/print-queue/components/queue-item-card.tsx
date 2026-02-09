@@ -71,10 +71,12 @@ export function QueueItemCard({
       )}
 
       {/* Item Icon */}
-      <div className={cn(
-        'w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0',
-        gradient
-      )}>
+      <div
+        className={cn(
+          'w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0',
+          gradient
+        )}
+      >
         <Icon className="w-6 h-6 text-white" />
       </div>
 

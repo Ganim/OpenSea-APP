@@ -3,6 +3,7 @@
  * Hook para gerenciar notificações do usuário
  */
 
+import { logger } from '@/lib/logger';
 import type { Notification } from '@/types/';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -58,7 +59,10 @@ export function useNotifications(): UseNotificationsReturn {
 
       setNotifications(mockNotifications);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      logger.error(
+        'Failed to fetch notifications',
+        error instanceof Error ? error : undefined
+      );
     } finally {
       setIsLoading(false);
     }

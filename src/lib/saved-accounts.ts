@@ -3,6 +3,8 @@
  * Armazena informações básicas das contas no localStorage
  */
 
+import { logger } from '@/lib/logger';
+
 const SAVED_ACCOUNTS_KEY = 'opensea_saved_accounts';
 
 export interface SavedAccount {
@@ -30,7 +32,10 @@ export function getSavedAccounts(): SavedAccount[] {
         new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime()
     );
   } catch (error) {
-    console.error('Erro ao carregar contas salvas:', error);
+    logger.error(
+      'Erro ao carregar contas salvas',
+      error instanceof Error ? error : undefined
+    );
     return [];
   }
 }
@@ -65,7 +70,10 @@ export function saveAccount(account: Omit<SavedAccount, 'lastLoginAt'>): void {
 
     localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(accounts));
   } catch (error) {
-    console.error('Erro ao salvar conta:', error);
+    logger.error(
+      'Erro ao salvar conta',
+      error instanceof Error ? error : undefined
+    );
   }
 }
 
@@ -80,7 +88,10 @@ export function removeAccount(identifier: string): void {
     const filtered = accounts.filter(a => a.identifier !== identifier);
     localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(filtered));
   } catch (error) {
-    console.error('Erro ao remover conta:', error);
+    logger.error(
+      'Erro ao remover conta',
+      error instanceof Error ? error : undefined
+    );
   }
 }
 

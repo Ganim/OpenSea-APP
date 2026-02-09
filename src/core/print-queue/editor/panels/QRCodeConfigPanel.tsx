@@ -27,7 +27,10 @@ interface QRCodeConfigPanelProps {
   onUpdate: (updates: Partial<QRCodeElement>) => void;
 }
 
-export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps) {
+export function QRCodeConfigPanel({
+  element,
+  onUpdate,
+}: QRCodeConfigPanelProps) {
   const { qrConfig } = element;
   const [fieldPickerOpen, setFieldPickerOpen] = useState(false);
   const [urlParamPickerOpen, setUrlParamPickerOpen] = useState(false);
@@ -48,7 +51,9 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
         <Label className="text-xs">Tipo de conteúdo</Label>
         <Select
           value={qrConfig.contentType}
-          onValueChange={v => updateConfig({ contentType: v as QRCodeConfig['contentType'] })}
+          onValueChange={v =>
+            updateConfig({ contentType: v as QRCodeConfig['contentType'] })
+          }
         >
           <SelectTrigger className="h-8">
             <SelectValue />
@@ -73,12 +78,16 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
             onClick={() => setFieldPickerOpen(true)}
           >
             <span className="truncate text-sm">
-              {qrConfig.dataPath ? getFieldLabel(qrConfig.dataPath) : 'Selecionar campo...'}
+              {qrConfig.dataPath
+                ? getFieldLabel(qrConfig.dataPath)
+                : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
           </Button>
           {qrConfig.dataPath && (
-            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{qrConfig.dataPath}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+              {qrConfig.dataPath}
+            </p>
           )}
           <FieldPickerModal
             open={fieldPickerOpen}
@@ -114,7 +123,7 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
             onOpenChange={setInsertModalOpen}
             onSelect={() => {}}
             insertMode
-            onInsert={(text) => {
+            onInsert={text => {
               const current = qrConfig.template || '';
               updateConfig({ template: current + text });
             }}
@@ -142,12 +151,16 @@ export function QRCodeConfigPanel({ element, onUpdate }: QRCodeConfigPanelProps)
               onClick={() => setUrlParamPickerOpen(true)}
             >
               <span className="truncate text-sm">
-                {qrConfig.urlParam ? getFieldLabel(qrConfig.urlParam) : 'Selecionar campo...'}
+                {qrConfig.urlParam
+                  ? getFieldLabel(qrConfig.urlParam)
+                  : 'Selecionar campo...'}
               </span>
               <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
             </Button>
             {qrConfig.urlParam && (
-              <p className="text-[10px] text-slate-400 font-mono mt-0.5">{qrConfig.urlParam}</p>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                {qrConfig.urlParam}
+              </p>
             )}
             <FieldPickerModal
               open={urlParamPickerOpen}

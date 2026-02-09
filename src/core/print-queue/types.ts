@@ -325,7 +325,10 @@ export interface PrintQueueActions {
   updatePageSettings: (settings: Partial<PageSettings>) => void;
 
   /** Selecionar template */
-  selectTemplate: (templateId: string, dimensions?: { width: number; height: number }) => void;
+  selectTemplate: (
+    templateId: string,
+    dimensions?: { width: number; height: number }
+  ) => void;
 
   /** Verificar se item está na fila */
   isInQueue: (entityId: string) => boolean;

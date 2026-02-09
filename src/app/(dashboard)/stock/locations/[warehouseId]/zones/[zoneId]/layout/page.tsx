@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { use, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -105,7 +106,10 @@ export default function LayoutEditorPage({ params }: PageProps) {
       toast.success('Layout salvo com sucesso!');
     } catch (error) {
       toast.error('Erro ao salvar layout');
-      console.error('Error saving layout:', error);
+      logger.error(
+        'Error saving layout',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 

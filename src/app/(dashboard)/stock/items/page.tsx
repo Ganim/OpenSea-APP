@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
@@ -203,7 +204,10 @@ export default function ItemsPage() {
         queryClient.invalidateQueries({ queryKey: ['items'] });
       } catch (error) {
         toast.error('Erro ao excluir itens');
-        console.error(error);
+        logger.error(
+          'Erro ao excluir itens',
+          error instanceof Error ? error : undefined
+        );
       }
     },
     [queryClient]

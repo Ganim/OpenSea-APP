@@ -3,6 +3,7 @@
  * Hook para gerenciar dados do usuário autenticado
  */
 
+import { logger } from '@/lib/logger';
 import type { User } from '@/types/';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -36,7 +37,10 @@ export function useUser(): UseUserReturn {
 
         setUser(mockUser);
       } catch (error) {
-        console.error('Failed to fetch user:', error);
+        logger.error(
+          'Failed to fetch user',
+          error instanceof Error ? error : undefined
+        );
         router.push('/fast-login');
       } finally {
         setIsLoading(false);
@@ -54,7 +58,10 @@ export function useUser(): UseUserReturn {
       setUser(null);
       router.push('/fast-login');
     } catch (error) {
-      console.error('Failed to logout:', error);
+      logger.error(
+        'Failed to logout',
+        error instanceof Error ? error : undefined
+      );
     }
   }, [router]);
 
@@ -65,7 +72,10 @@ export function useUser(): UseUserReturn {
 
       setUser(prev => (prev ? { ...prev, ...data } : null));
     } catch (error) {
-      console.error('Failed to update user:', error);
+      logger.error(
+        'Failed to update user',
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }, []);

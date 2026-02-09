@@ -70,7 +70,11 @@ export function TableConfigPanel({
   };
 
   // Atualiza ou cria uma célula
-  const updateCell = (row: number, col: number, updates: Partial<TableCell>) => {
+  const updateCell = (
+    row: number,
+    col: number,
+    updates: Partial<TableCell>
+  ) => {
     const existingIndex = cells.findIndex(c => c.row === row && c.col === col);
     const newCells = [...cells];
 
@@ -164,28 +168,26 @@ export function TableConfigPanel({
           {(cell?.type || 'text') === 'text' ? (
             <Input
               value={cell?.content || ''}
-              onChange={e =>
-                updateCell(row, col, { content: e.target.value })
-              }
+              onChange={e => updateCell(row, col, { content: e.target.value })}
               placeholder="Texto da célula..."
               className="h-7 text-xs"
             />
           ) : (
             <CellFieldConfig
               cell={cell}
-              onUpdateCell={(updates) => updateCell(row, col, updates)}
+              onUpdateCell={updates => updateCell(row, col, updates)}
             />
           )}
         </div>
 
         {/* Label (apenas para campo) */}
-        {(cell?.type === 'field') && (
+        {cell?.type === 'field' && (
           <>
             <Separator />
             <CellLabelEditor
               label={cell?.label}
               dataPath={cell?.dataPath}
-              onUpdate={(updates) => {
+              onUpdate={updates => {
                 const currentLabel = cell?.label || {
                   enabled: false,
                   text: '',
@@ -251,7 +253,8 @@ export function TableConfigPanel({
               className={`h-7 w-7 ${cellStyle.fontWeight === 'bold' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() =>
                 updateCellStyle({
-                  fontWeight: cellStyle.fontWeight === 'bold' ? 'normal' : 'bold',
+                  fontWeight:
+                    cellStyle.fontWeight === 'bold' ? 'normal' : 'bold',
                 })
               }
             >
@@ -263,7 +266,8 @@ export function TableConfigPanel({
               className={`h-7 w-7 ${cellStyle.fontStyle === 'italic' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() =>
                 updateCellStyle({
-                  fontStyle: cellStyle.fontStyle === 'italic' ? 'normal' : 'italic',
+                  fontStyle:
+                    cellStyle.fontStyle === 'italic' ? 'normal' : 'italic',
                 })
               }
             >
@@ -275,7 +279,10 @@ export function TableConfigPanel({
               className={`h-7 w-7 ${cellStyle.textDecoration === 'underline' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() =>
                 updateCellStyle({
-                  textDecoration: cellStyle.textDecoration === 'underline' ? 'none' : 'underline',
+                  textDecoration:
+                    cellStyle.textDecoration === 'underline'
+                      ? 'none'
+                      : 'underline',
                 })
               }
             >
@@ -287,7 +294,10 @@ export function TableConfigPanel({
               className={`h-7 w-7 ${cellStyle.textDecoration === 'line-through' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() =>
                 updateCellStyle({
-                  textDecoration: cellStyle.textDecoration === 'line-through' ? 'none' : 'line-through',
+                  textDecoration:
+                    cellStyle.textDecoration === 'line-through'
+                      ? 'none'
+                      : 'line-through',
                 })
               }
             >
@@ -334,7 +344,7 @@ export function TableConfigPanel({
             <Button
               variant="ghost"
               size="icon"
-              className={`h-7 w-7 ${(!cellStyle.verticalAlign || cellStyle.verticalAlign === 'middle') ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
+              className={`h-7 w-7 ${!cellStyle.verticalAlign || cellStyle.verticalAlign === 'middle' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ verticalAlign: 'middle' })}
             >
               <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
@@ -408,7 +418,10 @@ export function TableConfigPanel({
   // Adiciona linha
   const addRow = () => {
     const newRows = tableConfig.rows + 1;
-    const newRowHeights: (number | 'auto')[] = [...tableConfig.rowHeights, 'auto'];
+    const newRowHeights: (number | 'auto')[] = [
+      ...tableConfig.rowHeights,
+      'auto',
+    ];
     updateConfig({ rows: newRows, rowHeights: newRowHeights });
   };
 
@@ -420,13 +433,20 @@ export function TableConfigPanel({
     const newMergedCells = tableConfig.mergedCells.filter(
       m => m.startRow + m.rowSpan <= newRows
     );
-    updateConfig({ rows: newRows, rowHeights: newRowHeights, mergedCells: newMergedCells });
+    updateConfig({
+      rows: newRows,
+      rowHeights: newRowHeights,
+      mergedCells: newMergedCells,
+    });
     onUpdate({ cells: newCells });
   };
 
   const addColumn = () => {
     const newCols = tableConfig.columns + 1;
-    const newColWidths: (number | 'auto')[] = [...tableConfig.columnWidths, 'auto'];
+    const newColWidths: (number | 'auto')[] = [
+      ...tableConfig.columnWidths,
+      'auto',
+    ];
     updateConfig({ columns: newCols, columnWidths: newColWidths });
   };
 
@@ -438,7 +458,11 @@ export function TableConfigPanel({
     const newMergedCells = tableConfig.mergedCells.filter(
       m => m.startCol + m.colSpan <= newCols
     );
-    updateConfig({ columns: newCols, columnWidths: newColWidths, mergedCells: newMergedCells });
+    updateConfig({
+      columns: newCols,
+      columnWidths: newColWidths,
+      mergedCells: newMergedCells,
+    });
     onUpdate({ cells: newCells });
   };
 
@@ -453,10 +477,20 @@ export function TableConfigPanel({
         <div className="flex items-center justify-between">
           <Label className="text-xs">Linhas: {tableConfig.rows}</Label>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={removeRow}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-6 w-6"
+              onClick={removeRow}
+            >
               <Minus className="h-3 w-3" />
             </Button>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={addRow}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-6 w-6"
+              onClick={addRow}
+            >
               <Plus className="h-3 w-3" />
             </Button>
           </div>
@@ -464,10 +498,20 @@ export function TableConfigPanel({
         <div className="flex items-center justify-between">
           <Label className="text-xs">Colunas: {tableConfig.columns}</Label>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={removeColumn}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-6 w-6"
+              onClick={removeColumn}
+            >
               <Minus className="h-3 w-3" />
             </Button>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={addColumn}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-6 w-6"
+              onClick={addColumn}
+            >
               <Plus className="h-3 w-3" />
             </Button>
           </div>
@@ -480,7 +524,9 @@ export function TableConfigPanel({
         <Input
           type="number"
           value={tableConfig.cellPadding}
-          onChange={e => updateConfig({ cellPadding: parseFloat(e.target.value) || 0 })}
+          onChange={e =>
+            updateConfig({ cellPadding: parseFloat(e.target.value) || 0 })
+          }
           className="h-8"
           step={0.5}
           min={0}
@@ -504,9 +550,30 @@ export function TableConfigPanel({
                 const color = e.target.value;
                 updateConfig({
                   borders: {
-                    external: { ...(tableConfig.borders.external || { width: 0.3, style: 'solid', color: '#000' }), color },
-                    internalHorizontal: { ...(tableConfig.borders.internalHorizontal || { width: 0.3, style: 'solid', color: '#000' }), color },
-                    internalVertical: { ...(tableConfig.borders.internalVertical || { width: 0.3, style: 'solid', color: '#000' }), color },
+                    external: {
+                      ...(tableConfig.borders.external || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      color,
+                    },
+                    internalHorizontal: {
+                      ...(tableConfig.borders.internalHorizontal || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      color,
+                    },
+                    internalVertical: {
+                      ...(tableConfig.borders.internalVertical || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      color,
+                    },
                   },
                 });
               }}
@@ -519,9 +586,30 @@ export function TableConfigPanel({
                 const width = parseFloat(e.target.value) || 0.3;
                 updateConfig({
                   borders: {
-                    external: { ...(tableConfig.borders.external || { width: 0.3, style: 'solid', color: '#000' }), width },
-                    internalHorizontal: { ...(tableConfig.borders.internalHorizontal || { width: 0.3, style: 'solid', color: '#000' }), width: width * 0.5 },
-                    internalVertical: { ...(tableConfig.borders.internalVertical || { width: 0.3, style: 'solid', color: '#000' }), width: width * 0.5 },
+                    external: {
+                      ...(tableConfig.borders.external || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      width,
+                    },
+                    internalHorizontal: {
+                      ...(tableConfig.borders.internalHorizontal || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      width: width * 0.5,
+                    },
+                    internalVertical: {
+                      ...(tableConfig.borders.internalVertical || {
+                        width: 0.3,
+                        style: 'solid',
+                        color: '#000',
+                      }),
+                      width: width * 0.5,
+                    },
                   },
                 });
               }}
@@ -572,11 +660,13 @@ function MergeSection({
     };
     // Validate bounds
     if (
-      merge.startRow < 0 || merge.startCol < 0 ||
+      merge.startRow < 0 ||
+      merge.startCol < 0 ||
       merge.startRow + merge.rowSpan > tableConfig.rows ||
       merge.startCol + merge.colSpan > tableConfig.columns ||
       (merge.rowSpan <= 1 && merge.colSpan <= 1)
-    ) return;
+    )
+      return;
 
     updateConfig({
       mergedCells: [...tableConfig.mergedCells, merge],
@@ -603,7 +693,8 @@ function MergeSection({
               className="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-800 rounded px-2 py-1"
             >
               <span>
-                [{merge.startRow + 1},{merge.startCol + 1}] {merge.rowSpan}x{merge.colSpan}
+                [{merge.startRow + 1},{merge.startCol + 1}] {merge.rowSpan}x
+                {merge.colSpan}
               </span>
               <Button
                 variant="ghost"
@@ -721,12 +812,16 @@ function CellFieldConfig({
             onClick={() => setFieldPickerOpen(true)}
           >
             <span className="truncate">
-              {cell?.dataPath ? getFieldLabel(cell.dataPath) : 'Selecionar campo...'}
+              {cell?.dataPath
+                ? getFieldLabel(cell.dataPath)
+                : 'Selecionar campo...'}
             </span>
             <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
           </Button>
           {cell?.dataPath && (
-            <p className="text-[10px] text-slate-400 font-mono mt-0.5">{cell.dataPath}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+              {cell.dataPath}
+            </p>
           )}
           <FieldPickerModal
             open={fieldPickerOpen}
@@ -765,7 +860,7 @@ function CellFieldConfig({
             onOpenChange={setInsertModalOpen}
             onSelect={() => {}}
             insertMode
-            onInsert={(text) => {
+            onInsert={text => {
               const current = cell?.template || '';
               onUpdateCell({ template: current + text });
             }}
@@ -778,16 +873,13 @@ function CellFieldConfig({
       {fieldType === 'conditional' && (
         <CellConditionalConfig
           conditions={cell?.conditions}
-          onUpdate={(conditions) => onUpdateCell({ conditions })}
+          onUpdate={conditions => onUpdateCell({ conditions })}
         />
       )}
 
       {/* Calculado: fórmula + formato */}
       {fieldType === 'calculated' && (
-        <CellCalculatedConfig
-          cell={cell}
-          onUpdateCell={onUpdateCell}
-        />
+        <CellCalculatedConfig cell={cell} onUpdateCell={onUpdateCell} />
       )}
     </div>
   );
@@ -814,9 +906,7 @@ function CellCalculatedConfig({
         className="h-12 text-xs font-mono"
       />
       <div className="flex items-center justify-between">
-        <p className="text-[10px] text-slate-400">
-          Operadores: + - * / ( )
-        </p>
+        <p className="text-[10px] text-slate-400">Operadores: + - * / ( )</p>
         <Button
           variant="outline"
           size="sm"
@@ -865,7 +955,7 @@ function CellCalculatedConfig({
         onOpenChange={setInsertModalOpen}
         onSelect={() => {}}
         insertMode
-        onInsert={(text) => {
+        onInsert={text => {
           const current = cell?.formula || '';
           onUpdateCell({ formula: current + text });
         }}
@@ -903,7 +993,9 @@ function CellConditionalConfig({
           <ChevronRight className="h-3 w-3 shrink-0 text-slate-400" />
         </Button>
         {current.primary && (
-          <p className="text-[10px] text-slate-400 font-mono mt-0.5">{current.primary}</p>
+          <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+            {current.primary}
+          </p>
         )}
         <FieldPickerModal
           open={primaryPickerOpen}
@@ -1036,9 +1128,7 @@ function CellLabelEditor({
             <Label className="text-[10px]">Posição</Label>
             <Select
               value={label.position || 'above'}
-              onValueChange={v =>
-                onUpdate({ position: v as 'above' | 'left' })
-              }
+              onValueChange={v => onUpdate({ position: v as 'above' | 'left' })}
             >
               <SelectTrigger className="h-7 text-xs">
                 <SelectValue />
@@ -1112,10 +1202,15 @@ function CellBorderEditor({
   onClear,
 }: {
   borders?: CellBorderStyle;
-  onUpdate: (side: 'top' | 'right' | 'bottom' | 'left' | 'all', border: BorderStyle) => void;
+  onUpdate: (
+    side: 'top' | 'right' | 'bottom' | 'left' | 'all',
+    border: BorderStyle
+  ) => void;
   onClear: () => void;
 }) {
-  const [side, setSide] = useState<'top' | 'right' | 'bottom' | 'left' | 'all'>('all');
+  const [side, setSide] = useState<'top' | 'right' | 'bottom' | 'left' | 'all'>(
+    'all'
+  );
   const [width, setWidth] = useState(0.3);
   const [style, setStyle] = useState<BorderStyle['style']>('solid');
   const [color, setColor] = useState('#000000');
@@ -1157,7 +1252,10 @@ function CellBorderEditor({
             step={0.1}
             min={0}
           />
-          <Select value={style} onValueChange={v => setStyle(v as BorderStyle['style'])}>
+          <Select
+            value={style}
+            onValueChange={v => setStyle(v as BorderStyle['style'])}
+          >
             <SelectTrigger className="h-7 text-xs flex-1">
               <SelectValue />
             </SelectTrigger>

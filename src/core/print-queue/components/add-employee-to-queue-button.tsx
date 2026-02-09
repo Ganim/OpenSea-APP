@@ -48,7 +48,11 @@ export function AddEmployeeToQueueButton({
         )}
         onClick={handleClick}
         disabled={alreadyInQueue}
-        title={alreadyInQueue ? 'Já na fila de impressão' : 'Adicionar à fila de impressão'}
+        title={
+          alreadyInQueue
+            ? 'Já na fila de impressão'
+            : 'Adicionar à fila de impressão'
+        }
       >
         {alreadyInQueue ? (
           <Check className="w-4 h-4" />

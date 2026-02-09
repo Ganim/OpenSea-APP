@@ -172,9 +172,7 @@ function PositionFields({
         <Input
           type="number"
           value={element.height.toFixed(1)}
-          onChange={e =>
-            onUpdate({ height: parseFloat(e.target.value) || 1 })
-          }
+          onChange={e => onUpdate({ height: parseFloat(e.target.value) || 1 })}
           className="h-7 text-xs"
           step={0.5}
           min={1}
@@ -255,8 +253,7 @@ function TextStyleFields({
             active={textStyle.fontWeight === 'bold'}
             onClick={() =>
               updateTextStyle({
-                fontWeight:
-                  textStyle.fontWeight === 'bold' ? 'normal' : 'bold',
+                fontWeight: textStyle.fontWeight === 'bold' ? 'normal' : 'bold',
               })
             }
           />
@@ -528,7 +525,12 @@ function ElementProperties({
                     onUpdate({
                       stroke: {
                         ...element.stroke,
-                        style: v as 'solid' | 'dashed' | 'dotted' | 'double' | 'none',
+                        style: v as
+                          | 'solid'
+                          | 'dashed'
+                          | 'dotted'
+                          | 'double'
+                          | 'none',
                       },
                     })
                   }
@@ -826,9 +828,7 @@ export function PropertiesPanel({
               variant="outline"
               size="sm"
               className="flex-1 h-7 text-xs"
-              onClick={() =>
-                duplicateElements(selectedElements.map(e => e.id))
-              }
+              onClick={() => duplicateElements(selectedElements.map(e => e.id))}
             >
               <CopyPlus className="h-3.5 w-3.5 mr-1" />
               Duplicar
@@ -837,9 +837,7 @@ export function PropertiesPanel({
               variant="destructive"
               size="sm"
               className="flex-1 h-7 text-xs"
-              onClick={() =>
-                deleteElements(selectedElements.map(e => e.id))
-              }
+              onClick={() => deleteElements(selectedElements.map(e => e.id))}
             >
               <Trash2 className="h-3.5 w-3.5 mr-1" />
               Excluir

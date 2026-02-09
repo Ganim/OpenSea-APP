@@ -6,6 +6,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { CareIcon } from '@/components/care';
 import { InfoField } from '@/components/shared/info-field';
 import { Button } from '@/components/ui/button';
@@ -151,9 +152,8 @@ export function ProductViewer({
     actions: selectionActions,
     setAvailableIds,
   } = useSelection({
-    onSelectionChange: selectedIds => {
-      // Optional: track selection changes
-      console.log('Selection changed:', selectedIds.length, 'items');
+    onSelectionChange: () => {
+      /* noop */
     },
   });
 
@@ -267,7 +267,10 @@ export function ProductViewer({
       }
     } catch (error) {
       toast.error('Erro ao excluir produto');
-      console.error(error);
+      logger.error(
+        'Erro ao excluir produto',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 
@@ -349,7 +352,10 @@ export function ProductViewer({
         });
         await queryClient.invalidateQueries({ queryKey: ['item-history'] });
       } catch (error) {
-        console.error('Error changing location:', error);
+        logger.error(
+          'Error changing location',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao transferir itens');
         throw error;
       }
@@ -386,7 +392,10 @@ export function ProductViewer({
         });
         await queryClient.invalidateQueries({ queryKey: ['item-history'] });
       } catch (error) {
-        console.error('Error processing exit:', error);
+        logger.error(
+          'Error processing exit',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao processar saída');
         throw error;
       }

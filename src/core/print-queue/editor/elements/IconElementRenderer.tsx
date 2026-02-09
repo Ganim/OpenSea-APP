@@ -21,12 +21,66 @@ interface IconElementRendererProps {
  */
 export const ICON_CATEGORIES = {
   general: ['Check', 'X', 'Plus', 'Minus', 'Star', 'Heart', 'Flag', 'Bell'],
-  arrows: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ChevronUp', 'ChevronDown', 'ChevronLeft', 'ChevronRight'],
-  status: ['CheckCircle', 'XCircle', 'AlertCircle', 'Info', 'AlertTriangle', 'Ban', 'Clock', 'Timer'],
-  commerce: ['ShoppingCart', 'Package', 'Truck', 'CreditCard', 'DollarSign', 'Percent', 'Tag', 'Barcode'],
-  warehouse: ['Box', 'Archive', 'Warehouse', 'Layers', 'Grid3x3', 'LayoutGrid', 'MapPin', 'Navigation'],
-  actions: ['Edit', 'Trash2', 'Copy', 'Save', 'Download', 'Upload', 'Printer', 'QrCode'],
-  misc: ['User', 'Users', 'Building', 'Calendar', 'Mail', 'Phone', 'Globe', 'Link'],
+  arrows: [
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ChevronUp',
+    'ChevronDown',
+    'ChevronLeft',
+    'ChevronRight',
+  ],
+  status: [
+    'CheckCircle',
+    'XCircle',
+    'AlertCircle',
+    'Info',
+    'AlertTriangle',
+    'Ban',
+    'Clock',
+    'Timer',
+  ],
+  commerce: [
+    'ShoppingCart',
+    'Package',
+    'Truck',
+    'CreditCard',
+    'DollarSign',
+    'Percent',
+    'Tag',
+    'Barcode',
+  ],
+  warehouse: [
+    'Box',
+    'Archive',
+    'Warehouse',
+    'Layers',
+    'Grid3x3',
+    'LayoutGrid',
+    'MapPin',
+    'Navigation',
+  ],
+  actions: [
+    'Edit',
+    'Trash2',
+    'Copy',
+    'Save',
+    'Download',
+    'Upload',
+    'Printer',
+    'QrCode',
+  ],
+  misc: [
+    'User',
+    'Users',
+    'Building',
+    'Calendar',
+    'Mail',
+    'Phone',
+    'Globe',
+    'Link',
+  ],
 } as const;
 
 /**
@@ -34,9 +88,29 @@ export const ICON_CATEGORIES = {
  */
 function getIconComponent(iconId: string): LucideIcon | null {
   // Tenta encontrar o ícone no lucide-react
-  const icons = LucideIcons as unknown as Record<string, LucideIcon | undefined>;
+  const icons = LucideIcons as unknown as Record<
+    string,
+    LucideIcon | undefined
+  >;
   const IconComponent = icons[iconId];
   return IconComponent || null;
+}
+
+/**
+ * Renderiza um ícone Lucide pelo ID, sem criar componente durante render
+ */
+function LucideIconById({
+  iconId,
+  sizePx,
+}: {
+  iconId: string;
+  sizePx: number;
+}) {
+  const Icon = getIconComponent(iconId);
+  if (!Icon) return null;
+  return React.createElement(Icon, {
+    style: { width: sizePx * 0.9, height: sizePx * 0.9 },
+  });
 }
 
 /**
@@ -48,12 +122,12 @@ export function IconElementRenderer({
 }: IconElementRendererProps) {
   const { iconId, color, width, height } = element;
 
-  const IconComponent = getIconComponent(iconId);
+  const hasIcon = !!getIconComponent(iconId);
 
   // Calcula tamanho do ícone (usa o menor entre width e height)
   const sizePx = Math.min(mmToPx(width, zoom), mmToPx(height, zoom));
 
-  if (!IconComponent) {
+  if (!hasIcon) {
     // Fallback para ícone não encontrado
     return (
       <div
@@ -81,12 +155,7 @@ export function IconElementRenderer({
       className="w-full h-full flex items-center justify-center"
       style={{ color }}
     >
-      <IconComponent
-        style={{
-          width: sizePx * 0.9,
-          height: sizePx * 0.9,
-        }}
-      />
+      <LucideIconById iconId={iconId} sizePx={sizePx} />
     </div>
   );
 }

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -190,7 +191,10 @@ export function CreateProductForm({
         setSubmitSuccess(false);
       }, 1000);
     } catch (error) {
-      console.error('Error creating product:', error);
+      logger.error(
+        'Error creating product',
+        error instanceof Error ? error : undefined
+      );
     }
   };
 

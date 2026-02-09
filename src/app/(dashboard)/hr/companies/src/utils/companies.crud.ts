@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import type { Company, CreateCompanyData, UpdateCompanyData } from '@/types/hr';
 import { companiesApi } from '../api';
 import { buildCompanyPayload, generateValidCnpj } from './companies.helpers';
@@ -21,11 +22,12 @@ export async function updateCompany(
 
 export async function deleteCompany(id: string): Promise<void> {
   try {
-    console.log('[deleteCompany] Deletando empresa com ID:', id);
     await companiesApi.delete(id);
-    console.log('[deleteCompany] Empresa deletada com sucesso!');
   } catch (error) {
-    console.error('[deleteCompany] Erro ao deletar empresa:', error);
+    logger.error(
+      '[deleteCompany] Erro ao deletar empresa',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }

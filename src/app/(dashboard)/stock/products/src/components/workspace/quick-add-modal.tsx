@@ -6,6 +6,7 @@
  * Target: 3 clicks from open to complete product
  */
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -298,7 +299,10 @@ export function QuickAddModal({
         onSuccess?.(result);
         onOpenChange(false);
       } catch (error) {
-        console.error('Error creating product:', error);
+        logger.error(
+          'Error creating product',
+          error instanceof Error ? error : undefined
+        );
         toast.error('Erro ao criar produto', {
           description: 'Verifique os dados e tente novamente.',
         });

@@ -8,7 +8,11 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { mmToPx, pxToMm } from '../utils/unitConverter';
-import { calculateSnap, calculateResizeSnap, DEFAULT_SNAP_CONFIG } from '../utils/snapCalculator';
+import {
+  calculateSnap,
+  calculateResizeSnap,
+  DEFAULT_SNAP_CONFIG,
+} from '../utils/snapCalculator';
 import { SelectionBox } from './SelectionBox';
 import { cn } from '@/lib/utils';
 import type { LabelElement, SnapResult } from '../studio-types';
@@ -22,10 +26,20 @@ interface ElementWrapperProps {
 /**
  * Wrapper interativo para elementos
  */
-export function ElementWrapper({ element, zoom, children }: ElementWrapperProps) {
+export function ElementWrapper({
+  element,
+  zoom,
+  children,
+}: ElementWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [localPosition, setLocalPosition] = useState({ x: element.x, y: element.y });
-  const [localSize, setLocalSize] = useState({ width: element.width, height: element.height });
+  const [localPosition, setLocalPosition] = useState({
+    x: element.x,
+    y: element.y,
+  });
+  const [localSize, setLocalSize] = useState({
+    width: element.width,
+    height: element.height,
+  });
   const [localRotation, setLocalRotation] = useState(element.rotation);
   const [isDraggingLocal, setIsDraggingLocal] = useState(false);
   const [isResizingLocal, setIsResizingLocal] = useState(false);
@@ -64,7 +78,14 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
       setLocalPosition({ x: element.x, y: element.y });
       setLocalSize({ width: element.width, height: element.height });
     }
-  }, [element.x, element.y, element.width, element.height, isDraggingLocal, isResizingLocal]);
+  }, [
+    element.x,
+    element.y,
+    element.width,
+    element.height,
+    isDraggingLocal,
+    isResizingLocal,
+  ]);
 
   useEffect(() => {
     if (!isRotatingLocal) {
@@ -127,7 +148,17 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
       setIsDraggingLocal(true);
       setDragging(true);
     },
-    [readOnly, element.id, element.x, element.y, element.locked, isSelected, isEditing, selectElements, setDragging]
+    [
+      readOnly,
+      element.id,
+      element.x,
+      element.y,
+      element.locked,
+      isSelected,
+      isEditing,
+      selectElements,
+      setDragging,
+    ]
   );
 
   // === DOUBLE-CLICK HANDLER ===
@@ -161,7 +192,15 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
       setIsResizingLocal(true);
       setResizing(true);
     },
-    [readOnly, element.x, element.y, element.width, element.height, element.locked, setResizing]
+    [
+      readOnly,
+      element.x,
+      element.y,
+      element.width,
+      element.height,
+      element.locked,
+      setResizing,
+    ]
   );
 
   // === ROTATION HANDLERS ===
@@ -194,9 +233,14 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
     const handleGlobalMouseMove = (e: MouseEvent) => {
       // Rotation handling
       if (isRotatingLocal && rotateStartRef.current) {
-        const { centerX, centerY, startAngle, initialRotation } = rotateStartRef.current;
-        const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-        let newRotation = initialRotation + (currentAngle - startAngle) * (180 / Math.PI);
+        const { centerX, centerY, startAngle, initialRotation } =
+          rotateStartRef.current;
+        const currentAngle = Math.atan2(
+          e.clientY - centerY,
+          e.clientX - centerX
+        );
+        let newRotation =
+          initialRotation + (currentAngle - startAngle) * (180 / Math.PI);
         // Normalize to 0-360
         newRotation = ((newRotation % 360) + 360) % 360;
         // Shift snap to 15° increments
@@ -259,18 +303,30 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
 
         // Aplica delta baseado no anchor
         if (resizeAnchor.includes('e')) {
-          newWidth = Math.max(5, resizeStartRef.current.elementWidth + deltaXMm);
+          newWidth = Math.max(
+            5,
+            resizeStartRef.current.elementWidth + deltaXMm
+          );
         }
         if (resizeAnchor.includes('w')) {
-          const widthDelta = Math.min(deltaXMm, resizeStartRef.current.elementWidth - 5);
+          const widthDelta = Math.min(
+            deltaXMm,
+            resizeStartRef.current.elementWidth - 5
+          );
           newWidth = resizeStartRef.current.elementWidth - widthDelta;
           newX = resizeStartRef.current.elementX + widthDelta;
         }
         if (resizeAnchor.includes('s')) {
-          newHeight = Math.max(5, resizeStartRef.current.elementHeight + deltaYMm);
+          newHeight = Math.max(
+            5,
+            resizeStartRef.current.elementHeight + deltaYMm
+          );
         }
         if (resizeAnchor.includes('n')) {
-          const heightDelta = Math.min(deltaYMm, resizeStartRef.current.elementHeight - 5);
+          const heightDelta = Math.min(
+            deltaYMm,
+            resizeStartRef.current.elementHeight - 5
+          );
           newHeight = resizeStartRef.current.elementHeight - heightDelta;
           newY = resizeStartRef.current.elementY + heightDelta;
         }
@@ -297,11 +353,17 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
           // Aplica snap apenas às bordas relevantes
           if (resizeAnchor.includes('w')) {
             newX = snapResult.snappedX;
-            newWidth = resizeStartRef.current.elementX + resizeStartRef.current.elementWidth - newX;
+            newWidth =
+              resizeStartRef.current.elementX +
+              resizeStartRef.current.elementWidth -
+              newX;
           }
           if (resizeAnchor.includes('n')) {
             newY = snapResult.snappedY;
-            newHeight = resizeStartRef.current.elementY + resizeStartRef.current.elementHeight - newY;
+            newHeight =
+              resizeStartRef.current.elementY +
+              resizeStartRef.current.elementHeight -
+              newY;
           }
 
           setSnapGuides(snapResult.guides);
@@ -427,12 +489,21 @@ export function ElementWrapper({ element, zoom, children }: ElementWrapperProps)
         <div className="w-full h-full overflow-hidden">
           {React.Children.map(children, child => {
             if (React.isValidElement(child)) {
-              return React.cloneElement(child as React.ReactElement<{ isEditing?: boolean; onContentChange?: (content: string) => void }>, {
-                isEditing,
-                onContentChange: isEditing
-                  ? (content: string) => updateElement(element.id, { content } as Partial<LabelElement>)
-                  : undefined,
-              });
+              return React.cloneElement(
+                child as React.ReactElement<{
+                  isEditing?: boolean;
+                  onContentChange?: (content: string) => void;
+                }>,
+                {
+                  isEditing,
+                  onContentChange: isEditing
+                    ? (content: string) =>
+                        updateElement(element.id, {
+                          content,
+                        } as Partial<LabelElement>)
+                    : undefined,
+                }
+              );
             }
             return child;
           })}

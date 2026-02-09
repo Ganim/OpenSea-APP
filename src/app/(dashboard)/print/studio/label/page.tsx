@@ -6,6 +6,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 import type { LabelStudioSaveData } from '@/core/print-queue/editor';
 import { LabelStudioEditor, useEditorStore } from '@/core/print-queue/editor';
 import { useCreateLabelTemplate } from '@/hooks/stock/use-label-templates';
@@ -48,7 +49,10 @@ export default function NewLabelStudioPage() {
         });
         router.push('/print/studio');
       } catch (error) {
-        console.error('Failed to create template:', error);
+        logger.error(
+          'Failed to create template',
+          error instanceof Error ? error : undefined
+        );
       }
     },
     [createTemplate, router]

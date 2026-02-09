@@ -3,6 +3,8 @@
  * Integração com a API pública da BrasilAPI (https://brasilapi.com.br)
  */
 
+import { logger } from '@/lib/logger';
+
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
 }
@@ -57,7 +59,7 @@ class BrasilAPIClient {
         const errorMessage =
           (error as any)?.message || `HTTP error! status: ${response.status}`;
 
-        console.error('[BrasilAPI] Error response:', {
+        logger.error('[BrasilAPI] Error response', undefined, {
           status: response.status,
           statusText: response.statusText,
           url: response.url,
@@ -70,7 +72,7 @@ class BrasilAPIClient {
       return await response.json();
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.error('[BrasilAPI] Request timeout');
+        logger.error('[BrasilAPI] Request timeout');
         throw new Error('Requisição expirou. Tente novamente.');
       }
 
@@ -82,7 +84,11 @@ class BrasilAPIClient {
         errorMessage: error instanceof Error ? error.message : String(error),
       };
 
-      console.error('[BrasilAPI] Request failed:', errorInfo);
+      logger.error(
+        '[BrasilAPI] Request failed',
+        error instanceof Error ? error : undefined,
+        errorInfo
+      );
       throw error;
     }
   }

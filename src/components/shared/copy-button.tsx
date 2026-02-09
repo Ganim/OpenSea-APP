@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { logger } from '@/lib/logger';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -51,7 +52,10 @@ export function CopyButton({
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error('Erro ao copiar:', error);
+      logger.error(
+        'Erro ao copiar',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Não foi possível copiar');
     }
   };

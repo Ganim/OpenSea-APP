@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDownToLine, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -91,7 +92,7 @@ export function EntryModal({ open, onOpenChange, onSuccess }: EntryModalProps) {
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Entry error:', error);
+      logger.error('Entry error', error instanceof Error ? error : undefined);
       toast.error(
         error instanceof Error ? error.message : 'Erro ao registrar entrada'
       );
