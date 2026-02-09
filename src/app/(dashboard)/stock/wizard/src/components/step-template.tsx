@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Search, FileText, Check, Loader2 } from 'lucide-react';
+import { Search, Check, Loader2 } from 'lucide-react';
+import { GrObjectGroup } from 'react-icons/gr';
 import { useQuery } from '@tanstack/react-query';
 import { templatesService } from '@/services/stock';
 import type { Template } from '@/types/stock';
@@ -101,7 +102,7 @@ export function StepTemplate({
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <GrObjectGroup className="h-5 w-5 text-muted-foreground" />
                       <CardTitle className="text-base">
                         {template.name}
                       </CardTitle>

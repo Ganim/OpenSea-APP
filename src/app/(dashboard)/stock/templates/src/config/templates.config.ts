@@ -5,7 +5,8 @@
 
 import { defineEntityConfig } from '@/core/types';
 import type { Template } from '@/types/stock';
-import { Copy, Edit, Eye, FileText, Plus, Trash2 } from 'lucide-react';
+import { Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
+import { GrObjectGroup } from 'react-icons/gr';
 
 export const templatesConfig = defineEntityConfig<Template>()({
   // ======================== IDENTIFICAÇÃO ========================
@@ -13,7 +14,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
   namePlural: 'Templates',
   slug: 'templates',
   description: 'Gerenciamento de templates de produtos',
-  icon: FileText,
+  icon: GrObjectGroup,
 
   // ======================== API ========================
   api: {
@@ -42,7 +43,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
 
   // ======================== DISPLAY ========================
   display: {
-    icon: FileText,
+    icon: GrObjectGroup,
     color: 'purple',
     gradient: 'from-purple-500 to-pink-600',
     titleField: 'name',

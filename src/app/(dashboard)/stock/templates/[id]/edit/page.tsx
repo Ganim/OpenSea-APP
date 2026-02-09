@@ -16,7 +16,8 @@ import type {
   UnitOfMeasure,
 } from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, FileText, Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
+import { GrObjectGroup } from 'react-icons/gr';
 import { useParams, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -101,7 +102,7 @@ export default function TemplateEditPage() {
     return (
       <div className="container mx-auto p-6">
         <Card className="p-12 text-center">
-          <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <GrObjectGroup className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-semibold mb-2">
             {'Template não encontrado'}
           </h2>

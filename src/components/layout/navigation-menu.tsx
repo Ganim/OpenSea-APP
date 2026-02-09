@@ -100,7 +100,7 @@ export function NavigationMenu({
       return;
     }
 
-    if (item.submenu) {
+    if (item.submenu && item.submenu.length > 0) {
       setMenuHistory([...menuHistory, item.submenu]);
       setSearchQuery('');
     } else if (item.href) {
@@ -291,9 +291,11 @@ export function NavigationMenu({
                           </span>
 
                           {/* Submenu Indicator */}
-                          {item.submenu && !isDisabled && (
-                            <ChevronRight className="absolute bottom-3 right-3 w-4 h-4 text-gray-400" />
-                          )}
+                          {item.submenu &&
+                            item.submenu.length > 0 &&
+                            !isDisabled && (
+                              <ChevronRight className="absolute bottom-3 right-3 w-4 h-4 text-gray-400" />
+                            )}
                         </motion.button>
                       );
                     })}

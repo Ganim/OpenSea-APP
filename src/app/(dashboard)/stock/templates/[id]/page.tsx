@@ -10,9 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { templatesService } from '@/services/stock';
-import type { Template, UnitOfMeasure } from '@/types/stock';
+import type {
+  Template,
+  TemplateAttributes,
+  UnitOfMeasure,
+} from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { GrObjectGroup } from 'react-icons/gr';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -57,9 +61,9 @@ export default function TemplateDetailPage() {
         name: data.name,
         iconUrl: data.iconUrl,
         unitOfMeasure: data.unitOfMeasure,
-        productAttributes: data.productAttributes as any,
-        variantAttributes: data.variantAttributes as any,
-        itemAttributes: data.itemAttributes as any,
+        productAttributes: data.productAttributes as TemplateAttributes,
+        variantAttributes: data.variantAttributes as TemplateAttributes,
+        itemAttributes: data.itemAttributes as TemplateAttributes,
       });
       await queryClient.invalidateQueries({ queryKey: ['templates'] });
       toast.success('Template atualizado com sucesso!');
@@ -93,7 +97,7 @@ export default function TemplateDetailPage() {
     return (
       <div className="container mx-auto p-6">
         <Card className="p-12 text-center">
-          <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <GrObjectGroup className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-semibold mb-2">
             Template não encontrado
           </h2>

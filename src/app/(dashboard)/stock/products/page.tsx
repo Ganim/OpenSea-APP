@@ -31,17 +31,17 @@ import {
 import { formatUnitOfMeasure } from '@/helpers/formatters';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
-import type { Item, Product } from '@/types/stock';
+import type { Item, Product, UpdateProductRequest } from '@/types/stock';
 import {
   ExternalLink,
   Factory,
-  FileText,
   Grid3x3,
   Package,
   Plus,
   Tag,
   Upload,
 } from 'lucide-react';
+import { GrObjectGroup } from 'react-icons/gr';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { CreateProductForm, EditProductForm } from './src/components';
@@ -102,7 +102,9 @@ function ProductsPageContent() {
         .createProduct(data as ProductFormData)
         .then(r => r.product),
     updateFn: (id, data) =>
-      productsService.updateProduct(id, data as any).then(r => r.product),
+      productsService
+        .updateProduct(id, data as UpdateProductRequest)
+        .then(r => r.product),
     deleteFn: id => productsService.deleteProduct(id),
   });
 
@@ -530,7 +532,7 @@ function ProductsPageContent() {
         <div className="flex items-center gap-3 flex-wrap">
           <FilterDropdown
             label="Template"
-            icon={FileText}
+            icon={GrObjectGroup}
             options={availableTemplates.map(t => ({
               id: t.id,
               label: t.name,
