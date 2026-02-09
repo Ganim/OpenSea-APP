@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { Check, ChevronsUpDown, Search, X } from 'lucide-react';
+import { Check, CheckCheck, ChevronsUpDown, Search, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Popover,
@@ -139,6 +139,10 @@ export function FilterDropdown({
     onSelectionChange([]);
   };
 
+  const selectAll = () => {
+    onSelectionChange(options.map(o => o.id));
+  };
+
   const totalFiltered = selectedOptions.length + unselectedOptions.length;
 
   return (
@@ -187,11 +191,11 @@ export function FilterDropdown({
           </div>
         </div>
 
-        {/* Selection count + clear */}
-        {hasSelection && (
-          <>
-            <hr className="border-[rgb(var(--glass-border)/0.15)]" />
-            <div className="flex items-center justify-between px-3 py-1.5">
+        {/* Selection count + clear / select all */}
+        <hr className="border-[rgb(var(--glass-border)/0.15)]" />
+        <div className="flex items-center justify-between px-3 py-1.5">
+          {hasSelection ? (
+            <>
               <span className="text-xs opacity-60">
                 {selected.length} selecionado{selected.length > 1 ? 's' : ''}
               </span>
@@ -205,9 +209,25 @@ export function FilterDropdown({
                 Limpar
                 <X className="w-3 h-3" />
               </button>
-            </div>
-          </>
-        )}
+            </>
+          ) : (
+            <>
+              <span className="text-xs opacity-60">
+                {options.length} disponíve{options.length !== 1 ? 'is' : 'l'}
+              </span>
+              <button
+                onClick={selectAll}
+                className={cn(
+                  'flex items-center gap-1 text-xs font-medium cursor-pointer',
+                  colors.clear
+                )}
+              >
+                Selecionar tudo
+                <CheckCheck className="w-3 h-3" />
+              </button>
+            </>
+          )}
+        </div>
 
         <hr className="border-[rgb(var(--glass-border)/0.15)]" />
 
