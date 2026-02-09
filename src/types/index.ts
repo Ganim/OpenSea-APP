@@ -3,6 +3,7 @@ export * from './auth';
 export * from './stock';
 export * from './sales';
 export * from './hr';
+export * from './finance';
 export * from './admin';
 export * from './common';
 

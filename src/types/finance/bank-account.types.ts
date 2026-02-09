@@ -1,0 +1,71 @@
+export type BankAccountType = 'CHECKING' | 'SAVINGS' | 'SALARY' | 'PAYMENT' | 'INVESTMENT' | 'DIGITAL' | 'OTHER';
+export type BankAccountStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';
+export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
+
+export interface BankAccount {
+  id: string;
+  companyId: string;
+  companyName?: string;
+  name: string;
+  bankCode: string;
+  bankName?: string | null;
+  agency: string;
+  agencyDigit?: string | null;
+  accountNumber: string;
+  accountDigit?: string | null;
+  accountType: BankAccountType;
+  status: BankAccountStatus;
+  pixKeyType?: PixKeyType | null;
+  pixKey?: string | null;
+  currentBalance: number;
+  balanceUpdatedAt?: string | null;
+  apiEnabled: boolean;
+  color?: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+
+export interface CreateBankAccountData {
+  companyId: string;
+  name: string;
+  bankCode: string;
+  bankName?: string;
+  agency: string;
+  agencyDigit?: string;
+  accountNumber: string;
+  accountDigit?: string;
+  accountType: BankAccountType;
+  pixKeyType?: PixKeyType;
+  pixKey?: string;
+  color?: string;
+  isDefault?: boolean;
+}
+
+export type UpdateBankAccountData = Partial<Omit<CreateBankAccountData, 'companyId'>>;
+
+export interface BankAccountsQuery {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  companyId?: string;
+  accountType?: BankAccountType;
+  status?: BankAccountStatus;
+}
+
+export const BANK_ACCOUNT_TYPE_LABELS: Record<BankAccountType, string> = {
+  CHECKING: 'Conta Corrente',
+  SAVINGS: 'Poupança',
+  SALARY: 'Conta Salário',
+  PAYMENT: 'Conta Pagamento',
+  INVESTMENT: 'Investimento',
+  DIGITAL: 'Conta Digital',
+  OTHER: 'Outro',
+};
+
+export const BANK_ACCOUNT_STATUS_LABELS: Record<BankAccountStatus, string> = {
+  ACTIVE: 'Ativa',
+  INACTIVE: 'Inativa',
+  CLOSED: 'Encerrada',
+};
