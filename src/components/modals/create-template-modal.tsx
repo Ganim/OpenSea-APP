@@ -30,6 +30,7 @@ import type {
   TemplateAttribute,
   TemplateAttributes,
   TemplateAttributeType,
+  UnitOfMeasure,
 } from '@/types/stock';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -149,7 +150,7 @@ export function CreateTemplateModal({
     try {
       const data: CreateTemplateRequest = {
         name: name.trim(),
-        unitOfMeasure: unitOfMeasure as any,
+        unitOfMeasure: unitOfMeasure as UnitOfMeasure,
         variantAttributes: formatAttributes(variantAttributes),
         itemAttributes: formatAttributes(itemAttributes),
       };

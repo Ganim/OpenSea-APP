@@ -96,7 +96,7 @@ export function useUpdateVariant() {
         queryKey: QUERY_KEYS.VARIANT(variables.id),
       });
       // Invalidate product-specific variants if productId is available
-      const productId = (response as any)?.productId;
+      const productId = response.variant.productId;
       if (productId) {
         queryClient.invalidateQueries({
           queryKey: QUERY_KEYS.VARIANTS_BY_PRODUCT(productId),

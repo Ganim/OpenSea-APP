@@ -25,7 +25,14 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import GjsEditor, { Canvas, useEditorMaybe } from '@grapesjs/react';
-import type { Editor } from 'grapesjs';
+import type {
+  Component,
+  CssRule,
+  Editor,
+  Property,
+  Sector,
+  Selector,
+} from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import {
   Grid3X3,
@@ -466,15 +473,15 @@ export function LabelEditor({
     const allRules = cssComposer.getAll();
     const styles: Record<string, string> = {};
 
-    allRules.forEach((rule: any) => {
+    allRules.forEach((rule: CssRule) => {
       const ruleSelectors = rule.getSelectors();
       let matches = false;
 
       // Verificar se algum seletor da regra corresponde aos seletores do componente
-      ruleSelectors.forEach((ruleSel: any) => {
+      ruleSelectors.forEach((ruleSel: Selector) => {
         const ruleSelName =
           ruleSel.get('name') || ruleSel.getFullName?.() || '';
-        selectors.forEach((compSel: any) => {
+        selectors.forEach((compSel: Selector) => {
           const compSelName =
             compSel.get('name') || compSel.getFullName?.() || '';
           if (ruleSelName && compSelName && ruleSelName === compSelName) {
@@ -528,19 +535,26 @@ export function LabelEditor({
       // O StyleManager emite eventos quando propriedades são alteradas
 
       // 1. Quando uma propriedade de estilo é atualizada
-      editor.on('style:property:update', (prop: any, val: any) => {
-        const selected = editor.getSelected();
-        if (selected) {
-          const property = prop?.get?.('property') || prop?.property || prop;
-          const value = val || prop?.get?.('value') || prop?.getFullValue?.();
-          if (property && value) {
-            selected.addStyle({ [property]: value });
+      editor.on(
+        'style:property:update',
+        (prop: Property | string, val: string | undefined) => {
+          const selected = editor.getSelected();
+          if (selected) {
+            const propObj = typeof prop === 'string' ? null : prop;
+            const property =
+              propObj?.get?.('property') ||
+              (typeof prop === 'string' ? prop : undefined);
+            const value =
+              val || propObj?.get?.('value') || propObj?.getFullValue?.();
+            if (property && value) {
+              selected.addStyle({ [property]: value });
+            }
           }
         }
-      });
+      );
 
       // 2. Monitorar mudanças no target do StyleManager
-      editor.on('style:target', (target: any) => {
+      editor.on('style:target', (_target: Component | undefined) => {
         // Quando o target muda, sincronizar estilos
         setTimeout(() => syncStylesToComponent(editor), 100);
       });
@@ -551,7 +565,7 @@ export function LabelEditor({
       });
 
       // 4. Quando componente é selecionado
-      editor.on('component:selected', (component: any) => {
+      editor.on('component:selected', (component: Component) => {
         if (component) {
           setTimeout(() => syncStylesToComponent(editor), 100);
         }
@@ -566,10 +580,8 @@ export function LabelEditor({
       // 6. Adicionar listener ao StyleManager para cada setor/propriedade
       editor.on('load', () => {
         const sm = editor.StyleManager;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sm.getSectors().forEach((sector: any) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          sector.getProperties().forEach((prop: any) => {
+        sm.getSectors({ array: true }).forEach((sector: Sector) => {
+          sector.getProperties().forEach((prop: Property) => {
             prop.on('change', () => {
               const selected = editor.getSelected();
               if (selected) {

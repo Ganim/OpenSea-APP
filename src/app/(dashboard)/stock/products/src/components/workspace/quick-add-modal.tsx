@@ -72,7 +72,7 @@ import {
   itemsService,
 } from '@/services/stock';
 import type { QuickAddModalProps, QuickAddResult } from './types';
-import type { Template, Product, Variant } from '@/types/stock';
+import type { Template, Product, Variant, Item } from '@/types/stock';
 
 // ============================================
 // VALIDATION SCHEMA
@@ -180,7 +180,7 @@ export function QuickAddModal({
 
   // Form setup
   const form = useForm<QuickAddFormValues>({
-    resolver: zodResolver(quickAddSchema) as any,
+    resolver: zodResolver(quickAddSchema) as never,
     defaultValues: {
       templateId: defaultTemplateId || '',
       productName: '',
@@ -250,7 +250,7 @@ export function QuickAddModal({
         const product = productResponse.product;
 
         let variant: Variant | undefined;
-        const items: any[] = [];
+        const items: Item[] = [];
 
         // Step 2: Create Variant (if requested)
         if (values.createVariant && values.variantName && values.variantPrice) {

@@ -58,7 +58,7 @@ afterEach(() => {
  * Supress warnings não críticos em testes
  */
 const originalWarn = console.warn;
-console.warn = (...args: any[]) => {
+console.warn = (...args: unknown[]) => {
   if (
     typeof args[0] === 'string' &&
     args[0].includes('Warning: ReactDOM.render')

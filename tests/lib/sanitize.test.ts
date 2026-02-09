@@ -6,10 +6,14 @@
 import { describe, it, expect } from 'vitest';
 import { sanitizeForLogging } from '@/lib/sanitize';
 
-type Sanitized = Record<string, any>;
+// Recursive interface for sanitized output that allows deep property access in tests
+interface SanitizedRecord {
+  [key: string]: SanitizedRecord;
+  [index: number]: SanitizedRecord;
+}
 
-const sanitize = (value: unknown): Sanitized =>
-  sanitizeForLogging(value) as Sanitized;
+const sanitize = (value: unknown): SanitizedRecord =>
+  sanitizeForLogging(value) as unknown as SanitizedRecord;
 
 describe('Data Sanitization', () => {
   describe('Sensitive Key Detection', () => {

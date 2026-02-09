@@ -218,7 +218,7 @@ export function BatchVariantCreator({
 
   // Form setup
   const form = useForm<BatchVariantFormValues>({
-    resolver: zodResolver(batchVariantSchema) as any,
+    resolver: zodResolver(batchVariantSchema) as never,
     defaultValues: {
       basePrice: '' as unknown as number,
       skuPrefix: '',

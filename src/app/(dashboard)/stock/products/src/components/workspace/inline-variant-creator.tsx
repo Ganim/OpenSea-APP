@@ -68,7 +68,7 @@ function CompactForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InlineVariantFormValues>({
-    resolver: zodResolver(inlineVariantSchema) as any,
+    resolver: zodResolver(inlineVariantSchema) as never,
     defaultValues: {
       name: '',
       price: '' as unknown as number, // Controlled input needs a value
@@ -227,7 +227,7 @@ function ExpandedForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InlineVariantFormValues>({
-    resolver: zodResolver(inlineVariantSchema) as any,
+    resolver: zodResolver(inlineVariantSchema) as never,
     defaultValues: {
       name: '',
       price: '' as unknown as number,

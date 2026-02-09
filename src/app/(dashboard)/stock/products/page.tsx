@@ -35,13 +35,13 @@ import type { Item, Product, UpdateProductRequest } from '@/types/stock';
 import {
   ExternalLink,
   Factory,
+  Blocks,
   Grid3x3,
   Package,
   Plus,
   Tag,
   Upload,
 } from 'lucide-react';
-import { GrObjectGroup } from 'react-icons/gr';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { CreateProductForm, EditProductForm } from './src/components';
@@ -532,7 +532,7 @@ function ProductsPageContent() {
         <div className="flex items-center gap-3 flex-wrap">
           <FilterDropdown
             label="Template"
-            icon={GrObjectGroup}
+            icon={Blocks}
             options={availableTemplates.map(t => ({
               id: t.id,
               label: t.name,

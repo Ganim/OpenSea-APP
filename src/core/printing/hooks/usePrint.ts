@@ -190,7 +190,7 @@ export const usePrint = () => {
 /**
  * Hook especializado para impressão com template
  */
-export const usePrintWithTemplate = <T = any>(options: UsePrintOptions) => {
+export const usePrintWithTemplate = <T = unknown>(options: UsePrintOptions) => {
   const { template, data, config, onSuccess, onError } = options;
   const printHook = usePrint();
 

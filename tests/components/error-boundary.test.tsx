@@ -123,7 +123,7 @@ describe('ErrorBoundary Component', () => {
       );
 
       // Verify logger was called with error info
-      const errorCall = (logger.error as any).mock.calls[0];
+      const errorCall = vi.mocked(logger.error).mock.calls[0];
       expect(errorCall).toBeTruthy();
       expect(errorCall[0]).toContain('erro'); // Should have error message in Portuguese or English
 
@@ -194,7 +194,7 @@ describe('ErrorBoundary Component', () => {
       );
 
       expect(logger.error).toHaveBeenCalled();
-      const call = (logger.error as any).mock.calls[0];
+      const call = vi.mocked(logger.error).mock.calls[0];
       // Should have context with component information
       expect(call).toBeTruthy();
 

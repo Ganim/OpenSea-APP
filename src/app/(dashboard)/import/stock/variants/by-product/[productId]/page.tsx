@@ -33,6 +33,7 @@ import type {
   ImportFieldConfig,
   ValidationResult,
 } from '../../../../_shared/types';
+import type { TemplateAttribute } from '@/types/stock';
 
 // Fetch product details
 async function fetchProduct(productId: string) {
@@ -50,7 +51,7 @@ async function fetchTemplate(templateId: string) {
       template: {
         id: string;
         name: string;
-        variantAttributes?: Record<string, unknown>;
+        variantAttributes?: Record<string, TemplateAttribute>;
       };
     }>(`/v1/templates/${templateId}`)
     .then(res => res.template);
@@ -112,7 +113,7 @@ export default function ImportVariantsByProductPage() {
     if (template?.variantAttributes) {
       let order = fields.length;
       Object.entries(template.variantAttributes).forEach(
-        ([key, attrConfig]: [string, any]) => {
+        ([key, attrConfig]) => {
           fields.push({
             key: `attributes.${key}`,
             label: attrConfig.label || key,
@@ -121,7 +122,7 @@ export default function ImportVariantsByProductPage() {
             required: attrConfig.required || false,
             enabled: true,
             order: order++,
-            options: attrConfig.options?.map((opt: string) => ({
+            options: attrConfig.options?.map(opt => ({
               value: opt,
               label: opt,
             })),

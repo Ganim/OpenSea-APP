@@ -46,7 +46,13 @@ import {
   productsService,
   templatesService,
 } from '@/services/stock';
-import type { Category, Manufacturer, Product, Template } from '@/types/stock';
+import type {
+  Category,
+  Manufacturer,
+  Product,
+  Template,
+  TemplateAttribute,
+} from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, NotebookText, Package, Save, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -98,7 +104,7 @@ export default function EditProductPage() {
   const [description, setDescription] = useState('');
   const [manufacturerId, setManufacturerId] = useState<string>('');
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [attributes, setAttributes] = useState<Record<string, any>>({});
+  const [attributes, setAttributes] = useState<Record<string, unknown>>({});
   const [outOfLine, setOutOfLine] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
@@ -560,12 +566,12 @@ export default function EditProductPage() {
                 <div className="grid grid-cols-3 gap-4">
                   {Object.entries(template.productAttributes)
                     .sort(([, a], [, b]) => {
-                      const labelA = (a as any)?.label || '';
-                      const labelB = (b as any)?.label || '';
+                      const labelA = (a as TemplateAttribute)?.label || '';
+                      const labelB = (b as TemplateAttribute)?.label || '';
                       return labelA.localeCompare(labelB);
                     })
                     .map(([key, config]) => {
-                      const attrConfig = config as any;
+                      const attrConfig = config as TemplateAttribute;
                       const fieldType = attrConfig?.type || 'text';
                       const label = attrConfig?.label || key;
                       const options = attrConfig?.options || [];
@@ -595,7 +601,7 @@ export default function EditProductPage() {
                           <div key={key} className="grid gap-2">
                             <Label htmlFor={`attr-${key}`}>{label}</Label>
                             <Select
-                              value={attributes[key] || ''}
+                              value={String(attributes[key] ?? '')}
                               onValueChange={value =>
                                 setAttributes(prev => ({
                                   ...prev,
@@ -630,7 +636,7 @@ export default function EditProductPage() {
                                   ? 'date'
                                   : 'text'
                             }
-                            value={attributes[key] || ''}
+                            value={String(attributes[key] ?? '')}
                             onChange={e =>
                               setAttributes(prev => ({
                                 ...prev,
@@ -667,10 +673,7 @@ export default function EditProductPage() {
             <div className="space-y-6">
               <CareSelector
                 productId={productId}
-                initialSelectedIds={
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (product as any)?.careInstructionIds || []
-                }
+                initialSelectedIds={product?.careInstructionIds || []}
               />
             </div>
           </Card>

@@ -7,9 +7,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { logger } from '@/lib/logger';
 
 describe('Logger Utility', () => {
-  let consoleSpy: any;
-  let consoleErrorSpy: any;
-  let consoleWarnSpy: any;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     // Spy em console.log/error/warn para verificar saída
@@ -139,8 +139,9 @@ describe('Logger Utility', () => {
     });
 
     it('should include error code if available', () => {
-      const error = new Error('Error with code') as any;
-      error.code = 'ERR_TIMEOUT';
+      const error = Object.assign(new Error('Error with code'), {
+        code: 'ERR_TIMEOUT',
+      });
       expect(() => {
         logger.error('Error with code', error);
       }).not.toThrow();

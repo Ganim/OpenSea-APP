@@ -13,6 +13,7 @@ import {
   PrintFormat,
   PrintOrientation,
   PrintTemplate,
+  PrintTemplateBase,
   ReportData,
   TemplateType,
 } from '../types';
@@ -98,14 +99,14 @@ export const PRINT_TEMPLATES = {
 /**
  * Obtém template por ID
  */
-export const getTemplateById = (id: string): PrintTemplate | undefined => {
+export const getTemplateById = (id: string): PrintTemplateBase | undefined => {
   return Object.values(PRINT_TEMPLATES).find(template => template.id === id);
 };
 
 /**
  * Obtém templates por tipo
  */
-export const getTemplatesByType = (type: TemplateType): PrintTemplate[] => {
+export const getTemplatesByType = (type: TemplateType): PrintTemplateBase[] => {
   return Object.values(PRINT_TEMPLATES).filter(
     template => template.type === type
   );
@@ -114,6 +115,6 @@ export const getTemplatesByType = (type: TemplateType): PrintTemplate[] => {
 /**
  * Lista todos os templates
  */
-export const getAllTemplates = (): PrintTemplate[] => {
+export const getAllTemplates = (): PrintTemplateBase[] => {
   return Object.values(PRINT_TEMPLATES);
 };

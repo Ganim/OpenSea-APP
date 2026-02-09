@@ -64,7 +64,7 @@ describe('AuthContext', () => {
       const email = 'user@test.com';
       logger.error('Erro no login', error, { action: 'login', email });
 
-      const call = (logger.error as any).mock.calls[0];
+      const call = vi.mocked(logger.error).mock.calls[0];
       expect(call[2]).toMatchObject({ email });
     });
   });
@@ -157,9 +157,9 @@ describe('AuthContext', () => {
       // Correct way - only log userId, not password
       logger.info('✅ Usuário autenticado', { userId });
 
-      const call = (logger.info as any).mock.calls[0];
+      const call = vi.mocked(logger.info).mock.calls[0];
       expect(call[1]).toBeDefined();
-      expect(call[1].password).toBeUndefined();
+      expect(call[1]!.password).toBeUndefined();
     });
   });
 });

@@ -122,7 +122,7 @@ describe('Authentication Flow Integration', () => {
         step: 'token-validation',
       });
 
-      const call = (logger.error as any).mock.calls[0];
+      const call = vi.mocked(logger.error).mock.calls[0];
       expect(call[0]).toContain('error');
       expect(call[1]).toBe(error);
       expect(call[2]).toEqual(
@@ -164,7 +164,7 @@ describe('Authentication Flow Integration', () => {
       logger.debug('Login step 3', flowContext);
 
       // All logs should have context
-      (logger.debug as any).mock.calls.forEach((call: any) => {
+      vi.mocked(logger.debug).mock.calls.forEach(call => {
         expect(call[1]).toBeDefined();
       });
     });
@@ -208,11 +208,9 @@ describe('Authentication Flow Integration', () => {
       logger.info('Complete', { sessionId });
 
       // All calls should have the same sessionId
-      (logger.debug as any).mock.calls.forEach((call: any) => {
+      vi.mocked(logger.debug).mock.calls.forEach(call => {
         if (call[1]) {
-          expect(
-            call[1].sessionId || call[1] === sessionId || true
-          ).toBeTruthy();
+          expect(call[1].sessionId).toBe(sessionId);
         }
       });
     });

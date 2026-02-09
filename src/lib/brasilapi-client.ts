@@ -57,7 +57,11 @@ class BrasilAPIClient {
         }
 
         const errorMessage =
-          (error as any)?.message || `HTTP error! status: ${response.status}`;
+          (error instanceof Object &&
+          'message' in error &&
+          typeof (error as Record<string, unknown>).message === 'string'
+            ? ((error as Record<string, unknown>).message as string)
+            : null) || `HTTP error! status: ${response.status}`;
 
         logger.error('[BrasilAPI] Error response', undefined, {
           status: response.status,

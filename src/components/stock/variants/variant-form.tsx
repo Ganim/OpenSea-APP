@@ -28,6 +28,7 @@ import type {
   CreateVariantRequest,
   Product,
   Template,
+  TemplateAttribute,
   UpdateVariantRequest,
   Variant,
 } from '@/types/stock';
@@ -726,11 +727,14 @@ export function VariantForm({
             Object.keys(template.variantAttributes).length > 0 ? (
               <div className="grid grid-cols-3 gap-4">
                 {Object.entries(template.variantAttributes).map(
-                  ([key, config]: [string, any]) => {
-                    const currentValue =
-                      (formData.attributes as Record<string, any>)?.[key] || '';
+                  ([key, config]: [string, TemplateAttribute]) => {
+                    const rawAttrValue = (
+                      formData.attributes as Record<string, unknown>
+                    )?.[key];
+                    const currentValue = String(rawAttrValue ?? '');
+                    const configType: string = config.type;
                     const isBooleanType =
-                      config.type === 'boolean' || config.type === 'sim/nao';
+                      configType === 'boolean' || configType === 'sim/nao';
 
                     return (
                       <div key={key} className="grid gap-2">
@@ -757,7 +761,7 @@ export function VariantForm({
                             <Switch
                               id={`attr-${key}`}
                               checked={
-                                currentValue === true ||
+                                rawAttrValue === true ||
                                 currentValue === 'true' ||
                                 currentValue === 'sim' ||
                                 currentValue === '1'

@@ -332,7 +332,8 @@ export function ProductWorkspace({
   const searchInputRef = useCallback((node: HTMLInputElement | null) => {
     if (node) {
       // Store ref for keyboard shortcut
-      (window as any).__workspaceSearchInput = node;
+      (window as unknown as Record<string, unknown>).__workspaceSearchInput =
+        node;
     }
   }, []);
 
@@ -347,7 +348,8 @@ export function ProductWorkspace({
       }
     },
     onSearch: () => {
-      const input = (window as any).__workspaceSearchInput;
+      const input = (window as unknown as Record<string, unknown>)
+        .__workspaceSearchInput as HTMLInputElement | undefined;
       input?.focus();
     },
     onEscape: () => {

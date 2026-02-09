@@ -48,12 +48,12 @@ export const EntityForm = forwardRef<
   } = config;
 
   // Usa referência estável para evitar recriar objeto vazio em cada render
-  const emptyRef = useRef<Record<string, any>>({});
+  const emptyRef = useRef<Record<string, unknown>>({});
   const effectiveDefaultValues =
     defaultValuesProp !== undefined ? defaultValuesProp : emptyRef.current;
 
   // Estado do formulário
-  const [formData, setFormData] = useState<Record<string, any>>(
+  const [formData, setFormData] = useState<Record<string, unknown>>(
     effectiveDefaultValues
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -199,7 +199,12 @@ export const EntityForm = forwardRef<
       ))}
       {tab.attributes && (
         <AttributeManager
-          value={formData[`${tab.id}Attributes`] || []}
+          value={
+            (formData[`${tab.id}Attributes`] as Array<{
+              key: string;
+              value: string;
+            }>) || []
+          }
           onChange={attrs => handleFieldChange(`${tab.id}Attributes`, attrs)}
           config={tab.attributes}
           error={errors[`${tab.id}Attributes`]}

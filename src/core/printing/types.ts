@@ -148,22 +148,32 @@ export enum TemplateType {
   CUSTOM = 'CUSTOM',
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface PrintTemplate<T = any> {
+/**
+ * Base template metadata (without generic component rendering).
+ * Use this type when you only need template config/metadata,
+ * not the actual component for rendering.
+ */
+export interface PrintTemplateBase {
   id: string;
   name: string;
   description?: string;
   type: TemplateType;
   format: PrintFormat;
   orientation: PrintOrientation;
-  component: React.ComponentType<{ data: T }>;
   defaultConfig?: Partial<PrintConfig>;
+}
+
+/**
+ * Full template with typed component for rendering.
+ */
+export interface PrintTemplate<T = unknown> extends PrintTemplateBase {
+  component: React.ComponentType<{ data: T }>;
 }
 
 // ==================== HOOKS E UTILIDADES ====================
 
 export interface UsePrintOptions {
-  template: PrintTemplate;
+  template: PrintTemplateBase;
   data: unknown;
   config?: Partial<PrintConfig>;
   onSuccess?: () => void;
@@ -179,7 +189,7 @@ export interface PrintResult {
 // ==================== PREVIEW ====================
 
 export interface PrintPreviewProps {
-  template: PrintTemplate;
+  template: PrintTemplateBase;
   data: unknown;
   config?: PrintConfig;
   onPrint?: () => void;
@@ -196,7 +206,7 @@ export interface BatchPrintItem {
 }
 
 export interface BatchPrintConfig {
-  template: PrintTemplate;
+  template: PrintTemplateBase;
   items: BatchPrintItem[];
   config?: PrintConfig;
   outputType: PrintOutputType;

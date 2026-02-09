@@ -26,7 +26,7 @@ import {
   PrintTemplate,
 } from '../types';
 
-interface PrintPreviewProps<T = any> {
+interface PrintPreviewProps<T = unknown> {
   isOpen: boolean;
   onClose: () => void;
   template: PrintTemplate<T>;
@@ -35,7 +35,7 @@ interface PrintPreviewProps<T = any> {
   filename?: string;
 }
 
-export function PrintPreview<T = any>({
+export function PrintPreview<T = unknown>({
   isOpen,
   onClose,
   template,

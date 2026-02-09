@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { EntityViewer } from '../viewers/entity-viewer';
 
-interface MultiViewModalProps<T extends { id: string }> {
+interface MultiViewModalProps<T extends { id: string; name?: string }> {
   config: MultiViewModalConfig<T>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,7 +22,7 @@ type ViewMode = 'single' | 'compare' | 'search';
  * Suporta modo single, compare e search
  * Mantém o design exato do modal original
  */
-export function MultiViewModal<T extends { id: string }>({
+export function MultiViewModal<T extends { id: string; name?: string }>({
   config,
   open,
   onOpenChange,
@@ -269,7 +269,7 @@ export function MultiViewModal<T extends { id: string }>({
                     )}
                   >
                     <span className="font-medium text-sm truncate max-w-[150px]">
-                      {(item as any).name || item.id}
+                      {item.name || item.id}
                     </span>
                     <button
                       onClick={e => {
@@ -375,7 +375,7 @@ export function MultiViewModal<T extends { id: string }>({
                         searchConfig.renderResult(result)
                       ) : (
                         <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                          {(result as any).name || result.id}
+                          {result.name || result.id}
                         </div>
                       )}
                     </button>

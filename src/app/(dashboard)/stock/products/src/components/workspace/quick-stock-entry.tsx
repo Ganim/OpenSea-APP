@@ -78,7 +78,7 @@ export function QuickStockEntry({
   const locations = locationsData?.locations || [];
 
   const form = useForm<QuickStockFormValues>({
-    resolver: zodResolver(quickStockSchema) as any,
+    resolver: zodResolver(quickStockSchema) as never,
     defaultValues: {
       quantity: 1,
       locationId: '',

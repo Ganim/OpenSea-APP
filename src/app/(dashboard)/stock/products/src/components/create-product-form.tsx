@@ -25,6 +25,7 @@ import type {
   CreateProductRequest,
   Manufacturer,
   Template,
+  TemplateAttribute,
 } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -59,7 +60,7 @@ interface FormData {
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   supplierId?: string;
   manufacturerId?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 // =============================================================================
@@ -149,7 +150,7 @@ export function CreateProductForm({
 
   const handleFormChange = (
     field: keyof FormData,
-    value: string | Record<string, any>
+    value: string | Record<string, unknown>
   ) => {
     setFormData(prev => ({
       ...prev,
@@ -412,15 +413,24 @@ export function CreateProductForm({
             <div className="grid grid-cols-3 gap-4">
               {Object.entries(selectedTemplate.productAttributes)
                 .sort((a, b) => {
-                  const labelA = ((a[1] as any)?.label || a[0]).toLowerCase();
-                  const labelB = ((b[1] as any)?.label || b[0]).toLowerCase();
+                  const labelA = (
+                    (a[1] as TemplateAttribute)?.label || a[0]
+                  ).toLowerCase();
+                  const labelB = (
+                    (b[1] as TemplateAttribute)?.label || b[0]
+                  ).toLowerCase();
                   return labelA.localeCompare(labelB);
                 })
                 .map(([key, config]) => {
-                  const cfg = config as any;
+                  const cfg = config as TemplateAttribute;
                   const label = cfg?.label || key;
-                  const type = cfg?.type || 'text';
-                  const value = formData.attributes?.[key];
+                  const type: string = cfg?.type || 'text';
+                  const rawValue = formData.attributes?.[key];
+                  const value = rawValue as
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
 
                   if (type === 'boolean' || type === 'sim/nao') {
                     return (
@@ -468,7 +478,7 @@ export function CreateProductForm({
 
                       {type === 'select' ? (
                         <Select
-                          value={value || ''}
+                          value={String(value ?? '')}
                           onValueChange={val => {
                             setFormData(prev => ({
                               ...prev,
@@ -495,7 +505,7 @@ export function CreateProductForm({
                         <Input
                           id={`attr-${key}`}
                           type="number"
-                          value={value || ''}
+                          value={String(value ?? '')}
                           onChange={e => {
                             setFormData(prev => ({
                               ...prev,
@@ -513,7 +523,7 @@ export function CreateProductForm({
                         <Input
                           id={`attr-${key}`}
                           type="date"
-                          value={value || ''}
+                          value={String(value ?? '')}
                           onChange={e => {
                             setFormData(prev => ({
                               ...prev,
@@ -530,7 +540,7 @@ export function CreateProductForm({
                         <Input
                           id={`attr-${key}`}
                           type="text"
-                          value={value || ''}
+                          value={String(value ?? '')}
                           onChange={e => {
                             setFormData(prev => ({
                               ...prev,

@@ -140,7 +140,8 @@ export function AddressModal({
     if (!form.zip || !form.street) return;
 
     // Remover ibgeCityCode do form antes de enviar (se existir)
-    const { ibgeCityCode, ...formData } = form as any;
+    const { ibgeCityCode: _ibgeCityCode, ...formData } =
+      form as AddressFormData & { ibgeCityCode?: string | null };
 
     await onSubmit(formData);
     onClose();
