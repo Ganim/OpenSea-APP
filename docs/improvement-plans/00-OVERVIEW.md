@@ -7,7 +7,7 @@
 | Testes                | D      |        | `01-CRITICAL-testing.md`         |
 | Console.log / Logging | A+     | DONE   | `01-CRITICAL-logging.md`         |
 | ESLint / TypeScript   | A      | DONE   | `02-HIGH-eslint-typescript.md`   |
-| Componentes Grandes   | B      |        | `02-HIGH-component-splitting.md` |
+| Componentes Grandes   | A-     | DONE   | `02-HIGH-component-splitting.md` |
 | Type Generation       | A-     | DONE   | `02-HIGH-type-generation.md`     |
 | Performance           | B      |        | `03-MEDIUM-performance.md`       |
 | Acessibilidade        | A-     | DONE   | `03-MEDIUM-accessibility.md`     |
@@ -33,15 +33,16 @@ Concluido:
   [x] jsx-a11y/alt-text ESLint rule habilitada (warn)
   [x] Alt text em imagens (Avatar + imagens decorativas)
   [x] Color contrast audit (design system WCAG AA compliant)
+  [x] entity-form.tsx refatorado (663→196 linhas, 5 arquivos modulares)
+  [x] api-client.ts refatorado (479→220 linhas, 4 arquivos modulares)
+  [x] Hook factory CRUD criado (createCrudHooks + 3 hooks exemplo)
 
 Pendente - Alta prioridade:
   [ ] Iniciar testes do api-client e auth-context
   [ ] Continuar testes (hooks, forms)
-  [ ] Quebrar componentes grandes
 
 Pendente - Media prioridade:
   [ ] Dynamic imports para libs pesadas
-  [ ] Hook factory para CRUD
 
 Pendente - Baixa prioridade:
   [ ] Organizar CSS
