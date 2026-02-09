@@ -146,7 +146,7 @@ export interface EntityViewerConfig {
 /**
  * Configuração do modal multi-visualização
  */
-export interface MultiViewModalConfig<T = any> {
+export interface MultiViewModalConfig<T = unknown> {
   entity: string; // "Template", "Produto", etc.
   entityPlural: string; // "Templates", "Produtos", etc.
   items: T[]; // Entidades abertas

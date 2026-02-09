@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
 import { formatCNAE } from '@/helpers/formatters';
-import type { CompanyCnae } from '@/types/hr';
+import type { CompanyCnae, CreateCompanyCnaeData } from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, FileCheck, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -47,7 +47,8 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => companyCnaesApi.create(companyId, data),
+    mutationFn: (data: Partial<CreateCompanyCnaeData>) =>
+      companyCnaesApi.create(companyId, data as CreateCompanyCnaeData),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-cnaes', companyId],
@@ -63,8 +64,13 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      companyCnaesApi.update(companyId, id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateCompanyCnaeData>;
+    }) => companyCnaesApi.update(companyId, id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-cnaes', companyId],
@@ -91,7 +97,7 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: Partial<CreateCompanyCnaeData>) => {
     if (modalMode === 'create') {
       await createMutation.mutateAsync(data);
     } else if (selectedCnae) {

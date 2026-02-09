@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { itemsConfig } from '@/config/entities/items.config';
 import { ConfirmDialog, EntityCard, EntityGrid, useEntityCrud } from '@/core';
 import { variantsService } from '@/services/stock';
+import type { Item } from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -81,7 +82,7 @@ export default function VariantDetailPage() {
   // CRUD SETUP FOR ITEMS
   // ============================================================================
 
-  const itemCrud = useEntityCrud<any>({
+  const itemCrud = useEntityCrud<Item>({
     entityName: 'Item',
     entityNamePlural: 'Itens',
     queryKey: ['items', 'variant', variantId],
@@ -92,15 +93,15 @@ export default function VariantDetailPage() {
     },
     getFn: async (id: string) => {
       // TODO: Implementar get item
-      return {} as any;
+      return {} as Item;
     },
     createFn: async data => {
       // TODO: Implementar create item
-      return {} as any;
+      return {} as Item;
     },
     updateFn: async (id, data) => {
       // TODO: Implementar update item
-      return {} as any;
+      return {} as Item;
     },
     deleteFn: async id => {
       // TODO: Implementar delete item
@@ -118,10 +119,10 @@ export default function VariantDetailPage() {
     if (!searchQuery.trim()) return items;
     const q = searchQuery.toLowerCase();
     return items.filter(
-      (item: any) =>
-        item.name.toLowerCase().includes(q) ||
-        (item.code?.toLowerCase().includes(q) ?? false) ||
-        (item.barcode?.toLowerCase().includes(q) ?? false)
+      (item: Item) =>
+        (item.productName ?? '').toLowerCase().includes(q) ||
+        (item.fullCode?.toLowerCase().includes(q) ?? false) ||
+        (item.uniqueCode?.toLowerCase().includes(q) ?? false)
     );
   }, [items, searchQuery]);
 
@@ -129,7 +130,7 @@ export default function VariantDetailPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleItemDoubleClick = (item: any) => {
+  const handleItemDoubleClick = (item: Item) => {
     router.push(`/stock/items/${item.id}`);
   };
 
@@ -191,23 +192,25 @@ export default function VariantDetailPage() {
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const renderGridCard = (item: any, isSelected: boolean) => (
+  const renderGridCard = (item: Item, isSelected: boolean) => (
     <EntityCard
       id={item.id}
       variant="grid"
-      title={item.name}
-      subtitle={item.code || 'Sem código'}
+      title={item.productName ?? item.fullCode ?? 'Sem nome'}
+      subtitle={item.fullCode || 'Sem código'}
       icon={Box}
       iconBgColor="bg-gradient-to-br from-orange-500 to-amber-500"
       badges={[
         {
-          label: item.barcode ? `${item.barcode}` : 'Sem código de barras',
+          label: item.uniqueCode
+            ? `${item.uniqueCode}`
+            : 'Sem código de barras',
           variant: 'outline' as const,
         },
         {
           label: item.status,
           variant:
-            item.status === 'active'
+            item.status === 'AVAILABLE'
               ? ('default' as const)
               : ('secondary' as const),
         },
@@ -217,23 +220,25 @@ export default function VariantDetailPage() {
     />
   );
 
-  const renderListCard = (item: any, isSelected: boolean) => (
+  const renderListCard = (item: Item, isSelected: boolean) => (
     <EntityCard
       id={item.id}
       variant="list"
-      title={item.name}
-      subtitle={item.code || 'Sem código'}
+      title={item.productName ?? item.fullCode ?? 'Sem nome'}
+      subtitle={item.fullCode || 'Sem código'}
       icon={Box}
       iconBgColor="bg-gradient-to-br from-orange-500 to-amber-500"
       badges={[
         {
-          label: item.barcode ? `${item.barcode}` : 'Sem código de barras',
+          label: item.uniqueCode
+            ? `${item.uniqueCode}`
+            : 'Sem código de barras',
           variant: 'outline' as const,
         },
         {
           label: item.status,
           variant:
-            item.status === 'active'
+            item.status === 'AVAILABLE'
               ? ('default' as const)
               : ('secondary' as const),
         },

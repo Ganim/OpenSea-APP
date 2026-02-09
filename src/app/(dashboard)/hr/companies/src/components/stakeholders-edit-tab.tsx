@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
-import type { CompanyStakeholder } from '@/types/hr';
+import type {
+  CompanyStakeholder,
+  CreateCompanyStakeholderData,
+} from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Plus, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
@@ -61,7 +64,11 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => companyStakeholdersApi.create(companyId, data),
+    mutationFn: (data: Partial<CreateCompanyStakeholderData>) =>
+      companyStakeholdersApi.create(
+        companyId,
+        data as CreateCompanyStakeholderData
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-stakeholders', companyId],
@@ -77,8 +84,13 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      companyStakeholdersApi.update(companyId, id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateCompanyStakeholderData>;
+    }) => companyStakeholdersApi.update(companyId, id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-stakeholders', companyId],
@@ -105,7 +117,7 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: Partial<CreateCompanyStakeholderData>) => {
     if (modalMode === 'create') {
       await createMutation.mutateAsync(data);
     } else if (selectedStakeholder) {

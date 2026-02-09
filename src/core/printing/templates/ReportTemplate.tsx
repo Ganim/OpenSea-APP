@@ -6,7 +6,12 @@
  * Template flexível e customizável para qualquer tipo de relatório
  */
 
-import { ReportData, TableColumn } from '@/core/printing/types';
+import type {
+  ReportData,
+  ReportImageData,
+  ReportTableData,
+} from '@/core/printing/types';
+import { type TableColumn } from '@/core/printing/types';
 import React from 'react';
 
 interface ReportTemplateProps {
@@ -117,90 +122,102 @@ export const ReportTemplate = React.forwardRef<
             )}
 
             {/* Seção de Tabela */}
-            {section.type === 'table' && section.data && (
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  fontSize: '9pt',
-                }}
-              >
-                <thead>
-                  <tr style={{ backgroundColor: '#f5f5f5' }}>
-                    {section.data.columns.map(
-                      (col: TableColumn, colIdx: number) => (
-                        <th
-                          key={colIdx}
-                          style={{
-                            border: '1px solid #ddd',
-                            padding: '8px',
-                            textAlign: col.align || 'left',
-                            fontWeight: 'bold',
-                            width: col.width,
-                          }}
-                        >
-                          {col.header}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {section.data.rows.map((row: any, rowIdx: number) => (
-                    <tr
-                      key={rowIdx}
-                      style={{
-                        backgroundColor:
-                          rowIdx % 2 === 0 ? '#ffffff' : '#fafafa',
-                      }}
-                    >
-                      {section.data.columns.map(
-                        (col: TableColumn, colIdx: number) => (
-                          <td
-                            key={colIdx}
-                            style={{
-                              border: '1px solid #ddd',
-                              padding: '8px',
-                              textAlign: col.align || 'left',
-                            }}
-                          >
-                            {col.format
-                              ? col.format(row[col.accessor])
-                              : row[col.accessor]}
-                          </td>
-                        )
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {/* Seção de Imagem */}
-            {section.type === 'image' && section.data && (
-              <div style={{ textAlign: 'center' }}>
-                <img
-                  src={section.data.src}
-                  alt={section.data.alt || ''}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: section.data.maxHeight || '300px',
-                  }}
-                />
-                {section.data.caption && (
-                  <p
+            {section.type === 'table' &&
+              section.data &&
+              (() => {
+                const tableData = section.data as ReportTableData;
+                return (
+                  <table
                     style={{
-                      fontSize: '8pt',
-                      color: '#666',
-                      marginTop: '5px',
-                      fontStyle: 'italic',
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      fontSize: '9pt',
                     }}
                   >
-                    {section.data.caption}
-                  </p>
-                )}
-              </div>
-            )}
+                    <thead>
+                      <tr style={{ backgroundColor: '#f5f5f5' }}>
+                        {tableData.columns.map(
+                          (col: TableColumn, colIdx: number) => (
+                            <th
+                              key={colIdx}
+                              style={{
+                                border: '1px solid #ddd',
+                                padding: '8px',
+                                textAlign: col.align || 'left',
+                                fontWeight: 'bold',
+                                width: col.width,
+                              }}
+                            >
+                              {col.header}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tableData.rows.map(
+                        (row: Record<string, unknown>, rowIdx: number) => (
+                          <tr
+                            key={rowIdx}
+                            style={{
+                              backgroundColor:
+                                rowIdx % 2 === 0 ? '#ffffff' : '#fafafa',
+                            }}
+                          >
+                            {tableData.columns.map(
+                              (col: TableColumn, colIdx: number) => (
+                                <td
+                                  key={colIdx}
+                                  style={{
+                                    border: '1px solid #ddd',
+                                    padding: '8px',
+                                    textAlign: col.align || 'left',
+                                  }}
+                                >
+                                  {col.format
+                                    ? col.format(row[col.accessor])
+                                    : String(row[col.accessor] ?? '')}
+                                </td>
+                              )
+                            )}
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                );
+              })()}
+
+            {/* Seção de Imagem */}
+            {section.type === 'image' &&
+              section.data &&
+              (() => {
+                const imageData = section.data as ReportImageData;
+                return (
+                  <div style={{ textAlign: 'center' }}>
+                    <img
+                      src={imageData.src}
+                      alt={imageData.alt || ''}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: imageData.maxHeight || '300px',
+                      }}
+                    />
+                    {imageData.caption && (
+                      <p
+                        style={{
+                          fontSize: '8pt',
+                          color: '#666',
+                          marginTop: '5px',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        {imageData.caption}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
             {/* Seção Customizada */}
             {section.type === 'custom' && section.content && (

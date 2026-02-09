@@ -11,7 +11,11 @@ import { TemplateViewer } from '@/app/(dashboard)/stock/templates/src/components
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
 import { cn } from '@/lib/utils';
-import type { Template, UnitOfMeasure } from '@/types/stock';
+import type {
+  Template,
+  TemplateAttributes,
+  UnitOfMeasure,
+} from '@/types/stock';
 import { Eye, Plus, SquareSplitHorizontal, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -190,9 +194,9 @@ export function MultiViewModal({
           name: data.name,
           iconUrl: data.iconUrl,
           unitOfMeasure: data.unitOfMeasure,
-          productAttributes: data.productAttributes as any,
-          variantAttributes: data.variantAttributes as any,
-          itemAttributes: data.itemAttributes as any,
+          productAttributes: data.productAttributes as TemplateAttributes,
+          variantAttributes: data.variantAttributes as TemplateAttributes,
+          itemAttributes: data.itemAttributes as TemplateAttributes,
         },
       });
       toast.success('Template atualizado com sucesso!');
@@ -205,9 +209,9 @@ export function MultiViewModal({
               name: data.name,
               iconUrl: data.iconUrl,
               unitOfMeasure: data.unitOfMeasure,
-              productAttributes: data.productAttributes as any,
-              variantAttributes: data.variantAttributes as any,
-              itemAttributes: data.itemAttributes as any,
+              productAttributes: data.productAttributes as TemplateAttributes,
+              variantAttributes: data.variantAttributes as TemplateAttributes,
+              itemAttributes: data.itemAttributes as TemplateAttributes,
             } as Template)
           : t
       );

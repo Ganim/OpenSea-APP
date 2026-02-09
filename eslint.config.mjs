@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Generated files
+    'src/types/generated/**',
+    'swagger/**',
   ]),
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -21,7 +24,7 @@ const eslintConfig = defineConfig([
       reportUnusedDisableDirectives: 'off',
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@next/next/no-img-element': 'off',

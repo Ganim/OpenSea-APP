@@ -4,6 +4,10 @@
  */
 
 import { logger } from '@/lib/logger';
+import type {
+  CreatePositionRequest,
+  UpdatePositionRequest,
+} from '@/services/hr/positions.service';
 import type { Position } from '@/types/hr';
 import { positionsApi } from '../api';
 
@@ -23,7 +27,7 @@ export async function createPosition(
     maxSalary: data.maxSalary,
     isActive: data.isActive ?? true,
   };
-  return positionsApi.create(createData as any);
+  return positionsApi.create(createData as CreatePositionRequest);
 }
 
 /**
@@ -37,7 +41,7 @@ export async function updatePosition(
   const cleanData: Partial<Position> = Object.fromEntries(
     Object.entries(data).filter(([, v]) => v !== null && v !== undefined)
   );
-  return positionsApi.update(id, cleanData as any);
+  return positionsApi.update(id, cleanData as UpdatePositionRequest);
 }
 
 /**
@@ -71,7 +75,7 @@ export async function duplicatePosition(
   };
 
   try {
-    return positionsApi.create(duplicateData as any);
+    return positionsApi.create(duplicateData as CreatePositionRequest);
   } catch (error) {
     logger.error(
       '[Positions] Duplication failed',

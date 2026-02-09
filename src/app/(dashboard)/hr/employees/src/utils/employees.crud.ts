@@ -4,6 +4,10 @@
  */
 
 import { logger } from '@/lib/logger';
+import type {
+  CreateEmployeeRequest,
+  UpdateEmployeeRequest,
+} from '@/services/hr/employees.service';
 import type { Employee } from '@/types/hr';
 import { employeesApi } from '../api';
 
@@ -43,7 +47,7 @@ export async function createEmployee(
     status: data.status,
     terminationDate: data.terminationDate,
   };
-  return employeesApi.create(createData as any);
+  return employeesApi.create(createData as CreateEmployeeRequest);
 }
 
 /**
@@ -57,7 +61,7 @@ export async function updateEmployee(
   const cleanData: Partial<Employee> = Object.fromEntries(
     Object.entries(data).filter(([, v]) => v !== null && v !== undefined)
   );
-  return employeesApi.update(id, cleanData as any);
+  return employeesApi.update(id, cleanData as UpdateEmployeeRequest);
 }
 
 /**
@@ -96,7 +100,7 @@ export async function duplicateEmployee(
   };
 
   try {
-    return employeesApi.create(duplicateData as any);
+    return employeesApi.create(duplicateData as CreateEmployeeRequest);
   } catch (error) {
     logger.error(
       '[Employees] Duplication failed',

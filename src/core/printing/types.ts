@@ -108,13 +108,25 @@ export interface TableColumn {
   accessor: string;
   width?: string;
   align?: 'left' | 'center' | 'right';
-  format?: (value: any) => string;
+  format?: (value: unknown) => string;
 }
 
 export interface ReportTableData {
   columns: TableColumn[];
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
 }
+
+export interface ReportImageData {
+  src: string;
+  alt?: string;
+  maxHeight?: string;
+  caption?: string;
+}
+
+export type ReportSectionData =
+  | ReportTableData
+  | ReportImageData
+  | Record<string, unknown>;
 
 export interface ReportData extends ReportConfig {
   sections: ReportSection[];
@@ -124,7 +136,7 @@ export interface ReportSection {
   type: 'text' | 'table' | 'image' | 'custom';
   title?: string;
   content?: string;
-  data?: any;
+  data?: ReportSectionData;
 }
 
 // ==================== SISTEMA DE TEMPLATES ====================
@@ -136,6 +148,7 @@ export enum TemplateType {
   CUSTOM = 'CUSTOM',
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PrintTemplate<T = any> {
   id: string;
   name: string;
@@ -151,7 +164,7 @@ export interface PrintTemplate<T = any> {
 
 export interface UsePrintOptions {
   template: PrintTemplate;
-  data: any;
+  data: unknown;
   config?: Partial<PrintConfig>;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -167,7 +180,7 @@ export interface PrintResult {
 
 export interface PrintPreviewProps {
   template: PrintTemplate;
-  data: any;
+  data: unknown;
   config?: PrintConfig;
   onPrint?: () => void;
   onDownloadPdf?: () => void;
@@ -178,7 +191,7 @@ export interface PrintPreviewProps {
 
 export interface BatchPrintItem {
   id: string;
-  data: any;
+  data: unknown;
   copies?: number;
 }
 

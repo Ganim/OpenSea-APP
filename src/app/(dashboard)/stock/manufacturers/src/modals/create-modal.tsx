@@ -49,13 +49,13 @@ export function CreateModal({
         </DialogHeader>
 
         <EntityForm
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          config={manufacturersConfig.form! as any}
+          config={manufacturersConfig.form! as never}
           mode="create"
           initialData={defaultData}
           onSubmit={async data => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await onSubmit(data as any);
+            await onSubmit(
+              data as Record<string, unknown> as Partial<Manufacturer>
+            );
             onClose();
           }}
           onCancel={onClose}

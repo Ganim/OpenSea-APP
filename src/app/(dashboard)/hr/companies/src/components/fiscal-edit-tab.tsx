@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
-import type { CompanyFiscalSettings } from '@/types/hr';
+import type {
+  CompanyFiscalSettings,
+  CreateCompanyFiscalSettingsData,
+} from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
 import { useState } from 'react';
@@ -35,7 +38,11 @@ export function FiscalEditTab({ companyId }: FiscalEditTabProps) {
     });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => companyFiscalSettingsApi.create(companyId, data),
+    mutationFn: (data: Partial<CreateCompanyFiscalSettingsData>) =>
+      companyFiscalSettingsApi.create(
+        companyId,
+        data as CreateCompanyFiscalSettingsData
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-fiscal-settings', companyId],
@@ -51,7 +58,8 @@ export function FiscalEditTab({ companyId }: FiscalEditTabProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => companyFiscalSettingsApi.update(companyId, data),
+    mutationFn: (data: Partial<CreateCompanyFiscalSettingsData>) =>
+      companyFiscalSettingsApi.update(companyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['company-fiscal-settings', companyId],
@@ -67,7 +75,9 @@ export function FiscalEditTab({ companyId }: FiscalEditTabProps) {
     },
   });
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (
+    data: Partial<CreateCompanyFiscalSettingsData>
+  ) => {
     if (fiscalSettings) {
       await updateMutation.mutateAsync(data);
     } else {
