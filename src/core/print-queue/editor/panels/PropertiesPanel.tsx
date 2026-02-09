@@ -114,6 +114,7 @@ function ToggleButton({
                 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
             )}
             onClick={onClick}
+            aria-label={label}
           >
             <Icon className="h-3.5 w-3.5" />
           </Button>
@@ -786,6 +787,7 @@ export function PropertiesPanel({
                 size="icon"
                 className="h-8 w-8"
                 onClick={onToggleCollapse}
+                aria-label="Expandir propriedades"
               >
                 <PanelRightOpen className="h-4 w-4" />
               </Button>
@@ -892,6 +894,7 @@ export function PropertiesPanel({
           size="icon"
           className="h-7 w-7"
           onClick={onToggleCollapse}
+          aria-label="Recolher propriedades"
         >
           <PanelRightClose className="h-4 w-4" />
         </Button>

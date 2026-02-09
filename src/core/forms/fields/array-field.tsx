@@ -37,6 +37,13 @@ export function ArrayField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const items = value || [];
   const minItems = field.minItems ?? 0;
@@ -110,6 +117,7 @@ export function ArrayField<T = unknown>({
                       disabled={isDisabled || index === 0}
                       className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Mover para cima"
+                      aria-label="Mover item para cima"
                     >
                       <GripVertical className="w-4 h-4" />
                     </button>
@@ -119,6 +127,7 @@ export function ArrayField<T = unknown>({
                       disabled={isDisabled || index === items.length - 1}
                       className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Mover para baixo"
+                      aria-label="Mover item para baixo"
                     >
                       <GripVertical className="w-4 h-4" />
                     </button>
@@ -136,6 +145,8 @@ export function ArrayField<T = unknown>({
                     placeholder={field.placeholder || 'Item...'}
                     disabled={isDisabled}
                     className="flex-1"
+                    aria-invalid={!!error}
+                    aria-describedby={describedBy}
                   />
 
                   {/* Remove button */}
@@ -147,6 +158,7 @@ export function ArrayField<T = unknown>({
                     disabled={isDisabled || items.length <= minItems}
                     className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                     title="Remover item"
+                    aria-label="Remover item"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

@@ -5,8 +5,8 @@
 
 'use client';
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { FieldConfig } from '@/core/types';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
 import type { SelectOption } from './select-field';
@@ -42,6 +42,13 @@ export function RadioField<T = unknown>({
 
   // Determine orientation
   const orientation = field.radioOrientation || 'vertical';
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   return (
     <FormFieldWrapper
@@ -58,6 +65,8 @@ export function RadioField<T = unknown>({
         value={value || ''}
         onValueChange={onChange}
         disabled={isDisabled}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
         className={
           orientation === 'horizontal'
             ? 'flex flex-row gap-4'

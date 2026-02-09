@@ -1,8 +1,8 @@
 # MEDIA: Melhorias de Acessibilidade
 
-**Status**: Base boa (Radix-ui), mas gaps em ARIA, contrast, keyboard
+**Status**: EM PROGRESSO (~70% concluído - Feb 2025)
 **Meta**: WCAG 2.1 Level AA nos fluxos principais
-**Esforco**: ~6h
+**Esforço**: ~6h (4h gastas, 2h restantes)
 
 ---
 
@@ -15,14 +15,24 @@
 - Disabled states tratados
 - `data-slot` attributes em componentes
 
-**Gaps:**
+**✅ Concluído (Feb 2025):**
 
-- Botoes icon-only sem `aria-label`
-- Erros de form nao linkados via `aria-describedby`
-- Sem skip links
+- ✅ Form fields com `aria-describedby` e `aria-invalid` (20+ field types)
+- ✅ Skip links em dashboard e central layouts
+- ✅ ~65 botões icon-only com `aria-label` em:
+  - Navigation/layout (theme toggle, navbar, navigation menu, page headers)
+  - Shared components (notifications, modals, pagination, selection toolbar)
+  - Form fields (remove buttons, rich-text/array/object toolbars)
+  - Print queue system (panels, cards, preview, editors, toolbars)
+  - Stock module (wizard, volumes, purchase orders, products, locations)
+  - HR, Admin, Central modules
+
+**Gaps Restantes:**
+
 - EntityGrid drag-select nao acessivel por teclado
 - Color contrast nao testado
 - Imagens sem alt text (regra desligada no ESLint)
+- ~90 botões icon-only restantes (principalmente em componentes genéricos shadcn/ui)
 
 ## Plano de Acao
 
@@ -44,12 +54,12 @@ Buscar todos os botoes que usam apenas icone:
 
 Componentes a verificar:
 
-- [ ] Header buttons (todos os pages)
-- [ ] Navbar icons
-- [ ] Theme toggle
-- [ ] Search clear button
-- [ ] Modal close button
-- [ ] Pagination arrows
+- [x] Header buttons (todos os pages) - 65+ botões labelados
+- [x] Navbar icons
+- [x] Theme toggle
+- [ ] Search clear button (não encontrado/não usado)
+- [x] Modal close button
+- [x] Pagination arrows
 
 ### 2. Form Error Association (~1.5h)
 
@@ -179,10 +189,11 @@ Corrigir todos os `<img>` sem alt:
 
 ## Checklist
 
-- [ ] Zero botoes icon-only sem aria-label
-- [ ] Erros de form associados com aria-describedby
-- [ ] Skip link implementado
-- [ ] EntityGrid navegavel por teclado
-- [ ] Audit de contraste passa (WCAG AA)
-- [ ] `jsx-a11y/alt-text: warn` habilitado
-- [ ] Teste E2E de acessibilidade com axe-core
+- [x] ~65 botões icon-only críticos com aria-label (principais módulos cobertos)
+- [x] Erros de form associados com aria-describedby e aria-invalid
+- [x] Skip link implementado (dashboard e central layouts)
+- [ ] EntityGrid navegavel por teclado (~1.5h restante)
+- [ ] Audit de contraste passa (WCAG AA) (~1h restante)
+- [ ] `jsx-a11y/alt-text: warn` habilitado (~30min)
+- [ ] Teste E2E de acessibilidade com axe-core (opcional)
+- [ ] ~90 botões icon-only restantes em componentes shadcn/ui (baixa prioridade)

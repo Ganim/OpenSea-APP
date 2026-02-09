@@ -1,14 +1,12 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,19 +17,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
+  itemsService,
   productsService,
   variantsService,
-  itemsService,
 } from '@/services/stock';
 
 import {
+  StepProduct,
+  StepStock,
+  StepTemplate,
+  StepVariants,
   useWizard,
   WizardStepper,
-  StepTemplate,
-  StepProduct,
-  StepVariants,
-  StepStock,
 } from './src';
 
 export default function ProductWizardPage() {
@@ -191,7 +191,12 @@ export default function ProductWizardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleExit}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleExit}
+          aria-label="Voltar"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>

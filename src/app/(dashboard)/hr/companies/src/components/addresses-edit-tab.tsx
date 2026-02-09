@@ -206,6 +206,7 @@ export function AddressesEditTab({ companyId }: AddressesEditTabProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleOpenEdit(address)}
+                      aria-label="Editar endereço"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -214,6 +215,7 @@ export function AddressesEditTab({ companyId }: AddressesEditTabProps) {
                       size="icon"
                       onClick={() => deleteMutation.mutate(address.id)}
                       disabled={deleteMutation.isPending}
+                      aria-label="Remover endereço"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

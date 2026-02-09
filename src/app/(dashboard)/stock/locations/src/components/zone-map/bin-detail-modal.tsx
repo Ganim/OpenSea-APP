@@ -1,17 +1,7 @@
 'use client';
 
-import React from 'react';
-import {
-  Package,
-  Lock,
-  Unlock,
-  Tag,
-  Copy,
-  Check,
-  ArrowRightLeft,
-  Eye,
-  Printer,
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -24,14 +14,24 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMediaQuery } from '@/hooks';
+import {
+  ArrowRightLeft,
+  Check,
+  Copy,
+  Eye,
+  Lock,
+  Package,
+  Printer,
+  Tag,
+  Unlock,
+} from 'lucide-react';
+import React from 'react';
 import { useBinDetail } from '../../api';
-import type { BinOccupancy, Zone, BinItem } from '../../types';
+import type { BinItem, BinOccupancy, Zone } from '../../types';
 import { formatBinPosition } from '../../utils';
 
 interface BinDetailModalProps {
@@ -217,6 +217,7 @@ export function BinDetailModal({
                 size="icon"
                 className="h-8 w-8 ml-2"
                 onClick={handleCopyAddress}
+                aria-label="Copiar endereço"
               >
                 {copied ? (
                   <Check className="h-4 w-4 text-green-500" />

@@ -39,6 +39,13 @@ export function SliderField<T = unknown>({
   const max = field.max ?? 100;
   const step =
     typeof field.step === 'string' ? parseFloat(field.step) : (field.step ?? 1);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   return (
     <FormFieldWrapper
@@ -61,6 +68,7 @@ export function SliderField<T = unknown>({
           step={step}
           disabled={isDisabled}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{min}</span>

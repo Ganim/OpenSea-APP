@@ -13,10 +13,10 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { BaseEntity, EntityFormConfig } from '@/core/types';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import React, { forwardRef, useEffect, useMemo, useState } from 'react';
@@ -591,7 +591,11 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps<any>>(
               </div>
             </div>
             {section.collapsible && (
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={isCollapsed ? 'Expandir secao' : 'Recolher secao'}
+              >
                 {isCollapsed ? (
                   <ChevronDown className="w-5 h-5" />
                 ) : (

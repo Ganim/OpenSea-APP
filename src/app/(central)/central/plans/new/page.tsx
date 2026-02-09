@@ -12,17 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlan, useSetPlanModules } from '@/hooks/admin/use-admin';
 import { PlanTier } from '@/types/enums';
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -93,7 +93,7 @@ export default function NewPlanPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/central/plans">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Voltar para planos">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>

@@ -33,8 +33,8 @@ import {
   LABEL_FIELDS,
   LABEL_SIZE_PRESETS,
 } from '../constants';
-import type { LabelFieldDefinition } from '../types';
 import type { LabelTemplatePreset } from '../templates/label-templates-presets';
+import type { LabelFieldDefinition } from '../types';
 import { TemplateSelector } from './template-selector';
 
 interface SimpleLabelEditorProps {
@@ -300,6 +300,7 @@ export function SimpleLabelEditor({
             size="icon"
             className="h-8 w-8"
             onClick={() => setZoom(Math.max(50, zoom - 25))}
+            aria-label="Diminuir zoom"
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -309,6 +310,7 @@ export function SimpleLabelEditor({
             size="icon"
             className="h-8 w-8"
             onClick={() => setZoom(Math.min(300, zoom + 25))}
+            aria-label="Aumentar zoom"
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -319,6 +321,7 @@ export function SimpleLabelEditor({
             size="icon"
             className="h-8 w-8"
             onClick={() => setIsFullscreen(!isFullscreen)}
+            aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
           >
             {isFullscreen ? (
               <Minimize2 className="w-4 h-4" />

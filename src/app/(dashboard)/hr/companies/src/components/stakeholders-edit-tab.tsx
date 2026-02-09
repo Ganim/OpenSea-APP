@@ -206,6 +206,7 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleOpenEdit(stakeholder)}
+                      aria-label="Editar sócio"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -214,6 +215,7 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
                       size="icon"
                       onClick={() => deleteMutation.mutate(stakeholder.id)}
                       disabled={deleteMutation.isPending}
+                      aria-label="Remover sócio"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

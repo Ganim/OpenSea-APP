@@ -1,11 +1,11 @@
 'use client';
 
-import React, { memo, useState } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { memo, useState } from 'react';
+import type { AisleConfig, BinOccupancy, ZoneStructure } from '../../types';
 import { BinCell } from './bin-cell';
-import type { BinOccupancy, ZoneStructure, AisleConfig } from '../../types';
 
 interface ShelfData {
   number: number;
@@ -126,6 +126,7 @@ export const AisleRow = memo(function AisleRow({
               className="h-6 w-6"
               onClick={handleZoomOut}
               disabled={zoomLevel === 'compact'}
+              aria-label="Diminuir zoom"
             >
               <ZoomOut className="h-3 w-3" />
             </Button>
@@ -136,6 +137,7 @@ export const AisleRow = memo(function AisleRow({
               onClick={handleResetZoom}
               disabled={localZoomLevel === null}
               title="Restaurar zoom global"
+              aria-label="Restaurar zoom global"
             >
               <RotateCcw className="h-3 w-3" />
             </Button>
@@ -145,6 +147,7 @@ export const AisleRow = memo(function AisleRow({
               className="h-6 w-6"
               onClick={handleZoomIn}
               disabled={zoomLevel === 'detailed'}
+              aria-label="Aumentar zoom"
             >
               <ZoomIn className="h-3 w-3" />
             </Button>

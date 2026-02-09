@@ -44,6 +44,7 @@ export function PageHeader({
               size="icon"
               onClick={() => router.back()}
               className="w-14 h-14 rounded-2xl"
+              aria-label="Voltar"
             >
               <ChevronLeft className="w-6 h-6" />
             </Button>

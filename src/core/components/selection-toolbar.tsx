@@ -5,21 +5,8 @@
 
 'use client';
 
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
-  X,
-  MoreVertical,
-  Download,
-  Upload,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +14,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Copy,
+  Download,
+  Edit,
+  Eye,
+  MoreVertical,
+  Trash2,
+  X,
+} from 'lucide-react';
+import React from 'react';
 
 // =============================================================================
 // TYPES
@@ -229,7 +228,7 @@ export function SelectionToolbar({
                 <div className="w-px h-6 bg-border" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" aria-label="Mais acoes">
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -264,6 +263,7 @@ export function SelectionToolbar({
               size="icon"
               onClick={onClear}
               className="text-muted-foreground hover:text-foreground"
+              aria-label="Limpar selecao"
             >
               <X className="w-4 h-4" />
             </Button>

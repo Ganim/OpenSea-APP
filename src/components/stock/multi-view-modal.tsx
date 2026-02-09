@@ -6,10 +6,10 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
 import { TemplateViewer } from '@/app/(dashboard)/stock/templates/src/components';
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
   Template,
@@ -401,6 +401,7 @@ export function MultiViewModal({
                   onClick={() => setShowSearch(true)}
                   className="shrink-0"
                   title="Adicionar template"
+                  aria-label="Adicionar template"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -417,6 +418,9 @@ export function MultiViewModal({
                   title={
                     viewMode === 'compare' ? 'Modo Único' : 'Modo Comparação'
                   }
+                  aria-label={
+                    viewMode === 'compare' ? 'Modo unico' : 'Modo comparacao'
+                  }
                 >
                   <SquareSplitHorizontal
                     className={cn(
@@ -426,7 +430,12 @@ export function MultiViewModal({
                   />
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={onClose}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                aria-label="Fechar"
+              >
                 <X className="w-4 h-4" />
               </Button>
             </div>

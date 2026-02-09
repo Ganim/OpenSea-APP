@@ -5,11 +5,11 @@
 
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import type { FieldConfig } from '@/core/types';
+import { X } from 'lucide-react';
+import { KeyboardEvent, useState } from 'react';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface TagsFieldProps<T = unknown> {
@@ -39,6 +39,13 @@ export function TagsField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const tags = value || [];
 
@@ -85,6 +92,7 @@ export function TagsField<T = unknown>({
                   type="button"
                   onClick={() => removeTag(tag)}
                   disabled={isDisabled}
+                  aria-label={`Remover tag ${tag}`}
                   className="rounded-full p-0.5 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   <X className="w-3 h-3" />
@@ -109,6 +117,7 @@ export function TagsField<T = unknown>({
           placeholder={field.placeholder || 'Digite e pressione Enter...'}
           disabled={isDisabled}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       </div>
     </FormFieldWrapper>

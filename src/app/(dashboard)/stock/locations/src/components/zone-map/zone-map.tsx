@@ -21,11 +21,11 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
+import { MoveItemModal } from '../../modals/move-item-modal';
 import type { Bin, BinItem, BinOccupancy, Zone } from '../../types';
 import { AisleRow } from './aisle-row';
 import { BinDetailModal } from './bin-detail-modal';
 import { MapLegend } from './map-legend';
-import { MoveItemModal } from '../../modals/move-item-modal';
 
 interface AisleConfig {
   aisleNumber: number;
@@ -345,6 +345,7 @@ export function ZoneMap({
               className="h-8 w-8 rounded-r-none"
               onClick={handleZoomOut}
               disabled={zoomLevel === 'compact'}
+              aria-label="Diminuir zoom"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -353,6 +354,7 @@ export function ZoneMap({
               size="icon"
               className="h-8 w-8 rounded-none border-x"
               onClick={handleResetZoom}
+              aria-label="Resetar zoom"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -362,6 +364,7 @@ export function ZoneMap({
               className="h-8 w-8 rounded-l-none"
               onClick={handleZoomIn}
               disabled={zoomLevel === 'detailed'}
+              aria-label="Aumentar zoom"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>

@@ -74,6 +74,7 @@ export function ItemsActionBar({
           className="h-7 w-7 text-sky-100 hover:text-white hover:bg-sky-500/50"
           onClick={onClearSelection}
           title="Limpar seleção"
+          aria-label="Limpar seleção"
         >
           <X className="h-4 w-4" />
         </Button>

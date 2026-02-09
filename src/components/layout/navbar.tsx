@@ -61,6 +61,7 @@ export function Navbar({ onMenuOpen }: NavbarProps) {
               size="icon"
               className="rounded-xl"
               onClick={onMenuOpen}
+              aria-label="Abrir menu de navegacao"
             >
               <Grid3x3 className="w-5 h-5" />
             </Button>

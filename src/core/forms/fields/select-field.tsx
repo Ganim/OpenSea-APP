@@ -50,6 +50,13 @@ export function SelectField<T = unknown>({
 
   // Get options from field config
   const options = field.options || [];
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   return (
     <FormFieldWrapper
@@ -70,6 +77,7 @@ export function SelectField<T = unknown>({
         <SelectTrigger
           id={String(field.name)}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
           className="w-full"
         >
           <SelectValue placeholder={field.placeholder || 'Selecione...'} />

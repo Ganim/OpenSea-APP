@@ -1,6 +1,5 @@
 'use client';
 
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { logger } from '@/lib/logger';
 import type {
   CreateVariantRequest,
   Product,
@@ -926,6 +926,7 @@ export function VariantForm({
                       setSimilars(similars.filter((_, i) => i !== index));
                     }}
                     disabled={isLoading}
+                    aria-label="Remover item semelhante"
                   >
                     ×
                   </Button>

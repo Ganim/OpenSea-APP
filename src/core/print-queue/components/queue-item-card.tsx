@@ -109,6 +109,7 @@ export function QueueItemCard({
           className="h-8 w-8"
           onClick={() => onUpdateCopies(item.copies - 1)}
           disabled={item.copies <= 1}
+          aria-label="Diminuir copias"
         >
           <Minus className="w-4 h-4" />
         </Button>
@@ -133,6 +134,7 @@ export function QueueItemCard({
           className="h-8 w-8"
           onClick={() => onUpdateCopies(item.copies + 1)}
           disabled={item.copies >= 999}
+          aria-label="Aumentar copias"
         >
           <Plus className="w-4 h-4" />
         </Button>
@@ -144,6 +146,7 @@ export function QueueItemCard({
         size="icon"
         className="h-8 w-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
         onClick={onRemove}
+        aria-label="Remover item"
       >
         <Trash2 className="w-4 h-4" />
       </Button>

@@ -77,6 +77,7 @@ export function ManageGroupsModal({
                       size="icon"
                       onClick={() => onRemoveGroup(group.id)}
                       disabled={isLoading}
+                      aria-label="Remover grupo"
                     >
                       <X className="h-4 w-4" />
                     </Button>

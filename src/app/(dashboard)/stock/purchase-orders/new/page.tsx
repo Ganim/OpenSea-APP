@@ -1,11 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   ArrowLeft,
   Building2,
@@ -20,27 +15,21 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -49,6 +38,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -58,13 +58,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 import { useCreatePurchaseOrder } from '@/hooks/stock/use-purchase-orders';
 import { useSuppliers } from '@/hooks/stock/use-stock-other';
 import { useVariantsPaginated } from '@/hooks/stock/use-variants';
-import type { Variant, CreatePurchaseOrderRequest } from '@/types/stock';
+import type { CreatePurchaseOrderRequest, Variant } from '@/types/stock';
 
 // Zod schema for form validation
 const purchaseOrderSchema = z.object({
@@ -273,6 +273,7 @@ export default function NewPurchaseOrderPage() {
           variant="ghost"
           size="icon"
           onClick={() => router.push('/stock/purchase-orders')}
+          aria-label="Voltar para ordens de compra"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -425,6 +426,7 @@ export default function NewPurchaseOrderPage() {
                               handleUpdateQuantity(item.variantId, -1)
                             }
                             disabled={item.quantity <= 1}
+                            aria-label="Diminuir quantidade"
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -439,6 +441,7 @@ export default function NewPurchaseOrderPage() {
                             onClick={() =>
                               handleUpdateQuantity(item.variantId, 1)
                             }
+                            aria-label="Aumentar quantidade"
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -469,6 +472,7 @@ export default function NewPurchaseOrderPage() {
                           size="icon"
                           className="h-8 w-8 text-destructive hover:text-destructive"
                           onClick={() => handleRemoveItem(item.variantId)}
+                          aria-label="Remover item da ordem"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

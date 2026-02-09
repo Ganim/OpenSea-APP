@@ -111,6 +111,7 @@ function ToolbarButton({
             )}
             onClick={onClick}
             disabled={disabled}
+            aria-label={label}
           >
             <Icon className="h-4 w-4" />
           </Button>
@@ -275,6 +276,9 @@ function LayersPopover({
                         e.stopPropagation();
                         onUpdate(el.id, { visible: !el.visible });
                       }}
+                      aria-label={
+                        el.visible ? 'Ocultar camada' : 'Mostrar camada'
+                      }
                     >
                       {el.visible ? (
                         <Eye className="h-3 w-3 text-slate-400" />
@@ -290,6 +294,9 @@ function LayersPopover({
                         e.stopPropagation();
                         onUpdate(el.id, { locked: !el.locked });
                       }}
+                      aria-label={
+                        el.locked ? 'Desbloquear camada' : 'Bloquear camada'
+                      }
                     >
                       {el.locked ? (
                         <Lock className="h-3 w-3 text-amber-500" />
@@ -315,6 +322,7 @@ function LayersPopover({
                       size="icon"
                       className="h-6 w-6"
                       onClick={() => onBringToFront(selectedIds[0])}
+                      aria-label="Trazer para frente"
                     >
                       <BiChevronsUp className="h-3 w-3" />
                     </Button>
@@ -330,6 +338,7 @@ function LayersPopover({
                       size="icon"
                       className="h-6 w-6"
                       onClick={() => onMoveForward(selectedIds[0])}
+                      aria-label="Avancar camada"
                     >
                       <BiChevronUp className="h-3 w-3" />
                     </Button>
@@ -345,6 +354,7 @@ function LayersPopover({
                       size="icon"
                       className="h-6 w-6"
                       onClick={() => onMoveBackward(selectedIds[0])}
+                      aria-label="Recuar camada"
                     >
                       <BiChevronDown className="h-3 w-3" />
                     </Button>
@@ -360,6 +370,7 @@ function LayersPopover({
                       size="icon"
                       className="h-6 w-6"
                       onClick={() => onSendToBack(selectedIds[0])}
+                      aria-label="Enviar para tras"
                     >
                       <BiChevronsDown className="h-3 w-3" />
                     </Button>
@@ -376,6 +387,7 @@ function LayersPopover({
                     size="icon"
                     className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                     onClick={() => onDelete(selectedIds[0])}
+                    aria-label="Excluir"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

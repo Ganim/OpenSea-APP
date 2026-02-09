@@ -5,26 +5,9 @@
  * Painel de configuração de tabelas com modo tabela/célula
  */
 
-import React, { useState } from 'react';
-import type {
-  TableElement,
-  TableConfig,
-  TableCell,
-  MergedCell,
-  CellBorderStyle,
-  CellLabelConfig,
-  BorderStyle,
-  TextStyle,
-} from '../studio-types';
-import { getFieldLabel } from '../elements/FieldElementRenderer';
-import { FieldPickerModal } from '../components/FieldPickerModal';
-import { useEditorStore } from '../stores/editorStore';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -32,24 +15,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import {
-  Plus,
-  Minus,
-  Trash2,
-  ArrowLeft,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  AlignLeft,
   AlignCenter,
+  AlignLeft,
   AlignRight,
-  AlignVerticalJustifyStart,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyEnd,
-  ChevronRight,
+  AlignVerticalJustifyStart,
+  ArrowLeft,
+  Bold,
   Braces,
+  ChevronRight,
+  Italic,
+  Minus,
+  Plus,
+  Strikethrough,
+  Trash2,
+  Underline,
 } from 'lucide-react';
+import { useState } from 'react';
+import { FieldPickerModal } from '../components/FieldPickerModal';
+import { getFieldLabel } from '../elements/FieldElementRenderer';
+import { useEditorStore } from '../stores/editorStore';
+import type {
+  BorderStyle,
+  CellBorderStyle,
+  CellLabelConfig,
+  MergedCell,
+  TableCell,
+  TableConfig,
+  TableElement,
+  TextStyle,
+} from '../studio-types';
 
 interface TableConfigPanelProps {
   element: TableElement;
@@ -137,6 +137,7 @@ export function TableConfigPanel({
             size="icon"
             className="h-6 w-6 shrink-0"
             onClick={() => onSelectCell(null)}
+            aria-label="Voltar"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
           </Button>
@@ -258,6 +259,7 @@ export function TableConfigPanel({
                     cellStyle.fontWeight === 'bold' ? 'normal' : 'bold',
                 })
               }
+              aria-label="Negrito"
             >
               <Bold className="h-3.5 w-3.5" />
             </Button>
@@ -271,6 +273,7 @@ export function TableConfigPanel({
                     cellStyle.fontStyle === 'italic' ? 'normal' : 'italic',
                 })
               }
+              aria-label="Italico"
             >
               <Italic className="h-3.5 w-3.5" />
             </Button>
@@ -286,6 +289,7 @@ export function TableConfigPanel({
                       : 'underline',
                 })
               }
+              aria-label="Sublinhado"
             >
               <Underline className="h-3.5 w-3.5" />
             </Button>
@@ -301,6 +305,7 @@ export function TableConfigPanel({
                       : 'line-through',
                 })
               }
+              aria-label="Tachado"
             >
               <Strikethrough className="h-3.5 w-3.5" />
             </Button>
@@ -311,6 +316,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${cellStyle.textAlign === 'left' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ textAlign: 'left' })}
+              aria-label="Alinhar a esquerda"
             >
               <AlignLeft className="h-3.5 w-3.5" />
             </Button>
@@ -319,6 +325,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${cellStyle.textAlign === 'center' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ textAlign: 'center' })}
+              aria-label="Alinhar ao centro"
             >
               <AlignCenter className="h-3.5 w-3.5" />
             </Button>
@@ -327,6 +334,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${cellStyle.textAlign === 'right' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ textAlign: 'right' })}
+              aria-label="Alinhar a direita"
             >
               <AlignRight className="h-3.5 w-3.5" />
             </Button>
@@ -339,6 +347,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${cellStyle.verticalAlign === 'top' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ verticalAlign: 'top' })}
+              aria-label="Alinhar ao topo"
             >
               <AlignVerticalJustifyStart className="h-3.5 w-3.5" />
             </Button>
@@ -347,6 +356,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${!cellStyle.verticalAlign || cellStyle.verticalAlign === 'middle' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ verticalAlign: 'middle' })}
+              aria-label="Alinhar ao meio"
             >
               <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
             </Button>
@@ -355,6 +365,7 @@ export function TableConfigPanel({
               size="icon"
               className={`h-7 w-7 ${cellStyle.verticalAlign === 'bottom' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : ''}`}
               onClick={() => updateCellStyle({ verticalAlign: 'bottom' })}
+              aria-label="Alinhar a base"
             >
               <AlignVerticalJustifyEnd className="h-3.5 w-3.5" />
             </Button>
@@ -393,6 +404,7 @@ export function TableConfigPanel({
                 onClick={() =>
                   updateCell(row, col, { backgroundColor: undefined })
                 }
+                aria-label="Limpar fundo"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -483,6 +495,7 @@ export function TableConfigPanel({
               size="icon"
               className="h-6 w-6"
               onClick={removeRow}
+              aria-label="Remover linha"
             >
               <Minus className="h-3 w-3" />
             </Button>
@@ -491,6 +504,7 @@ export function TableConfigPanel({
               size="icon"
               className="h-6 w-6"
               onClick={addRow}
+              aria-label="Adicionar linha"
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -504,6 +518,7 @@ export function TableConfigPanel({
               size="icon"
               className="h-6 w-6"
               onClick={removeColumn}
+              aria-label="Remover coluna"
             >
               <Minus className="h-3 w-3" />
             </Button>
@@ -512,6 +527,7 @@ export function TableConfigPanel({
               size="icon"
               className="h-6 w-6"
               onClick={addColumn}
+              aria-label="Adicionar coluna"
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -702,6 +718,7 @@ function MergeSection({
                 size="icon"
                 className="h-5 w-5"
                 onClick={() => removeMerge(i)}
+                aria-label="Remover mesclagem"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>

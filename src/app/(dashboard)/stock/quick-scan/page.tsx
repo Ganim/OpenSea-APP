@@ -1,35 +1,34 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
-  ScanLine,
-  Camera,
-  Keyboard,
-  Info,
-  PackagePlus,
-  PackageMinus,
-  ArrowRightLeft,
-  ClipboardList,
-  X,
-  Check,
   AlertCircle,
-  Package,
-  MapPin,
+  ArrowRightLeft,
   Boxes,
+  Camera,
+  ClipboardList,
+  Info,
+  Keyboard,
+  MapPin,
+  Package,
+  PackageMinus,
+  PackagePlus,
+  ScanLine,
   Tag,
+  X,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
-import { useScanMode, useContinuousScan } from '@/hooks/stock';
-import type { ScanResult, ScanEntityType } from '@/types/stock';
+import { useScanMode } from '@/hooks/stock';
+import type { ScanEntityType, ScanResult } from '@/types/stock';
 
 // ============================================
 // SCAN MODE SELECTOR
@@ -169,6 +168,7 @@ function ScanResultCard({ result, onAction, onRemove }: ScanResultCardProps) {
                   size="icon"
                   className="h-6 w-6 ml-auto"
                   onClick={onRemove}
+                  aria-label="Remover resultado"
                 >
                   <X className="h-4 w-4" />
                 </Button>

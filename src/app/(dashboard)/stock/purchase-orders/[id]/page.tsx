@@ -1,8 +1,5 @@
 'use client';
 
-import { use, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import {
   ArrowLeft,
   Calendar,
@@ -14,14 +11,15 @@ import {
   RefreshCw,
   ShoppingCart,
   Truck,
-  User,
   XCircle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useMemo } from 'react';
+import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -34,8 +32,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 import {
-  usePurchaseOrder,
   useCancelPurchaseOrder,
+  usePurchaseOrder,
   useUpdatePurchaseOrderStatus,
 } from '@/hooks/stock/use-purchase-orders';
 import { useSuppliers } from '@/hooks/stock/use-stock-other';
@@ -185,6 +183,7 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
             variant="ghost"
             size="icon"
             onClick={() => router.push('/stock/purchase-orders')}
+            aria-label="Voltar para ordens de compra"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -205,7 +204,12 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            aria-label="Atualizar"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
           {purchaseOrder.status === 'PENDING' && (

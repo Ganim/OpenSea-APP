@@ -41,7 +41,12 @@ export function PrintQueuePanel() {
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-xl relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl relative"
+            aria-label="Fila de impressao"
+          >
             <Printer className="w-5 h-5" />
             {hasItems && (
               <motion.div
@@ -157,6 +162,7 @@ export function PrintQueuePanel() {
                                     )
                                   }
                                   disabled={queueItem.copies <= 1}
+                                  aria-label="Diminuir copias"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </Button>
@@ -173,6 +179,7 @@ export function PrintQueuePanel() {
                                       queueItem.copies + 1
                                     )
                                   }
+                                  aria-label="Aumentar copias"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </Button>
@@ -185,6 +192,7 @@ export function PrintQueuePanel() {
                                   actions.removeFromQueue(queueItem.queueId)
                                 }
                                 className="h-6 px-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
+                                aria-label="Remover item"
                               >
                                 <X className="w-3 h-3" />
                               </Button>

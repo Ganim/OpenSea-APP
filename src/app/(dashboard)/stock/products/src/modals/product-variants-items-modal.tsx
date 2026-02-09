@@ -16,12 +16,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePrintQueue } from '@/core/print-queue';
 import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
 import { cn } from '@/lib/utils';
 import { itemsService, variantsService } from '@/services/stock';
 import type { Item, Product, Variant } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
-import { usePrintQueue } from '@/core/print-queue';
 import {
   Box,
   Copy,
@@ -247,6 +247,7 @@ export function ProductVariantsItemsModal({
                       }
                     }}
                     title="Copiar ID do produto"
+                    aria-label="Copiar ID do produto"
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>

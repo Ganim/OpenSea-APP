@@ -1,12 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -14,9 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Plus, Trash2, Wand2, X } from 'lucide-react';
 import type { Template } from '@/types/stock';
+import { Plus, Trash2, Wand2, X } from 'lucide-react';
+import { useState } from 'react';
 import type { WizardVariant } from '../hooks/use-wizard';
 
 interface StepVariantsProps {
@@ -214,6 +214,7 @@ function VariantCard({
           size="icon"
           className="h-8 w-8 text-red-500 hover:text-red-600"
           onClick={onRemove}
+          aria-label="Remover variante"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -414,6 +415,7 @@ function VariantGenerator({
                     variant="ghost"
                     size="icon"
                     onClick={() => removeAttribute(attrIndex)}
+                    aria-label="Remover atributo"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

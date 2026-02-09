@@ -5,7 +5,6 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import GjsEditor, { Canvas, useEditorMaybe } from '@grapesjs/react';
 import type {
@@ -287,6 +287,7 @@ function EditorToolbar({
                 className="h-8 w-8"
                 onClick={handleZoomOut}
                 disabled={zoom <= ZOOM_LEVELS[0]}
+                aria-label="Diminuir zoom"
               >
                 <ZoomOut className="w-4 h-4" />
               </Button>
@@ -315,6 +316,7 @@ function EditorToolbar({
                 className="h-8 w-8"
                 onClick={handleZoomIn}
                 disabled={zoom >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+                aria-label="Aumentar zoom"
               >
                 <ZoomIn className="w-4 h-4" />
               </Button>
@@ -329,6 +331,7 @@ function EditorToolbar({
                 size="icon"
                 className="h-8 w-8"
                 onClick={handleResetZoom}
+                aria-label="Resetar zoom"
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
@@ -347,6 +350,7 @@ function EditorToolbar({
               size="icon"
               className="h-8 w-8"
               onClick={() => setShowGrid(!showGrid)}
+              aria-label={showGrid ? 'Ocultar grid' : 'Mostrar grid'}
             >
               <Grid3X3 className="w-4 h-4" />
             </Button>
@@ -366,6 +370,7 @@ function EditorToolbar({
                 className="h-8 w-8"
                 onClick={handleUndo}
                 disabled={readOnly}
+                aria-label="Desfazer"
               >
                 <Undo2 className="w-4 h-4" />
               </Button>
@@ -381,6 +386,7 @@ function EditorToolbar({
                 className="h-8 w-8"
                 onClick={handleRedo}
                 disabled={readOnly}
+                aria-label="Refazer"
               >
                 <Redo2 className="w-4 h-4" />
               </Button>
@@ -399,6 +405,7 @@ function EditorToolbar({
               size="icon"
               className="h-8 w-8"
               onClick={() => setIsFullscreen(!isFullscreen)}
+              aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
             >
               {isFullscreen ? (
                 <Minimize2 className="w-4 h-4" />

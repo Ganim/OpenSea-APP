@@ -5,8 +5,6 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -21,8 +19,10 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { cn } from '@/lib/utils';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { useState } from 'react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface RelationOption {
   value: string;
@@ -59,6 +59,13 @@ export function RelationField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   // Get options from field config
   const options = (field.relationOptions || []) as RelationOption[];
@@ -143,6 +150,8 @@ export function RelationField<T = unknown>({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
             disabled={isDisabled}
             className={cn(
               'w-full justify-between',
@@ -228,6 +237,7 @@ export function RelationField<T = unknown>({
                   type="button"
                   onClick={() => handleSelect(val)}
                   disabled={isDisabled}
+                  aria-label={`Remover ${option.label}`}
                   className="rounded-full p-0.5 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   <X className="w-3 h-3" />

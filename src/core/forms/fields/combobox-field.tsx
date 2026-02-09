@@ -62,6 +62,13 @@ export function ComboboxField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   // Get current selected option
   const selectedOption = options.find(opt => opt.value === value);
@@ -123,6 +130,8 @@ export function ComboboxField<T = unknown>({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
             disabled={isDisabled}
             className={cn(
               'w-full justify-between',

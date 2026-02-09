@@ -7,8 +7,8 @@
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from 'lucide-react';
 import type { FieldConfig } from '@/core/types';
+import { Calendar } from 'lucide-react';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface DateRange {
@@ -41,6 +41,13 @@ export function DateRangeField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const dateRange = value || { start: '', end: '' };
 
@@ -81,6 +88,7 @@ export function DateRangeField<T = unknown>({
               disabled={isDisabled}
               className="pr-10"
               aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
@@ -104,6 +112,7 @@ export function DateRangeField<T = unknown>({
               min={dateRange.start || undefined}
               className="pr-10"
               aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>

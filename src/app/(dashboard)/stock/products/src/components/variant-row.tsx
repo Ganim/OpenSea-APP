@@ -188,6 +188,7 @@ export function VariantRow({
           e.stopPropagation();
           onClick();
         }}
+        aria-label="Ver itens da variante"
       >
         <ChevronRight
           className={cn(

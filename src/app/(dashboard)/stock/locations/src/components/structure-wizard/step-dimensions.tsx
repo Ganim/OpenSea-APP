@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Minus, Plus, Box, Layers, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -12,10 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { STRUCTURE_LIMITS } from '../../constants';
-import { BIN_DIRECTION_LABELS } from '../../constants';
+import { Box, Grid3X3, Layers, Minus, Plus } from 'lucide-react';
+import { BIN_DIRECTION_LABELS, STRUCTURE_LIMITS } from '../../constants';
 import type { ZoneStructureFormData } from '../../types';
 
 interface StepDimensionsProps {
@@ -91,6 +89,7 @@ export function StepDimensions({
                     handleDecrement('aisles', STRUCTURE_LIMITS.minAisles)
                   }
                   disabled={formData.aisles <= STRUCTURE_LIMITS.minAisles}
+                  aria-label="Diminuir número de corredores"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -116,6 +115,7 @@ export function StepDimensions({
                     handleIncrement('aisles', STRUCTURE_LIMITS.maxAisles)
                   }
                   disabled={formData.aisles >= STRUCTURE_LIMITS.maxAisles}
+                  aria-label="Aumentar número de corredores"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -158,6 +158,7 @@ export function StepDimensions({
                     formData.shelvesPerAisle <=
                     STRUCTURE_LIMITS.minShelvesPerAisle
                   }
+                  aria-label="Diminuir prateleiras"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -189,6 +190,7 @@ export function StepDimensions({
                     formData.shelvesPerAisle >=
                     STRUCTURE_LIMITS.maxShelvesPerAisle
                   }
+                  aria-label="Aumentar prateleiras"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -228,6 +230,7 @@ export function StepDimensions({
                   disabled={
                     formData.binsPerShelf <= STRUCTURE_LIMITS.minBinsPerShelf
                   }
+                  aria-label="Diminuir nichos"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -258,6 +261,7 @@ export function StepDimensions({
                   disabled={
                     formData.binsPerShelf >= STRUCTURE_LIMITS.maxBinsPerShelf
                   }
+                  aria-label="Aumentar nichos"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>

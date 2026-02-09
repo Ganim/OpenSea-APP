@@ -11,18 +11,8 @@
  * - Keyboard shortcuts
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,43 +20,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-  Search,
-  Plus,
-  Sparkles,
-  Keyboard,
   ChevronDown,
-  LayoutGrid,
-  List,
+  Keyboard,
   Package,
+  Plus,
   RefreshCw,
+  Search,
+  Sparkles,
 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import { HierarchyTree } from './hierarchy-tree';
-import { DetailPanel } from './detail-panel';
-import { QuickAddModal } from './quick-add-modal';
 import { BatchVariantCreator } from './batch-variant-creator';
-import {
-  useKeyboardShortcuts,
-  ShortcutHint,
-  SHORTCUTS,
-} from './use-keyboard-shortcuts';
+import { DetailPanel } from './detail-panel';
+import { HierarchyTree } from './hierarchy-tree';
+import { QuickAddModal } from './quick-add-modal';
 import type {
-  ProductWorkspaceProps,
   HierarchyNode,
+  ProductWorkspaceProps,
   WorkspaceView,
 } from './types';
+import {
+  ShortcutHint,
+  SHORTCUTS,
+  useKeyboardShortcuts,
+} from './use-keyboard-shortcuts';
 
 import { useProducts } from '@/hooks/stock/use-products';
-import { useVariants } from '@/hooks/stock/use-variants';
 import { useTemplates } from '@/hooks/stock/use-stock-other';
-import type { Product, Variant, Template } from '@/types/stock';
+import { useVariants } from '@/hooks/stock/use-variants';
+import type { Product, Template, Variant } from '@/types/stock';
 
 // ============================================
 // HOOKS
@@ -399,7 +397,12 @@ export function ProductWorkspace({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={refetch}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={refetch}
+                  aria-label="Atualizar"
+                >
                   <RefreshCw
                     className={cn('w-4 h-4', isLoading && 'animate-spin')}
                   />

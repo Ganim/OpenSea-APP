@@ -34,6 +34,13 @@ export function ColorField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   return (
     <FormFieldWrapper
@@ -62,6 +69,7 @@ export function ColorField<T = unknown>({
           disabled={isDisabled}
           className="w-20 h-9 p-1 cursor-pointer"
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
 
         {/* Hex input */}
@@ -74,6 +82,7 @@ export function ColorField<T = unknown>({
           className="flex-1 font-mono"
           pattern="^#[0-9A-Fa-f]{6}$"
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       </div>
     </FormFieldWrapper>

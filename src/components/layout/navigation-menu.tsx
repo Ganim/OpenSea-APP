@@ -211,6 +211,7 @@ export function NavigationMenu({
                         size="icon"
                         onClick={handleBack}
                         className="rounded-xl hover:bg-gray-100 dark:hover:bg-white/5"
+                        aria-label="Voltar"
                       >
                         <ArrowLeft className="w-5 h-5" />
                       </Button>

@@ -55,6 +55,8 @@ export function FormFieldWrapper({
   className,
   children,
 }: FormFieldWrapperProps) {
+  const descriptionId = `${id}-description`;
+  const errorId = `${id}-error`;
   return (
     <div
       className={cn(
@@ -82,14 +84,21 @@ export function FormFieldWrapper({
 
         {/* Descrição */}
         {description && !error && (
-          <p className="text-xs text-[rgb(var(--color-foreground-subtle))] px-2 ">
+          <p
+            id={descriptionId}
+            className="text-xs text-[rgb(var(--color-foreground-subtle))] px-2 "
+          >
             {description}
           </p>
         )}
 
         {/* Erro */}
         {error && (
-          <div className="flex items-start gap-2 text-xs text-[rgb(var(--color-destructive))]">
+          <div
+            id={errorId}
+            role="alert"
+            className="flex items-start gap-2 text-xs text-[rgb(var(--color-destructive))]"
+          >
             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>

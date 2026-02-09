@@ -42,6 +42,14 @@ export function JsonField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const effectiveError = error || validationError || undefined;
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = effectiveError
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   // Validate JSON
   const validateJson = (jsonString: string) => {
@@ -128,7 +136,7 @@ export function JsonField<T = unknown>({
       label={field.label}
       required={field.required}
       description={field.description}
-      error={error || validationError || undefined}
+      error={effectiveError}
       icon={field.icon}
       colSpan={field.colSpan}
       disabled={isDisabled}
@@ -190,6 +198,7 @@ export function JsonField<T = unknown>({
           )}
           spellCheck={false}
           aria-invalid={!!error || !isValid}
+          aria-describedby={describedBy}
         />
 
         {/* Validation error */}

@@ -5,20 +5,20 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import type { FieldConfig } from '@/core/types';
 import {
   Bold,
+  Code,
   Italic,
+  Link as LinkIcon,
   List,
   ListOrdered,
-  Link as LinkIcon,
-  Code,
   Quote,
 } from 'lucide-react';
-import type { FieldConfig } from '@/core/types';
+import { useState } from 'react';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface RichTextFieldProps<T = unknown> {
@@ -48,6 +48,13 @@ export function RichTextField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   // Helper to insert markdown syntax
   const insertMarkdown = (syntax: string, placeholder: string = 'texto') => {
@@ -164,6 +171,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('bold', 'negrito')}
               disabled={isDisabled}
               title="Negrito"
+              aria-label="Negrito"
             >
               <Bold className="w-4 h-4" />
             </Button>
@@ -174,6 +182,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('italic', 'itálico')}
               disabled={isDisabled}
               title="Itálico"
+              aria-label="Italico"
             >
               <Italic className="w-4 h-4" />
             </Button>
@@ -184,6 +193,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('code', 'código')}
               disabled={isDisabled}
               title="Código"
+              aria-label="Codigo"
             >
               <Code className="w-4 h-4" />
             </Button>
@@ -195,6 +205,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('ul', 'item')}
               disabled={isDisabled}
               title="Lista"
+              aria-label="Lista"
             >
               <List className="w-4 h-4" />
             </Button>
@@ -205,6 +216,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('ol', 'item')}
               disabled={isDisabled}
               title="Lista Numerada"
+              aria-label="Lista numerada"
             >
               <ListOrdered className="w-4 h-4" />
             </Button>
@@ -216,6 +228,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('link', 'texto do link')}
               disabled={isDisabled}
               title="Link"
+              aria-label="Link"
             >
               <LinkIcon className="w-4 h-4" />
             </Button>
@@ -226,6 +239,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('quote', 'citação')}
               disabled={isDisabled}
               title="Citação"
+              aria-label="Citacao"
             >
               <Quote className="w-4 h-4" />
             </Button>
@@ -242,6 +256,7 @@ export function RichTextField<T = unknown>({
             rows={field.rows || 8}
             className="font-mono"
             aria-invalid={!!error}
+            aria-describedby={describedBy}
           />
 
           <p className="text-xs text-muted-foreground">

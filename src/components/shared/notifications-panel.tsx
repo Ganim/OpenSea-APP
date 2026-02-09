@@ -128,7 +128,12 @@ export function NotificationsPanel() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-xl relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-xl relative"
+          aria-label="Notificacoes"
+        >
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
             <motion.div

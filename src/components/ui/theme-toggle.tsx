@@ -20,6 +20,7 @@ export function ThemeToggle() {
           variant="secondary"
           size="icon"
           className="rounded-2xl backdrop-blur-xl bg-white/5 dark:bg-white/5 border border-white/10"
+          aria-label="Alternar tema"
         >
           <div className="w-5 h-5" />
         </Button>
@@ -36,6 +37,7 @@ export function ThemeToggle() {
         size="icon"
         onClick={() => setTheme(isDark ? 'light' : 'dark')}
         className="rounded-2xl backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300"
+        aria-label="Alternar tema"
       >
         {isDark ? (
           <Sun className="w-5 h-5 text-yellow-500" />

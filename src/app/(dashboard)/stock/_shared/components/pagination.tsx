@@ -9,13 +9,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import type { PaginationMeta } from '@/types/stock';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-react';
-import type { PaginationMeta } from '@/types/stock';
 
 interface PaginationProps {
   pagination: PaginationMeta;
@@ -131,6 +131,7 @@ export function Pagination({
             onClick={() => onPageChange(1)}
             disabled={!hasPrev}
             title="Primeira página"
+            aria-label="Primeira pagina"
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
@@ -143,6 +144,7 @@ export function Pagination({
             onClick={() => onPageChange(page - 1)}
             disabled={!hasPrev}
             title="Página anterior"
+            aria-label="Pagina anterior"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -184,6 +186,7 @@ export function Pagination({
             onClick={() => onPageChange(page + 1)}
             disabled={!hasNext}
             title="Próxima página"
+            aria-label="Proxima pagina"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -196,6 +199,7 @@ export function Pagination({
             onClick={() => onPageChange(totalPages)}
             disabled={!hasNext}
             title="Última página"
+            aria-label="Ultima pagina"
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>

@@ -1,8 +1,5 @@
 'use client';
 
-import { use, useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import {
   AlertCircle,
   ArrowLeft,
@@ -21,20 +18,13 @@ import {
   Trash2,
   Undo2,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +35,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 import type { Volume, VolumeStatus } from '@/types/stock';
@@ -445,6 +445,7 @@ export default function VolumeDetailPage({ params }: PageProps) {
             variant="ghost"
             size="icon"
             onClick={() => router.push('/stock/volumes')}
+            aria-label="Voltar para volumes"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -466,7 +467,12 @@ export default function VolumeDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            aria-label="Atualizar"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
           {volume.status === 'OPEN' && (
@@ -578,6 +584,7 @@ export default function VolumeDetailPage({ params }: PageProps) {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleRemoveItem()}
+                                aria-label="Remover item do volume"
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>

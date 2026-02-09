@@ -5,12 +5,12 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import type { FieldConfig } from '@/core/types';
+import { logger } from '@/lib/logger';
+import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
 import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface CodeFieldProps<T = unknown> {
@@ -40,6 +40,13 @@ export function CodeField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const handleCopy = async () => {
     if (!value) return;
@@ -77,6 +84,7 @@ export function CodeField<T = unknown>({
           disabled={isDisabled || !value}
           className="absolute top-2 right-2 z-10 h-8 w-8 p-0"
           title="Copiar código"
+          aria-label="Copiar codigo"
         >
           {copied ? (
             <Check className="w-4 h-4 text-green-600" />
@@ -97,6 +105,7 @@ export function CodeField<T = unknown>({
           className="font-mono text-sm bg-gray-50 dark:bg-gray-950 border-gray-300 dark:border-gray-700 resize-y min-h-[200px]"
           spellCheck={false}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
 
         {/* Line numbers overlay (optional enhancement) */}

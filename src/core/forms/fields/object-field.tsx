@@ -37,6 +37,13 @@ export function ObjectField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const obj = value || {};
   const entries = Object.entries(obj);
@@ -102,6 +109,8 @@ export function ObjectField<T = unknown>({
                       }
                       disabled={isDisabled}
                       className="font-mono text-sm"
+                      aria-invalid={!!error}
+                      aria-describedby={describedBy}
                     />
                   </div>
 
@@ -117,6 +126,8 @@ export function ObjectField<T = unknown>({
                         field.valuePlaceholder || field.valueLabel || 'Valor'
                       }
                       disabled={isDisabled}
+                      aria-invalid={!!error}
+                      aria-describedby={describedBy}
                     />
                   </div>
 
@@ -129,6 +140,7 @@ export function ObjectField<T = unknown>({
                     disabled={isDisabled}
                     className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                     title="Remover propriedade"
+                    aria-label="Remover propriedade"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

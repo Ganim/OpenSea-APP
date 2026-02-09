@@ -78,6 +78,7 @@ export function PageHeader({
           disabled={disabled || loading}
           className="h-10 w-10 rounded-xl"
           title={text}
+          aria-label={text || 'Acao'}
         >
           {Icon && <Icon className={`w-5 h-5 ${iconClass}`} />}
           {loading && <span className="ml-2">...</span>}
@@ -118,6 +119,7 @@ export function PageHeader({
               size="icon"
               onClick={() => (backUrl ? router.push(backUrl) : router.back())}
               className="mt-1 shrink-0 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5"
+              aria-label="Voltar"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>

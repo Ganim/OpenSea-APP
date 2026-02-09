@@ -5,17 +5,9 @@
  * Painel de configuração de campos dinâmicos
  */
 
-import React, { useState, useRef } from 'react';
-import type { FieldElement, FieldConfig, LabelConfig } from '../studio-types';
-import { getFieldLabel } from '../elements/FieldElementRenderer';
-import { FieldPickerModal } from '../components/FieldPickerModal';
-import { useEditorStore } from '../stores/editorStore';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -23,7 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronRight, Plus, Trash2, Braces } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Braces, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { FieldPickerModal } from '../components/FieldPickerModal';
+import { getFieldLabel } from '../elements/FieldElementRenderer';
+import { useEditorStore } from '../stores/editorStore';
+import type { FieldConfig, FieldElement, LabelConfig } from '../studio-types';
 
 interface FieldConfigPanelProps {
   element: FieldElement;
@@ -199,6 +199,7 @@ function ConditionalFieldConfig({
                   );
                   updateConditions({ fallbacks: newFallbacks });
                 }}
+                aria-label="Remover fallback"
               >
                 <Trash2 className="w-3 h-3" />
               </Button>

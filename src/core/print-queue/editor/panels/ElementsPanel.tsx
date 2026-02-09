@@ -386,6 +386,7 @@ export function ElementsPanel({
                 size="icon"
                 className="h-8 w-8 mb-2"
                 onClick={onToggleCollapse}
+                aria-label="Expandir painel"
               >
                 <PanelLeftOpen className="h-4 w-4" />
               </Button>
@@ -406,6 +407,7 @@ export function ElementsPanel({
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => handleAddElement(element.id)}
+                      aria-label={element.name}
                     >
                       <Icon className="h-4 w-4 text-slate-600 dark:text-slate-300" />
                     </Button>
@@ -437,6 +439,7 @@ export function ElementsPanel({
           size="icon"
           className="h-7 w-7"
           onClick={onToggleCollapse}
+          aria-label="Recolher painel"
         >
           <PanelLeftClose className="h-4 w-4" />
         </Button>
@@ -470,6 +473,7 @@ export function ElementsPanel({
                       )}
                       onClick={() => handleAddElement(element.id)}
                       title={element.description}
+                      aria-label={element.name}
                     >
                       <Icon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
                       <span className="text-xs text-slate-600 dark:text-slate-300">

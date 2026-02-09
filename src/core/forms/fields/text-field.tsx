@@ -76,6 +76,13 @@ export function TextField<T = unknown>({
 
   // Comprimento máximo baseado na máscara
   const maxLength = field.mask ? getMaskMaxLength(field.mask) : undefined;
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   return (
     <FormFieldWrapper
@@ -98,6 +105,7 @@ export function TextField<T = unknown>({
           readOnly={field.readOnly}
           rows={4}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : (
         <Input
@@ -110,6 +118,7 @@ export function TextField<T = unknown>({
           readOnly={field.readOnly}
           maxLength={maxLength}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       )}
     </FormFieldWrapper>

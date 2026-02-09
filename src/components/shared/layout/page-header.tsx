@@ -124,6 +124,7 @@ export function PageHeader({ config }: PageHeaderProps) {
               size="icon"
               onClick={handleBack}
               className="mt-1 shrink-0 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5"
+              aria-label="Voltar"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -151,6 +152,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onHelp}
                 className="h-10 w-10 rounded-xl"
                 title="Ajuda"
+                aria-label="Ajuda"
               >
                 <HelpCircle className="w-5 h-5" />
               </Button>
@@ -163,6 +165,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onImport}
                 className="h-10 w-10 rounded-xl"
                 title={importLabel}
+                aria-label={importLabel}
               >
                 <Upload className="w-5 h-5" />
               </Button>
@@ -175,6 +178,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onQuickAdd}
                 className="h-10 w-10 rounded-xl"
                 title={quickAddLabel}
+                aria-label={quickAddLabel}
               >
                 <Zap className="w-5 h-5" />
               </Button>
@@ -187,6 +191,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onEdit}
                 className="h-10 w-10 rounded-xl"
                 title={editLabel}
+                aria-label={editLabel}
               >
                 <Edit className="w-5 h-5" />
               </Button>
@@ -199,6 +204,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onDuplicate}
                 className="h-10 w-10 rounded-xl"
                 title={duplicateLabel}
+                aria-label={duplicateLabel}
               >
                 <Copy className="w-5 h-5" />
               </Button>
@@ -211,6 +217,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onCancel}
                 className="h-10 w-10 rounded-xl"
                 title={cancelLabel}
+                aria-label={cancelLabel}
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -223,6 +230,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onDelete}
                 className="h-10 w-10 rounded-xl text-red-600 hover:text-red-700"
                 title={deleteLabel}
+                aria-label={deleteLabel}
               >
                 <Trash2 className="w-5 h-5" />
               </Button>
@@ -235,6 +243,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 disabled={saveDisabled || isLoading}
                 className="h-10 w-10 rounded-xl"
                 title={saveLabel}
+                aria-label={saveLabel}
               >
                 <Save className="w-5 h-5" />
               </Button>
@@ -246,6 +255,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                 onClick={onAdd}
                 className="h-10 w-10 rounded-xl"
                 title={addLabel}
+                aria-label={addLabel}
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -263,6 +273,7 @@ export function PageHeader({ config }: PageHeaderProps) {
                   disabled={action.disabled || action.loading}
                   className="h-10 w-10 rounded-xl"
                   title={action.label}
+                  aria-label={action.label}
                 >
                   {action.icon}
                 </Button>

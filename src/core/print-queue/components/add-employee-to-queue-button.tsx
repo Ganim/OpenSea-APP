@@ -53,6 +53,11 @@ export function AddEmployeeToQueueButton({
             ? 'Já na fila de impressão'
             : 'Adicionar à fila de impressão'
         }
+        aria-label={
+          alreadyInQueue
+            ? 'Ja na fila de impressao'
+            : 'Adicionar a fila de impressao'
+        }
       >
         {alreadyInQueue ? (
           <Check className="w-4 h-4" />

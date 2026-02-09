@@ -50,7 +50,7 @@ export default function NewTenantPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/central/tenants">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Voltar para empresas">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>

@@ -108,6 +108,7 @@ export function BatchPrintItemLabels({
                 size="icon"
                 onClick={() => setIsOpen(false)}
                 className="h-6 w-6"
+                aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
               </Button>

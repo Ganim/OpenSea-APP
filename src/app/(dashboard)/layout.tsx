@@ -61,6 +61,12 @@ export default function DashboardLayout({
           </div>
 
           <div className="relative">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-blue-600 focus:rounded"
+            >
+              Pular para o conteudo principal
+            </a>
             <Navbar onMenuOpen={() => setIsMenuOpen(true)} />
 
             <NavigationMenu
@@ -70,7 +76,7 @@ export default function DashboardLayout({
             />
 
             {/* Main Content */}
-            <main className="pt-28 px-6 pb-12">
+            <main id="main-content" tabIndex={-1} className="pt-28 px-6 pb-12">
               <div className="max-w-[1600px] mx-auto">{children}</div>
             </main>
           </div>

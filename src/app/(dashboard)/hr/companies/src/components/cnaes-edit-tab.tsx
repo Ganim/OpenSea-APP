@@ -170,6 +170,7 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleOpenEdit(primaryCnae)}
+                      aria-label="Editar CNAE"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -178,6 +179,7 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
                       size="icon"
                       onClick={() => deleteMutation.mutate(primaryCnae.id)}
                       disabled={deleteMutation.isPending}
+                      aria-label="Remover CNAE"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -220,6 +222,7 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenEdit(cnae)}
+                          aria-label="Editar CNAE"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -228,6 +231,7 @@ export function CnaesEditTab({ companyId }: CnaesEditTabProps) {
                           size="icon"
                           onClick={() => deleteMutation.mutate(cnae.id)}
                           disabled={deleteMutation.isPending}
+                          aria-label="Remover CNAE"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>

@@ -146,6 +146,7 @@ export function ItemRow({
             className="shrink-0 h-6 w-6 opacity-50 hover:opacity-100"
             onClick={handleCopyCode}
             title="Copiar código"
+            aria-label="Copiar código"
           >
             <Copy className="h-3 w-3" />
           </Button>
@@ -156,6 +157,7 @@ export function ItemRow({
               className="shrink-0 h-6 w-6 opacity-50 hover:opacity-100 text-blue-600 hover:text-blue-700"
               onClick={handlePrintClick}
               title="Imprimir etiqueta"
+              aria-label="Imprimir etiqueta"
             >
               <Printer className="h-3 w-3" />
             </Button>

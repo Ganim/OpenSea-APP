@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { Trash2, RotateCw, Move, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { Move, RotateCw, Trash2, X } from 'lucide-react';
 import type {
   AislePosition,
   LayoutAnnotation,
@@ -148,6 +147,7 @@ export function PropertiesPanel({
                 size="icon"
                 className="h-8 w-8 flex-shrink-0"
                 onClick={() => onRotateAisle?.(selectedAisle.aisleNumber)}
+                aria-label="Rotacionar corredor"
               >
                 <RotateCw className="h-4 w-4" />
               </Button>
@@ -194,6 +194,7 @@ export function PropertiesPanel({
               size="icon"
               className="h-6 w-6"
               onClick={onClearSelection}
+              aria-label="Fechar painel"
             >
               <X className="h-4 w-4" />
             </Button>

@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
-import { ArrowLeft, Tags, RefreshCw } from 'lucide-react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, RefreshCw, Tags } from 'lucide-react';
+import Link from 'next/link';
 
 import { useWarehouses } from '../src/api';
 import { useAllZones } from '../src/api/zones.queries';
@@ -37,7 +36,12 @@ export default function LabelsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            aria-label="Voltar para localizações"
+          >
             <Link href="/stock/locations">
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -103,7 +107,12 @@ export default function LabelsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          aria-label="Voltar para localizações"
+        >
           <Link href="/stock/locations">
             <ArrowLeft className="h-4 w-4" />
           </Link>

@@ -5,13 +5,13 @@
 
 'use client';
 
-import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import type { FieldConfig } from '@/core/types';
-import { FormFieldWrapper } from '../components/form-field-wrapper';
 import { cn } from '@/lib/utils';
+import { Image as ImageIcon, Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { useRef, useState } from 'react';
+import { FormFieldWrapper } from '../components/form-field-wrapper';
 
 export interface ImageFieldProps<T = unknown> {
   field: FieldConfig<T>;
@@ -42,6 +42,13 @@ export function ImageField<T = unknown>({
         ? field.disabled(formData)
         : false
       : field.disabled);
+  const descriptionId = `${String(field.name)}-description`;
+  const errorId = `${String(field.name)}-error`;
+  const describedBy = error
+    ? `${field.description ? `${descriptionId} ` : ''}${errorId}`
+    : field.description
+      ? descriptionId
+      : undefined;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -141,6 +148,7 @@ export function ImageField<T = unknown>({
               onClick={handleRemove}
               disabled={isDisabled}
               className="absolute top-2 right-2 h-8 w-8 p-0"
+              aria-label="Remover imagem"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -171,6 +179,8 @@ export function ImageField<T = unknown>({
               onChange={handleChange}
               accept="image/*"
               disabled={isDisabled}
+              aria-invalid={!!error}
+              aria-describedby={describedBy}
             />
 
             <div className="flex flex-col items-center gap-2">
@@ -225,6 +235,8 @@ export function ImageField<T = unknown>({
             onChange={handleChange}
             accept="image/*"
             disabled={isDisabled}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
           />
         )}
       </div>

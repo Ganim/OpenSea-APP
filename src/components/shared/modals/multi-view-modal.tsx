@@ -277,6 +277,7 @@ export function MultiViewModal<T extends { id: string; name?: string }>({
                         handleRemove(item.id);
                       }}
                       className="ml-1 hover:bg-white/20 rounded p-0.5"
+                      aria-label="Remover item"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -292,6 +293,7 @@ export function MultiViewModal<T extends { id: string; name?: string }>({
                   onClick={() => setShowSearch(true)}
                   className="shrink-0"
                   title={`Adicionar ${entity.toLowerCase()}`}
+                  aria-label={`Adicionar ${entity.toLowerCase()}`}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -308,6 +310,9 @@ export function MultiViewModal<T extends { id: string; name?: string }>({
                   title={
                     viewMode === 'compare' ? 'Modo Único' : 'Modo Comparação'
                   }
+                  aria-label={
+                    viewMode === 'compare' ? 'Modo unico' : 'Modo comparacao'
+                  }
                 >
                   <SquareSplitHorizontal
                     className={cn(
@@ -321,6 +326,7 @@ export function MultiViewModal<T extends { id: string; name?: string }>({
                 variant="ghost"
                 size="icon"
                 onClick={() => onOpenChange(false)}
+                aria-label="Fechar"
               >
                 <X className="w-4 h-4" />
               </Button>

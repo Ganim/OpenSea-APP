@@ -1,11 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Plus, Trash2, Layers, Grid3X3, Box, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -20,7 +18,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { STRUCTURE_LIMITS, BIN_DIRECTION_LABELS } from '../../constants';
+import { Box, Copy, Grid3X3, Layers, Plus, Trash2 } from 'lucide-react';
+import { BIN_DIRECTION_LABELS, STRUCTURE_LIMITS } from '../../constants';
 import type { AisleConfig } from '../../types';
 
 interface StepAislesProps {
@@ -195,6 +194,7 @@ export function StepAisles({
                           size="icon"
                           className="h-8 w-8"
                           onClick={() => handleDuplicateAisle(index)}
+                          aria-label="Duplicar corredor"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
