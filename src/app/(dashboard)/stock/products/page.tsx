@@ -33,19 +33,28 @@ import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
 import type { Item, Product, UpdateProductRequest } from '@/types/stock';
 import {
+  Copy,
   ExternalLink,
   Factory,
   Blocks,
   Grid3x3,
   Package,
+  Pencil,
   Plus,
   Tag,
+  Trash2,
   Upload,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { CreateProductForm, EditProductForm } from './src/components';
-import { ProductVariantsItemsModal } from './src/modals';
+import {
+  ProductVariantsItemsModal,
+  RenameProductModal,
+  AssignCategoryModal,
+  AssignManufacturerModal,
+} from './src/modals';
 import type { ProductFormData } from './src/types';
 
 export default function ProductsPage() {
@@ -82,6 +91,13 @@ function ProductsPageContent() {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productModalOpen, setProductModalOpen] = useState(false);
+
+  // Quick-action modals state
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameProduct, setRenameProduct] = useState<Product | null>(null);
+  const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
+  const [assignManufacturerOpen, setAssignManufacturerOpen] = useState(false);
+  const [actionProductIds, setActionProductIds] = useState<string[]>([]);
 
   // ============================================================================
   // CRUD SETUP (always fetches ALL products - filtering is client-side)
@@ -333,6 +349,66 @@ function ProductsPageContent() {
     page.modals.open('delete');
   };
 
+  // Quick-action context menu handlers
+  const handleContextRename = useCallback(
+    (ids: string[]) => {
+      const product = crud.items?.find(p => p.id === ids[0]) || null;
+      setRenameProduct(product);
+      setRenameModalOpen(true);
+    },
+    [crud.items]
+  );
+
+  const handleContextAssignCategory = useCallback((ids: string[]) => {
+    setActionProductIds(ids);
+    setAssignCategoryOpen(true);
+  }, []);
+
+  const handleContextAssignManufacturer = useCallback((ids: string[]) => {
+    setActionProductIds(ids);
+    setAssignManufacturerOpen(true);
+  }, []);
+
+  // Quick-action submit handlers
+  const handleRenameSubmit = useCallback(
+    async (id: string, data: { name: string }) => {
+      await crud.update(id, data as UpdateProductRequest);
+    },
+    [crud]
+  );
+
+  const handleAssignCategorySubmit = useCallback(
+    async (ids: string[], categoryId: string) => {
+      for (const id of ids) {
+        await crud.update(id, {
+          categoryIds: [categoryId],
+        } as UpdateProductRequest);
+      }
+      await crud.invalidate();
+      toast.success(
+        ids.length === 1
+          ? 'Categoria atribuída com sucesso!'
+          : `Categoria atribuída a ${ids.length} produtos!`
+      );
+    },
+    [crud]
+  );
+
+  const handleAssignManufacturerSubmit = useCallback(
+    async (ids: string[], manufacturerId: string) => {
+      for (const id of ids) {
+        await crud.update(id, { manufacturerId } as UpdateProductRequest);
+      }
+      await crud.invalidate();
+      toast.success(
+        ids.length === 1
+          ? 'Fabricante atribuído com sucesso!'
+          : `Fabricante atribuído a ${ids.length} produtos!`
+      );
+    },
+    [crud]
+  );
+
   // ============================================================================
   // RENDER FUNCTIONS
   // ============================================================================
@@ -352,8 +428,42 @@ function ProductsPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        actions={[
+          {
+            id: 'rename',
+            label: 'Renomear',
+            icon: Pencil,
+            onClick: handleContextRename,
+            hidden: ids => ids.length > 1,
+          },
+          {
+            id: 'duplicate',
+            label: 'Duplicar',
+            icon: Copy,
+            onClick: handleContextDuplicate,
+          },
+          {
+            id: 'assign-category',
+            label: 'Atribuir Categoria',
+            icon: Tag,
+            onClick: handleContextAssignCategory,
+            separator: 'before',
+          },
+          {
+            id: 'assign-manufacturer',
+            label: 'Atribuir Fabricante',
+            icon: Factory,
+            onClick: handleContextAssignManufacturer,
+          },
+          {
+            id: 'delete',
+            label: 'Excluir',
+            icon: Trash2,
+            onClick: handleContextDelete,
+            variant: 'destructive',
+            separator: 'before',
+          },
+        ]}
       >
         <EntityCard
           id={item.id}
@@ -412,8 +522,42 @@ function ProductsPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        actions={[
+          {
+            id: 'rename',
+            label: 'Renomear',
+            icon: Pencil,
+            onClick: handleContextRename,
+            hidden: ids => ids.length > 1,
+          },
+          {
+            id: 'duplicate',
+            label: 'Duplicar',
+            icon: Copy,
+            onClick: handleContextDuplicate,
+          },
+          {
+            id: 'assign-category',
+            label: 'Atribuir Categoria',
+            icon: Tag,
+            onClick: handleContextAssignCategory,
+            separator: 'before',
+          },
+          {
+            id: 'assign-manufacturer',
+            label: 'Atribuir Fabricante',
+            icon: Factory,
+            onClick: handleContextAssignManufacturer,
+          },
+          {
+            id: 'delete',
+            label: 'Excluir',
+            icon: Trash2,
+            onClick: handleContextDelete,
+            variant: 'destructive',
+            separator: 'before',
+          },
+        ]}
       >
         <EntityCard
           id={item.id}
@@ -715,6 +859,42 @@ function ProductsPageContent() {
           confirmLabel="Duplicar"
           cancelLabel="Cancelar"
           isLoading={crud.isDuplicating}
+        />
+
+        {/* Rename Product Modal */}
+        <RenameProductModal
+          isOpen={renameModalOpen}
+          onClose={() => {
+            setRenameModalOpen(false);
+            setRenameProduct(null);
+          }}
+          product={renameProduct}
+          isSubmitting={crud.isUpdating}
+          onSubmit={handleRenameSubmit}
+        />
+
+        {/* Assign Category Modal */}
+        <AssignCategoryModal
+          isOpen={assignCategoryOpen}
+          onClose={() => {
+            setAssignCategoryOpen(false);
+            setActionProductIds([]);
+          }}
+          productIds={actionProductIds}
+          isSubmitting={crud.isUpdating}
+          onSubmit={handleAssignCategorySubmit}
+        />
+
+        {/* Assign Manufacturer Modal */}
+        <AssignManufacturerModal
+          isOpen={assignManufacturerOpen}
+          onClose={() => {
+            setAssignManufacturerOpen(false);
+            setActionProductIds([]);
+          }}
+          productIds={actionProductIds}
+          isSubmitting={crud.isUpdating}
+          onSubmit={handleAssignManufacturerSubmit}
         />
 
         {/* Product Variants & Items Modal (Two-column) */}

@@ -9,6 +9,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
@@ -28,6 +29,8 @@ export interface ContextMenuAction {
   onClick: (ids: string[]) => void;
   variant?: 'default' | 'destructive';
   separator?: 'before' | 'after';
+  /** Oculta a ação dinamicamente com base nos IDs selecionados */
+  hidden?: (ids: string[]) => boolean;
 }
 
 export interface EntityContextMenuProps {
@@ -112,9 +115,6 @@ export function EntityContextMenu({
     [itemId, selectionContext]
   );
 
-  // Calcula o sufixo baseado no estado
-  const suffix = menuState.isMultiple ? ` (${menuState.count})` : '';
-
   // Ações padrão
   const defaultActions: ContextMenuAction[] = [];
 
@@ -155,8 +155,10 @@ export function EntityContextMenu({
     }
   }
 
-  // Combinar ações padrão com customizadas
-  const allActions = [...defaultActions, ...actions];
+  // Combinar ações padrão com customizadas, filtrando as ocultas
+  const allActions = [...defaultActions, ...actions].filter(
+    action => !action.hidden?.(menuState.actionIds)
+  );
 
   return (
     <ContextMenu onOpenChange={handleOpenChange} modal={false}>
@@ -164,6 +166,14 @@ export function EntityContextMenu({
         <div className="w-full h-full">{children}</div>
       </ContextMenuTrigger>
       <ContextMenuContent className="overflow-hidden">
+        {menuState.isMultiple && (
+          <>
+            <ContextMenuLabel className="text-xs text-muted-foreground font-normal">
+              {menuState.count} itens selecionados
+            </ContextMenuLabel>
+            <ContextMenuSeparator />
+          </>
+        )}
         {allActions.map((action, index) => (
           <React.Fragment key={action.id}>
             {action.separator === 'before' && index > 0 && (
@@ -187,7 +197,6 @@ export function EntityContextMenu({
                 />
               )}
               {action.label}
-              {suffix}
             </ContextMenuItem>
             {action.separator === 'after' && index < allActions.length - 1 && (
               <ContextMenuSeparator />

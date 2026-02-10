@@ -11,3 +11,6 @@ export { QuickAddItemModal } from './quick-add-item-modal';
 export { ExitItemsModal } from './exit-items-modal';
 export { ChangeLocationModal } from './change-location-modal';
 export { ItemHistoryModal } from './item-history-modal';
+export { RenameProductModal } from './rename-product-modal';
+export { AssignCategoryModal } from './assign-category-modal';
+export { AssignManufacturerModal } from './assign-manufacturer-modal';
