@@ -69,3 +69,11 @@ export const BANK_ACCOUNT_STATUS_LABELS: Record<BankAccountStatus, string> = {
   INACTIVE: 'Inativa',
   CLOSED: 'Encerrada',
 };
+
+export const PIX_KEY_TYPE_LABELS: Record<PixKeyType, string> = {
+  CPF: 'CPF',
+  CNPJ: 'CNPJ',
+  EMAIL: 'E-mail',
+  PHONE: 'Telefone',
+  RANDOM: 'Chave Aleatória',
+};

@@ -370,6 +370,74 @@ export const API_ENDPOINTS = {
       SET_MODULES: (id: string) => `/v1/admin/plans/${id}/modules`,
     },
   },
+  // Finance - Cost Centers
+  COST_CENTERS: {
+    LIST: '/v1/finance/cost-centers',
+    GET: (id: string) => `/v1/finance/cost-centers/${id}`,
+    CREATE: '/v1/finance/cost-centers',
+    UPDATE: (id: string) => `/v1/finance/cost-centers/${id}`,
+    DELETE: (id: string) => `/v1/finance/cost-centers/${id}`,
+  },
+  // Finance - Bank Accounts
+  BANK_ACCOUNTS: {
+    LIST: '/v1/finance/bank-accounts',
+    GET: (id: string) => `/v1/finance/bank-accounts/${id}`,
+    CREATE: '/v1/finance/bank-accounts',
+    UPDATE: (id: string) => `/v1/finance/bank-accounts/${id}`,
+    DELETE: (id: string) => `/v1/finance/bank-accounts/${id}`,
+  },
+  // Finance - Categories
+  FINANCE_CATEGORIES: {
+    LIST: '/v1/finance/categories',
+    GET: (id: string) => `/v1/finance/categories/${id}`,
+    CREATE: '/v1/finance/categories',
+    UPDATE: (id: string) => `/v1/finance/categories/${id}`,
+    DELETE: (id: string) => `/v1/finance/categories/${id}`,
+  },
+  // Finance - Entries (Payable / Receivable)
+  FINANCE_ENTRIES: {
+    LIST: '/v1/finance/entries',
+    GET: (id: string) => `/v1/finance/entries/${id}`,
+    CREATE: '/v1/finance/entries',
+    UPDATE: (id: string) => `/v1/finance/entries/${id}`,
+    DELETE: (id: string) => `/v1/finance/entries/${id}`,
+    CANCEL: (id: string) => `/v1/finance/entries/${id}/cancel`,
+    REGISTER_PAYMENT: (id: string) => `/v1/finance/entries/${id}/payments`,
+    UPLOAD_ATTACHMENT: (id: string) => `/v1/finance/entries/${id}/attachments`,
+    DELETE_ATTACHMENT: (id: string, attachmentId: string) =>
+      `/v1/finance/entries/${id}/attachments/${attachmentId}`,
+  },
+  // Finance - Dashboard & Reports
+  FINANCE_DASHBOARD: {
+    OVERVIEW: '/v1/finance/dashboard',
+    FORECAST: '/v1/finance/forecast',
+    CASHFLOW: '/v1/finance/cashflow',
+    CHECK_OVERDUE: '/v1/finance/check-overdue',
+    PARSE_BOLETO: '/v1/finance/parse-boleto',
+    EXPORT_ACCOUNTING: '/v1/finance/export/accounting',
+    IMPORT_PAYROLL: (payrollId: string) =>
+      `/v1/finance/import/payroll/${payrollId}`,
+  },
+  // Finance - Loans
+  LOANS: {
+    LIST: '/v1/finance/loans',
+    GET: (id: string) => `/v1/finance/loans/${id}`,
+    CREATE: '/v1/finance/loans',
+    UPDATE: (id: string) => `/v1/finance/loans/${id}`,
+    DELETE: (id: string) => `/v1/finance/loans/${id}`,
+    REGISTER_PAYMENT: (id: string) => `/v1/finance/loans/${id}/payments`,
+  },
+  // Finance - Consortia
+  CONSORTIA: {
+    LIST: '/v1/finance/consortia',
+    GET: (id: string) => `/v1/finance/consortia/${id}`,
+    CREATE: '/v1/finance/consortia',
+    UPDATE: (id: string) => `/v1/finance/consortia/${id}`,
+    DELETE: (id: string) => `/v1/finance/consortia/${id}`,
+    REGISTER_PAYMENT: (id: string) => `/v1/finance/consortia/${id}/payments`,
+    MARK_CONTEMPLATED: (id: string) =>
+      `/v1/finance/consortia/${id}/contemplated`,
+  },
   // Health
   HEALTH: '/health',
 } as const;

@@ -191,6 +191,12 @@ export const FINANCE_ENTRY_TYPE_LABELS: Record<FinanceEntryType, string> = {
   RECEIVABLE: 'A Receber',
 };
 
+export const RECURRENCE_TYPE_LABELS: Record<FinanceEntryRecurrence, string> = {
+  SINGLE: 'Única',
+  RECURRING: 'Recorrente',
+  INSTALLMENT: 'Parcelado',
+};
+
 export const RECURRENCE_UNIT_LABELS: Record<RecurrenceUnit, string> = {
   DAILY: 'Diário',
   WEEKLY: 'Semanal',
