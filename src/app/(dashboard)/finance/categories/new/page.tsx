@@ -39,10 +39,15 @@ export default function NewFinanceCategoryPage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Categoria criada com sucesso!');
+      await createMutation.mutateAsync({
+        name: formData.name,
+        type: formData.type,
+        isActive: formData.isActive,
+        description: formData.description || undefined,
+        displayOrder: formData.displayOrder || undefined,
+      });
       router.push('/finance/categories');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar categoria');
     }
   };

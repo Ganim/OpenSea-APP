@@ -8,8 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateConsortium } from '@/hooks/finance';
+import {
+  useBankAccounts,
+  useCostCenters,
+  useCreateConsortium,
+} from '@/hooks/finance';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -19,15 +30,21 @@ export default function NewConsortiumPage() {
   const router = useRouter();
   const createMutation = useCreateConsortium();
 
+  const { data: bankAccountsData } = useBankAccounts();
+  const { data: costCentersData } = useCostCenters();
+
+  const bankAccounts = bankAccountsData?.bankAccounts ?? [];
+  const costCenters = costCentersData?.costCenters ?? [];
+
   const [formData, setFormData] = useState({
     name: '',
     administrator: '',
-    groupCode: '',
+    groupNumber: '',
     quotaNumber: '',
     creditValue: 0,
     monthlyPayment: 0,
     totalInstallments: 1,
-    installmentDay: 1,
+    paymentDay: 1,
     startDate: new Date().toISOString().split('T')[0],
     bankAccountId: '',
     costCenterId: '',
@@ -38,10 +55,22 @@ export default function NewConsortiumPage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Consórcio criado com sucesso!');
+      await createMutation.mutateAsync({
+        name: formData.name,
+        administrator: formData.administrator,
+        bankAccountId: formData.bankAccountId,
+        costCenterId: formData.costCenterId,
+        creditValue: formData.creditValue,
+        monthlyPayment: formData.monthlyPayment,
+        totalInstallments: formData.totalInstallments,
+        startDate: formData.startDate,
+        paymentDay: formData.paymentDay,
+        groupNumber: formData.groupNumber || undefined,
+        quotaNumber: formData.quotaNumber || undefined,
+        notes: formData.notes || undefined,
+      });
       router.push('/finance/consortia');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar consórcio');
     }
   };
@@ -90,12 +119,56 @@ export default function NewConsortiumPage() {
             </div>
 
             <div>
-              <Label htmlFor="groupCode">Código do Grupo</Label>
+              <Label htmlFor="bankAccountId">Conta Bancária *</Label>
+              <Select
+                value={formData.bankAccountId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
+                required
+              >
+                <SelectTrigger id="bankAccountId">
+                  <SelectValue placeholder="Selecione uma conta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bankAccounts.map((ba) => (
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="costCenterId">Centro de Custo *</Label>
+              <Select
+                value={formData.costCenterId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
+                required
+              >
+                <SelectTrigger id="costCenterId">
+                  <SelectValue placeholder="Selecione um centro de custo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {costCenters.map((cc) => (
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="groupNumber">Código do Grupo</Label>
               <Input
-                id="groupCode"
-                value={formData.groupCode}
+                id="groupNumber"
+                value={formData.groupNumber}
                 onChange={(e) =>
-                  setFormData({ ...formData, groupCode: e.target.value })
+                  setFormData({ ...formData, groupNumber: e.target.value })
                 }
               />
             </div>
@@ -163,18 +236,18 @@ export default function NewConsortiumPage() {
             </div>
 
             <div>
-              <Label htmlFor="installmentDay">Dia de Vencimento *</Label>
+              <Label htmlFor="paymentDay">Dia de Vencimento *</Label>
               <Input
-                id="installmentDay"
+                id="paymentDay"
                 type="number"
                 required
                 min="1"
                 max="31"
-                value={formData.installmentDay}
+                value={formData.paymentDay}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    installmentDay: parseInt(e.target.value) || 1,
+                    paymentDay: parseInt(e.target.value) || 1,
                   })
                 }
               />

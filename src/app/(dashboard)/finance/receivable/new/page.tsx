@@ -16,8 +16,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateFinanceEntry } from '@/hooks/finance';
-import { RECURRENCE_UNIT_LABELS } from '@/types/finance';
+import {
+  useBankAccounts,
+  useCostCenters,
+  useCreateFinanceEntry,
+  useFinanceCategories,
+} from '@/hooks/finance';
+import { RECURRENCE_TYPE_LABELS } from '@/types/finance';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -27,8 +32,15 @@ export default function NewReceivablePage() {
   const router = useRouter();
   const createMutation = useCreateFinanceEntry();
 
+  const { data: categoriesData } = useFinanceCategories({ type: 'REVENUE' });
+  const { data: costCentersData } = useCostCenters();
+  const { data: bankAccountsData } = useBankAccounts();
+
+  const categories = categoriesData?.categories ?? [];
+  const costCenters = costCentersData?.costCenters ?? [];
+  const bankAccounts = bankAccountsData?.bankAccounts ?? [];
+
   const [formData, setFormData] = useState({
-    type: 'RECEIVABLE' as const,
     description: '',
     categoryId: '',
     costCenterId: '',
@@ -40,7 +52,7 @@ export default function NewReceivablePage() {
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: new Date().toISOString().split('T')[0],
     customerName: '',
-    recurrenceType: '' as any,
+    recurrenceType: 'SINGLE',
     notes: '',
     tags: [] as string[],
   });
@@ -51,10 +63,25 @@ export default function NewReceivablePage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Conta a receber criada com sucesso!');
+      await createMutation.mutateAsync({
+        type: 'RECEIVABLE',
+        description: formData.description,
+        categoryId: formData.categoryId,
+        costCenterId: formData.costCenterId,
+        bankAccountId: formData.bankAccountId || undefined,
+        expectedAmount: formData.expectedAmount,
+        discount: formData.discount,
+        interest: formData.interest,
+        penalty: formData.penalty,
+        issueDate: formData.issueDate,
+        dueDate: formData.dueDate,
+        customerName: formData.customerName || undefined,
+        recurrenceType: formData.recurrenceType as 'SINGLE' | 'RECURRING' | 'INSTALLMENT',
+        notes: formData.notes || undefined,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
+      });
       router.push('/finance/receivable');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar conta a receber');
     }
   };
@@ -102,6 +129,71 @@ export default function NewReceivablePage() {
                   setFormData({ ...formData, description: e.target.value })
                 }
               />
+            </div>
+
+            <div>
+              <Label htmlFor="categoryId">Categoria *</Label>
+              <Select
+                value={formData.categoryId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, categoryId: value })
+                }
+                required
+              >
+                <SelectTrigger id="categoryId">
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="costCenterId">Centro de Custo *</Label>
+              <Select
+                value={formData.costCenterId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
+                required
+              >
+                <SelectTrigger id="costCenterId">
+                  <SelectValue placeholder="Selecione um centro de custo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {costCenters.map((cc) => (
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="bankAccountId">Conta Bancária</Label>
+              <Select
+                value={formData.bankAccountId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
+              >
+                <SelectTrigger id="bankAccountId">
+                  <SelectValue placeholder="Selecione (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bankAccounts.map((ba) => (
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -210,15 +302,15 @@ export default function NewReceivablePage() {
               <Label htmlFor="recurrenceType">Recorrência</Label>
               <Select
                 value={formData.recurrenceType}
-                onValueChange={(value: any) =>
+                onValueChange={(value) =>
                   setFormData({ ...formData, recurrenceType: value })
                 }
               >
                 <SelectTrigger id="recurrenceType">
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(RECURRENCE_UNIT_LABELS).map(
+                  {Object.entries(RECURRENCE_TYPE_LABELS).map(
                     ([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
@@ -248,7 +340,7 @@ export default function NewReceivablePage() {
                   id="tags"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addTag();

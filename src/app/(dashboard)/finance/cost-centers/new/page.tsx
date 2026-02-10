@@ -32,10 +32,16 @@ export default function NewCostCenterPage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Centro de custo criado com sucesso!');
+      await createMutation.mutateAsync({
+        code: formData.code,
+        name: formData.name,
+        isActive: formData.isActive,
+        description: formData.description || undefined,
+        monthlyBudget: formData.monthlyBudget || undefined,
+        annualBudget: formData.annualBudget || undefined,
+      });
       router.push('/finance/cost-centers');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar centro de custo');
     }
   };

@@ -20,6 +20,9 @@ import {
   BANK_ACCOUNT_TYPE_LABELS,
   PIX_KEY_TYPE_LABELS,
 } from '@/types/finance';
+import type { CreateBankAccountData } from '@/types/finance';
+import { companiesService } from '@/services/hr';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -28,6 +31,13 @@ import { useState } from 'react';
 export default function NewBankAccountPage() {
   const router = useRouter();
   const createMutation = useCreateBankAccount();
+
+  const { data: companiesData } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => companiesService.listCompanies({ perPage: 100 }),
+  });
+
+  const companies = companiesData?.companies ?? [];
 
   const [formData, setFormData] = useState({
     companyId: '',
@@ -39,7 +49,7 @@ export default function NewBankAccountPage() {
     accountNumber: '',
     accountDigit: '',
     accountType: 'CHECKING' as const,
-    pixKeyType: '' as any,
+    pixKeyType: '',
     pixKey: '',
     color: '#3b82f6',
     isDefault: false,
@@ -49,10 +59,23 @@ export default function NewBankAccountPage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Conta bancária criada com sucesso!');
+      await createMutation.mutateAsync({
+        companyId: formData.companyId,
+        name: formData.name,
+        bankCode: formData.bankCode,
+        agency: formData.agency,
+        accountNumber: formData.accountNumber,
+        accountType: formData.accountType,
+        bankName: formData.bankName || undefined,
+        agencyDigit: formData.agencyDigit || undefined,
+        accountDigit: formData.accountDigit || undefined,
+        pixKeyType: (formData.pixKeyType || undefined) as CreateBankAccountData['pixKeyType'],
+        pixKey: formData.pixKey || undefined,
+        color: formData.color || undefined,
+        isDefault: formData.isDefault,
+      });
       router.push('/finance/bank-accounts');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar conta bancária');
     }
   };
@@ -76,6 +99,28 @@ export default function NewBankAccountPage() {
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <Label htmlFor="companyId">Empresa *</Label>
+              <Select
+                value={formData.companyId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, companyId: value })
+                }
+                required
+              >
+                <SelectTrigger id="companyId">
+                  <SelectValue placeholder="Selecione uma empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.legalName || company.tradeName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="md:col-span-2">
               <Label htmlFor="name">Nome da Conta *</Label>
               <Input

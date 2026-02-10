@@ -16,7 +16,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateLoan } from '@/hooks/finance';
+import {
+  useBankAccounts,
+  useCostCenters,
+  useCreateLoan,
+} from '@/hooks/finance';
 import { LOAN_TYPE_LABELS } from '@/types/finance';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
@@ -27,6 +31,12 @@ export default function NewLoanPage() {
   const router = useRouter();
   const createMutation = useCreateLoan();
 
+  const { data: bankAccountsData } = useBankAccounts();
+  const { data: costCentersData } = useCostCenters();
+
+  const bankAccounts = bankAccountsData?.bankAccounts ?? [];
+  const costCenters = costCentersData?.costCenters ?? [];
+
   const [formData, setFormData] = useState({
     bankAccountId: '',
     costCenterId: '',
@@ -35,9 +45,9 @@ export default function NewLoanPage() {
     contractNumber: '',
     principalAmount: 0,
     interestRate: 0,
-    interestType: 'SIMPLE' as const,
+    interestType: 'SIMPLE',
     startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
+    endDate: '',
     totalInstallments: 1,
     installmentDay: 1,
     notes: '',
@@ -47,10 +57,23 @@ export default function NewLoanPage() {
     e.preventDefault();
 
     try {
-      await createMutation.mutateAsync(formData);
-      alert('Empréstimo criado com sucesso!');
+      await createMutation.mutateAsync({
+        bankAccountId: formData.bankAccountId,
+        costCenterId: formData.costCenterId,
+        name: formData.name,
+        type: formData.type,
+        principalAmount: formData.principalAmount,
+        interestRate: formData.interestRate,
+        startDate: formData.startDate,
+        totalInstallments: formData.totalInstallments,
+        interestType: formData.interestType || undefined,
+        installmentDay: formData.installmentDay,
+        contractNumber: formData.contractNumber || undefined,
+        endDate: formData.endDate || undefined,
+        notes: formData.notes || undefined,
+      });
       router.push('/finance/loans');
-    } catch (error) {
+    } catch {
       alert('Erro ao criar empréstimo');
     }
   };
@@ -84,6 +107,50 @@ export default function NewLoanPage() {
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
+            </div>
+
+            <div>
+              <Label htmlFor="bankAccountId">Conta Bancária *</Label>
+              <Select
+                value={formData.bankAccountId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
+                required
+              >
+                <SelectTrigger id="bankAccountId">
+                  <SelectValue placeholder="Selecione uma conta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bankAccounts.map((ba) => (
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="costCenterId">Centro de Custo *</Label>
+              <Select
+                value={formData.costCenterId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
+                required
+              >
+                <SelectTrigger id="costCenterId">
+                  <SelectValue placeholder="Selecione um centro de custo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {costCenters.map((cc) => (
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
