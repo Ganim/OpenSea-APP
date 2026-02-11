@@ -17,7 +17,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Item } from '@/types/stock';
-import { ArrowRight, Loader2, MapPin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { BinSelector } from '../components/bin-selector';
 
@@ -77,54 +77,55 @@ export function ChangeLocationModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Mudar Local</DialogTitle>
-          <DialogDescription>
-            Transferir{' '}
+          <DialogTitle>
+            Transferência de Estoque (
             {selectedItems.length === 1
               ? '1 item'
-              : `${selectedItems.length} itens`}{' '}
-            para um novo local
+              : `${selectedItems.length} itens`}
+            )
+          </DialogTitle>
+          <DialogDescription>
+            Selecione o novo local para os itens selecionados.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
-          {/* Current Locations */}
-          <div className="space-y-2">
-            <Label>Local atual</Label>
-            <div className="flex flex-wrap gap-2">
+          {/* Current + New Location side by side */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+            <div className="space-y-2">
+              <Label>Local atual</Label>
               {currentLocations.map(location => (
                 <div
                   key={location}
-                  className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded text-sm"
+                  className="flex items-center gap-2 h-11 px-3 rounded-2xl border border-input bg-muted/50 text-sm w-full"
                 >
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="font-mono">{location}</span>
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="font-mono truncate">{location}</span>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Arrow indicator */}
-          <div className="flex justify-center">
-            <ArrowRight className="h-5 w-5 text-muted-foreground" />
-          </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground mt-10" />
 
-          {/* New Location Selector */}
-          <div className="space-y-2">
-            <Label htmlFor="new-location">Novo local</Label>
-            <BinSelector
-              value={newBinId}
-              onChange={setNewBinId}
-              placeholder="Selecione o novo local..."
-            />
+            <div className="space-y-2">
+              <Label>Novo local</Label>
+              <BinSelector
+                value={newBinId}
+                onChange={setNewBinId}
+                placeholder="Selecione..."
+                className="bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30"
+              />
+            </div>
           </div>
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Motivo da transferência (opcional)</Label>
+            <Label htmlFor="reason">
+              Quer deixar alguma observação? (Opcional)
+            </Label>
             <Textarea
               id="reason"
-              placeholder="Digite o motivo da transferência..."
+              placeholder="Digite uma observação..."
               value={reason}
               onChange={e => setReason(e.target.value)}
               rows={2}
@@ -137,8 +138,10 @@ export function ChangeLocationModal({
             variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
+            className="gap-1.5"
           >
-            Cancelar
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
           </Button>
           <Button onClick={handleSubmit} disabled={!newBinId || isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

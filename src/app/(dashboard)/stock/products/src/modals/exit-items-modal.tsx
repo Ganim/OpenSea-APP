@@ -1,5 +1,7 @@
 /**
- * ExitItemsModal - Modal for selecting exit type and processing item exit
+ * ExitItemsModal - Two-step modal for item exit
+ * Step 1: Select exit type
+ * Step 2: Observation + confirmation (or transfer modal for TRANSFER)
  */
 
 'use client';
@@ -15,38 +17,72 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { Item } from '@/types/stock';
 import {
-  AlertCircle,
-  AlertTriangle,
+  ArrowLeft,
   ArrowRightLeft,
   Building,
-  Clock,
   Loader2,
+  LogOut,
+  ShieldAlert,
   ShoppingCart,
   Undo2,
 } from 'lucide-react';
-import { useState } from 'react';
-import { type ExitType, EXIT_TYPE_CONFIG } from '../types/products.types';
+import { useEffect, useState } from 'react';
+import type { ExitType } from '../types/products.types';
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  ShoppingCart: ShoppingCart,
-  AlertTriangle: AlertTriangle,
-  Clock: Clock,
-  AlertCircle: AlertCircle,
-  Building: Building,
-  Undo2: Undo2,
-  ArrowRightLeft: ArrowRightLeft,
-};
+const EXIT_OPTIONS: {
+  type: ExitType;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color?: 'red' | 'orange';
+}[] = [
+  {
+    type: 'SALE',
+    label: 'Venda',
+    description: 'Saída por venda ao cliente',
+    icon: ShoppingCart,
+  },
+  {
+    type: 'INTERNAL_USE',
+    label: 'Consumo Interno',
+    description: 'Uso interno da empresa ou ordem de serviço',
+    icon: Building,
+  },
+  {
+    type: 'SUPPLIER_RETURN',
+    label: 'Devolução ao Fornecedor',
+    description: 'Retorno do item ao fornecedor',
+    icon: Undo2,
+  },
+  {
+    type: 'LOSS',
+    label: 'Perda/Furto/Roubo',
+    description: 'Item perdido, furtado ou roubado',
+    icon: ShieldAlert,
+    color: 'red',
+  },
+  {
+    type: 'TRANSFER',
+    label: 'Transferência de Estoque',
+    description: 'Movimentação para outro local',
+    icon: ArrowRightLeft,
+    color: 'orange',
+  },
+];
 
 export interface ExitItemsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedItems: Item[];
   onConfirm: (exitType: ExitType, reason: string) => Promise<void>;
+  /** Called when user selects TRANSFER - parent should open transfer modal */
+  onTransfer?: () => void;
+  /** When provided, skips step 1 and opens directly on step 2 with this type */
+  initialExitType?: ExitType;
 }
 
 export function ExitItemsModal({
@@ -54,10 +90,32 @@ export function ExitItemsModal({
   onOpenChange,
   selectedItems,
   onConfirm,
+  onTransfer,
+  initialExitType,
 }: ExitItemsModalProps) {
+  const [step, setStep] = useState<1 | 2>(1);
   const [selectedType, setSelectedType] = useState<ExitType | null>(null);
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // When opening with initialExitType, skip to step 2
+  useEffect(() => {
+    if (open && initialExitType) {
+      setSelectedType(initialExitType);
+      setStep(2);
+    }
+  }, [open, initialExitType]);
+
+  const handleSelectType = (type: ExitType) => {
+    if (type === 'TRANSFER') {
+      // Close this modal and open transfer modal
+      handleClose();
+      onTransfer?.();
+      return;
+    }
+    setSelectedType(type);
+    setStep(2);
+  };
 
   const handleSubmit = async () => {
     if (!selectedType) return;
@@ -65,9 +123,7 @@ export function ExitItemsModal({
     setIsSubmitting(true);
     try {
       await onConfirm(selectedType, reason);
-      onOpenChange(false);
-      setSelectedType(null);
-      setReason('');
+      handleClose();
     } catch (error) {
       logger.error(
         'Error processing exit',
@@ -78,9 +134,21 @@ export function ExitItemsModal({
     }
   };
 
+  const handleBack = () => {
+    if (initialExitType) {
+      // Came from action bar with pre-selected type - close modal
+      handleClose();
+      return;
+    }
+    setStep(1);
+    setSelectedType(null);
+    setReason('');
+  };
+
   const handleClose = () => {
     if (!isSubmitting) {
       onOpenChange(false);
+      setStep(1);
       setSelectedType(null);
       setReason('');
     }
@@ -91,100 +159,125 @@ export function ExitItemsModal({
     0
   );
 
+  const selectedConfig = EXIT_OPTIONS.find(o => o.type === selectedType);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Dar Saída de Estoque</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {step === 1 ? (
+              <>
+                <LogOut className="h-5 w-5" />
+                Dar Saída de Estoque
+              </>
+            ) : (
+              <>
+                {selectedConfig && <selectedConfig.icon className="h-5 w-5" />}
+                {selectedConfig?.label} (
+                {selectedItems.length === 1
+                  ? '1 item'
+                  : `${selectedItems.length} itens`}
+                )
+              </>
+            )}
+          </DialogTitle>
           <DialogDescription>
-            Selecione o tipo de saída para{' '}
-            {selectedItems.length === 1
-              ? '1 item'
-              : `${selectedItems.length} itens`}{' '}
-            (total: {totalQuantity} unidades)
+            {step === 1 ? (
+              <>
+                Selecione o tipo de saída para{' '}
+                {selectedItems.length === 1
+                  ? '1 item'
+                  : `${selectedItems.length} itens`}{' '}
+                (total: {totalQuantity} unidades)
+              </>
+            ) : (
+              'Confirmação de saída. Essa ação não poderá ser desfeita!'
+            )}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
-          <RadioGroup
-            value={selectedType || ''}
-            onValueChange={value => setSelectedType(value as ExitType)}
-            className="grid gap-2"
-          >
-            {(
-              Object.entries(EXIT_TYPE_CONFIG) as [
-                ExitType,
-                (typeof EXIT_TYPE_CONFIG)[ExitType],
-              ][]
-            ).map(([type, config]) => {
-              const Icon = ICON_MAP[config.icon];
+        {step === 1 ? (
+          /* Step 1: Select exit type */
+          <div className="py-2 space-y-2">
+            {EXIT_OPTIONS.map(option => {
+              const Icon = option.icon;
+              const isOrange = option.color === 'orange';
+              const isRed = option.color === 'red';
               return (
-                <div key={type}>
-                  <RadioGroupItem
-                    value={type}
-                    id={type}
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor={type}
+                <button
+                  key={option.type}
+                  type="button"
+                  onClick={() => handleSelectType(option.type)}
+                  className="flex items-center gap-3 w-full p-3 rounded-lg border border-border cursor-pointer transition-colors text-left hover:bg-muted/50"
+                >
+                  <Icon
                     className={cn(
-                      'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
-                      'hover:bg-muted/50',
-                      selectedType === type
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border'
+                      'h-5 w-5 shrink-0',
+                      isRed
+                        ? 'text-red-500'
+                        : isOrange
+                          ? 'text-orange-500'
+                          : 'text-muted-foreground'
                     )}
-                  >
-                    {Icon && (
-                      <Icon
-                        className={cn(
-                          'h-5 w-5 shrink-0',
-                          selectedType === type
-                            ? 'text-primary'
-                            : 'text-muted-foreground'
-                        )}
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium">{config.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {config.description}
-                      </p>
-                    </div>
-                  </Label>
-                </div>
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium">{option.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {option.description}
+                    </p>
+                  </div>
+                </button>
               );
             })}
-          </RadioGroup>
-
-          <div className="space-y-2">
-            <Label htmlFor="reason">Observação (opcional)</Label>
-            <Textarea
-              id="reason"
-              placeholder="Digite uma observação ou motivo adicional..."
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              rows={3}
-            />
           </div>
-        </div>
+        ) : (
+          /* Step 2: Observation + confirmation */
+          <div className="py-2 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason">
+                Quer deixar alguma observação? (Opcional)
+              </Label>
+              <Textarea
+                id="reason"
+                placeholder="Digite uma observação..."
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                rows={4}
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedType || isSubmitting}
-            variant="destructive"
-          >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Confirmar Saída
-          </Button>
+          {step === 1 ? (
+            <Button variant="outline" onClick={handleClose}>
+              Cancelar
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="gap-1.5"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                variant="destructive"
+              >
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Confirmar Saída
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

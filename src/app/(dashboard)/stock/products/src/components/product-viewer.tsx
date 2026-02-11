@@ -8,11 +8,20 @@
 
 import { logger } from '@/lib/logger';
 import { CareIcon } from '@/components/care';
+import { CopyButton } from '@/components/shared/copy-button';
 import { InfoField } from '@/components/shared/info-field';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +34,11 @@ import { useSelection } from '@/core/selection/hooks/use-selection';
 import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
 import { useCareOptions } from '@/hooks/stock';
 import { cn } from '@/lib/utils';
-import { itemsService, productsService } from '@/services/stock';
+import {
+  itemMovementsService,
+  itemsService,
+  productsService,
+} from '@/services/stock';
 import type { ExitMovementType } from '@/types/stock';
 import type { Item, Product, Variant } from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,8 +46,10 @@ import {
   ArrowLeft,
   Box,
   Edit,
+  Expand,
   Package,
   Palette,
+  Plus,
   Printer,
   Search,
   Upload,
@@ -47,8 +62,11 @@ import { ItemsActionBar } from '../components/items-action-bar';
 import { VariantRow } from '../components/variant-row';
 import {
   ChangeLocationModal,
+  EditVariantModal,
   ExitItemsModal,
   ItemHistoryModal,
+  QuickAddItemModal,
+  QuickAddVariantModal,
 } from '../modals';
 import type { ExitType } from '../types/products.types';
 
@@ -89,6 +107,18 @@ export function ProductViewer({
   const [changeLocationModalOpen, setChangeLocationModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyItem, setHistoryItem] = useState<Item | null>(null);
+  const [showAddVariantModal, setShowAddVariantModal] = useState(false);
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [showEditVariantModal, setShowEditVariantModal] = useState(false);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [sessionExitReasonMap, setSessionExitReasonMap] = useState<
+    Record<string, string>
+  >({});
+  const [hideExitedItems, setHideExitedItems] = useState(true);
+  const [exitInitialType, setExitInitialType] = useState<
+    ExitType | undefined
+  >();
 
   // ============================================================================
   // DATA FETCHING - CARE OPTIONS
@@ -108,9 +138,12 @@ export function ProductViewer({
       const stats: Record<string, { count: number; totalQty: number }> = {};
       for (const variant of variants) {
         const itemsResponse = await itemsService.listItems(variant.id);
+        const inStockItems = itemsResponse.items.filter(
+          item => item.currentQuantity > 0
+        );
         stats[variant.id] = {
-          count: itemsResponse.items.length,
-          totalQty: itemsResponse.items.reduce(
+          count: inStockItems.length,
+          totalQty: inStockItems.reduce(
             (sum, item) => sum + item.currentQuantity,
             0
           ),
@@ -141,11 +174,62 @@ export function ProductViewer({
   });
 
   // ============================================================================
+  // DATA FETCHING - EXIT REASONS (for exited items badges)
+  // ============================================================================
+
+  const exitedItemIds = useMemo(
+    () =>
+      (itemsData?.items || [])
+        .filter((item: Item) => item.currentQuantity === 0)
+        .map((item: Item) => item.id),
+    [itemsData]
+  );
+
+  const { data: fetchedExitReasons } = useQuery({
+    queryKey: ['exit-reasons', selectedVariant?.id, exitedItemIds],
+    queryFn: async () => {
+      if (exitedItemIds.length === 0) return {};
+      const results = await Promise.all(
+        exitedItemIds.map(itemId =>
+          itemMovementsService.listMovements({ itemId })
+        )
+      );
+      const reasonMap: Record<string, string> = {};
+      for (let i = 0; i < exitedItemIds.length; i++) {
+        const movements = results[i].movements;
+        // Find the most recent non-ENTRY movement
+        const exitMovement = movements.find(
+          m => m.reasonCode !== 'ENTRY' && m.movementType !== 'TRANSFER'
+        );
+        if (exitMovement) {
+          reasonMap[exitedItemIds[i]] =
+            exitMovement.reasonCode || exitMovement.movementType;
+        }
+      }
+      return reasonMap;
+    },
+    enabled: exitedItemIds.length > 0,
+  });
+
+  // Merge fetched reasons with session-local reasons (session overrides)
+  const exitReasonMap = useMemo(
+    () => ({ ...(fetchedExitReasons || {}), ...sessionExitReasonMap }),
+    [fetchedExitReasons, sessionExitReasonMap]
+  );
+
+  // ============================================================================
   // ITEM SELECTION
   // ============================================================================
 
   const items = useMemo(() => itemsData?.items || [], [itemsData]);
-  const itemIds = useMemo(() => items.map((item: Item) => item.id), [items]);
+  // Apenas itens com qty > 0 são selecionáveis
+  const itemIds = useMemo(
+    () =>
+      items
+        .filter((item: Item) => item.currentQuantity > 0)
+        .map((item: Item) => item.id),
+    [items]
+  );
 
   const {
     state: selectionState,
@@ -200,25 +284,34 @@ export function ProductViewer({
 
   const filteredItems = useMemo(() => {
     if (!items || items.length === 0) return [];
-    if (!itemsSearch.trim()) return items;
+    let result = items;
+
+    // Ocultar itens que saíram do estoque (qty=0)
+    if (hideExitedItems) {
+      result = result.filter((item: Item) => item.currentQuantity > 0);
+    }
+
+    if (!itemsSearch.trim()) return result;
     const q = itemsSearch.toLowerCase();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return items.filter((item: any) => {
+    return result.filter((item: any) => {
       const locationAddress =
         (item.bin?.address as string) ||
         (item.resolvedAddress as string) ||
         (item.binId as string) ||
         (item.locationId as string) ||
         '';
-      const itemCode =
-        (item.uniqueCode as string) || (item.fullCode as string) || '';
+      const fullCode = (item.fullCode as string) || '';
+      const uniqueCode = (item.uniqueCode as string) || '';
+      const quantity = String(item.currentQuantity ?? '');
       return (
-        itemCode.toLowerCase().includes(q) ||
-        ((item.batchNumber as string)?.toLowerCase().includes(q) ?? false) ||
-        locationAddress.toLowerCase().includes(q)
+        fullCode.toLowerCase().includes(q) ||
+        uniqueCode.toLowerCase().includes(q) ||
+        locationAddress.toLowerCase().includes(q) ||
+        quantity.includes(q)
       );
     });
-  }, [items, itemsSearch]);
+  }, [items, itemsSearch, hideExitedItems]);
 
   const totalItemsQuantity = useMemo(
     () =>
@@ -288,6 +381,9 @@ export function ProductViewer({
 
   const handleItemClick = useCallback(
     (item: Item, e: React.MouseEvent) => {
+      // Items com qty=0 não podem ser selecionados
+      if (item.currentQuantity === 0) return;
+
       if (e.shiftKey && selectionState.lastSelectedId) {
         // Shift+Click: Range selection
         selectionActions.selectRange(selectionState.lastSelectedId, item.id);
@@ -379,6 +475,13 @@ export function ProductViewer({
 
         await Promise.all(exitPromises);
 
+        // Registrar motivos de saída localmente para exibir badges imediatamente
+        const newReasons: Record<string, string> = {};
+        for (const item of selectedItems) {
+          newReasons[item.id] = exitType;
+        }
+        setSessionExitReasonMap(prev => ({ ...prev, ...newReasons }));
+
         toast.success(
           `Saída de ${selectedItems.length} ${selectedItems.length === 1 ? 'item' : 'itens'} registrada com sucesso!`
         );
@@ -403,14 +506,28 @@ export function ProductViewer({
     [selectedItems, selectionActions, queryClient, selectedVariant, product.id]
   );
 
-  const handleSendToServiceOrder = useCallback(() => {
-    // This is essentially an exit with type INTERNAL_USE
+  const handleActionSell = useCallback(() => {
+    setExitInitialType('SALE');
     setExitModalOpen(true);
-    toast.info('Selecione "Consumo Interno" para enviar para Ordem de Serviço');
   }, []);
 
-  const handleSendToQuote = useCallback(() => {
-    toast.info('Funcionalidade em desenvolvimento');
+  const handleActionInternalUse = useCallback(() => {
+    setExitInitialType('INTERNAL_USE');
+    setExitModalOpen(true);
+  }, []);
+
+  const handleActionReturn = useCallback(() => {
+    setExitInitialType('SUPPLIER_RETURN');
+    setExitModalOpen(true);
+  }, []);
+
+  const handleActionLoss = useCallback(() => {
+    setExitInitialType('LOSS');
+    setExitModalOpen(true);
+  }, []);
+
+  const handleActionTransfer = useCallback(() => {
+    setChangeLocationModalOpen(true);
   }, []);
 
   const handleReserveItem = useCallback(() => {
@@ -428,6 +545,16 @@ export function ProductViewer({
       toast.success('Item adicionado à fila de impressão');
     },
     [printActions, selectedVariant, product]
+  );
+
+  // Exit single item (from ItemRow button)
+  const handleExitItem = useCallback(
+    (item: Item) => {
+      selectionActions.deselectAll();
+      selectionActions.select(item.id);
+      setExitModalOpen(true);
+    },
+    [selectionActions]
   );
 
   // Print all selected items (from action bar)
@@ -497,12 +624,7 @@ export function ProductViewer({
               <Upload className="h-4 w-4" />
               Importar Variantes
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEditProduct}
-              className="gap-2"
-            >
+            <Button size="sm" onClick={handleEditProduct} className="gap-2">
               <Edit className="h-4 w-4" />
               Editar Produto
             </Button>
@@ -517,18 +639,18 @@ export function ProductViewer({
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-cyan-500">
               <Package className="h-8 w-8 text-white" />
             </div>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold ">
+                <h1 className="text-2xl font-bold">
                   {product.template?.name} {product.name}
                 </h1>
                 {product.outOfLine && (
-                  <span className="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-md">
+                  <span className="px-2 py-1 text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-md">
                     Fora de Linha
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-muted-foreground">
                 {product.manufacturer
                   ? product.manufacturer?.name
                   : 'Fabricante não informado'}
@@ -582,6 +704,45 @@ export function ProductViewer({
           )}
         </div>
       </Card>
+      {/* Product Details */}
+      <Card className="p-6 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <InfoField
+            label="Template"
+            value={product.template?.name || 'Não informado'}
+            showCopyButton
+          />
+          <InfoField
+            label="Código"
+            value={product.fullCode || 'Não informado'}
+            showCopyButton
+          />
+          <InfoField
+            label="Categoria"
+            value={product.productCategories?.[0]?.name || 'Sem categoria'}
+            showCopyButton
+          />
+          <InfoField
+            label="Descrição"
+            value={product.description || 'Sem descrição'}
+            truncate
+            action={
+              product.description ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 opacity-50 hover:opacity-100"
+                  onClick={() => setShowDescriptionModal(true)}
+                  title="Ver descrição completa"
+                >
+                  <Expand className="h-3.5 w-3.5" />
+                </Button>
+              ) : undefined
+            }
+          />
+        </div>
+      </Card>
+
       {/* Atributos Personalizados */}
       {(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -644,10 +805,10 @@ export function ProductViewer({
       {/* Two-column layout - Variantes e Items */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* LEFT COLUMN - Variants */}
-        <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           {/* Variants Header */}
-          <div className="p-4 bg-muted/30 border-b">
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-muted/30 dark:to-muted/30 border-b">
+            <div className="flex items-center justify-between mb-3 min-h-[28px]">
               <div className="flex items-center gap-2">
                 <Palette className="w-4 h-4 text-muted-foreground" />
                 <h3 className="font-medium">Variantes</h3>
@@ -697,6 +858,10 @@ export function ProductViewer({
                   unitLabel={unitOfMeasure}
                   isSelected={selectedVariant?.id === variant.id}
                   onClick={() => handleVariantSelect(variant)}
+                  onEdit={v => {
+                    setEditingVariant(v);
+                    setShowEditVariantModal(true);
+                  }}
                   variantAttributes={
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (product as any).template?.variantAttributes
@@ -705,15 +870,27 @@ export function ProductViewer({
               ))
             )}
           </div>
+
+          {/* Add Variant Button */}
+          <div className="p-4 border-t">
+            <Button
+              variant="outline"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+              onClick={() => setShowAddVariantModal(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Variante
+            </Button>
+          </div>
         </div>
 
         {/* RIGHT COLUMN - Items */}
-        <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           {selectedVariant ? (
             <>
               {/* Items Header */}
-              <div className="p-4 bg-muted/30 border-b">
-                <div className="flex items-center justify-between mb-3">
+              <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-muted/30 dark:to-muted/30 border-b">
+                <div className="flex items-center justify-between mb-3 min-h-[28px]">
                   <div className="flex items-center gap-2">
                     <Box className="w-4 h-4 text-muted-foreground" />
                     <h3 className="font-medium">{selectedVariant.name}</h3>
@@ -737,16 +914,34 @@ export function ProductViewer({
                   </div>
                 </div>
 
-                {/* Items Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 z-10 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Buscar itens..."
-                    value={itemsSearch}
-                    onChange={e => setItemsSearch(e.target.value)}
-                    className="pl-9 h-9"
-                  />
+                {/* Hide exited items switch + Search */}
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 z-10 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Buscar itens..."
+                      value={itemsSearch}
+                      onChange={e => setItemsSearch(e.target.value)}
+                      className="pl-9 h-9"
+                    />
+                  </div>
+                  {items.some((i: Item) => i.currentQuantity === 0) && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Switch
+                        id="hide-exited"
+                        checked={hideExitedItems}
+                        onCheckedChange={setHideExitedItems}
+                        className="scale-75"
+                      />
+                      <Label
+                        htmlFor="hide-exited"
+                        className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
+                      >
+                        Ocultar saídas
+                      </Label>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -787,9 +982,23 @@ export function ProductViewer({
                       onClick={e => handleItemClick(item, e)}
                       onDoubleClick={() => handleItemDoubleClick(item)}
                       onPrint={handlePrintItem}
+                      onExit={handleExitItem}
+                      lastExitReasonCode={exitReasonMap[item.id]}
                     />
                   ))
                 )}
+              </div>
+
+              {/* Add Item Button */}
+              <div className="p-4 border-t">
+                <Button
+                  variant="outline"
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white"
+                  onClick={() => setShowAddItemModal(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Registrar Entrada
+                </Button>
               </div>
             </>
           ) : (
@@ -825,12 +1034,13 @@ export function ProductViewer({
       <ItemsActionBar
         selectedCount={selectionState.count}
         onClearSelection={() => selectionActions.deselectAll()}
-        onChangeLocation={() => setChangeLocationModalOpen(true)}
-        onSendToServiceOrder={handleSendToServiceOrder}
-        onSendToQuote={handleSendToQuote}
-        onReserveItem={handleReserveItem}
+        onSell={handleActionSell}
+        onInternalUse={handleActionInternalUse}
+        onReturn={handleActionReturn}
+        onTransfer={handleActionTransfer}
+        onLoss={handleActionLoss}
+        onReserve={handleReserveItem}
         onPrintLabel={handlePrintLabel}
-        onExit={() => setExitModalOpen(true)}
       />
 
       {/* Change Location Modal */}
@@ -844,9 +1054,14 @@ export function ProductViewer({
       {/* Exit Items Modal */}
       <ExitItemsModal
         open={exitModalOpen}
-        onOpenChange={setExitModalOpen}
+        onOpenChange={open => {
+          setExitModalOpen(open);
+          if (!open) setExitInitialType(undefined);
+        }}
         selectedItems={selectedItems}
         onConfirm={handleExitItems}
+        onTransfer={handleActionTransfer}
+        initialExitType={exitInitialType}
       />
 
       {/* Item History Modal */}
@@ -855,6 +1070,52 @@ export function ProductViewer({
         onOpenChange={setHistoryModalOpen}
         item={historyItem}
       />
+
+      {/* Edit Variant Modal */}
+      <EditVariantModal
+        product={product}
+        variant={editingVariant}
+        open={showEditVariantModal}
+        onOpenChange={setShowEditVariantModal}
+      />
+
+      {/* Quick Add Variant Modal */}
+      <QuickAddVariantModal
+        product={product}
+        open={showAddVariantModal}
+        onOpenChange={setShowAddVariantModal}
+      />
+
+      {/* Quick Add Item Modal */}
+      <QuickAddItemModal
+        product={product}
+        variant={selectedVariant}
+        open={showAddItemModal}
+        onOpenChange={setShowAddItemModal}
+      />
+
+      {/* Description Modal */}
+      <Dialog
+        open={showDescriptionModal}
+        onOpenChange={setShowDescriptionModal}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Descrição do Produto</DialogTitle>
+              {product.description && (
+                <CopyButton
+                  content={product.description}
+                  tooltipText="Copiar descrição"
+                />
+              )}
+            </div>
+          </DialogHeader>
+          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+            {product.description || 'Sem descrição'}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

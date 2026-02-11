@@ -3,10 +3,12 @@
  * Desktop: Side-by-side columns
  * Left: Product header, variants search, variants list, add variant button
  * Right: Selected variant info, items search, items list, add item button
+ * Supports: hide exited items, double-click history, exit reason badges
  */
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,13 +17,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { usePrintQueue } from '@/core/print-queue';
 import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
 import { cn } from '@/lib/utils';
-import { itemsService, variantsService } from '@/services/stock';
-import type { Item, Product, Variant } from '@/types/stock';
-import { useQuery } from '@tanstack/react-query';
+import {
+  itemMovementsService,
+  itemsService,
+  variantsService,
+} from '@/services/stock';
+import type { ExitMovementType, Item, Product, Variant } from '@/types/stock';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Copy,
@@ -35,6 +43,10 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ItemRow } from '../components/item-row';
 import { VariantRow } from '../components/variant-row';
+import type { ExitType } from '../types/products.types';
+import { EditVariantModal } from './edit-variant-modal';
+import { ExitItemsModal } from './exit-items-modal';
+import { ItemHistoryModal } from './item-history-modal';
 import { QuickAddItemModal } from './quick-add-item-modal';
 import { QuickAddVariantModal } from './quick-add-variant-modal';
 
@@ -49,28 +61,39 @@ export function ProductVariantsItemsModal({
   product,
   open,
   onOpenChange,
-  onMoveItem,
 }: ProductVariantsItemsModalProps) {
+  const { actions: printActions } = usePrintQueue();
+  const queryClient = useQueryClient();
+
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [variantsSearch, setVariantsSearch] = useState('');
   const [itemsSearch, setItemsSearch] = useState('');
+  const [hideExitedItems, setHideExitedItems] = useState(true);
   const [showAddVariantModal, setShowAddVariantModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
-
-  // Print queue hook
-  const { actions: printActions } = usePrintQueue();
+  const [showEditVariantModal, setShowEditVariantModal] = useState(false);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyItem, setHistoryItem] = useState<Item | null>(null);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [exitItem, setExitItem] = useState<Item | null>(null);
+  const [sessionExitReasonMap, setSessionExitReasonMap] = useState<
+    Record<string, string>
+  >({});
 
   // Track previous product to reset state when it changes
   const previousProductIdRef = useRef<string | null>(null);
   if (product?.id !== previousProductIdRef.current) {
     previousProductIdRef.current = product?.id ?? null;
-    // Reset state when product changes (during render, not in effect)
     if (selectedVariant !== null) setSelectedVariant(null);
     if (variantsSearch !== '') setVariantsSearch('');
     if (itemsSearch !== '') setItemsSearch('');
   }
 
-  // Fetch variants for this product
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
   const {
     data: variantsData,
     isLoading: isLoadingVariants,
@@ -84,18 +107,19 @@ export function ProductVariantsItemsModal({
     enabled: !!product?.id && open,
   });
 
-  // Fetch items count and total quantity for each variant
   const { data: variantStatsMap } = useQuery({
     queryKey: ['items', 'stats-by-variants', product?.id],
     queryFn: async () => {
       if (!variantsData?.variants?.length) return {};
-
       const stats: Record<string, { count: number; totalQty: number }> = {};
       for (const variant of variantsData.variants) {
         const itemsResponse = await itemsService.listItems(variant.id);
+        const inStockItems = itemsResponse.items.filter(
+          item => item.currentQuantity > 0
+        );
         stats[variant.id] = {
-          count: itemsResponse.items.length,
-          totalQty: itemsResponse.items.reduce(
+          count: inStockItems.length,
+          totalQty: inStockItems.reduce(
             (sum, item) => sum + item.currentQuantity,
             0
           ),
@@ -106,7 +130,6 @@ export function ProductVariantsItemsModal({
     enabled: !!variantsData?.variants?.length && open,
   });
 
-  // Fetch items for selected variant
   const {
     data: itemsData,
     isLoading: isLoadingItems,
@@ -115,16 +138,61 @@ export function ProductVariantsItemsModal({
     queryKey: ['items', 'by-variant', selectedVariant?.id],
     queryFn: async () => {
       if (!selectedVariant?.id) return { items: [] };
-      const response = await itemsService.listItems(selectedVariant.id);
-      return response;
+      return itemsService.listItems(selectedVariant.id);
     },
     enabled: !!selectedVariant?.id && open,
   });
 
-  const variants = useMemo(() => variantsData?.variants || [], [variantsData]);
+  // ============================================================================
+  // EXIT REASONS (for exited items badges)
+  // ============================================================================
+
   const items = useMemo(() => itemsData?.items || [], [itemsData]);
 
-  // Filter variants by search
+  const exitedItemIds = useMemo(
+    () =>
+      items
+        .filter((item: Item) => item.currentQuantity === 0)
+        .map((item: Item) => item.id),
+    [items]
+  );
+
+  const { data: fetchedExitReasons } = useQuery({
+    queryKey: ['exit-reasons', selectedVariant?.id, exitedItemIds],
+    queryFn: async () => {
+      if (exitedItemIds.length === 0) return {};
+      const results = await Promise.all(
+        exitedItemIds.map(itemId =>
+          itemMovementsService.listMovements({ itemId })
+        )
+      );
+      const reasonMap: Record<string, string> = {};
+      for (let i = 0; i < exitedItemIds.length; i++) {
+        const movements = results[i].movements;
+        const exitMovement = movements.find(
+          m => m.reasonCode !== 'ENTRY' && m.movementType !== 'TRANSFER'
+        );
+        if (exitMovement) {
+          reasonMap[exitedItemIds[i]] =
+            exitMovement.reasonCode || exitMovement.movementType;
+        }
+      }
+      return reasonMap;
+    },
+    enabled: exitedItemIds.length > 0 && open,
+  });
+
+  const exitReasonMap = useMemo(
+    () => ({ ...(fetchedExitReasons || {}), ...sessionExitReasonMap }),
+    [fetchedExitReasons, sessionExitReasonMap]
+  );
+
+  // ============================================================================
+  // COMPUTED
+  // ============================================================================
+
+  const variants = useMemo(() => variantsData?.variants || [], [variantsData]);
+
   const filteredVariants = useMemo(
     () =>
       variants.filter(variant => {
@@ -138,34 +206,40 @@ export function ProductVariantsItemsModal({
     [variants, variantsSearch]
   );
 
-  // Filter items by search
-  const filteredItems = useMemo(
-    () =>
-      items.filter(item => {
-        const q = itemsSearch.toLowerCase();
-        // Resolver endereço da localização: bin.address > resolvedAddress > binId > locationId
-        const locationAddress =
-          item.bin?.address ||
-          item.resolvedAddress ||
-          item.binId ||
-          item.locationId ||
-          '';
-        // Resolver código do item: uniqueCode > fullCode
-        const itemCode = item.uniqueCode || item.fullCode || '';
-        return (
-          itemCode.toLowerCase().includes(q) ||
-          (item.batchNumber?.toLowerCase().includes(q) ?? false) ||
-          locationAddress.toLowerCase().includes(q)
-        );
-      }),
-    [items, itemsSearch]
-  );
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (hideExitedItems) {
+      result = result.filter((item: Item) => item.currentQuantity > 0);
+    }
+    if (!itemsSearch.trim()) return result;
+    const q = itemsSearch.toLowerCase();
+    return result.filter(item => {
+      const locationAddress =
+        item.bin?.address ||
+        item.resolvedAddress ||
+        item.binId ||
+        item.locationId ||
+        '';
+      const fullCode = item.fullCode || '';
+      const uniqueCode = item.uniqueCode || '';
+      const quantity = String(item.currentQuantity ?? '');
+      return (
+        fullCode.toLowerCase().includes(q) ||
+        uniqueCode.toLowerCase().includes(q) ||
+        locationAddress.toLowerCase().includes(q) ||
+        quantity.includes(q)
+      );
+    });
+  }, [items, itemsSearch, hideExitedItems]);
 
-  // Calculate totals
   const totalItemsQuantity = useMemo(
     () => filteredItems.reduce((sum, item) => sum + item.currentQuantity, 0),
     [filteredItems]
   );
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
   const handleVariantSelect = useCallback((variant: Variant) => {
     setSelectedVariant(variant);
@@ -179,7 +253,11 @@ export function ProductVariantsItemsModal({
     setItemsSearch('');
   }, [onOpenChange]);
 
-  // Handler para imprimir um item
+  const handleItemDoubleClick = useCallback((item: Item) => {
+    setHistoryItem(item);
+    setHistoryModalOpen(true);
+  }, []);
+
   const handlePrintItem = useCallback(
     (item: Item) => {
       printActions.addToQueue({
@@ -192,13 +270,11 @@ export function ProductVariantsItemsModal({
     [printActions, selectedVariant, product]
   );
 
-  // Handler para imprimir todos os items filtrados
   const handlePrintAllItems = useCallback(() => {
     if (filteredItems.length === 0) {
       toast.warning('Nenhum item para imprimir');
       return;
     }
-
     printActions.addToQueue(
       filteredItems.map(item => ({
         item,
@@ -210,6 +286,67 @@ export function ProductVariantsItemsModal({
       `${filteredItems.length} item(s) adicionado(s) à fila de impressão`
     );
   }, [printActions, filteredItems, selectedVariant, product]);
+
+  const handleItemExit = useCallback((item: Item) => {
+    setExitItem(item);
+    setExitModalOpen(true);
+  }, []);
+
+  const mapExitType = (exitType: ExitType): ExitMovementType => {
+    const mapping: Record<ExitType, ExitMovementType> = {
+      SALE: 'SALE',
+      DAMAGE: 'LOSS',
+      EXPIRATION: 'LOSS',
+      LOSS: 'LOSS',
+      INTERNAL_USE: 'PRODUCTION',
+      SUPPLIER_RETURN: 'LOSS',
+      TRANSFER: 'SAMPLE',
+    };
+    return mapping[exitType] || 'LOSS';
+  };
+
+  const handleExitConfirm = useCallback(
+    async (exitType: ExitType, reason: string) => {
+      if (!exitItem) return;
+      try {
+        await itemsService.registerExit({
+          itemId: exitItem.id,
+          quantity: exitItem.currentQuantity,
+          movementType: mapExitType(exitType),
+          reasonCode: exitType,
+          notes: reason || undefined,
+        });
+
+        setSessionExitReasonMap(prev => ({
+          ...prev,
+          [exitItem.id]: exitType,
+        }));
+
+        toast.success('Saída registrada com sucesso!');
+        setExitItem(null);
+
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'by-variant', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'stats-by-variants', product?.id],
+        });
+        await queryClient.invalidateQueries({ queryKey: ['item-history'] });
+      } catch (error) {
+        logger.error(
+          'Error processing exit',
+          error instanceof Error ? error : undefined
+        );
+        toast.error('Erro ao processar saída');
+        throw error;
+      }
+    },
+    [exitItem, queryClient, selectedVariant, product]
+  );
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   if (!product) return null;
 
@@ -264,8 +401,8 @@ export function ProductVariantsItemsModal({
             {/* LEFT COLUMN - Variants */}
             <div className="flex flex-col border-r border-border overflow-hidden">
               {/* Variants Header */}
-              <div className="p-4 pb-3 bg-muted/30">
-                <div className="flex items-center justify-between mb-3">
+              <div className="p-4 pb-3 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-muted/30 dark:to-muted/30">
+                <div className="flex items-center justify-between mb-3 min-h-[28px]">
                   <div className="flex items-center gap-2">
                     <Palette className="w-4 h-4 text-muted-foreground" />
                     <h3 className="font-medium">Variantes</h3>
@@ -323,13 +460,17 @@ export function ProductVariantsItemsModal({
                       unitLabel={unitOfMeasure}
                       isSelected={selectedVariant?.id === variant.id}
                       onClick={() => handleVariantSelect(variant)}
+                      onEdit={v => {
+                        setEditingVariant(v);
+                        setShowEditVariantModal(true);
+                      }}
                     />
                   ))
                 )}
               </div>
 
               {/* Add Variant Button */}
-              <div className="p-4  border-t">
+              <div className="p-4 border-t">
                 <Button
                   variant="outline"
                   className="w-full bg-emerald-600 hover:bg-emerald-500"
@@ -346,8 +487,8 @@ export function ProductVariantsItemsModal({
               {selectedVariant ? (
                 <>
                   {/* Items Header */}
-                  <div className="p-4 pb-3 bg-muted/30">
-                    <div className="flex items-center justify-between mb-3">
+                  <div className="p-4 pb-3 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-muted/30 dark:to-muted/30">
+                    <div className="flex items-center justify-between mb-3 min-h-[28px]">
                       <div className="flex items-center gap-2">
                         <Box className="w-4 h-4 text-muted-foreground" />
                         <h3 className="font-medium">{selectedVariant.name}</h3>
@@ -371,16 +512,34 @@ export function ProductVariantsItemsModal({
                       </div>
                     </div>
 
-                    {/* Items Search */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 z-10 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Buscar itens..."
-                        value={itemsSearch}
-                        onChange={e => setItemsSearch(e.target.value)}
-                        className="pl-9 h-9"
-                      />
+                    {/* Hide exited items switch + Search */}
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 z-10 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Buscar itens..."
+                          value={itemsSearch}
+                          onChange={e => setItemsSearch(e.target.value)}
+                          className="pl-9 h-9"
+                        />
+                      </div>
+                      {items.some((i: Item) => i.currentQuantity === 0) && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Switch
+                            id="hide-exited-modal"
+                            checked={hideExitedItems}
+                            onCheckedChange={setHideExitedItems}
+                            className="scale-75"
+                          />
+                          <Label
+                            htmlFor="hide-exited-modal"
+                            className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
+                          >
+                            Ocultar saídas
+                          </Label>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -408,19 +567,22 @@ export function ProductVariantsItemsModal({
                         </p>
                       </div>
                     ) : (
-                      filteredItems.map(item => (
+                      filteredItems.map((item: Item) => (
                         <ItemRow
                           key={item.id}
                           item={item}
                           unitLabel={unitOfMeasure}
+                          onDoubleClick={() => handleItemDoubleClick(item)}
                           onPrint={handlePrintItem}
+                          onExit={handleItemExit}
+                          lastExitReasonCode={exitReasonMap[item.id]}
                         />
                       ))
                     )}
                   </div>
 
                   {/* Add Item Button */}
-                  <div className="p-4 *:border-t">
+                  <div className="p-4 border-t">
                     <Button
                       variant="outline"
                       className="w-full bg-purple-600 hover:bg-purple-500"
@@ -452,6 +614,32 @@ export function ProductVariantsItemsModal({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Item History Modal */}
+      <ItemHistoryModal
+        open={historyModalOpen}
+        onOpenChange={setHistoryModalOpen}
+        item={historyItem}
+      />
+
+      {/* Exit Items Modal */}
+      <ExitItemsModal
+        open={exitModalOpen}
+        onOpenChange={open => {
+          setExitModalOpen(open);
+          if (!open) setExitItem(null);
+        }}
+        selectedItems={exitItem ? [exitItem] : []}
+        onConfirm={handleExitConfirm}
+      />
+
+      {/* Edit Variant Modal */}
+      <EditVariantModal
+        product={product}
+        variant={editingVariant}
+        open={showEditVariantModal}
+        onOpenChange={setShowEditVariantModal}
+      />
 
       {/* Quick Add Variant Modal */}
       <QuickAddVariantModal

@@ -10,43 +10,37 @@ import { cn } from '@/lib/utils';
 import {
   ArrowRightLeft,
   Bookmark,
-  FileText,
-  LogOut,
+  Building,
   Printer,
-  Wrench,
+  ShieldAlert,
+  ShoppingCart,
+  Undo2,
   X,
 } from 'lucide-react';
 
 export interface ItemsActionBarProps {
-  /** Number of selected items */
   selectedCount: number;
-  /** Callback when clear selection is clicked */
   onClearSelection: () => void;
-  /** Callback when "Mudar Local" is clicked */
-  onChangeLocation: () => void;
-  /** Callback when "Enviar para OS" is clicked */
-  onSendToServiceOrder: () => void;
-  /** Callback when "Enviar para Orçamento" is clicked */
-  onSendToQuote: () => void;
-  /** Callback when "Reservar Item" is clicked */
-  onReserveItem: () => void;
-  /** Callback when "Imprimir Etiqueta" is clicked */
+  onSell: () => void;
+  onInternalUse: () => void;
+  onReturn: () => void;
+  onTransfer: () => void;
+  onLoss: () => void;
+  onReserve: () => void;
   onPrintLabel: () => void;
-  /** Callback when "Dar Saída" is clicked */
-  onExit: () => void;
-  /** Optional className */
   className?: string;
 }
 
 export function ItemsActionBar({
   selectedCount,
   onClearSelection,
-  onChangeLocation,
-  onSendToServiceOrder,
-  onSendToQuote,
-  onReserveItem,
+  onSell,
+  onInternalUse,
+  onReturn,
+  onTransfer,
+  onLoss,
+  onReserve,
   onPrintLabel,
-  onExit,
   className,
 }: ItemsActionBarProps) {
   if (selectedCount === 0) return null;
@@ -63,67 +57,77 @@ export function ItemsActionBar({
         className
       )}
     >
-      {/* Selection Count & Clear */}
-      <div className="flex items-center gap-2 px-3 border-r border-sky-400/30">
-        <span className="text-sm font-medium text-white">
-          {selectedCount} {selectedCount === 1 ? 'item' : 'itens'}
-        </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-sky-100 hover:text-white hover:bg-sky-500/50"
-          onClick={onClearSelection}
-          title="Limpar seleção"
-          aria-label="Limpar seleção"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Action Buttons */}
+      {/* Primary Actions */}
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="sm"
           className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
-          onClick={onChangeLocation}
-          title="Mudar Local (Transferência de Estoque)"
+          onClick={onSell}
+          title="Vender"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          <span className="hidden sm:inline">Vender</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
+          onClick={onInternalUse}
+          title="Utilizar (Consumo Interno)"
+        >
+          <Building className="h-4 w-4" />
+          <span className="hidden sm:inline">Utilizar</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
+          onClick={onReturn}
+          title="Devolver ao Fornecedor"
+        >
+          <Undo2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Devolver</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
+          onClick={onTransfer}
+          title="Transferir de Local"
         >
           <ArrowRightLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Mudar Local</span>
+          <span className="hidden sm:inline">Transferir</span>
         </Button>
+      </div>
 
+      <div className="h-6 w-px bg-sky-400/30" />
+
+      {/* Secondary Actions */}
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="sm"
-          className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
-          onClick={onSendToServiceOrder}
-          title="Enviar para Ordem de Serviço"
+          className="text-red-200 hover:text-white hover:bg-red-500/50 gap-1.5"
+          onClick={onLoss}
+          title="Registrar Desvio (Perda/Furto/Roubo)"
         >
-          <Wrench className="h-4 w-4" />
-          <span className="hidden sm:inline">Enviar para OS</span>
+          <ShieldAlert className="h-4 w-4" />
+          <span className="hidden sm:inline">Desvio</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
           className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
-          onClick={onSendToQuote}
-          title="Enviar para Orçamento"
-        >
-          <FileText className="h-4 w-4" />
-          <span className="hidden sm:inline">Orçamento</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-white hover:text-white hover:bg-sky-500/50 gap-1.5"
-          onClick={onReserveItem}
+          onClick={onReserve}
           title="Reservar Item"
         >
           <Bookmark className="h-4 w-4" />
-          <span className="hidden sm:inline">Reservar</span>
+          <span className="hidden sm:inline">Reserva</span>
         </Button>
 
         <Button
@@ -136,18 +140,24 @@ export function ItemsActionBar({
           <Printer className="h-4 w-4" />
           <span className="hidden sm:inline">Etiqueta</span>
         </Button>
+      </div>
 
-        <div className="h-6 w-px bg-sky-400/30 mx-1" />
+      <div className="h-6 w-px bg-sky-400/30" />
 
+      {/* Selection Count & Clear */}
+      <div className="flex items-center gap-2 px-2">
+        <span className="text-sm font-medium text-white">
+          {selectedCount} {selectedCount === 1 ? 'item' : 'itens'}
+        </span>
         <Button
           variant="ghost"
-          size="sm"
-          className="text-red-200 hover:text-white hover:bg-red-500/50 gap-1.5"
-          onClick={onExit}
-          title="Dar Saída"
+          size="icon"
+          className="h-7 w-7 text-sky-100 hover:text-white hover:bg-sky-500/50"
+          onClick={onClearSelection}
+          title="Limpar seleção"
+          aria-label="Limpar seleção"
         >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Dar Saída</span>
+          <X className="h-4 w-4" />
         </Button>
       </div>
     </div>

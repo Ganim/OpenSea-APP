@@ -1,10 +1,10 @@
 /**
  * ItemHistoryModal - Modal showing item movement history
+ * Shows proper action labels, icons, colors per movement type/reason
  */
 
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,19 +16,28 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { movementsService } from '@/services/stock';
-import type { Item, ItemMovementExtended, MovementType } from '@/types/stock';
+import type { Item, ItemMovementExtended } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowDownRight,
   ArrowRightLeft,
   ArrowUpRight,
-  Box,
-  Calendar,
+  Bookmark,
+  Building,
   Clock,
+  History,
   MapPin,
   Package,
-  User,
+  ShieldAlert,
+  ShoppingCart,
+  Undo2,
 } from 'lucide-react';
+import {
+  PiCalendarBlankDuotone,
+  PiHashStraightDuotone,
+  PiMapPinDuotone,
+  PiUserDuotone,
+} from 'react-icons/pi';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -38,45 +47,186 @@ export interface ItemHistoryModalProps {
   item: Item | null;
 }
 
-// Simplified movement categories
-type MovementCategory = 'ENTRADA' | 'MOVIMENTO' | 'SAIDA';
+/** Action config resolved from movementType + reasonCode */
+interface ActionConfig {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badgeClass: string;
+  iconColor: string;
+  quantityPrefix: '+' | '-' | '';
+}
 
-const getMovementCategory = (type: MovementType): MovementCategory => {
-  if (type === 'ENTRY') return 'ENTRADA';
-  if (type === 'EXIT') return 'SAIDA';
-  return 'MOVIMENTO'; // TRANSFER, ADJUSTMENT
-};
-
-const MOVEMENT_CATEGORY_CONFIG: Record<
-  MovementCategory,
-  {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    badgeClass: string;
-    iconColor: string;
+/**
+ * Resolve the display action from backend movementType and reasonCode.
+ *
+ * Backend movementType values:
+ *  - INVENTORY_ADJUSTMENT (entry uses reasonCode='ENTRY')
+ *  - SALE, LOSS, PRODUCTION, SAMPLE (exit types)
+ *  - TRANSFER
+ *  - ZONE_RECONFIGURE
+ *
+ * reasonCode values (from ExitType):
+ *  - ENTRY, SALE, LOSS, INTERNAL_USE, SUPPLIER_RETURN, TRANSFER, RESERVATION
+ */
+const getActionConfig = (
+  movementType: string,
+  reasonCode?: string | null
+): ActionConfig => {
+  // 1. Check reasonCode first — it has the most specific info
+  if (reasonCode === 'ENTRY') {
+    return {
+      label: 'Entrada',
+      icon: ArrowDownRight,
+      badgeClass:
+        'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
+      iconColor: 'text-green-500 border-green-500',
+      quantityPrefix: '+',
+    };
   }
-> = {
-  ENTRADA: {
-    label: 'ENTRADA NO ESTOQUE',
-    icon: ArrowDownRight,
-    badgeClass:
-      'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
-    iconColor: 'text-green-500 border-green-500',
-  },
-  MOVIMENTO: {
-    label: 'MOVIMENTO DE ESTOQUE',
+
+  if (reasonCode === 'SALE') {
+    return {
+      label: 'Venda',
+      icon: ShoppingCart,
+      badgeClass:
+        'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
+      iconColor: 'text-emerald-500 border-emerald-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (reasonCode === 'SUPPLIER_RETURN') {
+    return {
+      label: 'Devolução',
+      icon: Undo2,
+      badgeClass:
+        'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
+      iconColor: 'text-blue-500 border-blue-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (reasonCode === 'INTERNAL_USE') {
+    return {
+      label: 'Utilização',
+      icon: Building,
+      badgeClass:
+        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
+      iconColor: 'text-yellow-500 border-yellow-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (reasonCode === 'LOSS') {
+    return {
+      label: 'Perda',
+      icon: ShieldAlert,
+      badgeClass:
+        'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
+      iconColor: 'text-red-500 border-red-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (reasonCode === 'RESERVATION') {
+    return {
+      label: 'Reserva',
+      icon: Bookmark,
+      badgeClass:
+        'bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border-indigo-500/30',
+      iconColor: 'text-indigo-500 border-indigo-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  // 2. Then by movementType
+  if (movementType === 'TRANSFER') {
+    return {
+      label: 'Transferência',
+      icon: ArrowRightLeft,
+      badgeClass:
+        'bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-500/30',
+      iconColor: 'text-orange-500 border-orange-500',
+      quantityPrefix: '',
+    };
+  }
+
+  if (movementType === 'ZONE_RECONFIGURE') {
+    return {
+      label: 'Reconfiguração',
+      icon: ArrowRightLeft,
+      badgeClass:
+        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
+      iconColor: 'text-purple-500 border-purple-500',
+      quantityPrefix: '',
+    };
+  }
+
+  // Exit movementTypes without specific reasonCode
+  if (movementType === 'SALE') {
+    return {
+      label: 'Venda',
+      icon: ShoppingCart,
+      badgeClass:
+        'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
+      iconColor: 'text-emerald-500 border-emerald-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (movementType === 'LOSS') {
+    return {
+      label: 'Perda',
+      icon: ShieldAlert,
+      badgeClass:
+        'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
+      iconColor: 'text-red-500 border-red-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (movementType === 'PRODUCTION') {
+    return {
+      label: 'Utilização',
+      icon: Building,
+      badgeClass:
+        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
+      iconColor: 'text-yellow-500 border-yellow-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (movementType === 'SAMPLE') {
+    return {
+      label: 'Amostra',
+      icon: ArrowUpRight,
+      badgeClass:
+        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
+      iconColor: 'text-purple-500 border-purple-500',
+      quantityPrefix: '-',
+    };
+  }
+
+  if (movementType === 'INVENTORY_ADJUSTMENT') {
+    return {
+      label: 'Ajuste',
+      icon: Package,
+      badgeClass:
+        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
+      iconColor: 'text-yellow-500 border-yellow-500',
+      quantityPrefix: '',
+    };
+  }
+
+  // Fallback
+  return {
+    label: 'Movimento',
     icon: ArrowRightLeft,
     badgeClass:
-      'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-    iconColor: 'text-yellow-500 border-yellow-500',
-  },
-  SAIDA: {
-    label: 'SAÍDA DO ESTOQUE',
-    icon: ArrowUpRight,
-    badgeClass:
-      'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
-    iconColor: 'text-red-500 border-red-500',
-  },
+      'bg-gray-500/20 text-gray-700 dark:text-gray-400 border-gray-500/30',
+    iconColor: 'text-gray-500 border-gray-500',
+    quantityPrefix: '',
+  };
 };
 
 export function ItemHistoryModal({
@@ -95,18 +245,19 @@ export function ItemHistoryModal({
 
   const movements = historyData?.movements || [];
   const itemCode =
-    item?.uniqueCode || item?.fullCode || item?.id.substring(0, 8);
+    item?.fullCode || item?.uniqueCode || item?.id.substring(0, 8);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Box className="h-5 w-5" />
+            <History className="h-5 w-5" />
             Histórico do Item
           </DialogTitle>
           {item && (
             <DialogDescription className="flex items-center gap-2">
+              <Package className="h-3.5 w-3.5" />
               <span className="font-mono">{itemCode}</span>
               {item.bin?.address && (
                 <>
@@ -172,8 +323,7 @@ function MovementItem({
   movement: ItemMovementExtended;
   isLast: boolean;
 }) {
-  const category = getMovementCategory(movement.movementType);
-  const config = MOVEMENT_CATEGORY_CONFIG[category];
+  const config = getActionConfig(movement.movementType, movement.reasonCode);
   const Icon = config.icon;
 
   const formatDate = (date: Date | string) => {
@@ -184,6 +334,23 @@ function MovementItem({
       return String(date);
     }
   };
+
+  // Format quantity with proper sign
+  const formatMovementQuantity = () => {
+    if (movement.quantity === undefined || movement.quantity === null)
+      return null;
+    const absQty = Math.abs(movement.quantity);
+    if (config.quantityPrefix === '-') return `-${absQty}`;
+    if (config.quantityPrefix === '+') return `+${absQty}`;
+    return String(movement.quantity);
+  };
+
+  const quantityDisplay = formatMovementQuantity();
+
+  // Extract location from destinationRef (format: "Bin: ADDRESS")
+  const locationDisplay = movement.destinationRef?.startsWith('Bin: ')
+    ? movement.destinationRef.slice(5)
+    : movement.destinationRef || null;
 
   return (
     <div className="flex gap-3">
@@ -205,33 +372,60 @@ function MovementItem({
       <div className={cn('flex-1 pb-4', isLast && 'pb-0')}>
         <div className="flex items-start justify-between gap-2">
           <div>
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  'px-2.5 py-0.5 rounded-full text-xs font-semibold border',
-                  config.badgeClass
-                )}
-              >
-                {config.label}
-              </span>
-            </div>
+            <span
+              className={cn(
+                'px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+                config.badgeClass
+              )}
+            >
+              {config.label}
+            </span>
 
             <div className="mt-2 text-sm text-muted-foreground space-y-0.5">
-              {movement.quantity !== undefined && (
-                <p>
-                  Quantidade: {movement.quantity > 0 ? '+' : ''}
-                  {movement.quantity}
-                </p>
-              )}
-
-              {movement.reasonCode && <p>Motivo: {movement.reasonCode}</p>}
-
-              {movement.destinationRef && (
+              {quantityDisplay && (
                 <p className="flex items-center gap-1">
-                  <ArrowRightLeft className="h-3 w-3" />
-                  <span>Ref: {movement.destinationRef}</span>
+                  <PiHashStraightDuotone className="h-3.5 w-3.5 shrink-0" />
+                  <span className="font-semibold">Quantidade:</span>
+                  <span
+                    className={cn(
+                      'font-mono font-semibold',
+                      config.quantityPrefix === '-'
+                        ? 'text-red-600 dark:text-red-400'
+                        : config.quantityPrefix === '+'
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-foreground'
+                    )}
+                  >
+                    {quantityDisplay}
+                  </span>
                 </p>
               )}
+
+              {movement.originRef && locationDisplay ? (
+                <p className="flex items-center gap-1">
+                  <PiMapPinDuotone className="h-3.5 w-3.5 shrink-0" />
+                  <span className="font-semibold">Localização:</span>
+                  {movement.originRef.startsWith('Bin: ')
+                    ? movement.originRef.slice(5)
+                    : movement.originRef}
+                  <ArrowRightLeft className="h-3 w-3 shrink-0 mx-0.5" />
+                  {locationDisplay}
+                </p>
+              ) : locationDisplay ? (
+                <p className="flex items-center gap-1">
+                  <PiMapPinDuotone className="h-3.5 w-3.5 shrink-0" />
+                  <span className="font-semibold">Localização:</span>
+                  {locationDisplay}
+                </p>
+              ) : movement.originRef ? (
+                <p className="flex items-center gap-1">
+                  <PiMapPinDuotone className="h-3.5 w-3.5 shrink-0" />
+                  <span className="font-semibold">Localização:</span>
+                  {movement.originRef.startsWith('Bin: ')
+                    ? movement.originRef.slice(5)
+                    : movement.originRef}
+                </p>
+              ) : null}
 
               {movement.notes && (
                 <p className="italic">&ldquo;{movement.notes}&rdquo;</p>
@@ -240,13 +434,13 @@ function MovementItem({
           </div>
 
           <div className="text-right shrink-0">
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
+            <p className="flex items-center gap-1 text-xs text-muted-foreground justify-end">
+              <PiCalendarBlankDuotone className="h-3.5 w-3.5" />
               {formatDate(movement.createdAt)}
             </p>
             {movement.user && (
-              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                <User className="h-3 w-3" />
+              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5 justify-end">
+                <PiUserDuotone className="h-3.5 w-3.5" />
                 {movement.user.name || 'Sistema'}
               </p>
             )}
