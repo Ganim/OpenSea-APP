@@ -92,7 +92,7 @@ export function ActivityTab() {
   return (
     <div className="space-y-6">
       {/* Filters Card */}
-      <Card className="p-4 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+      <Card className="p-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
@@ -154,7 +154,7 @@ export function ActivityTab() {
       </Card>
 
       {/* Activity List */}
-      <Card className="backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10 overflow-hidden">
+      <Card className="bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 overflow-hidden">
         {isLoading ? (
           <div className="p-4 space-y-3">
             {[1, 2, 3, 4, 5].map(i => (

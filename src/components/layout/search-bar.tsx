@@ -199,7 +199,7 @@ export function SearchBar({
   return (
     <Card
       className={cn(
-        'backdrop-blur-xl bg-linear-to-r from-white to-gray-100 dark:from-sky-500/10 dark:to-slate-900/20',
+        'bg-linear-to-r from-white to-gray-100 dark:from-sky-500/10 dark:to-slate-900/20',
         'p-0',
         'border-gray-200/50 dark:border-white/10',
         'transition-all duration-200',

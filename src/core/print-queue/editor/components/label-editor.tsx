@@ -211,7 +211,7 @@ function EditorToolbar({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-2 px-4 py-2 border-b bg-card/95 backdrop-blur-sm">
+      <div className="flex items-center gap-2 px-4 py-2 border-b bg-card">
         {/* Nome do Template */}
         <div className="flex items-center gap-2 min-w-[200px]">
           <Input

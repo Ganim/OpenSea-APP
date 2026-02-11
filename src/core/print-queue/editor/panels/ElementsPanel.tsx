@@ -374,7 +374,7 @@ export function ElementsPanel({
     return (
       <div
         className={cn(
-          'w-12 flex flex-col items-center py-2 gap-1 bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-r border-slate-200/50 dark:border-slate-700/50',
+          'w-12 flex flex-col items-center py-2 gap-1 bg-white/90 dark:bg-slate-800/50 border-r border-slate-200/50 dark:border-slate-700/50',
           className
         )}
       >
@@ -425,7 +425,7 @@ export function ElementsPanel({
   return (
     <div
       className={cn(
-        'w-64 flex flex-col bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-r border-slate-200/50 dark:border-slate-700/50 overflow-y-auto',
+        'w-64 flex flex-col bg-white/90 dark:bg-slate-800/50 border-r border-slate-200/50 dark:border-slate-700/50 overflow-y-auto',
         className
       )}
     >
@@ -468,7 +468,7 @@ export function ElementsPanel({
                         'border border-slate-200/50 dark:border-slate-600/30',
                         'hover:from-blue-100/80 hover:to-purple-100/60 dark:hover:from-blue-900/30 dark:hover:to-purple-700/40',
                         'hover:border-blue-300/50 dark:hover:border-blue-600/30',
-                        'backdrop-blur-lg transition-all duration-200',
+                        'transition-all duration-200',
                         'cursor-pointer'
                       )}
                       onClick={() => handleAddElement(element.id)}

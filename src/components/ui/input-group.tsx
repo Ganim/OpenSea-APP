@@ -49,7 +49,7 @@ const InputGroupText = React.forwardRef<
       ref={ref}
       className={cn(
         'inline-flex h-12 items-center px-4 text-base',
-        'backdrop-blur-(--glass-blur) bg-(--input-bg)',
+        'bg-(--input-bg)',
         'border border-[rgb(var(--color-border))]',
         'text-[rgb(var(--color-foreground-subtle))]',
         'transition-all duration-(--transition-normal)',
@@ -71,7 +71,7 @@ const InputGroupInput = React.forwardRef<
       type={type}
       className={cn(
         'flex h-12 w-full px-4 py-3 text-base',
-        'backdrop-blur-(--glass-blur) bg-(--input-bg)',
+        'bg-(--input-bg)',
         'border-y border-[rgb(var(--color-border))]',
         'text-[rgb(var(--color-foreground))]',
         'placeholder:text-[rgb(var(--color-foreground-subtle))]',
@@ -127,7 +127,7 @@ const MoneyInput = React.forwardRef<
       placeholder="0,00"
       className={cn(
         'flex h-12 w-full px-4 py-3 text-base',
-        'backdrop-blur-(--glass-blur) bg-(--input-bg)',
+        'bg-(--input-bg)',
         'border-y border-[rgb(var(--color-border))]',
         'text-[rgb(var(--color-foreground))]',
         'placeholder:text-[rgb(var(--color-foreground-subtle))]',

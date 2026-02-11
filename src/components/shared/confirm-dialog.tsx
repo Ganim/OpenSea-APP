@@ -49,7 +49,7 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl p-6">
+      <DialogContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl p-6">
         <DialogHeader>
           {icon && (
             <div

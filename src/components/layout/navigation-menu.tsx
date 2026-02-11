@@ -184,7 +184,7 @@ export function NavigationMenu({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-60"
+            className="fixed inset-0 bg-black/50 z-60"
             onClick={handleClose}
           />
 
@@ -198,7 +198,7 @@ export function NavigationMenu({
             onClick={handleClose}
           >
             <div
-              className="w-full max-w-5xl backdrop-blur-3xl bg-white/90 dark:bg-gray-900/90 border border-gray-200/50 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+              className="w-full max-w-5xl bg-white/98 dark:bg-gray-900/98 border border-gray-200/50 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               {/* Header with Search */}
@@ -264,7 +264,7 @@ export function NavigationMenu({
                           }}
                           onClick={() => handleMenuItemClick(item)}
                           disabled={isDisabled}
-                          className={`group relative aspect-square rounded-2xl backdrop-blur-xl border p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 ${styles.button}`}
+                          className={`group relative aspect-square rounded-2xl border p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 ${styles.button}`}
                         >
                           {/* Badge */}
                           {item.badge && (

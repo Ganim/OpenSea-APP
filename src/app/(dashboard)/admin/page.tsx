@@ -142,9 +142,9 @@ export default function AdminLandingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="relative overflow-hidden p-8 md:p-12 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/10 rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 max-w-2xl">
             <div className="flex items-center gap-3 mb-4">
@@ -181,7 +181,7 @@ export default function AdminLandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 + index * 0.05 }}
             >
-              <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
                 <div className="flex items-center gap-4">
                   <div
                     className={`w-12 h-12 rounded-xl bg-linear-to-br ${stat.gradient} flex items-center justify-center`}
@@ -233,7 +233,7 @@ export default function AdminLandingPage() {
               >
                 <Link href={card.href}>
                   <Card
-                    className={`p-6 h-full backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${card.hoverBg}`}
+                    className={`p-6 h-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${card.hoverBg}`}
                   >
                     <div className="flex flex-col h-full">
                       <div className="flex items-start justify-between mb-4">

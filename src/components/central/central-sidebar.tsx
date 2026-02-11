@@ -17,7 +17,7 @@ export function CentralSidebar() {
   return (
     <aside className="w-72 min-h-[calc(100vh-5rem)] p-6 relative">
       {/* Glass background */}
-      <div className="absolute inset-0 backdrop-blur-md border-r central-glass central-transition" />
+      <div className="absolute inset-0 border-r central-glass central-transition" />
 
       <div className="relative z-10 space-y-2">
         {sidebarItems.map(item => {
@@ -41,7 +41,7 @@ export function CentralSidebar() {
                 className={cn(
                   'absolute inset-0 central-transition',
                   isActive
-                    ? 'central-glass backdrop-blur-sm'
+                    ? 'central-glass'
                     : 'bg-transparent group-hover:bg-[rgb(var(--glass-bg)/var(--glass-bg-opacity))]'
                 )}
               />

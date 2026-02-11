@@ -66,7 +66,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
   return (
     <div className="space-y-6">
       {/* Avatar Card */}
-      <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+      <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <UserAvatar
             name={user?.profile?.name}
@@ -90,7 +90,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       </Card>
 
       {/* Profile Form */}
-      <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+      <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

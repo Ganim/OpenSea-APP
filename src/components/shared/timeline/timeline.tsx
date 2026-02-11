@@ -208,7 +208,7 @@ const TimelineItem: React.FC<{
       <div className="flex-1 pb-8">
         <Card
           className={cn(
-            'p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10',
+            'p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10',
             'hover:shadow-md transition-all duration-200',
             item.onClick &&
               'cursor-pointer hover:border-gray-300 dark:hover:border-white/20'

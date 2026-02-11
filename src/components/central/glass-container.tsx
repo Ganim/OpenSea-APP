@@ -21,7 +21,7 @@ export const GlassContainer = forwardRef<HTMLDivElement, GlassContainerProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-xl shadow-lg backdrop-saturate-150 central-transition',
+          'rounded-xl shadow-lg central-transition',
           variants[variant],
           className
         )}

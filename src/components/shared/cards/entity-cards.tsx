@@ -64,7 +64,7 @@ export function TemplateGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -140,7 +140,7 @@ export function TemplateListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -223,7 +223,7 @@ export function ProductGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -307,7 +307,7 @@ export function ProductListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -389,7 +389,7 @@ export function VariantGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -470,7 +470,7 @@ export function VariantListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -565,7 +565,7 @@ export function ItemGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -669,7 +669,7 @@ export function ItemListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'

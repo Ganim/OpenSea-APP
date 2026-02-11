@@ -775,7 +775,7 @@ export function PropertiesPanel({
     return (
       <div
         className={cn(
-          'w-12 flex flex-col items-center py-2 bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-l border-slate-200/50 dark:border-slate-700/50',
+          'w-12 flex flex-col items-center py-2 bg-white/90 dark:bg-slate-800/50 border-l border-slate-200/50 dark:border-slate-700/50',
           className
         )}
       >
@@ -880,7 +880,7 @@ export function PropertiesPanel({
   return (
     <div
       className={cn(
-        'w-72 flex flex-col bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm border-l border-slate-200/50 dark:border-slate-700/50 overflow-hidden',
+        'w-72 flex flex-col bg-white/90 dark:bg-slate-800/50 border-l border-slate-200/50 dark:border-slate-700/50 overflow-hidden',
         className
       )}
     >

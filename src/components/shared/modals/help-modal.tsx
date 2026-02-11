@@ -49,7 +49,7 @@ export function HelpModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 border-gray-200/50 dark:border-white/10 max-w-2xl">
+      <DialogContent className="bg-white/95 dark:bg-gray-900/95 border-gray-200/50 dark:border-white/10 max-w-2xl">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <div className="p-2 rounded-lg bg-purple-500/10">
@@ -65,7 +65,7 @@ export function HelpModal({
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className="border border-gray-200/50 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-xl bg-white/50 dark:bg-white/5"
+                className="border border-gray-200/50 dark:border-white/10 rounded-xl overflow-hidden bg-white/60 dark:bg-white/5"
               >
                 <button
                   onClick={() => toggleFAQ(index)}

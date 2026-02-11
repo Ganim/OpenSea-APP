@@ -502,7 +502,7 @@ export default function TenantDetailPage() {
                   Novo Usuário
                 </GlassButton>
               </DialogTrigger>
-              <DialogContent className="backdrop-blur-2xl border shadow-2xl central-glass-strong">
+              <DialogContent className="border shadow-2xl central-glass-strong">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold central-text">
                     Adicionar Novo Usuário

@@ -865,13 +865,11 @@ body {
 
 .glass {
   background: rgb(var(--glass-bg) / var(--glass-bg-opacity));
-  backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgb(var(--glass-border) / var(--glass-border-opacity));
 }
 
 .glass-strong {
   background: rgb(var(--glass-bg) / 0.95);
-  backdrop-filter: blur(25px);
   border: 1px solid rgb(var(--glass-border) / 0.4);
 }
 
@@ -908,23 +906,17 @@ body {
 /* Glass containers - variantes com diferentes níveis de opacidade */
 .central-glass {
   background: rgb(var(--glass-bg) / var(--glass-bg-opacity));
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgb(var(--glass-border) / var(--glass-border-opacity));
 }
 
 .central-glass-subtle {
   background: rgb(var(--glass-bg) / calc(var(--glass-bg-opacity) * 0.5));
-  backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   border: 1px solid
     rgb(var(--glass-border) / calc(var(--glass-border-opacity) * 0.5));
 }
 
 .central-glass-strong {
   background: rgb(var(--glass-bg) / calc(var(--glass-bg-opacity) * 1.2));
-  backdrop-filter: blur(calc(var(--glass-blur) * 1.3));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 1.3));
   border: 1px solid
     rgb(var(--glass-border) / calc(var(--glass-border-opacity) * 1.5));
 }

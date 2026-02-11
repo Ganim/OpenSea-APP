@@ -76,7 +76,7 @@ export function GridLoading({
   const config = layoutConfig[layout];
 
   const renderGridSkeleton = () => (
-    <Card className="overflow-hidden backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+    <Card className="overflow-hidden bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
       <div className="p-4 space-y-3">
         {/* Header Skeleton */}
         <div className="space-y-2">
@@ -119,7 +119,7 @@ export function GridLoading({
   );
 
   const renderListSkeleton = () => (
-    <Card className="overflow-hidden backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+    <Card className="overflow-hidden bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
       <div className="p-4 flex gap-4">
         {/* Left Content */}
         <div className="shrink-0">
@@ -167,7 +167,7 @@ export function GridLoading({
   );
 
   const renderCompactSkeleton = () => (
-    <Card className="overflow-hidden backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+    <Card className="overflow-hidden bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
       <div className="p-3 space-y-2">
         {/* Compact Image */}
         <Skeleton

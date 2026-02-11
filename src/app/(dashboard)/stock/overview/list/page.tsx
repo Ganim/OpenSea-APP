@@ -1042,7 +1042,7 @@ export default function StockOverviewListPage() {
         {/* Floating selection bar */}
         {selectionSummary && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-            <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-white dark:bg-gray-900 shadow-lg">
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {selectionSummary.count}{' '}
                 {selectionSummary.count === 1 ? 'item' : 'itens'}

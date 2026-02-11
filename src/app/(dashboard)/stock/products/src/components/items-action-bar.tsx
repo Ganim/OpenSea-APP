@@ -50,7 +50,7 @@ export function ItemsActionBar({
       className={cn(
         'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
         'flex items-center gap-2 p-2 rounded-xl',
-        'bg-sky-600/95 dark:bg-sky-700/95 backdrop-blur-sm',
+        'bg-sky-600 dark:bg-sky-700',
         'border border-sky-400/50 dark:border-sky-500/50',
         'shadow-[0_0_30px_rgba(14,165,233,0.4)] dark:shadow-[0_0_30px_rgba(14,165,233,0.3)]',
         'animate-in slide-in-from-bottom-4 duration-300',

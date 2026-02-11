@@ -21,7 +21,7 @@ const variantClasses: Record<
 > = {
   default:
     'bg-linear-to-br from-slate-100 to-slate-300 dark:from-slate-800 dark:to-slate-900',
-  subtle: 'bg-white/70 dark:bg-slate-900/70 backdrop-blur',
+  subtle: 'bg-white/80 dark:bg-slate-900/80',
   solid: 'bg-slate-900 text-white',
 };
 

@@ -17,30 +17,26 @@ export function AuthBackground({ children }: AuthBackgroundProps) {
         }}
       />
 
-      {/* Animated background spheres */}
+      {/* Static background spheres (no blur, no animate-pulse) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Esfera superior direita - Azul */}
         <div
-          className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse"
+          className="absolute -top-40 -right-40 w-80 h-80 rounded-full"
           style={{
-            backgroundColor: `rgb(var(--sphere-1) / var(--sphere-1-opacity))`,
+            background: `radial-gradient(circle, rgb(var(--sphere-1) / var(--sphere-1-opacity)) 0%, transparent 70%)`,
           }}
         />
 
-        {/* Esfera inferior esquerda - Roxo */}
         <div
-          className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse"
+          className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full"
           style={{
-            backgroundColor: `rgb(var(--sphere-2) / var(--sphere-2-opacity))`,
-            animationDelay: '1000ms',
+            background: `radial-gradient(circle, rgb(var(--sphere-2) / var(--sphere-2-opacity)) 0%, transparent 70%)`,
           }}
         />
 
-        {/* Esfera central - Azul claro */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full"
           style={{
-            backgroundColor: `rgb(var(--sphere-3) / var(--sphere-3-opacity))`,
+            background: `radial-gradient(circle, rgb(var(--sphere-3) / var(--sphere-3-opacity)) 0%, transparent 70%)`,
           }}
         />
       </div>

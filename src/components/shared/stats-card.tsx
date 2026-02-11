@@ -28,7 +28,7 @@ export function StatsCard({
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       className={cn(
-        'backdrop-blur-xl bg-white/90 dark:bg-white/5',
+        'bg-white/95 dark:bg-white/5',
         'border border-gray-200 dark:border-white/10',
         'rounded-2xl p-4',
         'shadow-xl hover:shadow-2xl',

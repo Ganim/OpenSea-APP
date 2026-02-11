@@ -64,7 +64,7 @@ export function StatsSection({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card className="p-6 backdrop-blur-xl bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+                  <Card className="p-6 bg-white/60 dark:bg-white/5 border-gray-200/50 dark:border-white/10 hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-200">
                     <div className="flex items-start justify-between mb-3">
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                         {stat.label}

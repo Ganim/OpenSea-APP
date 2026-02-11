@@ -61,7 +61,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+      <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
@@ -89,7 +89,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
       {/* Info Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Work Information */}
-        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <Building2 className="w-5 h-5 text-blue-500" />
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -125,7 +125,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
         </Card>
 
         {/* Contract Information */}
-        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-5 h-5 text-purple-500" />
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -166,7 +166,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
         </Card>
 
         {/* Personal Information */}
-        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <User className="w-5 h-5 text-green-500" />
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -207,7 +207,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
         </Card>
 
         {/* Financial Information - Only show basic info for self-service */}
-        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <Banknote className="w-5 h-5 text-emerald-500" />
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -236,7 +236,7 @@ export function EmployeeTab({ employee, isLoading }: EmployeeTabProps) {
       </div>
 
       {/* Metadata */}
-      <Card className="p-4 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+      <Card className="p-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-white/40">
           <span>
             Cadastro criado em:{' '}

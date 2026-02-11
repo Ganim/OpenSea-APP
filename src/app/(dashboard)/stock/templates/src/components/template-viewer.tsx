@@ -260,7 +260,7 @@ export function TemplateViewer({
     attributes: Record<string, TemplateAttribute> | null,
     iconColor: string
   ) => (
-    <div className="w-full p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+    <div className="w-full p-6 rounded-xl bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-4">
         <Layers className={`w-5 h-5 ${iconColor}`} />
         <h2 className="text-lg font-semibold">{title}</h2>

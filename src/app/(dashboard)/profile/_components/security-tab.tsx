@@ -92,7 +92,7 @@ function PasswordChangeSection() {
   };
 
   return (
-    <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+    <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 rounded-lg bg-red-500/10">
           <Key className="w-5 h-5 text-red-500" />
@@ -229,7 +229,7 @@ function SessionsSection() {
   };
 
   return (
-    <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+    <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-500/10">

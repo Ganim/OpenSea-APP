@@ -182,7 +182,7 @@ export default function AuditLogsPage() {
         {/* Stats */}
         {pagination && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Total de Logs
               </div>
@@ -191,7 +191,7 @@ export default function AuditLogsPage() {
               </div>
             </Card>
 
-            <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Pagina Atual
               </div>
@@ -200,7 +200,7 @@ export default function AuditLogsPage() {
               </div>
             </Card>
 
-            <Card className="p-4 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Logs Exibidos
               </div>
@@ -225,7 +225,7 @@ export default function AuditLogsPage() {
             }}
           />
         ) : (
-          <Card className="p-6 backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10 space-y-4">
+          <Card className="p-6 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10 space-y-4">
             <AuditLegend />
             <AuditEventsList
               logs={logs}

@@ -698,7 +698,7 @@ export const TemplateForm = forwardRef<TemplateFormRef, TemplateFormProps>(
             value="product"
             className="w-full space-y-4 mt-6 px-6 pb-6"
           >
-            <div className="w-full p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+            <div className="w-full p-6 rounded-xl bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-semibold">Atributos de Produtos</h3>
@@ -740,7 +740,7 @@ export const TemplateForm = forwardRef<TemplateFormRef, TemplateFormProps>(
             value="variant"
             className="w-full space-y-4 mt-6 px-6 pb-6"
           >
-            <div className="w-full p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+            <div className="w-full p-6 rounded-xl bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-semibold">Atributos de Variantes</h3>
@@ -779,7 +779,7 @@ export const TemplateForm = forwardRef<TemplateFormRef, TemplateFormProps>(
 
           {/* Tab: Itens */}
           <TabsContent value="item" className="w-full space-y-4 mt-6 px-6 pb-6">
-            <div className="w-full p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+            <div className="w-full p-6 rounded-xl bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-semibold">Atributos de Itens</h3>

@@ -3,7 +3,6 @@ import { HTMLAttributes, forwardRef } from 'react';
 
 export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'subtle' | 'strong' | 'gradient';
-  blur?: 'sm' | 'md' | 'lg' | 'xl';
   hover?: boolean;
 }
 
@@ -17,7 +16,6 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
     {
       className,
       variant = 'default',
-      blur = 'md',
       hover = false,
       children,
       ...props
@@ -32,20 +30,12 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
         'central-glass bg-gradient-to-br from-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*1.5))] to-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
     };
 
-    const blurs = {
-      sm: 'backdrop-blur-sm',
-      md: 'backdrop-blur-md',
-      lg: 'backdrop-blur-lg',
-      xl: 'backdrop-blur-xl',
-    };
-
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-2xl shadow-xl backdrop-saturate-150 central-transition',
+          'rounded-2xl shadow-xl central-transition',
           variants[variant],
-          blurs[blur],
           hover && 'central-glass-hover hover:scale-[1.02] hover:shadow-2xl',
           className
         )}

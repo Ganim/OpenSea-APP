@@ -30,7 +30,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'backdrop-blur-xl bg-white/80 dark:bg-white/5',
+        'bg-white/90 dark:bg-white/5',
         'border-b border-gray-200 dark:border-white/10',
         'px-8 py-6 sticky top-20 z-10',
         className

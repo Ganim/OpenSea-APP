@@ -63,8 +63,8 @@ export default function CentralWelcomePage() {
           className="p-8 md:p-12 central-accent-amber"
         >
           {/* Background decorations */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[rgb(var(--os-amber-500)/0.1)] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[rgb(var(--os-purple-500)/0.1)] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[rgb(var(--os-amber-500)/0.1)] rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[rgb(var(--os-purple-500)/0.1)] rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 max-w-2xl">
             <div className="flex items-center gap-3 mb-4">

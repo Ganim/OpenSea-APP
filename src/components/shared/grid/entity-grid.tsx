@@ -262,7 +262,7 @@ export function EntityGrid<T extends { id: string }>({
 
   if (items.length === 0) {
     return (
-      <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+      <Card className="p-12 text-center bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
           {emptyIcon || <Grid3x3 className="w-8 h-8 text-gray-400" />}
         </div>
@@ -279,7 +279,7 @@ export function EntityGrid<T extends { id: string }>({
           {selectedIds.size > 0 &&
             ` · ${selectedIds.size} selecionado${selectedIds.size > 1 ? 's' : ''}`}
         </p>
-        <div className="flex items-center gap-2 backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
+        <div className="flex items-center gap-2 bg-white/90 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
           <Button
             variant="ghost"
             size="sm"

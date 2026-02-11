@@ -639,7 +639,7 @@ export function EntityGrid<T extends BaseEntity>({
   // Empty state
   if (items.length === 0 && !isLoading) {
     return (
-      <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+      <Card className="p-12 text-center bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
           {emptyIcon ?? <Grid3x3 className="w-8 h-8 text-gray-400" />}
         </div>
@@ -671,7 +671,7 @@ export function EntityGrid<T extends BaseEntity>({
                   value={currentSortValue}
                   onValueChange={handleSortChange}
                 >
-                  <SelectTrigger className="h-11 cursor-pointer backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl">
+                  <SelectTrigger className="h-11 cursor-pointer bg-white/90 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl">
                     <SelectValue placeholder="Ordenar por" />
                   </SelectTrigger>
                   <SelectContent>
@@ -694,7 +694,7 @@ export function EntityGrid<T extends BaseEntity>({
               )}
 
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
+              <div className="flex items-center gap-2 bg-white/90 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
                 <Button
                   variant="ghost"
                   size="sm"

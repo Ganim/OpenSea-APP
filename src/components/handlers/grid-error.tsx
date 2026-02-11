@@ -146,7 +146,7 @@ export function GridError({
     <div className={className}>
       <Card
         className={cn(
-          'backdrop-blur-xl bg-white/40 dark:bg-white/5',
+          'bg-white/50 dark:bg-white/5',
           'border-red-200/50 dark:border-red-500/20',
           'overflow-hidden',
           cardClassName

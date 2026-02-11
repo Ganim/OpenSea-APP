@@ -187,11 +187,11 @@ export const ItemCard = forwardRef<HTMLDivElement, ItemCardProps>(
 
     // Base classes para diferentes variantes
     const baseClasses = cn(
-      'backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200',
+      'border-gray-200/50 dark:border-white/10 transition-all duration-200',
       clickable && 'cursor-pointer',
       isSelected
         ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
-        : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10',
+        : 'bg-white/90 dark:bg-white/5 hover:bg-white/95 dark:hover:bg-white/10',
       clickable && !isSelected && 'hover:shadow-lg'
     );
 

@@ -70,7 +70,7 @@ export function UserDropdown() {
       <DropdownMenuContent
         align="end"
         sideOffset={22}
-        className="w-64 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10 p-2"
+        className="w-64 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 p-2"
       >
         <DropdownMenuLabel className="px-3 py-2">
           <p className="text-sm font-semibold text-gray-900 dark:text-white">

@@ -98,10 +98,10 @@ export default function DashboardWelcomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="relative overflow-hidden p-8 md:p-12 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           {/* Background decorations */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 max-w-2xl">
             <div className="flex items-center gap-3 mb-4">
@@ -159,7 +159,7 @@ export default function DashboardWelcomePage() {
             >
               <Link href={link.href}>
                 <Card
-                  className={`p-6 h-full backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${link.hoverBg}`}
+                  className={`p-6 h-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${link.hoverBg}`}
                 >
                   <div className="flex flex-col h-full">
                     <div
@@ -199,7 +199,7 @@ export default function DashboardWelcomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
             >
-              <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
                 <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 w-fit mb-4">
                   <feature.icon className="h-5 w-5 text-gray-600 dark:text-white/60" />
                 </div>
@@ -221,7 +221,7 @@ export default function DashboardWelcomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.7 }}
       >
-        <Card className="p-6 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="p-3 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 shrink-0">
               <Sparkles className="h-6 w-6 text-white" />

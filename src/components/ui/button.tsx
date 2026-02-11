@@ -16,7 +16,7 @@ const buttonVariants = cva(
         outline:
           'border border-[rgb(var(--color-border))] bg-[var(--btn-outline-bg)] hover:bg-[rgb(var(--color-background-muted))] text-[rgb(var(--color-foreground))]',
         secondary:
-          'backdrop-blur-xl bg-[rgb(var(--glass-bg)/0.1)] border border-[rgb(var(--glass-border)/0.2)] hover:bg-[rgb(var(--glass-bg)/0.2)] hover:border-[rgb(var(--glass-border)/0.3)] text-[rgb(var(--color-foreground))]',
+          'bg-[rgb(var(--glass-bg)/0.15)] border border-[rgb(var(--glass-border)/0.2)] hover:bg-[rgb(var(--glass-bg)/0.25)] hover:border-[rgb(var(--glass-border)/0.3)] text-[rgb(var(--color-foreground))]',
         ghost:
           'bg-transparent hover:bg-[rgb(var(--color-background-muted))] text-[rgb(var(--color-foreground))]',
         link: 'text-[rgb(var(--btn-link-text))] hover:text-[rgb(var(--btn-link-text-hover))] underline-offset-4 hover:underline',

@@ -53,7 +53,7 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
   );
 
   return (
-    <Card className="p-4 backdrop-blur-xl bg-white/40 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+    <Card className="p-4 bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
       <div className="space-y-4">
         {/* Search Bar */}
         <div className="flex gap-3">

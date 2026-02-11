@@ -53,7 +53,7 @@ export function SearchSection({
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={e => handleSearchChange(e.target.value)}
-            className="pl-12 pr-10 h-12 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl"
+            className="pl-12 pr-10 h-12 bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 rounded-xl"
           />
           {searchQuery && (
             <button
@@ -71,7 +71,7 @@ export function SearchSection({
             variant="outline"
             size="default"
             onClick={() => setShowFilters(!showFilters)}
-            className="relative h-12 px-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl"
+            className="relative h-12 px-4 bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 rounded-xl"
           >
             <Filter className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Filtros</span>
@@ -102,7 +102,7 @@ export function SearchSection({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+            <div className="p-4 rounded-lg bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
               {filters}
             </div>
           </motion.div>

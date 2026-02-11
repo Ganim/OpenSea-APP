@@ -176,7 +176,7 @@ export function SelectionToolbar({
           className
         )}
       >
-        <Card className="backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-white/10 shadow-2xl">
+        <Card className="bg-white dark:bg-slate-900 border-gray-200/50 dark:border-white/10 shadow-2xl">
           <div className="flex items-center gap-2 px-4 py-3">
             {/* Contador de seleção */}
             <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">

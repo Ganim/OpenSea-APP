@@ -276,7 +276,7 @@ export function ItemsGrid<T extends { id: string }>({
 
   if (items.length === 0) {
     return (
-      <Card className="p-12 text-center backdrop-blur-xl bg-white/80 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+      <Card className="p-12 text-center bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
           <Grid3x3 className="w-8 h-8 text-gray-400" />
         </div>
@@ -293,7 +293,7 @@ export function ItemsGrid<T extends { id: string }>({
           {selectedIds.size > 0 &&
             ` · ${selectedIds.size} selecionado${selectedIds.size > 1 ? 's' : ''}`}
         </p>
-        <div className="flex items-center gap-2 backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
+        <div className="flex items-center gap-2 bg-white/90 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl p-1">
           <Button
             variant="ghost"
             size="sm"
@@ -465,7 +465,7 @@ export function TemplateGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -545,7 +545,7 @@ export function TemplateListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -650,7 +650,7 @@ export function LocationGridCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-6 backdrop-blur-xl border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+      className={`p-6 border-gray-200/50 dark:border-white/10 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'
@@ -793,7 +793,7 @@ export function LocationListCard({
   return (
     <Card
       onClick={onClick}
-      className={`p-4 backdrop-blur-xl border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
+      className={`p-4 border-gray-200/50 dark:border-white/10 transition-all duration-200 cursor-pointer group ${
         isSelected
           ? 'bg-blue-500/20 dark:bg-blue-500/20 border-blue-500 ring-2 ring-blue-500'
           : 'bg-white/80 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10'

@@ -150,7 +150,7 @@ export function NotificationsPanel() {
       <DropdownMenuContent
         align="end"
         sideOffset={22}
-        className="w-96 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10 p-0"
+        className="w-96 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 p-0"
       >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-white/10">

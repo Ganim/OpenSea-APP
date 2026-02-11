@@ -94,7 +94,7 @@ export default function ProfilePage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="lg:w-64 flex-shrink-0"
         >
-          <Card className="p-2 backdrop-blur-xl bg-white/90 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <Card className="p-2 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <nav className="space-y-1">
               {availableTabs.map(tab => (
                 <button
