@@ -78,8 +78,26 @@ const productFields: EntityFieldDefinition[] = [
     options: [
       { value: 'ACTIVE', label: 'Ativo' },
       { value: 'INACTIVE', label: 'Inativo' },
-      { value: 'ARCHIVED', label: 'Arquivado' },
+      { value: 'DRAFT', label: 'Rascunho' },
+      { value: 'OUT_OF_STOCK', label: 'Sem Estoque' },
+      { value: 'DISCONTINUED', label: 'Descontinuado' },
     ],
+  },
+  {
+    key: 'outOfLine',
+    label: 'Fora de Linha',
+    type: 'boolean',
+    required: false,
+    description: 'Se o produto está fora de linha (descontinuado)',
+    defaultValue: false,
+  },
+  {
+    key: 'careInstructionIds',
+    label: 'Instruções de Cuidado',
+    type: 'text',
+    required: false,
+    description:
+      'Códigos de instruções de cuidado separados por vírgula (ex: WASH_30,IRON_150,DO_NOT_BLEACH)',
   },
 ];
 

@@ -164,10 +164,31 @@ export default function ProductsSheetsPage() {
     batchSize: 10,
     delayBetweenBatches: 1000,
     transformRow: config?.templateId
-      ? row => ({
-          ...row,
-          data: { ...row.data, templateId: config.templateId },
-        })
+      ? row => {
+          const data: Record<string, unknown> = {
+            ...row.data,
+            templateId: config.templateId,
+          };
+
+          // Convert categoryId (single) → categoryIds (array)
+          if (data.categoryId) {
+            data.categoryIds = [data.categoryId as string];
+            delete data.categoryId;
+          }
+
+          // Convert careInstructionIds comma-separated string → array
+          if (
+            typeof data.careInstructionIds === 'string' &&
+            data.careInstructionIds.trim()
+          ) {
+            data.careInstructionIds = (data.careInstructionIds as string)
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter(Boolean);
+          }
+
+          return { ...row, data };
+        }
       : undefined,
     onComplete: result => {
       toast.success(
