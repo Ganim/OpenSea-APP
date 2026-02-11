@@ -70,7 +70,9 @@ export function VariantDetailModal({
     const statusLabels = {
       AVAILABLE: 'Disponível',
       RESERVED: 'Reservado',
-      SOLD: 'Vendido',
+      IN_TRANSIT: 'Em Trânsito',
+      EXPIRED: 'Expirado',
+      DISPOSED: 'Descartado',
       DAMAGED: 'Danificado',
     };
 
@@ -114,7 +116,9 @@ export function VariantDetailModal({
     const statusLabels = {
       AVAILABLE: 'Disponível',
       RESERVED: 'Reservado',
-      SOLD: 'Vendido',
+      IN_TRANSIT: 'Em Trânsito',
+      EXPIRED: 'Expirado',
+      DISPOSED: 'Descartado',
       DAMAGED: 'Danificado',
     };
 

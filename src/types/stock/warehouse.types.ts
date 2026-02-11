@@ -4,8 +4,11 @@ export type LocationType =
   | 'WAREHOUSE'
   | 'ZONE'
   | 'AISLE'
+  | 'RACK'
   | 'SHELF'
   | 'BIN'
+  | 'FLOOR'
+  | 'ROOM'
   | 'OTHER';
 
 /** @deprecated Use Warehouse -> Zone -> Bin hierarchy instead */

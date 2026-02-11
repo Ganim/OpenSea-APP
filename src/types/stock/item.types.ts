@@ -4,7 +4,22 @@ import type { PaginationMeta, PaginatedQuery } from '../pagination';
 import type { Variant } from './variant.types';
 import type { Location } from './warehouse.types';
 
-export type ItemStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'DAMAGED';
+export type ItemStatus =
+  | 'AVAILABLE'
+  | 'RESERVED'
+  | 'IN_TRANSIT'
+  | 'DAMAGED'
+  | 'EXPIRED'
+  | 'DISPOSED';
+
+export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
+  AVAILABLE: 'Disponível',
+  RESERVED: 'Reservado',
+  IN_TRANSIT: 'Em Trânsito',
+  DAMAGED: 'Danificado',
+  EXPIRED: 'Expirado',
+  DISPOSED: 'Descartado',
+};
 export type MovementType =
   | 'ENTRY'
   | 'EXIT'

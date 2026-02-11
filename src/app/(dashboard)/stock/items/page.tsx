@@ -59,8 +59,10 @@ const STATUS_OPTIONS: { value: ItemStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Todos os Status' },
   { value: 'AVAILABLE', label: 'Disponível' },
   { value: 'RESERVED', label: 'Reservado' },
-  { value: 'SOLD', label: 'Vendido' },
+  { value: 'IN_TRANSIT', label: 'Em Trânsito' },
   { value: 'DAMAGED', label: 'Danificado' },
+  { value: 'EXPIRED', label: 'Expirado' },
+  { value: 'DISPOSED', label: 'Descartado' },
 ];
 
 const SORT_OPTIONS = [

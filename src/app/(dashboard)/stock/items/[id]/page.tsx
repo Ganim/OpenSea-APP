@@ -64,13 +64,21 @@ const STATUS_CONFIG: Record<ItemStatus, { label: string; className: string }> =
       label: 'Reservado',
       className: 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400',
     },
-    SOLD: {
-      label: 'Vendido',
+    IN_TRANSIT: {
+      label: 'Em Trânsito',
       className: 'bg-blue-500/20 text-blue-700 dark:text-blue-400',
     },
     DAMAGED: {
       label: 'Danificado',
       className: 'bg-red-500/20 text-red-700 dark:text-red-400',
+    },
+    EXPIRED: {
+      label: 'Expirado',
+      className: 'bg-orange-500/20 text-orange-700 dark:text-orange-400',
+    },
+    DISPOSED: {
+      label: 'Descartado',
+      className: 'bg-gray-500/20 text-gray-700 dark:text-gray-400',
     },
   };
 

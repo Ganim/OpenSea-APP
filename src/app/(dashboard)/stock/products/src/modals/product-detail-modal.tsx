@@ -135,9 +135,11 @@ export function ProductDetailModal({
   if (!product) return null;
 
   const statusLabels = {
+    DRAFT: 'Rascunho',
     ACTIVE: 'Ativo',
     INACTIVE: 'Inativo',
-    ARCHIVED: 'Arquivado',
+    DISCONTINUED: 'Descontinuado',
+    OUT_OF_STOCK: 'Sem Estoque',
   };
 
   return (

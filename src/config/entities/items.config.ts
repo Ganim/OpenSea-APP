@@ -64,15 +64,19 @@ export const itemsConfig = defineEntityConfig<Item>()({
         colorMap: {
           AVAILABLE: 'bg-green-500/20 text-green-700 dark:text-green-400',
           RESERVED: 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400',
-          SOLD: 'bg-blue-500/20 text-blue-700 dark:text-blue-400',
+          IN_TRANSIT: 'bg-blue-500/20 text-blue-700 dark:text-blue-400',
           DAMAGED: 'bg-red-500/20 text-red-700 dark:text-red-400',
+          EXPIRED: 'bg-orange-500/20 text-orange-700 dark:text-orange-400',
+          DISPOSED: 'bg-gray-500/20 text-gray-700 dark:text-gray-400',
         },
         render: (value: unknown) => {
           const labels = {
             AVAILABLE: 'Disponível',
             RESERVED: 'Reservado',
-            SOLD: 'Vendido',
+            IN_TRANSIT: 'Em Trânsito',
             DAMAGED: 'Danificado',
+            EXPIRED: 'Expirado',
+            DISPOSED: 'Descartado',
           };
           return labels[value as keyof typeof labels] || String(value);
         },
@@ -207,8 +211,10 @@ export const itemsConfig = defineEntityConfig<Item>()({
             options: [
               { value: 'AVAILABLE', label: 'Disponível' },
               { value: 'RESERVED', label: 'Reservado' },
-              { value: 'SOLD', label: 'Vendido' },
+              { value: 'IN_TRANSIT', label: 'Em Trânsito' },
               { value: 'DAMAGED', label: 'Danificado' },
+              { value: 'EXPIRED', label: 'Expirado' },
+              { value: 'DISPOSED', label: 'Descartado' },
             ],
           },
         ],

@@ -56,6 +56,8 @@ export interface ItemSelectionContext {
 export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
   AVAILABLE: 'Disponível',
   RESERVED: 'Reservado',
-  SOLD: 'Vendido',
+  IN_TRANSIT: 'Em Trânsito',
   DAMAGED: 'Danificado',
+  EXPIRED: 'Expirado',
+  DISPOSED: 'Descartado',
 };

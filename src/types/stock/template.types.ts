@@ -47,37 +47,13 @@ export interface TemplateAttribute {
  */
 export type TemplateAttributes = Record<string, TemplateAttribute>;
 
-export type UnitOfMeasure =
-  | 'UNITS'
-  | 'KILOGRAMS'
-  | 'GRAMS'
-  | 'LITERS'
-  | 'MILLILITERS'
-  | 'METERS'
-  | 'CENTIMETERS'
-  | 'MILLIMETERS'
-  | 'SQUARE_METERS'
-  | 'CUBIC_METERS'
-  | 'PIECES'
-  | 'BOXES'
-  | 'PACKAGES'
-  | 'BAGS'
-  | 'BOTTLES'
-  | 'CANS'
-  | 'TUBES'
-  | 'ROLLS'
-  | 'SHEETS'
-  | 'BARS'
-  | 'COILS'
-  | 'POUNDS'
-  | 'OUNCES'
-  | 'GALLONS'
-  | 'QUARTS'
-  | 'PINTS'
-  | 'CUPS'
-  | 'TABLESPOONS'
-  | 'TEASPOONS'
-  | 'CUSTOM';
+export type UnitOfMeasure = 'METERS' | 'KILOGRAMS' | 'UNITS';
+
+export const UNIT_OF_MEASURE_LABELS: Record<UnitOfMeasure, string> = {
+  METERS: 'Metros (m)',
+  KILOGRAMS: 'Quilogramas (kg)',
+  UNITS: 'Unidades (un)',
+};
 
 /**
  * Template de produto

@@ -57,7 +57,7 @@ interface FormData {
   templateId: string;
   name: string;
   description?: string;
-  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED' | 'OUT_OF_STOCK';
   supplierId?: string;
   manufacturerId?: string;
   attributes?: Record<string, unknown>;

@@ -6,7 +6,20 @@ import type { Supplier } from './supplier.types';
 import type { Manufacturer } from './manufacturer.types';
 import type { ProductCategory, ProductTag } from './category.types';
 
-export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+export type ProductStatus =
+  | 'DRAFT'
+  | 'ACTIVE'
+  | 'INACTIVE'
+  | 'DISCONTINUED'
+  | 'OUT_OF_STOCK';
+
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  DRAFT: 'Rascunho',
+  ACTIVE: 'Ativo',
+  INACTIVE: 'Inativo',
+  DISCONTINUED: 'Descontinuado',
+  OUT_OF_STOCK: 'Sem Estoque',
+};
 
 /**
  * Product - Tipo principal que retorna do backend JA COM DADOS EXPANDIDOS

@@ -173,9 +173,11 @@ export function ProductsFilterBar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="DRAFT">Rascunho</SelectItem>
               <SelectItem value="ACTIVE">Ativo</SelectItem>
               <SelectItem value="INACTIVE">Inativo</SelectItem>
-              <SelectItem value="ARCHIVED">Arquivado</SelectItem>
+              <SelectItem value="DISCONTINUED">Descontinuado</SelectItem>
+              <SelectItem value="OUT_OF_STOCK">Sem Estoque</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -336,8 +338,10 @@ export function ItemsFilterBar({
               <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="AVAILABLE">Disponível</SelectItem>
               <SelectItem value="RESERVED">Reservado</SelectItem>
-              <SelectItem value="SOLD">Vendido</SelectItem>
+              <SelectItem value="IN_TRANSIT">Em Trânsito</SelectItem>
               <SelectItem value="DAMAGED">Danificado</SelectItem>
+              <SelectItem value="EXPIRED">Expirado</SelectItem>
+              <SelectItem value="DISPOSED">Descartado</SelectItem>
             </SelectContent>
           </Select>
         </div>

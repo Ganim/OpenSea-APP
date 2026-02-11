@@ -63,15 +63,19 @@ export const productsConfig = defineEntityConfig<Product>()({
         field: 'status',
         label: 'Status',
         colorMap: {
+          DRAFT: 'bg-slate-500/20 text-slate-700 dark:text-slate-400',
           ACTIVE: 'bg-green-500/20 text-green-700 dark:text-green-400',
           INACTIVE: 'bg-gray-500/20 text-gray-700 dark:text-gray-400',
-          ARCHIVED: 'bg-orange-500/20 text-orange-700 dark:text-orange-400',
+          DISCONTINUED: 'bg-orange-500/20 text-orange-700 dark:text-orange-400',
+          OUT_OF_STOCK: 'bg-red-500/20 text-red-700 dark:text-red-400',
         },
         render: (value: unknown) => {
           const labels = {
+            DRAFT: 'Rascunho',
             ACTIVE: 'Ativo',
             INACTIVE: 'Inativo',
-            ARCHIVED: 'Arquivado',
+            DISCONTINUED: 'Descontinuado',
+            OUT_OF_STOCK: 'Sem Estoque',
           };
           return labels[value as keyof typeof labels] || String(value);
         },
@@ -160,9 +164,11 @@ export const productsConfig = defineEntityConfig<Product>()({
             colSpan: 2,
             defaultValue: 'ACTIVE',
             options: [
+              { value: 'DRAFT', label: 'Rascunho' },
               { value: 'ACTIVE', label: 'Ativo' },
               { value: 'INACTIVE', label: 'Inativo' },
-              { value: 'ARCHIVED', label: 'Arquivado' },
+              { value: 'DISCONTINUED', label: 'Descontinuado' },
+              { value: 'OUT_OF_STOCK', label: 'Sem Estoque' },
             ],
             description: 'Padrão: Ativo',
           },

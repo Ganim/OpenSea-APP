@@ -9,8 +9,11 @@ export type LocationType =
   | 'WAREHOUSE'
   | 'ZONE'
   | 'AISLE'
+  | 'RACK'
   | 'SHELF'
   | 'BIN'
+  | 'FLOOR'
+  | 'ROOM'
   | 'OTHER';
 
 export interface AisleConfig {

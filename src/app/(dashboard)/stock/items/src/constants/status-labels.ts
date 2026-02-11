@@ -8,12 +8,7 @@ import type { ItemStatus } from '@/types/stock';
 /**
  * Labels para status de items
  */
-export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
-  AVAILABLE: 'Disponível',
-  RESERVED: 'Reservado',
-  SOLD: 'Vendido',
-  DAMAGED: 'Danificado',
-};
+export { ITEM_STATUS_LABELS } from '@/types/stock';
 
 /**
  * Cores para badges de status
@@ -24,6 +19,8 @@ export const ITEM_STATUS_COLORS: Record<
 > = {
   AVAILABLE: 'default',
   RESERVED: 'secondary',
-  SOLD: 'outline',
+  IN_TRANSIT: 'outline',
   DAMAGED: 'destructive',
+  EXPIRED: 'destructive',
+  DISPOSED: 'secondary',
 };

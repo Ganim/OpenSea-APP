@@ -214,7 +214,6 @@ export function CreateTemplateModal({
                     <SelectItem value="UNITS">Unidades</SelectItem>
                     <SelectItem value="METERS">Metros</SelectItem>
                     <SelectItem value="KILOGRAMS">Quilogramas</SelectItem>
-                    <SelectItem value="LITERS">Litros</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

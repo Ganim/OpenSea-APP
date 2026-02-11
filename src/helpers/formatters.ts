@@ -162,53 +162,9 @@ export function formatUnitOfMeasure(
   if (!unitOfMeasure) return 'Unidade';
 
   const unitMap: Record<string, string> = {
-    // Unidades básicas
     UNITS: 'Unidades (un)',
-    PIECES: 'Peças (pç)',
-
-    // Peso
     KILOGRAMS: 'Quilogramas (kg)',
-    GRAMS: 'Gramas (g)',
-    POUNDS: 'Libras (lb)',
-    OUNCES: 'Onças (oz)',
-
-    // Volume
-    LITERS: 'Litros (L)',
-    MILLILITERS: 'Mililitros (mL)',
-    GALLONS: 'Galões (gal)',
-    QUARTS: 'Quartos (qt)',
-    PINTS: 'Pintas (pt)',
-    CUPS: 'Xícaras (xíc)',
-
-    // Comprimento
     METERS: 'Metros (m)',
-    CENTIMETERS: 'Centímetros (cm)',
-    MILLIMETERS: 'Milímetros (mm)',
-
-    // Área
-    SQUARE_METERS: 'Metros quadrados (m²)',
-
-    // Volume cúbico
-    CUBIC_METERS: 'Metros cúbicos (m³)',
-
-    // Embalagens
-    BOXES: 'Caixas (cx)',
-    PACKAGES: 'Pacotes (pct)',
-    BAGS: 'Sacos (sc)',
-    BOTTLES: 'Garrafas (gf)',
-    CANS: 'Latas (lt)',
-    TUBES: 'Tubos (tb)',
-    ROLLS: 'Rolos (rl)',
-    SHEETS: 'Folhas (fl)',
-    BARS: 'Barras (br)',
-    COILS: 'Bobinas (bob)',
-
-    // Utensílios
-    TABLESPOONS: 'Colheres de sopa (cs)',
-    TEASPOONS: 'Colheres de chá (cch)',
-
-    // Customizado
-    CUSTOM: 'Customizado',
   };
 
   return unitMap[unitOfMeasure] || unitOfMeasure;

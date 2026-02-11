@@ -26,9 +26,8 @@ export type PaymentMethod =
 export type FinanceAttachmentType =
   | 'BOLETO'
   | 'PAYMENT_RECEIPT'
-  | 'INVOICE'
   | 'CONTRACT'
-  | 'BANK_STATEMENT'
+  | 'INVOICE'
   | 'OTHER';
 export type OverdueRange = '1-7' | '8-30' | '31-60' | '60+';
 

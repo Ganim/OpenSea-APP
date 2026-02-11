@@ -86,8 +86,10 @@ const STATUS_CONFIG: Record<
 > = {
   AVAILABLE: { label: 'Disponível', variant: 'default' },
   RESERVED: { label: 'Reservado', variant: 'secondary' },
-  SOLD: { label: 'Vendido', variant: 'outline' },
+  IN_TRANSIT: { label: 'Em Trânsito', variant: 'outline' },
   DAMAGED: { label: 'Danificado', variant: 'destructive' },
+  EXPIRED: { label: 'Expirado', variant: 'destructive' },
+  DISPOSED: { label: 'Descartado', variant: 'secondary' },
 };
 
 export function ItemRow({
