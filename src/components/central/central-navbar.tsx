@@ -42,7 +42,7 @@ export function CentralNavbar() {
   return (
     <nav className="h-20 px-6 flex items-center justify-between relative z-50">
       {/* Glass effect background */}
-      <div className="absolute inset-0 border-b central-glass central-transition" />
+      <div className="absolute inset-0 border-b central-glass" />
 
       <div className="relative z-10 flex items-center gap-4">
         <Link href="/central" className="flex items-center gap-3 group">

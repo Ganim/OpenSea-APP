@@ -17,7 +17,7 @@ export function CentralSidebar() {
   return (
     <aside className="w-72 min-h-[calc(100vh-5rem)] p-6 relative">
       {/* Glass background */}
-      <div className="absolute inset-0 border-r central-glass central-transition" />
+      <div className="absolute inset-0 border-r central-glass" />
 
       <div className="relative z-10 space-y-2">
         {sidebarItems.map(item => {

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import type { Category } from '@/types/stock';
 import { format } from 'date-fns';
+import Image from 'next/image';
 import { ptBR } from 'date-fns/locale';
 import {
   Calendar,
@@ -62,10 +63,13 @@ export function ViewModal({
           <DialogTitle className="flex items-center gap-2">
             {category.iconUrl ? (
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-purple-600 overflow-hidden">
-                <img
+                <Image
                   src={category.iconUrl}
                   alt=""
+                  width={20}
+                  height={20}
                   className="h-5 w-5 object-contain brightness-0 invert"
+                  unoptimized
                   onError={e => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
@@ -156,10 +160,13 @@ export function ViewModal({
                 </h4>
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
-                    <img
+                    <Image
                       src={category.iconUrl}
                       alt="Ícone"
+                      width={24}
+                      height={24}
                       className="h-6 w-6 object-contain brightness-0 invert"
+                      unoptimized
                       onError={e => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}

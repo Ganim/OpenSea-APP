@@ -26,6 +26,7 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react';
+import Image from 'next/image';
 import {
   MdPrint,
   MdPrintDisabled,
@@ -658,10 +659,13 @@ export const TemplateForm = forwardRef<TemplateFormRef, TemplateFormProps>(
               <Label>Preview do Ícone</Label>
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
                 {iconUrl ? (
-                  <img
+                  <Image
                     src={iconUrl}
                     alt="Preview"
+                    width={24}
+                    height={24}
                     className="h-6 w-6 object-contain brightness-0 invert"
+                    unoptimized
                     onError={e => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}

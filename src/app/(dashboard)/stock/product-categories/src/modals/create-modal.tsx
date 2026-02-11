@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Category } from '@/types/stock';
+import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
 
@@ -124,10 +125,13 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                 <Label>Preview do Ícone</Label>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
                   {formData.iconUrl ? (
-                    <img
+                    <Image
                       src={formData.iconUrl}
                       alt="Preview"
+                      width={24}
+                      height={24}
                       className="h-6 w-6 object-contain brightness-0 invert"
+                      unoptimized
                       onError={e => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}

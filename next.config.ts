@@ -3,6 +3,11 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   output: 'standalone',
 
+  images: {
+    // Allow any remote image (icons, avatars, thumbnails come from dynamic URLs)
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+  },
+
   // Turbopack is enabled by default in Next.js 16+
   // Empty config silences webpack compatibility warning
   turbopack: {},

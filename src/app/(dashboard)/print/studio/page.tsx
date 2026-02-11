@@ -44,6 +44,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -238,10 +239,13 @@ export default function PrintStudioPage() {
           {/* Preview/Thumbnail */}
           <div className="aspect-video bg-muted rounded-md mb-3 flex items-center justify-center overflow-hidden">
             {template.thumbnailUrl ? (
-              <img
+              <Image
                 src={template.thumbnailUrl}
                 alt={template.name}
+                width={200}
+                height={200}
                 className="w-full h-full object-contain"
+                unoptimized
               />
             ) : (
               <div className="flex flex-col items-center text-muted-foreground">

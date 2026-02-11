@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Check, Circle, Clock } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 
 // ============================================
@@ -270,9 +271,11 @@ const TimelineItem: React.FC<{
               {item.user && (
                 <>
                   {item.user.avatar ? (
-                    <img
+                    <Image
                       src={item.user.avatar}
                       alt={item.user.name}
+                      width={20}
+                      height={20}
                       className="w-5 h-5 rounded-full"
                     />
                   ) : (

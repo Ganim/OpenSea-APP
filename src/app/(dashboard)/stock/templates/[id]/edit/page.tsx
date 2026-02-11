@@ -17,6 +17,7 @@ import type {
 } from '@/types/stock';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save } from 'lucide-react';
+import Image from 'next/image';
 import { GrObjectGroup } from 'react-icons/gr';
 import { useParams, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -142,10 +143,13 @@ export default function TemplateEditPage() {
         <div className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 shadow-lg">
             {template.iconUrl ? (
-              <img
+              <Image
                 src={template.iconUrl}
                 alt={template.name}
+                width={28}
+                height={28}
                 className="h-7 w-7 object-contain brightness-0 invert"
+                unoptimized
               />
             ) : (
               <span className="text-2xl font-bold text-white">

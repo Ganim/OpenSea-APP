@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/tooltip';
 import type { Template, TemplateAttribute, UnitOfMeasure } from '@/types/stock';
 import { Calendar, Layers, Pencil, RefreshCcwDot } from 'lucide-react';
+import Image from 'next/image';
 import {
   MdPrint,
   MdPrintDisabled,
@@ -315,10 +316,13 @@ export function TemplateViewer({
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
                 {template.iconUrl ? (
-                  <img
+                  <Image
                     src={template.iconUrl}
                     alt={template.name}
+                    width={24}
+                    height={24}
                     className="h-6 w-6 object-contain brightness-0 invert"
+                    unoptimized
                     onError={e => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
@@ -401,10 +405,13 @@ export function TemplateViewer({
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
                   {template.iconUrl ? (
-                    <img
+                    <Image
                       src={template.iconUrl}
                       alt={template.name}
+                      width={24}
+                      height={24}
                       className="h-6 w-6 object-contain brightness-0 invert"
+                      unoptimized
                     />
                   ) : (
                     <GrObjectGroup className="h-5 w-5 text-white" />

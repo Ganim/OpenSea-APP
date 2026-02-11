@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface CareIconProps {
   assetPath: string;
@@ -20,13 +21,13 @@ export function CareIcon({
   const baseUrl = process.env.NEXT_PUBLIC_ASSETS_URL || '/assets';
 
   return (
-    <img
+    <Image
       src={`${baseUrl}/${assetPath}`}
       alt={alt}
       width={size}
       height={size}
       className={cn('object-contain', className)}
-      loading="lazy"
+      unoptimized
     />
   );
 }

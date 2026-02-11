@@ -24,7 +24,6 @@ export const GlassBadge = forwardRef<HTMLSpanElement, GlassBadgeProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
-          'central-transition',
           variants[variant],
           className
         )}

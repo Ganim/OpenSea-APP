@@ -39,6 +39,7 @@ import {
 } from '@/hooks/stock/use-categories';
 import type { Category, UpdateCategoryRequest } from '@/types/stock';
 import { ArrowLeft, FolderTree, Save, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useRef, useState } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
@@ -275,10 +276,13 @@ export default function EditCategoryPage({
         <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 shadow-lg overflow-hidden">
             {category.iconUrl ? (
-              <img
+              <Image
                 src={category.iconUrl}
                 alt={category.name}
+                width={28}
+                height={28}
                 className="h-7 w-7 object-contain brightness-0 invert"
+                unoptimized
                 onError={e => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -335,10 +339,13 @@ export default function EditCategoryPage({
                   <Label>Preview do Ícone</Label>
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
                     {iconUrl ? (
-                      <img
+                      <Image
                         src={iconUrl}
                         alt="Preview"
+                        width={24}
+                        height={24}
                         className="h-6 w-6 object-contain brightness-0 invert"
+                        unoptimized
                         onError={e => {
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}

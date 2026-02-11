@@ -1,5 +1,6 @@
 'use client';
 
+import './central.css';
 import { SuperAdminGuard } from '@/components/auth/super-admin-guard';
 import { AnimatedBackground } from '@/components/central/animated-background';
 import { CentralNavbar } from '@/components/central/central-navbar';

@@ -24,6 +24,7 @@ import {
   Hash,
   Package,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
@@ -234,10 +235,13 @@ export default function ProductCategoryDetailPage() {
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
             {category.iconUrl ? (
-              <img
+              <Image
                 src={category.iconUrl}
                 alt=""
+                width={32}
+                height={32}
                 className="h-8 w-8 object-contain brightness-0 invert"
+                unoptimized
                 onError={e => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -343,10 +347,13 @@ export default function ProductCategoryDetailPage() {
                     </h3>
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 overflow-hidden">
-                        <img
+                        <Image
                           src={category.iconUrl}
                           alt="Ícone"
+                          width={24}
+                          height={24}
                           className="h-6 w-6 object-contain brightness-0 invert"
+                          unoptimized
                           onError={e => {
                             (e.target as HTMLImageElement).style.display =
                               'none';

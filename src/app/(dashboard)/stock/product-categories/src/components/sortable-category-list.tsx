@@ -25,6 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@/components/ui/badge';
 import type { Category } from '@/types/stock';
 import { GripVertical } from 'lucide-react';
+import Image from 'next/image';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
 
@@ -72,10 +73,13 @@ function SortableItem({ item }: SortableItemProps) {
 
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-purple-600 overflow-hidden flex-shrink-0">
         {item.iconUrl ? (
-          <img
+          <Image
             src={item.iconUrl}
             alt=""
+            width={20}
+            height={20}
             className="h-5 w-5 object-contain brightness-0 invert"
+            unoptimized
             onError={e => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
