@@ -14,8 +14,8 @@ import {
   Slash,
   X,
 } from 'lucide-react';
-import { PiMouseScrollDuotone, PiTableDuotone } from 'react-icons/pi';
 import { useQuery } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { Header } from '@/components/layout/header';
 import {
@@ -32,14 +32,12 @@ import { Switch } from '@/components/ui/switch';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import type { FilterOption } from '@/components/ui/filter-dropdown';
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Pagination } from '../../_shared/components/pagination';
 import { useItems } from '@/hooks/stock/use-items';
 import { useManufacturers, useTemplates } from '@/hooks/stock';
 import { itemMovementsService } from '@/services/stock';
@@ -321,8 +319,6 @@ ${tables}
 }
 
 export default function StockOverviewListPage() {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState('');
   const [visibleColumns, setVisibleColumns] = useState<string[] | null>(null);
   const [hideExited, setHideExited] = useState(true);
@@ -336,19 +332,8 @@ export default function StockOverviewListPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyItem, setHistoryItem] = useState<Item | null>(null);
-  const [viewMode, setViewMode] = useState<'pagination' | 'scroll'>(() => {
-    if (typeof window !== 'undefined') {
-      return (
-        (localStorage.getItem('stock-overview-viewMode') as
-          | 'pagination'
-          | 'scroll') || 'scroll'
-      );
-    }
-    return 'scroll';
-  });
-  const [visibleCount, setVisibleCount] = useState(40);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, error, refetch, isFetching } = useItems();
 
@@ -493,38 +478,19 @@ export default function StockOverviewListPage() {
     [binFiltered, hideExited]
   );
 
-  // Client-side pagination / scroll
-  const totalFiltered = filteredItems.length;
-  const totalPages = Math.ceil(totalFiltered / limit) || 1;
+  // Virtualizer for table rows
+  const rowVirtualizer = useVirtualizer({
+    count: filteredItems.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 49,
+    overscan: 10,
+  });
 
-  const items = useMemo(() => {
-    if (viewMode === 'scroll') {
-      return filteredItems.slice(0, visibleCount);
-    }
-    const start = (page - 1) * limit;
-    return filteredItems.slice(start, start + limit);
-  }, [filteredItems, page, limit, viewMode, visibleCount]);
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
-  const pagination = useMemo(
-    () => ({
-      total: totalFiltered,
-      page,
-      limit,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-    }),
-    [totalFiltered, page, limit, totalPages]
-  );
-
-  // Persist viewMode
+  // Scroll to top when filters change
   useEffect(() => {
-    localStorage.setItem('stock-overview-viewMode', viewMode);
-  }, [viewMode]);
-
-  // Reset visibleCount when filters change
-  useEffect(() => {
-    setVisibleCount(40);
+    scrollContainerRef.current?.scrollTo({ top: 0 });
   }, [
     search,
     selectedManufacturers,
@@ -532,24 +498,6 @@ export default function StockOverviewListPage() {
     selectedBinAddresses,
     hideExited,
   ]);
-
-  // IntersectionObserver for infinite scroll
-  useEffect(() => {
-    if (viewMode !== 'scroll') return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && visibleCount < filteredItems.length) {
-          setVisibleCount(prev => Math.min(prev + 40, filteredItems.length));
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [viewMode, visibleCount, filteredItems.length]);
 
   const dynamicColumns = useMemo(
     () => buildDynamicColumns(filteredItems, templates),
@@ -652,8 +600,8 @@ export default function StockOverviewListPage() {
     activeDynamicColumns.length;
 
   return (
-    <PageLayout>
-      <PageHeader>
+    <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
+      <PageHeader className="shrink-0">
         <Header
           title="Listagem de Estoque"
           description="Visão consolidada de todos os itens com localização, quantidades e atributos personalizados."
@@ -676,20 +624,14 @@ export default function StockOverviewListPage() {
         />
       </PageHeader>
 
-      <PageBody>
-        <Card className="border-gray-200/60 dark:border-white/10">
-          <CardContent className="p-4 sm:p-6 space-y-4">
+      <PageBody className="flex flex-col flex-1 min-h-0">
+        <Card className="border-gray-200/60 dark:border-white/10 flex flex-col flex-1 min-h-0">
+          <CardContent className="p-4 sm:p-6 flex flex-col flex-1 min-h-0 gap-4">
             <SearchBar
               value={search}
               placeholder="Buscar por código, produto, variante ou atributos..."
-              onSearch={value => {
-                setSearch(value);
-                setPage(1);
-              }}
-              onClear={() => {
-                setSearch('');
-                setPage(1);
-              }}
+              onSearch={setSearch}
+              onClear={() => setSearch('')}
             />
 
             <div className="flex items-center justify-between">
@@ -699,10 +641,7 @@ export default function StockOverviewListPage() {
                   icon={Factory}
                   options={manufacturerOptions}
                   selected={selectedManufacturers}
-                  onSelectionChange={value => {
-                    setSelectedManufacturers(value);
-                    setPage(1);
-                  }}
+                  onSelectionChange={setSelectedManufacturers}
                   activeColor="violet"
                   searchPlaceholder="Buscar fabricante..."
                   emptyText="Nenhum fabricante encontrado."
@@ -712,10 +651,7 @@ export default function StockOverviewListPage() {
                   icon={Grid3X3}
                   options={zoneOptions}
                   selected={selectedZones}
-                  onSelectionChange={value => {
-                    setSelectedZones(value);
-                    setPage(1);
-                  }}
+                  onSelectionChange={setSelectedZones}
                   activeColor="cyan"
                   searchPlaceholder="Buscar zona..."
                   emptyText="Nenhuma zona encontrada."
@@ -725,10 +661,7 @@ export default function StockOverviewListPage() {
                   icon={MapPin}
                   options={binAddressOptions}
                   selected={selectedBinAddresses}
-                  onSelectionChange={value => {
-                    setSelectedBinAddresses(value);
-                    setPage(1);
-                  }}
+                  onSelectionChange={setSelectedBinAddresses}
                   activeColor="emerald"
                   searchPlaceholder="Buscar endereço..."
                   emptyText="Nenhuma localização encontrada."
@@ -737,10 +670,7 @@ export default function StockOverviewListPage() {
                   <Switch
                     id="hide-exited-overview"
                     checked={hideExited}
-                    onCheckedChange={value => {
-                      setHideExited(value);
-                      setPage(1);
-                    }}
+                    onCheckedChange={setHideExited}
                     className="scale-75"
                   />
                   <Label
@@ -752,28 +682,6 @@ export default function StockOverviewListPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 text-xs"
-                  onClick={() =>
-                    setViewMode(prev =>
-                      prev === 'pagination' ? 'scroll' : 'pagination'
-                    )
-                  }
-                >
-                  {viewMode === 'pagination' ? (
-                    <>
-                      <PiMouseScrollDuotone className="w-4 h-4" />
-                      Rolagem
-                    </>
-                  ) : (
-                    <>
-                      <PiTableDuotone className="w-4 h-4" />
-                      Paginação
-                    </>
-                  )}
-                </Button>
                 <FilterDropdown
                   label="Colunas"
                   icon={Columns3}
@@ -796,33 +704,36 @@ export default function StockOverviewListPage() {
                 Não foi possível carregar a listagem. Tente novamente.
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="rounded-xl border border-gray-200/70 dark:border-white/10 overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-gray-50/80 dark:bg-white/5">
-                        <TableHead className="w-14">Cor</TableHead>
+              <div className="flex flex-col flex-1 min-h-0 gap-2">
+                <div
+                  ref={scrollContainerRef}
+                  className="rounded-xl border border-gray-200/70 dark:border-white/10 overflow-auto flex-1 min-h-0"
+                >
+                  <table className="w-full caption-bottom text-sm table-fixed">
+                    <colgroup>
+                      <col style={{ width: 56 }} />
+                      <col />
+                      {showFabricante && <col style={{ width: 180 }} />}
+                      {showLocalizacao && <col style={{ width: 180 }} />}
+                      {showQuantidade && <col style={{ width: 160 }} />}
+                      {activeDynamicColumns.map(col => (
+                        <col key={col.id} style={{ width: 120 }} />
+                      ))}
+                    </colgroup>
+                    <TableHeader className="sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                      <TableRow>
+                        <TableHead>Cor</TableHead>
                         <TableHead>Item</TableHead>
-                        {showFabricante && (
-                          <TableHead className="w-[180px]">
-                            Fabricante
-                          </TableHead>
-                        )}
-                        {showLocalizacao && (
-                          <TableHead className="w-[180px]">
-                            Localização
-                          </TableHead>
-                        )}
-                        {showQuantidade && (
-                          <TableHead className="w-40">Quantidade</TableHead>
-                        )}
+                        {showFabricante && <TableHead>Fabricante</TableHead>}
+                        {showLocalizacao && <TableHead>Localização</TableHead>}
+                        {showQuantidade && <TableHead>Quantidade</TableHead>}
                         {activeDynamicColumns.map(col => (
                           <TableHead key={col.id}>{col.label}</TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {items.length === 0 ? (
+                      {filteredItems.length === 0 ? (
                         <TableRow>
                           <TableCell
                             colSpan={totalCols}
@@ -834,210 +745,219 @@ export default function StockOverviewListPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        items.map(item => {
-                          const unitAbbr = getUnitAbbreviation(
-                            item.templateUnitOfMeasure
-                          );
-                          const qtyLabel = unitAbbr
-                            ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
-                            : formatQuantity(item.currentQuantity);
+                        <>
+                          {virtualItems.length > 0 &&
+                            virtualItems[0].start > 0 && (
+                              <tr>
+                                <td
+                                  colSpan={totalCols}
+                                  style={{
+                                    height: virtualItems[0].start,
+                                    padding: 0,
+                                    border: 'none',
+                                  }}
+                                />
+                              </tr>
+                            )}
+                          {virtualItems.map(virtualRow => {
+                            const item = filteredItems[virtualRow.index];
+                            const unitAbbr = getUnitAbbreviation(
+                              item.templateUnitOfMeasure
+                            );
+                            const qtyLabel = unitAbbr
+                              ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
+                              : formatQuantity(item.currentQuantity);
 
-                          const hasBin =
-                            item.bin?.zone?.id && item.bin?.zone?.warehouseId;
+                            const hasBin =
+                              item.bin?.zone?.id && item.bin?.zone?.warehouseId;
 
-                          const isSelected = selectedIds.has(item.id);
-                          const isExited = item.currentQuantity === 0;
+                            const isSelected = selectedIds.has(item.id);
+                            const isExited = item.currentQuantity === 0;
 
-                          return (
-                            <TableRow
-                              key={item.id}
-                              className={cn(
-                                'cursor-pointer transition-colors',
-                                isSelected &&
-                                  'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15',
-                                !isSelected &&
-                                  'hover:bg-gray-50 dark:hover:bg-white/5',
-                                isExited && !isSelected && 'opacity-60'
-                              )}
-                              onClick={() => handleRowClick(item)}
-                              onDoubleClick={() => handleRowDoubleClick(item)}
-                            >
-                              {/* Cor */}
-                              <TableCell>
-                                {item.variantColorHex ? (
-                                  <div
-                                    className="h-8 w-12 rounded border border-gray-200 dark:border-slate-700"
-                                    style={{
-                                      backgroundColor: item.variantColorHex,
-                                    }}
-                                    title={item.variantColorHex}
-                                  />
-                                ) : (
-                                  <div
-                                    className="flex items-center gap-1 text-muted-foreground h-8 w-12 justify-center"
-                                    title="Cor não definida"
-                                  >
-                                    <Palette className="h-4 w-4" />
-                                    <Slash className="h-3 w-3" />
-                                  </div>
+                            return (
+                              <TableRow
+                                key={item.id}
+                                data-index={virtualRow.index}
+                                ref={rowVirtualizer.measureElement}
+                                className={cn(
+                                  'cursor-pointer transition-colors',
+                                  isSelected &&
+                                    'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15',
+                                  !isSelected &&
+                                    'hover:bg-gray-50 dark:hover:bg-white/5',
+                                  isExited && !isSelected && 'opacity-60'
                                 )}
-                              </TableCell>
-
-                              {/* Item */}
-                              <TableCell>
-                                {(() => {
-                                  const exitBadge = isExited
-                                    ? EXIT_REASON_BADGE[
-                                        exitReasonMap[item.id] || ''
-                                      ] || DEFAULT_EXIT_BADGE
-                                    : null;
-                                  return (
-                                    <div className="flex flex-col">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium text-gray-900 dark:text-white">
-                                          {resolveItemName(item)}
-                                        </span>
-                                        {exitBadge && (
-                                          <Badge
-                                            variant="outline"
-                                            className={cn(
-                                              'text-[10px] px-1.5 py-0 border',
-                                              exitBadge.className
-                                            )}
-                                          >
-                                            {exitBadge.label}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <span className="text-xs font-mono text-muted-foreground">
-                                        {item.fullCode || item.uniqueCode || ''}
-                                      </span>
-                                    </div>
-                                  );
-                                })()}
-                              </TableCell>
-
-                              {/* Fabricante */}
-                              {showFabricante && (
+                                onClick={() => handleRowClick(item)}
+                                onDoubleClick={() => handleRowDoubleClick(item)}
+                              >
+                                {/* Cor */}
                                 <TableCell>
-                                  {item.manufacturerName ? (
-                                    <button
-                                      type="button"
-                                      className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        if (
-                                          !selectedManufacturers.includes(
-                                            item.manufacturerName!
-                                          )
-                                        ) {
-                                          setSelectedManufacturers(prev => [
-                                            ...prev,
-                                            item.manufacturerName!,
-                                          ]);
-                                          setPage(1);
-                                        }
+                                  {item.variantColorHex ? (
+                                    <div
+                                      className="h-8 w-12 rounded border border-gray-200 dark:border-slate-700"
+                                      style={{
+                                        backgroundColor: item.variantColorHex,
                                       }}
-                                    >
-                                      {item.manufacturerName}
-                                    </button>
+                                      title={item.variantColorHex}
+                                    />
                                   ) : (
-                                    <span className="text-sm text-gray-700 dark:text-gray-200">
-                                      -
-                                    </span>
+                                    <div
+                                      className="flex items-center gap-1 text-muted-foreground h-8 w-12 justify-center"
+                                      title="Cor não definida"
+                                    >
+                                      <Palette className="h-4 w-4" />
+                                      <Slash className="h-3 w-3" />
+                                    </div>
                                   )}
                                 </TableCell>
-                              )}
 
-                              {/* Localização */}
-                              {showLocalizacao && (
+                                {/* Item */}
                                 <TableCell>
-                                  {hasBin ? (
-                                    <Link
-                                      href={`/stock/locations/${item.bin!.zone!.warehouseId}/zones/${item.bin!.zone!.id}?highlight=${item.bin!.id}`}
-                                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                                      onClick={e => e.stopPropagation()}
+                                  {(() => {
+                                    const exitBadge = isExited
+                                      ? EXIT_REASON_BADGE[
+                                          exitReasonMap[item.id] || ''
+                                        ] || DEFAULT_EXIT_BADGE
+                                      : null;
+                                    return (
+                                      <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-gray-900 dark:text-white">
+                                            {resolveItemName(item)}
+                                          </span>
+                                          {exitBadge && (
+                                            <Badge
+                                              variant="outline"
+                                              className={cn(
+                                                'text-[10px] px-1.5 py-0 border',
+                                                exitBadge.className
+                                              )}
+                                            >
+                                              {exitBadge.label}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <span className="text-xs font-mono text-muted-foreground">
+                                          {item.fullCode ||
+                                            item.uniqueCode ||
+                                            ''}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                </TableCell>
+
+                                {/* Fabricante */}
+                                {showFabricante && (
+                                  <TableCell>
+                                    {item.manufacturerName ? (
+                                      <button
+                                        type="button"
+                                        className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          if (
+                                            !selectedManufacturers.includes(
+                                              item.manufacturerName!
+                                            )
+                                          ) {
+                                            setSelectedManufacturers(prev => [
+                                              ...prev,
+                                              item.manufacturerName!,
+                                            ]);
+                                          }
+                                        }}
+                                      >
+                                        {item.manufacturerName}
+                                      </button>
+                                    ) : (
+                                      <span className="text-sm text-gray-700 dark:text-gray-200">
+                                        -
+                                      </span>
+                                    )}
+                                  </TableCell>
+                                )}
+
+                                {/* Localização */}
+                                {showLocalizacao && (
+                                  <TableCell>
+                                    {hasBin ? (
+                                      <Link
+                                        href={`/stock/locations/${item.bin!.zone!.warehouseId}/zones/${item.bin!.zone!.id}?highlight=${item.bin!.id}`}
+                                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                        onClick={e => e.stopPropagation()}
+                                      >
+                                        {item.bin!.address ||
+                                          item.resolvedAddress ||
+                                          '-'}
+                                      </Link>
+                                    ) : (
+                                      <span className="text-sm text-gray-700 dark:text-gray-200">
+                                        {item.resolvedAddress ||
+                                          item.lastKnownAddress ||
+                                          '-'}
+                                      </span>
+                                    )}
+                                  </TableCell>
+                                )}
+
+                                {/* Quantidade */}
+                                {showQuantidade && (
+                                  <TableCell>
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-sm"
                                     >
-                                      {item.bin!.address ||
-                                        item.resolvedAddress ||
-                                        '-'}
-                                    </Link>
-                                  ) : (
-                                    <span className="text-sm text-gray-700 dark:text-gray-200">
-                                      {item.resolvedAddress ||
-                                        item.lastKnownAddress ||
-                                        '-'}
-                                    </span>
-                                  )}
-                                </TableCell>
-                              )}
+                                      {qtyLabel}
+                                    </Badge>
+                                  </TableCell>
+                                )}
 
-                              {/* Quantidade */}
-                              {showQuantidade && (
-                                <TableCell>
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-sm"
-                                  >
-                                    {qtyLabel}
-                                  </Badge>
-                                </TableCell>
-                              )}
-
-                              {/* Colunas dinâmicas */}
-                              {activeDynamicColumns.map(col => (
-                                <TableCell key={col.id} className="text-sm">
-                                  {getDynamicValue(item, col)}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          );
-                        })
+                                {/* Colunas dinâmicas */}
+                                {activeDynamicColumns.map(col => (
+                                  <TableCell key={col.id} className="text-sm">
+                                    {getDynamicValue(item, col)}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            );
+                          })}
+                          {virtualItems.length > 0 && (
+                            <tr>
+                              <td
+                                colSpan={totalCols}
+                                style={{
+                                  height:
+                                    rowVirtualizer.getTotalSize() -
+                                    virtualItems[virtualItems.length - 1].end,
+                                  padding: 0,
+                                  border: 'none',
+                                }}
+                              />
+                            </tr>
+                          )}
+                        </>
                       )}
                     </TableBody>
-                  </Table>
+                  </table>
                 </div>
 
-                {viewMode === 'pagination' ? (
-                  <Pagination
-                    pagination={pagination}
-                    onPageChange={setPage}
-                    onLimitChange={value => {
-                      setLimit(value);
-                      setPage(1);
-                    }}
-                  />
-                ) : (
-                  <>
-                    {visibleCount < filteredItems.length && (
-                      <div
-                        ref={sentinelRef}
-                        className="flex items-center justify-center py-4 text-xs text-muted-foreground"
-                      >
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Carregando mais itens... ({items.length} de{' '}
-                        {filteredItems.length})
-                      </div>
-                    )}
-                    {visibleCount >= filteredItems.length &&
-                      filteredItems.length > 0 && (
-                        <div className="text-center py-3 text-xs text-muted-foreground">
-                          Todos os {filteredItems.length} itens carregados
-                        </div>
-                      )}
-                  </>
-                )}
+                <div className="flex items-center justify-end gap-2 shrink-0 pr-1 text-xs text-muted-foreground">
+                  {isFetching && !isLoading && (
+                    <span className="flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Atualizando...
+                    </span>
+                  )}
+                  <span>
+                    {filteredItems.length}{' '}
+                    {filteredItems.length === 1 ? 'item' : 'itens'}
+                  </span>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
-
-        {isFetching && !isLoading && (
-          <div className="flex items-center justify-center text-xs text-muted-foreground gap-2">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Atualizando lista...
-          </div>
-        )}
 
         {/* Floating selection bar */}
         {selectionSummary && (
