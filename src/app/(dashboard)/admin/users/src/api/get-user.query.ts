@@ -91,8 +91,8 @@ export function useOnlineUsers(options?: OnlineUsersOptions) {
       };
     },
 
-    staleTime: 30 * 1000, // 30 seconds for online status
-    refetchInterval: 60 * 1000, // Refetch every minute
+    staleTime: 60 * 1000,
+    refetchInterval: 120 * 1000, // Refetch every 2 minutes
     ...options,
   });
 }

@@ -65,8 +65,8 @@ export function useInventoryCycleProgress(cycleId: string) {
     queryKey: INVENTORY_QUERY_KEYS.CYCLE_PROGRESS(cycleId),
     queryFn: () => inventoryService.getCycleProgress(cycleId),
     enabled: !!cycleId,
-    // Refresh frequently during active counting
-    refetchInterval: 10000,
+    // Refresh during active counting
+    refetchInterval: 60000,
   });
 }
 

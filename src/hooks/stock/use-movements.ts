@@ -65,8 +65,8 @@ export function usePendingApprovals() {
   return useQuery({
     queryKey: MOVEMENT_QUERY_KEYS.PENDING_APPROVALS,
     queryFn: () => movementsService.getPendingApprovals(),
-    // Refresh every 30 seconds to keep approvals up to date
-    refetchInterval: 30000,
+    // Refresh approvals periodically
+    refetchInterval: 120000,
   });
 }
 

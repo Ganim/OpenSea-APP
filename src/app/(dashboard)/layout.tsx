@@ -6,9 +6,15 @@ import { NavigationMenu } from '@/components/layout/navigation-menu';
 import { menuItems } from '@/config/menu-items';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
-import { PrintQueueProvider } from '@/core/print-queue';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+const PrintQueueProvider = dynamic(
+  () =>
+    import('@/core/print-queue').then(m => m.PrintQueueProvider),
+  { ssr: false }
+);
 
 export default function DashboardLayout({
   children,

@@ -60,8 +60,8 @@ export function useStockDashboard() {
   return useQuery({
     queryKey: ANALYTICS_QUERY_KEYS.DASHBOARD,
     queryFn: () => analyticsService.getDashboard(),
-    staleTime: 30000, // Refresh more frequently for dashboard
-    refetchInterval: 60000, // Auto-refresh every minute
+    staleTime: 60000,
+    refetchInterval: 300000, // Auto-refresh every 5 minutes
   });
 }
 
@@ -93,7 +93,7 @@ export function useLowStockAlerts() {
     queryKey: ANALYTICS_QUERY_KEYS.LOW_STOCK_ALERTS,
     queryFn: () => analyticsService.getLowStockAlerts(),
     staleTime: 60000,
-    refetchInterval: 300000, // Auto-refresh every 5 minutes
+    refetchInterval: 600000, // Auto-refresh every 10 minutes
   });
 }
 

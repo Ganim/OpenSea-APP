@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
+import { useDebounce } from './use-debounce';
 import { toast } from 'sonner';
 import type { UseEntityCrudReturn } from './use-entity-crud';
 import { useModals } from './use-modals';
@@ -169,6 +170,7 @@ export function useEntityPage<T extends BaseEntity>(
   // =============================================================================
 
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [activeOperation, setActiveOperation] = useState<
     'delete' | 'duplicate' | null
   >(null);
@@ -186,16 +188,16 @@ export function useEntityPage<T extends BaseEntity>(
   const items = crud.items || [];
 
   const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) {
+    if (!debouncedSearchQuery.trim()) {
       return items;
     }
 
     if (filterFn) {
-      return items.filter(item => filterFn(item, searchQuery));
+      return items.filter(item => filterFn(item, debouncedSearchQuery));
     }
 
     // Filtro padrão simples (busca em todos os campos string)
-    const query = searchQuery.toLowerCase();
+    const query = debouncedSearchQuery.toLowerCase();
     return items.filter(item => {
       return Object.values(item).some(value => {
         if (typeof value === 'string') {
@@ -204,7 +206,7 @@ export function useEntityPage<T extends BaseEntity>(
         return false;
       });
     });
-  }, [items, searchQuery, filterFn]);
+  }, [items, debouncedSearchQuery, filterFn]);
 
   // =============================================================================
   // HANDLERS

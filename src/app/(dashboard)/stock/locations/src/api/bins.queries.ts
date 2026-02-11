@@ -115,8 +115,8 @@ export function useBinOccupancy(zoneId: string) {
       return mappedResponse;
     },
     enabled: !!zoneId,
-    staleTime: 1000 * 30, // 30 segundos - ocupação muda frequentemente
-    refetchInterval: 1000 * 60, // Refetch a cada minuto
+    staleTime: 1000 * 60,
+    refetchInterval: 1000 * 120, // Refetch a cada 2 minutos
   });
 }
 
