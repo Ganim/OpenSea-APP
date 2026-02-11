@@ -75,7 +75,7 @@ export function CentralSidebar() {
                 <span>{item.label}</span>
 
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse bg-[rgb(var(--color-primary))]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[rgb(var(--color-primary))]" />
                 )}
               </div>
             </Link>

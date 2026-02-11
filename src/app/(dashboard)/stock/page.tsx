@@ -22,7 +22,7 @@ import {
   tagsService,
   categoriesService,
 } from '@/services/stock';
-import { motion } from 'framer-motion';
+
 import {
   ArrowRight,
   Factory,
@@ -258,11 +258,7 @@ export default function StockLandingPage() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
@@ -287,7 +283,7 @@ export default function StockLandingPage() {
             </p>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Sections */}
       {sections.map((section, sectionIndex) => {
@@ -298,25 +294,16 @@ export default function StockLandingPage() {
         if (visibleCards.length === 0) return null;
 
         return (
-          <motion.div
+          <div
             key={section.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 + sectionIndex * 0.1 }}
           >
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               {section.title}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleCards.map((card, cardIndex) => (
-                <motion.div
+              {visibleCards.map((card) => (
+                <div
                   key={card.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: 0.2 + sectionIndex * 0.1 + cardIndex * 0.05,
-                  }}
                 >
                   <Link href={card.href}>
                     <Card
@@ -346,10 +333,10 @@ export default function StockLandingPage() {
                       </div>
                     </Card>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

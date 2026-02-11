@@ -17,7 +17,7 @@ import {
 import { useOptionalSelectionContext } from '@/core/selection';
 import type { BaseEntity, EntityConfig } from '@/core/types';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+
 import {
   ArrowDownAZ,
   ArrowUpDown,
@@ -746,19 +746,11 @@ export function EntityGrid<T extends BaseEntity>({
         {viewMode === 'grid' ? (
           <div className={cn('grid gap-4', gridColumns)}>
             {sortedItems.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, y: 20 },
-                    animate: { opacity: 1, y: 0 },
-                    transition: { delay: index * 0.05 },
-                  };
               const isSelected = selectedIds.has(item.id);
               const isFocused = index === focusedIndex;
 
               return (
-                <ItemWrapper
+                <div
                   key={item.id}
                   data-item-card
                   ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
@@ -775,29 +767,20 @@ export function EntityGrid<T extends BaseEntity>({
                   tabIndex={isFocused ? 0 : -1}
                   role="gridcell"
                   aria-selected={isSelected}
-                  {...animationProps}
                 >
                   {renderGridItem(item, isSelected)}
-                </ItemWrapper>
+                </div>
               );
             })}
           </div>
         ) : (
           <div className="space-y-3">
             {sortedItems.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, x: -20 },
-                    animate: { opacity: 1, x: 0 },
-                    transition: { delay: index * 0.03 },
-                  };
               const isSelected = selectedIds.has(item.id);
               const isFocused = index === focusedIndex;
 
               return (
-                <ItemWrapper
+                <div
                   key={item.id}
                   data-item-card
                   ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
@@ -814,10 +797,9 @@ export function EntityGrid<T extends BaseEntity>({
                   tabIndex={isFocused ? 0 : -1}
                   role="gridcell"
                   aria-selected={isSelected}
-                  {...animationProps}
                 >
                   {renderListItem(item, isSelected)}
-                </ItemWrapper>
+                </div>
               );
             })}
           </div>

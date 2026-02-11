@@ -208,7 +208,7 @@ export const BinCell = memo(function BinCell({
         isFiltered && 'opacity-20',
         // Highlight via URL param - efeito azul brilhante (usa shadow inset para simular borda interna)
         isHighlighted
-          ? 'bg-blue-500/30 dark:bg-blue-500/40 shadow-[inset_0_0_0_2px_rgba(59,130,246,1),0_0_12px_rgba(59,130,246,0.6)] animate-pulse z-20'
+          ? 'bg-blue-500/30 dark:bg-blue-500/40 shadow-[inset_0_0_0_2px_rgba(59,130,246,1),0_0_12px_rgba(59,130,246,0.6)] z-20'
           : isSelected
             ? 'bg-blue-100 dark:bg-blue-900/50 shadow-[inset_0_0_0_2px_rgba(59,130,246,1)]'
             : OCCUPANCY_BG[occupancyLevel],

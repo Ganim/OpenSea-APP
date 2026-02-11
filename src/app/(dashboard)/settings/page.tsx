@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { motion } from 'framer-motion';
+
 import {
   Bell,
   Globe,
@@ -36,26 +36,18 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
           Configurações
         </h1>
         <p className="text-lg text-gray-600 dark:text-white/60">
           Personalize sua experiência no sistema
         </p>
-      </motion.div>
+      </div>
 
       <div className="space-y-6">
         {/* Aparência */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <div>
           <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -95,14 +87,10 @@ export default function SettingsPage() {
               </div>
             </div>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Notificações */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <div>
           <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-linear-to-br from-green-500 to-green-600 flex items-center justify-center">
@@ -193,14 +181,10 @@ export default function SettingsPage() {
               </div>
             </div>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Segurança */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
+        <div>
           <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-linear-to-br from-red-500 to-red-600 flex items-center justify-center">
@@ -244,7 +228,7 @@ export default function SettingsPage() {
               </Button>
             </div>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { motion } from 'framer-motion';
+
 import {
   Grid3x2,
   Grid3x3,
@@ -52,7 +52,7 @@ export function ItemsGrid<T extends { id: string }>({
   renderListItem,
   emptyMessage = 'Nenhum item encontrado',
   defaultView = 'grid',
-  isSearching = false,
+  isSearching: _isSearching = false,
   selectedIds = new Set(),
   onItemClick,
   onItemDoubleClick,
@@ -329,21 +329,13 @@ export function ItemsGrid<T extends { id: string }>({
       >
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, y: 20 },
-                    animate: { opacity: 1, y: 0 },
-                    transition: { delay: index * 0.05 },
-                  };
+            {items.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 
               return (
                 <ItemContextMenu key={item.id} {...contextHandlers}>
-                  <ItemWrapper
+                  <div
                     data-item-card
                     ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
                     onClick={(e: React.MouseEvent) => {
@@ -354,31 +346,22 @@ export function ItemsGrid<T extends { id: string }>({
                       e.stopPropagation();
                       handleItemDoubleClick(item.id, e);
                     }}
-                    {...animationProps}
                   >
                     {renderGridItem(item, isSelected)}
-                  </ItemWrapper>
+                  </div>
                 </ItemContextMenu>
               );
             })}
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, x: -20 },
-                    animate: { opacity: 1, x: 0 },
-                    transition: { delay: index * 0.03 },
-                  };
+            {items.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 
               return (
                 <ItemContextMenu key={item.id} {...contextHandlers}>
-                  <ItemWrapper
+                  <div
                     data-item-card
                     ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
                     onClick={(e: React.MouseEvent) => {
@@ -389,10 +372,9 @@ export function ItemsGrid<T extends { id: string }>({
                       e.stopPropagation();
                       handleItemDoubleClick(item.id, e);
                     }}
-                    {...animationProps}
                   >
                     {renderListItem(item, isSelected)}
-                  </ItemWrapper>
+                  </div>
                 </ItemContextMenu>
               );
             })}

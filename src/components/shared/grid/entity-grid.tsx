@@ -8,7 +8,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { motion } from 'framer-motion';
+
 import { Grid3x3, List } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EntityContextMenu } from '../context-menu/entity-context-menu';
@@ -315,21 +315,13 @@ export function EntityGrid<T extends { id: string }>({
       >
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, y: 20 },
-                    animate: { opacity: 1, y: 0 },
-                    transition: { delay: index * 0.05 },
-                  };
+            {items.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 
               return (
                 <EntityContextMenu key={item.id} {...contextHandlers}>
-                  <ItemWrapper
+                  <div
                     data-item-card
                     ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
                     onClick={(e: React.MouseEvent) => {
@@ -340,31 +332,22 @@ export function EntityGrid<T extends { id: string }>({
                       e.stopPropagation();
                       handleItemDoubleClick(item.id, e);
                     }}
-                    {...animationProps}
                   >
                     {renderGridItem(item, isSelected)}
-                  </ItemWrapper>
+                  </div>
                 </EntityContextMenu>
               );
             })}
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item, index) => {
-              const ItemWrapper = isSearching ? 'div' : motion.div;
-              const animationProps = isSearching
-                ? {}
-                : {
-                    initial: { opacity: 0, x: -20 },
-                    animate: { opacity: 1, x: 0 },
-                    transition: { delay: index * 0.03 },
-                  };
+            {items.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 
               return (
                 <EntityContextMenu key={item.id} {...contextHandlers}>
-                  <ItemWrapper
+                  <div
                     data-item-card
                     ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
                     onClick={(e: React.MouseEvent) => {
@@ -375,10 +358,9 @@ export function EntityGrid<T extends { id: string }>({
                       e.stopPropagation();
                       handleItemDoubleClick(item.id, e);
                     }}
-                    {...animationProps}
                   >
                     {renderListItem(item, isSelected)}
-                  </ItemWrapper>
+                  </div>
                 </EntityContextMenu>
               );
             })}

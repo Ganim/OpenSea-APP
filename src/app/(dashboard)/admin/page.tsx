@@ -15,7 +15,7 @@ import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import { usersService } from '@/services/auth/users.service';
 import { listPermissionGroups } from '@/services/rbac/rbac.service';
-import { motion } from 'framer-motion';
+
 import {
   ArrowRight,
   History,
@@ -137,11 +137,7 @@ export default function AdminLandingPage() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/10 rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
@@ -165,21 +161,14 @@ export default function AdminLandingPage() {
             </p>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Stats Row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
+      <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stats.map((stat, index) => (
-            <motion.div
+          {stats.map((stat) => (
+            <div
               key={stat.countKey}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 + index * 0.05 }}
             >
               <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
                 <div className="flex items-center gap-4">
@@ -205,31 +194,21 @@ export default function AdminLandingPage() {
                   </div>
                 </div>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Navigation Cards */}
       {visibleNavCards.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
+        <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             Navegação
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleNavCards.map((card, cardIndex) => (
-              <motion.div
+            {visibleNavCards.map((card) => (
+              <div
                 key={card.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.5,
-                  delay: 0.35 + cardIndex * 0.05,
-                }}
               >
                 <Link href={card.href}>
                   <Card
@@ -259,10 +238,10 @@ export default function AdminLandingPage() {
                     </div>
                   </Card>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

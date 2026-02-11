@@ -139,27 +139,24 @@ export function NavigationMenu({
     const styles = {
       primary: {
         button:
-          'bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10 hover:scale-105 hover:bg-white/80 dark:hover:bg-white/10 hover:shadow-xl cursor-pointer',
+          'bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 hover:shadow-xl cursor-pointer',
         icon: 'bg-linear-to-br from-blue-500 to-purple-600',
         label: 'text-gray-900 dark:text-white',
         badge: 'bg-blue-500 text-white',
-        hover: { scale: 1.1, rotate: 5 },
       },
       alert: {
         button:
-          'bg-white/50 dark:bg-white/5 border-red-200/50 dark:border-red-500/20 hover:scale-105 hover:bg-red-50/80 dark:hover:bg-red-500/10 hover:shadow-xl cursor-pointer',
+          'bg-white/50 dark:bg-white/5 border-red-200/50 dark:border-red-500/20 hover:bg-red-50/80 dark:hover:bg-red-500/10 hover:shadow-xl cursor-pointer',
         icon: 'bg-linear-to-br from-red-500 to-orange-600',
         label: 'text-gray-900 dark:text-white',
         badge: 'bg-red-500 text-white',
-        hover: { scale: 1.1, rotate: 5 },
       },
       new: {
         button:
-          'bg-white/50 dark:bg-white/5 border-green-200/50 dark:border-green-500/20 hover:scale-105 hover:bg-green-50/80 dark:hover:bg-green-500/10 hover:shadow-xl cursor-pointer',
+          'bg-white/50 dark:bg-white/5 border-green-200/50 dark:border-green-500/20 hover:bg-green-50/80 dark:hover:bg-green-500/10 hover:shadow-xl cursor-pointer',
         icon: 'bg-linear-to-br from-green-500 to-emerald-600',
         label: 'text-gray-900 dark:text-white',
         badge: 'bg-green-500 text-white',
-        hover: { scale: 1.1, rotate: 5 },
       },
       inactive: {
         button:
@@ -167,7 +164,6 @@ export function NavigationMenu({
         icon: 'bg-gray-400 dark:bg-gray-600 dark:text-gray-300',
         label: 'text-gray-500 dark:text-gray-600',
         badge: 'bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300',
-        hover: {},
       },
     };
 
@@ -253,18 +249,11 @@ export function NavigationMenu({
                       const isDisabled = variant === 'inactive';
 
                       return (
-                        <motion.button
+                        <button
                           key={item.id}
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{
-                            duration: 0.2,
-                            delay: index * 0.03,
-                            ease: 'easeOut',
-                          }}
                           onClick={() => handleMenuItemClick(item)}
                           disabled={isDisabled}
-                          className={`group relative aspect-square rounded-2xl border p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 ${styles.button}`}
+                          className={`group relative aspect-square rounded-2xl border p-6 flex flex-col items-center justify-center gap-3 transition-colors duration-150 ${styles.button}`}
                         >
                           {/* Badge */}
                           {item.badge && (
@@ -276,13 +265,11 @@ export function NavigationMenu({
                           )}
 
                           {/* Icon */}
-                          <motion.div
-                            whileHover={styles.hover}
-                            transition={{ duration: 0.2 }}
+                          <div
                             className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg ${styles.icon}`}
                           >
                             {renderIcon(item.icon)}
-                          </motion.div>
+                          </div>
 
                           {/* Label */}
                           <span
@@ -297,7 +284,7 @@ export function NavigationMenu({
                             !isDisabled && (
                               <ChevronRight className="absolute bottom-3 right-3 w-4 h-4 text-gray-400" />
                             )}
-                        </motion.button>
+                        </button>
                       );
                     })}
                   </div>

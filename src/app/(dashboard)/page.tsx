@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
-import { motion } from 'framer-motion';
+
 import {
   ArrowRight,
   BarChart3,
@@ -93,11 +93,7 @@ export default function DashboardWelcomePage() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           {/* Background decorations */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
@@ -138,24 +134,17 @@ export default function DashboardWelcomePage() {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Quick Links */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Acesso Rápido
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickLinks.map((link, index) => (
-            <motion.div
+          {quickLinks.map((link) => (
+            <div
               key={link.href}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
             >
               <Link href={link.href}>
                 <Card
@@ -177,27 +166,20 @@ export default function DashboardWelcomePage() {
                   </div>
                 </Card>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Features Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           O que você pode fazer
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {features.map((feature, index) => (
-            <motion.div
+          {features.map((feature) => (
+            <div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
             >
               <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
                 <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 w-fit mb-4">
@@ -210,17 +192,13 @@ export default function DashboardWelcomePage() {
                   {feature.description}
                 </p>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Help Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-      >
+      <div>
         <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="p-3 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 shrink-0">
@@ -243,7 +221,7 @@ export default function DashboardWelcomePage() {
             </Link>
           </div>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

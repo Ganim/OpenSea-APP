@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
 import { useMyEmployee } from '@/hooks/use-me';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+
 import { Activity, Briefcase, ChevronRight, Shield, User } from 'lucide-react';
 import { useState } from 'react';
 
@@ -72,26 +72,19 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
           Minha Conta
         </h1>
         <p className="text-gray-600 dark:text-white/60">
           Gerencie suas informações pessoais, segurança e preferências
         </p>
-      </motion.div>
+      </div>
 
       {/* Main Content - Sidebar + Content */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Navigation */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+        <div
           className="lg:w-64 flex-shrink-0"
         >
           <Card className="p-2 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
@@ -145,13 +138,10 @@ export default function ProfilePage() {
               ))}
             </nav>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Content Area */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <div
           className="flex-1 min-w-0"
         >
           {activeTab === 'profile' && <ProfileTab user={user} />}
@@ -163,7 +153,7 @@ export default function ProfilePage() {
             />
           )}
           {activeTab === 'activity' && <ActivityTab />}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
