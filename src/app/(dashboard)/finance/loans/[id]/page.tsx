@@ -157,15 +157,15 @@ export default function LoanDetailPage({
         <h2 className="text-lg font-semibold mb-4">Resumo Financeiro</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Valor Principal</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Valor Principal
+            </p>
             <p className="text-2xl font-bold">
               {formatCurrency(loan.principalAmount)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-1">
-              Saldo Devedor
-            </p>
+            <p className="text-sm text-muted-foreground mb-1">Saldo Devedor</p>
             <p className="text-2xl font-bold text-orange-600">
               {formatCurrency(loan.outstandingBalance)}
             </p>
@@ -208,7 +208,9 @@ export default function LoanDetailPage({
             <p className="font-medium">{formatDate(loan.startDate)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Data de Término</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Data de Término
+            </p>
             <p className="font-medium">{formatDate(loan.endDate)}</p>
           </div>
           <div>
@@ -273,8 +275,11 @@ export default function LoanDetailPage({
                 </tr>
               </thead>
               <tbody>
-                {loan.installments.map((installment) => (
-                  <tr key={installment.id} className="border-b hover:bg-muted/50">
+                {loan.installments.map(installment => (
+                  <tr
+                    key={installment.id}
+                    className="border-b hover:bg-muted/50"
+                  >
                     <td className="p-2">{installment.installmentNumber}</td>
                     <td className="p-2">{formatDate(installment.dueDate)}</td>
                     <td className="text-right p-2">

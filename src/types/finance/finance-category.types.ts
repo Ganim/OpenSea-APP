@@ -40,8 +40,9 @@ export interface FinanceCategoriesQuery {
   parentId?: string;
 }
 
-export const FINANCE_CATEGORY_TYPE_LABELS: Record<FinanceCategoryType, string> = {
-  EXPENSE: 'Despesa',
-  REVENUE: 'Receita',
-  BOTH: 'Ambos',
-};
+export const FINANCE_CATEGORY_TYPE_LABELS: Record<FinanceCategoryType, string> =
+  {
+    EXPENSE: 'Despesa',
+    REVENUE: 'Receita',
+    BOTH: 'Ambos',
+  };

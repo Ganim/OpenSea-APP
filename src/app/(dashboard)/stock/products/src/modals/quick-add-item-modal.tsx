@@ -75,21 +75,20 @@ export function QuickAddItemModal({
     },
   });
 
-  // Get required item attributes from template
-  const requiredItemAttributes = useMemo(() => {
+  // Get ALL item attributes from template (required + optional)
+  const itemAttributes = useMemo(() => {
     if (!template?.itemAttributes) return [];
 
     const attrs = template.itemAttributes as Record<
       string,
       { required?: boolean; type?: string; label?: string }
     >;
-    return Object.entries(attrs)
-      .filter(([, config]) => config?.required)
-      .map(([key, config]) => ({
-        key,
-        label: config?.label || key,
-        type: config?.type || 'text',
-      }));
+    return Object.entries(attrs).map(([key, config]) => ({
+      key,
+      label: config?.label || key,
+      type: config?.type || 'text',
+      required: config?.required || false,
+    }));
   }, [template]);
 
   const resetForm = useCallback(() => {
@@ -199,17 +198,18 @@ export function QuickAddItemModal({
             </p>
           </div>
 
-          {/* Required Template Attributes */}
-          {requiredItemAttributes.length > 0 && (
+          {/* Template Item Attributes (required + optional) */}
+          {itemAttributes.length > 0 && (
             <div className="space-y-3">
               <Label className="text-sm font-medium">
                 Atributos do Template
               </Label>
               <div className="grid grid-cols-2 gap-3">
-                {requiredItemAttributes.map(attr => (
+                {itemAttributes.map(attr => (
                   <div key={attr.key} className="space-y-1.5">
                     <Label htmlFor={`attr-${attr.key}`} className="text-xs">
-                      {attr.label} *
+                      {attr.label}
+                      {attr.required ? ' *' : ''}
                     </Label>
                     <Input
                       id={`attr-${attr.key}`}
@@ -218,7 +218,7 @@ export function QuickAddItemModal({
                       onChange={e =>
                         handleAttributeChange(attr.key, e.target.value)
                       }
-                      required
+                      required={attr.required}
                     />
                   </div>
                 ))}

@@ -256,10 +256,14 @@ export function useEntityPage<T extends BaseEntity>(
       if (ids.length === 0) return;
 
       if (ids.length === 1) {
-        const item = items.find(i => i.id === ids[0]);
-        if (item) {
-          modals.setViewingItem(item);
-          modals.open('view');
+        if (viewRoute) {
+          router.push(viewRoute(ids[0]));
+        } else {
+          const item = items.find(i => i.id === ids[0]);
+          if (item) {
+            modals.setViewingItem(item);
+            modals.open('view');
+          }
         }
       } else {
         // Multi-view
@@ -267,7 +271,7 @@ export function useEntityPage<T extends BaseEntity>(
         modals.open('multiView');
       }
     },
-    [items, modals]
+    [items, modals, viewRoute, router]
   );
 
   const handleItemsEdit = useCallback(

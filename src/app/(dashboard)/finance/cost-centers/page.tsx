@@ -29,11 +29,7 @@ export default function CostCentersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -78,17 +74,23 @@ export default function CostCentersPage() {
                   <th className="text-left p-4 font-semibold">Nome</th>
                   <th className="text-left p-4 font-semibold">Empresa</th>
                   <th className="text-left p-4 font-semibold">Status</th>
-                  <th className="text-right p-4 font-semibold">Orçamento Mensal</th>
-                  <th className="text-right p-4 font-semibold">Orçamento Anual</th>
+                  <th className="text-right p-4 font-semibold">
+                    Orçamento Mensal
+                  </th>
+                  <th className="text-right p-4 font-semibold">
+                    Orçamento Anual
+                  </th>
                   <th className="text-left p-4 font-semibold">Criado em</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {costCenters.map((costCenter) => (
+                {costCenters.map(costCenter => (
                   <tr
                     key={costCenter.id}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => router.push(`/finance/cost-centers/${costCenter.id}`)}
+                    onClick={() =>
+                      router.push(`/finance/cost-centers/${costCenter.id}`)
+                    }
                   >
                     <td className="p-4 font-mono text-sm">{costCenter.code}</td>
                     <td className="p-4">{costCenter.name}</td>

@@ -2,11 +2,11 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  
+
   // Turbopack is enabled by default in Next.js 16+
   // Empty config silences webpack compatibility warning
   turbopack: {},
-  
+
   // Bundle Analyzer - Enable with ANALYZE=true npm run build
   webpack: (config, { isServer }) => {
     if (process.env.ANALYZE === 'true') {

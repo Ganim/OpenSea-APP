@@ -97,7 +97,7 @@ export default function LoansPage() {
                 </tr>
               </thead>
               <tbody>
-                {loans.map((loan) => (
+                {loans.map(loan => (
                   <tr
                     key={loan.id}
                     className="border-b hover:bg-muted/50 cursor-pointer"

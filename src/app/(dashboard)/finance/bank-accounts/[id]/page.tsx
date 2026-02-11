@@ -174,7 +174,9 @@ export default function BankAccountDetailPage({
           <h2 className="text-lg font-semibold mb-4">Dados PIX</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Tipo de Chave</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                Tipo de Chave
+              </p>
               <p className="font-medium">
                 {account.pixKeyType
                   ? PIX_KEY_TYPE_LABELS[account.pixKeyType]

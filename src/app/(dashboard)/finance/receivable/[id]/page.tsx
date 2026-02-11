@@ -188,7 +188,9 @@ export default function ReceivableDetailPage({
           </div>
           {entry.totalDue - entry.remainingBalance > 0 && (
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Valor Recebido</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                Valor Recebido
+              </p>
               <p className="text-xl font-bold text-green-600">
                 {formatCurrency(entry.totalDue - entry.remainingBalance)}
               </p>
@@ -202,7 +204,9 @@ export default function ReceivableDetailPage({
         <h2 className="text-lg font-semibold mb-4">Informações</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Data de Emissão</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Data de Emissão
+            </p>
             <p className="font-medium">{formatDate(entry.issueDate)}</p>
           </div>
           <div>
@@ -283,16 +287,22 @@ export default function ReceivableDetailPage({
             </h2>
           </div>
           <div className="space-y-3">
-            {entry.payments.map((payment) => (
+            {entry.payments.map(payment => (
               <div
                 key={payment.id}
                 className="flex items-center justify-between p-3 rounded-lg border"
               >
                 <div>
-                  <p className="font-medium">{formatCurrency(payment.amount)}</p>
+                  <p className="font-medium">
+                    {formatCurrency(payment.amount)}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(payment.paidAt)} •{' '}
-                    {payment.method ? PAYMENT_METHOD_LABELS[payment.method as keyof typeof PAYMENT_METHOD_LABELS] ?? payment.method : ''}
+                    {payment.method
+                      ? (PAYMENT_METHOD_LABELS[
+                          payment.method as keyof typeof PAYMENT_METHOD_LABELS
+                        ] ?? payment.method)
+                      : ''}
                   </p>
                 </div>
               </div>

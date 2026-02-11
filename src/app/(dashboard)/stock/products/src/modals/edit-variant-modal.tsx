@@ -1,5 +1,5 @@
 /**
- * QuickAddVariantModal - Overlay modal for quickly adding a variant
+ * EditVariantModal - Modal for editing an existing variant
  */
 
 'use client';
@@ -16,14 +16,15 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { variantsService } from '@/services/stock';
 import { useTemplate } from '@/hooks/stock/use-stock-other';
-import type { Product, CreateVariantRequest } from '@/types/stock';
+import type { Product, UpdateVariantRequest, Variant } from '@/types/stock';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { Loader2, Save } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-interface QuickAddVariantModalProps {
+interface EditVariantModalProps {
   product: Product | null;
+  variant: Variant | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -37,30 +38,49 @@ interface FormData {
   attributes: Record<string, string>;
 }
 
-const INITIAL_FORM: FormData = {
-  name: '',
-  reference: '',
-  outOfLine: false,
-  colorHex: '',
-  price: '',
-  attributes: {},
-};
-
-export function QuickAddVariantModal({
+export function EditVariantModal({
   product,
+  variant,
   open,
   onOpenChange,
-}: QuickAddVariantModalProps) {
+}: EditVariantModalProps) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    reference: '',
+    outOfLine: false,
+    colorHex: '',
+    price: '',
+    attributes: {},
+  });
 
-  // Fetch template for required variant attributes
+  // Fetch template for variant attributes
   const { data: template } = useTemplate(product?.templateId || '');
 
-  // Create variant mutation
-  const createVariantMutation = useMutation({
-    mutationFn: (data: CreateVariantRequest) =>
-      variantsService.createVariant(data),
+  // Populate form when variant changes
+  useEffect(() => {
+    if (variant && open) {
+      const attrs: Record<string, string> = {};
+      if (variant.attributes && typeof variant.attributes === 'object') {
+        for (const [key, value] of Object.entries(variant.attributes)) {
+          attrs[key] = value != null ? String(value) : '';
+        }
+      }
+      setFormData({
+        name: variant.name || '',
+        reference: variant.reference || '',
+        outOfLine: variant.outOfLine ?? false,
+        colorHex: variant.colorHex || '',
+        price: variant.price != null ? String(variant.price) : '',
+        attributes: attrs,
+      });
+    }
+  }, [variant, open]);
+
+  // Update variant mutation
+  const updateVariantMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateVariantRequest }) =>
+      variantsService.updateVariant(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['variants', 'by-product', product?.id],
@@ -69,12 +89,11 @@ export function QuickAddVariantModal({
       queryClient.invalidateQueries({
         queryKey: ['items', 'stats-by-variants', product?.id],
       });
-      toast.success('Variante criada com sucesso!');
-      resetForm();
+      toast.success('Variante atualizada com sucesso!');
       onOpenChange(false);
     },
     onError: (error: Error) => {
-      toast.error(`Erro ao criar variante: ${error.message}`);
+      toast.error(`Erro ao atualizar variante: ${error.message}`);
     },
   });
 
@@ -94,15 +113,11 @@ export function QuickAddVariantModal({
     }));
   }, [template]);
 
-  const resetForm = useCallback(() => {
-    setFormData(INITIAL_FORM);
-  }, []);
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!product?.id || !formData.name.trim()) {
+      if (!variant?.id || !formData.name.trim()) {
         toast.error('Preencha todos os campos obrigatórios');
         return;
       }
@@ -115,8 +130,7 @@ export function QuickAddVariantModal({
         return;
       }
 
-      const createData: CreateVariantRequest = {
-        productId: product.id,
+      const updateData: UpdateVariantRequest = {
         name: formData.name.trim(),
         reference: formData.reference.trim() || undefined,
         outOfLine: formData.outOfLine,
@@ -125,9 +139,9 @@ export function QuickAddVariantModal({
         attributes: formData.attributes,
       };
 
-      createVariantMutation.mutate(createData);
+      updateVariantMutation.mutate({ id: variant.id, data: updateData });
     },
-    [product, formData, createVariantMutation]
+    [variant, formData, updateVariantMutation]
   );
 
   const handleAttributeChange = useCallback((key: string, value: string) => {
@@ -141,30 +155,29 @@ export function QuickAddVariantModal({
   }, []);
 
   const handleClose = useCallback(() => {
-    resetForm();
     onOpenChange(false);
-  }, [resetForm, onOpenChange]);
+  }, [onOpenChange]);
 
-  if (!product) return null;
+  if (!product || !variant) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nova Variante</DialogTitle>
+          <DialogTitle>Editar Variante</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Adicionar variante para {product.name}
+            Editando {variant.name}
           </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nome */}
           <div className="space-y-1.5">
-            <Label htmlFor="variant-name">
+            <Label htmlFor="edit-variant-name">
               Nome da Variante <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="variant-name"
+              id="edit-variant-name"
               placeholder="Ex: Azul P, 100ml, etc."
               value={formData.name}
               onChange={e =>
@@ -178,9 +191,9 @@ export function QuickAddVariantModal({
           {/* Referência e Preço */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="variant-reference">Referência</Label>
+              <Label htmlFor="edit-variant-reference">Referência</Label>
               <Input
-                id="variant-reference"
+                id="edit-variant-reference"
                 placeholder="Opcional"
                 value={formData.reference}
                 onChange={e =>
@@ -193,9 +206,9 @@ export function QuickAddVariantModal({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="variant-price">Preço de Venda (R$)</Label>
+              <Label htmlFor="edit-variant-price">Preço de Venda (R$)</Label>
               <Input
-                id="variant-price"
+                id="edit-variant-price"
                 type="text"
                 inputMode="decimal"
                 placeholder="0,00"
@@ -209,10 +222,10 @@ export function QuickAddVariantModal({
 
           {/* Cor de Exibição */}
           <div className="space-y-1.5">
-            <Label htmlFor="variant-color">Cor de Exibição</Label>
+            <Label htmlFor="edit-variant-color">Cor de Exibição</Label>
             <div className="flex items-center gap-3">
               <input
-                id="variant-color"
+                id="edit-variant-color"
                 type="color"
                 value={formData.colorHex || '#000000'}
                 onChange={e =>
@@ -249,7 +262,7 @@ export function QuickAddVariantModal({
           <div className="flex items-center justify-between p-3 rounded-lg border">
             <div className="space-y-0.5">
               <Label
-                htmlFor="variant-outOfLine"
+                htmlFor="edit-variant-outOfLine"
                 className="text-sm font-medium"
               >
                 Fora de Linha
@@ -259,7 +272,7 @@ export function QuickAddVariantModal({
               </p>
             </div>
             <Switch
-              id="variant-outOfLine"
+              id="edit-variant-outOfLine"
               checked={formData.outOfLine}
               onCheckedChange={checked =>
                 setFormData(prev => ({ ...prev, outOfLine: checked }))
@@ -276,14 +289,17 @@ export function QuickAddVariantModal({
               <div className="grid grid-cols-2 gap-3">
                 {variantAttributes.map(attr => (
                   <div key={attr.key} className="space-y-1.5">
-                    <Label htmlFor={`attr-${attr.key}`} className="text-xs">
+                    <Label
+                      htmlFor={`edit-attr-${attr.key}`}
+                      className="text-xs"
+                    >
                       {attr.label}
                       {attr.required && (
                         <span className="text-red-500"> *</span>
                       )}
                     </Label>
                     <Input
-                      id={`attr-${attr.key}`}
+                      id={`edit-attr-${attr.key}`}
                       placeholder={attr.label}
                       value={formData.attributes[attr.key] || ''}
                       onChange={e =>
@@ -309,17 +325,17 @@ export function QuickAddVariantModal({
             <Button
               type="submit"
               className="flex-1"
-              disabled={createVariantMutation.isPending}
+              disabled={updateVariantMutation.isPending}
             >
-              {createVariantMutation.isPending ? (
+              {updateVariantMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Criando...
+                  Salvando...
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Variante
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
                 </>
               )}
             </Button>

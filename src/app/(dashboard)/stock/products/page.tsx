@@ -33,7 +33,6 @@ import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsService } from '@/services/stock';
 import type { Item, Product, UpdateProductRequest } from '@/types/stock';
 import {
-  Copy,
   ExternalLink,
   Factory,
   Blocks,
@@ -340,10 +339,6 @@ function ProductsPageContent() {
     page.handlers.handleItemsEdit(ids);
   };
 
-  const handleContextDuplicate = (ids: string[]) => {
-    page.handlers.handleItemsDuplicate(ids);
-  };
-
   const handleContextDelete = (ids: string[]) => {
     page.modals.setItemsToDelete(ids);
     page.modals.open('delete');
@@ -437,12 +432,6 @@ function ProductsPageContent() {
             hidden: ids => ids.length > 1,
           },
           {
-            id: 'duplicate',
-            label: 'Duplicar',
-            icon: Copy,
-            onClick: handleContextDuplicate,
-          },
-          {
             id: 'assign-category',
             label: 'Atribuir Categoria',
             icon: Tag,
@@ -476,7 +465,7 @@ function ProductsPageContent() {
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
             ...(item.outOfLine
-              ? [{ label: 'Fora de Linha', variant: 'destructive' as const }]
+              ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
             ...(item.status !== 'ACTIVE'
               ? [
@@ -531,12 +520,6 @@ function ProductsPageContent() {
             hidden: ids => ids.length > 1,
           },
           {
-            id: 'duplicate',
-            label: 'Duplicar',
-            icon: Copy,
-            onClick: handleContextDuplicate,
-          },
-          {
             id: 'assign-category',
             label: 'Atribuir Categoria',
             icon: Tag,
@@ -570,7 +553,7 @@ function ProductsPageContent() {
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
             ...(item.outOfLine
-              ? [{ label: 'Fora de Linha', variant: 'destructive' as const }]
+              ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
             ...(item.status !== 'ACTIVE'
               ? [
@@ -774,13 +757,12 @@ function ProductsPageContent() {
             defaultActions={{
               view: true,
               edit: true,
-              duplicate: true,
+              duplicate: false,
               delete: true,
             }}
             handlers={{
               onView: page.handlers.handleItemsView,
               onEdit: page.handlers.handleItemsEdit,
-              onDuplicate: page.handlers.handleItemsDuplicate,
               onDelete: page.handlers.handleItemsDelete,
             }}
           />
@@ -843,22 +825,6 @@ function ProductsPageContent() {
           cancelLabel="Cancelar"
           variant="destructive"
           isLoading={crud.isDeleting}
-        />
-
-        {/* Duplicate Confirmation */}
-        <ConfirmDialog
-          open={page.modals.isOpen('duplicate')}
-          onOpenChange={open => !open && page.modals.close('duplicate')}
-          title="Duplicar Produto"
-          description={
-            page.modals.itemsToDuplicate.length === 1
-              ? 'Tem certeza que deseja duplicar este produto?'
-              : `Tem certeza que deseja duplicar ${page.modals.itemsToDuplicate.length} produtos?`
-          }
-          onConfirm={page.handlers.handleDuplicateConfirm}
-          confirmLabel="Duplicar"
-          cancelLabel="Cancelar"
-          isLoading={crud.isDuplicating}
         />
 
         {/* Rename Product Modal */}

@@ -91,7 +91,7 @@ export default function ConsortiaPage() {
                 </tr>
               </thead>
               <tbody>
-                {consortia.map((consortium) => (
+                {consortia.map(consortium => (
                   <tr
                     key={consortium.id}
                     className="border-b hover:bg-muted/50 cursor-pointer"

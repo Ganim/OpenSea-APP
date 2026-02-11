@@ -71,7 +71,7 @@ export default function NewCostCenterPage() {
                 id="code"
                 required
                 value={formData.code}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, code: e.target.value })
                 }
               />
@@ -83,7 +83,7 @@ export default function NewCostCenterPage() {
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -94,7 +94,7 @@ export default function NewCostCenterPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, description: e.target.value })
                 }
                 rows={3}
@@ -108,7 +108,7 @@ export default function NewCostCenterPage() {
                 type="number"
                 step="0.01"
                 value={formData.monthlyBudget}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     monthlyBudget: parseFloat(e.target.value) || 0,
@@ -124,7 +124,7 @@ export default function NewCostCenterPage() {
                 type="number"
                 step="0.01"
                 value={formData.annualBudget}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     annualBudget: parseFloat(e.target.value) || 0,
@@ -139,7 +139,7 @@ export default function NewCostCenterPage() {
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, isActive: e.target.checked })
                   }
                   className="h-4 w-4"

@@ -49,11 +49,7 @@ export default function ReceivablePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -97,19 +93,25 @@ export default function ReceivablePage() {
                   <th className="text-left p-4 font-semibold">Código</th>
                   <th className="text-left p-4 font-semibold">Descrição</th>
                   <th className="text-left p-4 font-semibold">Categoria</th>
-                  <th className="text-left p-4 font-semibold">Centro de Custo</th>
+                  <th className="text-left p-4 font-semibold">
+                    Centro de Custo
+                  </th>
                   <th className="text-left p-4 font-semibold">Cliente</th>
-                  <th className="text-right p-4 font-semibold">Valor Esperado</th>
+                  <th className="text-right p-4 font-semibold">
+                    Valor Esperado
+                  </th>
                   <th className="text-left p-4 font-semibold">Vencimento</th>
                   <th className="text-left p-4 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {entries.map((entry) => (
+                {entries.map(entry => (
                   <tr
                     key={entry.id}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => router.push(`/finance/receivable/${entry.id}`)}
+                    onClick={() =>
+                      router.push(`/finance/receivable/${entry.id}`)
+                    }
                   >
                     <td className="p-4 font-mono text-sm">{entry.code}</td>
                     <td className="p-4">
@@ -121,14 +123,14 @@ export default function ReceivablePage() {
                       )}
                     </td>
                     <td className="p-4 text-sm">{entry.categoryName || '—'}</td>
-                    <td className="p-4 text-sm">{entry.costCenterName || '—'}</td>
+                    <td className="p-4 text-sm">
+                      {entry.costCenterName || '—'}
+                    </td>
                     <td className="p-4 text-sm">{entry.customerName || '—'}</td>
                     <td className="p-4 text-right font-mono text-sm">
                       {formatCurrency(entry.expectedAmount)}
                     </td>
-                    <td className="p-4 text-sm">
-                      {formatDate(entry.dueDate)}
-                    </td>
+                    <td className="p-4 text-sm">{formatDate(entry.dueDate)}</td>
                     <td className="p-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(entry.status)}`}

@@ -364,18 +364,18 @@ export default function EditProductPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-cyan-500">
               <Package className="h-8 w-8 text-white" />
             </div>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold ">
+                <h1 className="text-2xl font-bold">
                   {product.template?.name} {product.name}
                 </h1>
                 {product.outOfLine && (
-                  <span className="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-md">
+                  <span className="px-2 py-1 text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-md">
                     Fora de Linha
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-muted-foreground">
                 {product.manufacturer
                   ? product.manufacturer?.name
                   : 'Fabricante não informado'}

@@ -76,7 +76,10 @@ export default function NewReceivablePage() {
         issueDate: formData.issueDate,
         dueDate: formData.dueDate,
         customerName: formData.customerName || undefined,
-        recurrenceType: formData.recurrenceType as 'SINGLE' | 'RECURRING' | 'INSTALLMENT',
+        recurrenceType: formData.recurrenceType as
+          | 'SINGLE'
+          | 'RECURRING'
+          | 'INSTALLMENT',
         notes: formData.notes || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
       });
@@ -96,7 +99,7 @@ export default function NewReceivablePage() {
   const removeTag = (tag: string) => {
     setFormData({
       ...formData,
-      tags: formData.tags.filter((t) => t !== tag),
+      tags: formData.tags.filter(t => t !== tag),
     });
   };
 
@@ -125,7 +128,7 @@ export default function NewReceivablePage() {
                 id="description"
                 required
                 value={formData.description}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, description: e.target.value })
                 }
               />
@@ -135,7 +138,7 @@ export default function NewReceivablePage() {
               <Label htmlFor="categoryId">Categoria *</Label>
               <Select
                 value={formData.categoryId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, categoryId: value })
                 }
                 required
@@ -144,7 +147,7 @@ export default function NewReceivablePage() {
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
+                  {categories.map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
                     </SelectItem>
@@ -157,7 +160,7 @@ export default function NewReceivablePage() {
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, costCenterId: value })
                 }
                 required
@@ -166,7 +169,7 @@ export default function NewReceivablePage() {
                   <SelectValue placeholder="Selecione um centro de custo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {costCenters.map((cc) => (
+                  {costCenters.map(cc => (
                     <SelectItem key={cc.id} value={cc.id}>
                       {cc.name}
                     </SelectItem>
@@ -179,7 +182,7 @@ export default function NewReceivablePage() {
               <Label htmlFor="bankAccountId">Conta Bancária</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, bankAccountId: value })
                 }
               >
@@ -187,7 +190,7 @@ export default function NewReceivablePage() {
                   <SelectValue placeholder="Selecione (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {bankAccounts.map((ba) => (
+                  {bankAccounts.map(ba => (
                     <SelectItem key={ba.id} value={ba.id}>
                       {ba.name}
                     </SelectItem>
@@ -201,7 +204,7 @@ export default function NewReceivablePage() {
               <Input
                 id="customerName"
                 value={formData.customerName}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, customerName: e.target.value })
                 }
               />
@@ -215,7 +218,7 @@ export default function NewReceivablePage() {
                 step="0.01"
                 required
                 value={formData.expectedAmount}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     expectedAmount: parseFloat(e.target.value) || 0,
@@ -231,7 +234,7 @@ export default function NewReceivablePage() {
                 type="number"
                 step="0.01"
                 value={formData.discount}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     discount: parseFloat(e.target.value) || 0,
@@ -247,7 +250,7 @@ export default function NewReceivablePage() {
                 type="number"
                 step="0.01"
                 value={formData.interest}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     interest: parseFloat(e.target.value) || 0,
@@ -263,7 +266,7 @@ export default function NewReceivablePage() {
                 type="number"
                 step="0.01"
                 value={formData.penalty}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     penalty: parseFloat(e.target.value) || 0,
@@ -279,7 +282,7 @@ export default function NewReceivablePage() {
                 type="date"
                 required
                 value={formData.issueDate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, issueDate: e.target.value })
                 }
               />
@@ -292,7 +295,7 @@ export default function NewReceivablePage() {
                 type="date"
                 required
                 value={formData.dueDate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, dueDate: e.target.value })
                 }
               />
@@ -302,7 +305,7 @@ export default function NewReceivablePage() {
               <Label htmlFor="recurrenceType">Recorrência</Label>
               <Select
                 value={formData.recurrenceType}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, recurrenceType: value })
                 }
               >
@@ -326,7 +329,7 @@ export default function NewReceivablePage() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={3}
@@ -339,8 +342,8 @@ export default function NewReceivablePage() {
                 <Input
                   id="tags"
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addTag();
@@ -353,7 +356,7 @@ export default function NewReceivablePage() {
               </div>
               {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.tags.map((tag) => (
+                  {formData.tags.map(tag => (
                     <span
                       key={tag}
                       className="bg-secondary px-2 py-1 rounded text-sm flex items-center gap-1"

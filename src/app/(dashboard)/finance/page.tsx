@@ -196,16 +196,33 @@ export default function FinanceLandingPage() {
 
   useEffect(() => {
     async function fetchCounts() {
-      const [payable, receivable, overdue, bankAccounts, costCenters, loans, consortia] =
-        await Promise.allSettled([
-          financeEntriesService.list({ type: 'PAYABLE', status: 'PENDING', page: 1, perPage: 1 }),
-          financeEntriesService.list({ type: 'RECEIVABLE', status: 'PENDING', page: 1, perPage: 1 }),
-          financeEntriesService.list({ isOverdue: true, page: 1, perPage: 1 }),
-          bankAccountsService.list({ page: 1, perPage: 1 }),
-          costCentersService.list({ page: 1, perPage: 1 }),
-          loansService.list({ page: 1, perPage: 1 }),
-          consortiaService.list({ page: 1, perPage: 1 }),
-        ]);
+      const [
+        payable,
+        receivable,
+        overdue,
+        bankAccounts,
+        costCenters,
+        loans,
+        consortia,
+      ] = await Promise.allSettled([
+        financeEntriesService.list({
+          type: 'PAYABLE',
+          status: 'PENDING',
+          page: 1,
+          perPage: 1,
+        }),
+        financeEntriesService.list({
+          type: 'RECEIVABLE',
+          status: 'PENDING',
+          page: 1,
+          perPage: 1,
+        }),
+        financeEntriesService.list({ isOverdue: true, page: 1, perPage: 1 }),
+        bankAccountsService.list({ page: 1, perPage: 1 }),
+        costCentersService.list({ page: 1, perPage: 1 }),
+        loansService.list({ page: 1, perPage: 1 }),
+        consortiaService.list({ page: 1, perPage: 1 }),
+      ]);
 
       setCounts({
         payable:
@@ -240,9 +257,7 @@ export default function FinanceLandingPage() {
             : null,
         loans:
           loans.status === 'fulfilled'
-            ? (loans.value.meta?.total ??
-              loans.value.loans?.length ??
-              null)
+            ? (loans.value.meta?.total ?? loans.value.loans?.length ?? null)
             : null,
         consortia:
           consortia.status === 'fulfilled'
@@ -283,7 +298,8 @@ export default function FinanceLandingPage() {
             </h1>
 
             <p className="text-lg text-gray-600 dark:text-white/60">
-              Gerencie contas a pagar, receber, fluxo de caixa, empréstimos e consórcios da sua empresa.
+              Gerencie contas a pagar, receber, fluxo de caixa, empréstimos e
+              consórcios da sua empresa.
             </p>
           </div>
         </Card>
@@ -374,12 +390,15 @@ function CountBadge({
 
   if (count === null || count === undefined) return null;
 
-  const bgClass = variant === 'alert'
-    ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
-    : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/70';
+  const bgClass =
+    variant === 'alert'
+      ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
+      : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/70';
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgClass}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgClass}`}
+    >
       {count.toLocaleString('pt-BR')}
     </span>
   );

@@ -1,4 +1,11 @@
-export type BankAccountType = 'CHECKING' | 'SAVINGS' | 'SALARY' | 'PAYMENT' | 'INVESTMENT' | 'DIGITAL' | 'OTHER';
+export type BankAccountType =
+  | 'CHECKING'
+  | 'SAVINGS'
+  | 'SALARY'
+  | 'PAYMENT'
+  | 'INVESTMENT'
+  | 'DIGITAL'
+  | 'OTHER';
 export type BankAccountStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';
 export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
 
@@ -43,7 +50,9 @@ export interface CreateBankAccountData {
   isDefault?: boolean;
 }
 
-export type UpdateBankAccountData = Partial<Omit<CreateBankAccountData, 'companyId'>>;
+export type UpdateBankAccountData = Partial<
+  Omit<CreateBankAccountData, 'companyId'>
+>;
 
 export interface BankAccountsQuery {
   page?: number;

@@ -77,7 +77,7 @@ export default function NewFinanceCategoryPage() {
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -87,8 +87,11 @@ export default function NewFinanceCategoryPage() {
               <Label htmlFor="type">Tipo *</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: any) =>
-                  setFormData({ ...formData, type: value })
+                onValueChange={(value: string) =>
+                  setFormData({
+                    ...formData,
+                    type: value as typeof formData.type,
+                  })
                 }
               >
                 <SelectTrigger id="type">
@@ -111,7 +114,7 @@ export default function NewFinanceCategoryPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, description: e.target.value })
                 }
                 rows={3}
@@ -124,7 +127,7 @@ export default function NewFinanceCategoryPage() {
                 id="displayOrder"
                 type="number"
                 value={formData.displayOrder}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     displayOrder: parseInt(e.target.value) || 0,
@@ -139,7 +142,7 @@ export default function NewFinanceCategoryPage() {
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, isActive: e.target.checked })
                   }
                   className="h-4 w-4"

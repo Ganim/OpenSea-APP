@@ -57,7 +57,9 @@ export function showValidationErrors(errors: Record<string, string>): void {
 export function buildDefaultValues<T extends BaseEntity>(
   initialData: Partial<T> | undefined,
   config: EntityFormConfig<T>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const values: any = { ...(initialData || {}) };
   const allFields = config.sections?.flatMap(s => s.fields) || [];
 

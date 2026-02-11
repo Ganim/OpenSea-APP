@@ -100,7 +100,7 @@ export default function NewConsortiumPage() {
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -112,7 +112,7 @@ export default function NewConsortiumPage() {
                 id="administrator"
                 required
                 value={formData.administrator}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, administrator: e.target.value })
                 }
               />
@@ -122,7 +122,7 @@ export default function NewConsortiumPage() {
               <Label htmlFor="bankAccountId">Conta Bancária *</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, bankAccountId: value })
                 }
                 required
@@ -131,7 +131,7 @@ export default function NewConsortiumPage() {
                   <SelectValue placeholder="Selecione uma conta" />
                 </SelectTrigger>
                 <SelectContent>
-                  {bankAccounts.map((ba) => (
+                  {bankAccounts.map(ba => (
                     <SelectItem key={ba.id} value={ba.id}>
                       {ba.name}
                     </SelectItem>
@@ -144,7 +144,7 @@ export default function NewConsortiumPage() {
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, costCenterId: value })
                 }
                 required
@@ -153,7 +153,7 @@ export default function NewConsortiumPage() {
                   <SelectValue placeholder="Selecione um centro de custo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {costCenters.map((cc) => (
+                  {costCenters.map(cc => (
                     <SelectItem key={cc.id} value={cc.id}>
                       {cc.name}
                     </SelectItem>
@@ -167,7 +167,7 @@ export default function NewConsortiumPage() {
               <Input
                 id="groupNumber"
                 value={formData.groupNumber}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, groupNumber: e.target.value })
                 }
               />
@@ -178,7 +178,7 @@ export default function NewConsortiumPage() {
               <Input
                 id="quotaNumber"
                 value={formData.quotaNumber}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, quotaNumber: e.target.value })
                 }
               />
@@ -192,7 +192,7 @@ export default function NewConsortiumPage() {
                 step="0.01"
                 required
                 value={formData.creditValue}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     creditValue: parseFloat(e.target.value) || 0,
@@ -209,7 +209,7 @@ export default function NewConsortiumPage() {
                 step="0.01"
                 required
                 value={formData.monthlyPayment}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     monthlyPayment: parseFloat(e.target.value) || 0,
@@ -226,7 +226,7 @@ export default function NewConsortiumPage() {
                 required
                 min="1"
                 value={formData.totalInstallments}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     totalInstallments: parseInt(e.target.value) || 1,
@@ -244,7 +244,7 @@ export default function NewConsortiumPage() {
                 min="1"
                 max="31"
                 value={formData.paymentDay}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     paymentDay: parseInt(e.target.value) || 1,
@@ -260,7 +260,7 @@ export default function NewConsortiumPage() {
                 type="date"
                 required
                 value={formData.startDate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, startDate: e.target.value })
                 }
               />
@@ -271,7 +271,7 @@ export default function NewConsortiumPage() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={3}

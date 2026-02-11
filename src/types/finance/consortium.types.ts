@@ -1,6 +1,11 @@
 import type { FinanceEntryStatus } from './finance-entry.types';
 
-export type ConsortiumStatus = 'ACTIVE' | 'CONTEMPLATED' | 'WITHDRAWN' | 'COMPLETED' | 'CANCELLED';
+export type ConsortiumStatus =
+  | 'ACTIVE'
+  | 'CONTEMPLATED'
+  | 'WITHDRAWN'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
 export interface Consortium {
   id: string;
@@ -62,7 +67,9 @@ export interface CreateConsortiumData {
   notes?: string;
 }
 
-export type UpdateConsortiumData = Partial<Omit<CreateConsortiumData, 'creditValue'>>;
+export type UpdateConsortiumData = Partial<
+  Omit<CreateConsortiumData, 'creditValue'>
+>;
 
 export interface PayConsortiumInstallmentData {
   bankAccountId?: string;

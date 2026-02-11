@@ -7,11 +7,7 @@
  */
 
 import { tagsService } from '@/services/stock';
-import type {
-    CreateTagRequest,
-    Tag,
-    UpdateTagRequest
-} from '@/types/stock';
+import type { CreateTagRequest, Tag, UpdateTagRequest } from '@/types/stock';
 import { createCrudHooks } from '../create-crud-hooks';
 
 // =============================================================================

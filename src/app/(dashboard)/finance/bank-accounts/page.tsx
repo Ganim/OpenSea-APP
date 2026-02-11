@@ -3,7 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useBankAccounts } from '@/hooks/finance';
-import { BANK_ACCOUNT_STATUS_LABELS, BANK_ACCOUNT_TYPE_LABELS } from '@/types/finance';
+import {
+  BANK_ACCOUNT_STATUS_LABELS,
+  BANK_ACCOUNT_TYPE_LABELS,
+} from '@/types/finance';
 import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -38,11 +41,7 @@ export default function BankAccountsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -94,14 +93,18 @@ export default function BankAccountsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {bankAccounts.map((account) => (
+                {bankAccounts.map(account => (
                   <tr
                     key={account.id}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => router.push(`/finance/bank-accounts/${account.id}`)}
+                    onClick={() =>
+                      router.push(`/finance/bank-accounts/${account.id}`)
+                    }
                   >
                     <td className="p-4 font-medium">{account.name}</td>
-                    <td className="p-4">{account.bankName || account.bankCode}</td>
+                    <td className="p-4">
+                      {account.bankName || account.bankCode}
+                    </td>
                     <td className="p-4 font-mono text-sm">
                       {account.agency}
                       {account.agencyDigit ? `-${account.agencyDigit}` : ''}

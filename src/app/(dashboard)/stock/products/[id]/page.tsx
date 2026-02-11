@@ -34,7 +34,7 @@ export default function ProductDetailPage() {
   });
 
   const { data: variants, isLoading: isLoadingVariants } = useQuery<Variant[]>({
-    queryKey: ['variants', 'product', productId],
+    queryKey: ['variants', 'by-product', productId],
     queryFn: async () => {
       const response = await variantsService.listVariants(productId);
       return response.variants;

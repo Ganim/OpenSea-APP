@@ -38,7 +38,9 @@ export interface EntityFormProps<T extends BaseEntity> {
 
 export interface RenderFieldProps<T extends BaseEntity> {
   field: EntityFormConfig<T>['sections'][0]['fields'][0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any; // react-hook-form Control
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any; // react-hook-form FieldErrors
   formValues: Partial<T>;
   sectionColumns?: number;

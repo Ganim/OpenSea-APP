@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * OpenSea OS - EntityFormField Component
  * Renderiza um campo individual do formulário

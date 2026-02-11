@@ -177,7 +177,11 @@ export function BinSelector({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className={cn('w-full justify-between font-normal', className)}
+          className={cn(
+            'w-full justify-between font-normal',
+            'bg-background border-input',
+            className
+          )}
         >
           {selectedBin ? (
             <div className="flex items-center gap-2 truncate">

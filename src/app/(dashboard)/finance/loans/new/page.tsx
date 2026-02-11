@@ -103,7 +103,7 @@ export default function NewLoanPage() {
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -113,7 +113,7 @@ export default function NewLoanPage() {
               <Label htmlFor="bankAccountId">Conta Bancária *</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, bankAccountId: value })
                 }
                 required
@@ -122,7 +122,7 @@ export default function NewLoanPage() {
                   <SelectValue placeholder="Selecione uma conta" />
                 </SelectTrigger>
                 <SelectContent>
-                  {bankAccounts.map((ba) => (
+                  {bankAccounts.map(ba => (
                     <SelectItem key={ba.id} value={ba.id}>
                       {ba.name}
                     </SelectItem>
@@ -135,7 +135,7 @@ export default function NewLoanPage() {
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, costCenterId: value })
                 }
                 required
@@ -144,7 +144,7 @@ export default function NewLoanPage() {
                   <SelectValue placeholder="Selecione um centro de custo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {costCenters.map((cc) => (
+                  {costCenters.map(cc => (
                     <SelectItem key={cc.id} value={cc.id}>
                       {cc.name}
                     </SelectItem>
@@ -157,8 +157,11 @@ export default function NewLoanPage() {
               <Label htmlFor="type">Tipo *</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: any) =>
-                  setFormData({ ...formData, type: value })
+                onValueChange={(value: string) =>
+                  setFormData({
+                    ...formData,
+                    type: value as typeof formData.type,
+                  })
                 }
               >
                 <SelectTrigger id="type">
@@ -179,7 +182,7 @@ export default function NewLoanPage() {
               <Input
                 id="contractNumber"
                 value={formData.contractNumber}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, contractNumber: e.target.value })
                 }
               />
@@ -193,7 +196,7 @@ export default function NewLoanPage() {
                 step="0.01"
                 required
                 value={formData.principalAmount}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     principalAmount: parseFloat(e.target.value) || 0,
@@ -210,7 +213,7 @@ export default function NewLoanPage() {
                 step="0.01"
                 required
                 value={formData.interestRate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     interestRate: parseFloat(e.target.value) || 0,
@@ -223,7 +226,7 @@ export default function NewLoanPage() {
               <Label htmlFor="interestType">Tipo de Juros *</Label>
               <Select
                 value={formData.interestType}
-                onValueChange={(value: any) =>
+                onValueChange={(value: string) =>
                   setFormData({ ...formData, interestType: value })
                 }
               >
@@ -244,7 +247,7 @@ export default function NewLoanPage() {
                 type="date"
                 required
                 value={formData.startDate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, startDate: e.target.value })
                 }
               />
@@ -257,7 +260,7 @@ export default function NewLoanPage() {
                 type="date"
                 required
                 value={formData.endDate}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, endDate: e.target.value })
                 }
               />
@@ -271,7 +274,7 @@ export default function NewLoanPage() {
                 required
                 min="1"
                 value={formData.totalInstallments}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     totalInstallments: parseInt(e.target.value) || 1,
@@ -289,7 +292,7 @@ export default function NewLoanPage() {
                 min="1"
                 max="31"
                 value={formData.installmentDay}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     installmentDay: parseInt(e.target.value) || 1,
@@ -303,7 +306,7 @@ export default function NewLoanPage() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows={3}

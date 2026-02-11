@@ -1,8 +1,19 @@
 import type { FinanceEntryStatus } from './finance-entry.types';
 
-export type LoanType = 'PERSONAL' | 'BUSINESS' | 'WORKING_CAPITAL'
-  | 'EQUIPMENT' | 'REAL_ESTATE' | 'CREDIT_LINE' | 'OTHER';
-export type LoanStatus = 'ACTIVE' | 'PAID_OFF' | 'DEFAULTED' | 'RENEGOTIATED' | 'CANCELLED';
+export type LoanType =
+  | 'PERSONAL'
+  | 'BUSINESS'
+  | 'WORKING_CAPITAL'
+  | 'EQUIPMENT'
+  | 'REAL_ESTATE'
+  | 'CREDIT_LINE'
+  | 'OTHER';
+export type LoanStatus =
+  | 'ACTIVE'
+  | 'PAID_OFF'
+  | 'DEFAULTED'
+  | 'RENEGOTIATED'
+  | 'CANCELLED';
 
 export interface Loan {
   id: string;

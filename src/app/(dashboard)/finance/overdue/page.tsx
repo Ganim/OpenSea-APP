@@ -34,7 +34,9 @@ export default function OverduePage() {
   const calculateDaysOverdue = (dueDate: string) => {
     const due = new Date(dueDate);
     const now = new Date();
-    const diff = Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+    const diff = Math.floor(
+      (now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)
+    );
     return diff > 0 ? diff : 0;
   };
 
@@ -66,11 +68,7 @@ export default function OverduePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -137,12 +135,14 @@ export default function OverduePage() {
                   </th>
                   <th className="text-right p-4 font-semibold">Valor</th>
                   <th className="text-left p-4 font-semibold">Vencimento</th>
-                  <th className="text-center p-4 font-semibold">Dias em Atraso</th>
+                  <th className="text-center p-4 font-semibold">
+                    Dias em Atraso
+                  </th>
                   <th className="text-left p-4 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {entries.map((entry) => {
+                {entries.map(entry => {
                   const daysOverdue = calculateDaysOverdue(entry.dueDate);
                   return (
                     <tr
@@ -156,7 +156,9 @@ export default function OverduePage() {
                       <td className="p-4">
                         <div className="font-medium">{entry.description}</div>
                       </td>
-                      <td className="p-4 text-sm">{entry.categoryName || '—'}</td>
+                      <td className="p-4 text-sm">
+                        {entry.categoryName || '—'}
+                      </td>
                       <td className="p-4 text-sm">
                         {currentTab === 'payable'
                           ? entry.supplierName || '—'

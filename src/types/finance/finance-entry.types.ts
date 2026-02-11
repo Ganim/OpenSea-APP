@@ -1,12 +1,35 @@
 export type FinanceEntryType = 'PAYABLE' | 'RECEIVABLE';
 export type FinanceEntryRecurrence = 'SINGLE' | 'RECURRING' | 'INSTALLMENT';
-export type FinanceEntryStatus = 'PENDING' | 'OVERDUE' | 'PAID' | 'RECEIVED'
-  | 'PARTIALLY_PAID' | 'CANCELLED' | 'SCHEDULED';
-export type RecurrenceUnit = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY'
-  | 'QUARTERLY' | 'SEMIANNUAL' | 'ANNUAL';
-export type PaymentMethod = 'PIX' | 'BOLETO' | 'TRANSFER' | 'CASH' | 'CHECK' | 'CARD';
-export type FinanceAttachmentType = 'BOLETO' | 'PAYMENT_RECEIPT' | 'INVOICE'
-  | 'CONTRACT' | 'BANK_STATEMENT' | 'OTHER';
+export type FinanceEntryStatus =
+  | 'PENDING'
+  | 'OVERDUE'
+  | 'PAID'
+  | 'RECEIVED'
+  | 'PARTIALLY_PAID'
+  | 'CANCELLED'
+  | 'SCHEDULED';
+export type RecurrenceUnit =
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'BIWEEKLY'
+  | 'MONTHLY'
+  | 'QUARTERLY'
+  | 'SEMIANNUAL'
+  | 'ANNUAL';
+export type PaymentMethod =
+  | 'PIX'
+  | 'BOLETO'
+  | 'TRANSFER'
+  | 'CASH'
+  | 'CHECK'
+  | 'CARD';
+export type FinanceAttachmentType =
+  | 'BOLETO'
+  | 'PAYMENT_RECEIPT'
+  | 'INVOICE'
+  | 'CONTRACT'
+  | 'BANK_STATEMENT'
+  | 'OTHER';
 export type OverdueRange = '1-7' | '8-30' | '31-60' | '60+';
 
 export interface FinanceEntry {

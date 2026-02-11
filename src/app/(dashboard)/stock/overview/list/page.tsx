@@ -37,7 +37,11 @@ import {
 import { Pagination } from '../../_shared/components/pagination';
 import { useItems } from '@/hooks/stock/use-items';
 import { useManufacturers, useTemplates } from '@/hooks/stock';
-import { formatQuantity, formatUnitOfMeasure, getUnitAbbreviation } from '@/helpers/formatters';
+import {
+  formatQuantity,
+  formatUnitOfMeasure,
+  getUnitAbbreviation,
+} from '@/helpers/formatters';
 import type { Item } from '@/types/stock';
 import type { Template, TemplateAttribute } from '@/types/stock';
 import { cn } from '@/lib/utils';
@@ -53,11 +57,15 @@ const OPTIONAL_FIXED_COLUMNS: FilterOption[] = [
   { id: COL_QUANTIDADE, label: 'Quantidade' },
 ];
 
-const DEFAULT_OPTIONAL_FIXED = [COL_FABRICANTE, COL_LOCALIZACAO, COL_QUANTIDADE];
+const DEFAULT_OPTIONAL_FIXED = [
+  COL_FABRICANTE,
+  COL_LOCALIZACAO,
+  COL_QUANTIDADE,
+];
 
 function resolveItemName(item: Item) {
   const parts = [item.templateName, item.productName, item.variantName].filter(
-    Boolean,
+    Boolean
   ) as string[];
   const name = parts.length > 0 ? parts.join(' ') : 'Item sem identificação';
   const sku = item.variantSku;
@@ -81,10 +89,10 @@ interface DynamicColumn {
 
 function buildDynamicColumns(
   items: Item[],
-  templates: Template[],
+  templates: Template[]
 ): DynamicColumn[] {
   const templateIds = new Set(
-    items.map((i) => i.templateId).filter(Boolean) as string[],
+    items.map(i => i.templateId).filter(Boolean) as string[]
   );
   const columns: DynamicColumn[] = [];
   const seen = new Set<string>();
@@ -114,10 +122,10 @@ function buildDynamicColumns(
 
 function getDefaultVisibleColumns(
   items: Item[],
-  templates: Template[],
+  templates: Template[]
 ): string[] {
   const templateIds = new Set(
-    items.map((i) => i.templateId).filter(Boolean) as string[],
+    items.map(i => i.templateId).filter(Boolean) as string[]
   );
   const visible = [...DEFAULT_OPTIONAL_FIXED];
   const seen = new Set<string>();
@@ -171,14 +179,17 @@ function buildGroupTable(groupItems: Item[], unitKey: string): string {
   const unitLabel = abbr || (unitKey === '_none' ? '' : unitKey);
 
   const rows = groupItems
-    .map((item) => {
+    .map(item => {
       const name = [item.templateName, item.productName, item.variantName]
         .filter(Boolean)
         .join(' ');
       const sku = item.variantSku ? ` - ${item.variantSku}` : '';
       const code = item.fullCode || item.uniqueCode || '';
       const loc =
-        item.bin?.address || item.resolvedAddress || item.lastKnownAddress || '';
+        item.bin?.address ||
+        item.resolvedAddress ||
+        item.lastKnownAddress ||
+        '';
       const qty = item.currentQuantity;
       const manufacturer = item.manufacturerName || '';
       return `<tr>
@@ -191,9 +202,9 @@ function buildGroupTable(groupItems: Item[], unitKey: string): string {
     })
     .join('');
 
-  const total = Math.round(
-    groupItems.reduce((s, i) => s + i.currentQuantity, 0) * 1000,
-  ) / 1000;
+  const total =
+    Math.round(groupItems.reduce((s, i) => s + i.currentQuantity, 0) * 1000) /
+    1000;
 
   return `<table>
   <thead><tr><th>Item</th><th>Código</th><th>Fabricante</th><th>Localização</th><th style="text-align:right">Quantidade</th></tr></thead>
@@ -259,7 +270,7 @@ export default function StockOverviewListPage() {
   const [search, setSearch] = useState('');
   const [visibleColumns, setVisibleColumns] = useState<string[] | null>(null);
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(
-    [],
+    []
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -273,18 +284,18 @@ export default function StockOverviewListPage() {
 
   const manufacturerOptions: FilterOption[] = useMemo(
     () =>
-      (manufacturersData?.manufacturers ?? []).map((m) => ({
+      (manufacturersData?.manufacturers ?? []).map(m => ({
         id: m.name,
         label: m.name,
       })),
-    [manufacturersData],
+    [manufacturersData]
   );
 
   // Client-side search filtering
   const searchedItems = useMemo(() => {
     if (!search.trim()) return allItems;
     const s = search.toLowerCase().trim();
-    return allItems.filter((item) => {
+    return allItems.filter(item => {
       const name = resolveItemName(item).toLowerCase();
       const code = (item.fullCode || item.uniqueCode || '').toLowerCase();
       const manufacturer = (item.manufacturerName || '').toLowerCase();
@@ -310,12 +321,12 @@ export default function StockOverviewListPage() {
     () =>
       selectedManufacturers.length === 0
         ? searchedItems
-        : searchedItems.filter((item) =>
+        : searchedItems.filter(item =>
             item.manufacturerName
               ? selectedManufacturers.includes(item.manufacturerName)
-              : false,
+              : false
           ),
-    [searchedItems, selectedManufacturers],
+    [searchedItems, selectedManufacturers]
   );
 
   // Client-side pagination
@@ -336,17 +347,17 @@ export default function StockOverviewListPage() {
       hasNext: page < totalPages,
       hasPrev: page > 1,
     }),
-    [totalFiltered, page, limit, totalPages],
+    [totalFiltered, page, limit, totalPages]
   );
 
   const dynamicColumns = useMemo(
     () => buildDynamicColumns(filteredItems, templates),
-    [filteredItems, templates],
+    [filteredItems, templates]
   );
 
   const defaultVisible = useMemo(
     () => getDefaultVisibleColumns(filteredItems, templates),
-    [filteredItems, templates],
+    [filteredItems, templates]
   );
 
   const activeColumns = visibleColumns ?? defaultVisible;
@@ -354,14 +365,14 @@ export default function StockOverviewListPage() {
   const columnOptions: FilterOption[] = useMemo(
     () => [
       ...OPTIONAL_FIXED_COLUMNS,
-      ...dynamicColumns.map((c) => ({ id: c.id, label: c.label })),
+      ...dynamicColumns.map(c => ({ id: c.id, label: c.label })),
     ],
-    [dynamicColumns],
+    [dynamicColumns]
   );
 
   const activeDynamicColumns = useMemo(
-    () => dynamicColumns.filter((c) => activeColumns.includes(c.id)),
-    [dynamicColumns, activeColumns],
+    () => dynamicColumns.filter(c => activeColumns.includes(c.id)),
+    [dynamicColumns, activeColumns]
   );
 
   const showFabricante = activeColumns.includes(COL_FABRICANTE);
@@ -374,7 +385,7 @@ export default function StockOverviewListPage() {
 
   // --- Selection ---
   const toggleSelection = useCallback((id: string) => {
-    setSelectedIds((prev) => {
+    setSelectedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -394,7 +405,7 @@ export default function StockOverviewListPage() {
         toggleSelection(item.id);
       }, 200);
     },
-    [toggleSelection],
+    [toggleSelection]
   );
 
   const handleRowDoubleClick = useCallback(
@@ -408,13 +419,13 @@ export default function StockOverviewListPage() {
         router.push(`/stock/products/${item.productId}`);
       }
     },
-    [router],
+    [router]
   );
 
   // --- Selection summary (search across all items, not just current page) ---
   const selectedItems = useMemo(
-    () => allItems.filter((i) => selectedIds.has(i.id)),
-    [allItems, selectedIds],
+    () => allItems.filter(i => selectedIds.has(i.id)),
+    [allItems, selectedIds]
   );
 
   const selectionSummary = useMemo(() => {
@@ -424,13 +435,10 @@ export default function StockOverviewListPage() {
     // Try to find common unit among selected items
     const units = new Set(
       selectedItems
-        .map((i) => i.templateUnitOfMeasure)
-        .filter(Boolean) as string[],
+        .map(i => i.templateUnitOfMeasure)
+        .filter(Boolean) as string[]
     );
-    const unitAbbr =
-      units.size === 1
-        ? getUnitAbbreviation([...units][0])
-        : '';
+    const unitAbbr = units.size === 1 ? getUnitAbbreviation([...units][0]) : '';
     return {
       count: selectedItems.length,
       total: rounded,
@@ -476,7 +484,7 @@ export default function StockOverviewListPage() {
             <SearchBar
               value={search}
               placeholder="Buscar por código, produto, variante ou atributos..."
-              onSearch={(value) => {
+              onSearch={value => {
                 setSearch(value);
                 setPage(1);
               }}
@@ -492,7 +500,7 @@ export default function StockOverviewListPage() {
                 icon={Factory}
                 options={manufacturerOptions}
                 selected={selectedManufacturers}
-                onSelectionChange={(value) => {
+                onSelectionChange={value => {
                   setSelectedManufacturers(value);
                   setPage(1);
                 }}
@@ -541,7 +549,7 @@ export default function StockOverviewListPage() {
                         {showQuantidade && (
                           <TableHead className="w-40">Quantidade</TableHead>
                         )}
-                        {activeDynamicColumns.map((col) => (
+                        {activeDynamicColumns.map(col => (
                           <TableHead key={col.id}>{col.label}</TableHead>
                         ))}
                       </TableRow>
@@ -559,9 +567,9 @@ export default function StockOverviewListPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        items.map((item) => {
+                        items.map(item => {
                           const unitAbbr = getUnitAbbreviation(
-                            item.templateUnitOfMeasure,
+                            item.templateUnitOfMeasure
                           );
                           const qtyLabel = unitAbbr
                             ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
@@ -580,7 +588,7 @@ export default function StockOverviewListPage() {
                                 isSelected &&
                                   'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15',
                                 !isSelected &&
-                                  'hover:bg-gray-50 dark:hover:bg-white/5',
+                                  'hover:bg-gray-50 dark:hover:bg-white/5'
                               )}
                               onClick={() => handleRowClick(item)}
                               onDoubleClick={() => handleRowDoubleClick(item)}
@@ -634,7 +642,7 @@ export default function StockOverviewListPage() {
                                     <Link
                                       href={`/stock/locations/${item.bin!.zone!.warehouseId}/zones/${item.bin!.zone!.id}?highlight=${item.bin!.id}`}
                                       className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                                      onClick={(e) => e.stopPropagation()}
+                                      onClick={e => e.stopPropagation()}
                                     >
                                       {item.bin!.address ||
                                         item.resolvedAddress ||
@@ -663,7 +671,7 @@ export default function StockOverviewListPage() {
                               )}
 
                               {/* Colunas dinâmicas */}
-                              {activeDynamicColumns.map((col) => (
+                              {activeDynamicColumns.map(col => (
                                 <TableCell key={col.id} className="text-sm">
                                   {getDynamicValue(item, col)}
                                 </TableCell>
@@ -679,7 +687,7 @@ export default function StockOverviewListPage() {
                 <Pagination
                   pagination={pagination}
                   onPageChange={setPage}
-                  onLimitChange={(value) => {
+                  onLimitChange={value => {
                     setLimit(value);
                     setPage(1);
                   }}

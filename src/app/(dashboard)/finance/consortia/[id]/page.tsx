@@ -178,7 +178,9 @@ export default function ConsortiumDetailPage({
           <div>
             <p className="text-sm text-muted-foreground mb-1">Total Pago</p>
             <p className="text-2xl font-bold text-green-600">
-              {formatCurrency(consortium.paidInstallments * consortium.monthlyPayment)}
+              {formatCurrency(
+                consortium.paidInstallments * consortium.monthlyPayment
+              )}
             </p>
           </div>
         </div>
@@ -299,14 +301,16 @@ export default function ConsortiumDetailPage({
                 </tr>
               </thead>
               <tbody>
-                {consortium.payments.map((payment) => (
+                {consortium.payments.map(payment => (
                   <tr key={payment.id} className="border-b hover:bg-muted/50">
                     <td className="p-2">{payment.installmentNumber}</td>
                     <td className="p-2">{formatDate(payment.dueDate)}</td>
                     <td className="text-right p-2">
                       {formatCurrency(payment.expectedAmount)}
                     </td>
-                    <td className="p-2">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</td>
+                    <td className="p-2">
+                      {payment.paidAt ? formatDate(payment.paidAt) : '—'}
+                    </td>
                     <td className="text-center p-2">
                       <Badge variant={getPaymentStatusVariant(payment.status)}>
                         {FINANCE_ENTRY_STATUS_LABELS[payment.status]}

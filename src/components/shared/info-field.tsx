@@ -15,6 +15,10 @@ interface InfoFieldProps {
   icon?: React.ReactNode;
   badge?: React.ReactNode;
   emptyText?: string;
+  /** Custom action element displayed in place of copy button */
+  action?: React.ReactNode;
+  /** Truncate value text with single line */
+  truncate?: boolean;
 }
 
 export function InfoField({
@@ -26,6 +30,8 @@ export function InfoField({
   icon,
   badge,
   emptyText = 'Não Informado',
+  action,
+  truncate = false,
 }: InfoFieldProps) {
   const hasValue = value !== null && value !== undefined && value !== '';
   const displayValue = hasValue ? String(value) : emptyText;
@@ -45,12 +51,14 @@ export function InfoField({
         <p
           className={`mt-1 text-sm sm:text-base ${
             isEmptyValue ? 'dark:text-slate-500/80 text-slate-400' : ''
-          }`}
+          } ${truncate ? 'truncate' : ''}`}
         >
           {displayValue}
         </p>
       </div>
-      {showCopyButton && hasValue && (
+      {action ? (
+        <div className="flex h-full items-center">{action}</div>
+      ) : showCopyButton && hasValue ? (
         <div className="flex h-full items-center ">
           <CopyButton
             content={String(value)}
@@ -58,7 +66,7 @@ export function InfoField({
             className="gap-2 self-auto px-4"
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

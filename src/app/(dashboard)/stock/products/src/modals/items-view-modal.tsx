@@ -137,10 +137,14 @@ export function ItemsViewModal({
       items.filter(item => {
         const q = searchQuery.toLowerCase();
         const binAddress = item.binId ? binsMap[item.binId] || '' : '';
+        const fullCode = item.fullCode || '';
+        const uniqueCode = item.uniqueCode || '';
+        const quantity = String(item.currentQuantity ?? '');
         return (
-          (item.uniqueCode?.toLowerCase().includes(q) ?? false) ||
-          (item.batchNumber?.toLowerCase().includes(q) ?? false) ||
-          binAddress.toLowerCase().includes(q)
+          fullCode.toLowerCase().includes(q) ||
+          uniqueCode.toLowerCase().includes(q) ||
+          binAddress.toLowerCase().includes(q) ||
+          quantity.includes(q)
         );
       }),
     [items, searchQuery, binsMap]

@@ -16,10 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateBankAccount } from '@/hooks/finance';
-import {
-  BANK_ACCOUNT_TYPE_LABELS,
-  PIX_KEY_TYPE_LABELS,
-} from '@/types/finance';
+import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
 import type { CreateBankAccountData } from '@/types/finance';
 import { companiesService } from '@/services/hr';
 import { useQuery } from '@tanstack/react-query';
@@ -69,7 +66,8 @@ export default function NewBankAccountPage() {
         bankName: formData.bankName || undefined,
         agencyDigit: formData.agencyDigit || undefined,
         accountDigit: formData.accountDigit || undefined,
-        pixKeyType: (formData.pixKeyType || undefined) as CreateBankAccountData['pixKeyType'],
+        pixKeyType: (formData.pixKeyType ||
+          undefined) as CreateBankAccountData['pixKeyType'],
         pixKey: formData.pixKey || undefined,
         color: formData.color || undefined,
         isDefault: formData.isDefault,
@@ -103,7 +101,7 @@ export default function NewBankAccountPage() {
               <Label htmlFor="companyId">Empresa *</Label>
               <Select
                 value={formData.companyId}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setFormData({ ...formData, companyId: value })
                 }
                 required
@@ -112,7 +110,7 @@ export default function NewBankAccountPage() {
                   <SelectValue placeholder="Selecione uma empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((company) => (
+                  {companies.map(company => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.legalName || company.tradeName}
                     </SelectItem>
@@ -127,7 +125,7 @@ export default function NewBankAccountPage() {
                 id="name"
                 required
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -139,7 +137,7 @@ export default function NewBankAccountPage() {
                 id="bankCode"
                 required
                 value={formData.bankCode}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, bankCode: e.target.value })
                 }
               />
@@ -151,7 +149,7 @@ export default function NewBankAccountPage() {
                 id="bankName"
                 required
                 value={formData.bankName}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, bankName: e.target.value })
                 }
               />
@@ -163,7 +161,7 @@ export default function NewBankAccountPage() {
                 id="agency"
                 required
                 value={formData.agency}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, agency: e.target.value })
                 }
               />
@@ -174,7 +172,7 @@ export default function NewBankAccountPage() {
               <Input
                 id="agencyDigit"
                 value={formData.agencyDigit}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, agencyDigit: e.target.value })
                 }
               />
@@ -186,7 +184,7 @@ export default function NewBankAccountPage() {
                 id="accountNumber"
                 required
                 value={formData.accountNumber}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, accountNumber: e.target.value })
                 }
               />
@@ -197,7 +195,7 @@ export default function NewBankAccountPage() {
               <Input
                 id="accountDigit"
                 value={formData.accountDigit}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, accountDigit: e.target.value })
                 }
               />
@@ -207,8 +205,11 @@ export default function NewBankAccountPage() {
               <Label htmlFor="accountType">Tipo de Conta *</Label>
               <Select
                 value={formData.accountType}
-                onValueChange={(value: any) =>
-                  setFormData({ ...formData, accountType: value })
+                onValueChange={(value: string) =>
+                  setFormData({
+                    ...formData,
+                    accountType: value as typeof formData.accountType,
+                  })
                 }
               >
                 <SelectTrigger id="accountType">
@@ -230,7 +231,7 @@ export default function NewBankAccountPage() {
               <Label htmlFor="pixKeyType">Tipo de Chave PIX</Label>
               <Select
                 value={formData.pixKeyType}
-                onValueChange={(value: any) =>
+                onValueChange={(value: string) =>
                   setFormData({ ...formData, pixKeyType: value })
                 }
               >
@@ -252,7 +253,7 @@ export default function NewBankAccountPage() {
               <Input
                 id="pixKey"
                 value={formData.pixKey}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, pixKey: e.target.value })
                 }
               />
@@ -264,7 +265,7 @@ export default function NewBankAccountPage() {
                 id="color"
                 type="color"
                 value={formData.color}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, color: e.target.value })
                 }
               />
@@ -276,7 +277,7 @@ export default function NewBankAccountPage() {
                   type="checkbox"
                   id="isDefault"
                   checked={formData.isDefault}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, isDefault: e.target.checked })
                   }
                   className="h-4 w-4"

@@ -9,4 +9,9 @@ import { financeMenu } from './finance';
 import { hrMenu } from './hr';
 import { stockMenu } from './stock';
 
-export const menuItems: MenuItem[] = [stockMenu, hrMenu, financeMenu, adminMenu];
+export const menuItems: MenuItem[] = [
+  stockMenu,
+  hrMenu,
+  financeMenu,
+  adminMenu,
+];

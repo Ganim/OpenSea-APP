@@ -36,7 +36,7 @@ export interface EntityCardBadge {
   /** Texto do badge */
   label: string;
   /** Variante visual */
-  variant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  variant?: 'default' | 'secondary' | 'outline' | 'destructive' | 'warning';
   /** Cor customizada (Tailwind classes) */
   color?: string;
   /** Ícone do badge */

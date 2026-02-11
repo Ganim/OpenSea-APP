@@ -1,52 +1,52 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, TrendingDown, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, TrendingDown, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useFinanceCashflow } from '@/hooks/finance'
-type CashflowGroupBy = 'day' | 'week' | 'month'
+} from '@/components/ui/select';
+import { useFinanceCashflow } from '@/hooks/finance';
+type CashflowGroupBy = 'day' | 'week' | 'month';
 
 // Helper to get start/end of current month
 function getMonthRange() {
-  const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), 1)
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   return {
     start: start.toISOString().split('T')[0],
     end: end.toISOString().split('T')[0],
-  }
+  };
 }
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(value)
+  }).format(value);
 }
 
 export default function CashflowPage() {
-  const router = useRouter()
-  const defaultRange = getMonthRange()
-  const [startDate, setStartDate] = useState(defaultRange.start)
-  const [endDate, setEndDate] = useState(defaultRange.end)
-  const [groupBy, setGroupBy] = useState<CashflowGroupBy>('day')
+  const router = useRouter();
+  const defaultRange = getMonthRange();
+  const [startDate, setStartDate] = useState(defaultRange.start);
+  const [endDate, setEndDate] = useState(defaultRange.end);
+  const [groupBy, setGroupBy] = useState<CashflowGroupBy>('day');
 
   const { data, isLoading } = useFinanceCashflow({
     startDate,
     endDate,
     groupBy,
-  })
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -79,7 +79,7 @@ export default function CashflowPage() {
                 id="startDate"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -88,14 +88,14 @@ export default function CashflowPage() {
                 id="endDate"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="groupBy">Agrupar por</Label>
               <Select
                 value={groupBy}
-                onValueChange={(value) => setGroupBy(value as CashflowGroupBy)}
+                onValueChange={value => setGroupBy(value as CashflowGroupBy)}
               >
                 <SelectTrigger id="groupBy">
                   <SelectValue />
@@ -159,7 +159,7 @@ export default function CashflowPage() {
                   </thead>
                   <tbody>
                     {data.data.map((entry, index) => {
-                      const isPositiveFlow = entry.netFlow >= 0
+                      const isPositiveFlow = entry.netFlow >= 0;
                       return (
                         <tr key={index} className="border-b last:border-0">
                           <td className="py-3 px-4">{entry.period}</td>
@@ -171,9 +171,7 @@ export default function CashflowPage() {
                           </td>
                           <td
                             className={`py-3 px-4 text-right font-medium ${
-                              isPositiveFlow
-                                ? 'text-green-600'
-                                : 'text-red-600'
+                              isPositiveFlow ? 'text-green-600' : 'text-red-600'
                             }`}
                           >
                             {formatCurrency(entry.netFlow)}
@@ -182,7 +180,7 @@ export default function CashflowPage() {
                             {formatCurrency(entry.cumulativeBalance)}
                           </td>
                         </tr>
-                      )
+                      );
                     })}
                   </tbody>
                 </table>
@@ -221,9 +219,7 @@ export default function CashflowPage() {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    Fluxo Líquido
-                  </p>
+                  <p className="text-sm text-muted-foreground">Fluxo Líquido</p>
                   <p
                     className={`text-2xl font-bold ${
                       data.summary.netFlow >= 0
@@ -246,5 +242,5 @@ export default function CashflowPage() {
         </>
       )}
     </div>
-  )
+  );
 }

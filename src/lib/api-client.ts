@@ -7,11 +7,11 @@ import { apiConfig } from '@/config/api';
 import { logger } from '@/lib/logger';
 import { TokenManager } from './api-client-auth';
 import {
-    createApiError,
-    extractErrorMessage,
-    handleNetworkError,
-    logErrorResponse,
-    parseErrorResponse,
+  createApiError,
+  extractErrorMessage,
+  handleNetworkError,
+  logErrorResponse,
+  parseErrorResponse,
 } from './api-client-error';
 import type { RequestOptions } from './api-client.types';
 
@@ -98,10 +98,7 @@ class ApiClient {
           });
 
           if (!retryResponse.ok) {
-            if (
-              retryResponse.status === 401 ||
-              retryResponse.status === 403
-            ) {
+            if (retryResponse.status === 401 || retryResponse.status === 403) {
               if (typeof window !== 'undefined') {
                 localStorage.removeItem('selected_tenant_id');
                 localStorage.removeItem('user');
@@ -165,7 +162,7 @@ class ApiClient {
           this.baseURL,
           restOptions.method || 'GET'
         );
-        
+
         if (networkError !== error) {
           throw networkError;
         }

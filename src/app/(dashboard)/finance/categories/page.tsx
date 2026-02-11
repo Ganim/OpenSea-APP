@@ -31,11 +31,7 @@ export default function FinanceCategoriesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -84,11 +80,13 @@ export default function FinanceCategoriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {categories.map((category) => (
+                {categories.map(category => (
                   <tr
                     key={category.id}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => router.push(`/finance/categories/${category.id}`)}
+                    onClick={() =>
+                      router.push(`/finance/categories/${category.id}`)
+                    }
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-2">
@@ -113,9 +111,7 @@ export default function FinanceCategoriesPage() {
                         {FINANCE_CATEGORY_TYPE_LABELS[category.type]}
                       </span>
                     </td>
-                    <td className="p-4 text-center">
-                      {category.displayOrder}
-                    </td>
+                    <td className="p-4 text-center">{category.displayOrder}</td>
                     <td className="p-4 text-center">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

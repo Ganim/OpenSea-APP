@@ -16,7 +16,9 @@ export interface FinanceCategoryResponse {
 }
 
 export const financeCategoriesService = {
-  async list(params?: FinanceCategoriesQuery): Promise<FinanceCategoriesResponse> {
+  async list(
+    params?: FinanceCategoriesQuery
+  ): Promise<FinanceCategoriesResponse> {
     const query = new URLSearchParams();
 
     if (params?.type) query.append('type', params.type);
@@ -36,7 +38,9 @@ export const financeCategoriesService = {
     );
   },
 
-  async create(data: CreateFinanceCategoryData): Promise<FinanceCategoryResponse> {
+  async create(
+    data: CreateFinanceCategoryData
+  ): Promise<FinanceCategoryResponse> {
     return apiClient.post<FinanceCategoryResponse>(
       API_ENDPOINTS.FINANCE_CATEGORIES.CREATE,
       data

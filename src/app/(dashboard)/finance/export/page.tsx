@@ -51,7 +51,7 @@ export default function ExportPage() {
             text: 'Exportação realizada com sucesso.',
           });
         },
-        onError: (error) => {
+        onError: error => {
           setMessage({
             type: 'error',
             text:
@@ -111,7 +111,7 @@ export default function ExportPage() {
                 id="startDate"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -120,7 +120,7 @@ export default function ExportPage() {
                 id="endDate"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
               />
             </div>
           </div>
