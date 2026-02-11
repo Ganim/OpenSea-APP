@@ -49,6 +49,8 @@ export function SearchBar({
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,6 +93,8 @@ export function SearchBar({
   };
 
   // Debounce da busca
+  // onSearch is stored in a ref to avoid re-triggering the effect when
+  // the parent passes a new callback reference (e.g. inline arrow function).
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -99,7 +103,7 @@ export function SearchBar({
     debounceTimerRef.current = setTimeout(async () => {
       try {
         setIsLoading(true);
-        const result = onSearch(value);
+        const result = onSearchRef.current(value);
         if (result instanceof Promise) {
           await result;
         }
@@ -113,7 +117,7 @@ export function SearchBar({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [value, onSearch, debounceDelay]);
+  }, [value, debounceDelay]);
 
   // Auto-focus
   useEffect(() => {

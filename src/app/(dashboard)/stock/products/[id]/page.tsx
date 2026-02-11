@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { productsService, variantsService } from '@/services/stock';
-import type { Product, Variant } from '@/types/stock';
+import type { Product } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Package } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -33,14 +33,15 @@ export default function ProductDetailPage() {
     refetchOnMount: 'always', // Sempre buscar dados frescos ao montar
   });
 
-  const { data: variants, isLoading: isLoadingVariants } = useQuery<Variant[]>({
+  const { data: variantsData, isLoading: isLoadingVariants } = useQuery({
     queryKey: ['variants', 'by-product', productId],
     queryFn: async () => {
-      const response = await variantsService.listVariants(productId);
-      return response.variants;
+      return variantsService.listVariants(productId);
     },
     refetchOnMount: 'always', // Sempre buscar dados frescos ao montar
   });
+
+  const variants = variantsData?.variants;
 
   // ============================================================================
   // HANDLERS

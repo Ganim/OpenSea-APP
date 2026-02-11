@@ -1049,6 +1049,10 @@ export function ProductViewer({
         onOpenChange={setChangeLocationModalOpen}
         selectedItems={selectedItems}
         onConfirm={handleChangeLocation}
+        onBack={() => {
+          setChangeLocationModalOpen(false);
+          setExitModalOpen(true);
+        }}
       />
 
       {/* Exit Items Modal */}

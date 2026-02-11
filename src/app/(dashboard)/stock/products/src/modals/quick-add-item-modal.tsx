@@ -33,6 +33,7 @@ interface QuickAddItemModalProps {
 interface FormData {
   binId: string;
   quantity: string;
+  unitCost: string;
   attributes: Record<string, string>;
 }
 
@@ -46,6 +47,7 @@ export function QuickAddItemModal({
   const [formData, setFormData] = useState<FormData>({
     binId: '',
     quantity: '1',
+    unitCost: '',
     attributes: {},
   });
 
@@ -95,6 +97,7 @@ export function QuickAddItemModal({
     setFormData({
       binId: '',
       quantity: '1',
+      unitCost: '',
       attributes: {},
     });
   }, []);
@@ -126,12 +129,20 @@ export function QuickAddItemModal({
 
       const uniqueCode = generateUniqueCode();
 
+      // Parse optional unit cost
+      const parsedCost = formData.unitCost
+        ? parseFloat(formData.unitCost.replace(',', '.'))
+        : undefined;
+
       const createData: RegisterItemEntryRequest = {
         variantId: variant.id,
         binId: formData.binId,
         quantity: roundedQuantity,
         uniqueCode,
         attributes: formData.attributes,
+        ...(parsedCost && !isNaN(parsedCost) && parsedCost > 0
+          ? { unitCost: parsedCost }
+          : {}),
       };
 
       createItemMutation.mutate(createData);
@@ -173,29 +184,49 @@ export function QuickAddItemModal({
               value={formData.binId}
               onChange={binId => setFormData(prev => ({ ...prev, binId }))}
               placeholder="Buscar localização..."
+              className="h-9 rounded-md"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="item-quantity">Quantidade *</Label>
-            <Input
-              id="item-quantity"
-              type="text"
-              inputMode="decimal"
-              placeholder="1,000"
-              value={formData.quantity}
-              onChange={e => {
-                const sanitized = sanitizeQuantityInput(e.target.value);
-                setFormData(prev => ({
-                  ...prev,
-                  quantity: sanitized,
-                }));
-              }}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Máximo 3 casas decimais
-            </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="item-quantity">Quantidade *</Label>
+              <Input
+                id="item-quantity"
+                type="text"
+                inputMode="decimal"
+                placeholder="1,000"
+                value={formData.quantity}
+                onChange={e => {
+                  const sanitized = sanitizeQuantityInput(e.target.value);
+                  setFormData(prev => ({
+                    ...prev,
+                    quantity: sanitized,
+                  }));
+                }}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Máximo 3 casas decimais
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="item-unit-cost">Preço de Custo</Label>
+              <Input
+                id="item-unit-cost"
+                type="text"
+                inputMode="decimal"
+                placeholder="0,00"
+                value={formData.unitCost}
+                onChange={e => {
+                  setFormData(prev => ({
+                    ...prev,
+                    unitCost: e.target.value,
+                  }));
+                }}
+              />
+              <p className="text-xs text-muted-foreground">Opcional (R$)</p>
+            </div>
           </div>
 
           {/* Template Item Attributes (required + optional) */}

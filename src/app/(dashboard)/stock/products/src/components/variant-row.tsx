@@ -103,9 +103,7 @@ export function VariantRow({
           )}
         </div>
         <p className="text-xs text-muted-foreground truncate">
-          {variant.reference
-            ? variant.reference
-            : variant.sku || variant.barcode || `ID: ${variant.id.slice(0, 8)}`}
+          {variant.reference ? `Ref: ${variant.reference}` : 'Sem referência'}
         </p>
       </div>
 

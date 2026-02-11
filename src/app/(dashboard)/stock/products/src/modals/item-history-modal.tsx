@@ -25,6 +25,7 @@ import {
   Bookmark,
   Building,
   Clock,
+  ExternalLink,
   History,
   MapPin,
   Package,
@@ -32,6 +33,7 @@ import {
   ShoppingCart,
   Undo2,
 } from 'lucide-react';
+import Link from 'next/link';
 import {
   PiCalendarBlankDuotone,
   PiHashStraightDuotone,
@@ -45,6 +47,8 @@ export interface ItemHistoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: Item | null;
+  /** Optional productId — when provided, shows a "Ver Produto" link in the footer */
+  productId?: string;
 }
 
 /** Action config resolved from movementType + reasonCode */
@@ -233,6 +237,7 @@ export function ItemHistoryModal({
   open,
   onOpenChange,
   item,
+  productId,
 }: ItemHistoryModalProps) {
   const { data: historyData, isLoading } = useQuery({
     queryKey: ['item-history', item?.id],
@@ -306,7 +311,17 @@ export function ItemHistoryModal({
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t">
+        <div className="flex justify-between pt-4 border-t">
+          <div>
+            {(productId || item?.productId) && (
+              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                <Link href={`/stock/products/${productId || item?.productId}`}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Ver Produto
+                </Link>
+              </Button>
+            )}
+          </div>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>

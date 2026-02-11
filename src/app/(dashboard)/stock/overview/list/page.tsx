@@ -1,18 +1,21 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Columns3,
   Factory,
+  Grid3X3,
   Loader2,
+  MapPin,
   Palette,
   Printer,
   RefreshCw,
   Slash,
   X,
 } from 'lucide-react';
+import { PiMouseScrollDuotone, PiTableDuotone } from 'react-icons/pi';
+import { useQuery } from '@tanstack/react-query';
 
 import { Header } from '@/components/layout/header';
 import {
@@ -24,6 +27,8 @@ import { SearchBar } from '@/components/layout/search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import type { FilterOption } from '@/components/ui/filter-dropdown';
 import {
@@ -37,14 +42,17 @@ import {
 import { Pagination } from '../../_shared/components/pagination';
 import { useItems } from '@/hooks/stock/use-items';
 import { useManufacturers, useTemplates } from '@/hooks/stock';
+import { itemMovementsService } from '@/services/stock';
 import {
   formatQuantity,
   formatUnitOfMeasure,
   getUnitAbbreviation,
 } from '@/helpers/formatters';
+import { normaliseName } from '@/helpers/normalise-name';
 import type { Item } from '@/types/stock';
 import type { Template, TemplateAttribute } from '@/types/stock';
 import { cn } from '@/lib/utils';
+import { ItemHistoryModal } from '../../products/src/modals/item-history-modal';
 
 // IDs for optional fixed columns
 const COL_FABRICANTE = '_fabricante';
@@ -63,12 +71,57 @@ const DEFAULT_OPTIONAL_FIXED = [
   COL_QUANTIDADE,
 ];
 
+/** Badge config para itens que saíram do estoque (qty=0) */
+const EXIT_REASON_BADGE: Record<string, { label: string; className: string }> =
+  {
+    SALE: {
+      label: 'Vendido',
+      className:
+        'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
+    },
+    SUPPLIER_RETURN: {
+      label: 'Devolvido',
+      className:
+        'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
+    },
+    INTERNAL_USE: {
+      label: 'Utilizado',
+      className:
+        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
+    },
+    LOSS: {
+      label: 'Perdido',
+      className:
+        'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
+    },
+    PRODUCTION: {
+      label: 'Utilizado',
+      className:
+        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
+    },
+    SAMPLE: {
+      label: 'Amostra',
+      className:
+        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
+    },
+  };
+
+const DEFAULT_EXIT_BADGE = {
+  label: 'Saiu',
+  className:
+    'bg-gray-500/20 text-gray-700 dark:text-gray-400 border-gray-500/30',
+};
+
 function resolveItemName(item: Item) {
   const parts = [item.templateName, item.productName, item.variantName].filter(
     Boolean
   ) as string[];
   const name = parts.length > 0 ? parts.join(' ') : 'Item sem identificação';
   const sku = item.variantSku;
+  // Don't append the SKU if it was auto-generated from the variant name
+  if (sku && item.variantName && normaliseName(item.variantName) === sku) {
+    return name;
+  }
   return sku ? `${name} - ${sku}` : name;
 }
 
@@ -183,7 +236,11 @@ function buildGroupTable(groupItems: Item[], unitKey: string): string {
       const name = [item.templateName, item.productName, item.variantName]
         .filter(Boolean)
         .join(' ');
-      const sku = item.variantSku ? ` - ${item.variantSku}` : '';
+      const isAutoSku =
+        item.variantSku &&
+        item.variantName &&
+        normaliseName(item.variantName) === item.variantSku;
+      const sku = item.variantSku && !isAutoSku ? ` - ${item.variantSku}` : '';
       const code = item.fullCode || item.uniqueCode || '';
       const loc =
         item.bin?.address ||
@@ -264,15 +321,33 @@ ${tables}
 }
 
 export default function StockOverviewListPage() {
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState('');
   const [visibleColumns, setVisibleColumns] = useState<string[] | null>(null);
+  const [hideExited, setHideExited] = useState(true);
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(
     []
   );
+  const [selectedZones, setSelectedZones] = useState<string[]>([]);
+  const [selectedBinAddresses, setSelectedBinAddresses] = useState<string[]>(
+    []
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyItem, setHistoryItem] = useState<Item | null>(null);
+  const [viewMode, setViewMode] = useState<'pagination' | 'scroll'>(() => {
+    if (typeof window !== 'undefined') {
+      return (
+        (localStorage.getItem('stock-overview-viewMode') as
+          | 'pagination'
+          | 'scroll') || 'scroll'
+      );
+    }
+    return 'scroll';
+  });
+  const [visibleCount, setVisibleCount] = useState(40);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, isLoading, error, refetch, isFetching } = useItems();
@@ -282,6 +357,37 @@ export default function StockOverviewListPage() {
 
   const allItems: Item[] = data?.items ?? [];
 
+  // Fetch exit reasons for items with qty=0
+  const exitedItemIds = useMemo(
+    () => allItems.filter(i => i.currentQuantity === 0).map(i => i.id),
+    [allItems]
+  );
+
+  const { data: exitReasonMap = {} } = useQuery({
+    queryKey: ['exit-reasons', 'overview', exitedItemIds],
+    queryFn: async () => {
+      if (exitedItemIds.length === 0) return {};
+      const results = await Promise.all(
+        exitedItemIds.map(itemId =>
+          itemMovementsService.listMovements({ itemId })
+        )
+      );
+      const reasonMap: Record<string, string> = {};
+      for (let i = 0; i < exitedItemIds.length; i++) {
+        const movements = results[i].movements;
+        const exitMovement = movements.find(
+          m => m.reasonCode !== 'ENTRY' && m.movementType !== 'TRANSFER'
+        );
+        if (exitMovement) {
+          reasonMap[exitedItemIds[i]] =
+            exitMovement.reasonCode || exitMovement.movementType;
+        }
+      }
+      return reasonMap;
+    },
+    enabled: exitedItemIds.length > 0,
+  });
+
   const manufacturerOptions: FilterOption[] = useMemo(
     () =>
       (manufacturersData?.manufacturers ?? []).map(m => ({
@@ -290,6 +396,30 @@ export default function StockOverviewListPage() {
       })),
     [manufacturersData]
   );
+
+  const zoneOptions: FilterOption[] = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const item of allItems) {
+      const zone = item.bin?.zone;
+      if (zone?.id && !seen.has(zone.id)) {
+        seen.set(zone.id, zone.name || zone.code);
+      }
+    }
+    return [...seen.entries()].map(([id, label]) => ({ id, label }));
+  }, [allItems]);
+
+  const binAddressOptions: FilterOption[] = useMemo(() => {
+    const seen = new Set<string>();
+    const options: FilterOption[] = [];
+    for (const item of allItems) {
+      const addr = item.bin?.address || item.resolvedAddress;
+      if (addr && !seen.has(addr)) {
+        seen.add(addr);
+        options.push({ id: addr, label: addr });
+      }
+    }
+    return options;
+  }, [allItems]);
 
   // Client-side search filtering
   const searchedItems = useMemo(() => {
@@ -317,7 +447,7 @@ export default function StockOverviewListPage() {
   }, [allItems, search]);
 
   // Client-side manufacturer filtering
-  const filteredItems = useMemo(
+  const manufacturerFiltered = useMemo(
     () =>
       selectedManufacturers.length === 0
         ? searchedItems
@@ -329,14 +459,51 @@ export default function StockOverviewListPage() {
     [searchedItems, selectedManufacturers]
   );
 
-  // Client-side pagination
+  // Client-side zone filtering
+  const zoneFiltered = useMemo(
+    () =>
+      selectedZones.length === 0
+        ? manufacturerFiltered
+        : manufacturerFiltered.filter(item =>
+            item.bin?.zone?.id
+              ? selectedZones.includes(item.bin.zone.id)
+              : false
+          ),
+    [manufacturerFiltered, selectedZones]
+  );
+
+  // Client-side bin address filtering
+  const binFiltered = useMemo(
+    () =>
+      selectedBinAddresses.length === 0
+        ? zoneFiltered
+        : zoneFiltered.filter(item => {
+            const addr = item.bin?.address || item.resolvedAddress;
+            return addr ? selectedBinAddresses.includes(addr) : false;
+          }),
+    [zoneFiltered, selectedBinAddresses]
+  );
+
+  // Client-side exit filtering
+  const filteredItems = useMemo(
+    () =>
+      hideExited
+        ? binFiltered.filter(item => item.currentQuantity > 0)
+        : binFiltered,
+    [binFiltered, hideExited]
+  );
+
+  // Client-side pagination / scroll
   const totalFiltered = filteredItems.length;
   const totalPages = Math.ceil(totalFiltered / limit) || 1;
 
   const items = useMemo(() => {
+    if (viewMode === 'scroll') {
+      return filteredItems.slice(0, visibleCount);
+    }
     const start = (page - 1) * limit;
     return filteredItems.slice(start, start + limit);
-  }, [filteredItems, page, limit]);
+  }, [filteredItems, page, limit, viewMode, visibleCount]);
 
   const pagination = useMemo(
     () => ({
@@ -349,6 +516,40 @@ export default function StockOverviewListPage() {
     }),
     [totalFiltered, page, limit, totalPages]
   );
+
+  // Persist viewMode
+  useEffect(() => {
+    localStorage.setItem('stock-overview-viewMode', viewMode);
+  }, [viewMode]);
+
+  // Reset visibleCount when filters change
+  useEffect(() => {
+    setVisibleCount(40);
+  }, [
+    search,
+    selectedManufacturers,
+    selectedZones,
+    selectedBinAddresses,
+    hideExited,
+  ]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    if (viewMode !== 'scroll') return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && visibleCount < filteredItems.length) {
+          setVisibleCount(prev => Math.min(prev + 40, filteredItems.length));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [viewMode, visibleCount, filteredItems.length]);
 
   const dynamicColumns = useMemo(
     () => buildDynamicColumns(filteredItems, templates),
@@ -408,19 +609,15 @@ export default function StockOverviewListPage() {
     [toggleSelection]
   );
 
-  const handleRowDoubleClick = useCallback(
-    (item: Item) => {
-      // Cancel the pending single-click
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-        clickTimerRef.current = null;
-      }
-      if (item.productId) {
-        router.push(`/stock/products/${item.productId}`);
-      }
-    },
-    [router]
-  );
+  const handleRowDoubleClick = useCallback((item: Item) => {
+    // Cancel the pending single-click
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+    setHistoryItem(item);
+    setHistoryModalOpen(true);
+  }, []);
 
   // --- Selection summary (search across all items, not just current page) ---
   const selectedItems = useMemo(
@@ -430,19 +627,20 @@ export default function StockOverviewListPage() {
 
   const selectionSummary = useMemo(() => {
     if (selectedItems.length === 0) return null;
-    const total = selectedItems.reduce((s, i) => s + i.currentQuantity, 0);
-    const rounded = Math.round(total * 1000) / 1000;
-    // Try to find common unit among selected items
-    const units = new Set(
-      selectedItems
-        .map(i => i.templateUnitOfMeasure)
-        .filter(Boolean) as string[]
-    );
-    const unitAbbr = units.size === 1 ? getUnitAbbreviation([...units][0]) : '';
+    // Group totals by unit of measure
+    const unitTotals = new Map<string, number>();
+    for (const item of selectedItems) {
+      const key = item.templateUnitOfMeasure || '_none';
+      unitTotals.set(key, (unitTotals.get(key) || 0) + item.currentQuantity);
+    }
+    const totals = [...unitTotals.entries()].map(([unit, total]) => ({
+      unit,
+      total: Math.round(total * 1000) / 1000,
+      abbr: unit === '_none' ? 'un' : getUnitAbbreviation(unit) || 'un',
+    }));
     return {
       count: selectedItems.length,
-      total: rounded,
-      unitAbbr,
+      totals,
     };
   }, [selectedItems]);
 
@@ -495,28 +693,97 @@ export default function StockOverviewListPage() {
             />
 
             <div className="flex items-center justify-between">
-              <FilterDropdown
-                label="Fabricante"
-                icon={Factory}
-                options={manufacturerOptions}
-                selected={selectedManufacturers}
-                onSelectionChange={value => {
-                  setSelectedManufacturers(value);
-                  setPage(1);
-                }}
-                activeColor="violet"
-                searchPlaceholder="Buscar fabricante..."
-                emptyText="Nenhum fabricante encontrado."
-              />
-              <FilterDropdown
-                label="Colunas"
-                icon={Columns3}
-                options={columnOptions}
-                selected={activeColumns}
-                onSelectionChange={setVisibleColumns}
-                activeColor="blue"
-                searchPlaceholder="Buscar coluna..."
-              />
+              <div className="flex items-center gap-2">
+                <FilterDropdown
+                  label="Fabricante"
+                  icon={Factory}
+                  options={manufacturerOptions}
+                  selected={selectedManufacturers}
+                  onSelectionChange={value => {
+                    setSelectedManufacturers(value);
+                    setPage(1);
+                  }}
+                  activeColor="violet"
+                  searchPlaceholder="Buscar fabricante..."
+                  emptyText="Nenhum fabricante encontrado."
+                />
+                <FilterDropdown
+                  label="Zona"
+                  icon={Grid3X3}
+                  options={zoneOptions}
+                  selected={selectedZones}
+                  onSelectionChange={value => {
+                    setSelectedZones(value);
+                    setPage(1);
+                  }}
+                  activeColor="cyan"
+                  searchPlaceholder="Buscar zona..."
+                  emptyText="Nenhuma zona encontrada."
+                />
+                <FilterDropdown
+                  label="Localização"
+                  icon={MapPin}
+                  options={binAddressOptions}
+                  selected={selectedBinAddresses}
+                  onSelectionChange={value => {
+                    setSelectedBinAddresses(value);
+                    setPage(1);
+                  }}
+                  activeColor="emerald"
+                  searchPlaceholder="Buscar endereço..."
+                  emptyText="Nenhuma localização encontrada."
+                />
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Switch
+                    id="hide-exited-overview"
+                    checked={hideExited}
+                    onCheckedChange={value => {
+                      setHideExited(value);
+                      setPage(1);
+                    }}
+                    className="scale-75"
+                  />
+                  <Label
+                    htmlFor="hide-exited-overview"
+                    className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
+                  >
+                    Ocultar saídas
+                  </Label>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() =>
+                    setViewMode(prev =>
+                      prev === 'pagination' ? 'scroll' : 'pagination'
+                    )
+                  }
+                >
+                  {viewMode === 'pagination' ? (
+                    <>
+                      <PiMouseScrollDuotone className="w-4 h-4" />
+                      Rolagem
+                    </>
+                  ) : (
+                    <>
+                      <PiTableDuotone className="w-4 h-4" />
+                      Paginação
+                    </>
+                  )}
+                </Button>
+                <FilterDropdown
+                  label="Colunas"
+                  icon={Columns3}
+                  options={columnOptions}
+                  selected={activeColumns}
+                  onSelectionChange={setVisibleColumns}
+                  activeColor="blue"
+                  searchPlaceholder="Buscar coluna..."
+                />
+              </div>
             </div>
 
             {isLoading ? (
@@ -579,6 +846,7 @@ export default function StockOverviewListPage() {
                             item.bin?.zone?.id && item.bin?.zone?.warehouseId;
 
                           const isSelected = selectedIds.has(item.id);
+                          const isExited = item.currentQuantity === 0;
 
                           return (
                             <TableRow
@@ -588,7 +856,8 @@ export default function StockOverviewListPage() {
                                 isSelected &&
                                   'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15',
                                 !isSelected &&
-                                  'hover:bg-gray-50 dark:hover:bg-white/5'
+                                  'hover:bg-gray-50 dark:hover:bg-white/5',
+                                isExited && !isSelected && 'opacity-60'
                               )}
                               onClick={() => handleRowClick(item)}
                               onDoubleClick={() => handleRowDoubleClick(item)}
@@ -616,22 +885,67 @@ export default function StockOverviewListPage() {
 
                               {/* Item */}
                               <TableCell>
-                                <div className="flex flex-col">
-                                  <span className="font-medium text-gray-900 dark:text-white">
-                                    {resolveItemName(item)}
-                                  </span>
-                                  <span className="text-xs font-mono text-muted-foreground">
-                                    {item.fullCode || item.uniqueCode || ''}
-                                  </span>
-                                </div>
+                                {(() => {
+                                  const exitBadge = isExited
+                                    ? EXIT_REASON_BADGE[
+                                        exitReasonMap[item.id] || ''
+                                      ] || DEFAULT_EXIT_BADGE
+                                    : null;
+                                  return (
+                                    <div className="flex flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-900 dark:text-white">
+                                          {resolveItemName(item)}
+                                        </span>
+                                        {exitBadge && (
+                                          <Badge
+                                            variant="outline"
+                                            className={cn(
+                                              'text-[10px] px-1.5 py-0 border',
+                                              exitBadge.className
+                                            )}
+                                          >
+                                            {exitBadge.label}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <span className="text-xs font-mono text-muted-foreground">
+                                        {item.fullCode || item.uniqueCode || ''}
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
                               </TableCell>
 
                               {/* Fabricante */}
                               {showFabricante && (
                                 <TableCell>
-                                  <span className="text-sm text-gray-700 dark:text-gray-200">
-                                    {item.manufacturerName || '-'}
-                                  </span>
+                                  {item.manufacturerName ? (
+                                    <button
+                                      type="button"
+                                      className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        if (
+                                          !selectedManufacturers.includes(
+                                            item.manufacturerName!
+                                          )
+                                        ) {
+                                          setSelectedManufacturers(prev => [
+                                            ...prev,
+                                            item.manufacturerName!,
+                                          ]);
+                                          setPage(1);
+                                        }
+                                      }}
+                                    >
+                                      {item.manufacturerName}
+                                    </button>
+                                  ) : (
+                                    <span className="text-sm text-gray-700 dark:text-gray-200">
+                                      -
+                                    </span>
+                                  )}
                                 </TableCell>
                               )}
 
@@ -684,14 +998,35 @@ export default function StockOverviewListPage() {
                   </Table>
                 </div>
 
-                <Pagination
-                  pagination={pagination}
-                  onPageChange={setPage}
-                  onLimitChange={value => {
-                    setLimit(value);
-                    setPage(1);
-                  }}
-                />
+                {viewMode === 'pagination' ? (
+                  <Pagination
+                    pagination={pagination}
+                    onPageChange={setPage}
+                    onLimitChange={value => {
+                      setLimit(value);
+                      setPage(1);
+                    }}
+                  />
+                ) : (
+                  <>
+                    {visibleCount < filteredItems.length && (
+                      <div
+                        ref={sentinelRef}
+                        className="flex items-center justify-center py-4 text-xs text-muted-foreground"
+                      >
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Carregando mais itens... ({items.length} de{' '}
+                        {filteredItems.length})
+                      </div>
+                    )}
+                    {visibleCount >= filteredItems.length &&
+                      filteredItems.length > 0 && (
+                        <div className="text-center py-3 text-xs text-muted-foreground">
+                          Todos os {filteredItems.length} itens carregados
+                        </div>
+                      )}
+                  </>
+                )}
               </div>
             )}
           </CardContent>
@@ -714,14 +1049,19 @@ export default function StockOverviewListPage() {
               </span>
               <span className="text-sm text-muted-foreground">
                 Total:{' '}
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {selectionSummary.total.toLocaleString('pt-BR', {
-                    maximumFractionDigits: 3,
-                  })}
-                  {selectionSummary.unitAbbr
-                    ? ` ${selectionSummary.unitAbbr}`
-                    : ''}
-                </span>
+                {selectionSummary.totals.map((t, i) => (
+                  <span key={t.unit}>
+                    {i > 0 && (
+                      <span className="mx-1 text-muted-foreground">|</span>
+                    )}
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {t.total.toLocaleString('pt-BR', {
+                        maximumFractionDigits: 3,
+                      })}
+                      {t.abbr ? ` ${t.abbr}` : ''}
+                    </span>
+                  </span>
+                ))}
               </span>
               <div className="w-px h-5 bg-gray-200 dark:bg-gray-700" />
               <Button
@@ -745,6 +1085,13 @@ export default function StockOverviewListPage() {
             </div>
           </div>
         )}
+        {/* Item History Modal (opened on double-click) */}
+        <ItemHistoryModal
+          open={historyModalOpen}
+          onOpenChange={setHistoryModalOpen}
+          item={historyItem}
+          productId={historyItem?.productId}
+        />
       </PageBody>
     </PageLayout>
   );

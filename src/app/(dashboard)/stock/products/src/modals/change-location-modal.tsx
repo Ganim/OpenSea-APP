@@ -17,7 +17,13 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Item } from '@/types/stock';
-import { ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowRightLeft,
+  Loader2,
+  MapPin,
+} from 'lucide-react';
 import { useState } from 'react';
 import { BinSelector } from '../components/bin-selector';
 
@@ -26,6 +32,8 @@ export interface ChangeLocationModalProps {
   onOpenChange: (open: boolean) => void;
   selectedItems: Item[];
   onConfirm: (newBinId: string, reason: string) => Promise<void>;
+  /** When provided, "Voltar" calls this instead of just closing */
+  onBack?: () => void;
 }
 
 export function ChangeLocationModal({
@@ -33,6 +41,7 @@ export function ChangeLocationModal({
   onOpenChange,
   selectedItems,
   onConfirm,
+  onBack,
 }: ChangeLocationModalProps) {
   const [newBinId, setNewBinId] = useState('');
   const [reason, setReason] = useState('');
@@ -77,7 +86,8 @@ export function ChangeLocationModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <ArrowRightLeft className="h-5 w-5 text-orange-500" />
             Transferência de Estoque (
             {selectedItems.length === 1
               ? '1 item'
@@ -136,7 +146,13 @@ export function ChangeLocationModal({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={handleClose}
+            onClick={() => {
+              if (onBack) {
+                onBack();
+              } else {
+                handleClose();
+              }
+            }}
             disabled={isSubmitting}
             className="gap-1.5"
           >

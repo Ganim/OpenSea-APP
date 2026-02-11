@@ -33,9 +33,13 @@ export function VariantListItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h4 className="font-medium text-sm truncate">{variant.name}</h4>
-          {variant.sku && (
+          {variant.reference ? (
             <span className="text-xs text-muted-foreground">
-              SKU: {variant.sku}
+              Ref: {variant.reference}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              Sem referência
             </span>
           )}
         </div>

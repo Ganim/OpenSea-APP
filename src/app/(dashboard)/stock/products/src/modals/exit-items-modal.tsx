@@ -173,7 +173,15 @@ export function ExitItemsModal({
               </>
             ) : (
               <>
-                {selectedConfig && <selectedConfig.icon className="h-5 w-5" />}
+                {selectedConfig && (
+                  <selectedConfig.icon
+                    className={cn(
+                      'h-5 w-5',
+                      selectedConfig.color === 'red' && 'text-red-500',
+                      selectedConfig.color === 'orange' && 'text-orange-500'
+                    )}
+                  />
+                )}
                 {selectedConfig?.label} (
                 {selectedItems.length === 1
                   ? '1 item'
