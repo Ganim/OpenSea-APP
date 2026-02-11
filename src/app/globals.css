@@ -911,10 +911,6 @@ body {
 .central-text-subtle {
   color: rgb(var(--color-foreground-subtle));
 }
-.central-text-inverted {
-  color: rgb(var(--color-foreground-inverted));
-}
-
 /* Glass containers - variantes com diferentes níveis de opacidade */
 .central-glass {
   background: rgb(var(--glass-bg) / var(--glass-bg-opacity));
@@ -1016,82 +1012,13 @@ body {
     rgb(var(--accent-bg) / 0.1)
   );
 }
-.central-accent-text {
-  color: rgb(var(--accent-color));
-}
-
 /* Separadores e divisores */
 .central-divider {
   background: rgb(var(--glass-border) / var(--glass-border-opacity));
 }
 
 /* ===========================================
-   10. ANIMATIONS
-   =========================================== */
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-out-right {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* ===========================================
-   11. SCROLLBAR
+   10. SCROLLBAR
    =========================================== */
 
 ::-webkit-scrollbar {
