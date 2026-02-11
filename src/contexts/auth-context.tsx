@@ -6,7 +6,14 @@ import { saveAccount } from '@/lib/saved-accounts';
 import { logger } from '@/lib/logger';
 import type { LoginCredentials, RegisterData, User } from '@/types';
 import { useRouter, usePathname } from 'next/navigation';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 interface LoginResult {
   redirected: boolean;
@@ -69,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth-token-change', handleTokenChange);
     };
-  }, [pathname]); // Re-verifica a cada mudança de rota
+  }, []); // Runs once — token changes detected via storage/auth-token-change events
 
   // Hooks de autenticação
   const loginMutation = useLogin();
@@ -174,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     : !!finalUser && hasToken && !userError;
 
   // Login
-  const login = async (credentials: LoginCredentials): Promise<LoginResult> => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<LoginResult> => {
     try {
       logger.debug('🔐 Iniciando login...', { email: credentials.email });
       const response = await loginMutation.mutateAsync(credentials);
@@ -245,10 +252,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       throw error;
     }
-  };
+  }, [loginMutation, refetchUser, router]);
 
   // Register
-  const register = async (data: RegisterData) => {
+  const register = useCallback(async (data: RegisterData) => {
     try {
       // Cria o usuário via endpoint de autenticação
       await registerMutation.mutateAsync(data);
@@ -265,10 +272,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       throw error;
     }
-  };
+  }, [registerMutation, login]);
 
   // Logout
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
@@ -286,18 +293,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Redireciona para login
       router.push('/fast-login');
     }
-  };
+  }, [logoutMutation, user?.id, router]);
 
-  const value: AuthContextType = {
-    user,
-    isLoading: isLoadingUser,
-    isAuthenticated,
-    isSuperAdmin: finalUser?.isSuperAdmin ?? false,
-    login,
-    register,
-    logout,
-    refetchUser,
-  };
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isLoading: isLoadingUser,
+      isAuthenticated,
+      isSuperAdmin: finalUser?.isSuperAdmin ?? false,
+      login,
+      register,
+      logout,
+      refetchUser,
+    }),
+    [
+      user,
+      isLoadingUser,
+      isAuthenticated,
+      finalUser?.isSuperAdmin,
+      login,
+      register,
+      logout,
+      refetchUser,
+    ]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

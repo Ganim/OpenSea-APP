@@ -13,6 +13,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -153,23 +154,39 @@ export function SelectionProvider({ children }: SelectionProviderProps) {
     [isSelecting]
   );
 
+  const value = useMemo(
+    () => ({
+      selectedIds,
+      lastSelectedId,
+      isSelecting,
+      selectItem,
+      toggleSelection,
+      selectRange,
+      clearSelection,
+      isSelected,
+      selectMultiple,
+      startDragSelection,
+      endDragSelection,
+      addToDragSelection,
+    }),
+    [
+      selectedIds,
+      lastSelectedId,
+      isSelecting,
+      selectItem,
+      toggleSelection,
+      selectRange,
+      clearSelection,
+      isSelected,
+      selectMultiple,
+      startDragSelection,
+      endDragSelection,
+      addToDragSelection,
+    ]
+  );
+
   return (
-    <SelectionContext.Provider
-      value={{
-        selectedIds,
-        lastSelectedId,
-        isSelecting,
-        selectItem,
-        toggleSelection,
-        selectRange,
-        clearSelection,
-        isSelected,
-        selectMultiple,
-        startDragSelection,
-        endDragSelection,
-        addToDragSelection,
-      }}
-    >
+    <SelectionContext.Provider value={value}>
       {children}
     </SelectionContext.Provider>
   );

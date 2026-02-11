@@ -1,7 +1,6 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import * as React from 'react';
 
 interface StatsCardProps {
@@ -16,7 +15,7 @@ interface StatsCardProps {
   className?: string;
 }
 
-export function StatsCard({
+export const StatsCard = React.memo(function StatsCard({
   label,
   value,
   icon,
@@ -25,14 +24,13 @@ export function StatsCard({
   className,
 }: StatsCardProps) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
+    <div
       className={cn(
         'bg-white/95 dark:bg-white/5',
         'border border-gray-200 dark:border-white/10',
         'rounded-2xl p-4',
         'shadow-xl hover:shadow-2xl',
-        'transition-all duration-300',
+        'transition-shadow duration-300',
         className
       )}
     >
@@ -70,6 +68,6 @@ export function StatsCard({
           <div className="w-6 h-6 text-white">{icon}</div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-}
+});

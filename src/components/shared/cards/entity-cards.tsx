@@ -5,6 +5,7 @@
 
 'use client';
 
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
@@ -44,7 +45,7 @@ function getItemBadge(
 
 // ==================== TEMPLATE CARDS ====================
 
-export function TemplateGridCard({
+export const TemplateGridCard = React.memo(function TemplateGridCard({
   name,
   attributesCount,
   createdAt,
@@ -111,9 +112,9 @@ export function TemplateGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function TemplateListCard({
+export const TemplateListCard = React.memo(function TemplateListCard({
   name,
   attributesCount,
   createdAt,
@@ -195,11 +196,11 @@ export function TemplateListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== PRODUCT CARDS ====================
 
-export function ProductGridCard({
+export const ProductGridCard = React.memo(function ProductGridCard({
   name,
   sku,
   price,
@@ -279,9 +280,9 @@ export function ProductGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function ProductListCard({
+export const ProductListCard = React.memo(function ProductListCard({
   name,
   sku,
   price,
@@ -361,11 +362,11 @@ export function ProductListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== VARIANT CARDS ====================
 
-export function VariantGridCard({
+export const VariantGridCard = React.memo(function VariantGridCard({
   name,
   sku,
   options,
@@ -444,9 +445,9 @@ export function VariantGridCard({
       )}
     </Card>
   );
-}
+});
 
-export function VariantListCard({
+export const VariantListCard = React.memo(function VariantListCard({
   name,
   sku,
   options,
@@ -529,11 +530,11 @@ export function VariantListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== ITEM CARDS ====================
 
-export function ItemGridCard({
+export const ItemGridCard = React.memo(function ItemGridCard({
   serialNumber,
   condition,
   status,
@@ -620,9 +621,9 @@ export function ItemGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function ItemListCard({
+export const ItemListCard = React.memo(function ItemListCard({
   serialNumber,
   condition,
   status,
@@ -755,11 +756,11 @@ export function ItemListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== MANUFACTURER CARDS ====================
 
-export function ManufacturerGridCard({
+export const ManufacturerGridCard = React.memo(function ManufacturerGridCard({
   name,
   country,
   email,
@@ -839,9 +840,9 @@ export function ManufacturerGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function ManufacturerListCard({
+export const ManufacturerListCard = React.memo(function ManufacturerListCard({
   name,
   country,
   email,
@@ -916,11 +917,11 @@ export function ManufacturerListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== SUPPLIER CARDS ====================
 
-export function SupplierGridCard({
+export const SupplierGridCard = React.memo(function SupplierGridCard({
   name,
   country,
   cnpj,
@@ -1010,9 +1011,9 @@ export function SupplierGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function SupplierListCard({
+export const SupplierListCard = React.memo(function SupplierListCard({
   name,
   country,
   cnpj,
@@ -1097,11 +1098,11 @@ export function SupplierListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== LOCATION CARDS ====================
 
-export function LocationGridCard({
+export const LocationGridCard = React.memo(function LocationGridCard({
   name,
   description,
   address,
@@ -1167,9 +1168,9 @@ export function LocationGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function LocationListCard({
+export const LocationListCard = React.memo(function LocationListCard({
   name,
   description,
   address,
@@ -1230,11 +1231,11 @@ export function LocationListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== TAG CARDS ====================
 
-export function TagGridCard({
+export const TagGridCard = React.memo(function TagGridCard({
   name,
   description,
   color,
@@ -1298,9 +1299,9 @@ export function TagGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function TagListCard({
+export const TagListCard = React.memo(function TagListCard({
   name,
   description,
   color,
@@ -1359,11 +1360,11 @@ export function TagListCard({
       </div>
     </Card>
   );
-}
+});
 
 // ==================== PURCHASE ORDER CARDS ====================
 
-export function PurchaseOrderGridCard({
+export const PurchaseOrderGridCard = React.memo(function PurchaseOrderGridCard({
   orderNumber,
   supplierName,
   orderDate,
@@ -1449,9 +1450,9 @@ export function PurchaseOrderGridCard({
       </div>
     </Card>
   );
-}
+});
 
-export function PurchaseOrderListCard({
+export const PurchaseOrderListCard = React.memo(function PurchaseOrderListCard({
   orderNumber,
   supplierName,
   orderDate,
@@ -1534,4 +1535,4 @@ export function PurchaseOrderListCard({
       </div>
     </Card>
   );
-}
+});

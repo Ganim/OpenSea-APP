@@ -11,6 +11,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -261,15 +262,26 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('tenant-refreshed', handleTenantRefreshed);
   }, []);
 
-  const value: TenantContextType = {
-    currentTenant,
-    tenants,
-    isLoading,
-    isInitialized,
-    selectTenant,
-    clearTenant,
-    refreshTenants,
-  };
+  const value = useMemo<TenantContextType>(
+    () => ({
+      currentTenant,
+      tenants,
+      isLoading,
+      isInitialized,
+      selectTenant,
+      clearTenant,
+      refreshTenants,
+    }),
+    [
+      currentTenant,
+      tenants,
+      isLoading,
+      isInitialized,
+      selectTenant,
+      clearTenant,
+      refreshTenants,
+    ]
+  );
 
   return (
     <TenantContext.Provider value={value}>{children}</TenantContext.Provider>
