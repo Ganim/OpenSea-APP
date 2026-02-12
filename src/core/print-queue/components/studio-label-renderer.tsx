@@ -7,10 +7,7 @@
 
 'use client';
 
-import type {
-  LabelElement,
-  LabelStudioTemplate,
-} from '@/core/print-queue/editor';
+import type { LabelStudioTemplate } from '@/core/print-queue/editor';
 import { ElementRenderer, mmToPx } from '@/core/print-queue/editor';
 
 interface StudioLabelRendererProps {

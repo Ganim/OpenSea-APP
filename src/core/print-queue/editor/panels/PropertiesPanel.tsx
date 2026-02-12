@@ -5,6 +5,12 @@
  * Painel de propriedades unificado (sem tabs) do elemento selecionado
  */
 
+import { CareIconInline } from '@/components/care/care-icon-inline';
+import {
+  CARE_CATEGORY_ORDER,
+  CARE_ICONS_BY_CATEGORY,
+  getCategoryLabel,
+} from '@/components/care/care-manifest';
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
@@ -455,21 +461,72 @@ function ElementProperties({
 
       {/* === ICON === */}
       {element.type === 'icon' && (
-        <Section title="Ícone">
-          <div className="flex items-center gap-1">
-            <input
-              type="color"
-              value={element.color}
-              onChange={e => onUpdate({ color: e.target.value })}
-              className="w-7 h-7 rounded border border-slate-200 dark:border-slate-600 cursor-pointer"
-            />
-            <Input
-              value={element.color}
-              onChange={e => onUpdate({ color: e.target.value })}
-              className="h-7 text-xs flex-1"
-            />
-          </div>
-        </Section>
+        <>
+          <Section title="Ícone">
+            <div className="flex items-center gap-1">
+              <input
+                type="color"
+                value={element.color}
+                onChange={e => onUpdate({ color: e.target.value })}
+                className="w-7 h-7 rounded border border-slate-200 dark:border-slate-600 cursor-pointer"
+              />
+              <Input
+                value={element.color}
+                onChange={e => onUpdate({ color: e.target.value })}
+                className="h-7 text-xs flex-1"
+              />
+            </div>
+          </Section>
+          {element.category === 'care' && (
+            <Section title="Símbolo de Cuidado">
+              <div className="space-y-2">
+                {CARE_CATEGORY_ORDER.map(catKey => {
+                  const icons = CARE_ICONS_BY_CATEGORY[catKey];
+                  if (!icons?.length) return null;
+                  return (
+                    <div key={catKey}>
+                      <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                        {getCategoryLabel(catKey)}
+                      </p>
+                      <div className="grid grid-cols-4 gap-1">
+                        {icons.map(icon => (
+                          <TooltipProvider key={icon.code} delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  className={cn(
+                                    'flex items-center justify-center p-1 rounded',
+                                    'border transition-all duration-150 cursor-pointer',
+                                    element.iconId === icon.code
+                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                                      : 'border-slate-200/50 dark:border-slate-600/30 hover:border-blue-300 dark:hover:border-blue-600'
+                                  )}
+                                  onClick={() =>
+                                    onUpdate({ iconId: icon.code })
+                                  }
+                                  aria-label={icon.label}
+                                >
+                                  <CareIconInline
+                                    code={icon.code}
+                                    size={24}
+                                    color={element.color}
+                                  />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">
+                                {icon.label}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Section>
+          )}
+        </>
       )}
 
       {/* === SHAPE === */}

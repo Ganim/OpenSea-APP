@@ -30,6 +30,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LabelTemplate } from '@/core/print-queue/editor';
 import { LABEL_SIZE_PRESETS } from '@/core/print-queue/editor';
+import { parseStudioTemplate } from '@/core/print-queue/components/studio-label-renderer';
+import { TestPrintModal } from '@/core/print-queue/components/test-print-modal';
 import { useLabelTemplateCrud } from '@/hooks/stock/use-label-templates';
 import { labelTemplatesService } from '@/services/stock/label-templates.service';
 import {
@@ -55,6 +57,8 @@ export default function PrintStudioPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] =
+    useState<LabelTemplate | null>(null);
+  const [testPrintTemplate, setTestPrintTemplate] =
     useState<LabelTemplate | null>(null);
 
   // Debounce search
@@ -153,6 +157,15 @@ export default function PrintStudioPage() {
       toast.success('Template exportado com sucesso!');
     } catch {
       toast.error('Erro ao exportar template');
+    }
+  }, []);
+
+  const handleTestPrint = useCallback(async (template: LabelTemplate) => {
+    try {
+      const fullTemplate = await labelTemplatesService.getTemplate(template.id);
+      setTestPrintTemplate(fullTemplate.template);
+    } catch {
+      toast.error('Erro ao carregar template para teste');
     }
   }, []);
 
@@ -329,6 +342,15 @@ export default function PrintStudioPage() {
                   <Download className="w-4 h-4 mr-2" />
                   Exportar JSON
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleTestPrint(template);
+                  }}
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Imprimir Teste
+                </DropdownMenuItem>
                 {!template.isSystem && (
                   <>
                     <DropdownMenuSeparator />
@@ -437,6 +459,21 @@ export default function PrintStudioPage() {
         className="hidden"
         onChange={handleImport}
       />
+
+      {/* Test Print Modal */}
+      {testPrintTemplate &&
+        (() => {
+          const studioTpl = parseStudioTemplate(testPrintTemplate.grapesJsData);
+          return studioTpl ? (
+            <TestPrintModal
+              open={!!testPrintTemplate}
+              onOpenChange={open => {
+                if (!open) setTestPrintTemplate(null);
+              }}
+              template={studioTpl}
+            />
+          ) : null;
+        })()}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

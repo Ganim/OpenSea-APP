@@ -5,6 +5,12 @@
  * Painel lateral com elementos disponíveis para adicionar ao canvas
  */
 
+import { CareIconInline } from '@/components/care/care-icon-inline';
+import {
+  CARE_CATEGORY_ORDER,
+  CARE_ICONS_BY_CATEGORY,
+  getCategoryLabel,
+} from '@/components/care/care-manifest';
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
@@ -29,6 +35,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   QrCode,
+  ShirtIcon,
   Square,
   Star,
   Table2,
@@ -344,6 +351,32 @@ function createNewElement(
   }
 }
 
+/**
+ * Cria um elemento de ícone de cuidados têxteis
+ */
+function createCareIconElement(
+  code: string,
+  canvasWidth: number,
+  canvasHeight: number
+): IconElement {
+  return {
+    id: '',
+    type: 'icon',
+    x: canvasWidth / 2 - 4,
+    y: canvasHeight / 2 - 4,
+    width: 8,
+    height: 8,
+    rotation: 0,
+    opacity: 1,
+    zIndex: 0,
+    locked: false,
+    visible: true,
+    iconId: code,
+    category: 'care',
+    color: '#000000',
+  };
+}
+
 interface ElementsPanelProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -367,6 +400,10 @@ export function ElementsPanel({
     if (newElement) {
       addElement(newElement);
     }
+  };
+
+  const handleAddCareIcon = (code: string) => {
+    addElement(createCareIconElement(code, canvasWidth, canvasHeight));
   };
 
   // Collapsed view - icon strip
@@ -418,6 +455,22 @@ export function ElementsPanel({
             );
           })
         )}
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => handleAddCareIcon('WASH_30')}
+                aria-label="Cuidados Têxteis"
+              >
+                <ShirtIcon className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Cuidados Têxteis</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     );
   }
@@ -486,6 +539,64 @@ export function ElementsPanel({
             </CollapsibleContent>
           </Collapsible>
         ))}
+
+        {/* Cuidados Têxteis (ISO 3758) */}
+        <Collapsible defaultOpen={false}>
+          <CollapsibleTrigger className="flex items-center gap-1.5 w-full py-1.5 group">
+            <ChevronRight className="h-3 w-3 text-slate-400 transition-transform group-data-[state=open]:rotate-90" />
+            <ShirtIcon className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Cuidados Têxteis
+            </span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="space-y-2 pt-1.5 pb-2">
+              {CARE_CATEGORY_ORDER.map(catKey => {
+                const icons = CARE_ICONS_BY_CATEGORY[catKey];
+                if (!icons?.length) return null;
+                return (
+                  <div key={catKey}>
+                    <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 pl-1">
+                      {getCategoryLabel(catKey)}
+                    </p>
+                    <div className="grid grid-cols-4 gap-1">
+                      {icons.map(icon => (
+                        <TooltipProvider key={icon.code} delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                className={cn(
+                                  'flex items-center justify-center p-1.5 rounded-md',
+                                  'bg-linear-to-br from-slate-100/80 to-slate-50/60 dark:from-slate-600/60 dark:to-slate-700/40',
+                                  'border border-slate-200/50 dark:border-slate-600/30',
+                                  'hover:from-blue-100/80 hover:to-purple-100/60 dark:hover:from-blue-900/30 dark:hover:to-purple-700/40',
+                                  'hover:border-blue-300/50 dark:hover:border-blue-600/30',
+                                  'transition-all duration-200',
+                                  'cursor-pointer'
+                                )}
+                                onClick={() => handleAddCareIcon(icon.code)}
+                                aria-label={icon.label}
+                              >
+                                <CareIconInline
+                                  code={icon.code}
+                                  size={28}
+                                  color="#374151"
+                                />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              {icon.label}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Tip */}

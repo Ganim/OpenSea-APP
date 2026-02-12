@@ -5,6 +5,7 @@
  * Renderiza elementos de ícone
  */
 
+import { CareIconInline } from '@/components/care/care-icon-inline';
 import React from 'react';
 import type { IconElement } from '../studio-types';
 import { mmToPx } from '../utils/unitConverter';
@@ -120,12 +121,24 @@ export function IconElementRenderer({
   element,
   zoom,
 }: IconElementRendererProps) {
-  const { iconId, color, width, height } = element;
-
-  const hasIcon = !!getIconComponent(iconId);
+  const { iconId, category, color, width, height } = element;
 
   // Calcula tamanho do ícone (usa o menor entre width e height)
   const sizePx = Math.min(mmToPx(width, zoom), mmToPx(height, zoom));
+
+  // Care icons use inline SVG for color support
+  if (category === 'care') {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center"
+        style={{ color }}
+      >
+        <CareIconInline code={iconId} color={color} size={sizePx * 0.9} />
+      </div>
+    );
+  }
+
+  const hasIcon = !!getIconComponent(iconId);
 
   if (!hasIcon) {
     // Fallback para ícone não encontrado

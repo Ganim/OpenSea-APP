@@ -16,6 +16,7 @@ import {
   useEditorStore,
 } from '@/core/print-queue/editor';
 import type { LabelStudioTemplate } from '@/core/print-queue/editor';
+import { TestPrintModal } from '@/core/print-queue/components/test-print-modal';
 import {
   useLabelTemplate,
   useDuplicateLabelTemplate,
@@ -27,6 +28,7 @@ import {
   Edit,
   Eye,
   EyeOff,
+  Printer,
   Tag,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -81,6 +83,7 @@ export default function ViewLabelTemplatePage() {
     useDuplicateLabelTemplate();
 
   const [showPreview, setShowPreview] = useState(true);
+  const [testPrintOpen, setTestPrintOpen] = useState(false);
 
   const template = data?.template;
 
@@ -208,18 +211,28 @@ export default function ViewLabelTemplatePage() {
         </div>
         <div className="flex items-center gap-2">
           {isStudioTemplate && (
-            <Button
-              variant={showPreview ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-            >
-              {showPreview ? (
-                <EyeOff className="w-4 h-4 mr-2" />
-              ) : (
-                <Eye className="w-4 h-4 mr-2" />
-              )}
-              {showPreview ? 'Ocultar Preview' : 'Preview'}
-            </Button>
+            <>
+              <Button
+                variant={showPreview ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                {showPreview ? (
+                  <EyeOff className="w-4 h-4 mr-2" />
+                ) : (
+                  <Eye className="w-4 h-4 mr-2" />
+                )}
+                {showPreview ? 'Ocultar Preview' : 'Preview'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTestPrintOpen(true)}
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Imprimir Teste
+              </Button>
+            </>
           )}
           <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
@@ -299,6 +312,15 @@ export default function ViewLabelTemplatePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Test Print Modal */}
+      {studioTemplate && (
+        <TestPrintModal
+          open={testPrintOpen}
+          onOpenChange={setTestPrintOpen}
+          template={studioTemplate}
+        />
+      )}
     </div>
   );
 }

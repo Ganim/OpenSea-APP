@@ -5,7 +5,6 @@
 
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -67,49 +66,20 @@ export function PrintQueuePanel() {
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-white/10">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between">
               <DropdownMenuLabel className="p-0 text-lg font-bold">
                 Fila de Impressao
               </DropdownMenuLabel>
-              <div className="flex items-center gap-2">
-                <Link href="/print/studio">
-                  <Button
-                    size="sm"
-                    className="h-7 px-3 text-xs font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Studio
-                  </Button>
-                </Link>
-                {hasItems && (
-                  <Badge variant="default" className="bg-blue-500 text-white">
-                    {totalLabels} etiqueta{totalLabels !== 1 && 's'}
-                  </Badge>
-                )}
-              </div>
+              <Link href="/print/studio">
+                <Button
+                  size="sm"
+                  className="h-7 px-3 text-xs font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Studio
+                </Button>
+              </Link>
             </div>
-            {hasItems && (
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsModalOpen(true)}
-                  className="h-7 text-xs"
-                >
-                  <Printer className="w-3 h-3 mr-1" />
-                  Abrir impressao
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={actions.clearQueue}
-                  className="h-7 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
-                >
-                  <Trash2 className="w-3 h-3 mr-1" />
-                  Limpar
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Queue List Preview */}
@@ -219,7 +189,21 @@ export function PrintQueuePanel() {
           {hasItems && (
             <>
               <DropdownMenuSeparator />
-              <div className="p-2">
+              <div className="flex items-center justify-between px-4 py-2">
+                <span className="text-xs text-gray-500 dark:text-white/50">
+                  {totalLabels} etiqueta{totalLabels !== 1 && 's'}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={actions.clearQueue}
+                  className="h-6 px-2 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Limpar
+                </Button>
+              </div>
+              <div className="px-2 pb-2">
                 <Button
                   variant="default"
                   className="w-full justify-center text-sm font-medium bg-blue-500 hover:bg-blue-600"
