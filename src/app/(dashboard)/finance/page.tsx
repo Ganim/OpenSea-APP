@@ -5,8 +5,9 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
+import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
@@ -20,7 +21,6 @@ import {
 import {
   AlertTriangle,
   ArrowDownCircle,
-  ArrowRight,
   ArrowUpCircle,
   Building2,
   DollarSign,
@@ -32,7 +32,6 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface CardItem {
@@ -45,36 +44,12 @@ interface CardItem {
   hoverBg: string;
   permission?: string;
   countKey?: string;
-  variant?: 'default' | 'alert';
 }
 
 const sections: {
   title: string;
   cards: CardItem[];
 }[] = [
-  {
-    title: 'Visão Geral',
-    cards: [
-      {
-        id: 'dashboard',
-        title: 'Dashboard Financeiro',
-        description: 'Indicadores e resumo financeiro',
-        icon: LayoutDashboard,
-        href: '/finance',
-        gradient: 'from-blue-500 to-blue-600',
-        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-      },
-      {
-        id: 'cashflow',
-        title: 'Fluxo de Caixa',
-        description: 'Entradas, saídas e projeções',
-        icon: TrendingUp,
-        href: '/finance/cashflow',
-        gradient: 'from-slate-500 to-slate-600',
-        hoverBg: 'hover:bg-slate-50 dark:hover:bg-slate-500/10',
-      },
-    ],
-  },
   {
     title: 'Lançamentos',
     cards: [
@@ -106,7 +81,6 @@ const sections: {
         href: '/finance/overdue',
         gradient: 'from-amber-500 to-amber-600',
         hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-        variant: 'alert',
         countKey: 'overdue',
       },
     ],
@@ -183,6 +157,29 @@ const sections: {
         hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
       },
     ],
+  },
+];
+
+const heroBannerButtons: (CardItem & { label: string })[] = [
+  {
+    id: 'dashboard',
+    title: 'Dashboard Financeiro',
+    label: 'Dashboard',
+    description: 'Indicadores e resumo financeiro',
+    icon: LayoutDashboard,
+    href: '/finance/dashboard',
+    gradient: 'from-blue-500 to-blue-600',
+    hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
+  },
+  {
+    id: 'cashflow',
+    title: 'Fluxo de Caixa',
+    label: 'Fluxo de Caixa',
+    description: 'Entradas, saídas e projeções',
+    icon: TrendingUp,
+    href: '/finance/cashflow',
+    gradient: 'from-slate-500 to-slate-600',
+    hoverBg: 'hover:bg-slate-50 dark:hover:bg-slate-500/10',
   },
 ];
 
@@ -273,120 +270,33 @@ export default function FinanceLandingPage() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <div>
-        <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full opacity-80 translate-y-1/2 -translate-x-1/2" />
+      <PageActionBar
+        breadcrumbItems={[{ label: 'Financeiro', href: '/finance' }]}
+        hasPermission={hasPermission}
+      />
 
-          <div className="relative z-10 max-w-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-xl bg-linear-to-br from-blue-500 to-emerald-600">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-gray-600 dark:text-white/60">
-                {tenantName}
-              </span>
-            </div>
+      <PageHeroBanner
+        title="Financeiro"
+        description="Gerencie contas a pagar, receber, fluxo de caixa, empréstimos e consórcios da sua empresa."
+        icon={DollarSign}
+        iconGradient="from-blue-500 to-emerald-600"
+        buttons={heroBannerButtons.map(btn => ({
+          id: btn.id,
+          label: btn.label,
+          icon: btn.icon,
+          href: btn.href,
+          gradient: btn.gradient,
+          permission: btn.permission,
+        }))}
+        hasPermission={hasPermission}
+      />
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              Financeiro
-            </h1>
-
-            <p className="text-lg text-gray-600 dark:text-white/60">
-              Gerencie contas a pagar, receber, fluxo de caixa, empréstimos e
-              consórcios da sua empresa.
-            </p>
-          </div>
-        </Card>
-      </div>
-
-      {/* Sections */}
-      {sections.map((section, sectionIndex) => {
-        const visibleCards = section.cards.filter(
-          card => !card.permission || hasPermission(card.permission)
-        );
-
-        if (visibleCards.length === 0) return null;
-
-        return (
-          <div
-            key={section.title}
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              {section.title}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleCards.map((card) => (
-                <div
-                  key={card.id}
-                >
-                  <Link href={card.href}>
-                    <Card
-                      className={`p-6 h-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${card.hoverBg}`}
-                    >
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-start justify-between mb-4">
-                          <div
-                            className={`w-12 h-12 rounded-xl bg-linear-to-br ${card.gradient} flex items-center justify-center`}
-                          >
-                            <card.icon className="h-6 w-6 text-white" />
-                          </div>
-                          {card.countKey && (
-                            <CountBadge
-                              count={counts[card.countKey]}
-                              loading={countsLoading}
-                              variant={card.variant}
-                            />
-                          )}
-                        </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                          {card.title}
-                          <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-white/60">
-                          {card.description}
-                        </p>
-                      </div>
-                    </Card>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      <PageDashboardSections
+        sections={sections}
+        counts={counts}
+        countsLoading={countsLoading}
+        hasPermission={hasPermission}
+      />
     </div>
-  );
-}
-
-function CountBadge({
-  count,
-  loading,
-  variant = 'default',
-}: {
-  count: number | null | undefined;
-  loading: boolean;
-  variant?: 'default' | 'alert';
-}) {
-  if (loading) {
-    return (
-      <div className="h-6 w-12 rounded-full bg-gray-200 dark:bg-white/10 animate-pulse" />
-    );
-  }
-
-  if (count === null || count === undefined) return null;
-
-  const bgClass =
-    variant === 'alert'
-      ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
-      : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/70';
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgClass}`}
-    >
-      {count.toLocaleString('pt-BR')}
-    </span>
   );
 }

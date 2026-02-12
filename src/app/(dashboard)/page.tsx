@@ -5,82 +5,74 @@
 
 'use client';
 
+import { PageActionBar } from '@/components/layout/page-action-bar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
+import { usePermissions } from '@/hooks/use-permissions';
 
 import {
   ArrowRight,
-  BarChart3,
-  Box,
   Building2,
-  ClipboardList,
-  FileSpreadsheet,
+  DollarSign,
   Package,
   Settings,
   Sparkles,
-  Users,
-  Warehouse,
+  UserRoundCog,
 } from 'lucide-react';
 import Link from 'next/link';
 
-const quickLinks = [
+const moduleCards = [
   {
-    title: 'Produtos',
-    description: 'Gerencie seu catálogo de produtos e variantes',
-    icon: Package,
-    href: '/stock/products',
-    gradient: 'from-blue-500 to-blue-600',
-    hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-  },
-  {
+    id: 'stock',
     title: 'Estoque',
-    description: 'Visualize o estoque geral e movimentações',
-    icon: Warehouse,
-    href: '/stock/overview/list',
+    description:
+      'Produtos, movimentações, localizações e cadeia de suprimentos',
+    icon: Package,
+    href: '/stock',
     gradient: 'from-emerald-500 to-emerald-600',
     hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
+    permission: UI_PERMISSIONS.MENU.STOCK,
   },
   {
-    title: 'Pedidos de Compra',
-    description: 'Acompanhe e gerencie suas compras',
-    icon: ClipboardList,
-    href: '/stock/purchase-orders',
+    id: 'hr',
+    title: 'Recursos Humanos',
+    description:
+      'Funcionários, departamentos, cargos e estrutura organizacional',
+    icon: UserRoundCog,
+    href: '/hr',
+    gradient: 'from-blue-500 to-purple-600',
+    hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
+    permission: UI_PERMISSIONS.MENU.HR,
+  },
+  {
+    id: 'finance',
+    title: 'Financeiro',
+    description: 'Contas a pagar e receber, fluxo de caixa e lançamentos',
+    icon: DollarSign,
+    href: '/finance',
+    gradient: 'from-blue-500 to-emerald-600',
+    hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
+    permission: UI_PERMISSIONS.MENU.FINANCE,
+  },
+  {
+    id: 'admin',
+    title: 'Administração',
+    description: 'Usuários, permissões e monitoramento do sistema',
+    icon: Settings,
+    href: '/admin',
     gradient: 'from-purple-500 to-purple-600',
     hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-  },
-  {
-    title: 'Importação',
-    description: 'Importe dados em massa via planilhas',
-    icon: FileSpreadsheet,
-    href: '/import',
-    gradient: 'from-amber-500 to-amber-600',
-    hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-  },
-];
-
-const features = [
-  {
-    icon: Box,
-    title: 'Gestão de Estoque',
-    description: 'Controle completo do seu inventário com rastreabilidade',
-  },
-  {
-    icon: BarChart3,
-    title: 'Relatórios',
-    description: 'Análises e métricas para tomada de decisão',
-  },
-  {
-    icon: Users,
-    title: 'Colaboração',
-    description: 'Gerencie usuários e permissões de acesso',
+    permission: UI_PERMISSIONS.MENU.RBAC,
   },
 ];
 
 export default function DashboardWelcomePage() {
   const { user } = useAuth();
   const { currentTenant } = useTenant();
+  const { hasPermission } = usePermissions();
 
   // Usa o primeiro nome do perfil, ou fallback para username/email
   const firstName =
@@ -90,8 +82,14 @@ export default function DashboardWelcomePage() {
     'Usuário';
   const tenantName = currentTenant?.name || 'Sua Empresa';
 
+  const visibleModules = moduleCards.filter(
+    card => !card.permission || hasPermission(card.permission)
+  );
+
   return (
     <div className="space-y-8">
+      <PageActionBar breadcrumbItems={[]} className="pl-2" />
+
       {/* Hero Section */}
       <div>
         <Card className="relative overflow-hidden p-8 md:p-12 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
@@ -113,89 +111,48 @@ export default function DashboardWelcomePage() {
               Bem-vindo, {firstName}!
             </h1>
 
-            <p className="text-lg text-gray-600 dark:text-white/60 mb-6">
-              Gerencie seu estoque, produtos e operações de forma eficiente. Use
-              o menu acima para navegar entre os módulos do sistema.
+            <p className="text-lg text-gray-600 dark:text-white/60">
+              Gerencie seu negócio de forma eficiente.
             </p>
-
-            <div className="flex flex-wrap gap-3">
-              <Link href="/stock/products">
-                <Button className="gap-2 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                  <Package className="h-4 w-4" />
-                  Ver Produtos
-                </Button>
-              </Link>
-              <Link href="/stock/overview/list">
-                <Button variant="outline" className="gap-2">
-                  <Warehouse className="h-4 w-4" />
-                  Ver Estoque
-                </Button>
-              </Link>
-            </div>
+            <p className="text-lg text-gray-600 dark:text-white/60">
+              Selecione um módulo abaixo para começar.
+            </p>
           </div>
         </Card>
       </div>
 
-      {/* Quick Links */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Acesso Rápido
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickLinks.map((link) => (
-            <div
-              key={link.href}
-            >
-              <Link href={link.href}>
+      {/* Módulos */}
+      {visibleModules.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Módulos
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {visibleModules.map(card => (
+              <Link key={card.id} href={card.href}>
                 <Card
-                  className={`p-6 h-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${link.hoverBg}`}
+                  className={`p-6 h-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 transition-all group ${card.hoverBg}`}
                 >
                   <div className="flex flex-col h-full">
                     <div
-                      className={`w-12 h-12 rounded-xl bg-linear-to-br ${link.gradient} flex items-center justify-center mb-4`}
+                      className={`w-12 h-12 rounded-xl bg-linear-to-br ${card.gradient} flex items-center justify-center mb-4`}
                     >
-                      <link.icon className="h-6 w-6 text-white" />
+                      <card.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                      {link.title}
+                      {card.title}
                       <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-white/60">
-                      {link.description}
+                      {card.description}
                     </p>
                   </div>
                 </Card>
               </Link>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Features Grid */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          O que você pode fazer
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-            >
-              <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 w-fit mb-4">
-                  <feature.icon className="h-5 w-5 text-gray-600 dark:text-white/60" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-white/60">
-                  {feature.description}
-                </p>
-              </Card>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Help Card */}
       <div>

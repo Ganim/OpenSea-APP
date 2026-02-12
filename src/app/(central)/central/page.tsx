@@ -2,6 +2,7 @@
 
 import { GlassButton } from '@/components/central/glass-button';
 import { GlassCard } from '@/components/central/glass-card';
+import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
 import { useAuth } from '@/contexts/auth-context';
 import {
   ArrowRight,
@@ -56,6 +57,9 @@ export default function CentralWelcomePage() {
 
   return (
     <div className="space-y-8 pb-8">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={[{ label: 'Central', href: '/central' }]} />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl">
         <GlassCard
