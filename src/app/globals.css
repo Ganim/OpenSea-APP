@@ -332,7 +332,7 @@
 
   /* === GLASSMORPHISM === */
   --glass-bg: var(--os-slate-800);
-  --glass-bg-opacity: 0.7;
+  --glass-bg-opacity: 0.95;
   --glass-border: var(--os-white);
   --glass-border-opacity: 0.1;
   --glass-blur: 20px;

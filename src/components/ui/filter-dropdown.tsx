@@ -186,7 +186,7 @@ export function FilterDropdown({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full h-8 pl-8 pr-3 text-sm bg-white/50 dark:bg-white/5 rounded-lg outline-none placeholder:opacity-50"
+              className="w-full h-8 pl-8 pr-3 text-sm bg-white/50 dark:bg-white/10 rounded-lg outline-none placeholder:opacity-50"
             />
           </div>
         </div>
