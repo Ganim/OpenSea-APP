@@ -18,7 +18,7 @@ export function CareIcon({
   alt = '',
 }: CareIconProps) {
   // URL base dos assets - você pode configurar como variável de ambiente
-  const baseUrl = process.env.NEXT_PUBLIC_ASSETS_URL || '/assets';
+  const baseUrl = process.env.NEXT_PUBLIC_ASSETS_URL || '/assets/care';
 
   return (
     <Image

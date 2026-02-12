@@ -18,7 +18,7 @@ export function CareIconDebug() {
     const checkIconLoading = async () => {
       try {
         // 1. Check base URL
-        const url = process.env.NEXT_PUBLIC_ASSETS_URL || '/assets';
+        const url = process.env.NEXT_PUBLIC_ASSETS_URL || '/assets/care';
         setBaseUrl(url);
 
         // 2. Fetch API response
