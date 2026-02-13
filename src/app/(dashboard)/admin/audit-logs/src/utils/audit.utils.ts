@@ -325,6 +325,12 @@ const ACTION_VERBS: Partial<Record<AuditAction | string, string>> = {
   NOTIFICATION_READ: 'leu notificação',
   NOTIFICATION_DELETE: 'excluiu notificação',
 
+  // Finance
+  PAYMENT_REGISTER: 'registrou pagamento de',
+  PAYMENT_CANCEL: 'cancelou pagamento de',
+  ENTRY_CANCEL: 'cancelou lançamento',
+  CONTEMPLATION: 'registrou contemplação de',
+
   // Checks
   CHECK_CPF: 'verificou CPF',
   CHECK_CNPJ: 'verificou CNPJ',
@@ -358,8 +364,8 @@ export function countChangedFields(log: AuditLog): number {
 export function buildMetadataChips(log: AuditLog) {
   const chips: Array<{ label: string; value: string }> = [];
 
-  chips.push({ label: 'Acao', value: getActionLabel(log.action) });
-  chips.push({ label: 'Modulo', value: getModuleLabel(log.module) });
+  chips.push({ label: 'Ação', value: getActionLabel(log.action) });
+  chips.push({ label: 'Módulo', value: getModuleLabel(log.module) });
   chips.push({ label: 'Entidade', value: getEntityLabel(log.entity) });
   if (log.entityId) chips.push({ label: 'ID', value: String(log.entityId) });
   if (log.ip) chips.push({ label: 'IP', value: log.ip });
@@ -584,13 +590,42 @@ function extractChanges(log: AuditLog): TimelineItemData['changes'] {
 // FORMAT HELPERS
 // ============================================
 
+export function formatRelativeTimestamp(timestamp: string): string {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMs / 3600000);
+  const diffDay = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1) return 'agora';
+  if (diffMin < 60) return `há ${diffMin}min`;
+  if (diffHr < 24) return `há ${diffHr}h`;
+  if (diffDay < 7) return `há ${diffDay}d`;
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+  }).format(date);
+}
+
+export function formatCompactTimestamp(timestamp: string): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(timestamp));
+}
+
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
     return '-';
   }
 
   if (typeof value === 'boolean') {
-    return value ? 'Sim' : 'Nao';
+    return value ? 'Sim' : 'Não';
   }
 
   if (typeof value === 'object') {
@@ -600,28 +635,28 @@ function formatValue(value: unknown): string {
   return String(value);
 }
 
-const FIELD_LABELS: Record<string, string> = {
+export const FIELD_LABELS: Record<string, string> = {
   name: 'Nome',
   email: 'Email',
   username: 'Username',
   password: 'Senha',
-  price: 'Preco',
+  price: 'Preço',
   quantity: 'Quantidade',
   status: 'Status',
-  description: 'Descricao',
+  description: 'Descrição',
   createdAt: 'Criado em',
   updatedAt: 'Atualizado em',
-  deletedAt: 'Excluido em',
+  deletedAt: 'Excluído em',
   sku: 'SKU',
-  title: 'Titulo',
+  title: 'Título',
   active: 'Ativo',
   enabled: 'Habilitado',
   role: 'Cargo',
   department: 'Departamento',
-  position: 'Posicao',
+  position: 'Posição',
   company: 'Empresa',
-  employee: 'Funcionario',
-  user: 'Usuario',
+  employee: 'Funcionário',
+  user: 'Usuário',
   product: 'Produto',
   variant: 'Variante',
   category: 'Categoria',
@@ -629,7 +664,7 @@ const FIELD_LABELS: Record<string, string> = {
   manufacturer: 'Fabricante',
   customer: 'Cliente',
   order: 'Pedido',
-  startDate: 'Data Inicio',
+  startDate: 'Data Início',
   endDate: 'Data Fim',
   dueDate: 'Data Vencimento',
   amount: 'Valor',
@@ -638,7 +673,7 @@ const FIELD_LABELS: Record<string, string> = {
   tax: 'Imposto',
 };
 
-function formatFieldLabel(field: string): string {
+export function formatFieldLabel(field: string): string {
   // Check if we have a predefined label
   if (FIELD_LABELS[field]) {
     return FIELD_LABELS[field];

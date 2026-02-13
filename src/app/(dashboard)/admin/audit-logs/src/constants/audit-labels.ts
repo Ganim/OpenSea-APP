@@ -51,112 +51,118 @@ import { AuditAction, AuditEntity, AuditModule } from '../types';
 
 export const ACTION_LABELS: Record<string, string> = {
   // CRUD
-  CREATE: 'Criacao',
-  UPDATE: 'Atualizacao',
-  DELETE: 'Exclusao',
-  RESTORE: 'Restauracao',
+  CREATE: 'Criação',
+  UPDATE: 'Atualização',
+  DELETE: 'Exclusão',
+  RESTORE: 'Restauração',
 
   // Auth
   LOGIN: 'Login',
   LOGOUT: 'Logout',
-  SESSION_REFRESH: 'Renovacao de Sessao',
-  SESSION_EXPIRE: 'Expiracao de Sessao',
-  SESSION_REVOKE: 'Revogacao de Sessao',
+  SESSION_REFRESH: 'Renovação de Sessão',
+  SESSION_EXPIRE: 'Expiração de Sessão',
+  SESSION_REVOKE: 'Revogação de Sessão',
 
   // Password
-  PASSWORD_CHANGE: 'Alteracao de Senha',
-  PASSWORD_RESET_REQUEST: 'Solicitacao Reset Senha',
-  PASSWORD_RESET_COMPLETE: 'Reset de Senha Concluido',
-  PASSWORD_FORCE_RESET: 'Reset Forcado de Senha',
+  PASSWORD_CHANGE: 'Alteração de Senha',
+  PASSWORD_RESET_REQUEST: 'Solicitação Reset Senha',
+  PASSWORD_RESET_COMPLETE: 'Reset de Senha Concluído',
+  PASSWORD_FORCE_RESET: 'Reset Forçado de Senha',
 
   // Profile
-  EMAIL_CHANGE: 'Alteracao de Email',
-  USERNAME_CHANGE: 'Alteracao de Username',
-  PROFILE_CHANGE: 'Alteracao de Perfil',
+  EMAIL_CHANGE: 'Alteração de Email',
+  USERNAME_CHANGE: 'Alteração de Username',
+  PROFILE_CHANGE: 'Alteração de Perfil',
 
   // RBAC
-  PERMISSION_GRANT: 'Concessao de Permissao',
-  PERMISSION_REVOKE: 'Revogacao de Permissao',
-  PERMISSION_UPDATE: 'Atualizacao de Permissao',
-  GROUP_ASSIGN: 'Atribuicao a Grupo',
-  GROUP_REMOVE: 'Remocao de Grupo',
-  PERMISSION_ADD_TO_GROUP: 'Permissao Adicionada ao Grupo',
-  PERMISSION_REMOVE_FROM_GROUP: 'Permissao Removida do Grupo',
+  PERMISSION_GRANT: 'Concessão de Permissão',
+  PERMISSION_REVOKE: 'Revogação de Permissão',
+  PERMISSION_UPDATE: 'Atualização de Permissão',
+  GROUP_ASSIGN: 'Atribuição a Grupo',
+  GROUP_REMOVE: 'Remoção de Grupo',
+  PERMISSION_ADD_TO_GROUP: 'Permissão Adicionada ao Grupo',
+  PERMISSION_REMOVE_FROM_GROUP: 'Permissão Removida do Grupo',
 
   // Stock
-  PRICE_CHANGE: 'Alteracao de Preco',
+  PRICE_CHANGE: 'Alteração de Preço',
   STOCK_ENTRY: 'Entrada de Estoque',
-  STOCK_EXIT: 'Saida de Estoque',
-  STOCK_TRANSFER: 'Transferencia de Estoque',
+  STOCK_EXIT: 'Saída de Estoque',
+  STOCK_TRANSFER: 'Transferência de Estoque',
   STOCK_ADJUSTMENT: 'Ajuste de Estoque',
 
   // Orders
-  ORDER_CREATE: 'Criacao de Pedido',
+  ORDER_CREATE: 'Criação de Pedido',
   ORDER_CANCEL: 'Cancelamento de Pedido',
-  STATUS_CHANGE: 'Alteracao de Status',
+  STATUS_CHANGE: 'Alteração de Status',
 
   // Reservations
-  RESERVATION_CREATE: 'Criacao de Reserva',
-  RESERVATION_RELEASE: 'Liberacao de Reserva',
+  RESERVATION_CREATE: 'Criação de Reserva',
+  RESERVATION_RELEASE: 'Liberação de Reserva',
 
   // HR - Employees
-  EMPLOYEE_HIRE: 'Contratacao',
+  EMPLOYEE_HIRE: 'Contratação',
   EMPLOYEE_TERMINATE: 'Desligamento',
-  EMPLOYEE_TRANSFER: 'Transferencia',
-  EMPLOYEE_LINK_USER: 'Vinculacao de Usuario',
+  EMPLOYEE_TRANSFER: 'Transferência',
+  EMPLOYEE_LINK_USER: 'Vinculação de Usuário',
 
   // HR - Time
   CLOCK_IN: 'Registro de Entrada',
-  CLOCK_OUT: 'Registro de Saida',
-  TIME_CALCULATE: 'Calculo de Tempo',
-  TIME_BANK_CREDIT: 'Credito em Banco de Horas',
-  TIME_BANK_DEBIT: 'Debito em Banco de Horas',
+  CLOCK_OUT: 'Registro de Saída',
+  TIME_CALCULATE: 'Cálculo de Tempo',
+  TIME_BANK_CREDIT: 'Crédito em Banco de Horas',
+  TIME_BANK_DEBIT: 'Débito em Banco de Horas',
   TIME_BANK_ADJUST: 'Ajuste de Banco de Horas',
 
   // HR - Absences
-  ABSENCE_REQUEST: 'Solicitacao de Ausencia',
-  ABSENCE_APPROVE: 'Aprovacao de Ausencia',
-  ABSENCE_REJECT: 'Rejeicao de Ausencia',
-  ABSENCE_CANCEL: 'Cancelamento de Ausencia',
-  VACATION_SCHEDULE: 'Agendamento de Ferias',
-  VACATION_START: 'Inicio de Ferias',
-  VACATION_COMPLETE: 'Conclusao de Ferias',
-  VACATION_CANCEL: 'Cancelamento de Ferias',
-  VACATION_SELL: 'Venda de Ferias',
+  ABSENCE_REQUEST: 'Solicitação de Ausência',
+  ABSENCE_APPROVE: 'Aprovação de Ausência',
+  ABSENCE_REJECT: 'Rejeição de Ausência',
+  ABSENCE_CANCEL: 'Cancelamento de Ausência',
+  VACATION_SCHEDULE: 'Agendamento de Férias',
+  VACATION_START: 'Início de Férias',
+  VACATION_COMPLETE: 'Conclusão de Férias',
+  VACATION_CANCEL: 'Cancelamento de Férias',
+  VACATION_SELL: 'Venda de Férias',
 
   // HR - Overtime
-  OVERTIME_REQUEST: 'Solicitacao de Hora Extra',
-  OVERTIME_APPROVE: 'Aprovacao de Hora Extra',
+  OVERTIME_REQUEST: 'Solicitação de Hora Extra',
+  OVERTIME_APPROVE: 'Aprovação de Hora Extra',
 
   // Payroll
-  PAYROLL_CREATE: 'Criacao de Folha',
-  PAYROLL_CALCULATE: 'Calculo de Folha',
-  PAYROLL_APPROVE: 'Aprovacao de Folha',
+  PAYROLL_CREATE: 'Criação de Folha',
+  PAYROLL_CALCULATE: 'Cálculo de Folha',
+  PAYROLL_APPROVE: 'Aprovação de Folha',
   PAYROLL_CANCEL: 'Cancelamento de Folha',
   PAYROLL_PAY: 'Pagamento de Folha',
 
   // Requests
-  REQUEST_CREATE: 'Criacao de Solicitacao',
-  REQUEST_ASSIGN: 'Atribuicao de Solicitacao',
-  REQUEST_COMPLETE: 'Conclusao de Solicitacao',
-  REQUEST_CANCEL: 'Cancelamento de Solicitacao',
-  REQUEST_COMMENT: 'Comentario em Solicitacao',
-  REQUEST_INFO: 'Pedido de Informacao',
-  REQUEST_INFO_PROVIDE: 'Informacao Fornecida',
+  REQUEST_CREATE: 'Criação de Solicitação',
+  REQUEST_ASSIGN: 'Atribuição de Solicitação',
+  REQUEST_COMPLETE: 'Conclusão de Solicitação',
+  REQUEST_CANCEL: 'Cancelamento de Solicitação',
+  REQUEST_COMMENT: 'Comentário em Solicitação',
+  REQUEST_INFO: 'Pedido de Informação',
+  REQUEST_INFO_PROVIDE: 'Informação Fornecida',
 
   // Notifications
-  NOTIFICATION_SEND: 'Envio de Notificacao',
-  NOTIFICATION_READ: 'Leitura de Notificacao',
-  NOTIFICATION_DELETE: 'Exclusao de Notificacao',
+  NOTIFICATION_SEND: 'Envio de Notificação',
+  NOTIFICATION_READ: 'Leitura de Notificação',
+  NOTIFICATION_DELETE: 'Exclusão de Notificação',
+
+  // Finance
+  PAYMENT_REGISTER: 'Registro de Pagamento',
+  PAYMENT_CANCEL: 'Cancelamento de Pagamento',
+  ENTRY_CANCEL: 'Cancelamento de Lançamento',
+  CONTEMPLATION: 'Contemplação',
 
   // Checks
-  CHECK_CPF: 'Verificacao de CPF',
-  CHECK_CNPJ: 'Verificacao de CNPJ',
+  CHECK_CPF: 'Verificação de CPF',
+  CHECK_CNPJ: 'Verificação de CNPJ',
 
   // System
-  EXPORT: 'Exportacao',
-  IMPORT: 'Importacao',
-  SYNC: 'Sincronizacao',
+  EXPORT: 'Exportação',
+  IMPORT: 'Importação',
+  SYNC: 'Sincronização',
   OTHER: 'Outro',
 };
 
@@ -175,7 +181,7 @@ export type ActionStyle = {
 
 const DEFAULT_STYLE: ActionStyle = {
   icon: Sparkles,
-  verb: 'executou acao em',
+  verb: 'executou ação em',
   text: 'text-slate-700 dark:text-slate-200',
   bg: 'bg-slate-50 dark:bg-slate-900',
   border: 'border-slate-200 dark:border-slate-800',
@@ -236,7 +242,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   SESSION_REFRESH: {
     icon: RefreshCcw,
-    verb: 'renovou a sessao',
+    verb: 'renovou a sessão',
     text: 'text-sky-700 dark:text-sky-200',
     bg: 'bg-sky-50 dark:bg-sky-950/30',
     border: 'border-sky-200 dark:border-sky-900',
@@ -244,7 +250,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   SESSION_EXPIRE: {
     icon: Clock,
-    verb: 'expirou a sessao de',
+    verb: 'expirou a sessão de',
     text: 'text-amber-700 dark:text-amber-200',
     bg: 'bg-amber-50 dark:bg-amber-950/30',
     border: 'border-amber-200 dark:border-amber-900',
@@ -252,7 +258,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   SESSION_REVOKE: {
     icon: XCircle,
-    verb: 'revogou a sessao de',
+    verb: 'revogou a sessão de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -286,7 +292,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   PASSWORD_FORCE_RESET: {
     icon: KeyRound,
-    verb: 'forcou reset de senha de',
+    verb: 'forçou reset de senha de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -322,7 +328,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   // RBAC
   PERMISSION_GRANT: {
     icon: ShieldCheck,
-    verb: 'concedeu permissao',
+    verb: 'concedeu permissão',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -330,7 +336,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   PERMISSION_REVOKE: {
     icon: ShieldX,
-    verb: 'revogou permissao',
+    verb: 'revogou permissão',
     text: 'text-rose-700 dark:text-rose-200',
     bg: 'bg-rose-50 dark:bg-rose-950/30',
     border: 'border-rose-200 dark:border-rose-900',
@@ -338,7 +344,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   PERMISSION_UPDATE: {
     icon: ShieldCheck,
-    verb: 'atualizou permissao',
+    verb: 'atualizou permissão',
     text: 'text-indigo-700 dark:text-indigo-200',
     bg: 'bg-indigo-50 dark:bg-indigo-950/30',
     border: 'border-indigo-200 dark:border-indigo-900',
@@ -362,7 +368,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   PERMISSION_ADD_TO_GROUP: {
     icon: ShieldCheck,
-    verb: 'adicionou permissao ao grupo',
+    verb: 'adicionou permissão ao grupo',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -370,7 +376,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   PERMISSION_REMOVE_FROM_GROUP: {
     icon: ShieldX,
-    verb: 'removeu permissao do grupo',
+    verb: 'removeu permissão do grupo',
     text: 'text-rose-700 dark:text-rose-200',
     bg: 'bg-rose-50 dark:bg-rose-950/30',
     border: 'border-rose-200 dark:border-rose-900',
@@ -380,7 +386,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   // Stock
   PRICE_CHANGE: {
     icon: CircleDollarSign,
-    verb: 'alterou o preco de',
+    verb: 'alterou o preço de',
     text: 'text-cyan-700 dark:text-cyan-200',
     bg: 'bg-cyan-50 dark:bg-cyan-950/30',
     border: 'border-cyan-200 dark:border-cyan-900',
@@ -396,7 +402,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   STOCK_EXIT: {
     icon: TrendingDown,
-    verb: 'registrou saida de',
+    verb: 'registrou saída de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -490,7 +496,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   EMPLOYEE_LINK_USER: {
     icon: UserCheck,
-    verb: 'vinculou usuario a',
+    verb: 'vinculou usuário a',
     text: 'text-indigo-700 dark:text-indigo-200',
     bg: 'bg-indigo-50 dark:bg-indigo-950/30',
     border: 'border-indigo-200 dark:border-indigo-900',
@@ -508,7 +514,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   CLOCK_OUT: {
     icon: Clock,
-    verb: 'registrou saida',
+    verb: 'registrou saída',
     text: 'text-blue-700 dark:text-blue-200',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900',
@@ -550,7 +556,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   // HR - Absences
   ABSENCE_REQUEST: {
     icon: Calendar,
-    verb: 'solicitou ausencia',
+    verb: 'solicitou ausência',
     text: 'text-amber-700 dark:text-amber-200',
     bg: 'bg-amber-50 dark:bg-amber-950/30',
     border: 'border-amber-200 dark:border-amber-900',
@@ -558,7 +564,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   ABSENCE_APPROVE: {
     icon: Check,
-    verb: 'aprovou ausencia de',
+    verb: 'aprovou ausência de',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -566,7 +572,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   ABSENCE_REJECT: {
     icon: XCircle,
-    verb: 'rejeitou ausencia de',
+    verb: 'rejeitou ausência de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -574,7 +580,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   ABSENCE_CANCEL: {
     icon: XCircle,
-    verb: 'cancelou ausencia de',
+    verb: 'cancelou ausência de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -582,7 +588,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   VACATION_SCHEDULE: {
     icon: Calendar,
-    verb: 'agendou ferias de',
+    verb: 'agendou férias de',
     text: 'text-blue-700 dark:text-blue-200',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900',
@@ -590,7 +596,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   VACATION_START: {
     icon: Calendar,
-    verb: 'iniciou ferias de',
+    verb: 'iniciou férias de',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -598,7 +604,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   VACATION_COMPLETE: {
     icon: Check,
-    verb: 'finalizou ferias de',
+    verb: 'finalizou férias de',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -606,7 +612,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   VACATION_CANCEL: {
     icon: XCircle,
-    verb: 'cancelou ferias de',
+    verb: 'cancelou férias de',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -614,7 +620,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   VACATION_SELL: {
     icon: CreditCard,
-    verb: 'vendeu ferias de',
+    verb: 'vendeu férias de',
     text: 'text-cyan-700 dark:text-cyan-200',
     bg: 'bg-cyan-50 dark:bg-cyan-950/30',
     border: 'border-cyan-200 dark:border-cyan-900',
@@ -684,7 +690,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   // Requests
   REQUEST_CREATE: {
     icon: FileText,
-    verb: 'criou solicitacao',
+    verb: 'criou solicitação',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -692,7 +698,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_ASSIGN: {
     icon: Users,
-    verb: 'atribuiu solicitacao',
+    verb: 'atribuiu solicitação',
     text: 'text-blue-700 dark:text-blue-200',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900',
@@ -700,7 +706,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_COMPLETE: {
     icon: Check,
-    verb: 'completou solicitacao',
+    verb: 'completou solicitação',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -708,7 +714,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_CANCEL: {
     icon: XCircle,
-    verb: 'cancelou solicitacao',
+    verb: 'cancelou solicitação',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
@@ -716,7 +722,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_COMMENT: {
     icon: MessageSquare,
-    verb: 'comentou em solicitacao',
+    verb: 'comentou em solicitação',
     text: 'text-blue-700 dark:text-blue-200',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900',
@@ -724,7 +730,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_INFO: {
     icon: MessageSquare,
-    verb: 'solicitou informacoes',
+    verb: 'solicitou informações',
     text: 'text-amber-700 dark:text-amber-200',
     bg: 'bg-amber-50 dark:bg-amber-950/30',
     border: 'border-amber-200 dark:border-amber-900',
@@ -732,7 +738,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   REQUEST_INFO_PROVIDE: {
     icon: MessageSquare,
-    verb: 'forneceu informacoes',
+    verb: 'forneceu informações',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -742,7 +748,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   // Notifications
   NOTIFICATION_SEND: {
     icon: Send,
-    verb: 'enviou notificacao',
+    verb: 'enviou notificação',
     text: 'text-blue-700 dark:text-blue-200',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900',
@@ -750,7 +756,7 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   NOTIFICATION_READ: {
     icon: Check,
-    verb: 'leu notificacao',
+    verb: 'leu notificação',
     text: 'text-emerald-700 dark:text-emerald-200',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30',
     border: 'border-emerald-200 dark:border-emerald-900',
@@ -758,11 +764,45 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
   },
   NOTIFICATION_DELETE: {
     icon: Trash2,
-    verb: 'excluiu notificacao',
+    verb: 'excluiu notificação',
     text: 'text-red-700 dark:text-red-200',
     bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-900',
     pill: 'bg-red-600 text-white hover:bg-red-700',
+  },
+
+  // Finance
+  PAYMENT_REGISTER: {
+    icon: CreditCard,
+    verb: 'registrou pagamento de',
+    text: 'text-emerald-700 dark:text-emerald-200',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    border: 'border-emerald-200 dark:border-emerald-900',
+    pill: 'bg-emerald-600 text-white hover:bg-emerald-700',
+  },
+  PAYMENT_CANCEL: {
+    icon: XCircle,
+    verb: 'cancelou pagamento de',
+    text: 'text-red-700 dark:text-red-200',
+    bg: 'bg-red-50 dark:bg-red-950/30',
+    border: 'border-red-200 dark:border-red-900',
+    pill: 'bg-red-600 text-white hover:bg-red-700',
+  },
+  ENTRY_CANCEL: {
+    icon: XCircle,
+    verb: 'cancelou lançamento',
+    text: 'text-red-700 dark:text-red-200',
+    bg: 'bg-red-50 dark:bg-red-950/30',
+    border: 'border-red-200 dark:border-red-900',
+    pill: 'bg-red-600 text-white hover:bg-red-700',
+  },
+  CONTEMPLATION: {
+    icon: Check,
+    verb: 'registrou contemplação de',
+    text: 'text-emerald-700 dark:text-emerald-200',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    border: 'border-emerald-200 dark:border-emerald-900',
+    pill: 'bg-emerald-600 text-white hover:bg-emerald-700',
   },
 
   // Checks
@@ -817,20 +857,20 @@ export const ACTION_STYLES: Record<string, ActionStyle> = {
 
 export const ENTITY_LABELS: Record<string, string> = {
   // Auth & Users
-  USER: 'Usuario',
-  USER_PROFILE: 'Perfil de Usuario',
-  USER_EMAIL: 'Email de Usuario',
-  USER_PASSWORD: 'Senha de Usuario',
+  USER: 'Usuário',
+  USER_PROFILE: 'Perfil de Usuário',
+  USER_EMAIL: 'Email de Usuário',
+  USER_PASSWORD: 'Senha de Usuário',
   USER_USERNAME: 'Username',
-  SESSION: 'Sessao',
-  REFRESH_TOKEN: 'Token de Atualizacao',
+  SESSION: 'Sessão',
+  REFRESH_TOKEN: 'Token de Atualização',
 
   // RBAC
-  PERMISSION: 'Permissao',
-  PERMISSION_GROUP: 'Grupo de Permissoes',
-  PERMISSION_GROUP_PERMISSION: 'Permissao do Grupo',
-  USER_PERMISSION_GROUP: 'Grupo do Usuario',
-  USER_DIRECT_PERMISSION: 'Permissao Direta',
+  PERMISSION: 'Permissão',
+  PERMISSION_GROUP: 'Grupo de Permissões',
+  PERMISSION_GROUP_PERMISSION: 'Permissão do Grupo',
+  USER_PERMISSION_GROUP: 'Grupo do Usuário',
+  USER_DIRECT_PERMISSION: 'Permissão Direta',
 
   // Stock Management
   PRODUCT: 'Produto',
@@ -839,20 +879,20 @@ export const ENTITY_LABELS: Record<string, string> = {
   CATEGORY: 'Categoria',
   SUPPLIER: 'Fornecedor',
   MANUFACTURER: 'Fabricante',
-  LOCATION: 'Localizacao',
+  LOCATION: 'Localização',
   TEMPLATE: 'Template',
-  ITEM_MOVEMENT: 'Movimentacao de Item',
+  ITEM_MOVEMENT: 'Movimentação de Item',
   PRODUCT_CATEGORY: 'Categoria de Produto',
-  VARIANT_PRICE_HISTORY: 'Historico de Precos',
+  VARIANT_PRICE_HISTORY: 'Histórico de Preços',
   TAG: 'Tag',
   PRODUCT_TAG: 'Tag de Produto',
   VARIANT_IMAGE: 'Imagem de Variante',
   PURCHASE_ORDER: 'Ordem de Compra',
   PURCHASE_ORDER_ITEM: 'Item da Ordem de Compra',
-  UNIT_CONVERSION: 'Conversao de Unidade',
+  UNIT_CONVERSION: 'Conversão de Unidade',
   STOCK_SNAPSHOT: 'Snapshot de Estoque',
-  VARIANT_SUPPLIER_CODE: 'Codigo do Fornecedor',
-  VARIANT_PROMOTION: 'Promocao',
+  VARIANT_SUPPLIER_CODE: 'Código do Fornecedor',
+  VARIANT_PROMOTION: 'Promoção',
 
   // Sales
   CUSTOMER: 'Cliente',
@@ -862,28 +902,28 @@ export const ENTITY_LABELS: Record<string, string> = {
 
   // Alerts & Notifications
   ALERT: 'Alerta',
-  NOTIFICATION: 'Notificacao',
-  NOTIFICATION_TEMPLATE: 'Template de Notificacao',
-  NOTIFICATION_PREFERENCE: 'Preferencia de Notificacao',
+  NOTIFICATION: 'Notificação',
+  NOTIFICATION_TEMPLATE: 'Template de Notificação',
+  NOTIFICATION_PREFERENCE: 'Preferência de Notificação',
 
   // Comments
-  COMMENT: 'Comentario',
+  COMMENT: 'Comentário',
 
   // Requests
-  REQUEST: 'Solicitacao',
-  REQUEST_ATTACHMENT: 'Anexo da Solicitacao',
-  REQUEST_COMMENT: 'Comentario da Solicitacao',
-  REQUEST_HISTORY: 'Historico da Solicitacao',
+  REQUEST: 'Solicitação',
+  REQUEST_ATTACHMENT: 'Anexo da Solicitação',
+  REQUEST_COMMENT: 'Comentário da Solicitação',
+  REQUEST_HISTORY: 'Histórico da Solicitação',
 
   // HR - Organization
   COMPANY: 'Empresa',
-  COMPANY_ADDRESS: 'Endereco da Empresa',
+  COMPANY_ADDRESS: 'Endereço da Empresa',
   COMPANY_CNAE: 'CNAE da Empresa',
   COMPANY_FISCAL_SETTINGS: 'Config. Fiscais',
-  COMPANY_STAKEHOLDER: 'Socio da Empresa',
+  COMPANY_STAKEHOLDER: 'Sócio da Empresa',
 
   // HR - Structure
-  EMPLOYEE: 'Funcionario',
+  EMPLOYEE: 'Funcionário',
   DEPARTMENT: 'Departamento',
   POSITION: 'Cargo',
 
@@ -894,15 +934,27 @@ export const ENTITY_LABELS: Record<string, string> = {
   TIME_BANK: 'Banco de Horas',
 
   // HR - Absences
-  ABSENCE: 'Ausencia',
-  VACATION_PERIOD: 'Periodo de Ferias',
-  VACATION_BALANCE: 'Saldo de Ferias',
+  ABSENCE: 'Ausência',
+  VACATION_PERIOD: 'Período de Férias',
+  VACATION_BALANCE: 'Saldo de Férias',
 
   // Payroll
   PAYROLL: 'Folha de Pagamento',
   PAYROLL_ITEM: 'Item da Folha',
-  BONUS: 'Bonus',
-  DEDUCTION: 'Deducao',
+  BONUS: 'Bônus',
+  DEDUCTION: 'Dedução',
+
+  // Finance
+  COST_CENTER: 'Centro de Custo',
+  BANK_ACCOUNT: 'Conta Bancária',
+  FINANCE_CATEGORY: 'Categoria Financeira',
+  FINANCE_ENTRY: 'Lançamento Financeiro',
+  FINANCE_ENTRY_PAYMENT: 'Pagamento de Lançamento',
+  FINANCE_ATTACHMENT: 'Anexo Financeiro',
+  LOAN: 'Empréstimo',
+  LOAN_INSTALLMENT: 'Parcela de Empréstimo',
+  CONSORTIUM: 'Consórcio',
+  CONSORTIUM_PAYMENT: 'Pagamento de Consórcio',
 
   // System
   OTHER: 'Outro',
@@ -914,14 +966,15 @@ export const ENTITY_LABELS: Record<string, string> = {
 
 export const MODULE_LABELS: Record<string, string> = {
   CORE: 'Sistema',
-  AUTH: 'Autenticacao',
+  AUTH: 'Autenticação',
   RBAC: 'Controle de Acesso',
   STOCK: 'Estoque',
   SALES: 'Vendas',
   HR: 'Recursos Humanos',
   PAYROLL: 'Folha de Pagamento',
-  NOTIFICATIONS: 'Notificacoes',
-  REQUESTS: 'Solicitacoes',
+  FINANCE: 'Financeiro',
+  NOTIFICATIONS: 'Notificações',
+  REQUESTS: 'Solicitações',
   SYSTEM: 'Sistema',
   OTHER: 'Outro',
 };
@@ -964,6 +1017,11 @@ export const MODULE_COLORS: Record<
     bg: 'bg-cyan-100 dark:bg-cyan-950/30',
     text: 'text-cyan-800 dark:text-cyan-200',
     border: 'border-cyan-200 dark:border-cyan-900',
+  },
+  FINANCE: {
+    bg: 'bg-green-100 dark:bg-green-950/30',
+    text: 'text-green-800 dark:text-green-200',
+    border: 'border-green-200 dark:border-green-900',
   },
   NOTIFICATIONS: {
     bg: 'bg-cyan-100 dark:bg-cyan-950/30',

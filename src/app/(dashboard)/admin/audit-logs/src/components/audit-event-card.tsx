@@ -1,26 +1,14 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
 import { cn } from '@/lib/utils';
-import {
-  MODULE_COLORS,
-  getActionLabel,
-  getEntityLabel,
-  getModuleLabel,
-} from '../constants';
+import { MODULE_COLORS, getEntityLabel, getModuleLabel } from '../constants';
 import type { AuditLog } from '../types';
 import {
   countChangedFields,
   formatAuditNarrative,
-  formatAuditTimestamp,
+  formatCompactTimestamp,
+  formatRelativeTimestamp,
   getActionStyle,
 } from '../utils';
 
@@ -29,51 +17,22 @@ interface AuditEventCardProps {
   onSelect?: (log: AuditLog) => void;
 }
 
-const ActorBadge = ({
-  label,
-  isSystem,
-}: {
-  label: string;
-  isSystem: boolean;
-}) => (
-  <div
-    className={cn(
-      'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium border',
-      isSystem
-        ? 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800'
-        : 'bg-linear-to-r from-blue-600 to-cyan-500 text-white border-transparent'
-    )}
-  >
-    <Avatar className="h-6 w-6 border border-white/40 shadow-sm">
-      <AvatarFallback className="text-xs font-semibold">
-        {label.slice(0, 2).toUpperCase()}
-      </AvatarFallback>
-    </Avatar>
-    <span className="truncate max-w-[150px]">{label}</span>
-  </div>
-);
-
-const TargetBadge = ({ label }: { label: string }) => (
-  <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 px-3 py-1 text-sm font-medium border border-gray-200 dark:border-gray-800">
-    <span className="truncate max-w-[180px]">{label}</span>
-  </div>
-);
-
 export const AuditEventCard: React.FC<AuditEventCardProps> = ({
   log,
   onSelect,
 }) => {
   const style = getActionStyle(log.action);
-  const { sentence, actor, target, timestamp } = formatAuditNarrative(log);
+  const narrative = formatAuditNarrative(log);
   const changesCount = countChangedFields(log);
   const Icon = style.icon;
+  const moduleColors = MODULE_COLORS[log.module] || MODULE_COLORS.OTHER;
 
   const handleSelect = () => {
     if (onSelect) onSelect(log);
   };
 
   return (
-    <Card
+    <div
       role="button"
       tabIndex={0}
       onClick={handleSelect}
@@ -83,137 +42,87 @@ export const AuditEventCard: React.FC<AuditEventCardProps> = ({
           handleSelect();
         }
       }}
-      className="relative overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-white/5 hover:shadow-md transition-all"
+      className="relative flex items-start gap-3 px-4 py-3 rounded-lg border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-white/5 hover:shadow-md hover:bg-gray-50/80 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
     >
-      <div className={cn('absolute inset-y-0 left-0 w-1', style.bg)} />
+      {/* Indicador lateral colorido */}
+      <div
+        className={cn('absolute inset-y-0 left-0 w-1 rounded-l-lg', style.bg)}
+      />
 
-      <div className="p-4 flex gap-4">
-        <div
-          className={cn(
-            'rounded-full border p-2 shadow-sm',
-            style.bg,
-            style.border
-          )}
-        >
-          <Icon className={cn('w-4 h-4', style.text)} />
+      {/* Ícone */}
+      <div
+        className={cn(
+          'mt-0.5 rounded-full border p-1.5 shrink-0',
+          style.bg,
+          style.border
+        )}
+      >
+        <Icon className={cn('w-3.5 h-3.5', style.text)} />
+      </div>
+
+      {/* Conteúdo */}
+      <div className="flex-1 min-w-0">
+        {/* Linha 1: narrativa estruturada com destaque no ator e alvo */}
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-sm text-gray-800 dark:text-gray-200 truncate">
+            <span className="font-medium text-gray-900 dark:text-white">
+              {narrative.actor.label}
+            </span>{' '}
+            <span className="text-gray-600 dark:text-gray-400">
+              {narrative.verb}
+            </span>{' '}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {narrative.target.label}
+            </span>
+          </p>
+          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 tabular-nums">
+            {formatRelativeTimestamp(log.createdAt)}
+          </span>
         </div>
 
-        <div className="flex-1 space-y-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger asChild>
-                <div>
-                  <ActorBadge label={actor.label} isSystem={actor.isSystem} />
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 text-sm">
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {actor.label}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">
-                  {actor.description}
-                </p>
-                {log.ip && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    IP: {log.ip}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {timestamp}
-                </p>
-              </HoverCardContent>
-            </HoverCard>
-
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {style.verb}
-            </span>
-
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger asChild>
-                <div>
-                  <TargetBadge label={target.label} />
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 text-sm space-y-1">
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {target.base}
-                </p>
-                {target.identifier && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Identificador: {target.identifier}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Módulo: {getModuleLabel(log.module)}
-                </p>
-              </HoverCardContent>
-            </HoverCard>
-
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              em {timestamp}
-            </span>
-          </div>
-
-          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-            {sentence}
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            <Badge className={cn(style.pill, 'text-xs')}>
-              {getActionLabel(log.action)}
-            </Badge>
+        {/* Linha 2: badges à esquerda + data completa à direita */}
+        <div className="flex items-center justify-between gap-2 mt-1">
+          <div className="flex items-center gap-1.5 min-w-0">
             <Badge
               variant="outline"
               className={cn(
-                'text-xs border',
-                MODULE_COLORS[log.module]?.bg,
-                MODULE_COLORS[log.module]?.text,
-                MODULE_COLORS[log.module]?.border
+                'text-[10px] leading-tight px-1.5 py-0 h-[18px]',
+                moduleColors.bg,
+                moduleColors.text,
+                moduleColors.border
               )}
             >
               {getModuleLabel(log.module)}
             </Badge>
-            <Badge variant="secondary" className="text-xs">
+
+            <span className="text-gray-300 dark:text-gray-600 text-[10px]">
+              ·
+            </span>
+
+            <Badge
+              variant="secondary"
+              className="text-[10px] leading-tight px-1.5 py-0 h-[18px]"
+            >
               {getEntityLabel(log.entity)}
-              {log.entityId
-                ? ` • #${log.entityId.length > 8 ? `${log.entityId.slice(0, 8)}...` : log.entityId}`
-                : ''}
             </Badge>
+
             {changesCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="text-xs bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-900"
-              >
-                {changesCount} alteração{changesCount > 1 ? 'es' : ''}
-              </Badge>
+              <>
+                <span className="text-gray-300 dark:text-gray-600 text-[10px]">
+                  ·
+                </span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                  {changesCount} alteração{changesCount > 1 ? 'es' : ''}
+                </span>
+              </>
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
-            <span>{formatAuditTimestamp(log.createdAt)}</span>
-            {log.ip && <span className="truncate">IP {log.ip}</span>}
-            {log.method && log.endpoint && (
-              <span className="truncate">
-                {log.method} {log.endpoint}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={event => {
-              event.stopPropagation();
-              handleSelect();
-            }}
-            className="text-xs text-gray-600 dark:text-gray-300 hover:text-gray-900"
-          >
-            Ver detalhes
-          </Button>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 tabular-nums shrink-0">
+            {formatCompactTimestamp(log.createdAt)}
+          </span>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };

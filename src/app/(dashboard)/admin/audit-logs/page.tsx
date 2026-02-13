@@ -1,8 +1,3 @@
-/**
- * OpenSea OS - Audit Logs Page
- * Pagina de visualizacao de logs de auditoria do sistema
- */
-
 'use client';
 
 import { GridError } from '@/components/handlers/grid-error';
@@ -14,29 +9,25 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { AccessDenied } from '@/components/rbac/access-denied';
-import { Card } from '@/components/ui/card';
+import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { AccessDenied } from '@/components/rbac/access-denied';
 import { usePermissions } from '@/hooks/use-permissions';
 import { auditLogService } from '@/services/audit/audit-log.service';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { RefreshCw } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { AuditEventsList, DetailModal, FiltersBar } from './src';
 import {
-  AuditEventsList,
-  AuditLegend,
-  auditLogsConfig,
-  DetailModal,
-  FiltersBar,
-} from './src';
+  getActionLabel,
+  getEntityLabel,
+  getModuleLabel,
+} from './src/constants';
 import type { AuditLog, AuditLogFilters } from './src/types';
 
 export default function AuditLogsPage() {
-  const router = useRouter();
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
-  // Verificar se o usuario tem permissao para visualizar logs de auditoria
   const canViewAuditLogs =
     hasPermission('audit.logs.view') || hasPermission('audit.logs.search');
 
@@ -44,46 +35,130 @@ export default function AuditLogsPage() {
   // STATE
   // ============================================================================
 
-  const [filters, setFilters] = useState<AuditLogFilters>({
-    page: 1,
-    limit: 50,
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedModules, setSelectedModules] = useState<string[]>([]);
+  const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
+  const [selectedActions, setSelectedActions] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // ============================================================================
-  // DATA FETCHING
+  // QUERY
   // ============================================================================
 
+  const queryFilters = useMemo(() => {
+    const filters: AuditLogFilters = {
+      limit: 50,
+    };
+    if (selectedModules.length) filters.module = selectedModules[0];
+    if (selectedEntities.length) filters.entity = selectedEntities[0];
+    if (selectedActions.length) filters.action = selectedActions[0];
+    if (startDate) filters.startDate = `${startDate}T00:00:00.000Z`;
+    if (endDate) filters.endDate = `${endDate}T23:59:59.999Z`;
+    return filters;
+  }, [selectedModules, selectedEntities, selectedActions, startDate, endDate]);
+
   const {
-    data: logsData,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
-    queryKey: ['audit-logs', filters],
-    queryFn: () => auditLogService.listAuditLogs(filters),
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['audit-logs', queryFilters],
+    queryFn: ({ pageParam = 1 }) =>
+      auditLogService.listAuditLogs({ ...queryFilters, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
     enabled: canViewAuditLogs,
   });
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const allLogs = useMemo(
+    () => data?.pages.flatMap(page => page.logs) ?? [],
+    [data]
+  );
+
+  // Client-side search filter (backend doesn't support search param)
+  const logs = useMemo(() => {
+    if (!searchQuery.trim()) return allLogs;
+    const term = searchQuery.toLowerCase();
+    return allLogs.filter(log => {
+      const searchable = [
+        log.userName,
+        log.description,
+        log.entityId,
+        log.affectedUser,
+        getActionLabel(log.action),
+        getEntityLabel(log.entity),
+        getModuleLabel(log.module),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchable.includes(term);
+    });
+  }, [allLogs, searchQuery]);
+
+  const availableModules = useMemo(() => {
+    const unique = [...new Set(allLogs.map(l => l.module))];
+    return unique
+      .map(id => ({ id, label: getModuleLabel(id) }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+  }, [allLogs]);
+
+  const availableEntities = useMemo(() => {
+    const unique = [...new Set(allLogs.map(l => l.entity))];
+    return unique
+      .map(id => ({ id, label: getEntityLabel(id) }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+  }, [allLogs]);
+
+  const availableActions = useMemo(() => {
+    const unique = [...new Set(allLogs.map(l => l.action))];
+    return unique
+      .map(id => ({ id, label: getActionLabel(id) }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+  }, [allLogs]);
 
   // ============================================================================
   // HANDLERS
   // ============================================================================
 
-  const handleFiltersChange = (newFilters: AuditLogFilters) => {
-    setFilters({
-      ...newFilters,
-      page: 1, // Reset to first page when filters change
-    });
-  };
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
-  const handleClearFilters = () => {
-    setFilters({
-      page: 1,
-      limit: 50,
-    });
-  };
+  const handleModulesChange = useCallback((ids: string[]) => {
+    setSelectedModules(ids);
+  }, []);
+
+  const handleEntitiesChange = useCallback((ids: string[]) => {
+    setSelectedEntities(ids);
+  }, []);
+
+  const handleActionsChange = useCallback((ids: string[]) => {
+    setSelectedActions(ids);
+  }, []);
+
+  const handleStartDateChange = useCallback((date: string) => {
+    setStartDate(date);
+  }, []);
+
+  const handleEndDateChange = useCallback((date: string) => {
+    setEndDate(date);
+  }, []);
 
   const handleLogClick = (log: AuditLog) => {
     setSelectedLog(log);
@@ -94,24 +169,14 @@ export default function AuditLogsPage() {
     refetch();
   }, [refetch]);
 
-  const handleLoadMore = () => {
-    setFilters(prev => ({
-      ...prev,
-      page: (prev.page || 1) + 1,
-    }));
-  };
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================================================
-  // COMPUTED VALUES
-  // ============================================================================
-
-  const logs = logsData?.logs || [];
-  const pagination = logsData?.pagination;
-
-  const hasMore = pagination ? pagination.page < pagination.totalPages : false;
-
-  // ============================================================================
-  // HEADER BUTTONS CONFIGURATION
+  // HEADER BUTTONS
   // ============================================================================
 
   const actionButtons: HeaderButton[] = useMemo(
@@ -146,7 +211,7 @@ export default function AuditLogsPage() {
     return (
       <AccessDenied
         title="Acesso Restrito"
-        message="Voce nao tem permissao para visualizar os logs de auditoria."
+        message="Você não tem permissão para visualizar os logs de auditoria."
       />
     );
   }
@@ -156,13 +221,14 @@ export default function AuditLogsPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout className="h-[calc(100dvh-10rem)] flex flex-col overflow-hidden">
       <PageHeader>
         <PageActionBar
+          breadcrumbItems={[
+            { label: 'Administração', href: '/admin' },
+            { label: 'Logs de Auditoria', href: '/admin/audit-logs' },
+          ]}
           buttons={actionButtons}
-          onBack={() => router.back()}
-          backLabel="Administracao"
-          backIcon={ArrowLeft}
         />
 
         <Header
@@ -171,47 +237,35 @@ export default function AuditLogsPage() {
         />
       </PageHeader>
 
-      <PageBody>
-        {/* Filters */}
-        <FiltersBar
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onClearFilters={handleClearFilters}
+      <PageBody className="flex-1 min-h-0 flex flex-col">
+        {/* Barra de pesquisa */}
+        <SearchBar
+          value={searchQuery}
+          placeholder="Buscar nos logs por ação, entidade ou descrição..."
+          onSearch={handleSearchChange}
+          onClear={() => handleSearchChange('')}
+          showClear
+          size="md"
         />
 
-        {/* Stats */}
-        {pagination && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Total de Logs
-              </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {pagination.total.toLocaleString('pt-BR')}
-              </div>
-            </Card>
+        {/* Linha de filtros */}
+        <FiltersBar
+          moduleOptions={availableModules}
+          modules={selectedModules}
+          onModulesChange={handleModulesChange}
+          entityOptions={availableEntities}
+          entities={selectedEntities}
+          onEntitiesChange={handleEntitiesChange}
+          actionOptions={availableActions}
+          actions={selectedActions}
+          onActionsChange={handleActionsChange}
+          startDate={startDate}
+          onStartDateChange={handleStartDateChange}
+          endDate={endDate}
+          onEndDateChange={handleEndDateChange}
+        />
 
-            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Pagina Atual
-              </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {pagination.page} de {pagination.totalPages}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Logs Exibidos
-              </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {logs.length}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Event List */}
+        {/* Lista de eventos */}
         {isLoading ? (
           <GridLoading count={6} layout="list" size="md" gap="gap-4" />
         ) : error ? (
@@ -225,19 +279,18 @@ export default function AuditLogsPage() {
             }}
           />
         ) : (
-          <Card className="p-6 bg-white/90 dark:bg-white/5 border-gray-200/50 dark:border-white/10 space-y-4">
-            <AuditLegend />
+          <div className="flex-1 min-h-0 flex flex-col">
             <AuditEventsList
               logs={logs}
-              isLoading={isLoading}
               onSelectLog={handleLogClick}
               onLoadMore={handleLoadMore}
-              hasMore={hasMore}
+              hasMore={!!hasNextPage}
+              isLoadingMore={isFetchingNextPage}
             />
-          </Card>
+          </div>
         )}
 
-        {/* Detail Modal */}
+        {/* Modal de detalhes */}
         <DetailModal
           isOpen={isDetailModalOpen}
           onOpenChange={setIsDetailModalOpen}
