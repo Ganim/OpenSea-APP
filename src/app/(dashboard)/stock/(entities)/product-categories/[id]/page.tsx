@@ -5,26 +5,25 @@
 
 'use client';
 
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { categoriesConfig } from '@/config/entities/categories.config';
 import { EntityCard, EntityContextMenu, EntityGrid } from '@/core';
 import { useCategories, useCategory } from '@/hooks/stock/use-categories';
 import type { Category } from '@/types/stock';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import {
-  ArrowLeft,
-  Calendar,
-  Edit,
-  FolderTree,
-  Hash,
-  Package,
-} from 'lucide-react';
+import { Calendar, Clock, Edit, FolderTree, Hash, Package } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
@@ -39,7 +38,12 @@ export default function ProductCategoryDetailPage() {
   // DATA FETCHING
   // ============================================================================
 
-  const { data: categoryData, isLoading } = useCategory(categoryId);
+  const {
+    data: categoryData,
+    isLoading,
+    error,
+    refetch,
+  } = useCategory(categoryId);
   const category = categoryData?.category;
 
   const { data: allCategoriesData } = useCategories();
@@ -65,16 +69,23 @@ export default function ProductCategoryDetailPage() {
   // HANDLERS
   // ============================================================================
 
-  const formatDate = (date: string | Date | undefined) => {
-    if (!date) return 'N/A';
-    try {
-      return format(new Date(date), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
-        locale: ptBR,
-      });
-    } catch {
-      return 'Data inválida';
-    }
-  };
+  // ============================================================================
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'edit-category',
+        title: 'Editar',
+        icon: Edit,
+        onClick: () =>
+          router.push(`/stock/product-categories/${categoryId}/edit`),
+        variant: 'default' as const,
+      },
+    ],
+    [router, categoryId]
+  );
 
   // ============================================================================
   // SUBCATEGORY CARD RENDERERS
@@ -165,41 +176,79 @@ export default function ProductCategoryDetailPage() {
   };
 
   // ============================================================================
-  // LOADING STATE
+  // LOADING / ERROR / NOT FOUND
   // ============================================================================
 
   if (isLoading) {
     return (
-      <div className="min-h-screen px-6">
-        <div className="max-w-8xl flex items-center justify-between mb-4">
-          <Skeleton className="h-9 w-48" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-        <div className="max-w-8xl mx-auto space-y-6">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+            ]}
+          />
+          <Header title="Carregando..." />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+            ]}
+          />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar categoria"
+            message="Ocorreu um erro ao tentar carregar os dados da categoria."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!category) {
     return (
-      <div className="min-h-screen px-6">
-        <Card className="max-w-8xl mx-auto p-12 text-center">
-          <PiFolderOpenDuotone className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Categoria não encontrada
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            A categoria que você está procurando não existe ou foi removida.
-          </p>
-          <Button onClick={() => router.push('/stock/product-categories')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Categorias
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+            ]}
+          />
+          <Header title="Categoria não encontrada" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Categoria não encontrada"
+            message="A categoria que você está procurando não existe ou foi removida."
+            action={{
+              label: 'Voltar para Categorias',
+              onClick: () => router.push('/stock/product-categories'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
@@ -208,11 +257,10 @@ export default function ProductCategoryDetailPage() {
   // ============================================================================
 
   return (
-    <div className="min-h-screen px-6">
-      {/* Header */}
-      <div className="max-w-8xl flex items-center justify-between mb-4">
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Categorias', href: '/stock/product-categories' },
             {
@@ -220,57 +268,93 @@ export default function ProductCategoryDetailPage() {
               href: `/stock/product-categories/${categoryId}`,
             },
           ]}
+          buttons={actionButtons}
         />
-        <Button
-          size="sm"
-          onClick={() =>
-            router.push(`/stock/product-categories/${categoryId}/edit`)
-          }
-        >
-          <Edit className="h-4 w-4" />
-          Editar
-        </Button>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-8xl mx-auto space-y-6">
         {/* Category Identity */}
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 overflow-hidden">
-            {category.iconUrl ? (
-              <Image
-                src={category.iconUrl}
-                alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain brightness-0 invert"
-                unoptimized
-                onError={e => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            ) : (
-              <PiFolderOpenDuotone className="h-7 w-7 text-white" />
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">
-                {category.name}
-              </h1>
-              <Badge variant={category.isActive ? 'default' : 'secondary'}>
-                {category.isActive ? 'Ativa' : 'Inativa'}
-              </Badge>
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-start gap-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 overflow-hidden shrink-0">
+              {category.iconUrl ? (
+                <Image
+                  src={category.iconUrl}
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 object-contain brightness-0 invert"
+                  unoptimized
+                  onError={e => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <PiFolderOpenDuotone className="h-7 w-7 text-white" />
+              )}
             </div>
-            <p className="text-muted-foreground text-sm font-mono">
-              {category.slug}
-            </p>
-          </div>
-        </div>
 
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {category.name}
+                </h1>
+                <Badge variant={category.isActive ? 'default' : 'secondary'}>
+                  {category.isActive ? 'Ativa' : 'Inativa'}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground text-sm font-mono mt-0.5">
+                {category.slug}
+              </p>
+              {category.description && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {category.description}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2 shrink-0 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-4 w-4 text-blue-500" />
+                <span>
+                  Criado em{' '}
+                  {category.createdAt
+                    ? new Date(category.createdAt).toLocaleDateString('pt-BR')
+                    : '-'}
+                </span>
+              </div>
+              {category.updatedAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 text-emerald-500" />
+                  <span>
+                    Atualizado em{' '}
+                    {new Date(category.updatedAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {parentCategory && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FolderTree className="h-4 w-4 text-purple-500" />
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                    onClick={() =>
+                      router.push(
+                        `/stock/product-categories/${parentCategory.id}`
+                      )
+                    }
+                  >
+                    Pai: {parentCategory.name}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </PageHeader>
+
+      <PageBody>
         {/* Tabs */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-3 mb-4 p-2 h-12">
             <TabsTrigger value="details">Detalhes</TabsTrigger>
             <TabsTrigger value="subcategories">
               Subcategorias ({subcategories.length})
@@ -281,27 +365,19 @@ export default function ProductCategoryDetailPage() {
           </TabsList>
 
           {/* Details Tab */}
-          <TabsContent value="details" className="mt-4">
-            <Card className="p-6">
-              <div className="grid gap-6">
-                {/* Description */}
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Descrição
-                  </h3>
-                  <p className="mt-1 text-sm">
-                    {category.description || 'Sem descrição'}
-                  </p>
-                </div>
-
+          <TabsContent value="details" className="w-full">
+            <Card className="w-full p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <div className="w-full grid gap-6">
                 {/* Info Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                       <Hash className="h-3 w-3" />
-                      Ordem
+                      Ordem de Exibição
                     </h3>
-                    <p className="mt-1 text-sm">{category.displayOrder || 0}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {category.displayOrder || 0}
+                    </p>
                   </div>
 
                   <div>
@@ -309,7 +385,7 @@ export default function ProductCategoryDetailPage() {
                       <FolderTree className="h-3 w-3" />
                       Subcategorias
                     </h3>
-                    <p className="mt-1 text-sm">
+                    <p className="mt-1 text-sm font-medium">
                       {category.childrenCount || 0}
                     </p>
                   </div>
@@ -319,27 +395,10 @@ export default function ProductCategoryDetailPage() {
                       <Package className="h-3 w-3" />
                       Produtos
                     </h3>
-                    <p className="mt-1 text-sm">{category.productCount || 0}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {category.productCount || 0}
+                    </p>
                   </div>
-
-                  {parentCategory && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">
-                        Categoria Pai
-                      </h3>
-                      <Button
-                        variant="link"
-                        className="mt-0 p-0 h-auto text-sm"
-                        onClick={() =>
-                          router.push(
-                            `/stock/product-categories/${parentCategory.id}`
-                          )
-                        }
-                      >
-                        {parentCategory.name}
-                      </Button>
-                    </div>
-                  )}
                 </div>
 
                 {/* Icon URL */}
@@ -369,28 +428,12 @@ export default function ProductCategoryDetailPage() {
                     </div>
                   </div>
                 )}
-
-                {/* Dates */}
-                <div className="border-t pt-4 grid gap-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Criado em: {formatDate(category.createdAt)}</span>
-                  </div>
-                  {category.updatedAt && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        Atualizado em: {formatDate(category.updatedAt)}
-                      </span>
-                    </div>
-                  )}
-                </div>
               </div>
             </Card>
           </TabsContent>
 
           {/* Subcategories Tab */}
-          <TabsContent value="subcategories" className="mt-4">
+          <TabsContent value="subcategories" className="w-full">
             {subcategories.length > 0 ? (
               <EntityGrid
                 config={categoriesConfig}
@@ -402,7 +445,7 @@ export default function ProductCategoryDetailPage() {
                 showSorting={false}
               />
             ) : (
-              <Card className="p-12 text-center">
+              <Card className="w-full p-12 text-center bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
                 <FolderTree className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-1">
                   Nenhuma subcategoria
@@ -415,8 +458,8 @@ export default function ProductCategoryDetailPage() {
           </TabsContent>
 
           {/* Products Tab */}
-          <TabsContent value="products" className="mt-4">
-            <Card className="p-12 text-center">
+          <TabsContent value="products" className="w-full">
+            <Card className="w-full p-12 text-center bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
               <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-1">
                 Produtos da categoria
@@ -428,7 +471,7 @@ export default function ProductCategoryDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }

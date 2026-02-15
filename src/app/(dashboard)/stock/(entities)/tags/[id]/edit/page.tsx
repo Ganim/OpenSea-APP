@@ -5,9 +5,16 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,17 +25,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteTag, useUpdateTag } from '@/hooks/stock/use-stock-other';
+import { logger } from '@/lib/logger';
 import type { Tag, UpdateTagRequest } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
-import { Save, Trash2 } from 'lucide-react';
+import { Save, Tag as TagIcon, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function EditTagPage({
@@ -39,7 +46,12 @@ export default function EditTagPage({
   const router = useRouter();
   const { id: tagId } = use(params);
 
-  const { data: tag, isLoading: isLoadingTag } = useQuery<Tag>({
+  const {
+    data: tag,
+    isLoading: isLoadingTag,
+    error,
+    refetch,
+  } = useQuery<Tag>({
     queryKey: ['tags', tagId],
     queryFn: async () => {
       const response = await fetch(`/api/v1/tags/${tagId}`);
@@ -57,7 +69,6 @@ export default function EditTagPage({
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#3B82F6');
 
-  // Carregar dados da tag quando disponível
   useEffect(() => {
     if (tag) {
       setName(tag.name || '');
@@ -66,8 +77,8 @@ export default function EditTagPage({
     }
   }, [tag]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!name.trim()) {
       toast.error('Nome é obrigatório');
       return;
@@ -92,9 +103,7 @@ export default function EditTagPage({
       logger.error(
         'Failed to update tag',
         error instanceof Error ? error : new Error(String(error)),
-        {
-          tagId,
-        }
+        { tagId }
       );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
@@ -118,9 +127,7 @@ export default function EditTagPage({
       logger.error(
         'Failed to delete tag',
         error instanceof Error ? error : new Error(String(error)),
-        {
-          tagId,
-        }
+        { tagId }
       );
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
@@ -131,61 +138,153 @@ export default function EditTagPage({
     }
   };
 
+  // ============================================================================
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'delete-tag',
+        title: 'Excluir',
+        icon: Trash2,
+        onClick: handleDeleteClick,
+        variant: 'destructive' as const,
+        disabled: isLoading || isDeleting,
+      },
+      {
+        id: 'cancel-edit',
+        title: 'Cancelar',
+        icon: X,
+        onClick: () => router.push(`/stock/tags/${tagId}`),
+        variant: 'outline' as const,
+      },
+      {
+        id: 'save-tag',
+        title: isLoading ? 'Salvando...' : 'Salvar',
+        icon: Save,
+        onClick: () => handleSubmit(),
+        variant: 'default' as const,
+        disabled: isLoading || isDeleting || !name.trim(),
+      },
+    ],
+    [isLoading, isDeleting, name, router, tagId]
+  );
+
+  const presetColors = [
+    '#EF4444',
+    '#F59E0B',
+    '#10B981',
+    '#3B82F6',
+    '#8B5CF6',
+    '#EC4899',
+    '#6B7280',
+    '#14B8A6',
+    '#F97316',
+    '#06B6D4',
+  ];
+
+  // ============================================================================
+  // LOADING / ERROR / NOT FOUND
+  // ============================================================================
+
   if (isLoadingTag) {
     return (
-      <ProtectedRoute requiredPermission="stock.tags.update">
-        <div className="container mx-auto px-4 py-8">
-          <Card className="p-8">
-            <div className="flex items-center justify-center">
-              <p className="text-muted-foreground">Carregando tag...</p>
-            </div>
-          </Card>
-        </div>
-      </ProtectedRoute>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+              { label: '...' },
+              { label: 'Editar' },
+            ]}
+          />
+          <Header title="Carregando..." />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={1} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+            ]}
+          />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar tag"
+            message="Ocorreu um erro ao tentar carregar os dados da tag."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!tag) {
     return (
-      <ProtectedRoute requiredPermission="stock.tags.update">
-        <div className="container mx-auto px-4 py-8">
-          <Card className="p-8">
-            <div className="flex items-center justify-center">
-              <p className="text-red-500">Tag não encontrada</p>
-            </div>
-          </Card>
-        </div>
-      </ProtectedRoute>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+            ]}
+          />
+          <Header title="Tag não encontrada" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Tag não encontrada"
+            message="A tag que você está procurando não existe ou foi removida."
+            action={{
+              label: 'Voltar para Tags',
+              onClick: () => router.push('/stock/tags'),
+            }}
+            icon={TagIcon}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  const presetColors = [
-    '#EF4444', // red
-    '#F59E0B', // amber
-    '#10B981', // green
-    '#3B82F6', // blue
-    '#8B5CF6', // purple
-    '#EC4899', // pink
-    '#6B7280', // gray
-    '#14B8A6', // teal
-    '#F97316', // orange
-    '#06B6D4', // cyan
-  ];
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <ProtectedRoute requiredPermission="stock.tags.update">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex w-full items-center justify-between mb-6">
-          <PageBreadcrumb
-            items={[
-              { label: 'Estoque', href: '/stock' },
-              { label: 'Tags', href: '/stock/tags' },
-              { label: tag?.name || '...', href: `/stock/tags/${tagId}` },
-              { label: 'Editar', href: `/stock/tags/${tagId}/edit` },
-            ]}
-          />
-        </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Estoque', href: '/stock' },
+            { label: 'Tags', href: '/stock/tags' },
+            { label: tag.name, href: `/stock/tags/${tagId}` },
+            { label: 'Editar' },
+          ]}
+          buttons={actionButtons}
+        />
 
+        <Header title="Editar Tag" description={`Editando: ${tag.name}`} />
+      </PageHeader>
+
+      <PageBody>
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
@@ -265,37 +364,18 @@ export default function EditTagPage({
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-between pt-4">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteClick}
-                disabled={isLoading || isDeleting}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir Tag
-              </Button>
-
-              <Button
-                type="submit"
-                disabled={isLoading || isDeleting || !name.trim()}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isLoading ? 'Salvando...' : 'Salvar Alterações'}
-              </Button>
-            </div>
           </form>
         </Card>
-      </div>
+      </PageBody>
 
+      {/* Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a tag "{tag.name}"? Esta ação não
-              pode ser desfeita.
+              Tem certeza que deseja excluir a tag &ldquo;{tag.name}&rdquo;?
+              Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -312,6 +392,6 @@ export default function EditTagPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </ProtectedRoute>
+    </PageLayout>
   );
 }

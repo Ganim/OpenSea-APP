@@ -21,7 +21,6 @@ import {
   productsService,
   purchaseOrdersService,
   suppliersService,
-  tagsService,
   templatesService,
 } from '@/services/stock';
 
@@ -33,7 +32,6 @@ import {
   MapPin,
   Package,
   ShoppingCart,
-  TagIcon,
   Upload,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -113,17 +111,6 @@ const sections: {
         permission: STOCK_PERMISSIONS.CATEGORIES.LIST,
         countKey: 'categories',
       },
-      {
-        id: 'tags',
-        title: 'Tags',
-        description: 'Etiquetas para organizar produtos',
-        icon: TagIcon,
-        href: '/stock/tags',
-        gradient: 'from-pink-500 to-pink-600',
-        hoverBg: 'hover:bg-pink-50 dark:hover:bg-pink-500/10',
-        permission: STOCK_PERMISSIONS.TAGS.LIST,
-        countKey: 'tags',
-      },
     ],
   },
 ];
@@ -202,7 +189,6 @@ export default function StockLandingPage() {
         templates,
         manufacturers,
         suppliers,
-        tags,
         categories,
       ] = await Promise.allSettled([
         productsService.listProducts(),
@@ -211,7 +197,6 @@ export default function StockLandingPage() {
         templatesService.listTemplates(),
         manufacturersService.listManufacturers(),
         suppliersService.listSuppliers(),
-        tagsService.listTags(),
         categoriesService.listCategories(),
       ]);
 
@@ -238,7 +223,6 @@ export default function StockLandingPage() {
           suppliers.status === 'fulfilled'
             ? suppliers.value.suppliers.length
             : null,
-        tags: tags.status === 'fulfilled' ? tags.value.tags.length : null,
         categories:
           categories.status === 'fulfilled'
             ? categories.value.categories.length

@@ -1,9 +1,14 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { RefreshCw, Tags } from 'lucide-react';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import dynamic from 'next/dynamic';
 
 import { useWarehouses } from '../src/api';
@@ -17,21 +22,15 @@ const LabelGenerator = dynamic(
     })),
   {
     ssr: false,
-    loading: () => (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Skeleton className="h-[400px] rounded-lg" />
-          <Skeleton className="h-[300px] rounded-lg" />
-        </div>
-        <div className="space-y-6">
-          <Skeleton className="h-[250px] rounded-lg" />
-          <Skeleton className="h-[120px] rounded-lg" />
-          <Skeleton className="h-[100px] rounded-lg" />
-        </div>
-      </div>
-    ),
+    loading: () => <GridLoading count={3} layout="list" size="md" />,
   }
 );
+
+const breadcrumbItems = [
+  { label: 'Estoque', href: '/stock' },
+  { label: 'Localizações', href: '/stock/locations' },
+  { label: 'Etiquetas', href: '/stock/locations/labels' },
+];
 
 export default function LabelsPage() {
   const {
@@ -58,95 +57,59 @@ export default function LabelsPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <PageBreadcrumb
-          items={[
-            { label: 'Estoque', href: '/stock' },
-            { label: 'Localizações', href: '/stock/locations' },
-            { label: 'Etiquetas', href: '/stock/locations/labels' },
-          ]}
-        />
-
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Gerador de Etiquetas
-          </h1>
-          <p className="text-muted-foreground">
-            Crie etiquetas com QR Code ou código de barras para suas
-            localizações
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-destructive">Erro ao carregar dados</p>
-          <Button variant="outline" onClick={handleRefetch}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Tentar novamente
-          </Button>
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+          <Header
+            title="Gerador de Etiquetas"
+            description="Crie etiquetas com QR Code ou código de barras para suas localizações"
+          />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar dados"
+            message="Ocorreu um erro ao tentar carregar os armazéns e zonas."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: handleRefetch,
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageBreadcrumb
-          items={[
-            { label: 'Estoque', href: '/stock' },
-            { label: 'Localizações', href: '/stock/locations' },
-            { label: 'Etiquetas', href: '/stock/locations/labels' },
-          ]}
-        />
-
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Gerador de Etiquetas
-          </h1>
-          <p className="text-muted-foreground">
-            Crie etiquetas com QR Code ou código de barras para suas
-            localizações
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-[400px] rounded-lg" />
-            <Skeleton className="h-[300px] rounded-lg" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-[250px] rounded-lg" />
-            <Skeleton className="h-[120px] rounded-lg" />
-            <Skeleton className="h-[100px] rounded-lg" />
-          </div>
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+          <Header
+            title="Gerador de Etiquetas"
+            description="Crie etiquetas com QR Code ou código de barras para suas localizações"
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageBreadcrumb
-        items={[
-          { label: 'Estoque', href: '/stock' },
-          { label: 'Localizações', href: '/stock/locations' },
-          { label: 'Etiquetas', href: '/stock/locations/labels' },
-        ]}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar breadcrumbItems={breadcrumbItems} />
+        <Header
+          title="Gerador de Etiquetas"
+          description="Crie etiquetas com QR Code ou código de barras para suas localizações"
+        />
+      </PageHeader>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Tags className="h-6 w-6" />
-          Gerador de Etiquetas
-        </h1>
-        <p className="text-muted-foreground">
-          Crie etiquetas com QR Code ou código de barras para suas localizações
-        </p>
-      </div>
-
-      {/* Label Generator */}
-      <LabelGenerator warehouses={warehouses || []} zones={zones || []} />
-    </div>
+      <PageBody>
+        <LabelGenerator warehouses={warehouses || []} zones={zones || []} />
+      </PageBody>
+    </PageLayout>
   );
 }

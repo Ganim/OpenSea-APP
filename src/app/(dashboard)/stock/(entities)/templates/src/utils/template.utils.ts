@@ -25,9 +25,9 @@ export function countTemplateAttributes(template: Template): number {
  */
 export function hasCareInstructions(template: Template): boolean {
   return (
-    template.careInstructions !== null &&
-    template.careInstructions !== undefined &&
-    Object.keys(template.careInstructions).length > 0
+    template.careLabel !== null &&
+    template.careLabel !== undefined &&
+    Object.keys(template.careLabel).length > 0
   );
 }
 

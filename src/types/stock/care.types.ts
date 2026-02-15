@@ -42,6 +42,19 @@ export interface CustomSymbol {
   svgPath?: string; // SVG personalizado
 }
 
+/**
+ * CareLabel - matches backend careLabelSchema exactly
+ * Used in Template entity for persistence
+ */
+export interface CareLabel {
+  washing?: string;
+  drying?: string;
+  ironing?: string;
+  bleaching?: string;
+  dryClean?: string;
+  composition?: FiberComposition[];
+}
+
 export interface CareInstructions {
   // Composicao textil (obrigatorio por lei)
   composition: FiberComposition[];

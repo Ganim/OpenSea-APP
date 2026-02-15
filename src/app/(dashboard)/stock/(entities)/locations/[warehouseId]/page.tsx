@@ -1,5 +1,16 @@
 'use client';
 
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { SearchBar } from '@/components/layout/search-bar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,19 +36,9 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Edit,
-  MapPin,
-  Plus,
-  RefreshCw,
-  Search,
-  Settings,
-  Warehouse,
-} from 'lucide-react';
-import Link from 'next/link';
+import { MapPin, Plus, Settings, Warehouse } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
-import React, { use, useState } from 'react';
+import React, { use, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -47,7 +48,7 @@ import {
   useWarehouse,
   useZones,
 } from '../src/api';
-import { ZoneCard, ZoneCardSkeleton } from '../src/components';
+import { ZoneCard } from '../src/components';
 import { PLACEHOLDERS, SUCCESS_MESSAGES } from '../src/constants';
 import type { Zone, ZoneFormData } from '../src/types';
 import { defaultZoneFormData } from '../src/types';
@@ -149,7 +150,6 @@ export default function WarehouseDetailPage({ params }: PageProps) {
       setIsCreateModalOpen(false);
       setFormData(defaultZoneFormData);
 
-      // Redirecionar para configuração de estrutura
       router.push(
         `/stock/locations/${warehouseId}/zones/${newZone.id}/structure`
       );
@@ -218,26 +218,64 @@ export default function WarehouseDetailPage({ params }: PageProps) {
     }
   };
 
-  // Render
+  // ============================================================================
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'create-zone',
+        title: 'Nova Zona',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default' as const,
+      },
+    ],
+    []
+  );
+
+  // ============================================================================
+  // ERROR STATE
+  // ============================================================================
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <p className="text-destructive">Erro ao carregar zonas</p>
-        <Button variant="outline" onClick={() => refetch()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Tentar novamente
-        </Button>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Localizações', href: '/stock/locations' },
+              { label: warehouse?.name || '...' },
+            ]}
+          />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar zonas"
+            message="Ocorreu um erro ao tentar carregar as zonas deste armazém."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
-        {/* Breadcrumb */}
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Localizações', href: '/stock/locations' },
             {
@@ -245,321 +283,322 @@ export default function WarehouseDetailPage({ params }: PageProps) {
               href: `/stock/locations/${warehouseId}`,
             },
           ]}
+          buttons={actionButtons}
         />
 
-        {/* Título e ações */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-              <Warehouse className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              {isLoadingWarehouse ? (
-                <>
-                  <Skeleton className="h-7 w-48 mb-1" />
-                  <Skeleton className="h-4 w-32" />
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold tracking-tight">
-                      {warehouse?.name}
-                    </h1>
-                    <Badge
-                      variant={warehouse?.isActive ? 'default' : 'secondary'}
-                    >
-                      {warehouse?.isActive ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground">
-                    {warehouse?.code}
-                    {warehouse?.description && ` • ${warehouse.description}`}
-                  </p>
-                </>
-              )}
-            </div>
+        {/* Warehouse Identity */}
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+            <Warehouse className="h-7 w-7 text-blue-600 dark:text-blue-400" />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" asChild>
-              <Link href={`/stock/locations/${warehouseId}/edit`}>
-                <Edit className="mr-2 h-4 w-4" />
-                Editar
-              </Link>
-            </Button>
-            <Button onClick={handleOpenCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Zona
-            </Button>
+          <div>
+            {isLoadingWarehouse ? (
+              <>
+                <Skeleton className="h-7 w-48 mb-1" />
+                <Skeleton className="h-4 w-32" />
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {warehouse?.name}
+                  </h1>
+                  <Badge
+                    variant={warehouse?.isActive ? 'default' : 'secondary'}
+                  >
+                    {warehouse?.isActive ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  {warehouse?.code}
+                  {warehouse?.description && ` • ${warehouse.description}`}
+                </p>
+              </>
+            )}
           </div>
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar zonas..."
+      <PageBody>
+        {/* Search */}
+        <SearchBar
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="pl-9"
+          placeholder="Buscar zonas..."
+          onSearch={value => setSearchQuery(value)}
+          onClear={() => setSearchQuery('')}
+          showClear={true}
+          size="md"
         />
-      </div>
 
-      {/* Grid de Zonas */}
-      {isLoadingZones ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map(i => (
-            <ZoneCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : filteredZones.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[300px] rounded-lg border border-dashed">
-          <MapPin className="h-12 w-12 text-muted-foreground/50 mb-4" />
-          {searchQuery ? (
-            <>
-              <p className="text-lg font-medium">Nenhuma zona encontrada</p>
-              <p className="text-sm text-muted-foreground">
-                Tente buscar por outro termo
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-lg font-medium">Nenhuma zona cadastrada</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Crie zonas para organizar este armazém
-              </p>
-              <Button onClick={handleOpenCreate}>
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Zona
+        {/* Grid de Zonas */}
+        {isLoadingZones ? (
+          <GridLoading count={6} layout="grid" size="md" gap="gap-4" />
+        ) : filteredZones.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] rounded-lg border border-dashed">
+            <MapPin className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            {searchQuery ? (
+              <>
+                <p className="text-lg font-medium">Nenhuma zona encontrada</p>
+                <p className="text-sm text-muted-foreground">
+                  Tente buscar por outro termo
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-medium">Nenhuma zona cadastrada</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Crie zonas para organizar este armazém
+                </p>
+                <Button onClick={handleOpenCreate}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar Zona
+                </Button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredZones.map(zone => (
+              <ZoneCard
+                key={zone.id}
+                zone={zone}
+                warehouseId={warehouseId}
+                onEdit={handleOpenEdit}
+                onDelete={handleOpenDelete}
+                onConfigure={handleConfigureStructure}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Modal de Criar */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Zona</DialogTitle>
+              <DialogDescription>
+                Crie uma nova zona neste armazém. Após criar, você será
+                direcionado para configurar a estrutura de corredores,
+                prateleiras e nichos.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="code">
+                    Código <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="code"
+                    placeholder={PLACEHOLDERS.ZONE_CODE}
+                    value={formData.code}
+                    onChange={e =>
+                      handleInputChange('code', e.target.value.toUpperCase())
+                    }
+                    maxLength={5}
+                    className={formErrors.code ? 'border-destructive' : ''}
+                  />
+                  {formErrors.code && (
+                    <p className="text-xs text-destructive">
+                      {formErrors.code}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">
+                    Nome <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder={PLACEHOLDERS.ZONE_NAME}
+                    value={formData.name}
+                    onChange={e => handleInputChange('name', e.target.value)}
+                    className={formErrors.name ? 'border-destructive' : ''}
+                  />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive">
+                      {formErrors.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  placeholder={PLACEHOLDERS.ZONE_DESCRIPTION}
+                  value={formData.description}
+                  onChange={e =>
+                    handleInputChange('description', e.target.value)
+                  }
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isActive">Ativa</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Zonas inativas não aparecem em buscas
+                  </p>
+                </div>
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={checked =>
+                    handleInputChange('isActive', checked)
+                  }
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancelar
               </Button>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredZones.map(zone => (
-            <ZoneCard
-              key={zone.id}
-              zone={zone}
-              warehouseId={warehouseId}
-              onEdit={handleOpenEdit}
-              onDelete={handleOpenDelete}
-              onConfigure={handleConfigureStructure}
-            />
-          ))}
-        </div>
-      )}
+              <Button
+                onClick={handleCreateSubmit}
+                disabled={createZone.isPending}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                {createZone.isPending ? 'Criando...' : 'Criar e Configurar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Modal de Criar */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nova Zona</DialogTitle>
-            <DialogDescription>
-              Crie uma nova zona neste armazém. Após criar, você será
-              direcionado para configurar a estrutura de corredores, prateleiras
-              e nichos.
-            </DialogDescription>
-          </DialogHeader>
+        {/* Modal de Editar */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Zona</DialogTitle>
+              <DialogDescription>
+                Atualize as informações da zona {selectedZone?.code}
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-code">
+                    Código <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-code"
+                    placeholder={PLACEHOLDERS.ZONE_CODE}
+                    value={formData.code}
+                    onChange={e =>
+                      handleInputChange('code', e.target.value.toUpperCase())
+                    }
+                    maxLength={5}
+                    className={formErrors.code ? 'border-destructive' : ''}
+                  />
+                  {formErrors.code && (
+                    <p className="text-xs text-destructive">
+                      {formErrors.code}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">
+                    Nome <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-name"
+                    placeholder={PLACEHOLDERS.ZONE_NAME}
+                    value={formData.name}
+                    onChange={e => handleInputChange('name', e.target.value)}
+                    className={formErrors.name ? 'border-destructive' : ''}
+                  />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive">
+                      {formErrors.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="code">
-                  Código <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="code"
-                  placeholder={PLACEHOLDERS.ZONE_CODE}
-                  value={formData.code}
+                <Label htmlFor="edit-description">Descrição</Label>
+                <Textarea
+                  id="edit-description"
+                  placeholder={PLACEHOLDERS.ZONE_DESCRIPTION}
+                  value={formData.description}
                   onChange={e =>
-                    handleInputChange('code', e.target.value.toUpperCase())
+                    handleInputChange('description', e.target.value)
                   }
-                  maxLength={5}
-                  className={formErrors.code ? 'border-destructive' : ''}
+                  rows={2}
                 />
-                {formErrors.code && (
-                  <p className="text-xs text-destructive">{formErrors.code}</p>
-                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Nome <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder={PLACEHOLDERS.ZONE_NAME}
-                  value={formData.name}
-                  onChange={e => handleInputChange('name', e.target.value)}
-                  className={formErrors.name ? 'border-destructive' : ''}
-                />
-                {formErrors.name && (
-                  <p className="text-xs text-destructive">{formErrors.name}</p>
-                )}
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder={PLACEHOLDERS.ZONE_DESCRIPTION}
-                value={formData.description}
-                onChange={e => handleInputChange('description', e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="isActive">Ativa</Label>
-                <p className="text-xs text-muted-foreground">
-                  Zonas inativas não aparecem em buscas
-                </p>
-              </div>
-              <Switch
-                id="isActive"
-                checked={formData.isActive}
-                onCheckedChange={checked =>
-                  handleInputChange('isActive', checked)
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCreateModalOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleCreateSubmit}
-              disabled={createZone.isPending}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              {createZone.isPending ? 'Criando...' : 'Criar e Configurar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Editar */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Zona</DialogTitle>
-            <DialogDescription>
-              Atualize as informações da zona {selectedZone?.code}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-code">
-                  Código <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="edit-code"
-                  placeholder={PLACEHOLDERS.ZONE_CODE}
-                  value={formData.code}
-                  onChange={e =>
-                    handleInputChange('code', e.target.value.toUpperCase())
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="edit-isActive">Ativa</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Zonas inativas não aparecem em buscas
+                  </p>
+                </div>
+                <Switch
+                  id="edit-isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={checked =>
+                    handleInputChange('isActive', checked)
                   }
-                  maxLength={5}
-                  className={formErrors.code ? 'border-destructive' : ''}
                 />
-                {formErrors.code && (
-                  <p className="text-xs text-destructive">{formErrors.code}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">
-                  Nome <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="edit-name"
-                  placeholder={PLACEHOLDERS.ZONE_NAME}
-                  value={formData.name}
-                  onChange={e => handleInputChange('name', e.target.value)}
-                  className={formErrors.name ? 'border-destructive' : ''}
-                />
-                {formErrors.name && (
-                  <p className="text-xs text-destructive">{formErrors.name}</p>
-                )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Descrição</Label>
-              <Textarea
-                id="edit-description"
-                placeholder={PLACEHOLDERS.ZONE_DESCRIPTION}
-                value={formData.description}
-                onChange={e => handleInputChange('description', e.target.value)}
-                rows={2}
-              />
-            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleEditSubmit}
+                disabled={updateZone.isPending}
+              >
+                {updateZone.isPending ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="edit-isActive">Ativa</Label>
-                <p className="text-xs text-muted-foreground">
-                  Zonas inativas não aparecem em buscas
-                </p>
-              </div>
-              <Switch
-                id="edit-isActive"
-                checked={formData.isActive}
-                onCheckedChange={checked =>
-                  handleInputChange('isActive', checked)
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleEditSubmit} disabled={updateZone.isPending}>
-              {updateZone.isPending ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Confirmação de Exclusão */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Zona?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir a zona{' '}
-              <strong>{selectedZone?.code}</strong>?
-              <br />
-              <br />
-              Esta ação não pode ser desfeita e irá excluir todos os corredores,
-              prateleiras e nichos associados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteZone.isPending ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Dialog de Confirmação de Exclusão */}
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir Zona?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir a zona{' '}
+                <strong>{selectedZone?.code}</strong>?
+                <br />
+                <br />
+                Esta ação não pode ser desfeita e irá excluir todos os
+                corredores, prateleiras e nichos associados.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteZone.isPending ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </PageBody>
+    </PageLayout>
   );
 }

@@ -110,7 +110,7 @@ export default function TemplatesPage() {
         productAttributes: item.productAttributes,
         variantAttributes: item.variantAttributes,
         itemAttributes: item.itemAttributes,
-        careInstructions: item.careInstructions,
+        careLabel: item.careLabel,
       }),
     },
   });
@@ -249,7 +249,7 @@ export default function TemplatesPage() {
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
-          updatedAt={item.updatedAt}
+          updatedAt={item.updatedAt ?? undefined}
           showStatusBadges={true}
         />
       </EntityContextMenu>
@@ -295,7 +295,7 @@ export default function TemplatesPage() {
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
-          updatedAt={item.updatedAt}
+          updatedAt={item.updatedAt ?? undefined}
           showStatusBadges={true}
         />
       </EntityContextMenu>

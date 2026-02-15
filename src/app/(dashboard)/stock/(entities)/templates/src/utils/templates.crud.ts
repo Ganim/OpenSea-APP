@@ -19,7 +19,7 @@ export async function createTemplate(
     productAttributes: data.productAttributes,
     variantAttributes: data.variantAttributes,
     itemAttributes: data.itemAttributes,
-    careInstructions: data.careInstructions,
+    careLabel: data.careLabel,
   };
   return templatesService.createTemplate(createData).then(r => r.template);
 }
@@ -81,8 +81,8 @@ export async function duplicateTemplate(
   ) {
     duplicateData.itemAttributes = original.itemAttributes;
   }
-  if (original.careInstructions) {
-    duplicateData.careInstructions = original.careInstructions;
+  if (original.careLabel) {
+    duplicateData.careLabel = original.careLabel;
   }
 
   try {

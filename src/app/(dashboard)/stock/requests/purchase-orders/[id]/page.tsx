@@ -181,7 +181,10 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
         <PageBreadcrumb
           items={[
             { label: 'Estoque', href: '/stock' },
-            { label: 'Ordens de Compra', href: '/stock/requests/purchase-orders' },
+            {
+              label: 'Ordens de Compra',
+              href: '/stock/requests/purchase-orders',
+            },
             {
               label: purchaseOrder.orderNumber,
               href: `/stock/requests/purchase-orders/${id}`,
@@ -374,7 +377,7 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
                     Valor Total
                   </span>
                   <p className="text-3xl font-bold">
-                    {formatCurrency(purchaseOrder.totalPrice || 0)}
+                    {formatCurrency(purchaseOrder.totalCost || 0)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -405,11 +408,8 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Variante</TableHead>
-                      <TableHead className="text-right">Qtd. Pedida</TableHead>
-                      <TableHead className="text-right">
-                        Qtd. Recebida
-                      </TableHead>
-                      <TableHead className="text-right">Preço Unit.</TableHead>
+                      <TableHead className="text-right">Qtd.</TableHead>
+                      <TableHead className="text-right">Custo Unit.</TableHead>
                       <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -436,23 +436,10 @@ export default function PurchaseOrderDetailPage({ params }: PageProps) {
                             {item.quantity}
                           </TableCell>
                           <TableCell className="text-right">
-                            <span
-                              className={cn(
-                                item.receivedQuantity >= item.quantity
-                                  ? 'text-green-600'
-                                  : item.receivedQuantity > 0
-                                    ? 'text-amber-600'
-                                    : 'text-muted-foreground'
-                              )}
-                            >
-                              {item.receivedQuantity}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(item.unitPrice)}
+                            {formatCurrency(item.unitCost)}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {formatCurrency(item.totalPrice)}
+                            {formatCurrency(item.totalCost)}
                           </TableCell>
                         </TableRow>
                       );

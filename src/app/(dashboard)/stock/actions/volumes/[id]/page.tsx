@@ -444,7 +444,10 @@ export default function VolumeDetailPage({ params }: PageProps) {
           items={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Volumes', href: '/stock/actions/volumes' },
-            { label: volume.name || volume.code, href: `/stock/actions/volumes/${id}` },
+            {
+              label: volume.name || volume.code,
+              href: `/stock/actions/volumes/${id}`,
+            },
           ]}
         />
         <div className="flex items-center gap-2">

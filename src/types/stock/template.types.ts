@@ -1,6 +1,6 @@
 // Template Types
 
-import type { CareInstructions } from './care.types';
+import type { CareLabel } from './care.types';
 
 /**
  * Tipo do atributo de template
@@ -69,10 +69,11 @@ export interface Template {
   productAttributes?: TemplateAttributes;
   variantAttributes?: TemplateAttributes;
   itemAttributes?: TemplateAttributes;
-  careInstructions?: CareInstructions;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date | null;
+  careLabel?: CareLabel | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 }
 
 export interface CreateTemplateRequest {
@@ -83,7 +84,7 @@ export interface CreateTemplateRequest {
   productAttributes?: TemplateAttributes;
   variantAttributes?: TemplateAttributes;
   itemAttributes?: TemplateAttributes;
-  careInstructions?: CareInstructions;
+  careLabel?: CareLabel | null;
 }
 
 export interface UpdateTemplateRequest {
@@ -94,7 +95,7 @@ export interface UpdateTemplateRequest {
   productAttributes?: TemplateAttributes;
   variantAttributes?: TemplateAttributes;
   itemAttributes?: TemplateAttributes;
-  careInstructions?: CareInstructions;
+  careLabel?: CareLabel | null;
 }
 
 export interface TemplatesResponse {

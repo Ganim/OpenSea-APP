@@ -71,7 +71,7 @@ export function PurchaseOrderRow({
 
       <div className="text-right">
         <div className="font-bold text-lg">
-          {formatCurrency(order.totalPrice || 0)}
+          {formatCurrency(order.totalCost || 0)}
         </div>
       </div>
 

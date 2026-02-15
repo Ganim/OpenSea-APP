@@ -5,21 +5,34 @@
 
 'use client';
 
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
-import { Button } from '@/components/ui/button';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { Tag } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Tag as TagIcon } from 'lucide-react';
+import { Edit, Tag as TagIcon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 export default function TagDetailPage() {
   const params = useParams();
   const router = useRouter();
   const tagId = params.id as string;
 
-  const { data: tag, isLoading } = useQuery<Tag>({
+  const {
+    data: tag,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<Tag>({
     queryKey: ['tags', tagId],
     queryFn: async () => {
       const response = await fetch(`/api/v1/tags/${tagId}`);
@@ -28,66 +41,136 @@ export default function TagDetailPage() {
     },
   });
 
+  // ============================================================================
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'edit-tag',
+        title: 'Editar',
+        icon: Edit,
+        onClick: () => router.push(`/stock/tags/${tagId}/edit`),
+        variant: 'default' as const,
+      },
+    ],
+    [router, tagId]
+  );
+
+  // ============================================================================
+  // LOADING / ERROR / NOT FOUND
+  // ============================================================================
+
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+            ]}
+          />
+          <Header title="Carregando..." />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={1} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+            ]}
+          />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar tag"
+            message="Ocorreu um erro ao tentar carregar os dados da tag."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!tag) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-12 text-center">
-          <TagIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">Tag não encontrada</h2>
-          <p className="text-muted-foreground mb-6">
-            A tag que você está procurando não existe ou foi removida.
-          </p>
-          <Button onClick={() => router.push('/stock/tags')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Tags
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Tags', href: '/stock/tags' },
+            ]}
+          />
+          <Header title="Tag não encontrada" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Tag não encontrada"
+            message="A tag que você está procurando não existe ou foi removida."
+            action={{
+              label: 'Voltar para Tags',
+              onClick: () => router.push('/stock/tags'),
+            }}
+            icon={TagIcon}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <div className="min-h-screen from-purple-50 via-gray-50 to-pink-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
-      <div className="max-w-8xl mb-2">
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Tags', href: '/stock/tags' },
             { label: tag.name, href: `/stock/tags/${tagId}` },
           ]}
+          buttons={actionButtons}
         />
-      </div>
 
-      <div className="max-w-8xl mx-auto space-y-6">
-        <Card className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-lg"
-              style={{
-                backgroundColor: tag.color || '#6B7280',
-              }}
-            >
-              <TagIcon className="h-7 w-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight">{tag.name}</h1>
-              {tag.description && (
-                <p className="text-muted-foreground text-sm">
-                  {tag.description}
-                </p>
-              )}
-            </div>
+        {/* Tag Identity */}
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-xl"
+            style={{ backgroundColor: tag.color || '#6B7280' }}
+          >
+            <TagIcon className="h-7 w-7 text-white" />
           </div>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold tracking-tight">{tag.name}</h1>
+            {tag.description && (
+              <p className="text-muted-foreground text-sm">{tag.description}</p>
+            )}
+          </div>
+        </div>
+      </PageHeader>
 
+      <PageBody>
+        <Card className="p-6">
           <div className="space-y-4">
             {tag.description && (
               <div>
@@ -114,15 +197,9 @@ export default function TagDetailPage() {
                 </div>
               )}
             </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button onClick={() => router.push(`/stock/tags/${tagId}/edit`)}>
-                Editar Tag
-              </Button>
-            </div>
           </div>
         </Card>
-      </div>
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }

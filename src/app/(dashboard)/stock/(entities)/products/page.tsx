@@ -25,7 +25,6 @@ import {
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsConfig } from '@/config/entities/products.config';
 import {
-  ConfirmDialog,
   CoreProvider,
   EntityCard,
   EntityContextMenu,
@@ -34,6 +33,7 @@ import {
   useEntityCrud,
   useEntityPage,
 } from '@/core';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { formatUnitOfMeasure } from '@/helpers/formatters';
 import { usePermissions } from '@/hooks/use-permissions';
 import { productsService } from '@/services/stock';
@@ -858,20 +858,16 @@ function ProductsPageContent() {
           </Dialog>
 
           {/* Delete Confirmation */}
-          <ConfirmDialog
-            open={page.modals.isOpen('delete')}
-            onOpenChange={open => !open && page.modals.close('delete')}
-            title="Excluir Produto"
+          <VerifyActionPinModal
+            isOpen={page.modals.isOpen('delete')}
+            onClose={() => page.modals.close('delete')}
+            onSuccess={() => page.handlers.handleDeleteConfirm()}
+            title="Confirmar Exclusão"
             description={
               page.modals.itemsToDelete.length === 1
-                ? 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
-                : `Tem certeza que deseja excluir ${page.modals.itemsToDelete.length} produtos? Esta ação não pode ser desfeita.`
+                ? 'Digite seu PIN de ação para excluir este produto. Esta ação não pode ser desfeita.'
+                : `Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} produtos. Esta ação não pode ser desfeita.`
             }
-            onConfirm={page.handlers.handleDeleteConfirm}
-            confirmLabel="Excluir"
-            cancelLabel="Cancelar"
-            variant="destructive"
-            isLoading={crud.isDeleting}
           />
 
           {/* Rename Product Modal */}

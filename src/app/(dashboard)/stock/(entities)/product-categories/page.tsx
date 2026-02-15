@@ -257,70 +257,63 @@ export default function ProductCategoriesPage() {
     page.modals.open('create');
   }, [page.modals]);
 
-  const actionButtons = useMemo<ActionButtonWithPermission[]>(
-    () =>
-      isReorderMode
-        ? [
-            {
-              id: 'cancel-reorder',
-              title: 'Cancelar',
-              icon: X,
-              onClick: () => setIsReorderMode(false),
-              variant: 'outline' as const,
-            },
-            {
-              id: 'finish-reorder',
-              title: 'Concluir',
-              icon: Check,
-              onClick: () => {
-                if (sortableRef.current) {
-                  reorderMutation.mutate(
-                    sortableRef.current.getReorderedItems()
-                  );
-                }
-                setIsReorderMode(false);
-              },
-              variant: 'default' as const,
-            },
-          ]
-        : [
-            {
-              id: 'reorder-categories',
-              title: 'Reordenar',
-              icon: ArrowUpDown,
-              onClick: () => setIsReorderMode(true),
-              variant: 'outline' as const,
-              permission: categoriesConfig.permissions?.update,
-            },
-            {
-              id: 'import-categories',
-              title: 'Importar',
-              icon: Upload,
-              onClick: handleImport,
-              variant: 'outline' as const,
-              permission: categoriesConfig.permissions?.import,
-            },
-            {
-              id: 'create-category',
-              title: 'Nova Categoria',
-              icon: Plus,
-              onClick: handleCreate,
-              variant: 'default' as const,
-              permission: categoriesConfig.permissions?.create,
-            },
-          ],
-    [isReorderMode, handleImport, handleCreate, reorderMutation]
-  );
+  const handleFinishReorder = useCallback(() => {
+    if (sortableRef.current) {
+      reorderMutation.mutate(sortableRef.current.getReorderedItems());
+    }
+    setIsReorderMode(false);
+  }, [reorderMutation]);
 
-  const visibleActionButtons = useMemo<HeaderButton[]>(
-    () =>
-      actionButtons
-        .filter(button =>
-          button.permission ? hasPermission(button.permission) : true
-        )
-        .map(({ permission, ...button }) => button),
-    [actionButtons, hasPermission]
-  );
+  const actionButtons: ActionButtonWithPermission[] = isReorderMode
+    ? [
+        {
+          id: 'cancel-reorder',
+          title: 'Cancelar',
+          icon: X,
+          onClick: () => setIsReorderMode(false),
+          variant: 'outline' as const,
+        },
+        {
+          id: 'finish-reorder',
+          title: 'Concluir',
+          icon: Check,
+          onClick: handleFinishReorder,
+          variant: 'default' as const,
+        },
+      ]
+    : [
+        {
+          id: 'reorder-categories',
+          title: 'Reordenar',
+          icon: ArrowUpDown,
+          onClick: () => setIsReorderMode(true),
+          variant: 'outline' as const,
+          permission: categoriesConfig.permissions?.update,
+        },
+        {
+          id: 'import-categories',
+          title: 'Importar',
+          icon: Upload,
+          onClick: handleImport,
+          variant: 'outline' as const,
+          permission: categoriesConfig.permissions?.import,
+        },
+        {
+          id: 'create-category',
+          title: 'Nova Categoria',
+          icon: Plus,
+          onClick: handleCreate,
+          variant: 'default' as const,
+          permission: categoriesConfig.permissions?.create,
+        },
+      ];
+
+  // eslint-disable-next-line react-hooks/refs -- ref is only accessed inside onClick callbacks, not during render
+  const visibleActionButtons: HeaderButton[] = actionButtons
+    .filter(button =>
+      button.permission ? hasPermission(button.permission) : true
+    )
+    .map(({ permission, ...button }) => button);
 
   // ============================================================================
   // RENDER

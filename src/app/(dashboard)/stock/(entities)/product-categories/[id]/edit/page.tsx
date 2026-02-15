@@ -5,7 +5,16 @@
 
 'use client';
 
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import {
   useCategories,
@@ -39,7 +47,7 @@ import {
 } from '@/hooks/stock/use-categories';
 import { logger } from '@/lib/logger';
 import type { Category, UpdateCategoryRequest } from '@/types/stock';
-import { ArrowLeft, FolderTree, Save, Trash2 } from 'lucide-react';
+import { FolderTree, Save, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useRef, useState } from 'react';
@@ -62,8 +70,12 @@ export default function EditCategoryPage({
   // DATA FETCHING
   // ============================================================================
 
-  const { data: categoryData, isLoading: isLoadingCategory } =
-    useCategory(categoryId);
+  const {
+    data: categoryData,
+    isLoading: isLoadingCategory,
+    error,
+    refetch,
+  } = useCategory(categoryId);
   const category = categoryData?.category;
 
   const { data: categoriesData } = useCategories();
@@ -196,41 +208,114 @@ export default function EditCategoryPage({
   };
 
   // ============================================================================
-  // LOADING / NOT FOUND
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = useMemo(
+    () => [
+      {
+        id: 'delete-category',
+        title: 'Excluir',
+        icon: Trash2,
+        onClick: handleDeleteClick,
+        variant: 'destructive' as const,
+        disabled: isLoading || isDeleting,
+      },
+      {
+        id: 'cancel-edit',
+        title: 'Cancelar',
+        icon: X,
+        onClick: () => router.push(`/stock/product-categories/${categoryId}`),
+        variant: 'outline' as const,
+      },
+      {
+        id: 'save-category',
+        title: isLoading ? 'Salvando...' : 'Salvar',
+        icon: Save,
+        onClick: () => handleSubmit(),
+        variant: 'default' as const,
+        disabled: isLoading || isDeleting || !name.trim(),
+      },
+    ],
+    [isLoading, isDeleting, name, router, categoryId]
+  );
+
+  // ============================================================================
+  // LOADING / ERROR / NOT FOUND
   // ============================================================================
 
   if (isLoadingCategory) {
     return (
-      <div className="min-h-screen px-6">
-        <div className="max-w-8xl flex items-center justify-between mb-6">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-40" />
-        </div>
-        <div className="max-w-8xl mx-auto space-y-6">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+              { label: '...' },
+              { label: 'Editar' },
+            ]}
+          />
+          <Header title="Carregando..." />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={2} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+            ]}
+          />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar categoria"
+            message="Ocorreu um erro ao tentar carregar os dados da categoria."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!category) {
     return (
-      <div className="min-h-screen px-6">
-        <Card className="max-w-8xl mx-auto p-12 text-center">
-          <PiFolderOpenDuotone className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Categoria não encontrada
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            A categoria que você está procurando não existe ou foi removida.
-          </p>
-          <Button onClick={() => router.push('/stock/product-categories')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Categorias
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Categorias', href: '/stock/product-categories' },
+            ]}
+          />
+          <Header title="Categoria não encontrada" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Categoria não encontrada"
+            message="A categoria que você está procurando não existe ou foi removida."
+            action={{
+              label: 'Voltar para Categorias',
+              onClick: () => router.push('/stock/product-categories'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
@@ -239,48 +324,30 @@ export default function EditCategoryPage({
   // ============================================================================
 
   return (
-    <div className="min-h-screen px-6">
-      {/* Header - Breadcrumb + Save */}
-      <div className="max-w-8xl flex w-full items-center justify-between mb-6">
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Categorias', href: '/stock/product-categories' },
             {
-              label: category?.name || '...',
+              label: category.name,
               href: `/stock/product-categories/${categoryId}`,
             },
-            {
-              label: 'Editar',
-              href: `/stock/product-categories/${categoryId}/edit`,
-            },
+            { label: 'Editar' },
           ]}
+          buttons={actionButtons}
         />
-        <div className="flex items-center gap-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleDeleteClick}
-            disabled={isLoading || isDeleting}
-          >
-            <Trash2 className="h-4 w-4" />
-            Excluir
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => handleSubmit()}
-            disabled={isLoading || isDeleting || !name.trim()}
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isLoading ? 'Salvando...' : 'Salvar alterações'}
-          </Button>
-        </div>
-      </div>
 
-      <div className="max-w-8xl mx-auto space-y-6">
+        <Header
+          title="Editar Categoria"
+          description={`Editando: ${category.name}`}
+        />
+      </PageHeader>
+
+      <PageBody>
         {/* Entity Banner */}
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white/95 dark:bg-white/5 border border-gray-200 dark:border-white/10">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 shadow-lg overflow-hidden">
             {category.iconUrl ? (
               <Image
@@ -305,7 +372,7 @@ export default function EditCategoryPage({
         </div>
 
         {/* Form */}
-        <Card className="p-6">
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="grid gap-2">
@@ -397,7 +464,7 @@ export default function EditCategoryPage({
 
         {/* Subcategories Section */}
         {subcategories.length > 0 && (
-          <Card className="p-6">
+          <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <FolderTree className="h-5 w-5" />
@@ -423,7 +490,7 @@ export default function EditCategoryPage({
             />
           </Card>
         )}
-      </div>
+      </PageBody>
 
       {/* Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -449,6 +516,6 @@ export default function EditCategoryPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 }

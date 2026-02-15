@@ -632,7 +632,9 @@ export default function VolumesPage() {
                 <VolumeRow
                   key={volume.id}
                   volume={volume}
-                  onView={() => router.push(`/stock/actions/volumes/${volume.id}`)}
+                  onView={() =>
+                    router.push(`/stock/actions/volumes/${volume.id}`)
+                  }
                   onClose={() => handleCloseVolume()}
                   onReopen={() => handleReopenVolume()}
                   onDeliver={() => handleDeliverVolume()}

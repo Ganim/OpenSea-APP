@@ -5,7 +5,6 @@
 
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -172,14 +171,21 @@ export function BinSelector({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          type="button"
           role="combobox"
           aria-expanded={open}
+          aria-controls="bin-selector-list"
           disabled={disabled}
           className={cn(
-            'w-full justify-between font-normal',
-            'bg-background border-input',
+            'flex h-12 w-full items-center justify-between rounded-(--input-radius) px-4 text-base',
+            'bg-(--input-bg)',
+            'border border-[rgb(var(--color-border))]',
+            'text-[rgb(var(--color-foreground))]',
+            'transition-all duration-(--transition-normal)',
+            'focus:outline-none focus:border-[rgb(var(--color-border-focus))]',
+            'focus:ring-[3px] focus:ring-[rgb(var(--color-ring)/0.5)]',
+            'disabled:pointer-events-none disabled:opacity-(--state-disabled-opacity) disabled:bg-[rgb(var(--color-background-muted))]',
             className
           )}
         >
@@ -197,7 +203,7 @@ export function BinSelector({
             <span className="text-muted-foreground">{placeholder}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="start">
         <Command shouldFilter={false}>
@@ -206,7 +212,7 @@ export function BinSelector({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
+          <CommandList id="bin-selector-list">
             {isLoading ? (
               <div className="p-4 space-y-2">
                 <Skeleton className="h-8 w-full" />

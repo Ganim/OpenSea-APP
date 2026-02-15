@@ -1,0 +1,898 @@
+/**
+ * ItemEntryFormModal - Unified modal for registering item entries
+ * Uses sidebar navigation pattern with all entry fields across 4 sections.
+ * Replaces QuickAddItemModal.
+ */
+
+'use client';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  MoneyInput,
+} from '@/components/ui/input-group';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { sanitizeQuantityInput } from '@/helpers/formatters';
+import { useTemplate } from '@/hooks/stock/use-stock-other';
+import { cn } from '@/lib/utils';
+import { itemsService } from '@/services/stock';
+import type {
+  EntryMovementType,
+  Product,
+  RegisterItemEntryRequest,
+  TemplateAttribute,
+  Variant,
+} from '@/types/stock';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  CalendarDays,
+  ChevronRight,
+  DollarSign,
+  Info,
+  Loader2,
+  Package,
+  Plus,
+  ShoppingCart,
+  SlidersHorizontal,
+  Undo2,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { BinSelector } from '../components/bin-selector';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface ItemEntryFormModalProps {
+  product: Product | null;
+  variant: Variant | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+type SectionId = 'entry' | 'costs' | 'batch' | 'attributes';
+
+interface SectionItem {
+  id: SectionId;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
+interface FormData {
+  // Entry
+  entryType: EntryMovementType;
+  binId: string;
+  quantity: string;
+  // Costs
+  unitCost: number;
+  // Batch & Traceability
+  batchNumber: string;
+  manufacturingDate: string;
+  expiryDate: string;
+  invoiceNumber: string;
+  notes: string;
+  // Attributes
+  attributes: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const SECTIONS: SectionItem[] = [
+  {
+    id: 'entry',
+    label: 'Entrada',
+    icon: <Package className="w-4 h-4" />,
+    description: 'Tipo, local, quantidade',
+  },
+  {
+    id: 'costs',
+    label: 'Custos',
+    icon: <DollarSign className="w-4 h-4" />,
+    description: 'Preço de custo',
+  },
+  {
+    id: 'batch',
+    label: 'Rastreabilidade',
+    icon: <CalendarDays className="w-4 h-4" />,
+    description: 'Lote, validade, NF',
+  },
+  {
+    id: 'attributes',
+    label: 'Atributos',
+    icon: <SlidersHorizontal className="w-4 h-4" />,
+    description: 'Atributos do template',
+  },
+];
+
+const ENTRY_TYPE_OPTIONS: {
+  type: EntryMovementType;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  {
+    type: 'PURCHASE',
+    label: 'Compra',
+    description: 'Entrada por aquisição',
+    icon: ShoppingCart,
+  },
+  {
+    type: 'CUSTOMER_RETURN',
+    label: 'Devolução',
+    description: 'Retorno de cliente',
+    icon: Undo2,
+  },
+];
+
+const INITIAL_FORM: FormData = {
+  entryType: 'PURCHASE',
+  binId: '',
+  quantity: '1',
+  unitCost: 0,
+  batchNumber: '',
+  manufacturingDate: '',
+  expiryDate: '',
+  invoiceNumber: '',
+  notes: '',
+  attributes: {},
+};
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+export function ItemEntryFormModal({
+  product,
+  variant,
+  open,
+  onOpenChange,
+}: ItemEntryFormModalProps) {
+  const queryClient = useQueryClient();
+  const [activeSection, setActiveSection] = useState<SectionId>('entry');
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+
+  // Fetch template for dynamic attributes
+  const { data: template } = useTemplate(product?.templateId || '');
+
+  // ---------------------------------------------------------------------------
+  // Reset form when modal opens
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (open) {
+      setFormData(INITIAL_FORM);
+      setActiveSection('entry');
+    }
+  }, [open]);
+
+  // ---------------------------------------------------------------------------
+  // Computed
+  // ---------------------------------------------------------------------------
+
+  const parsedQuantity = useMemo(() => {
+    const q = parseFloat(formData.quantity.replace(',', '.'));
+    return isNaN(q) || q <= 0 ? 0 : Math.round(q * 1000) / 1000;
+  }, [formData.quantity]);
+
+  const totalCost = useMemo(() => {
+    if (formData.unitCost > 0 && parsedQuantity > 0) {
+      return Number((formData.unitCost * parsedQuantity).toFixed(2));
+    }
+    return 0;
+  }, [formData.unitCost, parsedQuantity]);
+
+  const unitOfMeasure = useMemo(() => {
+    const uom = template?.unitOfMeasure || 'UNITS';
+    const labels: Record<string, string> = {
+      METERS: 'm',
+      KILOGRAMS: 'kg',
+      UNITS: 'un',
+    };
+    return labels[uom] || 'un';
+  }, [template]);
+
+  // ---------------------------------------------------------------------------
+  // Template attributes
+  // ---------------------------------------------------------------------------
+
+  const itemAttributes = useMemo(() => {
+    if (!template?.itemAttributes) return {};
+    return template.itemAttributes;
+  }, [template]);
+
+  const hasAttributes = Object.keys(itemAttributes).length > 0;
+
+  // ---------------------------------------------------------------------------
+  // Mutation
+  // ---------------------------------------------------------------------------
+
+  const createItemMutation = useMutation({
+    mutationFn: (data: RegisterItemEntryRequest) =>
+      itemsService.registerEntry(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['items', 'by-variant', variant?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['variants'] });
+      queryClient.invalidateQueries({ queryKey: ['bins'] });
+      queryClient.invalidateQueries({
+        queryKey: ['items', 'stats-by-variants', product?.id],
+      });
+      toast.success('Item registrado com sucesso!');
+      onOpenChange(false);
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao registrar entrada: ${error.message}`);
+    },
+  });
+
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!variant?.id) return;
+
+      if (!formData.binId) {
+        toast.error('Selecione uma localização');
+        return;
+      }
+
+      if (parsedQuantity <= 0) {
+        toast.error('Quantidade inválida');
+        return;
+      }
+
+      // Build notes: prepend invoice number if present
+      let notes = formData.notes.trim() || undefined;
+      if (formData.invoiceNumber.trim()) {
+        const invoiceLine = `NF: ${formData.invoiceNumber.trim()}`;
+        notes = notes ? `${invoiceLine} | ${notes}` : invoiceLine;
+      }
+
+      const createData: RegisterItemEntryRequest = {
+        variantId: variant.id,
+        binId: formData.binId,
+        quantity: parsedQuantity,
+        movementType: formData.entryType,
+        unitCost: formData.unitCost > 0 ? formData.unitCost : undefined,
+        attributes: formData.attributes,
+        batchNumber: formData.batchNumber.trim() || undefined,
+        manufacturingDate: formData.manufacturingDate
+          ? new Date(formData.manufacturingDate)
+          : undefined,
+        expiryDate: formData.expiryDate
+          ? new Date(formData.expiryDate)
+          : undefined,
+        notes,
+      };
+
+      createItemMutation.mutate(createData);
+    },
+    [variant, formData, parsedQuantity, createItemMutation]
+  );
+
+  const updateField = useCallback(
+    <K extends keyof FormData>(key: K, value: FormData[K]) => {
+      setFormData(prev => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+
+  const updateAttribute = useCallback((key: string, value: unknown) => {
+    setFormData(prev => ({
+      ...prev,
+      attributes: { ...prev.attributes, [key]: value },
+    }));
+  }, []);
+
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+
+  if (!product || !variant) return null;
+
+  const isPending = createItemMutation.isPending;
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-6xl p-0 gap-0 max-h-[85vh] flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <DialogTitle>Registrar Entrada</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Adicionar item para {variant.name}
+          </p>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0">
+            {/* Sidebar */}
+            <nav className="w-48 shrink-0 border-r p-2 space-y-1 overflow-auto">
+              {SECTIONS.map(section => (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() => setActiveSection(section.id)}
+                  className={cn(
+                    'w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg transition-all duration-200',
+                    'text-left group',
+                    activeSection === section.id
+                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'p-1.5 rounded-md transition-colors',
+                      activeSection === section.id
+                        ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                        : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 group-hover:bg-gray-200 dark:group-hover:bg-white/15'
+                    )}
+                  >
+                    {section.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={cn(
+                        'font-medium text-xs',
+                        activeSection === section.id
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-900 dark:text-white'
+                      )}
+                    >
+                      {section.label}
+                    </p>
+                    <p className="text-[10px] text-gray-500 dark:text-white/40 truncate">
+                      {section.description}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    className={cn(
+                      'w-3.5 h-3.5 shrink-0 transition-transform',
+                      activeSection === section.id
+                        ? 'text-blue-500 translate-x-0'
+                        : 'text-gray-400 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
+                    )}
+                  />
+                </button>
+              ))}
+            </nav>
+
+            {/* Content Area */}
+            <ScrollArea className="flex-1">
+              <div className="p-6 space-y-4">
+                {activeSection === 'entry' && (
+                  <EntrySection
+                    formData={formData}
+                    updateField={updateField}
+                    unitOfMeasure={unitOfMeasure}
+                    isPending={isPending}
+                  />
+                )}
+
+                {activeSection === 'costs' && (
+                  <CostsSection
+                    formData={formData}
+                    updateField={updateField}
+                    totalCost={totalCost}
+                    parsedQuantity={parsedQuantity}
+                    unitOfMeasure={unitOfMeasure}
+                    isPending={isPending}
+                  />
+                )}
+
+                {activeSection === 'batch' && (
+                  <BatchSection
+                    formData={formData}
+                    updateField={updateField}
+                    isPending={isPending}
+                  />
+                )}
+
+                {activeSection === 'attributes' && (
+                  <AttributesSection
+                    formData={formData}
+                    itemAttributes={itemAttributes}
+                    hasAttributes={hasAttributes}
+                    updateAttribute={updateAttribute}
+                    isPending={isPending}
+                  />
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isPending}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isPending || !formData.binId}>
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Registrando...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Registrar Entrada
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ===========================================================================
+// Section Components
+// ===========================================================================
+
+interface SectionProps {
+  formData: FormData;
+  updateField: <K extends keyof FormData>(key: K, value: FormData[K]) => void;
+  isPending: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Entry Section
+// ---------------------------------------------------------------------------
+
+interface EntrySectionProps extends SectionProps {
+  unitOfMeasure: string;
+}
+
+function EntrySection({
+  formData,
+  updateField,
+  unitOfMeasure,
+  isPending,
+}: EntrySectionProps) {
+  return (
+    <div className="space-y-4">
+      {/* Tipo de Entrada */}
+      <div className="space-y-1.5">
+        <Label>
+          Tipo de Entrada <span className="text-red-500">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-3">
+          {ENTRY_TYPE_OPTIONS.map(option => {
+            const Icon = option.icon;
+            const isSelected = formData.entryType === option.type;
+            return (
+              <button
+                key={option.type}
+                type="button"
+                onClick={() => updateField('entryType', option.type)}
+                disabled={isPending}
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-lg border text-left transition-all',
+                  isSelected
+                    ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20'
+                    : 'border-border hover:bg-muted/50 text-muted-foreground'
+                )}
+              >
+                <div
+                  className={cn(
+                    'p-2 rounded-md',
+                    isSelected
+                      ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                      : 'bg-muted text-muted-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{option.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {option.description}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Localização + Quantidade */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label>
+            Localização (Bin) <span className="text-red-500">*</span>
+          </Label>
+          <BinSelector
+            value={formData.binId}
+            onChange={binId => updateField('binId', binId)}
+            placeholder="Buscar localização..."
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="ief-quantity">
+            Quantidade <span className="text-red-500">*</span>
+          </Label>
+          <InputGroup className="rounded-md">
+            <Input
+              id="ief-quantity"
+              type="text"
+              inputMode="decimal"
+              placeholder="1,000"
+              value={formData.quantity}
+              onChange={e => {
+                const sanitized = sanitizeQuantityInput(e.target.value);
+                updateField('quantity', sanitized);
+              }}
+              required
+              disabled={isPending}
+              className="rounded-r-none"
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupText>{unitOfMeasure}</InputGroupText>
+            </InputGroupAddon>
+          </InputGroup>
+          <p className="text-xs text-muted-foreground">
+            Máximo 3 casas decimais
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Costs Section
+// ---------------------------------------------------------------------------
+
+interface CostsSectionProps extends SectionProps {
+  totalCost: number;
+  parsedQuantity: number;
+  unitOfMeasure: string;
+}
+
+function CostsSection({
+  formData,
+  updateField,
+  totalCost,
+  parsedQuantity,
+  unitOfMeasure,
+  isPending,
+}: CostsSectionProps) {
+  return (
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Custo Unitário */}
+          <div className="space-y-1.5">
+            <Label htmlFor="ief-unitCost">Preço de Custo Unitário</Label>
+            <InputGroup>
+              <InputGroupAddon>
+                <InputGroupText>R$</InputGroupText>
+              </InputGroupAddon>
+              <MoneyInput
+                id="ief-unitCost"
+                value={formData.unitCost}
+                onChange={value => updateField('unitCost', value)}
+                placeholder="0,00"
+                disabled={isPending}
+              />
+            </InputGroup>
+          </div>
+
+          {/* Custo Total */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="ief-totalCost">Custo Total</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Custo unitário x {parsedQuantity} {unitOfMeasure}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <InputGroup>
+              <InputGroupAddon>
+                <InputGroupText>R$</InputGroupText>
+              </InputGroupAddon>
+              <MoneyInput
+                id="ief-totalCost"
+                value={totalCost}
+                disabled
+                className="bg-muted"
+              />
+            </InputGroup>
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Batch Section
+// ---------------------------------------------------------------------------
+
+function BatchSection({ formData, updateField, isPending }: SectionProps) {
+  return (
+    <div className="space-y-4">
+      {/* Lote + NF */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="ief-batchNumber">N° do Lote</Label>
+          <Input
+            id="ief-batchNumber"
+            value={formData.batchNumber}
+            onChange={e => updateField('batchNumber', e.target.value)}
+            placeholder="Ex: LOTE-2026-001"
+            maxLength={64}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="ief-invoiceNumber">N° da Nota Fiscal</Label>
+          <Input
+            id="ief-invoiceNumber"
+            value={formData.invoiceNumber}
+            onChange={e => updateField('invoiceNumber', e.target.value)}
+            placeholder="Ex: 000.123.456"
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
+      {/* Datas */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="ief-manufacturingDate">Data de Fabricação</Label>
+          <Input
+            id="ief-manufacturingDate"
+            type="date"
+            value={formData.manufacturingDate}
+            onChange={e => updateField('manufacturingDate', e.target.value)}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="ief-expiryDate">Data de Validade</Label>
+          <Input
+            id="ief-expiryDate"
+            type="date"
+            value={formData.expiryDate}
+            onChange={e => updateField('expiryDate', e.target.value)}
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
+      {/* Observações */}
+      <div className="space-y-1.5">
+        <Label htmlFor="ief-notes">Observações</Label>
+        <textarea
+          id="ief-notes"
+          value={formData.notes}
+          onChange={e => updateField('notes', e.target.value)}
+          placeholder="Informações adicionais sobre esta entrada..."
+          maxLength={1000}
+          rows={3}
+          disabled={isPending}
+          className={cn(
+            'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
+            'ring-offset-background placeholder:text-muted-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'resize-none'
+          )}
+        />
+        <p className="text-xs text-muted-foreground text-right">
+          {formData.notes.length}/1000
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Attributes Section
+// ---------------------------------------------------------------------------
+
+interface AttributesSectionProps {
+  formData: FormData;
+  itemAttributes: Record<string, TemplateAttribute>;
+  hasAttributes: boolean;
+  updateAttribute: (key: string, value: unknown) => void;
+  isPending: boolean;
+}
+
+function AttributesSection({
+  formData,
+  itemAttributes,
+  hasAttributes,
+  updateAttribute,
+  isPending,
+}: AttributesSectionProps) {
+  if (!hasAttributes) {
+    return (
+      <div className="p-8 text-center border border-dashed rounded-lg">
+        <SlidersHorizontal className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+        <p className="text-sm text-muted-foreground">
+          Nenhum atributo de item definido no template
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="grid grid-cols-2 gap-4">
+        {Object.entries(itemAttributes).map(
+          ([key, config]: [string, TemplateAttribute]) => {
+            const rawValue = formData.attributes[key];
+            const currentValue = String(rawValue ?? '');
+            const isBooleanType =
+              config.type === 'boolean' ||
+              (config.type as string) === 'sim/nao';
+
+            return (
+              <div key={key} className="space-y-1.5">
+                {isBooleanType ? (
+                  <div className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`ief-attr-${key}`} className="text-sm">
+                        {config.label || key}
+                        {config.required && (
+                          <span className="text-red-500"> *</span>
+                        )}
+                      </Label>
+                      {config.description && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{config.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <Switch
+                      id={`ief-attr-${key}`}
+                      checked={
+                        rawValue === true ||
+                        currentValue === 'true' ||
+                        currentValue === 'sim' ||
+                        currentValue === '1'
+                      }
+                      onCheckedChange={checked => updateAttribute(key, checked)}
+                      disabled={isPending}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`ief-attr-${key}`} className="text-sm">
+                        {config.label || key}
+                        {config.required && (
+                          <span className="text-red-500"> *</span>
+                        )}
+                      </Label>
+                      {config.description && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{config.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+
+                    {config.type === 'select' ? (
+                      <Select
+                        value={currentValue}
+                        onValueChange={value => updateAttribute(key, value)}
+                        disabled={isPending}
+                      >
+                        <SelectTrigger id={`ief-attr-${key}`}>
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {config.options?.map((option: string) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : config.type === 'number' ? (
+                      <Input
+                        id={`ief-attr-${key}`}
+                        type="number"
+                        value={currentValue}
+                        onChange={e =>
+                          updateAttribute(key, parseFloat(e.target.value) || 0)
+                        }
+                        placeholder={config.placeholder || ''}
+                        required={config.required}
+                        disabled={isPending}
+                      />
+                    ) : config.type === 'date' ? (
+                      <Input
+                        id={`ief-attr-${key}`}
+                        type="date"
+                        value={currentValue}
+                        onChange={e => updateAttribute(key, e.target.value)}
+                        required={config.required}
+                        disabled={isPending}
+                      />
+                    ) : (
+                      <Input
+                        id={`ief-attr-${key}`}
+                        type="text"
+                        value={currentValue}
+                        onChange={e => updateAttribute(key, e.target.value)}
+                        placeholder={config.placeholder || ''}
+                        required={config.required}
+                        disabled={isPending}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          }
+        )}
+      </div>
+    </TooltipProvider>
+  );
+}

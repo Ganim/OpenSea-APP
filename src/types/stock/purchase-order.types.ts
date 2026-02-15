@@ -8,40 +8,42 @@ export type PurchaseOrderStatus =
 
 export interface PurchaseOrderItem {
   id: string;
-  purchaseOrderId: string;
+  orderId: string;
   variantId: string;
   quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  receivedQuantity: number;
-  notes?: string;
-  createdAt: Date;
-  updatedAt?: Date | null;
+  unitCost: number;
+  totalCost: number;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
 }
 
 export interface PurchaseOrder {
   id: string;
   orderNumber: string;
   supplierId: string;
+  createdBy?: string | null;
   status: PurchaseOrderStatus;
-  totalPrice: number;
-  notes?: string;
+  totalCost: number;
+  expectedDate?: string | null;
+  receivedDate?: string | null;
+  notes?: string | null;
   items: PurchaseOrderItem[];
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
 }
 
 export interface CreatePurchaseOrderRequest {
   orderNumber: string;
   supplierId: string;
+  expectedDate?: string;
   status?: PurchaseOrderStatus;
   notes?: string;
   items: Array<{
     variantId: string;
     quantity: number;
-    unitPrice: number;
-    notes?: string;
+    unitCost: number;
   }>;
 }
 

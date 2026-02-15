@@ -1,21 +1,28 @@
 'use client';
 
-import React, { use } from 'react';
-import Link from 'next/link';
+import { use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   MapPin,
   Settings,
-  RefreshCw,
   LayoutGrid,
   Info,
   Layers,
   Lock,
+  RefreshCw,
 } from 'lucide-react';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
@@ -76,7 +83,6 @@ export default function ZoneMapPage({ params }: PageProps) {
     targetBinAddress: string,
     quantity: number
   ) => {
-    // Resolve address to bin ID
     const binResponse = await apiClient.get<BinResponse>(
       API_ENDPOINTS.bins.getByAddress(targetBinAddress)
     );
@@ -89,7 +95,6 @@ export default function ZoneMapPage({ params }: PageProps) {
 
     toast.success(`Item transferido para ${targetBinAddress}`);
 
-    // Invalidate occupancy data to refresh the map
     refetch();
     queryClient.invalidateQueries({
       queryKey: QUERY_KEYS.zoneItemStats(zoneId),
@@ -97,7 +102,6 @@ export default function ZoneMapPage({ params }: PageProps) {
   };
 
   const handlePrintLabels = (binIds: string[]) => {
-    // TODO: Implementar impressão de etiquetas
     toast.info(`Gerando ${binIds.length} etiquetas...`);
   };
 
@@ -109,130 +113,211 @@ export default function ZoneMapPage({ params }: PageProps) {
     router.push(`/stock/locations/${warehouseId}/zones/${zoneId}/layout`);
   };
 
-  // Invalid IDs state
+  // ============================================================================
+  // BREADCRUMB
+  // ============================================================================
+
+  const breadcrumbItems = [
+    { label: 'Estoque', href: '/stock' },
+    { label: 'Localizações', href: '/stock/locations' },
+    {
+      label: warehouse?.name || '...',
+      href: `/stock/locations/${warehouseId}`,
+    },
+    {
+      label: zone?.name || '...',
+      href: `/stock/locations/${warehouseId}/zones/${zoneId}`,
+    },
+  ];
+
+  // ============================================================================
+  // ACTION BUTTONS
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = [
+    {
+      id: 'edit-layout',
+      title: 'Layout',
+      icon: LayoutGrid,
+      onClick: handleEditLayout,
+      variant: 'outline' as const,
+    },
+    {
+      id: 'configure-structure',
+      title: 'Estrutura',
+      icon: Settings,
+      onClick: handleConfigure,
+      variant: 'outline' as const,
+    },
+  ];
+
+  // ============================================================================
+  // INVALID IDS
+  // ============================================================================
+
   if (!isValidWarehouseId || !isValidZoneId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <MapPin className="h-12 w-12 text-muted-foreground/50" />
-        <div className="text-center">
-          <p className="text-lg font-medium">URL inválida</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Os parâmetros da URL são inválidos. Por favor, acesse a zona através
-            do menu de localizações.
-          </p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href="/stock/locations">Ir para Localizações</Link>
-        </Button>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Localizações', href: '/stock/locations' },
+            ]}
+          />
+          <Header title="URL inválida" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="URL inválida"
+            message="Os parâmetros da URL são inválidos. Por favor, acesse a zona através do menu de localizações."
+            icon={MapPin}
+            action={{
+              label: 'Ir para Localizações',
+              onClick: () => router.push('/stock/locations'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  // Loading state
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
   if (isLoadingZone || isLoadingWarehouse) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Skeleton className="h-4 w-24" />
-          <span>/</span>
-          <Skeleton className="h-4 w-16" />
-          <span>/</span>
-          <Skeleton className="h-4 w-16" />
-        </div>
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-[500px] w-full" />
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Localizações', href: '/stock/locations' },
+              { label: '...' },
+            ]}
+          />
+          <Header title="Carregando..." />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={4} layout="grid" size="sm" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  // Error state
+  // ============================================================================
+  // ERROR STATE
+  // ============================================================================
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <p className="text-destructive">Erro ao carregar dados da zona</p>
-        <Button variant="outline" onClick={() => refetch()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Tentar novamente
-        </Button>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+          <Header title="Erro" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="server"
+            title="Erro ao carregar dados da zona"
+            message="Ocorreu um erro ao tentar carregar os dados da zona."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  // Zone not found
+  // ============================================================================
+  // ZONE NOT FOUND
+  // ============================================================================
+
   if (!zone) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <MapPin className="h-12 w-12 text-muted-foreground/50" />
-        <p className="text-lg font-medium">Zona não encontrada</p>
-        <Button variant="outline" asChild>
-          <Link href={`/stock/locations/${warehouseId}`}>
-            Voltar para zonas
-          </Link>
-        </Button>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Localizações', href: '/stock/locations' },
+              {
+                label: warehouse?.name || '...',
+                href: `/stock/locations/${warehouseId}`,
+              },
+            ]}
+          />
+          <Header title="Zona não encontrada" />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Zona não encontrada"
+            message="A zona que você está procurando não existe ou foi removida."
+            icon={MapPin}
+            action={{
+              label: 'Voltar para Zonas',
+              onClick: () => router.push(`/stock/locations/${warehouseId}`),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  // Structure not configured
+  // ============================================================================
+  // STRUCTURE NOT CONFIGURED
+  // ============================================================================
+
   if (!zone.structure) {
     return (
-      <div className="space-y-6">
-        {/* Header */}
-        <PageBreadcrumb
-          items={[
-            { label: 'Estoque', href: '/stock' },
-            { label: 'Localizações', href: '/stock/locations' },
-            {
-              label: warehouse?.name || '...',
-              href: `/stock/locations/${warehouseId}`,
-            },
-            {
-              label: zone.name,
-              href: `/stock/locations/${warehouseId}/zones/${zoneId}`,
-            },
-          ]}
-        />
-
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 rounded-lg border border-dashed p-8">
-          <Settings className="h-12 w-12 text-muted-foreground/50" />
-          <div className="text-center">
-            <p className="text-lg font-medium">Estrutura não configurada</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Configure a estrutura de corredores, prateleiras e nichos
-            </p>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+          <Header
+            title={zone.name}
+            description={`${warehouse?.code}-${zone.code}`}
+          />
+        </PageHeader>
+        <PageBody>
+          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 rounded-lg border border-dashed p-8">
+            <Settings className="h-12 w-12 text-muted-foreground/50" />
+            <div className="text-center">
+              <p className="text-lg font-medium">Estrutura não configurada</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Configure a estrutura de corredores, prateleiras e nichos
+              </p>
+            </div>
+            <Button onClick={handleConfigure}>
+              <Settings className="mr-2 h-4 w-4" />
+              Configurar Estrutura
+            </Button>
           </div>
-          <Button onClick={handleConfigure}>
-            <Settings className="mr-2 h-4 w-4" />
-            Configurar Estrutura
-          </Button>
-        </div>
-      </div>
+        </PageBody>
+      </PageLayout>
     );
   }
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
 
   const bins: BinOccupancy[] = occupancyData?.bins || [];
   const stats = occupancyData?.stats;
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <PageBreadcrumb
-        items={[
-          { label: 'Estoque', href: '/stock' },
-          { label: 'Localizações', href: '/stock/locations' },
-          {
-            label: warehouse?.name || '...',
-            href: `/stock/locations/${warehouseId}`,
-          },
-          {
-            label: zone.name,
-            href: `/stock/locations/${warehouseId}/zones/${zoneId}`,
-          },
-        ]}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={breadcrumbItems}
+          buttons={actionButtons}
+        />
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        {/* Zone Identity */}
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
             <Layers className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
@@ -250,178 +335,169 @@ export default function ZoneMapPage({ params }: PageProps) {
             </p>
           </div>
         </div>
+      </PageHeader>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleEditLayout}>
-            <LayoutGrid className="mr-2 h-4 w-4" />
-            Layout
-          </Button>
-          <Button variant="outline" onClick={handleConfigure}>
-            <Settings className="mr-2 h-4 w-4" />
-            Estrutura
-          </Button>
-        </div>
-      </div>
+      <PageBody>
+        {/* Stats Cards */}
+        {stats && stats.total !== undefined && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Total de Nichos
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {stats.total?.toLocaleString() || '0'}
+                    </p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <Layers className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Stats Cards */}
-      {stats && stats.total !== undefined && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Total de Nichos
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {stats.total?.toLocaleString() || '0'}
-                  </p>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ocupados</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.occupied?.toLocaleString() || '0'}
+                    </p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                  </div>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Layers className="h-5 w-5 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ocupados</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.occupied?.toLocaleString() || '0'}
-                  </p>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vazios</p>
+                    <p className="text-2xl font-bold text-gray-600">
+                      {stats.empty?.toLocaleString() || '0'}
+                    </p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-gray-500" />
+                  </div>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Vazios</p>
-                  <p className="text-2xl font-bold text-gray-600">
-                    {stats.empty?.toLocaleString() || '0'}
-                  </p>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ocupação</p>
+                    <p className="text-2xl font-bold text-amber-600">
+                      {stats.occupancyPercentage?.toFixed(1) || '0'}%
+                    </p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <Info className="h-5 w-5 text-amber-600" />
+                  </div>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-gray-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ocupação</p>
-                  <p className="text-2xl font-bold text-amber-600">
-                    {stats.occupancyPercentage?.toFixed(1) || '0'}%
-                  </p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <Info className="h-5 w-5 text-amber-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Blocked Bins Alert */}
-      {itemStats &&
-        itemStats.blockedBins > 0 &&
-        itemStats.itemsInBlockedBins > 0 && (
-          <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-900/20">
-            <Lock className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800 dark:text-amber-300">
-              {itemStats.blockedBins} nicho(s) bloqueado(s) com itens
-            </AlertTitle>
-            <AlertDescription className="text-amber-700 dark:text-amber-400">
-              <span>
-                {itemStats.itemsInBlockedBins} item(ns) precisam ser realocados.
-                Use o filtro &quot;Bloqueados&quot; no mapa para visualizá-los e
-                mover os itens individualmente.
-              </span>
-            </AlertDescription>
-          </Alert>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
-      {/* Zone Map */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              Mapa da Zona
-            </CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ZoneMap
-            zone={zone}
-            bins={bins}
-            isLoading={isLoadingBins}
-            onPrintLabels={handlePrintLabels}
-            highlightBinId={highlightBinId}
-            onMoveItem={handleMoveItem}
-          />
-        </CardContent>
-      </Card>
+        {/* Blocked Bins Alert */}
+        {itemStats &&
+          itemStats.blockedBins > 0 &&
+          itemStats.itemsInBlockedBins > 0 && (
+            <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-900/20">
+              <Lock className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800 dark:text-amber-300">
+                {itemStats.blockedBins} nicho(s) bloqueado(s) com itens
+              </AlertTitle>
+              <AlertDescription className="text-amber-700 dark:text-amber-400">
+                <span>
+                  {itemStats.itemsInBlockedBins} item(ns) precisam ser
+                  realocados. Use o filtro &quot;Bloqueados&quot; no mapa para
+                  visualizá-los e mover os itens individualmente.
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
 
-      {/* Structure Info */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
-            <Info className="h-4 w-4" />
-            Informações da Estrutura
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Corredores</p>
-              <p className="text-lg font-semibold">{zone.structure.aisles}</p>
+        {/* Zone Map */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Mapa da Zona
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Prateleiras por Corredor
-              </p>
-              <p className="text-lg font-semibold">
-                {zone.structure.shelvesPerAisle}
-              </p>
+          </CardHeader>
+          <CardContent>
+            <ZoneMap
+              zone={zone}
+              bins={bins}
+              isLoading={isLoadingBins}
+              onPrintLabels={handlePrintLabels}
+              highlightBinId={highlightBinId}
+              onMoveItem={handleMoveItem}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Structure Info */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              Informações da Estrutura
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Corredores</p>
+                <p className="text-lg font-semibold">{zone.structure.aisles}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Prateleiras por Corredor
+                </p>
+                <p className="text-lg font-semibold">
+                  {zone.structure.shelvesPerAisle}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Nichos por Prateleira
+                </p>
+                <p className="text-lg font-semibold">
+                  {zone.structure.binsPerShelf}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Direção dos Nichos
+                </p>
+                <p className="text-lg font-semibold">
+                  {zone.structure.codePattern.binDirection.toUpperCase() ===
+                  'BOTTOM_UP'
+                    ? 'Baixo → Cima'
+                    : 'Cima → Baixo'}
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Nichos por Prateleira
-              </p>
-              <p className="text-lg font-semibold">
-                {zone.structure.binsPerShelf}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Direção dos Nichos
-              </p>
-              <p className="text-lg font-semibold">
-                {zone.structure.codePattern.binDirection.toUpperCase() ===
-                'BOTTOM_UP'
-                  ? 'Baixo → Cima'
-                  : 'Cima → Baixo'}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </PageBody>
+    </PageLayout>
   );
 }

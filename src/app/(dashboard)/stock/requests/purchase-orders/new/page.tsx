@@ -78,7 +78,7 @@ interface OrderItem {
   variantId: string;
   variant: Variant;
   quantity: number;
-  unitPrice: number;
+  unitCost: number;
   notes?: string;
 }
 
@@ -98,7 +98,7 @@ export default function NewPurchaseOrderPage() {
   const [variantSearch, setVariantSearch] = useState('');
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [itemQuantity, setItemQuantity] = useState(1);
-  const [itemUnitPrice, setItemUnitPrice] = useState(0);
+  const [itemUnitCost, setItemUnitCost] = useState(0);
   const [itemNotes, setItemNotes] = useState('');
 
   // Fetch data
@@ -128,7 +128,7 @@ export default function NewPurchaseOrderPage() {
   const totals = useMemo(() => {
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
     const totalValue = items.reduce(
-      (sum, item) => sum + item.quantity * item.unitPrice,
+      (sum, item) => sum + item.quantity * item.unitCost,
       0
     );
     return { totalItems, totalValue };
@@ -146,7 +146,7 @@ export default function NewPurchaseOrderPage() {
       return;
     }
 
-    if (itemUnitPrice <= 0) {
+    if (itemUnitCost <= 0) {
       toast.error('Preço unitário deve ser maior que zero');
       return;
     }
@@ -163,7 +163,7 @@ export default function NewPurchaseOrderPage() {
             ? {
                 ...item,
                 quantity: item.quantity + itemQuantity,
-                unitPrice: itemUnitPrice,
+                unitCost: itemUnitCost,
               }
             : item
         )
@@ -177,7 +177,7 @@ export default function NewPurchaseOrderPage() {
           variantId: selectedVariant.id,
           variant: selectedVariant,
           quantity: itemQuantity,
-          unitPrice: itemUnitPrice,
+          unitCost: itemUnitCost,
           notes: itemNotes || undefined,
         },
       ]);
@@ -187,11 +187,11 @@ export default function NewPurchaseOrderPage() {
     // Reset form
     setSelectedVariant(null);
     setItemQuantity(1);
-    setItemUnitPrice(0);
+    setItemUnitCost(0);
     setItemNotes('');
     setVariantSearch('');
     setIsAddItemDialogOpen(false);
-  }, [selectedVariant, itemQuantity, itemUnitPrice, itemNotes, items]);
+  }, [selectedVariant, itemQuantity, itemUnitCost, itemNotes, items]);
 
   const handleRemoveItem = useCallback((variantId: string) => {
     setItems(prev => prev.filter(item => item.variantId !== variantId));
@@ -218,7 +218,7 @@ export default function NewPurchaseOrderPage() {
       setItems(prev =>
         prev.map(item => {
           if (item.variantId === variantId) {
-            return { ...item, unitPrice: Math.max(0, newPrice) };
+            return { ...item, unitCost: Math.max(0, newPrice) };
           }
           return item;
         })
@@ -229,7 +229,7 @@ export default function NewPurchaseOrderPage() {
 
   const handleSelectVariant = useCallback((variant: Variant) => {
     setSelectedVariant(variant);
-    setItemUnitPrice(variant.costPrice || variant.price || 0);
+    setItemUnitCost(variant.costPrice || variant.price || 0);
   }, []);
 
   const handleSubmit = useCallback(
@@ -246,7 +246,7 @@ export default function NewPurchaseOrderPage() {
         items: items.map(item => ({
           variantId: item.variantId,
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
+          unitCost: item.unitCost,
           notes: item.notes,
         })),
       };
@@ -254,7 +254,9 @@ export default function NewPurchaseOrderPage() {
       createMutation.mutate(request, {
         onSuccess: response => {
           toast.success('Ordem de compra criada com sucesso');
-          router.push(`/stock/requests/purchase-orders/${response.purchaseOrder.id}`);
+          router.push(
+            `/stock/requests/purchase-orders/${response.purchaseOrder.id}`
+          );
         },
         onError: () => {
           toast.error('Erro ao criar ordem de compra');
@@ -271,8 +273,14 @@ export default function NewPurchaseOrderPage() {
         <PageBreadcrumb
           items={[
             { label: 'Estoque', href: '/stock' },
-            { label: 'Ordens de Compra', href: '/stock/requests/purchase-orders' },
-            { label: 'Nova Ordem', href: '/stock/requests/purchase-orders/new' },
+            {
+              label: 'Ordens de Compra',
+              href: '/stock/requests/purchase-orders',
+            },
+            {
+              label: 'Nova Ordem',
+              href: '/stock/requests/purchase-orders/new',
+            },
           ]}
         />
       </div>
@@ -441,7 +449,7 @@ export default function NewPurchaseOrderPage() {
                           type="number"
                           step="0.01"
                           min="0"
-                          value={item.unitPrice}
+                          value={item.unitCost}
                           onChange={e =>
                             handleUpdatePrice(
                               item.variantId,
@@ -452,7 +460,7 @@ export default function NewPurchaseOrderPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatCurrency(item.quantity * item.unitPrice)}
+                        {formatCurrency(item.quantity * item.unitCost)}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -650,9 +658,9 @@ export default function NewPurchaseOrderPage() {
                       type="number"
                       step="0.01"
                       min="0"
-                      value={itemUnitPrice}
+                      value={itemUnitCost}
                       onChange={e =>
-                        setItemUnitPrice(parseFloat(e.target.value) || 0)
+                        setItemUnitCost(parseFloat(e.target.value) || 0)
                       }
                     />
                   </div>
@@ -676,7 +684,7 @@ export default function NewPurchaseOrderPage() {
                     Subtotal do item
                   </span>
                   <span className="text-lg font-bold">
-                    {formatCurrency(itemQuantity * itemUnitPrice)}
+                    {formatCurrency(itemQuantity * itemUnitCost)}
                   </span>
                 </div>
               </div>
@@ -691,7 +699,7 @@ export default function NewPurchaseOrderPage() {
                 setIsAddItemDialogOpen(false);
                 setSelectedVariant(null);
                 setItemQuantity(1);
-                setItemUnitPrice(0);
+                setItemUnitCost(0);
                 setItemNotes('');
                 setVariantSearch('');
               }}
@@ -702,7 +710,7 @@ export default function NewPurchaseOrderPage() {
               type="button"
               onClick={handleAddItem}
               disabled={
-                !selectedVariant || itemQuantity <= 0 || itemUnitPrice <= 0
+                !selectedVariant || itemQuantity <= 0 || itemUnitCost <= 0
               }
             >
               <Plus className="h-4 w-4 mr-2" />

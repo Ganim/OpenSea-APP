@@ -44,11 +44,10 @@ import { toast } from 'sonner';
 import { ItemRow } from '../components/item-row';
 import { VariantRow } from '../components/variant-row';
 import type { ExitType } from '../types/products.types';
-import { EditVariantModal } from './edit-variant-modal';
 import { ExitItemsModal } from './exit-items-modal';
 import { ItemHistoryModal } from './item-history-modal';
-import { QuickAddItemModal } from './quick-add-item-modal';
-import { QuickAddVariantModal } from './quick-add-variant-modal';
+import { ItemEntryFormModal } from './item-entry-form-modal';
+import { VariantFormModal } from './variant-form-modal';
 
 interface ProductVariantsItemsModalProps {
   product: Product | null;
@@ -631,22 +630,22 @@ export function ProductVariantsItemsModal({
       />
 
       {/* Edit Variant Modal */}
-      <EditVariantModal
+      <VariantFormModal
         product={product}
         variant={editingVariant}
         open={showEditVariantModal}
         onOpenChange={setShowEditVariantModal}
       />
 
-      {/* Quick Add Variant Modal */}
-      <QuickAddVariantModal
+      {/* Add Variant Modal */}
+      <VariantFormModal
         product={product}
         open={showAddVariantModal}
         onOpenChange={setShowAddVariantModal}
       />
 
       {/* Quick Add Item Modal */}
-      <QuickAddItemModal
+      <ItemEntryFormModal
         product={product}
         variant={selectedVariant}
         open={showAddItemModal}

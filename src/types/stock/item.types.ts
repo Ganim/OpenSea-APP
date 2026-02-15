@@ -103,10 +103,10 @@ export interface Item {
   updatedAt?: Date;
   deletedAt?: Date;
   // Campos desnormalizados do produto/variante
-  productCode?: string;
-  productName?: string;
-  variantSku?: string;
-  variantName?: string;
+  productCode: string;
+  productName: string;
+  variantSku: string;
+  variantName: string;
   // Campos do template e atributos (para listagem enriquecida)
   templateId?: string;
   templateName?: string;

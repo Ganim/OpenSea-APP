@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfirmDialog } from '@/core';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -15,23 +15,18 @@ export function DeleteConfirmModal({
   onClose,
   itemCount,
   onConfirm,
-  isLoading,
 }: DeleteConfirmModalProps) {
   return (
-    <ConfirmDialog
-      open={isOpen}
-      onOpenChange={open => !open && onClose()}
-      title="Excluir Template"
+    <VerifyActionPinModal
+      isOpen={isOpen}
+      onClose={onClose}
+      onSuccess={() => onConfirm()}
+      title="Confirmar Exclusão"
       description={
         itemCount === 1
-          ? 'Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita.'
-          : `Tem certeza que deseja excluir ${itemCount} templates? Esta ação não pode ser desfeita.`
+          ? 'Digite seu PIN de ação para excluir este template. Esta ação não pode ser desfeita.'
+          : `Digite seu PIN de ação para excluir ${itemCount} templates. Esta ação não pode ser desfeita.`
       }
-      onConfirm={onConfirm}
-      confirmLabel="Excluir"
-      cancelLabel="Cancelar"
-      variant="destructive"
-      isLoading={isLoading}
     />
   );
 }

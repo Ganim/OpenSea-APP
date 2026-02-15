@@ -1,11 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDownToLine, Filter, Loader2, RefreshCw } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  Filter,
+  Loader2,
+  Printer,
+  RefreshCw,
+} from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
   PageHeader,
@@ -13,7 +21,6 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import type { FilterOption } from '@/components/ui/filter-dropdown';
 import {
@@ -96,6 +103,64 @@ function getReference(m: ItemMovement): string {
   // Batch reference
   if (m.batchNumber) return `Lote: ${m.batchNumber}`;
   return '-';
+}
+
+/** Opens a print window with a movements report. */
+function printMovements(
+  movements: ItemMovement[],
+  infoMap: Map<string, ItemInfo>
+) {
+  const rows = movements
+    .map(m => {
+      const info = infoMap.get(m.itemId);
+      const product = info?.productLabel ?? 'Item sem nome';
+      const code = info?.fullCode ?? m.itemId.slice(0, 8);
+      const type = MOVEMENT_TYPE_LABELS[m.movementType] ?? m.movementType;
+      const ref = getReference(m);
+      const date = formatDateTime(m.createdAt);
+      const user = m.user?.name ?? '-';
+      const dir = getMovementDirection(m);
+      const dirLabel =
+        dir === 'IN' ? 'Entrada' : dir === 'OUT' ? 'Saída' : 'Neutro';
+      return `<tr>
+        <td>${dirLabel}</td>
+        <td>${type}</td>
+        <td>${product}</td>
+        <td style="font-family:monospace;font-size:11px">${code}</td>
+        <td>${ref}</td>
+        <td>${date}</td>
+        <td>${user}</td>
+      </tr>`;
+    })
+    .join('');
+
+  const html = `<!DOCTYPE html>
+<html><head><title>Movimentações de Estoque</title>
+<style>
+  body{font-family:system-ui,sans-serif;padding:24px;font-size:13px}
+  h1{font-size:18px;margin-bottom:4px}
+  .meta{color:#666;margin-bottom:16px;font-size:12px}
+  table{width:100%;border-collapse:collapse;margin-bottom:8px}
+  th,td{border:1px solid #ddd;padding:6px 10px;text-align:left}
+  th{background:#f5f5f5;font-weight:600}
+</style>
+</head><body>
+<h1>Movimentações de Estoque</h1>
+<p class="meta">${movements.length} movimentaç${movements.length === 1 ? 'ão' : 'ões'} &bull; Impresso em ${new Date().toLocaleString('pt-BR')}</p>
+<table>
+  <thead><tr>
+    <th>Movimento</th><th>Tipo</th><th>Produto</th><th>Item</th><th>Referência</th><th>Data</th><th>Usuário</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -243,16 +308,19 @@ export default function MovementsListPage() {
   return (
     <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
       <PageHeader className="shrink-0">
-        <PageBreadcrumb
-          items={[
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Movimentações', href: '/stock/overview/movements' },
           ]}
-        />
-        <Header
-          title="Movimentações de Estoque"
-          description="Histórico de entradas, saídas e transferências"
           buttons={[
+            {
+              id: 'print-movements',
+              title: 'Imprimir',
+              icon: Printer,
+              onClick: () => printMovements(filteredMovements, itemInfoMap),
+              variant: 'outline',
+            },
             {
               id: 'refresh',
               title: 'Atualizar',
@@ -262,211 +330,219 @@ export default function MovementsListPage() {
             },
           ]}
         />
+        <Header
+          title="Movimentações de Estoque"
+          description="Histórico de entradas, saídas e transferências"
+        />
       </PageHeader>
 
-      <PageBody className="flex flex-col flex-1 min-h-0">
-        <Card className="border-gray-200/60 dark:border-white/10 flex flex-col flex-1 min-h-0">
-          <CardContent className="p-4 sm:p-6 flex flex-col flex-1 min-h-0 gap-4">
-            {/* Search */}
-            <SearchBar
-              value={search}
-              placeholder="Buscar por produto, código, usuário, lote..."
-              onSearch={setSearch}
-              onClear={() => setSearch('')}
-            />
+      <PageBody className="flex flex-col flex-1 min-h-0 gap-4">
+        {/* Search */}
+        <SearchBar
+          value={search}
+          placeholder="Buscar por produto, código, usuário, lote..."
+          onSearch={setSearch}
+          onClear={() => setSearch('')}
+        />
 
-            {/* Filters */}
-            <div className="flex items-center gap-2">
-              <FilterDropdown
-                label="Movimento"
-                icon={ArrowDownToLine}
-                options={DIRECTION_OPTIONS}
-                selected={selectedDirection}
-                onSelectionChange={setSelectedDirection}
-                activeColor="emerald"
-                searchPlaceholder="Buscar..."
-                emptyText="Nenhuma opção."
-              />
-              <FilterDropdown
-                label="Tipo"
-                icon={Filter}
-                options={SUBTYPE_OPTIONS}
-                selected={selectedSubtypes}
-                onSelectionChange={setSelectedSubtypes}
-                activeColor="violet"
-                searchPlaceholder="Buscar tipo..."
-                emptyText="Nenhum tipo encontrado."
-              />
+        {/* Filters */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FilterDropdown
+              label="Movimento"
+              icon={ArrowDownToLine}
+              options={DIRECTION_OPTIONS}
+              selected={selectedDirection}
+              onSelectionChange={setSelectedDirection}
+              activeColor="emerald"
+              searchPlaceholder="Buscar..."
+              emptyText="Nenhuma opção."
+            />
+            <FilterDropdown
+              label="Tipo"
+              icon={Filter}
+              options={SUBTYPE_OPTIONS}
+              selected={selectedSubtypes}
+              onSelectionChange={setSelectedSubtypes}
+              activeColor="violet"
+              searchPlaceholder="Buscar tipo..."
+              emptyText="Nenhum tipo encontrado."
+            />
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {filteredMovements.length}{' '}
+              {filteredMovements.length === 1
+                ? 'movimentação'
+                : 'movimentações'}
+            </span>
+          </div>
+        </div>
+
+        {/* Table */}
+        {isLoading ? (
+          <GridLoading count={8} layout="list" size="md" />
+        ) : error ? (
+          <GridError
+            type="server"
+            title="Erro ao carregar movimentações"
+            message="Não foi possível carregar as movimentações. Tente novamente."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        ) : (
+          <div className="flex flex-col flex-1 min-h-0 gap-2">
+            <div
+              ref={scrollContainerRef}
+              className="rounded-lg overflow-auto flex-1 min-h-0"
+            >
+              <table className="w-full caption-bottom text-sm table-fixed">
+                <colgroup>
+                  <col style={{ width: 90 }} />
+                  <col style={{ width: 170 }} />
+                  <col />
+                  <col style={{ width: 180 }} />
+                  <col />
+                  <col style={{ width: 140 }} />
+                  <col style={{ width: 140 }} />
+                </colgroup>
+                <TableHeader className="sticky top-0 z-10 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm">
+                  <TableRow className="border-b border-slate-200/60 dark:border-white/5 hover:bg-transparent">
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Movimento
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Tipo
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Produto
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Item
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Referência
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Data
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Usuário
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMovements.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={TOTAL_COLS} className="text-center">
+                        <div className="py-10 text-sm text-muted-foreground">
+                          Nenhuma movimentação encontrada.
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <>
+                      {/* Top spacer */}
+                      {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+                        <tr>
+                          <td
+                            colSpan={TOTAL_COLS}
+                            style={{
+                              height: virtualItems[0].start,
+                              padding: 0,
+                              border: 'none',
+                            }}
+                          />
+                        </tr>
+                      )}
+
+                      {/* Virtual rows */}
+                      {virtualItems.map(virtualRow => {
+                        const movement = filteredMovements[virtualRow.index];
+                        const info = itemInfoMap.get(movement.itemId);
+
+                        return (
+                          <TableRow
+                            key={movement.id}
+                            data-index={virtualRow.index}
+                            ref={rowVirtualizer.measureElement}
+                            className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-100/80 dark:hover:bg-slate-800/50"
+                          >
+                            {/* Movimento (Entrada/Saída/Neutro) */}
+                            <TableCell>
+                              {renderMovementBadge(movement)}
+                            </TableCell>
+
+                            {/* Tipo */}
+                            <TableCell>{renderTypeCell(movement)}</TableCell>
+
+                            {/* Produto */}
+                            <TableCell>
+                              <span className="text-sm font-medium text-foreground truncate block">
+                                {info?.productLabel ?? 'Item sem nome'}
+                              </span>
+                            </TableCell>
+
+                            {/* Item (fullCode) */}
+                            <TableCell>
+                              <span className="text-[11px] font-mono text-muted-foreground/60">
+                                {info?.fullCode ?? movement.itemId.slice(0, 8)}
+                              </span>
+                            </TableCell>
+
+                            {/* Referência */}
+                            <TableCell>
+                              <span className="text-xs text-gray-600 dark:text-gray-400 truncate block">
+                                {getReference(movement)}
+                              </span>
+                            </TableCell>
+
+                            {/* Data */}
+                            <TableCell>
+                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {formatDateTime(movement.createdAt)}
+                              </span>
+                            </TableCell>
+
+                            {/* Usuário */}
+                            <TableCell>
+                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
+                                {movement.user?.name ?? '-'}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+
+                      {/* Bottom spacer */}
+                      {virtualItems.length > 0 && (
+                        <tr>
+                          <td
+                            colSpan={TOTAL_COLS}
+                            style={{
+                              height:
+                                rowVirtualizer.getTotalSize() -
+                                virtualItems[virtualItems.length - 1].end,
+                              padding: 0,
+                              border: 'none',
+                            }}
+                          />
+                        </tr>
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </table>
             </div>
 
-            {/* Table */}
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                Carregando movimentações...
-              </div>
-            ) : error ? (
-              <div className="text-sm text-red-500">
-                Não foi possível carregar as movimentações. Tente novamente.
-              </div>
-            ) : (
-              <div className="flex flex-col flex-1 min-h-0 gap-2">
-                <div
-                  ref={scrollContainerRef}
-                  className="rounded-xl border border-gray-200/70 dark:border-white/10 overflow-auto flex-1 min-h-0"
-                >
-                  <table className="w-full caption-bottom text-sm table-fixed">
-                    <colgroup>
-                      <col style={{ width: 100 }} />
-                      <col />
-                      <col style={{ width: 140 }} />
-                      <col style={{ width: 180 }} />
-                      <col style={{ width: 200 }} />
-                      <col style={{ width: 150 }} />
-                      <col style={{ width: 160 }} />
-                    </colgroup>
-                    <TableHeader className="sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
-                      <TableRow>
-                        <TableHead>Movimento</TableHead>
-                        <TableHead>Produto</TableHead>
-                        <TableHead>Item</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Referência</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Usuário</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMovements.length === 0 ? (
-                        <TableRow>
-                          <TableCell
-                            colSpan={TOTAL_COLS}
-                            className="text-center"
-                          >
-                            <div className="py-10 text-sm text-muted-foreground">
-                              Nenhuma movimentação encontrada.
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        <>
-                          {/* Top spacer */}
-                          {virtualItems.length > 0 &&
-                            virtualItems[0].start > 0 && (
-                              <tr>
-                                <td
-                                  colSpan={TOTAL_COLS}
-                                  style={{
-                                    height: virtualItems[0].start,
-                                    padding: 0,
-                                    border: 'none',
-                                  }}
-                                />
-                              </tr>
-                            )}
-
-                          {/* Virtual rows */}
-                          {virtualItems.map(virtualRow => {
-                            const movement =
-                              filteredMovements[virtualRow.index];
-                            const info = itemInfoMap.get(movement.itemId);
-
-                            return (
-                              <TableRow
-                                key={movement.id}
-                                data-index={virtualRow.index}
-                                ref={rowVirtualizer.measureElement}
-                                className="hover:bg-gray-50 dark:hover:bg-white/5"
-                              >
-                                {/* Movimento (Entrada/Saída/Neutro) */}
-                                <TableCell>
-                                  {renderMovementBadge(movement)}
-                                </TableCell>
-
-                                {/* Produto */}
-                                <TableCell>
-                                  <span className="font-medium text-gray-900 dark:text-white truncate block">
-                                    {info?.productLabel ?? 'Item sem nome'}
-                                  </span>
-                                </TableCell>
-
-                                {/* Item (fullCode) */}
-                                <TableCell>
-                                  <span className="text-xs font-mono text-muted-foreground">
-                                    {info?.fullCode ??
-                                      movement.itemId.slice(0, 8)}
-                                  </span>
-                                </TableCell>
-
-                                {/* Tipo */}
-                                <TableCell>
-                                  {renderTypeCell(movement)}
-                                </TableCell>
-
-                                {/* Referência */}
-                                <TableCell>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400 truncate block">
-                                    {getReference(movement)}
-                                  </span>
-                                </TableCell>
-
-                                {/* Data */}
-                                <TableCell>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    {formatDateTime(movement.createdAt)}
-                                  </span>
-                                </TableCell>
-
-                                {/* Usuário */}
-                                <TableCell>
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
-                                    {movement.user?.name ?? '-'}
-                                  </span>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-
-                          {/* Bottom spacer */}
-                          {virtualItems.length > 0 && (
-                            <tr>
-                              <td
-                                colSpan={TOTAL_COLS}
-                                style={{
-                                  height:
-                                    rowVirtualizer.getTotalSize() -
-                                    virtualItems[virtualItems.length - 1].end,
-                                  padding: 0,
-                                  border: 'none',
-                                }}
-                              />
-                            </tr>
-                          )}
-                        </>
-                      )}
-                    </TableBody>
-                  </table>
-                </div>
-
-                {/* Footer status */}
-                <div className="flex items-center justify-end gap-2 shrink-0 pr-1 text-xs text-muted-foreground">
-                  {isFetching && !isLoading && (
-                    <span className="flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      Atualizando...
-                    </span>
-                  )}
-                  <span>
-                    {filteredMovements.length}{' '}
-                    {filteredMovements.length === 1
-                      ? 'movimentação'
-                      : 'movimentações'}
-                  </span>
-                </div>
+            {isFetching && !isLoading && (
+              <div className="flex items-center justify-end gap-1 shrink-0 pr-1 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Atualizando...
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        )}
       </PageBody>
     </PageLayout>
   );

@@ -105,6 +105,7 @@ function PDFLabel({ data, config, qrDataUrl, barcodeDataUrl }: PDFLabelProps) {
     >
       {/* QR Code or Barcode */}
       {config.format === 'qr' && qrDataUrl && (
+        // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image, not HTML img
         <Image
           src={qrDataUrl}
           style={[
@@ -114,6 +115,7 @@ function PDFLabel({ data, config, qrDataUrl, barcodeDataUrl }: PDFLabelProps) {
         />
       )}
       {config.format === 'barcode' && barcodeDataUrl && (
+        // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image, not HTML img
         <Image
           src={barcodeDataUrl}
           style={[

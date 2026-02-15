@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ConfirmDialog } from '@/core';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePrintQueue } from '@/core/print-queue';
 import { useSelection } from '@/core/selection/hooks/use-selection';
 import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
@@ -61,11 +61,10 @@ import { ItemsActionBar } from '../components/items-action-bar';
 import { VariantRow } from '../components/variant-row';
 import {
   ChangeLocationModal,
-  EditVariantModal,
   ExitItemsModal,
   ItemHistoryModal,
-  QuickAddItemModal,
-  QuickAddVariantModal,
+  ItemEntryFormModal,
+  VariantFormModal,
 } from '../modals';
 import type { ExitType } from '../types/products.types';
 
@@ -1014,12 +1013,12 @@ export function ProductViewer({
       </div>
 
       {/* Delete Product Confirmation */}
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDeleteProduct}
-        title="Excluir Produto"
-        description={`Tem certeza que deseja excluir o produto "${product.name}"? Esta ação não pode ser desfeita e todas as variantes associadas serão removidas.`}
+      <VerifyActionPinModal
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onSuccess={() => handleDeleteProduct()}
+        title="Confirmar Exclusão"
+        description={`Digite seu PIN de ação para excluir o produto "${product.name}". Esta ação não pode ser desfeita e todas as variantes associadas serão removidas.`}
       />
 
       {/* Items Action Bar */}
@@ -1068,22 +1067,22 @@ export function ProductViewer({
       />
 
       {/* Edit Variant Modal */}
-      <EditVariantModal
+      <VariantFormModal
         product={product}
         variant={editingVariant}
         open={showEditVariantModal}
         onOpenChange={setShowEditVariantModal}
       />
 
-      {/* Quick Add Variant Modal */}
-      <QuickAddVariantModal
+      {/* Add Variant Modal */}
+      <VariantFormModal
         product={product}
         open={showAddVariantModal}
         onOpenChange={setShowAddVariantModal}
       />
 
       {/* Quick Add Item Modal */}
-      <QuickAddItemModal
+      <ItemEntryFormModal
         product={product}
         variant={selectedVariant}
         open={showAddItemModal}

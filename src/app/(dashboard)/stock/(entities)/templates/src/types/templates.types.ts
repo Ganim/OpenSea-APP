@@ -26,7 +26,7 @@ export interface TemplateFormData {
   productAttributes?: Record<string, unknown>;
   variantAttributes?: Record<string, unknown>;
   itemAttributes?: Record<string, unknown>;
-  careInstructions?: Record<string, unknown>;
+  careLabel?: Record<string, unknown>;
 }
 
 /**

@@ -97,7 +97,7 @@ export default function PurchaseOrdersPage() {
       po => po.status === 'RECEIVED'
     ).length;
     const totalValue = purchaseOrders.reduce(
-      (sum, po) => sum + (po.totalPrice || 0),
+      (sum, po) => sum + (po.totalCost || 0),
       0
     );
 
@@ -236,7 +236,10 @@ export default function PurchaseOrdersPage() {
           <PageBreadcrumb
             items={[
               { label: 'Estoque', href: '/stock' },
-              { label: 'Ordens de Compra', href: '/stock/requests/purchase-orders' },
+              {
+                label: 'Ordens de Compra',
+                href: '/stock/requests/purchase-orders',
+              },
             ]}
           />
           <div className="flex items-center gap-2">

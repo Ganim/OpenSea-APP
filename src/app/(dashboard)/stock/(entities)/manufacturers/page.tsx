@@ -25,6 +25,7 @@ import {
   useEntityCrud,
   useEntityPage,
 } from '@/core';
+import { useAuth } from '@/contexts/auth-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import { productsService } from '@/services/stock';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
@@ -66,6 +67,7 @@ type ActionButtonWithPermission = HeaderButton & {
 
 export default function ManufacturersPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { hasPermission } = usePermissions();
 
   // ============================================================================
@@ -103,16 +105,18 @@ export default function ManufacturersPage() {
   // PRODUCT COUNTS
   // ============================================================================
 
-  const { data: products = [] } = useQuery<Product[]>({
+  const { data: products } = useQuery<Product[]>({
     queryKey: ['products-for-manufacturer-counts'],
     queryFn: async () => {
       const response = await productsService.listProducts();
       return response.products;
     },
+    enabled: isAuthenticated,
   });
 
   const productCountMap = useMemo(() => {
     const map = new Map<string, number>();
+    if (!products) return map;
     for (const product of products) {
       if (product.manufacturerId) {
         map.set(

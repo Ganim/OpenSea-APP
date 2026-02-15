@@ -9,7 +9,7 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
   PageHeader,
@@ -367,28 +367,13 @@ export default function LocationsPage() {
   return (
     <PageLayout>
       <PageHeader>
-        <div className="flex w-full items-center justify-between">
-          <PageBreadcrumb
-            items={[
-              { label: 'Estoque', href: '/stock' },
-              { label: 'Localizações', href: '/stock/locations' },
-            ]}
-          />
-          <div className="flex items-center gap-2">
-            {actionButtons.map(button => (
-              <Button
-                key={button.id}
-                variant={button.variant || 'default'}
-                size="sm"
-                onClick={button.onClick}
-                title={button.title}
-              >
-                {button.icon && <button.icon className="h-4 w-4" />}
-                <span className="hidden lg:inline">{button.title}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Estoque', href: '/stock' },
+            { label: 'Localizações', href: '/stock/locations' },
+          ]}
+          buttons={actionButtons}
+        />
 
         <Header
           title="Localizações"

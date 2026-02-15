@@ -11,14 +11,15 @@ import {
   Palette,
   Printer,
   RefreshCw,
-  Slash,
   X,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
   PageHeader,
@@ -27,7 +28,6 @@ import {
 import { SearchBar } from '@/components/layout/search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
@@ -607,15 +607,11 @@ export default function StockOverviewListPage() {
   return (
     <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
       <PageHeader className="shrink-0">
-        <PageBreadcrumb
-          items={[
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Estoque Geral', href: '/stock/overview/list' },
           ]}
-        />
-        <Header
-          title="Listagem de Estoque"
-          description="Visão consolidada de todos os itens com localização, quantidades e atributos personalizados."
           buttons={[
             {
               id: 'print-all',
@@ -633,347 +629,358 @@ export default function StockOverviewListPage() {
             },
           ]}
         />
+        <Header
+          title="Listagem de Estoque"
+          description="Visão consolidada de todos os itens com localização, quantidades e atributos personalizados."
+        />
       </PageHeader>
 
-      <PageBody className="flex flex-col flex-1 min-h-0">
-        <Card className="border-gray-200/60 dark:border-white/10 flex flex-col flex-1 min-h-0">
-          <CardContent className="p-4 sm:p-6 flex flex-col flex-1 min-h-0 gap-4">
-            <SearchBar
-              value={search}
-              placeholder="Buscar por código, produto, variante ou atributos..."
-              onSearch={setSearch}
-              onClear={() => setSearch('')}
-            />
+      <PageBody className="flex flex-col flex-1 min-h-0 gap-4">
+        <SearchBar
+          value={search}
+          placeholder="Buscar por código, produto, variante ou atributos..."
+          onSearch={setSearch}
+          onClear={() => setSearch('')}
+        />
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FilterDropdown
-                  label="Fabricante"
-                  icon={Factory}
-                  options={manufacturerOptions}
-                  selected={selectedManufacturers}
-                  onSelectionChange={setSelectedManufacturers}
-                  activeColor="violet"
-                  searchPlaceholder="Buscar fabricante..."
-                  emptyText="Nenhum fabricante encontrado."
-                />
-                <FilterDropdown
-                  label="Zona"
-                  icon={Grid3X3}
-                  options={zoneOptions}
-                  selected={selectedZones}
-                  onSelectionChange={setSelectedZones}
-                  activeColor="cyan"
-                  searchPlaceholder="Buscar zona..."
-                  emptyText="Nenhuma zona encontrada."
-                />
-                <FilterDropdown
-                  label="Localização"
-                  icon={MapPin}
-                  options={binAddressOptions}
-                  selected={selectedBinAddresses}
-                  onSelectionChange={setSelectedBinAddresses}
-                  activeColor="emerald"
-                  searchPlaceholder="Buscar endereço..."
-                  emptyText="Nenhuma localização encontrada."
-                />
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <Switch
-                    id="hide-exited-overview"
-                    checked={hideExited}
-                    onCheckedChange={setHideExited}
-                    className="scale-75"
-                  />
-                  <Label
-                    htmlFor="hide-exited-overview"
-                    className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
-                  >
-                    Ocultar saídas
-                  </Label>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <FilterDropdown
-                  label="Colunas"
-                  icon={Columns3}
-                  options={columnOptions}
-                  selected={activeColumns}
-                  onSelectionChange={setVisibleColumns}
-                  activeColor="blue"
-                  searchPlaceholder="Buscar coluna..."
-                />
-              </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FilterDropdown
+              label="Fabricante"
+              icon={Factory}
+              options={manufacturerOptions}
+              selected={selectedManufacturers}
+              onSelectionChange={setSelectedManufacturers}
+              activeColor="violet"
+              searchPlaceholder="Buscar fabricante..."
+              emptyText="Nenhum fabricante encontrado."
+            />
+            <FilterDropdown
+              label="Zona"
+              icon={Grid3X3}
+              options={zoneOptions}
+              selected={selectedZones}
+              onSelectionChange={setSelectedZones}
+              activeColor="cyan"
+              searchPlaceholder="Buscar zona..."
+              emptyText="Nenhuma zona encontrada."
+            />
+            <FilterDropdown
+              label="Localização"
+              icon={MapPin}
+              options={binAddressOptions}
+              selected={selectedBinAddresses}
+              onSelectionChange={setSelectedBinAddresses}
+              activeColor="emerald"
+              searchPlaceholder="Buscar endereço..."
+              emptyText="Nenhuma localização encontrada."
+            />
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {filteredItems.length}{' '}
+              {filteredItems.length === 1 ? 'item' : 'itens'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Switch
+                id="hide-exited-overview"
+                checked={hideExited}
+                onCheckedChange={setHideExited}
+                className="scale-75"
+              />
+              <Label
+                htmlFor="hide-exited-overview"
+                className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
+              >
+                Ocultar saídas
+              </Label>
+            </div>
+            <FilterDropdown
+              label="Colunas"
+              icon={Columns3}
+              options={columnOptions}
+              selected={activeColumns}
+              onSelectionChange={setVisibleColumns}
+              activeColor="blue"
+              searchPlaceholder="Buscar coluna..."
+            />
+          </div>
+        </div>
+
+        {isLoading ? (
+          <GridLoading count={8} layout="list" size="md" />
+        ) : error ? (
+          <GridError
+            type="server"
+            title="Erro ao carregar estoque"
+            message="Não foi possível carregar a listagem. Tente novamente."
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
+          />
+        ) : (
+          <div className="flex flex-col flex-1 min-h-0 gap-2">
+            <div
+              ref={scrollContainerRef}
+              className="rounded-lg overflow-auto flex-1 min-h-0"
+            >
+              <table className="w-full caption-bottom text-sm table-fixed">
+                <colgroup>
+                  <col style={{ width: 48 }} />
+                  <col />
+                  {showFabricante && <col style={{ width: 180 }} />}
+                  {showLocalizacao && <col style={{ width: 180 }} />}
+                  {showQuantidade && <col style={{ width: 160 }} />}
+                  {activeDynamicColumns.map(col => (
+                    <col key={col.id} style={{ width: 120 }} />
+                  ))}
+                </colgroup>
+                <TableHeader className="sticky top-0 z-10 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm">
+                  <TableRow className="border-b border-slate-200/60 dark:border-white/5 hover:bg-transparent">
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Cor
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      Item
+                    </TableHead>
+                    {showFabricante && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                        Fabricante
+                      </TableHead>
+                    )}
+                    {showLocalizacao && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                        Localização
+                      </TableHead>
+                    )}
+                    {showQuantidade && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                        Quantidade
+                      </TableHead>
+                    )}
+                    {activeDynamicColumns.map(col => (
+                      <TableHead
+                        key={col.id}
+                        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70"
+                      >
+                        {col.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={totalCols} className="text-center">
+                        <div className="py-10 text-sm text-muted-foreground">
+                          Nenhum item encontrado.
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <>
+                      {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+                        <tr>
+                          <td
+                            colSpan={totalCols}
+                            style={{
+                              height: virtualItems[0].start,
+                              padding: 0,
+                              border: 'none',
+                            }}
+                          />
+                        </tr>
+                      )}
+                      {virtualItems.map(virtualRow => {
+                        const item = filteredItems[virtualRow.index];
+                        const unitAbbr = getUnitAbbreviation(
+                          item.templateUnitOfMeasure
+                        );
+                        const qtyLabel = unitAbbr
+                          ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
+                          : formatQuantity(item.currentQuantity);
+
+                        const hasBin =
+                          item.bin?.zone?.id && item.bin?.zone?.warehouseId;
+
+                        const isSelected = selectedIds.has(item.id);
+                        const isExited = item.currentQuantity === 0;
+
+                        return (
+                          <TableRow
+                            key={item.id}
+                            data-index={virtualRow.index}
+                            ref={rowVirtualizer.measureElement}
+                            className={cn(
+                              'cursor-pointer transition-colors border-b border-slate-100 dark:border-white/5',
+                              isSelected
+                                ? 'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100/80 dark:hover:bg-blue-500/15'
+                                : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/50',
+                              isExited && !isSelected && 'opacity-50'
+                            )}
+                            onClick={() => handleRowClick(item)}
+                            onDoubleClick={() => handleRowDoubleClick(item)}
+                          >
+                            {/* Cor */}
+                            <TableCell>
+                              {item.variantColorHex ? (
+                                <div
+                                  className="h-8 w-8 rounded-full shadow-sm"
+                                  style={{
+                                    backgroundColor: item.variantColorHex,
+                                  }}
+                                  title={item.variantColorHex}
+                                />
+                              ) : (
+                                <div
+                                  className="flex items-center justify-center bg-muted rounded-full h-8 w-8"
+                                  title="Cor não definida"
+                                >
+                                  <Palette className="h-3.5 w-3.5 text-muted-foreground" />
+                                </div>
+                              )}
+                            </TableCell>
+
+                            {/* Item */}
+                            <TableCell>
+                              {(() => {
+                                const exitBadge = isExited
+                                  ? EXIT_REASON_BADGE[
+                                      exitReasonMap[item.id] || ''
+                                    ] || DEFAULT_EXIT_BADGE
+                                  : null;
+                                return (
+                                  <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-medium text-foreground">
+                                        {resolveItemName(item)}
+                                      </span>
+                                      {exitBadge && (
+                                        <Badge
+                                          variant="outline"
+                                          className={cn(
+                                            'text-[10px] px-1.5 py-0 border',
+                                            exitBadge.className
+                                          )}
+                                        >
+                                          {exitBadge.label}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] font-mono text-muted-foreground/60">
+                                      {item.fullCode || item.uniqueCode || ''}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
+                            </TableCell>
+
+                            {/* Fabricante */}
+                            {showFabricante && (
+                              <TableCell>
+                                {item.manufacturerName ? (
+                                  <button
+                                    type="button"
+                                    className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      if (
+                                        !selectedManufacturers.includes(
+                                          item.manufacturerName!
+                                        )
+                                      ) {
+                                        setSelectedManufacturers(prev => [
+                                          ...prev,
+                                          item.manufacturerName!,
+                                        ]);
+                                      }
+                                    }}
+                                  >
+                                    {item.manufacturerName}
+                                  </button>
+                                ) : (
+                                  <span className="text-sm text-gray-700 dark:text-gray-200">
+                                    -
+                                  </span>
+                                )}
+                              </TableCell>
+                            )}
+
+                            {/* Localização */}
+                            {showLocalizacao && (
+                              <TableCell>
+                                {hasBin ? (
+                                  <Link
+                                    href={`/stock/locations/${item.bin!.zone!.warehouseId}/zones/${item.bin!.zone!.id}?highlight=${item.bin!.id}`}
+                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    {item.bin!.address ||
+                                      item.resolvedAddress ||
+                                      '-'}
+                                  </Link>
+                                ) : (
+                                  <span className="text-sm text-gray-700 dark:text-gray-200">
+                                    {item.resolvedAddress ||
+                                      item.lastKnownAddress ||
+                                      '-'}
+                                  </span>
+                                )}
+                              </TableCell>
+                            )}
+
+                            {/* Quantidade */}
+                            {showQuantidade && (
+                              <TableCell>
+                                <Badge variant="secondary" className="text-sm">
+                                  {qtyLabel}
+                                </Badge>
+                              </TableCell>
+                            )}
+
+                            {/* Colunas dinâmicas */}
+                            {activeDynamicColumns.map(col => (
+                              <TableCell key={col.id} className="text-sm">
+                                {getDynamicValue(item, col)}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })}
+                      {virtualItems.length > 0 && (
+                        <tr>
+                          <td
+                            colSpan={totalCols}
+                            style={{
+                              height:
+                                rowVirtualizer.getTotalSize() -
+                                virtualItems[virtualItems.length - 1].end,
+                              padding: 0,
+                              border: 'none',
+                            }}
+                          />
+                        </tr>
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </table>
             </div>
 
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                Carregando itens...
-              </div>
-            ) : error ? (
-              <div className="text-sm text-red-500">
-                Não foi possível carregar a listagem. Tente novamente.
-              </div>
-            ) : (
-              <div className="flex flex-col flex-1 min-h-0 gap-2">
-                <div
-                  ref={scrollContainerRef}
-                  className="rounded-xl border border-gray-200/70 dark:border-white/10 overflow-auto flex-1 min-h-0"
-                >
-                  <table className="w-full caption-bottom text-sm table-fixed">
-                    <colgroup>
-                      <col style={{ width: 56 }} />
-                      <col />
-                      {showFabricante && <col style={{ width: 180 }} />}
-                      {showLocalizacao && <col style={{ width: 180 }} />}
-                      {showQuantidade && <col style={{ width: 160 }} />}
-                      {activeDynamicColumns.map(col => (
-                        <col key={col.id} style={{ width: 120 }} />
-                      ))}
-                    </colgroup>
-                    <TableHeader className="sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
-                      <TableRow>
-                        <TableHead>Cor</TableHead>
-                        <TableHead>Item</TableHead>
-                        {showFabricante && <TableHead>Fabricante</TableHead>}
-                        {showLocalizacao && <TableHead>Localização</TableHead>}
-                        {showQuantidade && <TableHead>Quantidade</TableHead>}
-                        {activeDynamicColumns.map(col => (
-                          <TableHead key={col.id}>{col.label}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredItems.length === 0 ? (
-                        <TableRow>
-                          <TableCell
-                            colSpan={totalCols}
-                            className="text-center"
-                          >
-                            <div className="py-10 text-sm text-muted-foreground">
-                              Nenhum item encontrado.
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        <>
-                          {virtualItems.length > 0 &&
-                            virtualItems[0].start > 0 && (
-                              <tr>
-                                <td
-                                  colSpan={totalCols}
-                                  style={{
-                                    height: virtualItems[0].start,
-                                    padding: 0,
-                                    border: 'none',
-                                  }}
-                                />
-                              </tr>
-                            )}
-                          {virtualItems.map(virtualRow => {
-                            const item = filteredItems[virtualRow.index];
-                            const unitAbbr = getUnitAbbreviation(
-                              item.templateUnitOfMeasure
-                            );
-                            const qtyLabel = unitAbbr
-                              ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
-                              : formatQuantity(item.currentQuantity);
-
-                            const hasBin =
-                              item.bin?.zone?.id && item.bin?.zone?.warehouseId;
-
-                            const isSelected = selectedIds.has(item.id);
-                            const isExited = item.currentQuantity === 0;
-
-                            return (
-                              <TableRow
-                                key={item.id}
-                                data-index={virtualRow.index}
-                                ref={rowVirtualizer.measureElement}
-                                className={cn(
-                                  'cursor-pointer transition-colors',
-                                  isSelected &&
-                                    'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15',
-                                  !isSelected &&
-                                    'hover:bg-gray-50 dark:hover:bg-white/5',
-                                  isExited && !isSelected && 'opacity-60'
-                                )}
-                                onClick={() => handleRowClick(item)}
-                                onDoubleClick={() => handleRowDoubleClick(item)}
-                              >
-                                {/* Cor */}
-                                <TableCell>
-                                  {item.variantColorHex ? (
-                                    <div
-                                      className="h-8 w-12 rounded border border-gray-200 dark:border-slate-700"
-                                      style={{
-                                        backgroundColor: item.variantColorHex,
-                                      }}
-                                      title={item.variantColorHex}
-                                    />
-                                  ) : (
-                                    <div
-                                      className="flex items-center gap-1 text-muted-foreground h-8 w-12 justify-center"
-                                      title="Cor não definida"
-                                    >
-                                      <Palette className="h-4 w-4" />
-                                      <Slash className="h-3 w-3" />
-                                    </div>
-                                  )}
-                                </TableCell>
-
-                                {/* Item */}
-                                <TableCell>
-                                  {(() => {
-                                    const exitBadge = isExited
-                                      ? EXIT_REASON_BADGE[
-                                          exitReasonMap[item.id] || ''
-                                        ] || DEFAULT_EXIT_BADGE
-                                      : null;
-                                    return (
-                                      <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-medium text-gray-900 dark:text-white">
-                                            {resolveItemName(item)}
-                                          </span>
-                                          {exitBadge && (
-                                            <Badge
-                                              variant="outline"
-                                              className={cn(
-                                                'text-[10px] px-1.5 py-0 border',
-                                                exitBadge.className
-                                              )}
-                                            >
-                                              {exitBadge.label}
-                                            </Badge>
-                                          )}
-                                        </div>
-                                        <span className="text-xs font-mono text-muted-foreground">
-                                          {item.fullCode ||
-                                            item.uniqueCode ||
-                                            ''}
-                                        </span>
-                                      </div>
-                                    );
-                                  })()}
-                                </TableCell>
-
-                                {/* Fabricante */}
-                                {showFabricante && (
-                                  <TableCell>
-                                    {item.manufacturerName ? (
-                                      <button
-                                        type="button"
-                                        className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          if (
-                                            !selectedManufacturers.includes(
-                                              item.manufacturerName!
-                                            )
-                                          ) {
-                                            setSelectedManufacturers(prev => [
-                                              ...prev,
-                                              item.manufacturerName!,
-                                            ]);
-                                          }
-                                        }}
-                                      >
-                                        {item.manufacturerName}
-                                      </button>
-                                    ) : (
-                                      <span className="text-sm text-gray-700 dark:text-gray-200">
-                                        -
-                                      </span>
-                                    )}
-                                  </TableCell>
-                                )}
-
-                                {/* Localização */}
-                                {showLocalizacao && (
-                                  <TableCell>
-                                    {hasBin ? (
-                                      <Link
-                                        href={`/stock/locations/${item.bin!.zone!.warehouseId}/zones/${item.bin!.zone!.id}?highlight=${item.bin!.id}`}
-                                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                                        onClick={e => e.stopPropagation()}
-                                      >
-                                        {item.bin!.address ||
-                                          item.resolvedAddress ||
-                                          '-'}
-                                      </Link>
-                                    ) : (
-                                      <span className="text-sm text-gray-700 dark:text-gray-200">
-                                        {item.resolvedAddress ||
-                                          item.lastKnownAddress ||
-                                          '-'}
-                                      </span>
-                                    )}
-                                  </TableCell>
-                                )}
-
-                                {/* Quantidade */}
-                                {showQuantidade && (
-                                  <TableCell>
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-sm"
-                                    >
-                                      {qtyLabel}
-                                    </Badge>
-                                  </TableCell>
-                                )}
-
-                                {/* Colunas dinâmicas */}
-                                {activeDynamicColumns.map(col => (
-                                  <TableCell key={col.id} className="text-sm">
-                                    {getDynamicValue(item, col)}
-                                  </TableCell>
-                                ))}
-                              </TableRow>
-                            );
-                          })}
-                          {virtualItems.length > 0 && (
-                            <tr>
-                              <td
-                                colSpan={totalCols}
-                                style={{
-                                  height:
-                                    rowVirtualizer.getTotalSize() -
-                                    virtualItems[virtualItems.length - 1].end,
-                                  padding: 0,
-                                  border: 'none',
-                                }}
-                              />
-                            </tr>
-                          )}
-                        </>
-                      )}
-                    </TableBody>
-                  </table>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 shrink-0 pr-1 text-xs text-muted-foreground">
-                  {isFetching && !isLoading && (
-                    <span className="flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      Atualizando...
-                    </span>
-                  )}
-                  <span>
-                    {filteredItems.length}{' '}
-                    {filteredItems.length === 1 ? 'item' : 'itens'}
-                  </span>
-                </div>
+            {isFetching && !isLoading && (
+              <div className="flex items-center justify-end gap-1 shrink-0 pr-1 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Atualizando...
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
         {/* Floating selection bar */}
         {selectionSummary && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-            <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-white dark:bg-gray-900 shadow-lg">
+            <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 dark:border-blue-400/30 bg-white dark:bg-blue-600/80 shadow-lg backdrop-blur-md">
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {selectionSummary.count}{' '}
                 {selectionSummary.count === 1 ? 'item' : 'itens'}
