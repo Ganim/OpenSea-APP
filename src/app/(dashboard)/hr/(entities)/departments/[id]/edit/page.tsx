@@ -5,7 +5,7 @@
 
 'use client';
 
-import { companiesApi } from '@/app/(dashboard)/hr/companies/src/api';
+import { companiesApi } from '@/app/(dashboard)/hr/(entities)/companies/src/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

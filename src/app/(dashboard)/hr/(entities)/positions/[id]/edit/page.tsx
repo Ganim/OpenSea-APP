@@ -5,7 +5,7 @@
 
 'use client';
 
-import { departmentsApi } from '@/app/(dashboard)/hr/departments/src';
+import { departmentsApi } from '@/app/(dashboard)/hr/(entities)/departments/src';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

@@ -5,7 +5,7 @@
 
 'use client';
 
-import { companiesApi } from '@/app/(dashboard)/hr/companies/src/api';
+import { companiesApi } from '@/app/(dashboard)/hr/(entities)/companies/src/api';
 import { InfoField } from '@/components/shared/info-field';
 import { MetadataSection } from '@/components/shared/metadata-section';
 import { Badge } from '@/components/ui/badge';

@@ -1,8 +1,8 @@
 'use client';
 
-import { companiesApi } from '@/app/(dashboard)/hr/companies/src';
-import { departmentsApi } from '@/app/(dashboard)/hr/departments/src';
-import { positionsApi } from '@/app/(dashboard)/hr/positions/src';
+import { companiesApi } from '@/app/(dashboard)/hr/(entities)/companies/src';
+import { departmentsApi } from '@/app/(dashboard)/hr/(entities)/departments/src';
+import { positionsApi } from '@/app/(dashboard)/hr/(entities)/positions/src';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {

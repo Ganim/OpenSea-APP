@@ -1,7 +1,7 @@
 'use client';
 
-import { companiesApi } from '@/app/(dashboard)/hr/companies/src';
-import { departmentsApi } from '@/app/(dashboard)/hr/departments/src';
+import { companiesApi } from '@/app/(dashboard)/hr/(entities)/companies/src';
+import { departmentsApi } from '@/app/(dashboard)/hr/(entities)/departments/src';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
