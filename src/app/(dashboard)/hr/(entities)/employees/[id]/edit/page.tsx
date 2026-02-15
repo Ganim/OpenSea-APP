@@ -1,6 +1,5 @@
 /**
  * OpenSea OS - Employee Edit Page
- * Página de edição de um funcionário específico
  */
 
 'use client';
@@ -8,6 +7,13 @@
 import { companiesApi } from '@/app/(dashboard)/hr/(entities)/companies/src';
 import { departmentsApi } from '@/app/(dashboard)/hr/(entities)/departments/src';
 import { positionsApi } from '@/app/(dashboard)/hr/(entities)/positions/src';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,12 +30,11 @@ import { logger } from '@/lib/logger';
 import type { Company, Department, Employee, Position } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
   ArrowRight,
   Briefcase,
   Building2,
-  Check,
   Loader2,
+  Save,
   Search,
   Users,
   X,
@@ -191,8 +196,8 @@ export default function EmployeeEditPage() {
     return dept.name;
   };
 
-  const getStatusVariant = (status?: string) => {
-    switch (status) {
+  const getStatusVariant = (s?: string) => {
+    switch (s) {
       case 'ACTIVE':
         return 'success';
       case 'INACTIVE':
@@ -209,14 +214,6 @@ export default function EmployeeEditPage() {
   // ============================================================================
   // HANDLERS
   // ============================================================================
-
-  const handleBack = () => {
-    router.push(`/hr/employees/${employeeId}`);
-  };
-
-  const handleCancel = () => {
-    router.push(`/hr/employees/${employeeId}`);
-  };
 
   const handleSelectDepartment = (department: Department) => {
     setSelectedDepartment(department);
@@ -264,7 +261,7 @@ export default function EmployeeEditPage() {
       router.push(`/hr/employees/${employeeId}`);
     } catch (error) {
       logger.error(
-        'Erro ao salvar funcionario',
+        'Erro ao salvar funcionário',
         error instanceof Error ? error : undefined
       );
       toast.error('Erro ao salvar funcionário');
@@ -279,19 +276,45 @@ export default function EmployeeEditPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">
-          Carregando dados do funcionário...
-        </p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Funcionários', href: '/hr/employees' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!employee) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Funcionário não encontrado.</p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Funcionários', href: '/hr/employees' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Funcionário não encontrado
+            </h2>
+            <Button onClick={() => router.push('/hr/employees')}>
+              Voltar para Funcionários
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
@@ -304,397 +327,393 @@ export default function EmployeeEditPage() {
   // ============================================================================
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-8xl flex items-center gap-4 mb-2">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-            Voltar
-          </Button>
-        </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'Funcionários', href: '/hr/employees' },
+            {
+              label: employee.fullName,
+              href: `/hr/employees/${employeeId}`,
+            },
+            { label: 'Editar' },
+          ]}
+          buttons={[
+            {
+              id: 'cancel',
+              title: 'Cancelar',
+              icon: X,
+              onClick: () => router.push(`/hr/employees/${employeeId}`),
+              variant: 'outline',
+              disabled: isSaving,
+            },
+            {
+              id: 'save',
+              title: 'Salvar',
+              icon: Save,
+              onClick: handleSave,
+              disabled: isSaving,
+            },
+          ]}
+        />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCancel}
-            disabled={isSaving}
-          >
-            <X className="mr-2 h-4 w-4" />
-            Cancelar
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Salvar
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Employee Info Card */}
-      <Card className="p-4 sm:p-6">
-        <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
-          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
-            <Users className="md:h-8 md:w-8 text-white" />
-          </div>
-          <div className="flex justify-between flex-1 gap-4 flex-row items-center">
-            <div>
-              <h1 className="text-lg sm:text-3xl font-bold tracking-tight">
+        {/* Identity Card */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-start gap-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
+              <Users className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight">
                 Editar Funcionário
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {employee.fullName} - {employee.registrationNumber}
               </p>
             </div>
-            <div>
-              <Badge
-                variant={getStatusVariant(employee.status)}
-                className="mt-1"
-              >
-                {getStatusLabel(employee.status)}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Seletor de Departamento */}
-      {showDepartmentSelector ? (
-        <Card className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Selecionar Departamento</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowDepartmentSelector(false);
-                  setSearchQuery('');
-                }}
-              >
-                Cancelar
-              </Button>
-            </div>
-
-            {/* Barra de pesquisa */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar departamento por nome, código ou empresa..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            {/* Lista de departamentos */}
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {isLoadingDepartments || isLoadingCompanies ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : filteredDepartments.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery
-                    ? 'Nenhum departamento encontrado'
-                    : 'Nenhum departamento cadastrado'}
-                </div>
-              ) : (
-                filteredDepartments.map(department => (
-                  <Card
-                    key={department.id}
-                    className="p-4 cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => handleSelectDepartment(department)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
-                        <Building2 className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">
-                          {department.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {department.company?.tradeName ||
-                            department.company?.legalName ||
-                            department.code}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                    </div>
-                  </Card>
-                ))
-              )}
-            </div>
+            <Badge variant={getStatusVariant(employee.status)}>
+              {getStatusLabel(employee.status)}
+            </Badge>
           </div>
         </Card>
-      ) : showPositionSelector ? (
-        /* Seletor de Cargo */
-        <Card className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Selecionar Cargo</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowPositionSelector(false);
-                  setSearchQuery('');
-                }}
-              >
-                Cancelar
-              </Button>
-            </div>
+      </PageHeader>
 
-            {/* Barra de pesquisa */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar cargo por nome ou código..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            {/* Lista de cargos */}
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {isLoadingPositions ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : filteredPositions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery
-                    ? 'Nenhum cargo encontrado'
-                    : 'Nenhum cargo cadastrado'}
-                </div>
-              ) : (
-                filteredPositions.map(position => (
-                  <Card
-                    key={position.id}
-                    className="p-4 cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => handleSelectPosition(position)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
-                        <Briefcase className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{position.name}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {position.code}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                    </div>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <>
-          {/* Departamento e Cargo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Departamento */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Departamento</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
-                    {departmentName || 'Nenhum departamento selecionado'}
-                  </p>
-                  {selectedDepartment?.code && (
-                    <p className="text-sm text-muted-foreground">
-                      {selectedDepartment.code}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDepartmentSelector(true)}
-                >
-                  Alterar
-                </Button>
-              </div>
-            </Card>
-
-            {/* Cargo */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Cargo</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
-                  <Briefcase className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
-                    {selectedPosition?.name || 'Nenhum cargo selecionado'}
-                  </p>
-                  {selectedPosition?.code && (
-                    <p className="text-sm text-muted-foreground">
-                      {selectedPosition.code}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowPositionSelector(true)}
-                >
-                  Alterar
-                </Button>
-              </div>
-            </Card>
-          </div>
-
-          {/* Dados Pessoais */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Dados Pessoais</h3>
+      <PageBody className="space-y-6">
+        {/* Seletor de Departamento */}
+        {showDepartmentSelector ? (
+          <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo *</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="Ex: João da Silva"
-                    value={fullName}
-                    onChange={e => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="registrationNumber">Matrícula *</Label>
-                  <Input
-                    id="registrationNumber"
-                    placeholder="Ex: 00001"
-                    value={registrationNumber}
-                    onChange={e => setRegistrationNumber(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">
+                  Selecionar Departamento
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowDepartmentSelector(false);
+                    setSearchQuery('');
+                  }}
+                >
+                  Cancelar
+                </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF *</Label>
-                  <Input
-                    id="cpf"
-                    placeholder="Ex: 000.000.000-00"
-                    value={cpf}
-                    onChange={e => setCpf(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar departamento por nome, código ou empresa..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="status">
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ACTIVE">Ativo</SelectItem>
-                      <SelectItem value="INACTIVE">Inativo</SelectItem>
-                      <SelectItem value="ON_LEAVE">Em Licença</SelectItem>
-                      <SelectItem value="TERMINATED">Desligado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {isLoadingDepartments || isLoadingCompanies ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredDepartments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchQuery
+                      ? 'Nenhum departamento encontrado'
+                      : 'Nenhum departamento cadastrado'}
+                  </div>
+                ) : (
+                  filteredDepartments.map(department => (
+                    <Card
+                      key={department.id}
+                      className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => handleSelectDepartment(department)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
+                          <Building2 className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">
+                            {department.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {department.company?.tradeName ||
+                              department.company?.legalName ||
+                              department.code}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           </Card>
-
-          {/* Dados Contratuais */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Dados Contratuais</h3>
+        ) : showPositionSelector ? (
+          /* Seletor de Cargo */
+          <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="hireDate">Data de Admissão</Label>
-                  <Input
-                    id="hireDate"
-                    type="date"
-                    value={hireDate}
-                    onChange={e => setHireDate(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contractType">Tipo de Contrato</Label>
-                  <Select value={contractType} onValueChange={setContractType}>
-                    <SelectTrigger id="contractType">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CLT">CLT</SelectItem>
-                      <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
-                      <SelectItem value="INTERN">Estagiário</SelectItem>
-                      <SelectItem value="TEMPORARY">Temporário</SelectItem>
-                      <SelectItem value="APPRENTICE">Aprendiz</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="workRegime">Regime de Trabalho</Label>
-                  <Select value={workRegime} onValueChange={setWorkRegime}>
-                    <SelectTrigger id="workRegime">
-                      <SelectValue placeholder="Selecione o regime" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="FULL_TIME">Tempo Integral</SelectItem>
-                      <SelectItem value="PART_TIME">Meio Período</SelectItem>
-                      <SelectItem value="HOURLY">Por Hora</SelectItem>
-                      <SelectItem value="SHIFT">Turnos</SelectItem>
-                      <SelectItem value="FLEXIBLE">Flexível</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Selecionar Cargo</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowPositionSelector(false);
+                    setSearchQuery('');
+                  }}
+                >
+                  Cancelar
+                </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="baseSalary">Salário Base</Label>
-                  <Input
-                    id="baseSalary"
-                    type="number"
-                    placeholder="Ex: 3000"
-                    value={baseSalary}
-                    onChange={e => setBaseSalary(e.target.value)}
-                  />
-                </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar cargo por nome ou código..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="weeklyHours">Horas Semanais</Label>
-                  <Input
-                    id="weeklyHours"
-                    type="number"
-                    placeholder="Ex: 44"
-                    value={weeklyHours}
-                    onChange={e => setWeeklyHours(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {isLoadingPositions ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredPositions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchQuery
+                      ? 'Nenhum cargo encontrado'
+                      : 'Nenhum cargo cadastrado'}
+                  </div>
+                ) : (
+                  filteredPositions.map(position => (
+                    <Card
+                      key={position.id}
+                      className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => handleSelectPosition(position)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
+                          <Briefcase className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">
+                            {position.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {position.code}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           </Card>
-        </>
-      )}
-    </div>
+        ) : (
+          <>
+            {/* Departamento e Cargo */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Departamento */}
+              <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+                <h3 className="text-lg font-semibold mb-4">Departamento</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
+                    <Building2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {departmentName || 'Nenhum departamento selecionado'}
+                    </p>
+                    {selectedDepartment?.code && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedDepartment.code}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDepartmentSelector(true)}
+                  >
+                    Alterar
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Cargo */}
+              <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+                <h3 className="text-lg font-semibold mb-4">Cargo</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
+                    <Briefcase className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {selectedPosition?.name || 'Nenhum cargo selecionado'}
+                    </p>
+                    {selectedPosition?.code && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedPosition.code}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPositionSelector(true)}
+                  >
+                    Alterar
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            {/* Dados Pessoais */}
+            <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <h3 className="text-lg font-semibold mb-4">Dados Pessoais</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Nome Completo *</Label>
+                    <Input
+                      id="fullName"
+                      placeholder="Ex: João da Silva"
+                      value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="registrationNumber">Matrícula *</Label>
+                    <Input
+                      id="registrationNumber"
+                      placeholder="Ex: 00001"
+                      value={registrationNumber}
+                      onChange={e => setRegistrationNumber(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cpf">CPF *</Label>
+                    <Input
+                      id="cpf"
+                      placeholder="Ex: 000.000.000-00"
+                      value={cpf}
+                      onChange={e => setCpf(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Ativo</SelectItem>
+                        <SelectItem value="INACTIVE">Inativo</SelectItem>
+                        <SelectItem value="ON_LEAVE">Em Licença</SelectItem>
+                        <SelectItem value="TERMINATED">Desligado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Dados Contratuais */}
+            <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <h3 className="text-lg font-semibold mb-4">Dados Contratuais</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hireDate">Data de Admissão</Label>
+                    <Input
+                      id="hireDate"
+                      type="date"
+                      value={hireDate}
+                      onChange={e => setHireDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contractType">Tipo de Contrato</Label>
+                    <Select
+                      value={contractType}
+                      onValueChange={setContractType}
+                    >
+                      <SelectTrigger id="contractType">
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CLT">CLT</SelectItem>
+                        <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
+                        <SelectItem value="INTERN">Estagiário</SelectItem>
+                        <SelectItem value="TEMPORARY">Temporário</SelectItem>
+                        <SelectItem value="APPRENTICE">Aprendiz</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="workRegime">Regime de Trabalho</Label>
+                    <Select value={workRegime} onValueChange={setWorkRegime}>
+                      <SelectTrigger id="workRegime">
+                        <SelectValue placeholder="Selecione o regime" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FULL_TIME">
+                          Tempo Integral
+                        </SelectItem>
+                        <SelectItem value="PART_TIME">Meio Período</SelectItem>
+                        <SelectItem value="HOURLY">Por Hora</SelectItem>
+                        <SelectItem value="SHIFT">Turnos</SelectItem>
+                        <SelectItem value="FLEXIBLE">Flexível</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="baseSalary">Salário Base</Label>
+                    <Input
+                      id="baseSalary"
+                      type="number"
+                      placeholder="Ex: 3000"
+                      value={baseSalary}
+                      onChange={e => setBaseSalary(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="weeklyHours">Horas Semanais</Label>
+                    <Input
+                      id="weeklyHours"
+                      type="number"
+                      placeholder="Ex: 44"
+                      value={weeklyHours}
+                      onChange={e => setWeeklyHours(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
+      </PageBody>
+    </PageLayout>
   );
 }

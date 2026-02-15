@@ -1,13 +1,18 @@
 /**
  * OpenSea OS - Employee Detail Page
- * Página de detalhes de um funcionário específico
  */
 
 'use client';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { InfoField } from '@/components/shared/info-field';
-import { MetadataSection } from '@/components/shared/metadata-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,13 +32,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { listPermissionGroups } from '@/services/rbac/rbac.service';
+import { usersService } from '@/services/auth';
 import type { Employee } from '@/types/hr';
 import type { PermissionGroup } from '@/types/rbac';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AddEmployeeToQueueButton } from '@/core/print-queue';
+import { usePrintQueue } from '@/core/print-queue';
 import {
   AlertCircle,
-  ArrowLeft,
   Briefcase,
   Building2,
   Calendar,
@@ -48,6 +53,7 @@ import {
   Lock,
   Mail,
   Plus,
+  Printer,
   Shield,
   Trash,
   User,
@@ -93,6 +99,15 @@ export default function EmployeeDetailPage() {
     },
   });
 
+  const { data: userData } = useQuery({
+    queryKey: ['users', employee?.userId],
+    queryFn: async () => {
+      const response = await usersService.getUser(employee!.userId!);
+      return response.user;
+    },
+    enabled: !!employee?.userId,
+  });
+
   const { data: permissionGroupsData } = useQuery<PermissionGroup[]>({
     queryKey: ['permission-groups'],
     queryFn: async () => {
@@ -102,6 +117,15 @@ export default function EmployeeDetailPage() {
   });
 
   const permissionGroups = permissionGroupsData || [];
+
+  // Print queue
+  const { actions: printActions } = usePrintQueue();
+  const isInPrintQueue = employee ? printActions.isInQueue(employee.id) : false;
+
+  const handlePrint = () => {
+    if (!employee || isInPrintQueue) return;
+    printActions.addToQueue({ entityType: 'employee', employee });
+  };
 
   // ============================================================================
   // MUTATIONS
@@ -159,10 +183,6 @@ export default function EmployeeDetailPage() {
   // ============================================================================
   // HANDLERS
   // ============================================================================
-
-  const handleBack = () => {
-    router.push('/hr/employees');
-  };
 
   const handleEdit = () => {
     router.push(`/hr/employees/${employeeId}/edit`);
@@ -251,19 +271,45 @@ export default function EmployeeDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">
-          Carregando dados do funcionário...
-        </p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Funcionários', href: '/hr/employees' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!employee) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Funcionário não encontrado.</p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Funcionários', href: '/hr/employees' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Funcionário não encontrado
+            </h2>
+            <Button onClick={() => router.push('/hr/employees')}>
+              Voltar para Funcionários
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
@@ -272,245 +318,251 @@ export default function EmployeeDetailPage() {
   // ============================================================================
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-8xl flex items-center gap-4 mb-2">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-            Voltar para Funcionários
-          </Button>
-        </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'Funcionários', href: '/hr/employees' },
+            { label: employee.fullName },
+          ]}
+          buttons={[
+            {
+              id: 'delete',
+              title: 'Excluir',
+              icon: Trash,
+              onClick: handleDelete,
+              variant: 'outline',
+            },
+            {
+              id: 'print',
+              title: isInPrintQueue ? 'Na fila' : 'Imprimir Etiqueta',
+              icon: Printer,
+              onClick: handlePrint,
+              variant: 'outline',
+              disabled: isInPrintQueue,
+            },
+            {
+              id: 'edit',
+              title: 'Editar',
+              icon: Edit,
+              onClick: handleEdit,
+            },
+          ]}
+        />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDelete}
-            className="gap-2 self-start sm:self-auto"
-          >
-            <Trash className="h-4 w-4 text-red-800" />
-            Excluir
-          </Button>
-
-          {employee && (
-            <AddEmployeeToQueueButton
-              employee={employee}
-              variant="outline"
-              size="sm"
-              showLabel
-            />
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEdit}
-            className="gap-2 self-start sm:self-auto"
-          >
-            <Edit className="h-4 w-4 text-sky-500" />
-            Editar
-          </Button>
-        </div>
-      </div>
-
-      {/* Employee Info Card */}
-      <Card className="p-4 sm:p-6">
-        <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
-          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
-            <Users className="md:h-8 md:w-8 text-white" />
-          </div>
-          <div className="flex justify-between flex-1 gap-4 flex-row items-center">
-            <div>
-              <h1 className="text-lg sm:text-3xl font-bold tracking-tight">
-                {employee.fullName}
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+        {/* Identity Card */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-start gap-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
+              <Users className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {employee.fullName}
+                </h1>
+                <Badge variant={getStatusVariant(employee.status)}>
+                  {getStatusLabel(employee.status)}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Matrícula: {employee.registrationNumber}
               </p>
             </div>
-            <div>
-              <Badge
-                variant={getStatusVariant(employee.status)}
-                className="mt-1"
-              >
-                {getStatusLabel(employee.status)}
-              </Badge>
+            <div className="flex flex-col gap-2 shrink-0 text-sm">
+              {employee.createdAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <span>
+                    {new Date(employee.createdAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {employee.updatedAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                  <span>
+                    {new Date(employee.updatedAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </PageHeader>
 
-      {/* Informações Pessoais */}
-      <Card className="p-4 sm:p-6">
-        <h3 className="text-lg uppercase font-semibold mb-4">
-          Informações Pessoais
-        </h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <InfoField
-            label="Nome Completo"
-            value={employee.fullName}
-            icon={<User className="h-4 w-4" />}
-            showCopyButton
-            copyTooltip="Copiar nome"
-          />
-          <InfoField
-            label="Matrícula"
-            value={employee.registrationNumber}
-            icon={<Hash className="h-4 w-4" />}
-            showCopyButton
-            copyTooltip="Copiar matrícula"
-          />
-          <InfoField
-            label="CPF"
-            value={formatCPF(employee.cpf)}
-            icon={<CreditCard className="h-4 w-4" />}
-            showCopyButton
-            copyTooltip="Copiar CPF"
-          />
-          <InfoField
-            label="Status"
-            value={getStatusLabel(employee.status)}
-            badge={
-              <Badge variant={getStatusVariant(employee.status)}>
-                {getStatusLabel(employee.status)}
-              </Badge>
-            }
-          />
-        </div>
-      </Card>
-
-      {/* Informações Profissionais */}
-      <Card className="p-4 sm:p-6">
-        <h3 className="text-lg uppercase font-semibold mb-4">
-          Informações Profissionais
-        </h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <InfoField
-            label="Cargo"
-            value={employee.position?.name}
-            icon={<Briefcase className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Departamento"
-            value={employee.department?.name}
-            icon={<Building2 className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Empresa"
-            value={getCompanyName()}
-            icon={<Factory className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Data de Admissão"
-            value={new Date(employee.hireDate).toLocaleDateString('pt-BR')}
-            icon={<Calendar className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Tempo de Empresa"
-            value={getCompanyTime(employee.hireDate)}
-            icon={<Clock className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Salário Base"
-            value={formatSalary(employee.baseSalary)}
-          />
-        </div>
-      </Card>
-
-      {/* Informações Contratuais */}
-      <Card className="p-4 sm:p-6">
-        <h3 className="text-lg uppercase font-semibold mb-4">
-          Informações Contratuais
-        </h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <InfoField
-            label="Tipo de Contrato"
-            value={getContractTypeLabel(employee.contractType)}
-            icon={<FileText className="h-4 w-4" />}
-          />
-          <InfoField
-            label="Regime de Trabalho"
-            value={getWorkRegimeLabel(employee.workRegime)}
-          />
-          <InfoField
-            label="Horas Semanais"
-            value={`${employee.weeklyHours}h`}
-            icon={<Clock className="h-4 w-4" />}
-          />
-          {employee.terminationDate && (
+      <PageBody className="space-y-6">
+        {/* Informações Pessoais */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <h3 className="text-lg uppercase font-semibold mb-4">
+            Informações Pessoais
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6">
             <InfoField
-              label="Data de Desligamento"
-              value={new Date(employee.terminationDate).toLocaleDateString(
-                'pt-BR'
-              )}
+              label="Nome Completo"
+              value={employee.fullName}
+              icon={<User className="h-4 w-4" />}
+              showCopyButton
+              copyTooltip="Copiar nome"
+            />
+            <InfoField
+              label="Matrícula"
+              value={employee.registrationNumber}
+              icon={<Hash className="h-4 w-4" />}
+              showCopyButton
+              copyTooltip="Copiar matrícula"
+            />
+            <InfoField
+              label="CPF"
+              value={formatCPF(employee.cpf)}
+              icon={<CreditCard className="h-4 w-4" />}
+              showCopyButton
+              copyTooltip="Copiar CPF"
+            />
+            <InfoField
+              label="Status"
+              value={getStatusLabel(employee.status)}
+              badge={
+                <Badge variant={getStatusVariant(employee.status)}>
+                  {getStatusLabel(employee.status)}
+                </Badge>
+              }
+            />
+          </div>
+        </Card>
+
+        {/* Informações Profissionais */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <h3 className="text-lg uppercase font-semibold mb-4">
+            Informações Profissionais
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <InfoField
+              label="Cargo"
+              value={employee.position?.name}
+              icon={<Briefcase className="h-4 w-4" />}
+            />
+            <InfoField
+              label="Departamento"
+              value={employee.department?.name}
+              icon={<Building2 className="h-4 w-4" />}
+            />
+            <InfoField
+              label="Empresa"
+              value={getCompanyName()}
+              icon={<Factory className="h-4 w-4" />}
+            />
+            <InfoField
+              label="Data de Admissão"
+              value={new Date(employee.hireDate).toLocaleDateString('pt-BR')}
               icon={<Calendar className="h-4 w-4" />}
             />
+            <InfoField
+              label="Tempo de Empresa"
+              value={getCompanyTime(employee.hireDate)}
+              icon={<Clock className="h-4 w-4" />}
+            />
+            <InfoField
+              label="Salário Base"
+              value={formatSalary(employee.baseSalary)}
+            />
+          </div>
+        </Card>
+
+        {/* Informações Contratuais */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <h3 className="text-lg uppercase font-semibold mb-4">
+            Informações Contratuais
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <InfoField
+              label="Tipo de Contrato"
+              value={getContractTypeLabel(employee.contractType)}
+              icon={<FileText className="h-4 w-4" />}
+            />
+            <InfoField
+              label="Regime de Trabalho"
+              value={getWorkRegimeLabel(employee.workRegime)}
+            />
+            <InfoField
+              label="Horas Semanais"
+              value={`${employee.weeklyHours}h`}
+              icon={<Clock className="h-4 w-4" />}
+            />
+            {employee.terminationDate && (
+              <InfoField
+                label="Data de Desligamento"
+                value={new Date(employee.terminationDate).toLocaleDateString(
+                  'pt-BR'
+                )}
+                icon={<Calendar className="h-4 w-4" />}
+              />
+            )}
+          </div>
+        </Card>
+
+        {/* Usuário Vinculado */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <h3 className="text-lg uppercase font-semibold mb-4">
+            Usuário do Sistema
+          </h3>
+          {employee.userId ? (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900">
+                  <UserCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {userData?.profile
+                      ? `${userData.profile.name} ${userData.profile.surname}`.trim()
+                      : userData?.username || 'Usuário vinculado'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {userData?.email ||
+                      'Este funcionário possui acesso ao sistema'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleViewUser}
+                className="gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                Visualizar Usuário
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 border rounded-lg border-dashed">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted">
+                  <UserCircle className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-medium text-muted-foreground">
+                    Nenhum usuário vinculado
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Crie um usuário para dar acesso ao sistema
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleOpenCreateUserModal}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Criar Usuário
+              </Button>
+            </div>
           )}
-        </div>
-      </Card>
-
-      {/* Usuário Vinculado */}
-      <Card className="p-4 sm:p-6">
-        <h3 className="text-lg uppercase font-semibold mb-4">
-          Usuário do Sistema
-        </h3>
-        {employee.userId ? (
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                <UserCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="font-medium">Usuário vinculado</p>
-                <p className="text-sm text-muted-foreground">
-                  Este funcionário possui acesso ao sistema
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleViewUser}
-              className="gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              Visualizar Usuário
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between p-4 border rounded-lg border-dashed">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted">
-                <UserCircle className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-muted-foreground">
-                  Nenhum usuário vinculado
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Crie um usuário para dar acesso ao sistema
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleOpenCreateUserModal}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Criar Usuário
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      {/* Metadados */}
-      <MetadataSection
-        createdAt={employee.createdAt}
-        updatedAt={employee.updatedAt}
-      />
+        </Card>
+      </PageBody>
 
       {/* Modal para criar usuário */}
       <Dialog
@@ -674,6 +726,6 @@ export default function EmployeeDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   );
 }

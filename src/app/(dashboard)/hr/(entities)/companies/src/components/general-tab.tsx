@@ -5,7 +5,6 @@
 'use client';
 
 import { InfoField } from '@/components/shared/info-field';
-import { MetadataSection } from '@/components/shared/metadata-section';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
@@ -31,7 +30,7 @@ export function GeneralTab({
   return (
     <TabsContent value="general" className="flex flex-col gap-4">
       {/* Contact Section */}
-      <Card className="flex flex-col gap-10 sm:p-6">
+      <Card className="flex flex-col gap-10 p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div>
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
             <NotebookText className="h-6 w-6" />
@@ -159,11 +158,6 @@ export function GeneralTab({
           )}
         </div>
       </Card>
-
-      <MetadataSection
-        createdAt={company.createdAt}
-        updatedAt={company.updatedAt}
-      />
     </TabsContent>
   );
 }

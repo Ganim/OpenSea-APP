@@ -122,36 +122,27 @@ export default function HRLandingPage() {
       const [employees, companies, departments, positions] =
         await Promise.allSettled([
           employeesService.listEmployees({ page: 1, perPage: 1 }),
-          companiesService.listCompanies({ page: 1, perPage: 1 }),
+          companiesService.listCompanies({ page: 1, perPage: 100 }),
           departmentsService.listDepartments({ page: 1, perPage: 1 }),
           positionsService.listPositions({ page: 1, perPage: 1 }),
         ]);
 
+      const extractCount = (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result: PromiseSettledResult<any>,
+        entityKey: string
+      ): number | null => {
+        if (result.status !== 'fulfilled') return null;
+        const v = result.value;
+        if (Array.isArray(v)) return v.length;
+        return v?.meta?.total ?? v?.total ?? v?.[entityKey]?.length ?? null;
+      };
+
       setCounts({
-        employees:
-          employees.status === 'fulfilled'
-            ? (employees.value.total ??
-              employees.value.employees?.length ??
-              null)
-            : null,
-        companies:
-          companies.status === 'fulfilled'
-            ? (companies.value.meta?.total ??
-              companies.value.companies?.length ??
-              null)
-            : null,
-        departments:
-          departments.status === 'fulfilled'
-            ? (departments.value.total ??
-              departments.value.departments?.length ??
-              null)
-            : null,
-        positions:
-          positions.status === 'fulfilled'
-            ? (positions.value.total ??
-              positions.value.positions?.length ??
-              null)
-            : null,
+        employees: extractCount(employees, 'employees'),
+        companies: extractCount(companies, 'companies'),
+        departments: extractCount(departments, 'departments'),
+        positions: extractCount(positions, 'positions'),
       });
       setCountsLoading(false);
     }

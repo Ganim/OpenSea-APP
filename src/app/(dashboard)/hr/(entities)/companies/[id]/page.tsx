@@ -1,9 +1,16 @@
 /**
- * Company Detail Page - Simplified Layout
+ * Company Detail Page
  */
 
 'use client';
 
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,10 +28,11 @@ import type {
 } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
-  ArrowLeft,
   ArrowRight,
   Briefcase,
   Building2,
+  Calendar,
+  Clock,
   Edit,
   FileText,
   Trash,
@@ -98,8 +106,7 @@ export default function CompanyDetailPage() {
           (response as unknown as { stakeholders?: CompanyStakeholder[] })
             ?.stakeholders ?? (Array.isArray(response) ? response : []);
         return items as CompanyStakeholder[];
-      } catch (error) {
-        // Se der erro (ex: 404), retorna array vazio
+      } catch {
         return [];
       }
     },
@@ -126,8 +133,7 @@ export default function CompanyDetailPage() {
           }
 
           return null;
-        } catch (error) {
-          // Se der erro (ex: 404), retorna null
+        } catch {
           return null;
         }
       },
@@ -167,236 +173,272 @@ export default function CompanyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Carregando dados da empresa...</p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Empresas', href: '/hr/companies' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (!company) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Empresa não encontrada.</p>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'Empresas', href: '/hr/companies' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Building2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Empresa não encontrada
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              A empresa que você está procurando não existe ou foi removida.
+            </p>
+            <Button onClick={() => router.push('/hr/companies')}>
+              Voltar para Empresas
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  const handleBack = () => {
-    router.push('/hr/companies');
+  const handleDelete = (id: string) => {
+    router.push(`/hr/companies/${id}`);
   };
-  const handleDelete = (companyId: string) => {
-    router.push(`/hr/companies/${companyId}`);
-  };
-  const handleEdit = (companyId: string) => {
-    router.push(`/hr/companies/${companyId}/edit`);
+  const handleEdit = (id: string) => {
+    router.push(`/hr/companies/${id}/edit`);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-8xl  flex items-center gap-4  mb-2">
-          <Button variant="ghost" size={'sm'} onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-            Voltar para empresas
-          </Button>
-        </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'Empresas', href: '/hr/companies' },
+            { label: company.legalName },
+          ]}
+          buttons={[
+            {
+              id: 'delete',
+              title: 'Excluir',
+              icon: Trash,
+              onClick: () => handleDelete(company.id),
+              variant: 'outline',
+            },
+            {
+              id: 'edit',
+              title: 'Editar',
+              icon: Edit,
+              onClick: () => handleEdit(company.id),
+            },
+          ]}
+        />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size={'sm'}
-            onClick={() => handleDelete(company.id)}
-            className="gap-2 self-start sm:self-auto"
-          >
-            <Trash className="h-4 w-4 text-red-800" />
-            Excluir
-          </Button>
-
-          <Button
-            variant="outline"
-            size={'sm'}
-            onClick={() => handleEdit(company.id)}
-            className="gap-2 self-start sm:self-auto"
-          >
-            <Edit className="h-4 w-4  text-sky-500" />
-            Editar
-          </Button>
-        </div>
-      </div>
-
-      {/* Company Info Card */}
-      <Card className="p-4 sm:p-6 ">
-        <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
-          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
-            <Building2 className="md:h-8 md:w-8 text-white" />
-          </div>
-          <div className="flex justify-between flex-1 gap-4 flex-row items-center">
-            <div>
-              <h1 className="text-lg sm:text-3xl font-bold tracking-tight">
-                {company.legalName}
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+        {/* Identity Card */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-start gap-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
+              <Building2 className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {company.legalName}
+                </h1>
+                <Badge variant="success">{company.status}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {company.tradeName || 'Sem nome fantasia'}
               </p>
             </div>
-            <div>
-              <Badge variant="success" className="mt-1">
-                {company.status}
-              </Badge>
+            <div className="flex flex-col gap-2 shrink-0 text-sm">
+              {company.createdAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <span>
+                    {new Date(company.createdAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {company.updatedAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                  <span>
+                    {new Date(company.updatedAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </PageHeader>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-4 p-2 h-12 ">
-          <TabsTrigger value="general" className="gap-2">
-            <Building2 className="h-4 w-4 hidden sm:inline" />
-            <span>Geral</span>
-          </TabsTrigger>
-          <TabsTrigger value="team" className="gap-2">
-            <Users className="h-4 w-4 hidden sm:inline" />
-            <span>Equipe</span>
-            <Badge variant="secondary" className="ml-1 hidden sm:inline">
-              {departments.length + employees.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="cnaes" className="gap-2">
-            <FileText className="h-4 w-4 hidden sm:inline" />
-            <span>CNAEs</span>
-          </TabsTrigger>
-          <TabsTrigger value="fiscal" className="gap-2">
-            <FileText className="h-4 w-4 hidden sm:inline" />
-            <span>Fiscal</span>
-          </TabsTrigger>
-        </TabsList>
+      <PageBody>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-4 p-2 h-12">
+            <TabsTrigger value="general" className="gap-2">
+              <Building2 className="h-4 w-4 hidden sm:inline" />
+              <span>Geral</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="gap-2">
+              <Users className="h-4 w-4 hidden sm:inline" />
+              <span>Equipe</span>
+              <Badge variant="secondary" className="ml-1 hidden sm:inline">
+                {departments.length + employees.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="cnaes" className="gap-2">
+              <FileText className="h-4 w-4 hidden sm:inline" />
+              <span>CNAEs</span>
+            </TabsTrigger>
+            <TabsTrigger value="fiscal" className="gap-2">
+              <FileText className="h-4 w-4 hidden sm:inline" />
+              <span>Fiscal</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <GeneralTab
-          company={company}
-          addresses={addresses}
-          isLoadingAddresses={isLoadingAddresses}
-          stakeholders={stakeholders}
-          isLoadingStakeholders={isLoadingStakeholders}
-        />
+          <GeneralTab
+            company={company}
+            addresses={addresses}
+            isLoadingAddresses={isLoadingAddresses}
+            stakeholders={stakeholders}
+            isLoadingStakeholders={isLoadingStakeholders}
+          />
 
-        {/* Aba Equipe */}
-        <TabsContent value="team" className="space-y-6 flex flex-col">
-          {/* Departamentos */}
-          <Card className="p-4 w-full sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Departamentos
-                <Badge variant="secondary" className="ml-2">
-                  {departments.length}
-                </Badge>
-              </h3>
-              <Link href={`/hr/departments?companyId=${companyId}`}>
-                <Button variant="outline" size="sm">
-                  Ver todos
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-            {departments.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4">
-                Nenhum departamento nesta empresa.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {departments.slice(0, 5).map((department: Department) => (
-                  <Link
-                    key={department.id}
-                    href={`/hr/departments/${department.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-                        <Building2 className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{department.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {department._count?.positions ?? 0} cargo(s) •{' '}
-                          {department._count?.employees ?? 0} funcionário(s)
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  </Link>
-                ))}
-                {departments.length > 5 && (
-                  <p className="text-sm text-muted-foreground text-center pt-2">
-                    + {departments.length - 5} outros departamentos
-                  </p>
-                )}
+          {/* Aba Equipe */}
+          <TabsContent value="team" className="space-y-6 w-full flex flex-col">
+            {/* Departamentos */}
+            <Card className="p-4 w-full sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Departamentos
+                  <Badge variant="secondary" className="ml-2">
+                    {departments.length}
+                  </Badge>
+                </h3>
+                <Link href={`/hr/departments?companyId=${companyId}`}>
+                  <Button variant="outline" size="sm">
+                    Ver todos
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
               </div>
-            )}
-          </Card>
+              {departments.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-4">
+                  Nenhum departamento nesta empresa.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {departments.slice(0, 5).map((department: Department) => (
+                    <Link
+                      key={department.id}
+                      href={`/hr/departments/${department.id}`}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{department.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {department._count?.positions ?? 0} cargo(s) •{' '}
+                            {department._count?.employees ?? 0} funcionário(s)
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </Link>
+                  ))}
+                  {departments.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center pt-2">
+                      + {departments.length - 5} outros departamentos
+                    </p>
+                  )}
+                </div>
+              )}
+            </Card>
 
-          {/* Funcionários */}
-          <Card className="p-4 sm:p-6 w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Funcionários
-                <Badge variant="secondary" className="ml-2">
-                  {employees.length}
-                </Badge>
-              </h3>
-              <Link href={`/hr/employees?companyId=${companyId}`}>
-                <Button variant="outline" size="sm">
-                  Ver todos
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-            {employees.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-4">
-                Nenhum funcionário nesta empresa.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {employees.slice(0, 5).map((employee: Employee) => (
-                  <Link
-                    key={employee.id}
-                    href={`/hr/employees/${employee.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
-                        {employee.fullName.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-medium">{employee.fullName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {employee.position?.name || 'Sem cargo'} •{' '}
-                          {employee.department?.name || 'Sem departamento'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  </Link>
-                ))}
-                {employees.length > 5 && (
-                  <p className="text-sm text-muted-foreground text-center pt-2">
-                    + {employees.length - 5} outros funcionários
-                  </p>
-                )}
+            {/* Funcionários */}
+            <Card className="p-4 sm:p-6 w-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Funcionários
+                  <Badge variant="secondary" className="ml-2">
+                    {employees.length}
+                  </Badge>
+                </h3>
+                <Link href={`/hr/employees?companyId=${companyId}`}>
+                  <Button variant="outline" size="sm">
+                    Ver todos
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
               </div>
-            )}
-          </Card>
-        </TabsContent>
+              {employees.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-4">
+                  Nenhum funcionário nesta empresa.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {employees.slice(0, 5).map((employee: Employee) => (
+                    <Link
+                      key={employee.id}
+                      href={`/hr/employees/${employee.id}`}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
+                          {employee.fullName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-medium">{employee.fullName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {employee.position?.name || 'Sem cargo'} •{' '}
+                            {employee.department?.name || 'Sem departamento'}
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </Link>
+                  ))}
+                  {employees.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center pt-2">
+                      + {employees.length - 5} outros funcionários
+                    </p>
+                  )}
+                </div>
+              )}
+            </Card>
+          </TabsContent>
 
-        <CnaesTab cnaes={cnaes} isLoadingCnaes={isLoadingCnaes} />
+          <CnaesTab cnaes={cnaes} isLoadingCnaes={isLoadingCnaes} />
 
-        <FiscalTab
-          fiscalSettings={fiscalSettings}
-          isLoadingFiscal={isLoadingFiscal}
-        />
-      </Tabs>
-    </div>
+          <FiscalTab
+            fiscalSettings={fiscalSettings}
+            isLoadingFiscal={isLoadingFiscal}
+          />
+        </Tabs>
+      </PageBody>
+    </PageLayout>
   );
 }

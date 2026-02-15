@@ -1,5 +1,12 @@
 import { apiClient } from '@/lib/api-client';
-import type { Employee, EmployeeLabelDataResponse } from '@/types/hr';
+import type {
+  ContractType,
+  Employee,
+  EmployeeLabelDataResponse,
+  EmergencyContactInfo,
+  HealthCondition,
+  WorkRegime,
+} from '@/types/hr';
 import type { PaginationMeta } from '@/types/pagination';
 
 export interface EmployeesResponse {
@@ -17,25 +24,35 @@ export interface EmployeeResponse {
 }
 
 export interface CreateEmployeeRequest {
+  // Obrigatórios
   registrationNumber: string;
   fullName: string;
   cpf: string;
   hireDate: string;
   baseSalary: number;
-  contractType: string;
-  workRegime: string;
+  contractType: ContractType;
+  workRegime: WorkRegime;
   weeklyHours: number;
+
+  // Vínculo organizacional
   companyId?: string | null;
   departmentId?: string | null;
   positionId?: string | null;
   supervisorId?: string | null;
-  userId?: string | null;
+  userId?: string;
+
+  // Dados pessoais
   socialName?: string;
   birthDate?: string;
   gender?: string;
+  pcd?: boolean;
   maritalStatus?: string;
   nationality?: string;
   birthPlace?: string;
+  emergencyContactInfo?: EmergencyContactInfo;
+  healthConditions?: HealthCondition[];
+
+  // Documentos
   rg?: string;
   rgIssuer?: string;
   rgIssueDate?: string;
@@ -43,30 +60,74 @@ export interface CreateEmployeeRequest {
   ctpsNumber?: string;
   ctpsSeries?: string;
   ctpsState?: string;
+  voterTitle?: string;
+  militaryDoc?: string;
+
+  // Contato
+  email?: string;
+  personalEmail?: string;
+  phone?: string;
+  mobilePhone?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+
+  // Endereço
+  address?: string;
+  addressNumber?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+
+  // Dados bancários
+  bankCode?: string;
+  bankName?: string;
+  bankAgency?: string;
+  bankAccount?: string;
+  bankAccountType?: string;
+  pixKey?: string;
+
+  // Foto e metadados
+  photoUrl?: string;
+  metadata?: Record<string, unknown>;
+
+  // Status
   status?: string;
   terminationDate?: string;
 }
 
 export interface UpdateEmployeeRequest {
+  // Dados base
   registrationNumber?: string;
   fullName?: string;
   cpf?: string;
   hireDate?: string;
   baseSalary?: number;
-  contractType?: string;
-  workRegime?: string;
+  contractType?: ContractType;
+  workRegime?: WorkRegime;
   weeklyHours?: number;
+
+  // Vínculo organizacional
   companyId?: string | null;
   departmentId?: string | null;
   positionId?: string | null;
   supervisorId?: string | null;
   userId?: string | null;
+
+  // Dados pessoais
   socialName?: string;
   birthDate?: string;
   gender?: string;
+  pcd?: boolean;
   maritalStatus?: string;
   nationality?: string;
   birthPlace?: string;
+  emergencyContactInfo?: EmergencyContactInfo;
+  healthConditions?: HealthCondition[];
+
+  // Documentos
   rg?: string;
   rgIssuer?: string;
   rgIssueDate?: string;
@@ -74,6 +135,40 @@ export interface UpdateEmployeeRequest {
   ctpsNumber?: string;
   ctpsSeries?: string;
   ctpsState?: string;
+  voterTitle?: string;
+  militaryDoc?: string;
+
+  // Contato
+  email?: string;
+  personalEmail?: string;
+  phone?: string;
+  mobilePhone?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+
+  // Endereço
+  address?: string;
+  addressNumber?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+
+  // Dados bancários
+  bankCode?: string;
+  bankName?: string;
+  bankAgency?: string;
+  bankAccount?: string;
+  bankAccountType?: string;
+  pixKey?: string;
+
+  // Foto e metadados
+  photoUrl?: string;
+  metadata?: Record<string, unknown>;
+
+  // Status
   status?: string;
   terminationDate?: string;
 }

@@ -25,14 +25,14 @@ export function CnaesTab({ cnaes, isLoadingCnaes }: CnaesTabProps) {
   return (
     <TabsContent value="cnaes" className="flex flex-col gap-2 space-y-4">
       {isLoadingCnaes ? (
-        <Card className="w-full p-4 sm:p-6">
+        <Card className="w-full p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <p className="text-muted-foreground">Carregando CNAEs...</p>
         </Card>
       ) : (
         <>
           {/* CNAE Principal */}
           {primaryCnae && (
-            <Card className="w-full p-4 sm:p-6 space-y-4">
+            <Card className="w-full p-4 sm:p-6 space-y-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
               <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
                 <FileCheck className="h-6 w-6" />
                 CNAE Principal
@@ -62,7 +62,7 @@ export function CnaesTab({ cnaes, isLoadingCnaes }: CnaesTabProps) {
 
           {/* CNAEs Secundários */}
           {secondaryCnaes && secondaryCnaes.length > 0 && (
-            <Card className="w-full p-4 sm:p-6 space-y-4">
+            <Card className="w-full p-4 sm:p-6 space-y-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
               <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4 text-white/60">
                 <FileText className="h-6 w-6" />
                 CNAEs Secundários
@@ -91,7 +91,7 @@ export function CnaesTab({ cnaes, isLoadingCnaes }: CnaesTabProps) {
 
           {/* Mensagem quando não há CNAEs */}
           {!primaryCnae && (!secondaryCnaes || secondaryCnaes.length === 0) && (
-            <Card className="w-full p-4 sm:p-6">
+            <Card className="w-full p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
               <p className="text-sm text-muted-foreground">
                 Nenhum CNAE cadastrado.
               </p>

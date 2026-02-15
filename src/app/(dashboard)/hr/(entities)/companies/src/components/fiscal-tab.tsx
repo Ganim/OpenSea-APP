@@ -23,7 +23,7 @@ export function FiscalTab({ fiscalSettings, isLoadingFiscal }: FiscalTabProps) {
 
   return (
     <TabsContent value="fiscal" className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-10 sm:p-6">
+      <Card className="flex flex-col gap-10 p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         {isLoadingFiscal ? (
           <p className="text-muted-foreground">Carregando dados fiscais...</p>
         ) : fiscalSettings ? (

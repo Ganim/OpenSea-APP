@@ -71,6 +71,7 @@ export interface Position {
   level: number;
   minSalary?: number | null;
   maxSalary?: number | null;
+  baseSalary?: number | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -94,6 +95,7 @@ export interface CreatePositionData {
   level?: number;
   minSalary?: number;
   maxSalary?: number;
+  baseSalary?: number;
   isActive?: boolean;
 }
 
@@ -109,5 +111,6 @@ export interface UpdatePositionData {
   level?: number;
   minSalary?: number;
   maxSalary?: number;
+  baseSalary?: number;
   isActive?: boolean;
 }
