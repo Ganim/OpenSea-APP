@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { Header } from '@/components/layout/header';
+import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
 import {
   PageBody,
   PageHeader,
@@ -50,7 +51,7 @@ import { normaliseName } from '@/helpers/normalise-name';
 import type { Item } from '@/types/stock';
 import type { Template, TemplateAttribute } from '@/types/stock';
 import { cn } from '@/lib/utils';
-import { ItemHistoryModal } from '../../products/src/modals/item-history-modal';
+import { ItemHistoryModal } from '../../(entities)/products/src/modals/item-history-modal';
 
 // IDs for optional fixed columns
 const COL_FABRICANTE = '_fabricante';
@@ -361,11 +362,15 @@ export default function StockOverviewListPage() {
       for (let i = 0; i < exitedItemIds.length; i++) {
         const movements = results[i].movements;
         const exitMovement = movements.find(
-          m => m.reasonCode !== 'ENTRY' && m.movementType !== 'TRANSFER'
+          m =>
+            m.movementType !== 'PURCHASE' &&
+            m.movementType !== 'CUSTOMER_RETURN' &&
+            m.movementType !== 'TRANSFER' &&
+            m.movementType !== 'INVENTORY_ADJUSTMENT' &&
+            m.movementType !== 'ZONE_RECONFIGURE'
         );
         if (exitMovement) {
-          reasonMap[exitedItemIds[i]] =
-            exitMovement.reasonCode || exitMovement.movementType;
+          reasonMap[exitedItemIds[i]] = exitMovement.movementType;
         }
       }
       return reasonMap;
@@ -602,6 +607,12 @@ export default function StockOverviewListPage() {
   return (
     <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
       <PageHeader className="shrink-0">
+        <PageBreadcrumb
+          items={[
+            { label: 'Estoque', href: '/stock' },
+            { label: 'Estoque Geral', href: '/stock/overview/list' },
+          ]}
+        />
         <Header
           title="Listagem de Estoque"
           description="Visão consolidada de todos os itens com localização, quantidades e atributos personalizados."

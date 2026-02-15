@@ -6,11 +6,15 @@ import type {
   GroupsResponse,
   MessageResponse,
   PermissionsResponse,
+  SetAccessPinRequest,
+  SetActionPinRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UpdateProfileRequest,
   UpdateUsernameRequest,
   UserResponse,
+  VerifyActionPinRequest,
+  VerifyActionPinResponse,
 } from '@/types/auth';
 import type { Employee } from '@/types/hr';
 
@@ -49,6 +53,32 @@ export const meService = {
   async updatePassword(data: UpdatePasswordRequest): Promise<MessageResponse> {
     return apiClient.patch<MessageResponse>(
       API_ENDPOINTS.ME.UPDATE_PASSWORD,
+      data
+    );
+  },
+
+  // PATCH /v1/me/access-pin
+  async setAccessPin(data: SetAccessPinRequest): Promise<UserResponse> {
+    return apiClient.patch<UserResponse>(
+      API_ENDPOINTS.ME.SET_ACCESS_PIN,
+      data
+    );
+  },
+
+  // PATCH /v1/me/action-pin
+  async setActionPin(data: SetActionPinRequest): Promise<UserResponse> {
+    return apiClient.patch<UserResponse>(
+      API_ENDPOINTS.ME.SET_ACTION_PIN,
+      data
+    );
+  },
+
+  // POST /v1/me/verify-action-pin
+  async verifyActionPin(
+    data: VerifyActionPinRequest
+  ): Promise<VerifyActionPinResponse> {
+    return apiClient.post<VerifyActionPinResponse>(
+      API_ENDPOINTS.ME.VERIFY_ACTION_PIN,
       data
     );
   },

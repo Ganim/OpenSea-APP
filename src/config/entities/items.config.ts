@@ -3,6 +3,7 @@
  * Configuração completa da entidade de itens
  */
 
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Item } from '@/types/stock';
 import { Box, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -271,12 +272,12 @@ export const itemsConfig = defineEntityConfig<Item>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'items.view',
-    create: 'items.create',
-    update: 'items.update',
-    delete: 'items.delete',
-    export: 'items.export',
-    import: 'items.import',
+    view: STOCK_PERMISSIONS.ITEMS.READ,
+    create: STOCK_PERMISSIONS.ITEMS.CREATE,
+    update: STOCK_PERMISSIONS.ITEMS.UPDATE,
+    delete: STOCK_PERMISSIONS.ITEMS.DELETE,
+    export: STOCK_PERMISSIONS.ITEMS.MANAGE,
+    import: STOCK_PERMISSIONS.ITEMS.MANAGE,
   },
 
   // ======================== FEATURES ========================
@@ -310,7 +311,7 @@ export const itemsConfig = defineEntityConfig<Item>()({
         label: 'Novo Item',
         icon: Plus,
         variant: 'default',
-        permission: 'items.create',
+        permission: STOCK_PERMISSIONS.ITEMS.CREATE,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -320,28 +321,28 @@ export const itemsConfig = defineEntityConfig<Item>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'items.view',
+        permission: STOCK_PERMISSIONS.ITEMS.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'items.update',
+        permission: STOCK_PERMISSIONS.ITEMS.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'items.create',
+        permission: STOCK_PERMISSIONS.ITEMS.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'items.delete',
+        permission: STOCK_PERMISSIONS.ITEMS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Item',
         confirmMessage: 'Tem certeza que deseja excluir este item?',
@@ -354,7 +355,7 @@ export const itemsConfig = defineEntityConfig<Item>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'items.delete',
+        permission: STOCK_PERMISSIONS.ITEMS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Itens',
         confirmMessage: 'Tem certeza que deseja excluir os itens selecionados?',

@@ -21,8 +21,7 @@ export function PageLayout({
         // Container
         'w-full',
         'mx-auto',
-        // Margin
-        'px-2 md:px-4 lg:px-6',
+
         // Spacing
         `space-y-${spacing.replace('gap-', '')}`,
         spacing,

@@ -27,9 +27,9 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { Position } from '@/types/hr';
 import {
-  ArrowLeft,
   Briefcase,
   Building2,
   ExternalLink,
@@ -39,6 +39,8 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
+import { useListCompanies } from '../companies/src';
+import { useListDepartments } from '../departments/src';
 import {
   CreateModal,
   createPosition,
@@ -52,8 +54,6 @@ import {
   updatePosition,
   ViewModal,
 } from './src';
-import { useListCompanies } from '../companies/src';
-import { useListDepartments } from '../departments/src';
 
 export default function PositionsPage() {
   return (
@@ -65,9 +65,14 @@ export default function PositionsPage() {
   );
 }
 
+type ActionButtonWithPermission = HeaderButton & {
+  permission?: string;
+};
+
 function PositionsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hasPermission } = usePermissions();
 
   // ============================================================================
   // URL-BASED FILTERS
@@ -325,7 +330,7 @@ function PositionsPageContent() {
           title={item.name}
           subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
-          iconBgColor="bg-gradient-to-br from-indigo-500 to-purple-600"
+          iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
             ...(deptLabel
               ? [
@@ -402,7 +407,7 @@ function PositionsPageContent() {
           title={item.name}
           subtitle={item.description || `Codigo: ${item.code}`}
           icon={Briefcase}
-          iconBgColor="bg-gradient-to-br from-indigo-500 to-purple-600"
+          iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
             ...(deptLabel
               ? [
@@ -477,7 +482,7 @@ function PositionsPageContent() {
     page.modals.open('create');
   }, [page.modals]);
 
-  const actionButtons: HeaderButton[] = useMemo(
+  const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
       {
         id: 'import-positions',
@@ -485,6 +490,7 @@ function PositionsPageContent() {
         icon: Upload,
         onClick: () => router.push('/import/hr/positions'),
         variant: 'outline',
+        permission: positionsConfig.permissions?.import,
       },
       {
         id: 'create-position',
@@ -492,9 +498,20 @@ function PositionsPageContent() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
+        permission: positionsConfig.permissions?.create,
       },
     ],
     [handleCreate, router]
+  );
+
+  const visibleActionButtons = useMemo<HeaderButton[]>(
+    () =>
+      actionButtons
+        .filter(button =>
+          button.permission ? hasPermission(button.permission) : true
+        )
+        .map(({ permission, ...button }) => button),
+    [actionButtons, hasPermission]
   );
 
   // ============================================================================
@@ -511,10 +528,11 @@ function PositionsPageContent() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            buttons={actionButtons}
-            onBack={() => router.back()}
-            backLabel="RH"
-            backIcon={ArrowLeft}
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Cargos', href: '/hr/positions' },
+            ]}
+            buttons={visibleActionButtons}
           />
 
           <Header
@@ -534,48 +552,6 @@ function PositionsPageContent() {
             size="md"
           />
 
-          {/* Filters */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <FilterDropdown
-              label="Empresa"
-              icon={Building2}
-              options={availableCompanies.map(c => ({
-                id: c.id,
-                label: c.name,
-              }))}
-              selected={companyIds}
-              onSelectionChange={setCompanyFilter}
-              activeColor="emerald"
-              searchPlaceholder="Buscar empresa..."
-              emptyText="Nenhuma empresa encontrada."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todas as empresas',
-                onClick: () => router.push('/hr/companies'),
-                color: 'emerald',
-              }}
-            />
-            <FilterDropdown
-              label="Departamento"
-              icon={Building2}
-              options={availableDepartments.map(d => ({
-                id: d.id,
-                label: d.name,
-              }))}
-              selected={departmentIds}
-              onSelectionChange={setDepartmentFilter}
-              activeColor="blue"
-              searchPlaceholder="Buscar departamento..."
-              emptyText="Nenhum departamento encontrado."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todos os departamentos',
-                onClick: () => router.push('/hr/departments'),
-                color: 'blue',
-              }}
-            />
-          </div>
-
           {/* Grid */}
           {page.isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -593,6 +569,48 @@ function PositionsPageContent() {
             <EntityGrid
               config={positionsConfig}
               items={displayedPositions}
+              toolbarStart={
+                <>
+                  <FilterDropdown
+                    label="Empresa"
+                    icon={Building2}
+                    options={availableCompanies.map(c => ({
+                      id: c.id,
+                      label: c.name,
+                    }))}
+                    selected={companyIds}
+                    onSelectionChange={setCompanyFilter}
+                    activeColor="emerald"
+                    searchPlaceholder="Buscar empresa..."
+                    emptyText="Nenhuma empresa encontrada."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todas as empresas',
+                      onClick: () => router.push('/hr/companies'),
+                      color: 'emerald',
+                    }}
+                  />
+                  <FilterDropdown
+                    label="Departamento"
+                    icon={Building2}
+                    options={availableDepartments.map(d => ({
+                      id: d.id,
+                      label: d.name,
+                    }))}
+                    selected={departmentIds}
+                    onSelectionChange={setDepartmentFilter}
+                    activeColor="blue"
+                    searchPlaceholder="Buscar departamento..."
+                    emptyText="Nenhum departamento encontrado."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todos os departamentos',
+                      onClick: () => router.push('/hr/departments'),
+                      color: 'blue',
+                    }}
+                  />
+                </>
+              }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}

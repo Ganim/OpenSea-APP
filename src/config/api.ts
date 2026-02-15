@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   // Auth
   AUTH: {
     LOGIN: '/v1/auth/login/password',
+    LOGIN_PIN: '/v1/auth/login/pin',
     REGISTER: '/v1/auth/register/password',
     SEND_PASSWORD_RESET: '/v1/auth/send/password',
     RESET_PASSWORD: '/v1/auth/reset/password',
@@ -33,6 +34,10 @@ export const API_ENDPOINTS = {
     UPDATE_USERNAME: '/v1/me/username',
     UPDATE_PASSWORD: '/v1/me/password',
     DELETE: '/v1/me',
+    // PIN
+    SET_ACCESS_PIN: '/v1/me/access-pin',
+    SET_ACTION_PIN: '/v1/me/action-pin',
+    VERIFY_ACTION_PIN: '/v1/me/verify-action-pin',
     // Employee
     EMPLOYEE: '/v1/me/employee',
     // Audit Logs
@@ -66,6 +71,10 @@ export const API_ENDPOINTS = {
     UPDATE_PASSWORD: (userId: string) => `/v1/users/${userId}/password`,
     UPDATE_PROFILE: (userId: string) => `/v1/users/${userId}`,
     DELETE: (userId: string) => `/v1/users/${userId}`,
+    FORCE_ACCESS_PIN_RESET: (userId: string) =>
+      `/v1/users/${userId}/force-access-pin-reset`,
+    FORCE_ACTION_PIN_RESET: (userId: string) =>
+      `/v1/users/${userId}/force-action-pin-reset`,
   },
   // HR - Employees
   EMPLOYEES: {

@@ -3,6 +3,7 @@
  * Configuração completa da entidade de permissões
  */
 
+import { RBAC_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Permission } from '@/types/rbac';
 import { Shield, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -217,12 +218,12 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'core.rbac.view',
-    create: 'core.rbac.create',
-    update: 'core.rbac.update',
-    delete: 'core.rbac.delete',
-    export: 'core.rbac.export',
-    import: 'core.rbac.import',
+    view: RBAC_PERMISSIONS.PERMISSIONS.READ,
+    create: RBAC_PERMISSIONS.PERMISSIONS.CREATE,
+    update: RBAC_PERMISSIONS.PERMISSIONS.UPDATE,
+    delete: RBAC_PERMISSIONS.PERMISSIONS.DELETE,
+    export: RBAC_PERMISSIONS.PERMISSIONS.LIST,
+    import: RBAC_PERMISSIONS.PERMISSIONS.LIST,
   },
 
   // ======================== FEATURES ========================
@@ -256,7 +257,7 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Nova Permissão',
         icon: Plus,
         variant: 'default',
-        permission: 'core.rbac.create',
+        permission: RBAC_PERMISSIONS.PERMISSIONS.CREATE,
         onClick: () => {},
       },
     ],
@@ -266,14 +267,14 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'core.rbac.view',
+        permission: RBAC_PERMISSIONS.PERMISSIONS.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'core.rbac.update',
+        permission: RBAC_PERMISSIONS.PERMISSIONS.UPDATE,
         show: (item: Permission) => !item.isSystem,
       },
       {
@@ -281,7 +282,7 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'core.rbac.delete',
+        permission: RBAC_PERMISSIONS.PERMISSIONS.DELETE,
         show: (item: Permission) => !item.isSystem,
         confirm: true,
         confirmTitle: 'Excluir Permissão',

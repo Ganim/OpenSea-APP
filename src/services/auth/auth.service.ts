@@ -3,6 +3,7 @@ import { apiClient } from '@/lib/api-client';
 import type {
   AuthResponse,
   LoginCredentials,
+  LoginWithPinCredentials,
   MessageResponse,
   RegisterData,
   RegisterResponse,
@@ -15,6 +16,23 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.AUTH.LOGIN,
+      credentials
+    );
+
+    if (response.token) {
+      this.setToken(response.token);
+      if (response.refreshToken) {
+        this.setRefreshToken(response.refreshToken);
+      }
+    }
+
+    return response;
+  },
+
+  // POST /v1/auth/login/pin
+  async loginWithPin(credentials: LoginWithPinCredentials): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.LOGIN_PIN,
       credentials
     );
 

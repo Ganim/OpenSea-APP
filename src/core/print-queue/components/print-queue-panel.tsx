@@ -73,7 +73,7 @@ export function PrintQueuePanel() {
               <Link href="/print/studio">
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
+                  className="h-7 px-3 text-xs font-semibold text-white bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
                 >
                   <Sparkles className="w-3 h-3 mr-1" />
                   Studio

@@ -54,6 +54,8 @@ export interface EntityContextMenuProps {
     duplicate?: string;
     delete?: string;
   };
+  /** Classes extras para o ContextMenuContent */
+  contentClassName?: string;
 }
 
 // =============================================================================
@@ -70,6 +72,7 @@ export function EntityContextMenu({
   onDelete,
   showDefaultActions = true,
   labels = {},
+  contentClassName,
 }: EntityContextMenuProps) {
   const selectionContext = useOptionalSelectionContext();
 
@@ -165,7 +168,7 @@ export function EntityContextMenu({
       <ContextMenuTrigger asChild>
         <div className="w-full h-full">{children}</div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="overflow-hidden">
+      <ContextMenuContent className={cn('overflow-hidden', contentClassName)}>
         {menuState.isMultiple && (
           <>
             <ContextMenuLabel className="text-xs text-muted-foreground font-normal">

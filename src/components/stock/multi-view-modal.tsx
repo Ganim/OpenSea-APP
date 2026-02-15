@@ -6,7 +6,7 @@
 
 'use client';
 
-import { TemplateViewer } from '@/app/(dashboard)/stock/templates/src/components';
+import { TemplateViewer } from '@/app/(dashboard)/stock/(entities)/templates/src/components';
 import { Button } from '@/components/ui/button';
 import { useUpdateTemplate } from '@/hooks/stock';
 import { logger } from '@/lib/logger';

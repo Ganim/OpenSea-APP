@@ -120,7 +120,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             logoUrl: null,
             status: 'ACTIVE',
             role: 'member',
-            joinedAt: new Date(),
+            joinedAt: new Date().toISOString(),
           });
         }
       } catch (error) {

@@ -34,6 +34,15 @@ export const CORE_PERMISSIONS = {
     READ: 'core.profiles.read',
     UPDATE: 'core.profiles.update',
   },
+  LABEL_TEMPLATES: {
+    CREATE: 'core.label-templates.create',
+    READ: 'core.label-templates.read',
+    UPDATE: 'core.label-templates.update',
+    DELETE: 'core.label-templates.delete',
+    LIST: 'core.label-templates.list',
+    DUPLICATE: 'core.label-templates.duplicate',
+    MANAGE: 'core.label-templates.manage',
+  },
 } as const;
 
 // =============================================================================
@@ -166,6 +175,21 @@ export const STOCK_PERMISSIONS = {
     DELETE: 'stock.warehouses.delete',
     LIST: 'stock.warehouses.list',
     MANAGE: 'stock.warehouses.manage',
+  },
+  VOLUMES: {
+    CREATE: 'stock.volumes.create',
+    READ: 'stock.volumes.read',
+    UPDATE: 'stock.volumes.update',
+    DELETE: 'stock.volumes.delete',
+    LIST: 'stock.volumes.list',
+    MANAGE: 'stock.volumes.manage',
+    CLOSE: 'stock.volumes.close',
+    REOPEN: 'stock.volumes.reopen',
+    DELIVER: 'stock.volumes.deliver',
+    RETURN: 'stock.volumes.return',
+    ADD_ITEM: 'stock.volumes.add-item',
+    REMOVE_ITEM: 'stock.volumes.remove-item',
+    ROMANEIO: 'stock.volumes.romaneio',
   },
 } as const;
 
@@ -681,21 +705,6 @@ export const UI_PERMISSIONS = {
 } as const;
 
 // =============================================================================
-// STUDIO - Editor de etiquetas
-// =============================================================================
-
-export const STUDIO_PERMISSIONS = {
-  LABELS: {
-    MANAGE: 'studio.labels.manage',
-    USE: 'studio.labels.use',
-    VIEW: 'studio.labels.view',
-    LIST: 'studio.labels.list',
-    EDIT: 'studio.labels.edit',
-    DELETE: 'studio.labels.delete',
-  },
-} as const;
-
-// =============================================================================
 // WILDCARD - Permissões especiais
 // =============================================================================
 
@@ -725,7 +734,6 @@ export const PermissionCodes = {
   REPORTS: REPORTS_PERMISSIONS,
   DATA: DATA_PERMISSIONS,
   UI: UI_PERMISSIONS,
-  STUDIO: STUDIO_PERMISSIONS,
   WILDCARD: WILDCARD_PERMISSIONS,
 } as const;
 
@@ -755,7 +763,8 @@ export type StockPermission =
   | (typeof STOCK_PERMISSIONS.CARE)[keyof typeof STOCK_PERMISSIONS.CARE]
   | (typeof STOCK_PERMISSIONS.BINS)[keyof typeof STOCK_PERMISSIONS.BINS]
   | (typeof STOCK_PERMISSIONS.ZONES)[keyof typeof STOCK_PERMISSIONS.ZONES]
-  | (typeof STOCK_PERMISSIONS.WAREHOUSES)[keyof typeof STOCK_PERMISSIONS.WAREHOUSES];
+  | (typeof STOCK_PERMISSIONS.WAREHOUSES)[keyof typeof STOCK_PERMISSIONS.WAREHOUSES]
+  | (typeof STOCK_PERMISSIONS.VOLUMES)[keyof typeof STOCK_PERMISSIONS.VOLUMES];
 
 export type HRPermission =
   | (typeof HR_PERMISSIONS.COMPANIES)[keyof typeof HR_PERMISSIONS.COMPANIES]

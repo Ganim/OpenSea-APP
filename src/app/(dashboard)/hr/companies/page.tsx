@@ -26,11 +26,11 @@ import {
   useEntityPage,
 } from '@/core';
 import { formatCNPJ } from '@/helpers/formatters';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Company } from '@/types/hr';
 import {
   ArrowDownAZ,
-  ArrowLeft,
   Building2,
   Calendar,
   Clock,
@@ -57,8 +57,13 @@ import {
 } from './src';
 import { createCompanyFromBrasilAPI } from './src/utils/create-from-brasilapi';
 
+type ActionButtonWithPermission = HeaderButton & {
+  permission?: string;
+};
+
 export default function CompaniesPage() {
   const router = useRouter();
+  const { hasPermission } = usePermissions();
   const [isCnpjModalOpen, setIsCnpjModalOpen] = useState(false);
 
   // ============================================================================
@@ -202,7 +207,7 @@ export default function CompaniesPage() {
           title={item.tradeName || '—'}
           subtitle={formatCNPJ(item.cnpj)}
           icon={Building2}
-          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(employeesCount > 0
               ? [
@@ -267,7 +272,7 @@ export default function CompaniesPage() {
           title={item.tradeName || '—'}
           subtitle={formatCNPJ(item.cnpj)}
           icon={Building2}
-          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(employeesCount > 0
               ? [
@@ -334,7 +339,7 @@ export default function CompaniesPage() {
     setIsCnpjModalOpen(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
+  const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
       {
         id: 'import-companies',
@@ -342,6 +347,7 @@ export default function CompaniesPage() {
         icon: Upload,
         onClick: () => router.push('/import/hr/companies'),
         variant: 'outline',
+        permission: companiesConfig.permissions?.import,
       },
       {
         id: 'create-company',
@@ -349,9 +355,20 @@ export default function CompaniesPage() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
+        permission: companiesConfig.permissions?.create,
       },
     ],
     [router, handleCreate]
+  );
+
+  const visibleActionButtons = useMemo<HeaderButton[]>(
+    () =>
+      actionButtons
+        .filter(button =>
+          button.permission ? hasPermission(button.permission) : true
+        )
+        .map(({ permission, ...button }) => button),
+    [actionButtons, hasPermission]
   );
 
   // ============================================================================
@@ -368,10 +385,11 @@ export default function CompaniesPage() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            buttons={actionButtons}
-            onBack={() => router.back()}
-            backLabel="RH"
-            backIcon={ArrowLeft}
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Empresas', href: '/hr/companies' },
+            ]}
+            buttons={visibleActionButtons}
           />
 
           <Header

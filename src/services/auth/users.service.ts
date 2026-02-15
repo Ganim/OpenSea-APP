@@ -87,7 +87,7 @@ export const usersService = {
   ): Promise<ProfileResponse> {
     return apiClient.patch<ProfileResponse>(
       API_ENDPOINTS.USERS.UPDATE_PROFILE(userId),
-      data
+      { profile: data }
     );
   },
 
@@ -104,6 +104,26 @@ export const usersService = {
     return apiClient.post<ForcePasswordResetResponse>(
       API_ENDPOINTS.FORCE_PASSWORD_RESET.REQUEST(userId),
       data
+    );
+  },
+
+  // POST /v1/users/:userId/force-access-pin-reset
+  async forceAccessPinReset(
+    userId: string
+  ): Promise<{ user: import('@/types/auth').User; message: string }> {
+    return apiClient.post(
+      API_ENDPOINTS.USERS.FORCE_ACCESS_PIN_RESET(userId),
+      {}
+    );
+  },
+
+  // POST /v1/users/:userId/force-action-pin-reset
+  async forceActionPinReset(
+    userId: string
+  ): Promise<{ user: import('@/types/auth').User; message: string }> {
+    return apiClient.post(
+      API_ENDPOINTS.USERS.FORCE_ACTION_PIN_RESET(userId),
+      {}
     );
   },
 };

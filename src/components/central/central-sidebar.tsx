@@ -48,7 +48,7 @@ export function CentralSidebar() {
 
               {/* Active indicator gradient */}
               {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--os-blue-500)/0.2)] via-[rgb(var(--os-purple-500)/0.2)] to-[rgb(236_72_153/0.2)]" />
+                <div className="absolute inset-0 bg-linear-to-r from-[rgb(var(--os-blue-500)/0.2)] via-[rgb(var(--os-purple-500)/0.2)] to-[rgb(236_72_153/0.2)]" />
               )}
 
               {/* Border */}
@@ -84,7 +84,7 @@ export function CentralSidebar() {
       </div>
 
       {/* Decorative gradient at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none bg-gradient-to-t from-[rgb(var(--os-purple-500)/0.1)] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none bg-linear-to-t from-[rgb(var(--os-purple-500)/0.1)] to-transparent" />
     </aside>
   );
 }

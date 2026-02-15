@@ -111,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/fast-login',
     '/register',
     '/reset-password',
+    '/setup-pins',
     '/',
     '/select-tenant',
   ];
@@ -215,6 +216,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatarUrl: u.profile?.avatarUrl,
         });
         logger.debug('💾 Conta salva para Fast Login', { userId: u.id });
+      }
+
+      // Check if PIN setup is required
+      const fetchedUser = userResult.data?.user;
+      if (fetchedUser?.forceAccessPinSetup || fetchedUser?.forceActionPinSetup) {
+        router.push('/setup-pins');
+        return { redirected: true };
       }
 
       // Fluxo padrão segue para o caller decidir o redirecionamento

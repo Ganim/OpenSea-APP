@@ -27,9 +27,9 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { Department } from '@/types/hr';
 import {
-  ArrowLeft,
   Briefcase,
   Building2,
   ExternalLink,
@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
+import { useListCompanies } from '../companies/src';
 import {
   createDepartment,
   CreateModal,
@@ -52,7 +53,6 @@ import {
   updateDepartment,
   ViewModal,
 } from './src';
-import { useListCompanies } from '../companies/src';
 
 export default function DepartmentsPage() {
   return (
@@ -64,9 +64,14 @@ export default function DepartmentsPage() {
   );
 }
 
+type ActionButtonWithPermission = HeaderButton & {
+  permission?: string;
+};
+
 function DepartmentsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hasPermission } = usePermissions();
 
   // ============================================================================
   // URL-BASED FILTERS
@@ -239,7 +244,7 @@ function DepartmentsPageContent() {
           title={item.name}
           subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
-          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
@@ -292,7 +297,7 @@ function DepartmentsPageContent() {
           title={item.name}
           subtitle={companyName || item.description || `Codigo: ${item.code}`}
           icon={Building2}
-          iconBgColor="bg-gradient-to-br from-blue-500 to-cyan-600"
+          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
             {
               label: item.isActive ? 'Ativo' : 'Inativo',
@@ -357,7 +362,7 @@ function DepartmentsPageContent() {
     page.modals.open('create');
   }, [page.modals]);
 
-  const actionButtons: HeaderButton[] = useMemo(
+  const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
       {
         id: 'import-departments',
@@ -365,6 +370,7 @@ function DepartmentsPageContent() {
         icon: Upload,
         onClick: () => router.push('/import/hr/departments'),
         variant: 'outline',
+        permission: departmentsConfig.permissions?.import,
       },
       {
         id: 'create-department',
@@ -372,9 +378,20 @@ function DepartmentsPageContent() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
+        permission: departmentsConfig.permissions?.create,
       },
     ],
     [handleCreate, router]
+  );
+
+  const visibleActionButtons = useMemo<HeaderButton[]>(
+    () =>
+      actionButtons
+        .filter(button =>
+          button.permission ? hasPermission(button.permission) : true
+        )
+        .map(({ permission, ...button }) => button),
+    [actionButtons, hasPermission]
   );
 
   // ============================================================================
@@ -391,10 +408,11 @@ function DepartmentsPageContent() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            buttons={actionButtons}
-            onBack={() => router.back()}
-            backLabel="RH"
-            backIcon={ArrowLeft}
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Departamentos', href: '/hr/departments' },
+            ]}
+            buttons={visibleActionButtons}
           />
 
           <Header
@@ -414,29 +432,6 @@ function DepartmentsPageContent() {
             size="md"
           />
 
-          {/* Filters */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <FilterDropdown
-              label="Empresa"
-              icon={Building2}
-              options={availableCompanies.map(c => ({
-                id: c.id,
-                label: c.name,
-              }))}
-              selected={companyIds}
-              onSelectionChange={setCompanyFilter}
-              activeColor="emerald"
-              searchPlaceholder="Buscar empresa..."
-              emptyText="Nenhuma empresa encontrada."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todas as empresas',
-                onClick: () => router.push('/hr/companies'),
-                color: 'emerald',
-              }}
-            />
-          </div>
-
           {/* Grid */}
           {page.isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -454,6 +449,27 @@ function DepartmentsPageContent() {
             <EntityGrid
               config={departmentsConfig}
               items={displayedDepartments}
+              toolbarStart={
+                <FilterDropdown
+                  label="Empresa"
+                  icon={Building2}
+                  options={availableCompanies.map(c => ({
+                    id: c.id,
+                    label: c.name,
+                  }))}
+                  selected={companyIds}
+                  onSelectionChange={setCompanyFilter}
+                  activeColor="emerald"
+                  searchPlaceholder="Buscar empresa..."
+                  emptyText="Nenhuma empresa encontrada."
+                  footerAction={{
+                    icon: ExternalLink,
+                    label: 'Ver todas as empresas',
+                    onClick: () => router.push('/hr/companies'),
+                    color: 'emerald',
+                  }}
+                />
+              }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}

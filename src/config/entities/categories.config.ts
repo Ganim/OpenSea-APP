@@ -3,6 +3,7 @@
  * Configuração completa da entidade de categorias
  */
 
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Category } from '@/types/stock';
 import { Copy, Edit, Eye, Folder, Plus, Trash2 } from 'lucide-react';
@@ -170,12 +171,12 @@ export const categoriesConfig = defineEntityConfig<Category>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'categories.view',
-    create: 'categories.create',
-    update: 'categories.update',
-    delete: 'categories.delete',
-    export: 'categories.export',
-    import: 'categories.import',
+    view: STOCK_PERMISSIONS.CATEGORIES.READ,
+    create: STOCK_PERMISSIONS.CATEGORIES.CREATE,
+    update: STOCK_PERMISSIONS.CATEGORIES.UPDATE,
+    delete: STOCK_PERMISSIONS.CATEGORIES.DELETE,
+    export: STOCK_PERMISSIONS.CATEGORIES.MANAGE,
+    import: STOCK_PERMISSIONS.CATEGORIES.MANAGE,
   },
 
   // ======================== FEATURES ========================
@@ -209,7 +210,7 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         label: 'Nova Categoria',
         icon: Plus,
         variant: 'default',
-        permission: 'categories.create',
+        permission: STOCK_PERMISSIONS.CATEGORIES.CREATE,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -219,28 +220,28 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'categories.view',
+        permission: STOCK_PERMISSIONS.CATEGORIES.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'categories.update',
+        permission: STOCK_PERMISSIONS.CATEGORIES.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'categories.create',
+        permission: STOCK_PERMISSIONS.CATEGORIES.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'categories.delete',
+        permission: STOCK_PERMISSIONS.CATEGORIES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Categoria',
         confirmMessage: 'Tem certeza que deseja excluir esta categoria?',
@@ -253,7 +254,7 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'categories.delete',
+        permission: STOCK_PERMISSIONS.CATEGORIES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Categorias',
         confirmMessage:

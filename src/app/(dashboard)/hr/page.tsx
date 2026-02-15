@@ -12,9 +12,9 @@ import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
-  employeesService,
   companiesService,
   departmentsService,
+  employeesService,
   positionsService,
 } from '@/services/hr';
 
@@ -59,17 +59,6 @@ const sections: {
         countKey: 'companies',
       },
       {
-        id: 'employees',
-        title: 'Funcionários',
-        description: 'Listagem e gestão de colaboradores',
-        icon: SquareUserRound,
-        href: '/hr/employees',
-        gradient: 'from-blue-500 to-blue-600',
-        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
-        countKey: 'employees',
-      },
-      {
         id: 'departments',
         title: 'Departamentos',
         description: 'Estrutura organizacional e áreas',
@@ -90,6 +79,17 @@ const sections: {
         hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
         permission: HR_PERMISSIONS.POSITIONS.LIST,
         countKey: 'positions',
+      },
+      {
+        id: 'employees',
+        title: 'Funcionários',
+        description: 'Listagem e gestão de colaboradores',
+        icon: SquareUserRound,
+        href: '/hr/employees',
+        gradient: 'from-blue-500 to-blue-600',
+        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+        countKey: 'employees',
       },
     ],
   },

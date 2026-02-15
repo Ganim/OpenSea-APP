@@ -195,10 +195,27 @@ const movementTypeConfig: Record<
     className?: string;
   }
 > = {
-  ENTRY: { label: 'Entrada', variant: 'default', className: 'bg-green-500' },
-  EXIT: { label: 'Saída', variant: 'destructive' },
-  TRANSFER: { label: 'Transferência', variant: 'secondary' },
-  ADJUSTMENT: { label: 'Ajuste', variant: 'outline' },
+  PURCHASE: { label: 'Compra', variant: 'default', className: 'bg-green-500' },
+  CUSTOMER_RETURN: {
+    label: 'Devolução (Cliente)',
+    variant: 'default',
+    className: 'bg-green-500',
+  },
+  SALE: { label: 'Venda', variant: 'destructive' },
+  PRODUCTION: { label: 'Utilização', variant: 'destructive' },
+  SAMPLE: { label: 'Amostra', variant: 'secondary' },
+  LOSS: { label: 'Perda', variant: 'destructive' },
+  SUPPLIER_RETURN: { label: 'Devolução (Fornecedor)', variant: 'destructive' },
+  TRANSFER: {
+    label: 'Transferência',
+    variant: 'secondary',
+    className: 'border-blue-500 text-blue-500',
+  },
+  INVENTORY_ADJUSTMENT: {
+    label: 'Ajuste',
+    variant: 'outline',
+    className: 'border-orange-500 text-orange-500',
+  },
   ZONE_RECONFIGURE: {
     label: 'Reconfiguração',
     variant: 'outline',

@@ -14,6 +14,7 @@ export interface PermissionGroup {
   isActive: boolean;
   isSystem: boolean;
   parentId: string | null;
+  tenantId: string | null;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string | null;

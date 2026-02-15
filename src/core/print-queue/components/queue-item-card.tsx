@@ -73,7 +73,7 @@ export function QueueItemCard({
       {/* Item Icon */}
       <div
         className={cn(
-          'w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0',
+          'w-12 h-12 rounded-lg bg-linear-to-br flex items-center justify-center shrink-0',
           gradient
         )}
       >

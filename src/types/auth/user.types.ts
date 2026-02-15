@@ -23,6 +23,10 @@ export interface User {
   forcePasswordReset?: boolean;
   forcePasswordResetReason?: string | null;
   forcePasswordResetRequestedAt?: Date | null;
+  hasAccessPin?: boolean;
+  hasActionPin?: boolean;
+  forceAccessPinSetup?: boolean;
+  forceActionPinSetup?: boolean;
   isSuperAdmin: boolean;
   profile?: Profile | null;
 }
@@ -77,6 +81,30 @@ export interface ForcePasswordResetResponse {
     forcePasswordResetRequestedAt?: Date | null;
   };
   message: string;
+}
+
+// PIN Types
+export interface LoginWithPinCredentials {
+  userId: string;
+  accessPin: string;
+}
+
+export interface SetAccessPinRequest {
+  currentPassword: string;
+  newAccessPin: string;
+}
+
+export interface SetActionPinRequest {
+  currentPassword: string;
+  newActionPin: string;
+}
+
+export interface VerifyActionPinRequest {
+  actionPin: string;
+}
+
+export interface VerifyActionPinResponse {
+  valid: boolean;
 }
 
 // Auth Responses

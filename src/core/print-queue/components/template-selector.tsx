@@ -65,7 +65,7 @@ export function TemplateSelector({ className }: TemplateSelectorProps) {
 
       <Button
         size="sm"
-        className="w-full text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
+        className="w-full text-white bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-sm"
         onClick={() => router.push('/print/studio')}
       >
         <ExternalLink className="w-3.5 h-3.5 mr-2" />

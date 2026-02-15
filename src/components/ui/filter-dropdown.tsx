@@ -1,16 +1,15 @@
 'use client';
 
-import * as React from 'react';
-import { useState, useMemo } from 'react';
-import { Check, CheckCheck, ChevronsUpDown, Search, X } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
+import { Check, CheckCheck, ChevronsUpDown, Search, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 export interface FilterOption {
   id: string;
@@ -172,7 +171,7 @@ export function FilterDropdown({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="glass shadow-xl rounded-xl p-0 border-0"
+        className=" shadow-xl rounded-xl p-0 border-0"
         style={{ width }}
         align="start"
         onOpenAutoFocus={e => e.preventDefault()}

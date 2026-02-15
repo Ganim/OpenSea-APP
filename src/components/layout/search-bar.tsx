@@ -239,7 +239,7 @@ export function SearchBar({
             className={cn(
               currentSize.inputPadding,
               currentSize.textSize,
-              'border-0 bg-transparent focus:outline-none focus:ring-0',
+              'border-0 bg-slate-100 dark:bg-white/5 focus:outline-none focus:ring-0',
               'placeholder:text-gray-400 dark:placeholder:text-gray-400',
               'transition-colors duration-200',
               inputClassName
@@ -253,7 +253,7 @@ export function SearchBar({
               disabled={disabled}
               className={cn(
                 'absolute right-0 top-1/2 -translate-y-1/2',
-                'z-10 flex items-center justify-center',
+                'z-10 flex items-center justify-center mr-4',
                 'p-1 rounded-md',
                 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                 'hover:bg-gray-200/50 dark:hover:bg-gray-700/50',

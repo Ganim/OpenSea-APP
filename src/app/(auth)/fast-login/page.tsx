@@ -5,6 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@/components/ui/input-otp';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
@@ -16,9 +21,12 @@ import {
   removeAccount,
   type SavedAccount,
 } from '@/lib/saved-accounts';
+import { authService } from '@/services/auth/auth.service';
+import { saveAccount } from '@/lib/saved-accounts';
 import {
   ChevronLeft,
   ChevronRight,
+  KeyRound,
   Lock,
   Plus,
   UserPlus,
@@ -38,6 +46,8 @@ export default function FastLoginPage() {
     null
   );
   const [password, setPassword] = useState('');
+  const [accessPin, setAccessPin] = useState('');
+  const [usePinLogin, setUsePinLogin] = useState(true);
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -71,6 +81,8 @@ export default function FastLoginPage() {
   const handleBack = () => {
     setSelectedAccount(null);
     setPassword('');
+    setAccessPin('');
+    setUsePinLogin(false);
     setError('');
   };
 
@@ -91,37 +103,89 @@ export default function FastLoginPage() {
     }
   };
 
+  const handlePostLogin = async (response: import('@/types/auth').AuthResponse) => {
+    // Check if PIN setup is required
+    const user = response.user;
+    if (user.forceAccessPinSetup || user.forceActionPinSetup) {
+      router.push('/setup-pins');
+      return;
+    }
+
+    // Super admins go straight to dashboard
+    if (user.isSuperAdmin) {
+      router.push('/');
+      return;
+    }
+
+    // Fetch tenants
+    const tenantsList = await refreshTenants();
+
+    if (tenantsList.length === 1) {
+      await selectTenant(tenantsList[0].id);
+      router.push('/');
+    } else {
+      router.push('/select-tenant');
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAccount || !password) return;
+    if (!selectedAccount) return;
+
+    if (usePinLogin) {
+      if (accessPin.length !== 6) return;
+    } else {
+      if (!password) return;
+    }
 
     setError('');
 
     try {
-      const result = await login({
-        email: selectedAccount.identifier,
-        password,
-      });
-      if (!result.redirected) {
-        // Super admins vão direto para o dashboard
-        if (result.isSuperAdmin) {
-          router.push('/');
-          return;
-        }
+      if (usePinLogin) {
+        // PIN login
+        const response = await authService.loginWithPin({
+          userId: selectedAccount.id,
+          accessPin,
+        });
 
-        // Busca os tenants do usuário
-        const tenantsList = await refreshTenants();
+        // Save account for fast login
+        const u = response.user;
+        saveAccount({
+          id: u.id,
+          identifier: selectedAccount.identifier,
+          displayName: u.profile?.name
+            ? `${u.profile.name}${u.profile.surname ? ` ${u.profile.surname}` : ''}`
+            : u.username,
+          avatarUrl: u.profile?.avatarUrl,
+        });
 
-        if (tenantsList.length === 1) {
-          // Se só tem um tenant, seleciona automaticamente
-          await selectTenant(tenantsList[0].id);
-          router.push('/');
-        } else {
-          // Se tem 0 ou 2+ tenants, vai para a página de seleção
-          router.push('/select-tenant');
+        await handlePostLogin(response);
+      } else {
+        // Password login
+        const result = await login({
+          email: selectedAccount.identifier,
+          password,
+        });
+        if (!result.redirected) {
+          // Super admins vão direto para o dashboard
+          if (result.isSuperAdmin) {
+            router.push('/');
+            return;
+          }
+
+          // Busca os tenants do usuário
+          const tenantsList = await refreshTenants();
+
+          if (tenantsList.length === 1) {
+            await selectTenant(tenantsList[0].id);
+            router.push('/');
+          } else {
+            router.push('/select-tenant');
+          }
         }
       }
     } catch (err: unknown) {
+      setAccessPin('');
       setError(translateError(err));
       logger.error('Erro no login', err instanceof Error ? err : undefined);
     }
@@ -176,7 +240,9 @@ export default function FastLoginPage() {
             </h1>
             <p className="text-gray-600 dark:text-white/60">
               {selectedAccount
-                ? 'Digite sua senha'
+                ? usePinLogin
+                  ? 'Digite seu PIN de Acesso'
+                  : 'Digite sua senha para entrar'
                 : 'Selecione uma conta para continuar'}
             </p>
           </div>
@@ -351,31 +417,78 @@ export default function FastLoginPage() {
                     </button>
                   </div>
 
-                  {/* Password field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        autoFocus
-                        className="pl-12"
-                      />
+                  {/* Password / PIN field */}
+                  {usePinLogin ? (
+                    <div className="space-y-2">
+                      <Label>PIN de Acesso (6 dígitos)</Label>
+                      <div className="flex justify-center">
+                        <InputOTP
+                          maxLength={6}
+                          value={accessPin}
+                          onChange={setAccessPin}
+                          autoFocus
+                        >
+                          <InputOTPGroup>
+                            <InputOTPSlot index={0} masked />
+                            <InputOTPSlot index={1} masked />
+                            <InputOTPSlot index={2} masked />
+                            <InputOTPSlot index={3} masked />
+                            <InputOTPSlot index={4} masked />
+                            <InputOTPSlot index={5} masked />
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Senha</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          autoFocus
+                          className="pl-12"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Forgot password */}
-                  <div className="text-right">
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
+                  {/* Toggle PIN/Password + Forgot password */}
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUsePinLogin(!usePinLogin);
+                        setPassword('');
+                        setAccessPin('');
+                        setError('');
+                      }}
+                      className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
                     >
-                      Esqueceu a senha?
-                    </Link>
+                      {usePinLogin ? (
+                        <>
+                          <Lock className="w-3.5 h-3.5" />
+                          Usar senha
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="w-3.5 h-3.5" />
+                          Usar PIN de Acesso
+                        </>
+                      )}
+                    </button>
+                    {!usePinLogin && (
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
+                      >
+                        Esqueceu a senha?
+                      </Link>
+                    )}
                   </div>
 
                   {/* Buttons */}
@@ -393,7 +506,7 @@ export default function FastLoginPage() {
                     <Button
                       type="submit"
                       className="flex-1"
-                      disabled={isLoading || !password}
+                      disabled={isLoading || (usePinLogin ? accessPin.length !== 6 : !password)}
                       size="lg"
                     >
                       {isLoading ? 'Entrando...' : 'Entrar'}

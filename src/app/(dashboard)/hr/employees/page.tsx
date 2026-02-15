@@ -27,9 +27,10 @@ import {
   useEntityPage,
   type SortDirection,
 } from '@/core';
+import { usePermissions } from '@/hooks/use-permissions';
+import { logger } from '@/lib/logger';
 import type { Employee } from '@/types/hr';
 import {
-  ArrowLeft,
   Briefcase,
   Building2,
   ExternalLink,
@@ -40,8 +41,10 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
+import { useListCompanies } from '../companies/src';
+import { useListDepartments } from '../departments/src';
+import { useListPositions } from '../positions/src';
 import {
   createEmployee,
   CreateModal,
@@ -56,9 +59,6 @@ import {
   ViewModal,
   type CreateEmployeeWithUserRequest,
 } from './src';
-import { useListCompanies } from '../companies/src';
-import { useListDepartments } from '../departments/src';
-import { useListPositions } from '../positions/src';
 
 export default function EmployeesPage() {
   return (
@@ -70,9 +70,14 @@ export default function EmployeesPage() {
   );
 }
 
+type ActionButtonWithPermission = HeaderButton & {
+  permission?: string;
+};
+
 function EmployeesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hasPermission } = usePermissions();
 
   // ============================================================================
   // URL-BASED FILTERS
@@ -409,7 +414,7 @@ function EmployeesPageContent() {
           title={item.fullName}
           subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
-          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(posInfo
               ? [
@@ -477,7 +482,7 @@ function EmployeesPageContent() {
           title={item.fullName}
           subtitle={posInfo?.name || 'Sem cargo definido'}
           icon={Users}
-          iconBgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
+          iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
             ...(posInfo
               ? [
@@ -542,7 +547,7 @@ function EmployeesPageContent() {
     page.modals.open('create');
   }, [page.modals]);
 
-  const actionButtons: HeaderButton[] = useMemo(
+  const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
       {
         id: 'import-employees',
@@ -550,6 +555,7 @@ function EmployeesPageContent() {
         icon: Upload,
         onClick: handleImport,
         variant: 'outline',
+        permission: employeesConfig.permissions?.import,
       },
       {
         id: 'create-employee',
@@ -557,9 +563,20 @@ function EmployeesPageContent() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
+        permission: employeesConfig.permissions?.create,
       },
     ],
     [handleImport, handleCreate]
+  );
+
+  const visibleActionButtons = useMemo<HeaderButton[]>(
+    () =>
+      actionButtons
+        .filter(button =>
+          button.permission ? hasPermission(button.permission) : true
+        )
+        .map(({ permission, ...button }) => button),
+    [actionButtons, hasPermission]
   );
 
   // ============================================================================
@@ -576,10 +593,11 @@ function EmployeesPageContent() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            buttons={actionButtons}
-            onBack={() => router.back()}
-            backLabel="RH"
-            backIcon={ArrowLeft}
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Funcionarios', href: '/hr/employees' },
+            ]}
+            buttons={visibleActionButtons}
           />
 
           <Header
@@ -598,67 +616,6 @@ function EmployeesPageContent() {
             size="md"
           />
 
-          {/* Filters */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <FilterDropdown
-              label="Empresa"
-              icon={Building2}
-              options={availableCompanies.map(c => ({
-                id: c.id,
-                label: c.name,
-              }))}
-              selected={companyIds}
-              onSelectionChange={setCompanyFilter}
-              activeColor="emerald"
-              searchPlaceholder="Buscar empresa..."
-              emptyText="Nenhuma empresa encontrada."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todas as empresas',
-                onClick: () => router.push('/hr/companies'),
-                color: 'emerald',
-              }}
-            />
-            <FilterDropdown
-              label="Departamento"
-              icon={Building2}
-              options={availableDepartments.map(d => ({
-                id: d.id,
-                label: d.name,
-              }))}
-              selected={departmentIds}
-              onSelectionChange={setDepartmentFilter}
-              activeColor="blue"
-              searchPlaceholder="Buscar departamento..."
-              emptyText="Nenhum departamento encontrado."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todos os departamentos',
-                onClick: () => router.push('/hr/departments'),
-                color: 'blue',
-              }}
-            />
-            <FilterDropdown
-              label="Cargo"
-              icon={Briefcase}
-              options={availablePositions.map(p => ({
-                id: p.id,
-                label: p.name,
-              }))}
-              selected={positionIds}
-              onSelectionChange={setPositionFilter}
-              activeColor="violet"
-              searchPlaceholder="Buscar cargo..."
-              emptyText="Nenhum cargo encontrado."
-              footerAction={{
-                icon: ExternalLink,
-                label: 'Ver todos os cargos',
-                onClick: () => router.push('/hr/positions'),
-                color: 'violet',
-              }}
-            />
-          </div>
-
           {/* Grid */}
           {page.isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -676,6 +633,67 @@ function EmployeesPageContent() {
             <EntityGrid
               config={employeesConfig}
               items={displayedEmployees}
+              toolbarStart={
+                <>
+                  <FilterDropdown
+                    label="Empresa"
+                    icon={Building2}
+                    options={availableCompanies.map(c => ({
+                      id: c.id,
+                      label: c.name,
+                    }))}
+                    selected={companyIds}
+                    onSelectionChange={setCompanyFilter}
+                    activeColor="emerald"
+                    searchPlaceholder="Buscar empresa..."
+                    emptyText="Nenhuma empresa encontrada."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todas as empresas',
+                      onClick: () => router.push('/hr/companies'),
+                      color: 'emerald',
+                    }}
+                  />
+                  <FilterDropdown
+                    label="Departamento"
+                    icon={Building2}
+                    options={availableDepartments.map(d => ({
+                      id: d.id,
+                      label: d.name,
+                    }))}
+                    selected={departmentIds}
+                    onSelectionChange={setDepartmentFilter}
+                    activeColor="blue"
+                    searchPlaceholder="Buscar departamento..."
+                    emptyText="Nenhum departamento encontrado."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todos os departamentos',
+                      onClick: () => router.push('/hr/departments'),
+                      color: 'blue',
+                    }}
+                  />
+                  <FilterDropdown
+                    label="Cargo"
+                    icon={Briefcase}
+                    options={availablePositions.map(p => ({
+                      id: p.id,
+                      label: p.name,
+                    }))}
+                    selected={positionIds}
+                    onSelectionChange={setPositionFilter}
+                    activeColor="violet"
+                    searchPlaceholder="Buscar cargo..."
+                    emptyText="Nenhum cargo encontrado."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todos os cargos',
+                      onClick: () => router.push('/hr/positions'),
+                      color: 'violet',
+                    }}
+                  />
+                </>
+              }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={page.isLoading}

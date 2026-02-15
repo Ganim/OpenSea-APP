@@ -38,7 +38,7 @@ export const AdminTenantSchema = z.object({
   id: z.string().uuid('TenantId deve ser um UUID válido'),
   name: z.string().min(1, 'Nome é obrigatório'),
   slug: z.string().min(1, 'Slug é obrigatório'),
-  logoUrl: z.string().url('Logo deve ser uma URL válida').nullable(),
+  logoUrl: z.string().nullable(),
   status: TenantStatusEnum,
   settings: z.custom<TenantSettings>().optional().default({}),
   createdAt: z.coerce.date(),
@@ -129,7 +129,7 @@ export const AdminTenantUserSchema = z.object({
     .object({
       id: z.string().uuid(),
       email: z.string().email(),
-      username: z.string().optional(),
+      username: z.string(),
     })
     .optional(),
 });

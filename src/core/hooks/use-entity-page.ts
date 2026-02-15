@@ -185,7 +185,7 @@ export function useEntityPage<T extends BaseEntity>(
   // DADOS FILTRADOS
   // =============================================================================
 
-  const items = crud.items || [];
+  const items = Array.isArray(crud.items) ? crud.items : [];
 
   const filteredItems = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {

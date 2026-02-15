@@ -87,6 +87,7 @@ export interface ListEmployeesParams {
   positionId?: string;
   supervisorId?: string;
   companyId?: string;
+  unlinked?: boolean;
   includeDeleted?: boolean;
 }
 
@@ -108,6 +109,7 @@ export const employeesService = {
     if (params?.positionId) query.append('positionId', params.positionId);
     if (params?.supervisorId) query.append('supervisorId', params.supervisorId);
     if (params?.companyId) query.append('companyId', params.companyId);
+    if (params?.unlinked) query.append('unlinked', 'true');
 
     return apiClient.get<EmployeesResponse>(
       `/v1/hr/employees?${query.toString()}`
@@ -172,6 +174,31 @@ export const employeesService = {
     return apiClient.post<EmployeeResponse>(
       `/v1/hr/employees/${id}/create-user`,
       data
+    );
+  },
+
+  // POST /v1/hr/employees/:id/link-user
+  async linkUserToEmployee(
+    employeeId: string,
+    userId: string
+  ): Promise<EmployeeResponse> {
+    return apiClient.post<EmployeeResponse>(
+      `/v1/hr/employees/${employeeId}/link-user`,
+      { userId }
+    );
+  },
+
+  // GET /v1/hr/employees/by-user/:userId
+  async getEmployeeByUserId(userId: string): Promise<EmployeeResponse> {
+    return apiClient.get<EmployeeResponse>(
+      `/v1/hr/employees/by-user/${userId}`
+    );
+  },
+
+  // POST /v1/hr/employees/:id/unlink-user
+  async unlinkUserFromEmployee(employeeId: string): Promise<EmployeeResponse> {
+    return apiClient.post<EmployeeResponse>(
+      `/v1/hr/employees/${employeeId}/unlink-user`
     );
   },
 };

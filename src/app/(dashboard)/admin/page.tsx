@@ -61,17 +61,21 @@ const sections: {
         permission: RBAC_PERMISSIONS.GROUPS.LIST,
         countKey: 'groups',
       },
-      {
-        id: 'audit-logs',
-        title: 'Logs de Auditoria',
-        description: 'Histórico de ações e alterações no sistema',
-        icon: History,
-        href: '/admin/audit-logs',
-        gradient: 'from-amber-500 to-amber-600',
-        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-        permission: AUDIT_PERMISSIONS.LOGS.VIEW,
-      },
     ],
+  },
+];
+
+const heroBannerButtons: (CardItem & { label: string })[] = [
+  {
+    id: 'audit-logs',
+    title: 'Logs de Auditoria',
+    label: 'Logs de Auditoria',
+    description: 'Histórico de ações e alterações no sistema',
+    icon: History,
+    href: '/admin/overview/audit-logs',
+    gradient: 'from-amber-500 to-amber-600',
+    hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+    permission: AUDIT_PERMISSIONS.LOGS.VIEW,
   },
 ];
 
@@ -108,7 +112,14 @@ export default function AdminLandingPage() {
         description="Gerencie usuários, permissões e monitore a atividade do sistema."
         icon={Settings}
         iconGradient="from-purple-500 to-purple-600"
-        buttons={[]}
+        buttons={heroBannerButtons.map(btn => ({
+          id: btn.id,
+          label: btn.label,
+          icon: btn.icon,
+          href: btn.href,
+          gradient: btn.gradient,
+          permission: btn.permission,
+        }))}
         hasPermission={hasPermission}
       />
 

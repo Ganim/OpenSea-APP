@@ -411,89 +411,15 @@ export async function listUsersByGroup(
   groupId: string,
   includeExpired = false
 ): Promise<UserInGroup[]> {
-  try {
-    const params = new URLSearchParams();
-    if (includeExpired) params.append('includeExpired', 'true');
+  const params = new URLSearchParams();
+  if (includeExpired) params.append('includeExpired', 'true');
 
-    const queryString = params.toString();
-    const response = await apiClient.get<
-      | { users: UserInGroup[] }
-      | UserInGroup[]
-      | { data: UserInGroup[] }
-      | { userIds: string[] }
-    >(
-      `${API_ENDPOINTS.RBAC.GROUPS.USERS(groupId)}${queryString ? `?${queryString}` : ''}`
-    );
+  const queryString = params.toString();
+  const response = await apiClient.get<{ users: UserInGroup[] }>(
+    `${API_ENDPOINTS.RBAC.GROUPS.USERS(groupId)}${queryString ? `?${queryString}` : ''}`
+  );
 
-    // Handle { userIds: [...] } format (API returns only IDs, need to fetch user details)
-    if (response && 'userIds' in response && Array.isArray(response.userIds)) {
-      if (response.userIds.length === 0) {
-        return [];
-      }
-
-      // Fetch user details for each ID
-      const userDetailsPromises = response.userIds.map(
-        async (userId: string) => {
-          try {
-            const userResponse = await apiClient.get<{ user: UserInGroup }>(
-              API_ENDPOINTS.USERS.GET(userId)
-            );
-            const user = (userResponse as { user: UserInGroup }).user;
-            return {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              assignedAt: new Date().toISOString(),
-              expiresAt: null,
-            } as UserInGroup;
-          } catch (error) {
-            logger.error(
-              'Failed to fetch user details',
-              error instanceof Error ? error : new Error(String(error)),
-              {
-                userId,
-              }
-            );
-            return null;
-          }
-        }
-      );
-
-      const users = await Promise.all(userDetailsPromises);
-      return users.filter((u): u is UserInGroup => u !== null);
-    }
-
-    // Handle multiple response formats
-    if (Array.isArray(response)) {
-      return response;
-    }
-
-    if (response && 'users' in response && Array.isArray(response.users)) {
-      return response.users;
-    }
-
-    if (
-      response &&
-      'data' in response &&
-      Array.isArray((response as { data: UserInGroup[] }).data)
-    ) {
-      return (response as { data: UserInGroup[] }).data;
-    }
-
-    logger.debug('Unexpected response format from listUsersByGroup', {
-      responseKeys: response ? Object.keys(response) : null,
-    });
-    return [];
-  } catch (error) {
-    logger.error(
-      'Failed to fetch users for group',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        groupId,
-      }
-    );
-    throw error;
-  }
+  return response.users;
 }
 
 export async function removeGroupFromUser(

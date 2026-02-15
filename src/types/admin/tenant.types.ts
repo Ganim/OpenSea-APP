@@ -5,7 +5,7 @@ export interface UserTenant {
   logoUrl: string | null;
   status: string;
   role: string;
-  joinedAt: Date;
+  joinedAt: string;
 }
 
 export interface SelectTenantResponse {

@@ -109,6 +109,8 @@ export interface EntityGridProps<T extends BaseEntity> {
   itemsClassName?: string;
   /** Grid columns classes */
   gridColumns?: string;
+  /** Conteúdo renderizado no início da toolbar (ex: filtros) */
+  toolbarStart?: React.ReactNode;
 }
 
 // =============================================================================
@@ -146,6 +148,7 @@ export function EntityGrid<T extends BaseEntity>({
   className,
   itemsClassName,
   gridColumns = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+  toolbarStart,
 }: EntityGridProps<T>) {
   // Selection context (opcional)
   const selectionContext = useOptionalSelectionContext();
@@ -650,19 +653,25 @@ export function EntityGrid<T extends BaseEntity>({
 
   return (
     <div className={cn('entity-grid', className)}>
-      {/* Header: Count + View Toggle */}
-      {(showItemCount || showViewToggle) && (
-        <div className="flex items-center justify-between mb-6 select-none">
-          {showItemCount && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {items.length}{' '}
-              {items.length === 1
-                ? config.display.labels.singular
-                : config.display.labels.plural}
-              {selectedIds.size > 0 &&
-                ` · ${selectedIds.size} selecionado${selectedIds.size > 1 ? 's' : ''}`}
-            </p>
-          )}
+      {/* Header: Filters + Count + View Toggle */}
+      {(showItemCount || showViewToggle || toolbarStart) && (
+        <div className="flex items-center justify-between mb-4 select-none gap-4 flex-wrap">
+          {/* Left: Filters + Item count */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {toolbarStart}
+            {showItemCount && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                {items.length}{' '}
+                {items.length === 1
+                  ? config.display.labels.singular
+                  : config.display.labels.plural}
+                {selectedIds.size > 0 &&
+                  ` · ${selectedIds.size} selecionado${selectedIds.size > 1 ? 's' : ''}`}
+              </p>
+            )}
+          </div>
+
+          {/* Right: Sort + View toggle */}
           {showViewToggle && (
             <div className="flex items-center gap-3">
               {/* Sort Select */}

@@ -13,13 +13,7 @@ export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
   (
-    {
-      className,
-      variant = 'default',
-      hover = false,
-      children,
-      ...props
-    },
+    { className, variant = 'default', hover = false, children, ...props },
     ref
   ) => {
     const variants = {
@@ -27,7 +21,7 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
       subtle: 'central-glass-subtle',
       strong: 'central-glass-strong',
       gradient:
-        'central-glass bg-gradient-to-br from-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*1.5))] to-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
+        'central-glass bg-linear-to-br from-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*1.5))] to-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
     };
 
     return (

@@ -90,7 +90,7 @@ export default function CostCenterDetailPage({
       {/* Cost Center Info Card */}
       <Card className="p-4 sm:p-6">
         <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
-          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shrink-0">
+          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-purple-500 to-pink-600 shrink-0">
             <Building2 className="md:h-8 md:w-8 text-white" />
           </div>
           <div className="flex justify-between flex-1 gap-4 flex-row items-center">

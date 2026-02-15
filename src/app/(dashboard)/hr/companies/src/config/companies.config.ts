@@ -1,3 +1,4 @@
+import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Company } from '@/types/hr';
 import { Building2, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -216,12 +217,12 @@ export const companiesConfig = defineEntityConfig<Company>()({
   },
 
   permissions: {
-    view: 'companies.view',
-    create: 'companies.create',
-    update: 'companies.update',
-    delete: 'companies.delete',
-    export: 'companies.export',
-    import: 'companies.import',
+    view: HR_PERMISSIONS.COMPANIES.READ,
+    create: HR_PERMISSIONS.COMPANIES.CREATE,
+    update: HR_PERMISSIONS.COMPANIES.UPDATE,
+    delete: HR_PERMISSIONS.COMPANIES.DELETE,
+    export: HR_PERMISSIONS.COMPANIES.MANAGE,
+    import: HR_PERMISSIONS.COMPANIES.MANAGE,
   },
 
   features: {
@@ -253,7 +254,7 @@ export const companiesConfig = defineEntityConfig<Company>()({
         label: 'Nova Empresa',
         icon: Plus,
         variant: 'default',
-        permission: 'companies.create',
+        permission: HR_PERMISSIONS.COMPANIES.CREATE,
         onClick: () => {},
       },
     ],
@@ -263,28 +264,28 @@ export const companiesConfig = defineEntityConfig<Company>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'companies.view',
+        permission: HR_PERMISSIONS.COMPANIES.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'companies.update',
+        permission: HR_PERMISSIONS.COMPANIES.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'companies.create',
+        permission: HR_PERMISSIONS.COMPANIES.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'companies.delete',
+        permission: HR_PERMISSIONS.COMPANIES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Empresa',
         confirmMessage: 'Tem certeza que deseja excluir esta empresa?',
@@ -297,7 +298,7 @@ export const companiesConfig = defineEntityConfig<Company>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'companies.delete',
+        permission: HR_PERMISSIONS.COMPANIES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Empresas',
         confirmMessage:

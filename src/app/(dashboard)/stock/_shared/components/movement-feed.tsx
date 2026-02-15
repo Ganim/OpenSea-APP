@@ -26,18 +26,28 @@ import type {
 // ============================================
 
 const movementTypeIcons: Record<MovementType, React.ElementType> = {
-  ENTRY: ArrowDownCircle,
-  EXIT: ArrowUpCircle,
+  PURCHASE: ArrowDownCircle,
+  CUSTOMER_RETURN: ArrowDownCircle,
+  SALE: ArrowUpCircle,
+  PRODUCTION: ArrowUpCircle,
+  SAMPLE: ArrowUpCircle,
+  LOSS: ArrowUpCircle,
+  SUPPLIER_RETURN: ArrowUpCircle,
   TRANSFER: ArrowRightCircle,
-  ADJUSTMENT: RefreshCcw,
+  INVENTORY_ADJUSTMENT: RefreshCcw,
   ZONE_RECONFIGURE: RotateCcw,
 };
 
 const movementTypeColors: Record<MovementType, string> = {
-  ENTRY: 'text-green-500',
-  EXIT: 'text-red-500',
+  PURCHASE: 'text-green-500',
+  CUSTOMER_RETURN: 'text-green-500',
+  SALE: 'text-red-500',
+  PRODUCTION: 'text-red-500',
+  SAMPLE: 'text-gray-500',
+  LOSS: 'text-red-500',
+  SUPPLIER_RETURN: 'text-red-500',
   TRANSFER: 'text-blue-500',
-  ADJUSTMENT: 'text-yellow-500',
+  INVENTORY_ADJUSTMENT: 'text-yellow-500',
   ZONE_RECONFIGURE: 'text-purple-500',
 };
 

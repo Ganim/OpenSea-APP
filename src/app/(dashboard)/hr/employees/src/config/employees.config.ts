@@ -1,3 +1,4 @@
+import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Employee } from '@/types/hr';
 import { Copy, Edit, Eye, Plus, Trash2, Users } from 'lucide-react';
@@ -104,12 +105,12 @@ export const employeesConfig = defineEntityConfig<Employee>()({
   },
 
   permissions: {
-    view: 'employees.view',
-    create: 'employees.create',
-    update: 'employees.update',
-    delete: 'employees.delete',
-    export: 'employees.export',
-    import: 'employees.import',
+    view: HR_PERMISSIONS.EMPLOYEES.READ,
+    create: HR_PERMISSIONS.EMPLOYEES.CREATE,
+    update: HR_PERMISSIONS.EMPLOYEES.UPDATE,
+    delete: HR_PERMISSIONS.EMPLOYEES.DELETE,
+    export: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+    import: HR_PERMISSIONS.EMPLOYEES.MANAGE,
   },
 
   features: {
@@ -141,7 +142,7 @@ export const employeesConfig = defineEntityConfig<Employee>()({
         label: 'Novo Funcionário',
         icon: Plus,
         variant: 'default',
-        permission: 'employees.create',
+        permission: HR_PERMISSIONS.EMPLOYEES.CREATE,
         onClick: () => {},
       },
     ],
@@ -151,28 +152,28 @@ export const employeesConfig = defineEntityConfig<Employee>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'employees.view',
+        permission: HR_PERMISSIONS.EMPLOYEES.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'employees.update',
+        permission: HR_PERMISSIONS.EMPLOYEES.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'employees.create',
+        permission: HR_PERMISSIONS.EMPLOYEES.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'employees.delete',
+        permission: HR_PERMISSIONS.EMPLOYEES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Funcionário',
         confirmMessage: 'Tem certeza que deseja excluir este funcionário?',
@@ -185,7 +186,7 @@ export const employeesConfig = defineEntityConfig<Employee>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'employees.delete',
+        permission: HR_PERMISSIONS.EMPLOYEES.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Funcionários',
         confirmMessage:

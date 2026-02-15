@@ -3,6 +3,7 @@ export { Header } from './header';
 export { Navbar } from './navbar';
 export { NavigationMenu } from './navigation-menu';
 export { PageActionBar } from './page-action-bar';
+export { PageBreadcrumb } from './page-breadcrumb';
 export { PageLayout } from './page-layout';
 export { SearchBar } from './search-bar';
 export { UserDropdown } from './user-dropdown';

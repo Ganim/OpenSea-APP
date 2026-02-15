@@ -190,7 +190,7 @@ Sidebar com glassmorphism e indicadores de página ativa.
 
 ### Background Base
 
-- Fundo: `bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900`
+- Fundo: `bg-linear-to-br from-slate-900 via-purple-900 to-slate-900`
 - Overlays: Gradientes com 20% de opacidade
 
 ## 📁 Estrutura de Arquivos
@@ -249,14 +249,14 @@ components/central/
 // Em qualquer componente
 const myGradient = 'from-indigo-500/20 to-indigo-600/20';
 
-<div className={`bg-gradient-to-br ${myGradient}`}>{/* Conteúdo */}</div>;
+<div className={`bg-linear-to-br ${myGradient}`}>{/* Conteúdo */}</div>;
 ```
 
 ### Criar Nova Variante de Card
 
 ```tsx
 <GlassCard
-  className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20"
+  className="bg-linear-to-br from-emerald-500/20 to-emerald-600/20"
   hover
 >
   {/* Conteúdo customizado */}

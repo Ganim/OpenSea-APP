@@ -109,6 +109,8 @@ export interface EntityCardProps {
   icon?: LucideIcon | ComponentType<{ className?: string }>;
   /** Cor de fundo do ícone (Tailwind classes) */
   iconBgColor?: string;
+  /** Estilo inline para o fundo do ícone (ex: gradient com cor dinâmica) */
+  iconBgStyle?: React.CSSProperties;
   /** URL da imagem/thumbnail */
   thumbnail?: string;
   /** Placeholder para imagem quando não há thumbnail */
@@ -224,6 +226,7 @@ interface IconRendererProps {
   variant: EntityCardVariant;
   icon?: LucideIcon | ComponentType<{ className?: string }>;
   iconBgColor: string;
+  iconBgStyle?: React.CSSProperties;
   thumbnail?: string;
   thumbnailFallback?: ReactNode;
   title: string;
@@ -234,6 +237,7 @@ function IconRenderer({
   variant,
   icon: Icon,
   iconBgColor,
+  iconBgStyle,
   thumbnail,
   thumbnailFallback,
   title,
@@ -251,7 +255,13 @@ function IconRenderer({
     compact: 'w-4 h-4',
   };
 
-  const bgColor = isSelected ? 'bg-blue-600' : iconBgColor;
+  // When selected, always use blue; when iconBgStyle is provided, use it instead of class-based bg
+  const useInlineStyle = !isSelected && iconBgStyle;
+  const bgColor = isSelected
+    ? 'bg-blue-600'
+    : !iconBgStyle
+      ? iconBgColor
+      : undefined;
 
   if (thumbnail) {
     return (
@@ -261,6 +271,7 @@ function IconRenderer({
           'overflow-hidden shrink-0 flex items-center justify-center p-2',
           bgColor
         )}
+        style={useInlineStyle ? iconBgStyle : undefined}
       >
         <Image
           src={thumbnail}
@@ -281,6 +292,7 @@ function IconRenderer({
           'flex items-center justify-center text-white shrink-0',
           bgColor
         )}
+        style={useInlineStyle ? iconBgStyle : undefined}
       >
         <Icon
           className={cn(innerSizeClasses[variant], 'brightness-0 invert')}
@@ -297,6 +309,7 @@ function IconRenderer({
           'flex items-center justify-center shrink-0',
           bgColor
         )}
+        style={useInlineStyle ? iconBgStyle : undefined}
       >
         <div className="flex items-center justify-center brightness-0 invert">
           {thumbnailFallback}
@@ -500,7 +513,8 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
       subtitle,
       metadata,
       icon,
-      iconBgColor = 'bg-gradient-to-br from-blue-500 to-purple-600',
+      iconBgColor = 'bg-linear-to-br from-blue-500 to-purple-600',
+      iconBgStyle,
       thumbnail,
       thumbnailFallback,
       badges = [],
@@ -576,6 +590,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
                   variant={variant}
                   icon={icon}
                   iconBgColor={iconBgColor}
+                  iconBgStyle={iconBgStyle}
                   thumbnail={thumbnail}
                   thumbnailFallback={thumbnailFallback}
                   title={title}

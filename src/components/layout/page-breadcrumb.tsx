@@ -13,7 +13,7 @@ import {
 
 export interface BreadcrumbItemData {
   label: string;
-  href: string;
+  href?: string;
 }
 
 interface PageBreadcrumbProps {
@@ -44,7 +44,7 @@ export function PageBreadcrumb({ items }: PageBreadcrumbProps) {
             <Fragment key={item.href + item.label}>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href={item.href}>{item.label}</Link>
+                  <Link href={item.href ?? '#'}>{item.label}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

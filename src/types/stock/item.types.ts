@@ -21,12 +21,58 @@ export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
   DISPOSED: 'Descartado',
 };
 export type MovementType =
-  | 'ENTRY'
-  | 'EXIT'
+  | 'PURCHASE'
+  | 'CUSTOMER_RETURN'
+  | 'SALE'
+  | 'PRODUCTION'
+  | 'SAMPLE'
+  | 'LOSS'
+  | 'SUPPLIER_RETURN'
   | 'TRANSFER'
-  | 'ADJUSTMENT'
+  | 'INVENTORY_ADJUSTMENT'
   | 'ZONE_RECONFIGURE';
-export type ExitMovementType = 'SALE' | 'PRODUCTION' | 'SAMPLE' | 'LOSS';
+
+export type EntryMovementType = 'PURCHASE' | 'CUSTOMER_RETURN';
+
+export type ExitMovementType =
+  | 'SALE'
+  | 'PRODUCTION'
+  | 'SAMPLE'
+  | 'LOSS'
+  | 'SUPPLIER_RETURN';
+
+export const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
+  PURCHASE: 'Compra',
+  CUSTOMER_RETURN: 'Devolução de Cliente',
+  SALE: 'Venda',
+  PRODUCTION: 'Utilização',
+  SAMPLE: 'Amostra',
+  LOSS: 'Perda',
+  SUPPLIER_RETURN: 'Devolução a Fornecedor',
+  TRANSFER: 'Transferência',
+  INVENTORY_ADJUSTMENT: 'Ajuste de Inventário',
+  ZONE_RECONFIGURE: 'Reconfiguração',
+};
+
+export const STOCK_INCREASE_TYPES: MovementType[] = [
+  'PURCHASE',
+  'CUSTOMER_RETURN',
+];
+export const STOCK_DECREASE_TYPES: MovementType[] = [
+  'SALE',
+  'PRODUCTION',
+  'SAMPLE',
+  'LOSS',
+  'SUPPLIER_RETURN',
+];
+
+export function isStockIncrease(type: MovementType): boolean {
+  return STOCK_INCREASE_TYPES.includes(type);
+}
+
+export function isStockDecrease(type: MovementType): boolean {
+  return STOCK_DECREASE_TYPES.includes(type);
+}
 export type MovementStatus =
   | 'PENDING_APPROVAL'
   | 'COMPLETED'
@@ -167,6 +213,7 @@ export interface RegisterItemEntryRequest {
   variantId: string;
   binId?: string;
   quantity: number;
+  movementType?: EntryMovementType;
   uniqueCode?: string;
   unitCost?: number;
   attributes?: Record<string, unknown>;
@@ -257,6 +304,7 @@ export interface ItemMovement {
   approvedBy?: string | null;
   salesOrderId?: string | null;
   createdAt: Date;
+  user?: { id: string; name: string } | null;
 }
 
 export interface ItemMovementsQuery {

@@ -353,6 +353,9 @@
   --sphere-2-opacity: 0.1;
   --sphere-3: var(--os-blue-500);
   --sphere-3-opacity: 0.05;
+
+  /* === COMPONENT OVERRIDES (Dark) === */
+  --btn-outline-border: var(--color-border);
 }
 
 /* ===========================================
@@ -385,7 +388,7 @@
   --btn-outline-bg: transparent;
   --btn-outline-bg-hover: var(--color-background-muted);
   --btn-outline-text: var(--color-foreground);
-  --btn-outline-border: var(--color-border);
+  --btn-outline-border: var(--os-gray-300);
 
   /* Button - Ghost */
   --btn-ghost-bg: transparent;

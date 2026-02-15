@@ -4,6 +4,7 @@
  */
 
 import type { BaseEntity } from '@/core/types';
+import { useAuth } from '@/contexts/auth-context';
 import { logger } from '@/lib/logger';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
@@ -136,6 +137,7 @@ export function useEntityCrud<T extends BaseEntity>(
   config: EntityCrudConfig<T>
 ): UseEntityCrudReturn<T> {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
   const silentModeRef = useRef(false);
 
   const {
@@ -168,6 +170,7 @@ export function useEntityCrud<T extends BaseEntity>(
   } = useQuery({
     queryKey,
     queryFn: listFn,
+    enabled: isAuthenticated,
   });
 
   // =============================================================================

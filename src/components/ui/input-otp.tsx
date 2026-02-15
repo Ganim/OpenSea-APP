@@ -9,13 +9,25 @@ import { cn } from '@/lib/utils';
 function InputOTP({
   className,
   containerClassName,
+  maxLength,
+  onChange,
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
   containerClassName?: string;
 }) {
+  const handleChange = React.useCallback(
+    (value: string) => {
+      const clamped = maxLength ? value.slice(0, maxLength) : value;
+      onChange?.(clamped);
+    },
+    [maxLength, onChange]
+  );
+
   return (
     <OTPInput
       data-slot="input-otp"
+      maxLength={maxLength}
+      onChange={handleChange}
       containerClassName={cn(
         'flex items-center gap-2 has-disabled:opacity-50',
         containerClassName

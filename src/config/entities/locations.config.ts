@@ -3,6 +3,7 @@
  * Configuração completa da entidade de localizações
  */
 
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { ApiLocation } from '@/types/stock';
 import { Copy, Edit, Eye, MapPin, Plus, Trash2 } from 'lucide-react';
@@ -225,12 +226,12 @@ export const locationsConfig = defineEntityConfig<ApiLocation>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'locations.view',
-    create: 'locations.create',
-    update: 'locations.update',
-    delete: 'locations.delete',
-    export: 'locations.export',
-    import: 'locations.import',
+    view: STOCK_PERMISSIONS.LOCATIONS.READ,
+    create: STOCK_PERMISSIONS.LOCATIONS.CREATE,
+    update: STOCK_PERMISSIONS.LOCATIONS.UPDATE,
+    delete: STOCK_PERMISSIONS.LOCATIONS.DELETE,
+    export: STOCK_PERMISSIONS.LOCATIONS.MANAGE,
+    import: STOCK_PERMISSIONS.LOCATIONS.MANAGE,
   },
 
   // ======================== FEATURES ========================
@@ -264,7 +265,7 @@ export const locationsConfig = defineEntityConfig<ApiLocation>()({
         label: 'Nova Localização',
         icon: Plus,
         variant: 'default',
-        permission: 'locations.create',
+        permission: STOCK_PERMISSIONS.LOCATIONS.CREATE,
         onClick: () => {},
       },
     ],
@@ -274,28 +275,28 @@ export const locationsConfig = defineEntityConfig<ApiLocation>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'locations.view',
+        permission: STOCK_PERMISSIONS.LOCATIONS.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'locations.update',
+        permission: STOCK_PERMISSIONS.LOCATIONS.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'locations.create',
+        permission: STOCK_PERMISSIONS.LOCATIONS.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'locations.delete',
+        permission: STOCK_PERMISSIONS.LOCATIONS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Localização',
         confirmMessage: 'Tem certeza que deseja excluir esta localização?',
@@ -308,7 +309,7 @@ export const locationsConfig = defineEntityConfig<ApiLocation>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'locations.delete',
+        permission: STOCK_PERMISSIONS.LOCATIONS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Localizações',
         confirmMessage:

@@ -3,6 +3,7 @@
  * Configuração completa da entidade de cargos
  */
 
+import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Position } from '@/types/hr';
 import { Briefcase, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -134,12 +135,12 @@ export const positionsConfig = defineEntityConfig<Position>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: 'positions.view',
-    create: 'positions.create',
-    update: 'positions.update',
-    delete: 'positions.delete',
-    export: 'positions.export',
-    import: 'positions.import',
+    view: HR_PERMISSIONS.POSITIONS.READ,
+    create: HR_PERMISSIONS.POSITIONS.CREATE,
+    update: HR_PERMISSIONS.POSITIONS.UPDATE,
+    delete: HR_PERMISSIONS.POSITIONS.DELETE,
+    export: HR_PERMISSIONS.POSITIONS.MANAGE,
+    import: HR_PERMISSIONS.POSITIONS.MANAGE,
   },
 
   // ======================== FEATURES ========================
@@ -173,7 +174,7 @@ export const positionsConfig = defineEntityConfig<Position>()({
         label: 'Novo Cargo',
         icon: Plus,
         variant: 'default',
-        permission: 'positions.create',
+        permission: HR_PERMISSIONS.POSITIONS.CREATE,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -183,28 +184,28 @@ export const positionsConfig = defineEntityConfig<Position>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: 'positions.view',
+        permission: HR_PERMISSIONS.POSITIONS.READ,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: 'positions.update',
+        permission: HR_PERMISSIONS.POSITIONS.UPDATE,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: 'positions.create',
+        permission: HR_PERMISSIONS.POSITIONS.CREATE,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: 'positions.delete',
+        permission: HR_PERMISSIONS.POSITIONS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Cargo',
         confirmMessage: 'Tem certeza que deseja excluir este cargo?',
@@ -217,7 +218,7 @@ export const positionsConfig = defineEntityConfig<Position>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: 'positions.delete',
+        permission: HR_PERMISSIONS.POSITIONS.DELETE,
         confirm: true,
         confirmTitle: 'Excluir Cargos',
         confirmMessage:
