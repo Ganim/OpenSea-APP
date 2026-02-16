@@ -525,10 +525,6 @@ export default function PrintStudioPage() {
   );
 
   const renderGridCard = (item: LabelTemplate, isSelected: boolean) => {
-    const sizePreset = LABEL_SIZE_PRESETS.find(
-      p => p.width === item.width && p.height === item.height
-    );
-
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -556,14 +552,6 @@ export default function PrintStudioPage() {
               label: item.isSystem ? 'Sistema' : 'Customizado',
               variant: item.isSystem ? 'secondary' : 'outline',
             },
-            ...(sizePreset
-              ? [
-                  {
-                    label: sizePreset.name,
-                    variant: 'outline' as const,
-                  },
-                ]
-              : []),
             {
               label: `${item.width}mm x ${item.height}mm`,
               variant: 'outline' as const,
@@ -581,10 +569,6 @@ export default function PrintStudioPage() {
   };
 
   const renderListCard = (item: LabelTemplate, isSelected: boolean) => {
-    const sizePreset = LABEL_SIZE_PRESETS.find(
-      p => p.width === item.width && p.height === item.height
-    );
-
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -603,14 +587,6 @@ export default function PrintStudioPage() {
               label: item.isSystem ? 'Sistema' : 'Customizado',
               variant: item.isSystem ? 'secondary' : 'outline',
             },
-            ...(sizePreset
-              ? [
-                  {
-                    label: sizePreset.name,
-                    variant: 'outline' as const,
-                  },
-                ]
-              : []),
             {
               label: `${item.width}mm x ${item.height}mm`,
               variant: 'outline' as const,
@@ -718,14 +694,14 @@ export default function PrintStudioPage() {
               }}
               toolbarStart={
                 <FilterDropdown
-                  label="Tamanho"
+                  label="Dimensões"
                   icon={Ruler}
                   options={sizeFilterOptions}
                   selected={selectedSizes}
                   onSelectionChange={setSelectedSizes}
                   activeColor="blue"
-                  searchPlaceholder="Buscar tamanho..."
-                  emptyText="Nenhum tamanho encontrado"
+                  searchPlaceholder="Buscar dimensões..."
+                  emptyText="Nenhuma dimensão encontrada"
                 />
               }
             />

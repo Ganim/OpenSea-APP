@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { CareIconInline } from '@/components/care/care-icon-inline';
 import type {
   FieldElement,
   TextStyle,
@@ -123,6 +124,12 @@ export const ENTITY_FIELD_REGISTRIES: Record<EntityType, DataFieldCategory[]> =
             path: 'product.unitFull',
             label: 'Unidade (completa)',
             example: 'metros',
+          },
+          {
+            path: 'product.careInstructions',
+            label: 'Instruções de Cuidado',
+            example: 'WASH_30,DO_NOT_BLEACH,IRON_150',
+            description: 'Ícones de cuidados têxteis (ISO 3758)',
           },
         ],
       },
@@ -643,6 +650,72 @@ export function FieldElementRenderer({
 }: FieldElementRendererProps) {
   const { fieldConfig, label, valueStyle } = element;
 
+  // ==========================================
+  // Special rendering: Care Instructions
+  // ==========================================
+  const isCareField =
+    fieldConfig.type === 'simple' &&
+    fieldConfig.dataPath === 'product.careInstructions';
+
+  if (isCareField) {
+    const defaultCodes = [
+      'WASH_30',
+      'DO_NOT_BLEACH',
+      'TUMBLE_DRY_NORMAL',
+      'IRON_150',
+      'DO_NOT_DRYCLEAN',
+    ];
+    let codes: string[] = defaultCodes;
+
+    if (previewData) {
+      const careValue = resolvePath(previewData, 'product.careInstructions');
+      if (typeof careValue === 'string' && careValue.trim()) {
+        codes = careValue
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      } else if (Array.isArray(careValue) && careValue.length > 0) {
+        codes = careValue.map(String);
+      }
+    }
+
+    const iconSizePx = mmToPx(
+      Math.min(
+        element.height * 0.7,
+        (element.width / Math.max(codes.length, 1)) * 0.85
+      ),
+      zoom
+    );
+
+    return (
+      <div className="w-full h-full relative">
+        <div
+          className="w-full h-full flex items-center justify-center flex-wrap"
+          style={{ padding: mmToPx(0.5, zoom), gap: mmToPx(0.5, zoom) }}
+        >
+          {codes.map((code, i) => (
+            <CareIconInline
+              key={`${code}-${i}`}
+              code={code}
+              size={iconSizePx}
+              color={valueStyle.color || '#000000'}
+            />
+          ))}
+        </div>
+        {/* Badge indicador */}
+        <div
+          className="absolute top-0 right-0 flex items-center gap-0.5 px-1 py-0.5 bg-blue-500 text-white rounded-bl"
+          style={{ fontSize: Math.max(8, mmToPx(1.5, zoom)) }}
+        >
+          <FieldTypeIcon type={fieldConfig.type} />
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // Standard field rendering
+  // ==========================================
   const previewValue = getPreviewValue(fieldConfig, previewData);
   const valueFontSizePx = mmToPx(valueStyle.fontSize, zoom);
 

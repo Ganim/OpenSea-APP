@@ -5,8 +5,15 @@
  * Página de edição de etiqueta com Label Studio Editor
  */
 
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 import type {
   LabelStudioSaveData,
   LabelStudioTemplate,
@@ -17,7 +24,7 @@ import {
   useUpdateLabelTemplate,
 } from '@/hooks/stock/use-label-templates';
 import { logger } from '@/lib/logger';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Tag } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import React, {
@@ -177,133 +184,171 @@ export default function EditLabelStudioPage() {
     }
   };
 
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
   if (isLoading) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <Skeleton className="w-64 h-8 mb-4 mx-auto" />
-          <Skeleton className="w-96 h-96" />
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Label Studio', href: '/print/studio' },
+              { label: 'Editar' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (error || !template) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            Template não encontrado
-          </h2>
-          <p className="text-muted-foreground mb-4">
-            O template que você está tentando editar não existe ou foi removido.
-          </p>
-          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para Studio
-          </Button>
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Label Studio', href: '/print/studio' },
+              { label: 'Editar' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Template não encontrado
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              O template que você está tentando editar não existe ou foi
+              removido.
+            </p>
+            <Button onClick={() => router.push('/print/studio')}>
+              Voltar para Studio
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (template.isSystem) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Template do Sistema</h2>
-          <p className="text-muted-foreground mb-4">
-            Templates do sistema não podem ser editados. Você pode duplicá-lo
-            para criar uma versão customizada.
-          </p>
-          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para Studio
-          </Button>
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Label Studio', href: '/print/studio' },
+              { label: template.name },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">Template do Sistema</h2>
+            <p className="text-muted-foreground mb-6">
+              Templates do sistema não podem ser editados. Você pode duplicá-lo
+              para criar uma versão customizada.
+            </p>
+            <Button onClick={() => router.push('/print/studio')}>
+              Voltar para Studio
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
   // Not a Label Studio template
   if (!isLabelStudio || !labelStudioTemplate) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Template incompatível</h2>
-          <p className="text-muted-foreground mb-4">
-            Este template não foi criado com o Label Studio e não pode ser
-            editado aqui.
-          </p>
-          <Button variant="ghost" onClick={() => router.push('/print/studio')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para Studio
-          </Button>
-        </div>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Label Studio', href: '/print/studio' },
+              { label: template.name },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Template incompatível
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Este template não foi criado com o Label Studio e não pode ser
+              editado aqui.
+            </p>
+            <Button onClick={() => router.push('/print/studio')}>
+              Voltar para Studio
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
+  const actionButtons = [
+    {
+      id: 'save',
+      title: isPending ? 'Salvando...' : 'Salvar',
+      icon: Save,
+      onClick: handleHeaderSave,
+      disabled: isPending,
+    },
+  ];
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] overflow-hidden">
-      {/* Page Header */}
-      <div className="flex items-center justify-between px-4 py-2 mb-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/print/studio')}
-            className="gap-2 text-slate-600 dark:text-slate-400"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Label Studio
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={handleHeaderSave}
-            disabled={isPending}
-            className="gap-2"
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Salvar
-          </Button>
-        </div>
-      </div>
+    <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Label Studio', href: '/print/studio' },
+            { label: template.name, href: `/print/studio/label/${templateId}` },
+            { label: 'Editar' },
+          ]}
+          buttons={actionButtons}
+        />
 
-      {/* Editable Title */}
-      <div className="px-4 py-2 mb-4">
-        {isEditingTitle ? (
-          <input
-            ref={titleInputRef}
-            value={templateName}
-            onChange={e => setTemplateName(e.target.value)}
-            onBlur={handleTitleBlur}
-            onKeyDown={handleTitleKeyDown}
-            className="text-3xl font-semibold bg-transparent border-none outline-none text-slate-900 dark:text-slate-100 w-full"
-            placeholder="Nome da etiqueta"
-          />
-        ) : (
-          <button
-            onClick={() => setIsEditingTitle(true)}
-            className="group cursor-pointer flex items-end gap-4 text-3xl font-semibold text-slate-900 dark:text-white transition-colors text-left"
-            title="Clique para editar o nome"
-          >
-            {templateName || 'Nova Etiqueta'}
-            <div className="text-sm text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              <PiPencilSimpleLineDuotone className="h-6 w-6" />
-            </div>
-          </button>
-        )}
-      </div>
+        {/* Editable Title */}
+        <div className="py-2">
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={templateName}
+              onChange={e => setTemplateName(e.target.value)}
+              onBlur={handleTitleBlur}
+              onKeyDown={handleTitleKeyDown}
+              className="text-3xl font-semibold bg-transparent border-none outline-none text-slate-900 dark:text-slate-100 w-full"
+              placeholder="Nome da etiqueta"
+            />
+          ) : (
+            <button
+              onClick={() => setIsEditingTitle(true)}
+              className="group cursor-pointer flex items-end gap-4 text-3xl font-semibold text-slate-900 dark:text-white transition-colors text-left"
+              title="Clique para editar o nome"
+            >
+              {templateName || 'Nova Etiqueta'}
+              <div className="text-sm text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <PiPencilSimpleLineDuotone className="h-6 w-6" />
+              </div>
+            </button>
+          )}
+        </div>
+      </PageHeader>
 
-      {/* Editor Card */}
-      <div className="flex-1 p-3 overflow-hidden">
+      <PageBody className="flex-1 min-h-0 pb-3 overflow-hidden">
         <div className="h-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
           <LabelStudioEditor
             template={labelStudioTemplate}
@@ -315,7 +360,7 @@ export default function EditLabelStudioPage() {
             className="h-full"
           />
         </div>
-      </div>
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }

@@ -5,25 +5,27 @@
 
 'use client';
 
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
-  LABEL_SIZE_PRESETS,
   LabelStudioEditor,
   buildSamplePreviewData,
   useEditorStore,
 } from '@/core/print-queue/editor';
 import type { LabelStudioTemplate } from '@/core/print-queue/editor';
 import { TestPrintModal } from '@/core/print-queue/components/test-print-modal';
+import { useLabelTemplate } from '@/hooks/stock/use-label-templates';
 import {
-  useLabelTemplate,
-  useDuplicateLabelTemplate,
-} from '@/hooks/stock/use-label-templates';
-import {
-  ArrowLeft,
-  Copy,
+  Calendar,
+  Clock,
   Download,
   Edit,
   Eye,
@@ -79,8 +81,6 @@ export default function ViewLabelTemplatePage() {
   const templateId = params.id as string;
 
   const { data, isLoading, error } = useLabelTemplate(templateId);
-  const { mutateAsync: duplicateTemplate, isPending: isDuplicating } =
-    useDuplicateLabelTemplate();
 
   const [showPreview, setShowPreview] = useState(true);
   const [testPrintOpen, setTestPrintOpen] = useState(false);
@@ -99,7 +99,6 @@ export default function ViewLabelTemplatePage() {
   // Toggle preview data (mock data in field elements)
   useEffect(() => {
     if (!studioTemplate) return;
-    // Small delay to ensure store is initialized after LabelStudioEditor mounts
     const timer = setTimeout(() => {
       if (showPreview) {
         useEditorStore.getState().setPreviewData(buildSamplePreviewData());
@@ -110,24 +109,9 @@ export default function ViewLabelTemplatePage() {
     return () => clearTimeout(timer);
   }, [showPreview, studioTemplate]);
 
-  const handleBack = useCallback(() => {
-    router.push('/print/studio');
-  }, [router]);
-
   const handleEdit = useCallback(() => {
     router.push(`/print/studio/label/${templateId}/edit`);
   }, [router, templateId]);
-
-  const handleDuplicate = useCallback(async () => {
-    if (!template) return;
-    const result = await duplicateTemplate({
-      id: templateId,
-      newName: `${template.name} (Cópia)`,
-    });
-    if (result?.template?.id) {
-      router.push(`/print/studio/label/${result.template.id}/edit`);
-    }
-  }, [duplicateTemplate, templateId, template, router]);
 
   const handleExport = useCallback(() => {
     if (!template) return;
@@ -157,161 +141,181 @@ export default function ViewLabelTemplatePage() {
     }
   }, [template]);
 
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[{ label: 'Label Studio', href: '/print/studio' }]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
   if (error || !template) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-12 text-center">
-          <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Template não encontrado
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            O template que você está procurando não existe ou foi removido.
-          </p>
-          <Button onClick={handleBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Studio
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[{ label: 'Label Studio', href: '/print/studio' }]}
+          />
+        </PageHeader>
+        <PageBody>
+          <Card className="bg-white/5 p-12 text-center">
+            <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">
+              Template não encontrado
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              O template que você está procurando não existe ou foi removido.
+            </p>
+            <Button onClick={() => router.push('/print/studio')}>
+              Voltar para Studio
+            </Button>
+          </Card>
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  const sizePreset = LABEL_SIZE_PRESETS.find(
-    p => p.width === template.width && p.height === template.height
-  );
+  const actionButtons = [
+    {
+      id: 'export',
+      title: 'Exportar',
+      icon: Download,
+      onClick: handleExport,
+      variant: 'outline' as const,
+    },
+    ...(isStudioTemplate
+      ? [
+          {
+            id: 'test-print',
+            title: 'Imprimir Teste',
+            icon: Printer,
+            onClick: () => setTestPrintOpen(true),
+            variant: 'outline' as const,
+          },
+        ]
+      : []),
+    ...(!template.isSystem
+      ? [
+          {
+            id: 'edit',
+            title: 'Editar',
+            icon: Edit,
+            onClick: handleEdit,
+          },
+        ]
+      : []),
+  ];
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-            Voltar
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              {template.name}
-              {template.isSystem && <Badge variant="secondary">Sistema</Badge>}
-            </h1>
-            {template.description && (
-              <p className="text-muted-foreground">{template.description}</p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {isStudioTemplate && (
-            <>
-              <Button
-                variant={showPreview ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowPreview(!showPreview)}
-              >
-                {showPreview ? (
-                  <EyeOff className="w-4 h-4 mr-2" />
-                ) : (
-                  <Eye className="w-4 h-4 mr-2" />
-                )}
-                {showPreview ? 'Ocultar Preview' : 'Preview'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTestPrintOpen(true)}
-              >
-                <Printer className="w-4 h-4 mr-2" />
-                Imprimir Teste
-              </Button>
-            </>
-          )}
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleDuplicate}
-            disabled={isDuplicating}
-          >
-            <Copy className="w-4 h-4 mr-2" />
-            {isDuplicating ? 'Duplicando...' : 'Duplicar'}
-          </Button>
-          {!template.isSystem && (
-            <Button onClick={handleEdit}>
-              <Edit className="w-4 h-4 mr-2" />
-              Editar
-            </Button>
-          )}
-        </div>
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Label Studio', href: '/print/studio' },
+            { label: template.name },
+          ]}
+          buttons={actionButtons}
+        />
 
-      {/* Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Informações do Template</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Dimensões</p>
-              <p className="font-medium">
-                {template.width}mm x {template.height}mm
-              </p>
+        {/* Identity Card */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-start gap-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-blue-500 to-cyan-600">
+              <Tag className="h-7 w-7 text-white" />
             </div>
-            {sizePreset && (
-              <div>
-                <p className="text-sm text-muted-foreground">Tamanho</p>
-                <p className="font-medium">{sizePreset.name}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {template.name}
+                </h1>
+                <Badge variant={template.isSystem ? 'secondary' : 'outline'}>
+                  {template.isSystem ? 'Sistema' : 'Customizado'}
+                </Badge>
               </div>
-            )}
-            <div>
-              <p className="text-sm text-muted-foreground">Tipo</p>
-              <p className="font-medium">
-                {template.isSystem ? 'Sistema' : 'Customizado'}
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {template.description ||
+                  `${template.width}mm x ${template.height}mm`}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Criado em</p>
-              <p className="font-medium">
-                {new Date(template.createdAt).toLocaleDateString('pt-BR')}
-              </p>
+            <div className="flex flex-col gap-2 shrink-0 text-sm">
+              {template.createdAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <span>
+                    {new Date(template.createdAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {template.updatedAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                  <span>
+                    {new Date(template.updatedAt).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </Card>
+      </PageHeader>
 
-      {/* Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Preview do Template</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[500px]">
-            {isStudioTemplate && studioTemplate ? (
-              <LabelStudioEditor
-                template={studioTemplate}
-                templateName={template.name}
-                className="h-full"
-                readOnly
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p>Preview não disponível para este tipo de template</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <PageBody className="space-y-6">
+        {/* Preview do Template */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <CardHeader className="p-0 pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg uppercase font-semibold">
+                Preview do Template
+              </CardTitle>
+              {isStudioTemplate && (
+                <Button
+                  variant={showPreview ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowPreview(!showPreview)}
+                >
+                  {showPreview ? (
+                    <EyeOff className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Eye className="w-4 h-4 mr-2" />
+                  )}
+                  {showPreview ? 'Ocultar Preview' : 'Preview'}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-[500px]">
+              {isStudioTemplate && studioTemplate ? (
+                <LabelStudioEditor
+                  template={studioTemplate}
+                  templateName={template.name}
+                  className="h-full"
+                  readOnly
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <p>Preview não disponível para este tipo de template</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </PageBody>
 
       {/* Test Print Modal */}
       {studioTemplate && (
@@ -321,6 +325,6 @@ export default function ViewLabelTemplatePage() {
           template={studioTemplate}
         />
       )}
-    </div>
+    </PageLayout>
   );
 }
