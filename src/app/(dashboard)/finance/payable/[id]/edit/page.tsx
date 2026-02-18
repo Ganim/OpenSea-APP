@@ -143,7 +143,9 @@ export default function EditPayablePage({
                 id="description"
                 required
                 value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </div>
 
@@ -151,7 +153,9 @@ export default function EditPayablePage({
               <Label htmlFor="categoryId">Categoria *</Label>
               <Select
                 value={formData.categoryId}
-                onValueChange={value => setFormData({ ...formData, categoryId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, categoryId: value })
+                }
                 required
               >
                 <SelectTrigger id="categoryId">
@@ -159,7 +163,9 @@ export default function EditPayablePage({
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -169,7 +175,9 @@ export default function EditPayablePage({
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={value => setFormData({ ...formData, costCenterId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
                 required
               >
                 <SelectTrigger id="costCenterId">
@@ -177,7 +185,9 @@ export default function EditPayablePage({
                 </SelectTrigger>
                 <SelectContent>
                   {costCenters.map(cc => (
-                    <SelectItem key={cc.id} value={cc.id}>{cc.name}</SelectItem>
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -187,14 +197,18 @@ export default function EditPayablePage({
               <Label htmlFor="bankAccountId">Conta Bancária</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={value => setFormData({ ...formData, bankAccountId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
               >
                 <SelectTrigger id="bankAccountId">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
                   {bankAccounts.map(ba => (
-                    <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -205,7 +219,9 @@ export default function EditPayablePage({
               <Input
                 id="supplierName"
                 value={formData.supplierName}
-                onChange={e => setFormData({ ...formData, supplierName: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, supplierName: e.target.value })
+                }
               />
             </div>
 
@@ -218,7 +234,10 @@ export default function EditPayablePage({
                 required
                 value={formData.expectedAmount}
                 onChange={e =>
-                  setFormData({ ...formData, expectedAmount: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    expectedAmount: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -230,7 +249,9 @@ export default function EditPayablePage({
                 type="date"
                 required
                 value={formData.dueDate}
-                onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, dueDate: e.target.value })
+                }
               />
             </div>
 
@@ -242,7 +263,10 @@ export default function EditPayablePage({
                 step="0.01"
                 value={formData.discount}
                 onChange={e =>
-                  setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    discount: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -255,7 +279,10 @@ export default function EditPayablePage({
                 step="0.01"
                 value={formData.interest}
                 onChange={e =>
-                  setFormData({ ...formData, interest: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    interest: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -268,7 +295,10 @@ export default function EditPayablePage({
                 step="0.01"
                 value={formData.penalty}
                 onChange={e =>
-                  setFormData({ ...formData, penalty: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    penalty: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -278,7 +308,9 @@ export default function EditPayablePage({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -286,7 +318,9 @@ export default function EditPayablePage({
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/payable/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

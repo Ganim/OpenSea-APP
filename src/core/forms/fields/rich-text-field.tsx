@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import type { FieldConfig } from '@/core/types';
+import DOMPurify from 'dompurify';
 import {
   Bold,
   Code,
@@ -268,7 +269,9 @@ export function RichTextField<T = unknown>({
           <div
             className="min-h-[200px] p-4 border rounded-md bg-white dark:bg-gray-900 prose prose-sm dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{
-              __html: renderPreview(value || 'Nada para visualizar...'),
+              __html: DOMPurify.sanitize(
+                renderPreview(value || 'Nada para visualizar...')
+              ),
             }}
           />
         </TabsContent>

@@ -101,7 +101,8 @@ export default function EditBankAccountPage({
           bankName: formData.bankName || undefined,
           agencyDigit: formData.agencyDigit || undefined,
           accountDigit: formData.accountDigit || undefined,
-          pixKeyType: (formData.pixKeyType || undefined) as CreateBankAccountData['pixKeyType'],
+          pixKeyType: (formData.pixKeyType ||
+            undefined) as CreateBankAccountData['pixKeyType'],
           pixKey: formData.pixKey || undefined,
           color: formData.color || undefined,
           isDefault: formData.isDefault,
@@ -134,7 +135,9 @@ export default function EditBankAccountPage({
                 id="name"
                 required
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
 
@@ -144,7 +147,9 @@ export default function EditBankAccountPage({
                 id="bankCode"
                 required
                 value={formData.bankCode}
-                onChange={e => setFormData({ ...formData, bankCode: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, bankCode: e.target.value })
+                }
               />
             </div>
 
@@ -153,7 +158,9 @@ export default function EditBankAccountPage({
               <Input
                 id="bankName"
                 value={formData.bankName}
-                onChange={e => setFormData({ ...formData, bankName: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, bankName: e.target.value })
+                }
               />
             </div>
 
@@ -163,7 +170,9 @@ export default function EditBankAccountPage({
                 id="agency"
                 required
                 value={formData.agency}
-                onChange={e => setFormData({ ...formData, agency: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, agency: e.target.value })
+                }
               />
             </div>
 
@@ -172,7 +181,9 @@ export default function EditBankAccountPage({
               <Input
                 id="agencyDigit"
                 value={formData.agencyDigit}
-                onChange={e => setFormData({ ...formData, agencyDigit: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, agencyDigit: e.target.value })
+                }
               />
             </div>
 
@@ -182,7 +193,9 @@ export default function EditBankAccountPage({
                 id="accountNumber"
                 required
                 value={formData.accountNumber}
-                onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, accountNumber: e.target.value })
+                }
               />
             </div>
 
@@ -191,7 +204,9 @@ export default function EditBankAccountPage({
               <Input
                 id="accountDigit"
                 value={formData.accountDigit}
-                onChange={e => setFormData({ ...formData, accountDigit: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, accountDigit: e.target.value })
+                }
               />
             </div>
 
@@ -200,16 +215,23 @@ export default function EditBankAccountPage({
               <Select
                 value={formData.accountType}
                 onValueChange={(value: string) =>
-                  setFormData({ ...formData, accountType: value as typeof formData.accountType })
+                  setFormData({
+                    ...formData,
+                    accountType: value as typeof formData.accountType,
+                  })
                 }
               >
                 <SelectTrigger id="accountType">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
-                  ))}
+                  {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -218,14 +240,18 @@ export default function EditBankAccountPage({
               <Label htmlFor="pixKeyType">Tipo de Chave PIX</Label>
               <Select
                 value={formData.pixKeyType}
-                onValueChange={(value: string) => setFormData({ ...formData, pixKeyType: value })}
+                onValueChange={(value: string) =>
+                  setFormData({ ...formData, pixKeyType: value })
+                }
               >
                 <SelectTrigger id="pixKeyType">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(PIX_KEY_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -236,7 +262,9 @@ export default function EditBankAccountPage({
               <Input
                 id="pixKey"
                 value={formData.pixKey}
-                onChange={e => setFormData({ ...formData, pixKey: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, pixKey: e.target.value })
+                }
               />
             </div>
 
@@ -246,7 +274,9 @@ export default function EditBankAccountPage({
                 id="color"
                 type="color"
                 value={formData.color}
-                onChange={e => setFormData({ ...formData, color: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
               />
             </div>
 
@@ -256,17 +286,23 @@ export default function EditBankAccountPage({
                   type="checkbox"
                   id="isDefault"
                   checked={formData.isDefault}
-                  onChange={e => setFormData({ ...formData, isDefault: e.target.checked })}
+                  onChange={e =>
+                    setFormData({ ...formData, isDefault: e.target.checked })
+                  }
                   className="h-4 w-4"
                 />
-                <Label htmlFor="isDefault" className="cursor-pointer">Conta padrão</Label>
+                <Label htmlFor="isDefault" className="cursor-pointer">
+                  Conta padrão
+                </Label>
               </div>
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/bank-accounts/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

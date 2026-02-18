@@ -182,105 +182,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     : !!finalUser && hasToken && !userError;
 
   // Login
-  const login = useCallback(async (credentials: LoginCredentials): Promise<LoginResult> => {
-    try {
-      logger.debug('🔐 Iniciando login...', { email: credentials.email });
-      const response = await loginMutation.mutateAsync(credentials);
-      logger.info('✅ Login bem-sucedido', { userId: response.user?.id });
+  const login = useCallback(
+    async (credentials: LoginCredentials): Promise<LoginResult> => {
+      try {
+        logger.debug('🔐 Iniciando login...', { email: credentials.email });
+        const response = await loginMutation.mutateAsync(credentials);
+        logger.info('✅ Login bem-sucedido', { userId: response.user?.id });
 
-      // Salva os tokens usando as chaves corretas
-      localStorage.setItem(authConfig.tokenKey, response.token);
-      localStorage.setItem(authConfig.refreshTokenKey, response.refreshToken);
-      if (response.sessionId) {
-        localStorage.setItem('session_id', response.sessionId);
-      }
-      setHasToken(true);
-      logger.debug('💾 Tokens salvos no localStorage');
+        // Salva os tokens usando as chaves corretas
+        localStorage.setItem(authConfig.tokenKey, response.token);
+        localStorage.setItem(authConfig.refreshTokenKey, response.refreshToken);
+        if (response.sessionId) {
+          localStorage.setItem('session_id', response.sessionId);
+        }
+        setHasToken(true);
+        logger.debug('💾 Tokens salvos no localStorage');
 
-      // Aguarda os dados do usuário serem carregados
-      logger.debug('🔄 Buscando dados do usuário...');
-      const userResult = await refetchUser();
-      logger.info('✅ Dados do usuário carregados', {
-        userId: userResult.data?.user?.id,
-      });
-
-      // Salva a conta para Fast Login
-      if (userResult.data?.user) {
-        const u = userResult.data.user;
-        saveAccount({
-          id: u.id,
-          identifier: credentials.email, // Salva o que o usuário digitou (email ou username)
-          displayName: u.profile?.name
-            ? `${u.profile.name}${u.profile.surname ? ` ${u.profile.surname}` : ''}`
-            : u.username,
-          avatarUrl: u.profile?.avatarUrl,
+        // Aguarda os dados do usuário serem carregados
+        logger.debug('🔄 Buscando dados do usuário...');
+        const userResult = await refetchUser();
+        logger.info('✅ Dados do usuário carregados', {
+          userId: userResult.data?.user?.id,
         });
-        logger.debug('💾 Conta salva para Fast Login', { userId: u.id });
-      }
 
-      // Check if PIN setup is required
-      const fetchedUser = userResult.data?.user;
-      if (fetchedUser?.forceAccessPinSetup || fetchedUser?.forceActionPinSetup) {
-        router.push('/setup-pins');
-        return { redirected: true };
-      }
-
-      // Fluxo padrão segue para o caller decidir o redirecionamento
-      return {
-        redirected: false,
-        isSuperAdmin: userResult.data?.user?.isSuperAdmin ?? false,
-      };
-    } catch (error) {
-      const err = error as Error & {
-        status?: number;
-        data?: { code?: string; resetToken?: string; reason?: string };
-        code?: string;
-      };
-
-      const code = err?.code || err?.data?.code;
-      if (code === 'PASSWORD_RESET_REQUIRED') {
-        const resetToken = err?.data?.resetToken;
-        const reason = err?.data?.reason;
-
-        if (resetToken) {
-          const search = new URLSearchParams({
-            token: resetToken,
-            forced: 'true',
+        // Salva a conta para Fast Login
+        if (userResult.data?.user) {
+          const u = userResult.data.user;
+          saveAccount({
+            id: u.id,
+            identifier: credentials.email, // Salva o que o usuário digitou (email ou username)
+            displayName: u.profile?.name
+              ? `${u.profile.name}${u.profile.surname ? ` ${u.profile.surname}` : ''}`
+              : u.username,
+            avatarUrl: u.profile?.avatarUrl,
           });
-          if (reason) search.set('reason', reason);
-          router.push(`/reset-password?${search.toString()}`);
-          // Não propaga o erro para evitar overlay/vermelho antes do redirect
+          logger.debug('💾 Conta salva para Fast Login', { userId: u.id });
+        }
+
+        // Check if PIN setup is required
+        const fetchedUser = userResult.data?.user;
+        if (
+          fetchedUser?.forceAccessPinSetup ||
+          fetchedUser?.forceActionPinSetup
+        ) {
+          router.push('/setup-pins');
           return { redirected: true };
         }
-      }
 
-      logger.error('Erro no login', error as Error, {
-        action: 'login',
-        email: credentials.email,
-      });
-      throw error;
-    }
-  }, [loginMutation, refetchUser, router]);
+        // Fluxo padrão segue para o caller decidir o redirecionamento
+        return {
+          redirected: false,
+          isSuperAdmin: userResult.data?.user?.isSuperAdmin ?? false,
+        };
+      } catch (error) {
+        const err = error as Error & {
+          status?: number;
+          data?: { code?: string; resetToken?: string; reason?: string };
+          code?: string;
+        };
+
+        const code = err?.code || err?.data?.code;
+        if (code === 'PASSWORD_RESET_REQUIRED') {
+          const resetToken = err?.data?.resetToken;
+          const reason = err?.data?.reason;
+
+          if (resetToken) {
+            const search = new URLSearchParams({
+              token: resetToken,
+              forced: 'true',
+            });
+            if (reason) search.set('reason', reason);
+            router.push(`/reset-password?${search.toString()}`);
+            // Não propaga o erro para evitar overlay/vermelho antes do redirect
+            return { redirected: true };
+          }
+        }
+
+        logger.error('Erro no login', error as Error, {
+          action: 'login',
+          email: credentials.email,
+        });
+        throw error;
+      }
+    },
+    [loginMutation, refetchUser, router]
+  );
 
   // Register
-  const register = useCallback(async (data: RegisterData) => {
-    try {
-      // Cria o usuário via endpoint de autenticação
-      await registerMutation.mutateAsync(data);
+  const register = useCallback(
+    async (data: RegisterData) => {
+      try {
+        // Cria o usuário via endpoint de autenticação
+        await registerMutation.mutateAsync(data);
 
-      // Após registro, faz login automático
-      await login({
-        email: data.email,
-        password: data.password,
-      });
-    } catch (error) {
-      logger.error('Erro no registro', error as Error, {
-        action: 'register',
-        email: data.email,
-      });
-      throw error;
-    }
-  }, [registerMutation, login]);
+        // Após registro, faz login automático
+        await login({
+          email: data.email,
+          password: data.password,
+        });
+      } catch (error) {
+        logger.error('Erro no registro', error as Error, {
+          action: 'register',
+          email: data.email,
+        });
+        throw error;
+      }
+    },
+    [registerMutation, login]
+  );
 
   // Logout
   const logout = useCallback(async () => {

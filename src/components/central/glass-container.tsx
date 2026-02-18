@@ -20,11 +20,7 @@ export const GlassContainer = forwardRef<HTMLDivElement, GlassContainerProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'rounded-xl shadow-lg',
-          variants[variant],
-          className
-        )}
+        className={cn('rounded-xl shadow-lg', variants[variant], className)}
         {...props}
       >
         {children}

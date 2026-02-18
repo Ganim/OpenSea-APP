@@ -134,7 +134,9 @@ export default function EditConsortiumPage({
                 id="name"
                 required
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
 
@@ -144,7 +146,9 @@ export default function EditConsortiumPage({
                 id="administrator"
                 required
                 value={formData.administrator}
-                onChange={e => setFormData({ ...formData, administrator: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, administrator: e.target.value })
+                }
               />
             </div>
 
@@ -152,7 +156,9 @@ export default function EditConsortiumPage({
               <Label htmlFor="bankAccountId">Conta Bancária *</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={value => setFormData({ ...formData, bankAccountId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
                 required
               >
                 <SelectTrigger id="bankAccountId">
@@ -160,7 +166,9 @@ export default function EditConsortiumPage({
                 </SelectTrigger>
                 <SelectContent>
                   {bankAccounts.map(ba => (
-                    <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -170,7 +178,9 @@ export default function EditConsortiumPage({
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={value => setFormData({ ...formData, costCenterId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
                 required
               >
                 <SelectTrigger id="costCenterId">
@@ -178,7 +188,9 @@ export default function EditConsortiumPage({
                 </SelectTrigger>
                 <SelectContent>
                   {costCenters.map(cc => (
-                    <SelectItem key={cc.id} value={cc.id}>{cc.name}</SelectItem>
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -189,7 +201,9 @@ export default function EditConsortiumPage({
               <Input
                 id="contractNumber"
                 value={formData.contractNumber}
-                onChange={e => setFormData({ ...formData, contractNumber: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, contractNumber: e.target.value })
+                }
               />
             </div>
 
@@ -198,7 +212,9 @@ export default function EditConsortiumPage({
               <Input
                 id="groupNumber"
                 value={formData.groupNumber}
-                onChange={e => setFormData({ ...formData, groupNumber: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, groupNumber: e.target.value })
+                }
               />
             </div>
 
@@ -207,7 +223,9 @@ export default function EditConsortiumPage({
               <Input
                 id="quotaNumber"
                 value={formData.quotaNumber}
-                onChange={e => setFormData({ ...formData, quotaNumber: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, quotaNumber: e.target.value })
+                }
               />
             </div>
 
@@ -220,7 +238,10 @@ export default function EditConsortiumPage({
                 max="31"
                 value={formData.paymentDay}
                 onChange={e =>
-                  setFormData({ ...formData, paymentDay: parseInt(e.target.value) || 1 })
+                  setFormData({
+                    ...formData,
+                    paymentDay: parseInt(e.target.value) || 1,
+                  })
                 }
               />
             </div>
@@ -230,7 +251,9 @@ export default function EditConsortiumPage({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -238,7 +261,9 @@ export default function EditConsortiumPage({
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/consortia/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

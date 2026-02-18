@@ -42,7 +42,10 @@ function BreadcrumbLink({
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn('hover:text-foreground hover:bg-accent px-2 py-1 rounded-md transition-colors', className)}
+      className={cn(
+        'hover:text-foreground hover:bg-accent px-2 py-1 rounded-md transition-colors',
+        className
+      )}
       {...props}
     />
   );

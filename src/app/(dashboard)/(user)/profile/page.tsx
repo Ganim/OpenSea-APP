@@ -72,14 +72,14 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <PageActionBar breadcrumbItems={[{ label: 'Minha Conta', href: '/profile' }]} />
+      <PageActionBar
+        breadcrumbItems={[{ label: 'Minha Conta', href: '/profile' }]}
+      />
 
       {/* Main Content - Sidebar + Content */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Navigation */}
-        <div
-          className="lg:w-64 flex-shrink-0"
-        >
+        <div className="lg:w-64 flex-shrink-0">
           <Card className="p-2 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <nav className="space-y-1">
               {availableTabs.map(tab => (
@@ -134,9 +134,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Content Area */}
-        <div
-          className="flex-1 min-w-0"
-        >
+        <div className="flex-1 min-w-0">
           {activeTab === 'profile' && <ProfileTab user={user} />}
           {activeTab === 'security' && <SecurityTab />}
           {activeTab === 'employee' && hasEmployee && (

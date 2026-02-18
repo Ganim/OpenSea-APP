@@ -315,7 +315,7 @@ export function EntityGrid<T extends { id: string }>({
       >
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map((item) => {
+            {items.map(item => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 
@@ -341,7 +341,7 @@ export function EntityGrid<T extends { id: string }>({
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item) => {
+            {items.map(item => {
               const isSelected = selectedIds.has(item.id);
               const contextHandlers = getContextMenuHandlers(item.id);
 

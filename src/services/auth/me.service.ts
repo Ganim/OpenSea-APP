@@ -59,18 +59,12 @@ export const meService = {
 
   // PATCH /v1/me/access-pin
   async setAccessPin(data: SetAccessPinRequest): Promise<UserResponse> {
-    return apiClient.patch<UserResponse>(
-      API_ENDPOINTS.ME.SET_ACCESS_PIN,
-      data
-    );
+    return apiClient.patch<UserResponse>(API_ENDPOINTS.ME.SET_ACCESS_PIN, data);
   },
 
   // PATCH /v1/me/action-pin
   async setActionPin(data: SetActionPinRequest): Promise<UserResponse> {
-    return apiClient.patch<UserResponse>(
-      API_ENDPOINTS.ME.SET_ACTION_PIN,
-      data
-    );
+    return apiClient.patch<UserResponse>(API_ENDPOINTS.ME.SET_ACTION_PIN, data);
   },
 
   // POST /v1/me/verify-action-pin

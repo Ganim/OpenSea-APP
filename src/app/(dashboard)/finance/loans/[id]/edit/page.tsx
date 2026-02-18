@@ -138,7 +138,9 @@ export default function EditLoanPage({
                 id="name"
                 required
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
 
@@ -146,7 +148,9 @@ export default function EditLoanPage({
               <Label htmlFor="bankAccountId">Conta Bancária *</Label>
               <Select
                 value={formData.bankAccountId}
-                onValueChange={value => setFormData({ ...formData, bankAccountId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, bankAccountId: value })
+                }
                 required
               >
                 <SelectTrigger id="bankAccountId">
@@ -154,7 +158,9 @@ export default function EditLoanPage({
                 </SelectTrigger>
                 <SelectContent>
                   {bankAccounts.map(ba => (
-                    <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                    <SelectItem key={ba.id} value={ba.id}>
+                      {ba.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -164,7 +170,9 @@ export default function EditLoanPage({
               <Label htmlFor="costCenterId">Centro de Custo *</Label>
               <Select
                 value={formData.costCenterId}
-                onValueChange={value => setFormData({ ...formData, costCenterId: value })}
+                onValueChange={value =>
+                  setFormData({ ...formData, costCenterId: value })
+                }
                 required
               >
                 <SelectTrigger id="costCenterId">
@@ -172,7 +180,9 @@ export default function EditLoanPage({
                 </SelectTrigger>
                 <SelectContent>
                   {costCenters.map(cc => (
-                    <SelectItem key={cc.id} value={cc.id}>{cc.name}</SelectItem>
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -183,7 +193,10 @@ export default function EditLoanPage({
               <Select
                 value={formData.type}
                 onValueChange={(value: string) =>
-                  setFormData({ ...formData, type: value as typeof formData.type })
+                  setFormData({
+                    ...formData,
+                    type: value as typeof formData.type,
+                  })
                 }
               >
                 <SelectTrigger id="type">
@@ -191,7 +204,9 @@ export default function EditLoanPage({
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(LOAN_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -202,7 +217,9 @@ export default function EditLoanPage({
               <Input
                 id="contractNumber"
                 value={formData.contractNumber}
-                onChange={e => setFormData({ ...formData, contractNumber: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, contractNumber: e.target.value })
+                }
               />
             </div>
 
@@ -214,7 +231,10 @@ export default function EditLoanPage({
                 step="0.01"
                 value={formData.interestRate}
                 onChange={e =>
-                  setFormData({ ...formData, interestRate: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    interestRate: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -223,7 +243,9 @@ export default function EditLoanPage({
               <Label htmlFor="interestType">Tipo de Juros</Label>
               <Select
                 value={formData.interestType}
-                onValueChange={(value: string) => setFormData({ ...formData, interestType: value })}
+                onValueChange={(value: string) =>
+                  setFormData({ ...formData, interestType: value })
+                }
               >
                 <SelectTrigger id="interestType">
                   <SelectValue />
@@ -241,7 +263,9 @@ export default function EditLoanPage({
                 id="endDate"
                 type="date"
                 value={formData.endDate}
-                onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
               />
             </div>
 
@@ -254,7 +278,10 @@ export default function EditLoanPage({
                 max="31"
                 value={formData.installmentDay}
                 onChange={e =>
-                  setFormData({ ...formData, installmentDay: parseInt(e.target.value) || 1 })
+                  setFormData({
+                    ...formData,
+                    installmentDay: parseInt(e.target.value) || 1,
+                  })
                 }
               />
             </div>
@@ -264,7 +291,9 @@ export default function EditLoanPage({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -272,7 +301,9 @@ export default function EditLoanPage({
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/loans/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

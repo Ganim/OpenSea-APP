@@ -103,7 +103,9 @@ export default function FastLoginPage() {
     }
   };
 
-  const handlePostLogin = async (response: import('@/types/auth').AuthResponse) => {
+  const handlePostLogin = async (
+    response: import('@/types/auth').AuthResponse
+  ) => {
     // Check if PIN setup is required
     const user = response.user;
     if (user.forceAccessPinSetup || user.forceActionPinSetup) {
@@ -506,7 +508,10 @@ export default function FastLoginPage() {
                     <Button
                       type="submit"
                       className="flex-1"
-                      disabled={isLoading || (usePinLogin ? accessPin.length !== 6 : !password)}
+                      disabled={
+                        isLoading ||
+                        (usePinLogin ? accessPin.length !== 6 : !password)
+                      }
                       size="lg"
                     >
                       {isLoading ? 'Entrando...' : 'Entrar'}

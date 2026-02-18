@@ -93,17 +93,24 @@ export default function SetupPinsPage() {
               {step === 'done' ? 'PINs Configurados!' : 'Configurar PINs'}
             </h1>
             <p className="text-gray-600 dark:text-white/60">
-              {step === 'access' && 'Primeiro, configure seu PIN de Acesso (6 dígitos)'}
-              {step === 'action' && 'Agora, configure seu PIN de Ação (4 dígitos)'}
-              {step === 'done' && 'Seus PINs foram configurados com sucesso. Redirecionando...'}
+              {step === 'access' &&
+                'Primeiro, configure seu PIN de Acesso (6 dígitos)'}
+              {step === 'action' &&
+                'Agora, configure seu PIN de Ação (4 dígitos)'}
+              {step === 'done' &&
+                'Seus PINs foram configurados com sucesso. Redirecionando...'}
             </p>
           </div>
 
           {/* Progress indicator */}
           {step !== 'done' && (
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className={`h-2 w-16 rounded-full ${step === 'access' ? 'bg-blue-500' : 'bg-green-500'}`} />
-              <div className={`h-2 w-16 rounded-full ${step === 'action' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`} />
+              <div
+                className={`h-2 w-16 rounded-full ${step === 'access' ? 'bg-blue-500' : 'bg-green-500'}`}
+              />
+              <div
+                className={`h-2 w-16 rounded-full ${step === 'action' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+              />
             </div>
           )}
 
@@ -152,7 +159,11 @@ export default function SetupPinsPage() {
                     <div className="space-y-2">
                       <Label>Novo PIN de Acesso (6 dígitos)</Label>
                       <div className="flex justify-center">
-                        <InputOTP maxLength={6} value={accessPin} onChange={setAccessPin}>
+                        <InputOTP
+                          maxLength={6}
+                          value={accessPin}
+                          onChange={setAccessPin}
+                        >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} masked />
                             <InputOTPSlot index={1} masked />
@@ -168,7 +179,11 @@ export default function SetupPinsPage() {
                     <div className="space-y-2">
                       <Label>Confirmar PIN de Acesso</Label>
                       <div className="flex justify-center">
-                        <InputOTP maxLength={6} value={accessPinConfirm} onChange={setAccessPinConfirm}>
+                        <InputOTP
+                          maxLength={6}
+                          value={accessPinConfirm}
+                          onChange={setAccessPinConfirm}
+                        >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} masked />
                             <InputOTPSlot index={1} masked />
@@ -192,7 +207,9 @@ export default function SetupPinsPage() {
                         accessPinConfirm.length !== 6
                       }
                     >
-                      {setAccessPinMutation.isPending ? 'Salvando...' : 'Continuar'}
+                      {setAccessPinMutation.isPending
+                        ? 'Salvando...'
+                        : 'Continuar'}
                     </Button>
                   </form>
                 )}
@@ -215,7 +232,12 @@ export default function SetupPinsPage() {
                     <div className="space-y-2">
                       <Label>Novo PIN de Ação (4 dígitos)</Label>
                       <div className="flex justify-center">
-                        <InputOTP maxLength={4} value={actionPin} onChange={setActionPin} autoFocus>
+                        <InputOTP
+                          maxLength={4}
+                          value={actionPin}
+                          onChange={setActionPin}
+                          autoFocus
+                        >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} masked />
                             <InputOTPSlot index={1} masked />
@@ -229,7 +251,11 @@ export default function SetupPinsPage() {
                     <div className="space-y-2">
                       <Label>Confirmar PIN de Ação</Label>
                       <div className="flex justify-center">
-                        <InputOTP maxLength={4} value={actionPinConfirm} onChange={setActionPinConfirm}>
+                        <InputOTP
+                          maxLength={4}
+                          value={actionPinConfirm}
+                          onChange={setActionPinConfirm}
+                        >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} masked />
                             <InputOTPSlot index={1} masked />
@@ -250,7 +276,9 @@ export default function SetupPinsPage() {
                         actionPinConfirm.length !== 4
                       }
                     >
-                      {setActionPinMutation.isPending ? 'Salvando...' : 'Finalizar'}
+                      {setActionPinMutation.isPending
+                        ? 'Salvando...'
+                        : 'Finalizar'}
                     </Button>
                   </form>
                 )}

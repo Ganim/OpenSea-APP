@@ -108,7 +108,9 @@ export default function EditCostCenterPage({
                 id="code"
                 required
                 value={formData.code}
-                onChange={e => setFormData({ ...formData, code: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, code: e.target.value })
+                }
               />
             </div>
 
@@ -118,7 +120,9 @@ export default function EditCostCenterPage({
                 id="name"
                 required
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
 
@@ -127,7 +131,9 @@ export default function EditCostCenterPage({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -140,7 +146,10 @@ export default function EditCostCenterPage({
                 step="0.01"
                 value={formData.monthlyBudget}
                 onChange={e =>
-                  setFormData({ ...formData, monthlyBudget: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    monthlyBudget: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -153,7 +162,10 @@ export default function EditCostCenterPage({
                 step="0.01"
                 value={formData.annualBudget}
                 onChange={e =>
-                  setFormData({ ...formData, annualBudget: parseFloat(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    annualBudget: parseFloat(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -164,17 +176,23 @@ export default function EditCostCenterPage({
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
-                  onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
+                  onChange={e =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
                   className="h-4 w-4"
                 />
-                <Label htmlFor="isActive" className="cursor-pointer">Ativo</Label>
+                <Label htmlFor="isActive" className="cursor-pointer">
+                  Ativo
+                </Label>
               </div>
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/cost-centers/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

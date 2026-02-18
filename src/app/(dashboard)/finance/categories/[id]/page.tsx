@@ -100,7 +100,8 @@ export default function FinanceCategoryDetailPage({
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {FINANCE_CATEGORY_TYPE_LABELS[category.type]}
-                {category.parentName && ` • Subcategoria de ${category.parentName}`}
+                {category.parentName &&
+                  ` • Subcategoria de ${category.parentName}`}
               </p>
             </div>
             <div className="flex gap-2">
@@ -145,14 +146,15 @@ export default function FinanceCategoryDetailPage({
               <p className="font-medium">{category.parentName}</p>
             </div>
           )}
-          {category.childrenCount !== undefined && category.childrenCount > 0 && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Subcategorias
-              </p>
-              <p className="font-medium">{category.childrenCount}</p>
-            </div>
-          )}
+          {category.childrenCount !== undefined &&
+            category.childrenCount > 0 && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Subcategorias
+                </p>
+                <p className="font-medium">{category.childrenCount}</p>
+              </div>
+            )}
           {category.entryCount !== undefined && (
             <div>
               <p className="text-sm text-muted-foreground mb-1">

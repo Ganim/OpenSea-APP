@@ -30,7 +30,9 @@ export const authService = {
   },
 
   // POST /v1/auth/login/pin
-  async loginWithPin(credentials: LoginWithPinCredentials): Promise<AuthResponse> {
+  async loginWithPin(
+    credentials: LoginWithPinCredentials
+  ): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.AUTH.LOGIN_PIN,
       credentials

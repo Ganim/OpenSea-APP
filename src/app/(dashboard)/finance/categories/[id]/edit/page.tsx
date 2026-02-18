@@ -117,7 +117,9 @@ export default function EditFinanceCategoryPage({
                 id="name"
                 required
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
 
@@ -126,16 +128,23 @@ export default function EditFinanceCategoryPage({
               <Select
                 value={formData.type}
                 onValueChange={(value: string) =>
-                  setFormData({ ...formData, type: value as typeof formData.type })
+                  setFormData({
+                    ...formData,
+                    type: value as typeof formData.type,
+                  })
                 }
               >
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
-                  ))}
+                  {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -145,7 +154,9 @@ export default function EditFinanceCategoryPage({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -157,7 +168,10 @@ export default function EditFinanceCategoryPage({
                 type="number"
                 value={formData.displayOrder}
                 onChange={e =>
-                  setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })
+                  setFormData({
+                    ...formData,
+                    displayOrder: parseInt(e.target.value) || 0,
+                  })
                 }
               />
             </div>
@@ -168,7 +182,9 @@ export default function EditFinanceCategoryPage({
                 id="color"
                 type="color"
                 value={formData.color || '#8b5cf6'}
-                onChange={e => setFormData({ ...formData, color: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
               />
             </div>
 
@@ -178,17 +194,23 @@ export default function EditFinanceCategoryPage({
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
-                  onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
+                  onChange={e =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
                   className="h-4 w-4"
                 />
-                <Label htmlFor="isActive" className="cursor-pointer">Ativa</Label>
+                <Label htmlFor="isActive" className="cursor-pointer">
+                  Ativa
+                </Label>
               </div>
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
             <Link href={`/finance/categories/${id}`}>
-              <Button type="button" variant="outline">Cancelar</Button>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" disabled={updateMutation.isPending}>
               <Save className="h-4 w-4 mr-2" />

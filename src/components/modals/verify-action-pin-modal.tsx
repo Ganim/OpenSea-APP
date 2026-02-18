@@ -73,7 +73,12 @@ export function VerifyActionPinModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={open => { if (!open) handleClose(); }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) handleClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
