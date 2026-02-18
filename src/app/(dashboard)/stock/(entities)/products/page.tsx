@@ -475,6 +475,10 @@ function ProductsPageContent() {
           badges={[
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
+            ...(item.productCategories?.map(cat => ({
+              label: cat.name,
+              variant: 'outline' as const,
+            })) ?? []),
             ...(item.outOfLine
               ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
@@ -563,6 +567,10 @@ function ProductsPageContent() {
           badges={[
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
+            ...(item.productCategories?.map(cat => ({
+              label: cat.name,
+              variant: 'outline' as const,
+            })) ?? []),
             ...(item.outOfLine
               ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
