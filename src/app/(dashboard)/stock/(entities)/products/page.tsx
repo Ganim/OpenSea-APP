@@ -174,10 +174,18 @@ function ProductsPageContent() {
       );
     }
     if (categoryIds.length > 0) {
-      const set = new Set(categoryIds);
-      items = items.filter((p: Product) =>
-        p.productCategories?.some(pc => set.has(pc.id))
-      );
+      const hasNone = categoryIds.includes('__none__');
+      const realIds = categoryIds.filter(id => id !== '__none__');
+      const set = new Set(realIds);
+      items = items.filter((p: Product) => {
+        const hasCategories =
+          p.productCategories && p.productCategories.length > 0;
+        if (hasNone && !hasCategories) return true;
+        if (set.size > 0 && hasCategories) {
+          return p.productCategories!.some(pc => set.has(pc.id));
+        }
+        return false;
+      });
     }
     return items;
   }, [page.filteredItems, templateIds, manufacturerIds, categoryIds]);
@@ -200,10 +208,18 @@ function ProductsPageContent() {
         );
       }
       if (exclude !== 'category' && categoryIds.length > 0) {
-        const set = new Set(categoryIds);
-        filtered = filtered.filter(p =>
-          p.productCategories?.some(pc => set.has(pc.id))
-        );
+        const hasNone = categoryIds.includes('__none__');
+        const realIds = categoryIds.filter(id => id !== '__none__');
+        const set = new Set(realIds);
+        filtered = filtered.filter(p => {
+          const hasCategories =
+            p.productCategories && p.productCategories.length > 0;
+          if (hasNone && !hasCategories) return true;
+          if (set.size > 0 && hasCategories) {
+            return p.productCategories!.some(pc => set.has(pc.id));
+          }
+          return false;
+        });
       }
       return filtered;
     },
@@ -260,27 +276,42 @@ function ProductsPageContent() {
     );
   }, [allProducts, templateIds, categoryIds, narrowProducts]);
 
-  // Extract unique categories from products data
+  // Extract unique categories from products data (with "Sem Categoria" virtual option)
   const availableCategories = useMemo(() => {
+    const noneOption = { id: '__none__', name: 'Sem categoria' };
     const categoryMap = new Map<string, { id: string; name: string }>();
+    let hasUncategorized = false;
+
     for (const product of allProducts) {
+      if (
+        !product.productCategories ||
+        product.productCategories.length === 0
+      ) {
+        hasUncategorized = true;
+      }
       product.productCategories?.forEach(pc => {
         categoryMap.set(pc.id, { id: pc.id, name: pc.name });
       });
     }
 
     if (templateIds.length === 0 && manufacturerIds.length === 0) {
-      return Array.from(categoryMap.values());
+      const result = Array.from(categoryMap.values());
+      return hasUncategorized ? [noneOption, ...result] : result;
     }
 
     const filtered = narrowProducts('category');
     const idsInFiltered = new Set<string>();
+    let filteredHasUncategorized = false;
     for (const p of filtered) {
+      if (!p.productCategories || p.productCategories.length === 0) {
+        filteredHasUncategorized = true;
+      }
       p.productCategories?.forEach(pc => idsInFiltered.add(pc.id));
     }
-    return Array.from(categoryMap.values()).filter(c =>
+    const result = Array.from(categoryMap.values()).filter(c =>
       idsInFiltered.has(c.id)
     );
+    return filteredHasUncategorized ? [noneOption, ...result] : result;
   }, [allProducts, templateIds, manufacturerIds, narrowProducts]);
 
   // Build URL preserving all filter params (comma-separated for multi-select)
@@ -428,6 +459,10 @@ function ProductsPageContent() {
     const variantLabel = item.variants?.length
       ? `${item.variants.length} variante${item.variants.length !== 1 ? 's' : ''}`
       : 'Ver variantes';
+    const categoryNames =
+      item.productCategories && item.productCategories.length > 0
+        ? item.productCategories.map(c => c.name).join(', ')
+        : 'Sem categoria';
 
     return (
       <EntityContextMenu
@@ -475,10 +510,6 @@ function ProductsPageContent() {
           badges={[
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
-            ...(item.productCategories?.map(cat => ({
-              label: cat.name,
-              variant: 'outline' as const,
-            })) ?? []),
             ...(item.outOfLine
               ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
@@ -506,7 +537,13 @@ function ProductsPageContent() {
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        />
+        >
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Tag className="w-3.5 h-3.5 shrink-0" />
+            <span className="font-medium">Categoria:</span>
+            <span className="truncate">{categoryNames}</span>
+          </div>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -520,6 +557,10 @@ function ProductsPageContent() {
     const variantLabel = item.variants?.length
       ? `${item.variants.length} variante${item.variants.length !== 1 ? 's' : ''}`
       : 'Ver variantes';
+    const categoryNames =
+      item.productCategories && item.productCategories.length > 0
+        ? item.productCategories.map(c => c.name).join(', ')
+        : 'Sem categoria';
 
     return (
       <EntityContextMenu
@@ -567,10 +608,6 @@ function ProductsPageContent() {
           badges={[
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
-            ...(item.productCategories?.map(cat => ({
-              label: cat.name,
-              variant: 'outline' as const,
-            })) ?? []),
             ...(item.outOfLine
               ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
               : []),
@@ -584,9 +621,10 @@ function ProductsPageContent() {
               : []),
           ]}
           metadata={
-            item.description ? (
-              <span className="text-xs truncate">{item.description}</span>
-            ) : undefined
+            <div className="flex items-center gap-1.5">
+              <Tag className="w-3 h-3 shrink-0" />
+              <span className="truncate">{categoryNames}</span>
+            </div>
           }
           footer={{
             type: 'single',

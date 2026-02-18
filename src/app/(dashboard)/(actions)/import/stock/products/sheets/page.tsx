@@ -192,11 +192,11 @@ export default function ProductsSheetsPage() {
       : undefined,
     onComplete: result => {
       toast.success(
-        `Importacao concluida! ${result.importedRows} produtos importados.`
+        `Importação concluída! ${result.importedRows} produtos importados.`
       );
     },
     onError: error => {
-      toast.error(`Erro na importacao: ${error.message}`);
+      toast.error(`Erro na importação: ${error.message}`);
     },
   });
 
@@ -305,14 +305,14 @@ export default function ProductsSheetsPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Settings className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="font-semibold text-lg mb-2">
-              Configuracao Necessaria
+              Configuração Necessária
             </h3>
             <p className="text-muted-foreground text-center mb-4">
-              Selecione um template e configure os campos de importacao
+              Selecione um template e configure os campos de importação
             </p>
             <Button onClick={() => router.push(`${basePath}/config`)}>
               <Settings className="w-4 h-4 mr-2" />
-              Configurar Importacao
+              Configurar Importação
             </Button>
           </CardContent>
         </Card>
@@ -372,7 +372,7 @@ export default function ProductsSheetsPage() {
                       >
                         Decimal:{' '}
                         {decimalSeparator === 'comma'
-                          ? 'Virgula (1.234,56)'
+                          ? 'Vírgula (1.234,56)'
                           : 'Ponto (1,234.56)'}
                       </Label>
                       <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
@@ -380,11 +380,11 @@ export default function ProductsSheetsPage() {
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
                     <p>
-                      Escolha o formato de numeros decimais usado na sua
+                      Escolha o formato de números decimais usado na sua
                       planilha.
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      <strong>Virgula:</strong> Formato brasileiro (1.234,56)
+                      <strong>Vírgula:</strong> Formato brasileiro (1.234,56)
                       <br />
                       <strong>Ponto:</strong> Formato americano (1,234.56)
                     </p>
@@ -422,7 +422,7 @@ export default function ProductsSheetsPage() {
               (validationResult.valid ? (
                 <Badge variant="default" className="gap-1 bg-green-600">
                   <CheckCircle2 className="w-3 h-3" />
-                  Dados validos
+                  Dados válidos
                 </Badge>
               ) : (
                 <Badge variant="destructive" className="gap-1">

@@ -184,7 +184,7 @@ function validateCell(
       row: rowIndex,
       column: colIndex,
       fieldKey: field.key,
-      message: `${field.customLabel || field.label} e obrigatorio`,
+      message: `${field.customLabel || field.label} é obrigatório`,
       value,
     };
   }
@@ -201,7 +201,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: `Valor deve ser um numero (use ${decimalSeparator === 'comma' ? 'virgula' : 'ponto'} como decimal)`,
+          message: `Valor deve ser um número (use ${decimalSeparator === 'comma' ? 'vírgula' : 'ponto'} como decimal)`,
           value,
         };
       }
@@ -210,7 +210,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: `Valor minimo e ${field.min}`,
+          message: `Valor mínimo é ${field.min}`,
           value,
         };
       }
@@ -219,7 +219,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: `Valor maximo e ${field.max}`,
+          message: `Valor máximo é ${field.max}`,
           value,
         };
       }
@@ -233,7 +233,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: 'Email invalido',
+          message: 'E-mail inválido',
           value,
         };
       }
@@ -247,7 +247,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: 'Data invalida. Use formato YYYY-MM-DD',
+          message: 'Data inválida. Use formato YYYY-MM-DD',
           value,
         };
       }
@@ -286,7 +286,7 @@ function validateCell(
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: `Valor invalido. Opcoes: ${validValues.join(', ')}`,
+          message: `Valor inválido. Opções: ${validValues.join(', ')}`,
           value,
         };
       }
@@ -308,7 +308,7 @@ function validateCell(
       row: rowIndex,
       column: colIndex,
       fieldKey: field.key,
-      message: `Minimo de ${field.minLength} caracteres`,
+      message: `Mínimo de ${field.minLength} caracteres`,
       value,
     };
   }
@@ -321,7 +321,7 @@ function validateCell(
       row: rowIndex,
       column: colIndex,
       fieldKey: field.key,
-      message: `Maximo de ${field.maxLength} caracteres`,
+      message: `Máximo de ${field.maxLength} caracteres`,
       value,
     };
   }
@@ -338,7 +338,7 @@ function validateCell(
         row: rowIndex,
         column: colIndex,
         fieldKey: field.key,
-        message: field.patternMessage || 'Formato invalido',
+        message: field.patternMessage || 'Formato inválido',
         value,
       };
     }

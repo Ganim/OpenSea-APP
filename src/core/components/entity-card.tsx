@@ -619,8 +619,8 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
               <StatusBadges isNew={isNew} isUpdated={isUpdated} />
             </div>
 
-            {/* Badges */}
-            {badges.length > 0 && <CustomBadges badges={badges} />}
+            {/* Children */}
+            {children}
 
             {/* Metadata */}
             {metadata && (
@@ -629,8 +629,8 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
               </div>
             )}
 
-            {/* Children */}
-            {children}
+            {/* Badges */}
+            {badges.length > 0 && <CustomBadges badges={badges} />}
           </div>
 
           {/* Footer */}

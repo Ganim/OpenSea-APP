@@ -18,14 +18,6 @@ const productFields: EntityFieldDefinition[] = [
     validation: { minLength: 1, maxLength: 255 },
   },
   {
-    key: 'code',
-    label: 'Código',
-    type: 'text',
-    required: false,
-    description: 'Código único do produto (auto-gerado se não fornecido)',
-    validation: { maxLength: 50 },
-  },
-  {
     key: 'description',
     label: 'Descrição',
     type: 'text',

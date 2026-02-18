@@ -129,25 +129,23 @@ function mapTemplateTypeToFieldType(
 
 /**
  * Migra configurações salvas antigas para corrigir tipos de atributos
- * Compara com o template atual e corrige os tipos se necessário
+ * e adicionar campos base que foram adicionados após a criação da configuração.
+ * Também remove campos que não existem mais na definição (ex: 'code' removido).
  */
 function migrateConfigFields(
   fields: ImportFieldConfig[],
   template: TemplateWithAttributes
 ): ImportFieldConfig[] {
-  if (!template.productAttributes) return fields;
-
-  return fields.map(field => {
-    // Verificar se é um campo de atributo personalizado
-    if (field.key.startsWith('attributes.')) {
+  // 1. Corrigir tipos de atributos personalizados
+  let migrated = fields.map(field => {
+    if (field.key.startsWith('attributes.') && template.productAttributes) {
       const attrKey = field.key.replace('attributes.', '');
-      const templateAttr = template.productAttributes?.[attrKey];
+      const templateAttr = template.productAttributes[attrKey];
 
       if (templateAttr) {
         const correctType = mapTemplateTypeToFieldType(
           templateAttr.type ?? 'text'
         );
-        // Se o tipo está diferente, corrigir
         if (field.type !== correctType) {
           return { ...field, type: correctType };
         }
@@ -155,6 +153,48 @@ function migrateConfigFields(
     }
     return field;
   });
+
+  // 2. Sincronizar campos base com a definição atual
+  const baseFields = getEntityFields('products');
+  const filteredBaseFields = baseFields.filter(f => f.key !== 'templateId');
+  const validBaseKeys = new Set(filteredBaseFields.map(f => f.key));
+  const savedBaseKeys = new Set(
+    migrated.filter(f => !f.key.startsWith('attributes.')).map(f => f.key)
+  );
+
+  // Remover campos base que não existem mais na definição
+  migrated = migrated.filter(
+    f => f.key.startsWith('attributes.') || validBaseKeys.has(f.key)
+  );
+
+  // Adicionar campos base que estão faltando
+  let nextOrder = migrated.length;
+  for (const field of filteredBaseFields) {
+    if (!savedBaseKeys.has(field.key)) {
+      migrated.push({
+        key: field.key,
+        label: field.label,
+        customLabel: undefined,
+        enabled: false,
+        order: nextOrder++,
+        type: field.type,
+        required: field.required,
+        defaultValue: field.defaultValue,
+        options: field.options,
+        referenceEntity:
+          field.referenceEntity as ImportFieldConfig['referenceEntity'],
+        referenceDisplayField: field.referenceDisplayField,
+        minLength: field.validation?.minLength,
+        maxLength: field.validation?.maxLength,
+        min: field.validation?.min,
+        max: field.validation?.max,
+        pattern: field.validation?.pattern,
+        patternMessage: field.validation?.patternMessage,
+      });
+    }
+  }
+
+  return migrated;
 }
 
 function createConfigForTemplate(
@@ -174,10 +214,8 @@ function createConfigForTemplate(
       required: field.required,
       defaultValue: field.defaultValue,
       options: field.options,
-      referenceEntity: field.referenceEntity as
-        | 'suppliers'
-        | 'manufacturers'
-        | undefined,
+      referenceEntity:
+        field.referenceEntity as ImportFieldConfig['referenceEntity'],
       referenceDisplayField: field.referenceDisplayField,
       minLength: field.validation?.minLength,
       maxLength: field.validation?.maxLength,
@@ -359,7 +397,7 @@ export default function ProductsConfigPage() {
     saveActiveConfigId(id);
     setConfig({ ...config, name, updatedAt: new Date() });
 
-    toast.success('Configuracao salva!');
+    toast.success('Configuração salva!');
     setConfigName('');
   };
 
@@ -386,7 +424,7 @@ export default function ProductsConfigPage() {
       });
       setActiveConfigId(id);
       saveActiveConfigId(id);
-      toast.success('Configuracao carregada!');
+      toast.success('Configuração carregada!');
     }
   };
 
@@ -401,7 +439,7 @@ export default function ProductsConfigPage() {
       saveActiveConfigId(null);
     }
 
-    toast.success('Configuracao excluida!');
+    toast.success('Configuração excluída!');
   };
 
   const handleResetConfig = () => {
@@ -442,7 +480,7 @@ export default function ProductsConfigPage() {
   return (
     <PageLayout backgroundVariant="none" maxWidth="full">
       <Header
-        title="Configurar Importacao de Produtos"
+        title="Configurar Importação de Produtos"
         description="Selecione o template e configure os campos"
         buttons={[
           {
@@ -546,7 +584,7 @@ export default function ProductsConfigPage() {
                       Configurar Campos
                     </CardTitle>
                     <CardDescription>
-                      Habilite e configure os campos que serao importados
+                      Habilite e configure os campos que serão importados
                     </CardDescription>
                   </div>
                 </div>
@@ -566,18 +604,18 @@ export default function ProductsConfigPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Salvar Configuracao</CardTitle>
+                <CardTitle className="text-base">Salvar Configuração</CardTitle>
                 <CardDescription>
                   Salve para reutilizar com este template
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-sm">Nome da configuracao</Label>
+                  <Label className="text-sm">Nome da configuração</Label>
                   <Input
                     value={configName}
                     onChange={e => setConfigName(e.target.value)}
-                    placeholder={`${selectedTemplate?.name} - Padrao`}
+                    placeholder={`${selectedTemplate?.name} - Padrão`}
                   />
                 </div>
                 <Button className="w-full" onClick={handleSaveConfig}>
@@ -591,10 +629,10 @@ export default function ProductsConfigPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">
-                    Configuracoes Salvas
+                    Configurações Salvas
                   </CardTitle>
                   <CardDescription>
-                    Configuracoes salvas para produtos
+                    Configurações salvas para produtos
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -671,7 +709,7 @@ export default function ProductsConfigPage() {
                   onClick={handleResetConfig}
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
-                  Resetar para Padrao
+                  Resetar para Padrão
                 </Button>
               </CardContent>
             </Card>
@@ -698,7 +736,7 @@ export default function ProductsConfigPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      Campos obrigatorios
+                      Campos obrigatórios
                     </span>
                     <span className="font-medium">
                       {config.fields.filter(f => f.required).length}
