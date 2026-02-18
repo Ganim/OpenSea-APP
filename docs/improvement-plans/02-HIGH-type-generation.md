@@ -9,11 +9,13 @@
 ## O que foi feito
 
 ### 1. Exportar Swagger do backend (commit API `087b91f`)
+
 - Criado `OpenSea-API/scripts/export-swagger.ts`
 - Usa `writeFileSync` (Sentry poluia stdout)
 - Gera `swagger.json` direto em `OpenSea-APP/swagger/`
 
 ### 2. Pipeline de geracao (commit APP `3e8f3fa`)
+
 - Scripts no package.json:
   - `api:export` - exporta swagger do backend
   - `api:generate` - gera types com `swagger-typescript-api`
@@ -23,8 +25,8 @@
 
 ### 3. Fragmentar monolitos em modulos
 
-| Arquivo original | Linhas | Destino | Arquivos | Commit |
-|------------------|--------|---------|----------|--------|
+| Arquivo original | Linhas | Destino             | Arquivos            | Commit    |
+| ---------------- | ------ | ------------------- | ------------------- | --------- |
 | `stock.ts`       | 1.721  | `src/types/stock/`  | 16 files + index.ts | `ca70229` |
 | `hr.ts`          | 502    | `src/types/hr/`     | 3 files + index.ts  | `4873ebb` |
 | `auth.ts`        | 341    | `src/types/auth/`   | 2 files + index.ts  | `13390a5` |
@@ -52,11 +54,13 @@ src/types/
 ```
 
 ### 5. Backwards compatibility
+
 - Root shims mantidos: `pagination.ts`, `enums.ts`, `dashboard.ts`, `tenant.ts`
 - Imports `from '@/types/stock'` continuam funcionando (barrel index.ts)
 - Conflitos auth/rbac resolvidos com exports seletivos
 
 ### 6. Documentacao
+
 - `src/types/README.md` - guia rapido para agentes/devs
 - `CLAUDE.md` - secao "Frontend Types Architecture" atualizada
 

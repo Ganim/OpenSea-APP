@@ -1,6 +1,6 @@
 # ALTA: Quebrar Componentes Grandes
 
-**Status**: ✅ CONCLUÍDO 
+**Status**: ✅ CONCLUÍDO
 **Meta**: Nenhum arquivo com mais de 300 linhas (exceto types)
 **Esforco**: ~6h → 4h investidas (entity-form 2h, api-client 1h, hooks factory 1h)
 
@@ -111,14 +111,16 @@ src/types/stock/
 Os 16+ hooks de stock repetem o mesmo pattern. Criado factory:
 
 **Implementação:**
+
 - `src/hooks/create-crud-hooks.ts` - Factory genérico para hooks CRUD
 - Gera automaticamente: useList, useGet, useCreate, useUpdate, useDelete
 - Gerenciamento automático de query keys e invalidação de cache
 - Suporte para customização via options
 
 **Exemplos de uso (3 hooks refatorados):**
+
 1. `use-tags.ts` - Tags usando createCrudHooks
-2. `use-volumes-crud.ts` - Volumes usando createCrudHooks  
+2. `use-volumes-crud.ts` - Volumes usando createCrudHooks
 3. `use-label-templates-crud.ts` - Label Templates usando createCrudHooks
 
 **Resultado**: Hooks CRUD reduzidos de ~50 linhas para ~15 linhas. Código mais consistente e fácil de manter.
@@ -161,11 +163,13 @@ export const productHooks = createCrudHooks<Product>({
 **Progresso**: 4/4 tarefas principais concluídas (100%)
 
 **Arquivos refatorados**:
+
 - entity-form.tsx: 663→196 linhas (70% redução)
-- api-client.ts: 479→220 linhas (54% redução)  
+- api-client.ts: 479→220 linhas (54% redução)
 - 3 novos hooks usando factory (90% redução de código)
 
 **Benefícios alcançados**:
+
 - ✅ Arquivos menores e mais focados
 - ✅ Separação clara de responsabilidades
 - ✅ Maior testabilidade (módulos independentes)

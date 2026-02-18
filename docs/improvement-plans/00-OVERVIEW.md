@@ -2,17 +2,17 @@
 
 ## Resultado da Auditoria: B+ (7.5/10)
 
-| Aspecto               | Nota   | Status | Arquivo do Plano                 |
-| --------------------- | ------ | ------ | -------------------------------- |
-| Testes                | D      |        | `01-CRITICAL-testing.md`         |
-| Console.log / Logging | A+     | DONE   | `01-CRITICAL-logging.md`         |
-| ESLint / TypeScript   | A      | DONE   | `02-HIGH-eslint-typescript.md`   |
-| Componentes Grandes   | A-     | DONE   | `02-HIGH-component-splitting.md` |
-| Type Generation       | A-     | DONE   | `02-HIGH-type-generation.md`     |
-| Performance           | A-     | DONE   | `03-MEDIUM-performance.md`       |
-| Acessibilidade        | A-     | DONE   | `03-MEDIUM-accessibility.md`     |
-| CSS Organization      | B+     |        | `03-MEDIUM-css-organization.md`  |
-| Extras                | -      |        | `04-LOW-extras.md`               |
+| Aspecto               | Nota | Status | Arquivo do Plano                 |
+| --------------------- | ---- | ------ | -------------------------------- |
+| Testes                | D    |        | `01-CRITICAL-testing.md`         |
+| Console.log / Logging | A+   | DONE   | `01-CRITICAL-logging.md`         |
+| ESLint / TypeScript   | A    | DONE   | `02-HIGH-eslint-typescript.md`   |
+| Componentes Grandes   | A-   | DONE   | `02-HIGH-component-splitting.md` |
+| Type Generation       | A-   | DONE   | `02-HIGH-type-generation.md`     |
+| Performance           | A-   | DONE   | `03-MEDIUM-performance.md`       |
+| Acessibilidade        | A-   | DONE   | `03-MEDIUM-accessibility.md`     |
+| CSS Organization      | B+   |        | `03-MEDIUM-css-organization.md`  |
+| Extras                | -    |        | `04-LOW-extras.md`               |
 
 ## Progresso
 
@@ -63,10 +63,10 @@ Pendente - Types (não bloqueante):
 
 ## Estimativa Restante
 
-| Prioridade | Esforco  | Timeline        |
-| ---------- | -------- | --------------- |
-| ~~Critica~~    | ~~30h~~ DONE | -               |
-| Alta       | ~14h     | 1 semana        |
-| Media      | ~10h     | 1 semana        |
-| Baixa      | ~20h     | quando possivel |
-| **Total restante** | **~44h** | **~2-3 semanas** |
+| Prioridade         | Esforco      | Timeline         |
+| ------------------ | ------------ | ---------------- |
+| ~~Critica~~        | ~~30h~~ DONE | -                |
+| Alta               | ~14h         | 1 semana         |
+| Media              | ~10h         | 1 semana         |
+| Baixa              | ~20h         | quando possivel  |
+| **Total restante** | **~44h**     | **~2-3 semanas** |

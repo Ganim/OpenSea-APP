@@ -118,12 +118,14 @@ const renderGridCard = useCallback((item: Product, isSelected: boolean) => {
 **Status**: CONCLUÍDO
 
 **Implementação**:
+
 - Instalado: `webpack-bundle-analyzer` e `cross-env`
 - Configurado em `next.config.ts` com ativação via ANALYZE=true
 - Adicionado script `npm run analyze` no package.json
 - Gera relatórios HTML para cliente e servidor
 
 **Uso**:
+
 ```bash
 npm run analyze
 ```
@@ -236,18 +238,21 @@ class TokenCache {
 **Progresso**: 6/9 tarefas concluídas (core completo)
 
 **Otimizações implementadas**:
+
 - ✅ Dynamic imports: ~700KB removido do bundle principal
 - ✅ Memoization: EntityForm + EntityFormField
 - ✅ Bundle analyzer: npm run analyze
 - ✅ Token cache: 1s TTL para localStorage
 
 **Impacto esperado**:
+
 - Bundle inicial reduzido significativamente
 - Lazy loading de features pesadas (GrapesJS, @react-pdf)
 - Menos re-renders em formulários complexos
 - Menos acessos ao localStorage
 
 **Próximos passos opcionais**:
+
 - [ ] Analisar bundle com npm run analyze para identificar outras oportunidades
 - [ ] Considerar code splitting adicional se chunks ainda estiverem grandes
 - [ ] Memoizar renderCard/renderGrid functions em páginas de lista (se profiling indicar necessidade)
