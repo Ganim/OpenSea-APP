@@ -3,14 +3,12 @@
 import { AuthBackground } from '@/components/ui/auth-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp';
-import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
@@ -19,19 +17,11 @@ import { logger } from '@/lib/logger';
 import {
   getSavedAccounts,
   removeAccount,
+  saveAccount,
   type SavedAccount,
 } from '@/lib/saved-accounts';
 import { authService } from '@/services/auth/auth.service';
-import { saveAccount } from '@/lib/saved-accounts';
-import {
-  ChevronLeft,
-  ChevronRight,
-  KeyRound,
-  Lock,
-  Plus,
-  UserPlus,
-  X,
-} from 'lucide-react';
+import { Lock, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -51,18 +41,15 @@ export default function FastLoginPage() {
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Carrega contas após hidratação e redireciona se não há
   useEffect(() => {
     setIsMounted(true);
     const accounts = getSavedAccounts();
     setSavedAccounts(accounts);
 
-    // Verifica se veio de uma sessão expirada
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('session') === 'expired') {
         setSessionExpired(true);
-        // Remove o parâmetro da URL
         window.history.replaceState({}, '', '/fast-login');
       }
     }
@@ -75,6 +62,8 @@ export default function FastLoginPage() {
   const handleSelectAccount = (account: SavedAccount) => {
     setSelectedAccount(account);
     setPassword('');
+    setAccessPin('');
+    setUsePinLogin(true);
     setError('');
   };
 
@@ -82,7 +71,7 @@ export default function FastLoginPage() {
     setSelectedAccount(null);
     setPassword('');
     setAccessPin('');
-    setUsePinLogin(false);
+    setUsePinLogin(true);
     setError('');
   };
 
@@ -92,12 +81,10 @@ export default function FastLoginPage() {
     const updated = getSavedAccounts();
     setSavedAccounts(updated);
 
-    // Se removeu a conta selecionada, volta para a lista
     if (selectedAccount?.identifier === identifier) {
       setSelectedAccount(null);
     }
 
-    // Se não há mais contas, redireciona para login
     if (updated.length === 0) {
       router.replace('/login');
     }
@@ -106,20 +93,17 @@ export default function FastLoginPage() {
   const handlePostLogin = async (
     response: import('@/types/auth').AuthResponse
   ) => {
-    // Check if PIN setup is required
     const user = response.user;
     if (user.forceAccessPinSetup || user.forceActionPinSetup) {
       router.push('/setup-pins');
       return;
     }
 
-    // Super admins go straight to dashboard
     if (user.isSuperAdmin) {
       router.push('/');
       return;
     }
 
-    // Fetch tenants
     const tenantsList = await refreshTenants();
 
     if (tenantsList.length === 1) {
@@ -144,13 +128,11 @@ export default function FastLoginPage() {
 
     try {
       if (usePinLogin) {
-        // PIN login
         const response = await authService.loginWithPin({
           userId: selectedAccount.id,
           accessPin,
         });
 
-        // Save account for fast login
         const u = response.user;
         saveAccount({
           id: u.id,
@@ -163,19 +145,16 @@ export default function FastLoginPage() {
 
         await handlePostLogin(response);
       } else {
-        // Password login
         const result = await login({
           email: selectedAccount.identifier,
           password,
         });
         if (!result.redirected) {
-          // Super admins vão direto para o dashboard
           if (result.isSuperAdmin) {
             router.push('/');
             return;
           }
 
-          // Busca os tenants do usuário
           const tenantsList = await refreshTenants();
 
           if (tenantsList.length === 1) {
@@ -202,20 +181,6 @@ export default function FastLoginPage() {
       .slice(0, 2);
   };
 
-  const formatLastLogin = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Hoje';
-    if (diffDays === 1) return 'Ontem';
-    if (diffDays < 7) return `${diffDays} dias atrás`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} semanas atrás`;
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  // Se não há contas, mostra loading (vai redirecionar)
   if (!isMounted || savedAccounts.length === 0) {
     return (
       <AuthBackground>
@@ -230,298 +195,255 @@ export default function FastLoginPage() {
     <AuthBackground>
       <ThemeToggle />
 
-      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 shadow-2xl shadow-blue-600/40 mb-4">
-              <span className="text-3xl">🌊</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              OpenSea
-            </h1>
-            <p className="text-gray-600 dark:text-white/60">
-              {selectedAccount
-                ? usePinLogin
-                  ? 'Digite seu PIN de Acesso'
-                  : 'Digite sua senha para entrar'
-                : 'Selecione uma conta para continuar'}
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+        {/* Session expired banner */}
+        {sessionExpired && (
+          <div className="mb-8 px-6 py-3 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 animate-in fade-in slide-in-from-top-2 duration-300">
+            <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
+              Sua sessão expirou. Por favor, faça login novamente.
             </p>
           </div>
+        )}
 
-          {/* Card */}
-          <Card className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-            <CardContent className="p-6 sm:p-8">
-              {/* Session expired message */}
-              {sessionExpired && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 animate-in fade-in slide-in-from-top-2 duration-200 mb-6">
-                  <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
-                    Sua sessão expirou. Por favor, faça login novamente.
-                  </p>
-                </div>
-              )}
+        {/* Error banner */}
+        {error && (
+          <div className="mb-8 px-6 py-3 rounded-full bg-red-500/10 dark:bg-red-500/15 border border-red-500/30 animate-in fade-in slide-in-from-top-2 duration-300">
+            <p className="text-sm text-red-600 dark:text-red-400 text-center">
+              {error}
+            </p>
+          </div>
+        )}
 
-              {/* Error message */}
-              {error && (
-                <div className="p-4 rounded-2xl bg-red-500/10 dark:bg-red-500/20 border border-red-500/30 animate-in fade-in slide-in-from-top-2 duration-200 mb-6">
-                  <p className="text-sm text-red-600 dark:text-red-400 text-center">
-                    {error}
-                  </p>
-                </div>
-              )}
+        {/* ── Profile Selection (Netflix-style) ── */}
+        {!selectedAccount && (
+          <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-10 tracking-tight">
+              Bem-vindo de volta
+            </h1>
 
-              {/* Account Selection */}
-              {!selectedAccount && (
-                <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
-                  {savedAccounts.map(account => (
-                    <button
-                      key={account.id}
-                      type="button"
-                      onClick={() => handleSelectAccount(account)}
-                      className="w-full flex items-center gap-4 p-4 rounded-2xl border border-gray-200 hover:border-blue-300 dark:border-gray-700 bg-blue-100/30 hover:bg-blue-100/60 dark:hover:bg-blue-800/50 dark:bg-blue-800/30 transition-all duration-200 group cursor-pointer"
-                    >
-                      <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-blue-600">
-                        <AvatarImage src={account.avatarUrl || undefined} />
-                        <AvatarFallback className="bg-blue-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-sm font-semibold">
-                          {getInitials(account.displayName)}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1 text-left min-w-0">
-                        <p className="font-semibold text-gray-900 dark:text-white truncate">
-                          {account.displayName}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                          {account.identifier}
-                        </p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                          Último acesso: {formatLastLogin(account.lastLoginAt)}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={e =>
-                            handleRemoveAccount(
-                              e as React.MouseEvent,
-                              account.identifier
-                            )
-                          }
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              // Call remove without the event parameter for keyboard
-                              const mockEvent = {
-                                preventDefault: () => {},
-                              } as React.MouseEvent;
-                              handleRemoveAccount(
-                                mockEvent,
-                                account.identifier
-                              );
-                            }
-                          }}
-                          className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
-                          title="Remover conta"
-                          aria-label="Remover conta"
-                        >
-                          <X className="w-4 h-4" />
-                        </span>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      </div>
-                    </button>
-                  ))}
-
-                  {/* Divider */}
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white dark:bg-gray-900 px-3 text-gray-500 dark:text-gray-400">
-                        ou
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Other options */}
-                  <Link
-                    href="/login"
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200"
-                  >
-                    <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Plus className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        Usar outra conta
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Entrar com uma conta diferente
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                  </Link>
-
-                  <Link
-                    href="/register"
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200"
-                  >
-                    <div className="h-12 w-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                      <UserPlus className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        Criar nova conta
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Cadastre-se no OpenSea
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                  </Link>
-                </div>
-              )}
-
-              {/* Password Entry */}
-              {selectedAccount && (
-                <form
-                  onSubmit={handleLogin}
-                  className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300"
+            {/* Profile avatars row */}
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-12">
+              {savedAccounts.map(account => (
+                <button
+                  key={account.id}
+                  type="button"
+                  onClick={() => handleSelectAccount(account)}
+                  className="group relative flex flex-col items-center gap-3 p-4 sm:p-5 rounded-2xl bg-transparent hover:bg-blue-500/10 dark:hover:bg-blue-400/10 transition-all duration-300 cursor-pointer"
                 >
-                  {/* Selected account info */}
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/50">
-                    <Avatar className="h-12 w-12 ring-2 ring-blue-200 dark:ring-blue-800">
-                      <AvatarImage
-                        src={selectedAccount.avatarUrl || undefined}
-                      />
-                      <AvatarFallback className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-sm font-semibold">
-                        {getInitials(selectedAccount.displayName)}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-white truncate">
-                        {selectedAccount.displayName}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                        {selectedAccount.identifier}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      className="p-2 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Password / PIN field */}
-                  {usePinLogin ? (
-                    <div className="space-y-2">
-                      <Label>PIN de Acesso (6 dígitos)</Label>
-                      <div className="flex justify-center">
-                        <InputOTP
-                          maxLength={6}
-                          value={accessPin}
-                          onChange={setAccessPin}
-                          autoFocus
-                        >
-                          <InputOTPGroup>
-                            <InputOTPSlot index={0} masked />
-                            <InputOTPSlot index={1} masked />
-                            <InputOTPSlot index={2} masked />
-                            <InputOTPSlot index={3} masked />
-                            <InputOTPSlot index={4} masked />
-                            <InputOTPSlot index={5} masked />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Senha</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={e => setPassword(e.target.value)}
-                          autoFocus
-                          className="pl-12"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Toggle PIN/Password + Forgot password */}
-                  <div className="flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUsePinLogin(!usePinLogin);
-                        setPassword('');
-                        setAccessPin('');
-                        setError('');
-                      }}
-                      className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
-                    >
-                      {usePinLogin ? (
-                        <>
-                          <Lock className="w-3.5 h-3.5" />
-                          Usar senha
-                        </>
-                      ) : (
-                        <>
-                          <KeyRound className="w-3.5 h-3.5" />
-                          Usar PIN de Acesso
-                        </>
-                      )}
-                    </button>
-                    {!usePinLogin && (
-                      <Link
-                        href="/forgot-password"
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium"
-                      >
-                        Esqueceu a senha?
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleBack}
-                      className="flex-1"
-                      size="lg"
-                    >
-                      <ChevronLeft className="w-5 h-5 mr-2" />
-                      Voltar
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1"
-                      disabled={
-                        isLoading ||
-                        (usePinLogin ? accessPin.length !== 6 : !password)
+                  {/* Remove button */}
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={e =>
+                      handleRemoveAccount(
+                        e as React.MouseEvent,
+                        account.identifier
+                      )
+                    }
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleRemoveAccount(
+                          e as unknown as React.MouseEvent,
+                          account.identifier
+                        );
                       }
-                      size="lg"
-                    >
-                      {isLoading ? 'Entrando...' : 'Entrar'}
-                    </Button>
-                  </div>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    }}
+                    className="absolute top-2 right-2 p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                    title="Remover conta"
+                    aria-label="Remover conta"
+                  >
+                    <X className="w-4 h-4" />
+                  </span>
+
+                  {/* Large avatar */}
+                  <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-3 ring-transparent group-hover:ring-blue-500/50 transition-all duration-300 shadow-lg group-hover:shadow-blue-500/20">
+                    <AvatarImage src={account.avatarUrl || undefined} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl sm:text-3xl font-bold">
+                      {getInitials(account.displayName)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  {/* Name */}
+                  <span className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 max-w-[120px] truncate">
+                    {account.displayName}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* "Entrar com outra conta" */}
+            <Link href="/login">
+              <Button
+                variant="ghost"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              >
+                Entrar com outra conta
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* ── PIN Entry Screen ── */}
+        {selectedAccount && usePinLogin && (
+          <form
+            onSubmit={handleLogin}
+            className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 w-full max-w-md"
+          >
+            {/* Avatar of selected user */}
+            <Avatar className="h-20 w-20 mb-6 ring-3 ring-blue-500/30 shadow-lg shadow-blue-500/10">
+              <AvatarImage src={selectedAccount.avatarUrl || undefined} />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-bold">
+                {getInitials(selectedAccount.displayName)}
+              </AvatarFallback>
+            </Avatar>
+
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              {selectedAccount.displayName}
+            </p>
+
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-8 tracking-tight">
+              Digite o PIN de acesso
+            </h1>
+
+            {/* Large OTP input */}
+            <div className="flex justify-center mb-8">
+              <InputOTP
+                maxLength={6}
+                value={accessPin}
+                onChange={setAccessPin}
+                autoFocus
+              >
+                <InputOTPGroup className="gap-2 sm:gap-3">
+                  {[0, 1, 2, 3, 4, 5].map(i => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      masked
+                      className="h-14 w-12 sm:h-16 sm:w-14 text-2xl border rounded-lg border-gray-300 dark:border-gray-600"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            {/* Submit button (only visible when PIN complete) */}
+            {accessPin.length === 6 && (
+              <Button
+                type="submit"
+                disabled={isLoading}
+                size="lg"
+                className="mb-6 min-w-[160px] animate-in fade-in zoom-in-95 duration-200"
+              >
+                {isLoading ? 'Entrando...' : 'Entrar'}
+              </Button>
+            )}
+
+            {/* "Entrar com uma senha" */}
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => {
+                setUsePinLogin(false);
+                setAccessPin('');
+                setError('');
+              }}
+              className="text-blue-600 dark:text-blue-400 mb-2"
+            >
+              <Lock className="w-4 h-4 mr-1.5" />
+              Entrar com uma senha
+            </Button>
+
+            {/* "Entrar com outra conta" */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleBack}
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              Entrar com outra conta
+            </Button>
+          </form>
+        )}
+
+        {/* ── Password Entry Screen ── */}
+        {selectedAccount && !usePinLogin && (
+          <form
+            onSubmit={handleLogin}
+            className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 w-full max-w-sm"
+          >
+            {/* Avatar of selected user */}
+            <Avatar className="h-20 w-20 mb-6 ring-3 ring-blue-500/30 shadow-lg shadow-blue-500/10">
+              <AvatarImage src={selectedAccount.avatarUrl || undefined} />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-bold">
+                {getInitials(selectedAccount.displayName)}
+              </AvatarFallback>
+            </Avatar>
+
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              {selectedAccount.displayName}
+            </p>
+
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-8 tracking-tight">
+              Digite sua senha
+            </h1>
+
+            {/* Password input */}
+            <div className="relative w-full mb-6">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 z-10 pointer-events-none" />
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoFocus
+                className="pl-12 h-12 text-base"
+              />
+            </div>
+
+            {/* Forgot password */}
+            <Link
+              href="/forgot-password"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium mb-6"
+            >
+              Esqueceu a senha?
+            </Link>
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={isLoading || !password}
+              size="lg"
+              className="mb-6 min-w-[160px]"
+            >
+              {isLoading ? 'Entrando...' : 'Entrar'}
+            </Button>
+
+            {/* "Entrar com PIN" */}
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => {
+                setUsePinLogin(true);
+                setPassword('');
+                setError('');
+              }}
+              className="text-blue-600 dark:text-blue-400 mb-2"
+            >
+              Entrar com PIN de Acesso
+            </Button>
+
+            {/* "Entrar com outra conta" */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleBack}
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              Entrar com outra conta
+            </Button>
+          </form>
+        )}
       </div>
     </AuthBackground>
   );

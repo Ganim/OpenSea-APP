@@ -259,18 +259,6 @@ export default function LoginPage() {
             </CardContent>
           </Card>
 
-          {/* Register link */}
-          <div className="mt-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-            <p className="text-gray-600 dark:text-white/60">
-              Não tem uma conta?{' '}
-              <Link
-                href="/register"
-                className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-              >
-                Criar conta
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </AuthBackground>
