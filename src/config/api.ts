@@ -306,6 +306,33 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/v1/notification-preferences/${id}`,
     DELETE: (id: string) => `/v1/notification-preferences/${id}`,
   },
+  // Email
+  EMAIL: {
+    ACCOUNTS: {
+      LIST: '/v1/email/accounts',
+      GET: (id: string) => `/v1/email/accounts/${id}`,
+      CREATE: '/v1/email/accounts',
+      UPDATE: (id: string) => `/v1/email/accounts/${id}`,
+      DELETE: (id: string) => `/v1/email/accounts/${id}`,
+      TEST: (id: string) => `/v1/email/accounts/${id}/test`,
+      SYNC: (id: string) => `/v1/email/accounts/${id}/sync`,
+      SHARE: (id: string) => `/v1/email/accounts/${id}/share`,
+      UNSHARE: (id: string, userId: string) =>
+        `/v1/email/accounts/${id}/share/${userId}`,
+    },
+    FOLDERS: {
+      LIST: '/v1/email/folders',
+    },
+    MESSAGES: {
+      LIST: '/v1/email/messages',
+      GET: (id: string) => `/v1/email/messages/${id}`,
+      DRAFT: '/v1/email/messages/draft',
+      SEND: '/v1/email/messages/send',
+      MARK_READ: (id: string) => `/v1/email/messages/${id}/read`,
+      MOVE: (id: string) => `/v1/email/messages/${id}/move`,
+      DELETE: (id: string) => `/v1/email/messages/${id}`,
+    },
+  },
   // RBAC - Permissions
   RBAC: {
     PERMISSIONS: {
@@ -446,6 +473,65 @@ export const API_ENDPOINTS = {
     REGISTER_PAYMENT: (id: string) => `/v1/finance/consortia/${id}/payments`,
     MARK_CONTEMPLATED: (id: string) =>
       `/v1/finance/consortia/${id}/contemplated`,
+  },
+  // Storage - Folders
+  STORAGE: {
+    FOLDERS: {
+      CREATE: '/v1/storage/folders',
+      GET: (id: string) => `/v1/storage/folders/${id}`,
+      CONTENTS: (id: string) => `/v1/storage/folders/${id}/contents`,
+      ROOT_CONTENTS: '/v1/storage/folders/root/contents',
+      UPDATE: (id: string) => `/v1/storage/folders/${id}`,
+      RENAME: (id: string) => `/v1/storage/folders/${id}/rename`,
+      MOVE: (id: string) => `/v1/storage/folders/${id}/move`,
+      DELETE: (id: string) => `/v1/storage/folders/${id}`,
+      BREADCRUMB: (id: string) => `/v1/storage/folders/${id}/breadcrumb`,
+      SEARCH: '/v1/storage/folders/search',
+      INITIALIZE: '/v1/storage/folders/initialize',
+      ENSURE_ENTITY: '/v1/storage/folders/ensure-entity',
+      ACCESS: {
+        LIST: (id: string) => `/v1/storage/folders/${id}/access`,
+        SET: (id: string) => `/v1/storage/folders/${id}/access`,
+        REMOVE: (id: string, ruleId: string) =>
+          `/v1/storage/folders/${id}/access/${ruleId}`,
+      },
+    },
+    FILES: {
+      UPLOAD: (folderId: string) => `/v1/storage/folders/${folderId}/files`,
+      LIST: '/v1/storage/files',
+      GET: (id: string) => `/v1/storage/files/${id}`,
+      DOWNLOAD: (id: string) => `/v1/storage/files/${id}/download`,
+      RENAME: (id: string) => `/v1/storage/files/${id}/rename`,
+      MOVE: (id: string) => `/v1/storage/files/${id}/move`,
+      DELETE: (id: string) => `/v1/storage/files/${id}`,
+      VERSIONS: {
+        LIST: (id: string) => `/v1/storage/files/${id}/versions`,
+        UPLOAD: (id: string) => `/v1/storage/files/${id}/versions`,
+        RESTORE: (id: string, vId: string) =>
+          `/v1/storage/files/${id}/versions/${vId}/restore`,
+      },
+    },
+    SEARCH: '/v1/storage/search',
+    STATS: '/v1/storage/stats',
+  },
+  // Calendar
+  CALENDAR: {
+    EVENTS: {
+      LIST: '/v1/calendar/events',
+      GET: (id: string) => `/v1/calendar/events/${id}`,
+      CREATE: '/v1/calendar/events',
+      UPDATE: (id: string) => `/v1/calendar/events/${id}`,
+      DELETE: (id: string) => `/v1/calendar/events/${id}`,
+      INVITE: (eventId: string) =>
+        `/v1/calendar/events/${eventId}/participants`,
+      RESPOND: (eventId: string) =>
+        `/v1/calendar/events/${eventId}/respond`,
+      REMOVE_PARTICIPANT: (eventId: string, userId: string) =>
+        `/v1/calendar/events/${eventId}/participants/${userId}`,
+      MANAGE_REMINDERS: (eventId: string) =>
+        `/v1/calendar/events/${eventId}/reminders`,
+      EXPORT: '/v1/calendar/events/export',
+    },
   },
   // Health
   HEALTH: '/health',

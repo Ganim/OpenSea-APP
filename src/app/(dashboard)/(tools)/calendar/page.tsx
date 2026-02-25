@@ -16,9 +16,13 @@ import { useCalendarEvents } from '@/hooks/calendar';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/contexts/auth-context';
 import { CALENDAR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { apiConfig, authConfig } from '@/config/api';
+import { calendarEventsService } from '@/services/calendar';
 import type { CalendarEvent, EventType } from '@/types/calendar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { Calendar, Download, Plus } from 'lucide-react';
 
 const LEGEND_TYPES: EventType[] = [
   'MEETING', 'TASK', 'REMINDER', 'DEADLINE', 'HOLIDAY',
@@ -93,24 +97,59 @@ export default function CalendarPage() {
     setEditDialogOpen(true);
   }, []);
 
+  const handleExport = useCallback(async () => {
+    try {
+      const exportPath = calendarEventsService.getExportUrl({
+        ...dateRange,
+        type: selectedType,
+        includeSystemEvents,
+      });
+      const token = localStorage.getItem(authConfig.tokenKey);
+      const url = new URL(exportPath, apiConfig.baseURL);
+
+      const response = await fetch(url.toString(), {
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      });
+
+      if (!response.ok) throw new Error('Falha ao exportar');
+
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = 'opensea-agenda.ics';
+      a.click();
+      URL.revokeObjectURL(downloadUrl);
+      toast.success('Agenda exportada com sucesso');
+    } catch {
+      toast.error('Erro ao exportar agenda');
+    }
+  }, [dateRange, selectedType, includeSystemEvents]);
+
+  const actionButtons: HeaderButton[] = [];
+  if (canCreate) {
+    actionButtons.push({
+      id: 'new-event',
+      title: 'Novo Evento',
+      icon: Plus,
+      onClick: () => setCreateDialogOpen(true),
+    });
+  }
+  actionButtons.push({
+    id: 'export-ical',
+    title: 'Exportar iCal',
+    icon: Download,
+    variant: 'outline',
+    onClick: handleExport,
+  });
+
   return (
     <ProtectedRoute requiredPermission={CALENDAR_PERMISSIONS.EVENTS.LIST}>
     <div className="space-y-6">
       {/* Action Bar */}
       <PageActionBar
         breadcrumbItems={[{ label: 'Agenda', href: '/calendar' }]}
-        buttons={
-          canCreate
-            ? [
-                {
-                  id: 'new-event',
-                  title: 'Novo Evento',
-                  icon: Plus,
-                  onClick: () => setCreateDialogOpen(true),
-                },
-              ]
-            : []
-        }
+        buttons={actionButtons}
       />
 
       {/* Hero Card */}

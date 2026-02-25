@@ -109,4 +109,21 @@ export const calendarEventsService = {
       data,
     );
   },
+
+  getExportUrl(params: {
+    startDate: string;
+    endDate: string;
+    type?: string;
+    includeSystemEvents?: boolean;
+  }): string {
+    const query = new URLSearchParams({
+      startDate: params.startDate,
+      endDate: params.endDate,
+    });
+    if (params.type) query.append('type', params.type);
+    if (params.includeSystemEvents !== undefined) {
+      query.append('includeSystemEvents', String(params.includeSystemEvents));
+    }
+    return `${API_ENDPOINTS.CALENDAR.EVENTS.EXPORT}?${query.toString()}`;
+  },
 };
