@@ -43,6 +43,19 @@ export const CORE_PERMISSIONS = {
     DUPLICATE: 'core.label-templates.duplicate',
     MANAGE: 'core.label-templates.manage',
   },
+  TEAMS: {
+    CREATE: 'core.teams.create',
+    READ: 'core.teams.read',
+    UPDATE: 'core.teams.update',
+    DELETE: 'core.teams.delete',
+    LIST: 'core.teams.list',
+    MANAGE: 'core.teams.manage',
+    MEMBERS: {
+      ADD: 'core.teams.members.add',
+      REMOVE: 'core.teams.members.remove',
+      MANAGE: 'core.teams.members.manage',
+    },
+  },
 } as const;
 
 // =============================================================================
@@ -485,6 +498,79 @@ export const HR_PERMISSIONS = {
 } as const;
 
 // =============================================================================
+// FINANCE - Gestão Financeira
+// =============================================================================
+
+export const FINANCE_PERMISSIONS = {
+  COMPANIES: {
+    CREATE: 'finance.companies.create',
+    READ: 'finance.companies.read',
+    UPDATE: 'finance.companies.update',
+    DELETE: 'finance.companies.delete',
+    LIST: 'finance.companies.list',
+    MANAGE: 'finance.companies.manage',
+  },
+  COST_CENTERS: {
+    CREATE: 'finance.cost-centers.create',
+    READ: 'finance.cost-centers.read',
+    UPDATE: 'finance.cost-centers.update',
+    DELETE: 'finance.cost-centers.delete',
+    LIST: 'finance.cost-centers.list',
+    MANAGE: 'finance.cost-centers.manage',
+  },
+  BANK_ACCOUNTS: {
+    CREATE: 'finance.bank-accounts.create',
+    READ: 'finance.bank-accounts.read',
+    UPDATE: 'finance.bank-accounts.update',
+    DELETE: 'finance.bank-accounts.delete',
+    LIST: 'finance.bank-accounts.list',
+    MANAGE: 'finance.bank-accounts.manage',
+  },
+  CATEGORIES: {
+    CREATE: 'finance.categories.create',
+    READ: 'finance.categories.read',
+    UPDATE: 'finance.categories.update',
+    DELETE: 'finance.categories.delete',
+    LIST: 'finance.categories.list',
+    MANAGE: 'finance.categories.manage',
+  },
+  ENTRIES: {
+    CREATE: 'finance.entries.create',
+    READ: 'finance.entries.read',
+    UPDATE: 'finance.entries.update',
+    DELETE: 'finance.entries.delete',
+    LIST: 'finance.entries.list',
+    PAY: 'finance.entries.pay',
+    CANCEL: 'finance.entries.cancel',
+    MANAGE: 'finance.entries.manage',
+  },
+  LOANS: {
+    CREATE: 'finance.loans.create',
+    READ: 'finance.loans.read',
+    UPDATE: 'finance.loans.update',
+    DELETE: 'finance.loans.delete',
+    LIST: 'finance.loans.list',
+    PAY: 'finance.loans.pay',
+    MANAGE: 'finance.loans.manage',
+  },
+  CONSORTIA: {
+    CREATE: 'finance.consortia.create',
+    READ: 'finance.consortia.read',
+    UPDATE: 'finance.consortia.update',
+    DELETE: 'finance.consortia.delete',
+    LIST: 'finance.consortia.list',
+    PAY: 'finance.consortia.pay',
+    MANAGE: 'finance.consortia.manage',
+  },
+  DASHBOARD: {
+    VIEW: 'finance.dashboard.view',
+  },
+  EXPORT: {
+    GENERATE: 'finance.export.generate',
+  },
+} as const;
+
+// =============================================================================
 // SELF - Operações do próprio usuário
 // =============================================================================
 
@@ -638,6 +724,55 @@ export const DATA_PERMISSIONS = {
 } as const;
 
 // =============================================================================
+// CALENDAR - Agenda Corporativa
+// =============================================================================
+
+export const CALENDAR_PERMISSIONS = {
+  EVENTS: {
+    CREATE: 'calendar.events.create',
+    READ: 'calendar.events.read',
+    UPDATE: 'calendar.events.update',
+    DELETE: 'calendar.events.delete',
+    LIST: 'calendar.events.list',
+    MANAGE: 'calendar.events.manage',
+  },
+  PARTICIPANTS: {
+    INVITE: 'calendar.participants.invite',
+    RESPOND: 'calendar.participants.respond',
+    MANAGE: 'calendar.participants.manage',
+  },
+  REMINDERS: {
+    CREATE: 'calendar.reminders.create',
+    DELETE: 'calendar.reminders.delete',
+  },
+} as const;
+
+// =============================================================================
+// EMAIL - Gestão de E-mails
+// =============================================================================
+
+export const EMAIL_PERMISSIONS = {
+  ACCOUNTS: {
+    CREATE: 'email.accounts.create',
+    READ: 'email.accounts.read',
+    UPDATE: 'email.accounts.update',
+    DELETE: 'email.accounts.delete',
+    LIST: 'email.accounts.list',
+    SHARE: 'email.accounts.share',
+  },
+  MESSAGES: {
+    READ: 'email.messages.read',
+    LIST: 'email.messages.list',
+    SEND: 'email.messages.send',
+    UPDATE: 'email.messages.update',
+    DELETE: 'email.messages.delete',
+  },
+  SYNC: {
+    EXECUTE: 'email.sync.execute',
+  },
+} as const;
+
+// =============================================================================
 // UI - Visibilidade de interface e menus
 // =============================================================================
 
@@ -654,6 +789,8 @@ export const UI_PERMISSIONS = {
     SETTINGS: 'ui.menu.settings',
     REQUESTS: 'ui.menu.requests',
     NOTIFICATIONS: 'ui.menu.notifications',
+    CALENDAR: 'ui.menu.calendar',
+    EMAIL: 'ui.menu.email',
     // Submenus
     STOCK_LOCATIONS: 'ui.menu.stock.locations',
     STOCK_PURCHASE_ORDERS: 'ui.menu.stock.purchase-orders',
@@ -702,6 +839,19 @@ export const UI_PERMISSIONS = {
     TIME_BANK: 'ui.menu.hr.time-bank',
     COMPANIES: 'ui.menu.hr.companies',
   },
+  FINANCE_SUBMENUS: {
+    OVERVIEW: 'ui.menu.finance.overview',
+    PAYABLE: 'ui.menu.finance.payable',
+    RECEIVABLE: 'ui.menu.finance.receivable',
+    BANK_ACCOUNTS: 'ui.menu.finance.bank-accounts',
+    COST_CENTERS: 'ui.menu.finance.cost-centers',
+    CATEGORIES: 'ui.menu.finance.categories',
+    COMPANIES: 'ui.menu.finance.companies',
+    LOANS: 'ui.menu.finance.loans',
+    CONSORTIA: 'ui.menu.finance.consortia',
+    CASHFLOW: 'ui.menu.finance.cashflow',
+    EXPORT: 'ui.menu.finance.export',
+  },
 } as const;
 
 // =============================================================================
@@ -728,11 +878,14 @@ export const PermissionCodes = {
   RBAC: RBAC_PERMISSIONS,
   AUDIT: AUDIT_PERMISSIONS,
   HR: HR_PERMISSIONS,
+  FINANCE: FINANCE_PERMISSIONS,
   SELF: SELF_PERMISSIONS,
   NOTIFICATIONS: NOTIFICATIONS_PERMISSIONS,
   SETTINGS: SETTINGS_PERMISSIONS,
   REPORTS: REPORTS_PERMISSIONS,
   DATA: DATA_PERMISSIONS,
+  CALENDAR: CALENDAR_PERMISSIONS,
+  EMAIL: EMAIL_PERMISSIONS,
   UI: UI_PERMISSIONS,
   WILDCARD: WILDCARD_PERMISSIONS,
 } as const;
@@ -778,11 +931,23 @@ export type HRPermission =
   | (typeof HR_PERMISSIONS.TIME_BANK)[keyof typeof HR_PERMISSIONS.TIME_BANK]
   | (typeof HR_PERMISSIONS.PAYROLL)[keyof typeof HR_PERMISSIONS.PAYROLL];
 
+export type FinancePermission =
+  | (typeof FINANCE_PERMISSIONS.COMPANIES)[keyof typeof FINANCE_PERMISSIONS.COMPANIES]
+  | (typeof FINANCE_PERMISSIONS.COST_CENTERS)[keyof typeof FINANCE_PERMISSIONS.COST_CENTERS]
+  | (typeof FINANCE_PERMISSIONS.BANK_ACCOUNTS)[keyof typeof FINANCE_PERMISSIONS.BANK_ACCOUNTS]
+  | (typeof FINANCE_PERMISSIONS.CATEGORIES)[keyof typeof FINANCE_PERMISSIONS.CATEGORIES]
+  | (typeof FINANCE_PERMISSIONS.ENTRIES)[keyof typeof FINANCE_PERMISSIONS.ENTRIES]
+  | (typeof FINANCE_PERMISSIONS.LOANS)[keyof typeof FINANCE_PERMISSIONS.LOANS]
+  | (typeof FINANCE_PERMISSIONS.CONSORTIA)[keyof typeof FINANCE_PERMISSIONS.CONSORTIA]
+  | (typeof FINANCE_PERMISSIONS.DASHBOARD)[keyof typeof FINANCE_PERMISSIONS.DASHBOARD]
+  | (typeof FINANCE_PERMISSIONS.EXPORT)[keyof typeof FINANCE_PERMISSIONS.EXPORT];
+
 export type UIPermission =
   | (typeof UI_PERMISSIONS.MENU)[keyof typeof UI_PERMISSIONS.MENU]
   | (typeof UI_PERMISSIONS.DASHBOARD)[keyof typeof UI_PERMISSIONS.DASHBOARD]
   | (typeof UI_PERMISSIONS.STOCK_SUBMENUS)[keyof typeof UI_PERMISSIONS.STOCK_SUBMENUS]
   | (typeof UI_PERMISSIONS.SALES_SUBMENUS)[keyof typeof UI_PERMISSIONS.SALES_SUBMENUS]
-  | (typeof UI_PERMISSIONS.HR_SUBMENUS)[keyof typeof UI_PERMISSIONS.HR_SUBMENUS];
+  | (typeof UI_PERMISSIONS.HR_SUBMENUS)[keyof typeof UI_PERMISSIONS.HR_SUBMENUS]
+  | (typeof UI_PERMISSIONS.FINANCE_SUBMENUS)[keyof typeof UI_PERMISSIONS.FINANCE_SUBMENUS];
 
 export default PermissionCodes;
