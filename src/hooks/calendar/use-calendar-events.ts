@@ -1,7 +1,11 @@
 import { calendarEventsService } from '@/services/calendar';
-import type { CalendarEventsResponse } from '@/services/calendar/calendar-events.service';
+import type {
+  CalendarEventsResponse,
+  CalendarEventResponse,
+} from '@/services/calendar/calendar-events.service';
 import type {
   CalendarEventsQuery,
+  CalendarEvent,
   CreateCalendarEventData,
   UpdateCalendarEventData,
   InviteParticipantsData,
@@ -36,7 +40,61 @@ export function useCreateCalendarEvent() {
   return useMutation({
     mutationFn: (data: CreateCalendarEventData) =>
       calendarEventsService.create(data),
-    onSuccess: () => {
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
+      const previousQueries = queryClient.getQueriesData<CalendarEventsResponse>({
+        queryKey: QUERY_KEYS.CALENDAR_EVENTS,
+      });
+
+      const tempEvent: CalendarEvent = {
+        id: `temp-${Date.now()}`,
+        tenantId: '',
+        title: data.title,
+        description: data.description ?? null,
+        location: data.location ?? null,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        isAllDay: data.isAllDay ?? false,
+        type: data.type ?? 'CUSTOM',
+        visibility: data.visibility ?? 'PUBLIC',
+        color: data.color ?? null,
+        rrule: data.rrule ?? null,
+        timezone: data.timezone ?? null,
+        systemSourceType: null,
+        systemSourceId: null,
+        metadata: {},
+        createdBy: '',
+        creatorName: null,
+        participants: [],
+        reminders: [],
+        isRecurring: !!data.rrule,
+        occurrenceDate: null,
+        deletedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: null,
+      };
+
+      queryClient.setQueriesData<CalendarEventsResponse>(
+        { queryKey: QUERY_KEYS.CALENDAR_EVENTS },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            events: [...old.events, tempEvent],
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousQueries) {
+        for (const [key, data] of context.previousQueries) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
     },
   });
@@ -125,7 +183,51 @@ export function useInviteParticipants() {
   return useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: InviteParticipantsData }) =>
       calendarEventsService.inviteParticipants(eventId, data),
-    onSuccess: (_, variables) => {
+    onMutate: async ({ eventId, data }) => {
+      await queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
+      });
+      const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
+        QUERY_KEYS.CALENDAR_EVENT(eventId),
+      );
+
+      if (previousEvent) {
+        const newParticipants = data.participants.map((p) => ({
+          id: `temp-${Date.now()}-${p.userId}`,
+          eventId,
+          userId: p.userId,
+          role: (p.role ?? 'GUEST') as 'OWNER' | 'ASSIGNEE' | 'GUEST',
+          status: 'PENDING' as const,
+          respondedAt: null,
+          userName: null,
+          userEmail: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: null,
+        }));
+
+        queryClient.setQueryData<CalendarEventResponse>(
+          QUERY_KEYS.CALENDAR_EVENT(eventId),
+          {
+            ...previousEvent,
+            event: {
+              ...previousEvent.event,
+              participants: [...previousEvent.event.participants, ...newParticipants],
+            },
+          },
+        );
+      }
+
+      return { previousEvent };
+    },
+    onError: (_, variables, context) => {
+      if (context?.previousEvent) {
+        queryClient.setQueryData(
+          QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
+          context.previousEvent,
+        );
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
@@ -139,7 +241,42 @@ export function useRespondToEvent() {
   return useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: RespondToEventData }) =>
       calendarEventsService.respondToEvent(eventId, data),
-    onSuccess: (_, variables) => {
+    onMutate: async ({ eventId, data }) => {
+      await queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
+      });
+      const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
+        QUERY_KEYS.CALENDAR_EVENT(eventId),
+      );
+
+      if (previousEvent) {
+        queryClient.setQueryData<CalendarEventResponse>(
+          QUERY_KEYS.CALENDAR_EVENT(eventId),
+          {
+            ...previousEvent,
+            event: {
+              ...previousEvent.event,
+              participants: previousEvent.event.participants.map((p) => ({
+                ...p,
+                status: data.status,
+                respondedAt: new Date().toISOString(),
+              })),
+            },
+          },
+        );
+      }
+
+      return { previousEvent };
+    },
+    onError: (_, variables, context) => {
+      if (context?.previousEvent) {
+        queryClient.setQueryData(
+          QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
+          context.previousEvent,
+        );
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
@@ -153,7 +290,40 @@ export function useRemoveParticipant() {
   return useMutation({
     mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
       calendarEventsService.removeParticipant(eventId, userId),
-    onSuccess: (_, variables) => {
+    onMutate: async ({ eventId, userId }) => {
+      await queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
+      });
+      const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
+        QUERY_KEYS.CALENDAR_EVENT(eventId),
+      );
+
+      if (previousEvent) {
+        queryClient.setQueryData<CalendarEventResponse>(
+          QUERY_KEYS.CALENDAR_EVENT(eventId),
+          {
+            ...previousEvent,
+            event: {
+              ...previousEvent.event,
+              participants: previousEvent.event.participants.filter(
+                (p) => p.userId !== userId,
+              ),
+            },
+          },
+        );
+      }
+
+      return { previousEvent };
+    },
+    onError: (_, variables, context) => {
+      if (context?.previousEvent) {
+        queryClient.setQueryData(
+          QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
+          context.previousEvent,
+        );
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
@@ -167,7 +337,48 @@ export function useManageReminders() {
   return useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: ManageRemindersData }) =>
       calendarEventsService.manageReminders(eventId, data),
-    onSuccess: (_, variables) => {
+    onMutate: async ({ eventId, data }) => {
+      await queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
+      });
+      const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
+        QUERY_KEYS.CALENDAR_EVENT(eventId),
+      );
+
+      if (previousEvent) {
+        const newReminders = data.reminders.map((r, i) => ({
+          id: `temp-${Date.now()}-${i}`,
+          eventId,
+          userId: '',
+          minutesBefore: r.minutesBefore,
+          isSent: false,
+          sentAt: null,
+          createdAt: new Date().toISOString(),
+        }));
+
+        queryClient.setQueryData<CalendarEventResponse>(
+          QUERY_KEYS.CALENDAR_EVENT(eventId),
+          {
+            ...previousEvent,
+            event: {
+              ...previousEvent.event,
+              reminders: newReminders,
+            },
+          },
+        );
+      }
+
+      return { previousEvent };
+    },
+    onError: (_, variables, context) => {
+      if (context?.previousEvent) {
+        queryClient.setQueryData(
+          QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
+          context.previousEvent,
+        );
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(variables.eventId),

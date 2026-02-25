@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { RecurrencePicker } from './recurrence-picker';
 import { useUpdateCalendarEvent } from '@/hooks/calendar';
 import { EventTypeLabels } from '@/types/common/enums';
@@ -34,8 +47,13 @@ import {
   MapPin,
   AlignLeft,
   ChevronRight,
+  Globe,
+  ChevronsUpDown,
+  Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { translateError } from '@/lib/errors';
 
 interface EventEditDialogProps {
   event: CalendarEvent | null;
@@ -74,9 +92,20 @@ export function EventEditDialog({
   const [color, setColor] = useState('');
   const [rrule, setRrule] = useState<string | null>(null);
 
+  const [timezone, setTimezone] = useState('');
   const [showDescription, setShowDescription] = useState(false);
   const [showLocation, setShowLocation] = useState(false);
+  const [showTimezone, setShowTimezone] = useState(false);
   const [showRecurrence, setShowRecurrence] = useState(false);
+  const [tzOpen, setTzOpen] = useState(false);
+
+  const timezoneOptions = useMemo(() => {
+    try {
+      return Intl.supportedValuesOf('timeZone');
+    } catch {
+      return ['America/Sao_Paulo', 'America/New_York', 'Europe/London', 'UTC'];
+    }
+  }, []);
 
   useEffect(() => {
     if (event) {
@@ -90,10 +119,13 @@ export function EventEditDialog({
       setVisibility(event.visibility);
       setColor(event.color ?? '');
       setRrule(event.rrule);
+      setTimezone(event.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
       // Auto-expand sections that have data
       setShowDescription(!!event.description);
       setShowLocation(!!event.location);
+      setShowTimezone(!!event.timezone);
       setShowRecurrence(!!event.rrule);
+      setTzOpen(false);
     }
   }, [event]);
 
@@ -122,14 +154,14 @@ export function EventEditDialog({
           visibility,
           color: color || null,
           rrule,
+          timezone: showTimezone ? timezone : null,
         },
       });
 
       toast.success('Evento atualizado com sucesso');
       onOpenChange(false);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao atualizar evento';
-      toast.error(msg);
+      toast.error(translateError(error));
     }
   }
 
@@ -192,6 +224,53 @@ export function EventEditDialog({
                 placeholder="Local do evento"
                 maxLength={512}
               />
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Timezone - collapsible */}
+          <Collapsible open={showTimezone} onOpenChange={setShowTimezone}>
+            <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer group w-full">
+              <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showTimezone ? 'rotate-90' : ''}`} />
+              <Globe className="w-3.5 h-3.5" />
+              <span>{showTimezone ? 'Fuso horário' : 'Fuso horário'}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <Popover open={tzOpen} onOpenChange={setTzOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={tzOpen}
+                    className="w-full justify-between font-normal"
+                  >
+                    {timezone || 'Selecionar fuso horário'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar fuso horário..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum fuso horário encontrado.</CommandEmpty>
+                      <CommandGroup className="max-h-[200px] overflow-y-auto">
+                        {timezoneOptions.map((tz) => (
+                          <CommandItem
+                            key={tz}
+                            value={tz}
+                            onSelect={() => {
+                              setTimezone(tz);
+                              setTzOpen(false);
+                            }}
+                          >
+                            <Check className={cn('mr-2 h-4 w-4', timezone === tz ? 'opacity-100' : 'opacity-0')} />
+                            {tz}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </CollapsibleContent>
           </Collapsible>
 

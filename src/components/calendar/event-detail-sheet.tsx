@@ -49,6 +49,7 @@ import {
   ExternalLink,
   FileText,
   Link2,
+  Globe,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -255,6 +256,13 @@ export function EventDetailSheet({
                     <div className="text-muted-foreground">até {formatDate(endDate)}</div>
                   </div>
                 </div>
+
+                {event.timezone && (
+                  <div className="flex items-start gap-2.5">
+                    <Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground">{event.timezone}</span>
+                  </div>
+                )}
 
                 {event.location && (
                   <div className="flex items-start gap-2.5">

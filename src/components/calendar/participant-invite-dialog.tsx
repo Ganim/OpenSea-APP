@@ -24,6 +24,7 @@ import { useInviteParticipants } from '@/hooks/calendar';
 import type { CalendarEvent, ParticipantRole } from '@/types/calendar';
 import { Search, UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { translateError } from '@/lib/errors';
 
 interface ParticipantInviteDialogProps {
   event: CalendarEvent;
@@ -94,8 +95,7 @@ export function ParticipantInviteDialog({
       setSearch('');
       onOpenChange(false);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao convidar participantes';
-      toast.error(msg);
+      toast.error(translateError(error));
     }
   }
 
