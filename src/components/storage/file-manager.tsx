@@ -9,6 +9,7 @@ import {
   useDeleteFile,
   useDeleteFolder,
   useDownloadFile,
+  useDownloadFolder,
   useEnsureEntityFolder,
   useFileManager,
   useInitializeFolders,
@@ -186,6 +187,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const deleteFolderMutation = useDeleteFolder();
     const deleteFileMutation = useDeleteFile();
     const downloadMutation = useDownloadFile();
+    const downloadFolderMutation = useDownloadFolder();
     const queryClient = useQueryClient();
     const initializeFolders = useInitializeFolders();
     const ensureEntityFolder = useEnsureEntityFolder();
@@ -248,6 +250,21 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         }
       },
       [downloadMutation]
+    );
+
+    // Folder download as ZIP
+    const handleDownloadFolder = useCallback(
+      async (folder: StorageFolder) => {
+        try {
+          toast.info('Preparando download da pasta...');
+          const result = await downloadFolderMutation.mutateAsync(folder.id);
+          window.open(result.url, '_blank');
+          toast.success('Download iniciado');
+        } catch {
+          toast.error('Erro ao baixar a pasta');
+        }
+      },
+      [downloadFolderMutation]
     );
 
     // Rename
@@ -571,6 +588,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onMoveFolder={handleMoveFolder}
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
+                  onDownloadFolder={handleDownloadFolder}
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}
@@ -599,6 +617,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onMoveFolder={handleMoveFolder}
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
+                  onDownloadFolder={handleDownloadFolder}
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}

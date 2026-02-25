@@ -491,6 +491,7 @@ export const API_ENDPOINTS = {
       SEARCH: '/v1/storage/folders/search',
       INITIALIZE: '/v1/storage/folders/initialize',
       ENSURE_ENTITY: '/v1/storage/folders/ensure-entity',
+      DOWNLOAD: (id: string) => `/v1/storage/folders/${id}/download`,
       ACCESS: {
         LIST: (id: string) => `/v1/storage/folders/${id}/access`,
         SET: (id: string) => `/v1/storage/folders/${id}/access`,

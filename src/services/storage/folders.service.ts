@@ -120,6 +120,13 @@ export const storageFoldersService = {
     );
   },
 
+  // GET /v1/storage/folders/:id/download - Download pasta como ZIP
+  async downloadFolder(id: string): Promise<{ url: string; fileName: string }> {
+    return apiClient.get<{ url: string; fileName: string }>(
+      API_ENDPOINTS.STORAGE.FOLDERS.DOWNLOAD(id)
+    );
+  },
+
   // POST /v1/storage/folders/ensure-entity - Garante pastas de uma entidade
   async ensureEntityFolder(
     request: EnsureEntityFolderRequest

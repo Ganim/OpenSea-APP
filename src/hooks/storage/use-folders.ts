@@ -2,6 +2,7 @@ import { storageFoldersService } from '@/services/storage';
 import type {
   CreateFolderRequest,
   EnsureEntityFolderRequest,
+  FolderContents,
   FolderContentsQuery,
   MoveFolderRequest,
   RenameFolderRequest,
@@ -96,6 +97,29 @@ export function useRenameFolder() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: RenameFolderRequest }) =>
       storageFoldersService.renameFolder(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
+      await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+
+      const updateFn = (old: FolderContents | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          folders: old.folders.map((f) =>
+            f.id === id ? { ...f, name: data.name } : f,
+          ),
+        };
+      };
+
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-folder-contents'] },
+        updateFn,
+      );
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-root-contents'] },
+        updateFn,
+      );
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
       queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
@@ -131,10 +155,41 @@ export function useDeleteFolder() {
 
   return useMutation({
     mutationFn: (id: string) => storageFoldersService.deleteFolder(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
+      await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+
+      const updateFn = (old: FolderContents | undefined) => {
+        if (!old) return old;
+        const folders = old.folders.filter((f) => f.id !== id);
+        return {
+          ...old,
+          folders,
+          totalFolders: folders.length,
+          total: folders.length + (old.totalFiles ?? old.files.length),
+        };
+      };
+
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-folder-contents'] },
+        updateFn,
+      );
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-root-contents'] },
+        updateFn,
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
       queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
     },
+  });
+}
+
+// GET /v1/storage/folders/:id/download - Download da pasta como ZIP
+export function useDownloadFolder() {
+  return useMutation({
+    mutationFn: (id: string) => storageFoldersService.downloadFolder(id),
   });
 }
 

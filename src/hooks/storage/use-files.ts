@@ -3,6 +3,7 @@ import type {
   RenameFileRequest,
   MoveFileRequest,
   ListFilesQuery,
+  FolderContents,
 } from '@/types/storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -76,6 +77,29 @@ export function useRenameFile() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: RenameFileRequest }) =>
       storageFilesService.renameFile(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
+      await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+
+      const updateFn = (old: FolderContents | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          files: old.files.map((f) =>
+            f.id === id ? { ...f, name: data.name } : f,
+          ),
+        };
+      };
+
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-folder-contents'] },
+        updateFn,
+      );
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-root-contents'] },
+        updateFn,
+      );
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
       queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
@@ -109,6 +133,30 @@ export function useDeleteFile() {
 
   return useMutation({
     mutationFn: (id: string) => storageFilesService.deleteFile(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
+      await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+
+      const updateFn = (old: FolderContents | undefined) => {
+        if (!old) return old;
+        const files = old.files.filter((f) => f.id !== id);
+        return {
+          ...old,
+          files,
+          totalFiles: (old.totalFiles ?? files.length),
+          total: (old.totalFolders ?? old.folders.length) + files.length,
+        };
+      };
+
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-folder-contents'] },
+        updateFn,
+      );
+      queryClient.setQueriesData<FolderContents>(
+        { queryKey: ['storage-root-contents'] },
+        updateFn,
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
       queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });

@@ -54,6 +54,8 @@ export interface FolderBreadcrumb {
 export interface FolderContents {
   folders: StorageFolder[];
   files: import('./file.types').StorageFile[];
+  totalFolders?: number;
+  totalFiles?: number;
   total: number;
 }
 
