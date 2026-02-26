@@ -11,10 +11,15 @@ import {
 import {
   addTeamMemberViaApi,
   createTeamViaApi,
+  enterActionPin,
   listTeamMembersViaApi,
   navigateToTeamDetail,
   waitForToast,
 } from '../helpers/teams.helper';
+import { setActionPinViaApi } from '../helpers/storage.helper';
+
+const TEST_PIN = '1234';
+const TEST_PASSWORD = 'E2eTest@123';
 
 let ownerToken: string;
 let ownerTenantId: string;
@@ -32,6 +37,9 @@ test.beforeAll(async () => {
   ownerToken = ownerAuth.token;
   ownerTenantId = ownerAuth.tenantId;
   ownerUserId = ownerAuth.userId;
+
+  // Set action PIN for the owner
+  await setActionPinViaApi(ownerToken, TEST_PASSWORD, TEST_PIN);
 
   // Create a second user to be used as a member
   const member = await createTeamsUser(
@@ -52,10 +60,7 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
-
-    // The owner should be listed with "Proprietário" badge
+    // The owner should be listed with "Proprietário" badge (members always visible)
     await expect(page.locator('text=Proprietário')).toBeVisible({
       timeout: 10_000,
     });
@@ -72,10 +77,7 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
-
-    // Should see 2 members: owner + the new member
+    // Should see 2 members: owner + the new member (members always visible)
     await expect(page.locator('text=Proprietário')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('text=Membro').first()).toBeVisible({ timeout: 5_000 });
   });
@@ -91,16 +93,13 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
-
-    // Should see "Administrador" badge
+    // Should see "Administrador" badge (members always visible)
     await expect(page.locator('text=Administrador')).toBeVisible({
       timeout: 10_000,
     });
   });
 
-  test('2.4 - Alterar papel de MEMBER para ADMIN', async ({ page }) => {
+  test('2.4 - Alterar papel de MEMBER para ADMIN (com PIN)', async ({ page }) => {
     const team = await createTeamViaApi(ownerToken, {
       name: `e2e-change-role-${Date.now()}`,
     });
@@ -111,8 +110,7 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
+    // Members are always visible - wait for member badge
     await expect(page.locator('text=Membro').first()).toBeVisible({ timeout: 10_000 });
 
     // Click the change role button (Shield icon) — only non-owner members have it
@@ -127,12 +125,16 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await page.locator('button[role="combobox"]').click();
     await page.locator('[role="option"]:has-text("Administrador")').click();
 
-    // Confirm
+    // Click Confirmar — opens PIN confirmation
     await page.locator('button:has-text("Confirmar")').click();
+
+    // Enter PIN
+    await enterActionPin(page, TEST_PIN);
+
     await waitForToast(page, 'Papel alterado com sucesso');
   });
 
-  test('2.5 - Remover membro da equipe', async ({ page }) => {
+  test('2.5 - Remover membro da equipe (com PIN)', async ({ page }) => {
     const team = await createTeamViaApi(ownerToken, {
       name: `e2e-remove-member-${Date.now()}`,
     });
@@ -143,13 +145,15 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
+    // Members are always visible
     await expect(page.locator('text=Membro').first()).toBeVisible({ timeout: 10_000 });
 
-    // Click remove button on the non-owner member
+    // Click remove button on the non-owner member — opens PIN confirmation
     const removeBtn = page.locator('button[title="Remover membro"]').first();
     await removeBtn.click();
+
+    // Enter PIN
+    await enterActionPin(page, TEST_PIN);
 
     await waitForToast(page, 'Membro removido com sucesso');
   });
@@ -162,8 +166,7 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
+    // Members are always visible
     await expect(page.locator('text=Proprietário')).toBeVisible({ timeout: 10_000 });
 
     // The owner row should NOT have change-role or remove buttons
@@ -180,12 +183,88 @@ test.describe('Teams - Gerenciamento de Membros', () => {
     await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
-
-    // "Adicionar Membro" button should be visible
+    // "Adicionar Membro" button should be visible (members always visible)
     await expect(page.locator('button:has-text("Adicionar Membro")')).toBeVisible({
       timeout: 10_000,
     });
+  });
+
+  test('2.8 - Transferir propriedade via UI (com PIN)', async ({ page }) => {
+    const team = await createTeamViaApi(ownerToken, {
+      name: `e2e-transfer-${Date.now()}`,
+    });
+
+    // Add member to transfer ownership to
+    await addTeamMemberViaApi(ownerToken, team.id, memberUserId);
+
+    await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
+    await navigateToTeamDetail(page, team.id);
+
+    // Wait for member to be visible
+    await expect(page.locator('text=Membro').first()).toBeVisible({ timeout: 10_000 });
+
+    // Click the change role button for the non-owner member
+    await page.locator('button[title="Alterar papel"]').first().click();
+
+    // Change role dialog should appear
+    await expect(page.locator('text=Alterar Papel do Membro')).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Select OWNER (transfer ownership) from the dropdown
+    await page.locator('button[role="combobox"]').click();
+    await page.locator('[role="option"]:has-text("Proprietário")').click();
+
+    // Warning banner about transfer should appear
+    await expect(page.locator('text=Transferência de propriedade')).toBeVisible({
+      timeout: 3_000,
+    });
+
+    // Click "Transferir Propriedade" button (not the combobox) — opens PIN confirmation
+    await page.getByRole('button', { name: 'Transferir Propriedade', exact: true }).click();
+
+    // PIN modal should appear with transfer title
+    await expect(page.locator('text=Confirmar Transferência de Propriedade')).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Enter PIN
+    await enterActionPin(page, TEST_PIN);
+
+    await waitForToast(page, 'Propriedade transferida com sucesso');
+  });
+
+  test('2.9 - Modal de alterar papel mostra aviso ao selecionar OWNER', async ({ page }) => {
+    const team = await createTeamViaApi(ownerToken, {
+      name: `e2e-owner-warning-${Date.now()}`,
+    });
+
+    // Add member
+    await addTeamMemberViaApi(ownerToken, team.id, memberUserId);
+
+    await injectAuthIntoBrowser(page, ownerToken, ownerTenantId);
+    await navigateToTeamDetail(page, team.id);
+
+    await expect(page.locator('text=Membro').first()).toBeVisible({ timeout: 10_000 });
+
+    // Open change role dialog
+    await page.locator('button[title="Alterar papel"]').first().click();
+    await expect(page.locator('text=Alterar Papel do Membro')).toBeVisible({ timeout: 5_000 });
+
+    // Initially, no warning should be visible (default is ADMIN or MEMBER)
+    await expect(page.locator('text=Transferência de propriedade')).not.toBeVisible();
+
+    // Select OWNER
+    await page.locator('button[role="combobox"]').click();
+    await page.locator('[role="option"]:has-text("Proprietário")').click();
+
+    // Warning should now be visible
+    await expect(page.locator('text=Transferência de propriedade')).toBeVisible();
+
+    // Button should say "Transferir Propriedade" instead of "Confirmar"
+    await expect(page.getByRole('button', { name: 'Transferir Propriedade', exact: true })).toBeVisible();
+
+    // Cancel
+    await page.locator('button:has-text("Cancelar")').click();
   });
 });

@@ -111,6 +111,49 @@ export async function listTeamMembersViaApi(
   return data.data ?? [];
 }
 
+export async function changeTeamMemberRoleViaApi(
+  token: string,
+  teamId: string,
+  memberId: string,
+  role: 'ADMIN' | 'MEMBER'
+): Promise<void> {
+  const res = await fetch(`${API_URL}/v1/teams/${teamId}/members/${memberId}/role`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Change role failed (${res.status}): ${await res.text()}`
+    );
+  }
+}
+
+export async function transferOwnershipViaApi(
+  token: string,
+  teamId: string,
+  userId: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/v1/teams/${teamId}/transfer-ownership`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Transfer ownership failed (${res.status}): ${await res.text()}`
+    );
+  }
+}
+
 // ─── UI Helpers ──────────────────────────────────────────────────────
 
 export async function navigateToTeams(page: Page): Promise<void> {
@@ -125,7 +168,7 @@ export async function navigateToTeamDetail(
   teamId: string
 ): Promise<void> {
   await page.goto(`/admin/teams/${teamId}`);
-  await expect(page.locator('[data-slot="tabs-list"], [role="tablist"]')).toBeVisible({
+  await expect(page.locator('h1').first()).toBeVisible({
     timeout: 15_000,
   });
 }

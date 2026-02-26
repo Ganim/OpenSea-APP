@@ -86,7 +86,7 @@ test.describe('Teams - Controle de Acesso', () => {
     await expect(page.locator('button:has-text("Editar")')).toHaveCount(0);
   });
 
-  test('3.3 - View-only: aba Membros sem botão "Adicionar Membro"', async ({ page }) => {
+  test('3.3 - View-only: sem botão "Adicionar Membro"', async ({ page }) => {
     const team = await createTeamViaApi(fullToken, {
       name: `e2e-acl-noadd-${Date.now()}`,
     });
@@ -94,10 +94,7 @@ test.describe('Teams - Controle de Acesso', () => {
     await injectAuthIntoBrowser(page, viewOnlyToken, viewOnlyTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // Switch to members tab
-    await page.getByRole('tab', { name: /Membros/ }).click();
-
-    // "Adicionar Membro" button should NOT be visible
+    // Members are always visible (no tabs) — "Adicionar Membro" button should NOT be visible
     await expect(page.locator('button:has-text("Adicionar Membro")')).toHaveCount(0);
   });
 
@@ -109,12 +106,11 @@ test.describe('Teams - Controle de Acesso', () => {
     await injectAuthIntoBrowser(page, fullToken, fullTenantId);
     await navigateToTeamDetail(page, team.id);
 
-    // "Editar" and "Excluir" buttons should be visible
+    // "Editar" and "Excluir" buttons should be visible in action bar
     await expect(page.locator('button:has-text("Editar")')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('button:has-text("Excluir")').first()).toBeVisible();
 
-    // Switch to members tab - "Adicionar Membro" should be visible
-    await page.getByRole('tab', { name: /Membros/ }).click();
+    // "Adicionar Membro" should be visible (members always visible, no tabs)
     await expect(page.locator('button:has-text("Adicionar Membro")')).toBeVisible({
       timeout: 5_000,
     });

@@ -97,15 +97,13 @@ test.describe('Teams - CRUD de Equipes', () => {
       timeout: 10_000,
     });
 
-    // Verify tabs exist
-    await expect(page.getByRole('tab', { name: /Visão Geral/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /Membros/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /Configurações/ })).toBeVisible();
+    // Verify description is visible (no tabs - inline layout)
+    await expect(page.getByText('Descrição de teste')).toBeVisible({
+      timeout: 5_000,
+    });
 
-    // Verify info tab shows description
-    await expect(
-      page.getByLabel('Visão Geral').getByText('Descrição de teste')
-    ).toBeVisible();
+    // Verify members section is visible
+    await expect(page.getByText('Membros').first()).toBeVisible();
   });
 
   test('1.5 - Editar equipe via modal (nome + descrição)', async ({ page }) => {

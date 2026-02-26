@@ -3,6 +3,7 @@
  * Funções utilitárias para o módulo de Audit Log
  */
 
+import type React from 'react';
 import type { TimelineItemData } from '@/components/shared/timeline';
 import {
   AlertCircle,
@@ -102,7 +103,35 @@ export function formatAuditTimestamp(timestamp: string) {
 export interface NarrativeSegment {
   type: 'text' | 'chip';
   value: string;
+  /** Classes CSS customizadas para bg do chip (sobrescreve estilo da ação) */
+  chipBg?: string;
+  /** Classes CSS customizadas para texto do chip (sobrescreve estilo da ação) */
+  chipText?: string;
+  /** Estilo inline para cores dinâmicas (ex: cor da equipe) */
+  chipStyle?: React.CSSProperties;
 }
+
+/** Cores dos chips de papel/role por valor PT-BR */
+const ROLE_CHIP_COLORS: Record<string, { bg: string; text: string }> = {
+  Membro: {
+    bg: 'bg-gray-200 dark:bg-gray-700/50',
+    text: 'text-gray-700 dark:text-gray-300',
+  },
+  Administrador: {
+    bg: 'bg-blue-200 dark:bg-blue-800/30',
+    text: 'text-blue-700 dark:text-blue-300',
+  },
+  Proprietário: {
+    bg: 'bg-amber-200 dark:bg-amber-800/30',
+    text: 'text-amber-700 dark:text-amber-300',
+  },
+};
+
+type ChipColor = {
+  bg?: string;
+  text?: string;
+  style?: React.CSSProperties;
+};
 
 /** Chaves de placeholder que representam nomes de entidades (devem virar chips) */
 const ENTITY_PLACEHOLDER_KEYS = new Set([
@@ -118,6 +147,13 @@ const ENTITY_PLACEHOLDER_KEYS = new Set([
   'companyName',
   'sourceTemplateName',
   'newTemplateName',
+  // Teams
+  'memberName',
+  'teamName',
+  'newOwnerName',
+  'oldRole',
+  'newRole',
+  'count',
 ]);
 
 /**
@@ -126,7 +162,8 @@ const ENTITY_PLACEHOLDER_KEYS = new Set([
  */
 function splitIntoSegments(
   text: string,
-  entityValues: string[]
+  entityValues: string[],
+  chipColorMap?: Map<string, ChipColor>
 ): NarrativeSegment[] {
   if (entityValues.length === 0) {
     return [{ type: 'text', value: text }];
@@ -145,7 +182,14 @@ function splitIntoSegments(
     if (idx > lastIndex) {
       segments.push({ type: 'text', value: text.slice(lastIndex, idx) });
     }
-    segments.push({ type: 'chip', value: match[0] });
+    const colors = chipColorMap?.get(match[0]);
+    segments.push({
+      type: 'chip',
+      value: match[0],
+      chipBg: colors?.bg,
+      chipText: colors?.text,
+      chipStyle: colors?.style,
+    });
     lastIndex = idx + match[0].length;
   }
 
@@ -154,6 +198,39 @@ function splitIntoSegments(
   }
 
   return segments;
+}
+
+/**
+ * Constrói mapa de cores customizadas para chips com base nos placeholders.
+ * - Roles (oldRole, newRole): cores por valor PT-BR
+ * - Team name: cor dinâmica da equipe via teamColor
+ */
+function buildChipColorMap(
+  placeholders: Record<string, string | number | null | undefined>
+): Map<string, ChipColor> {
+  const map = new Map<string, ChipColor>();
+
+  // Role chips
+  for (const key of ['oldRole', 'newRole']) {
+    const val = placeholders[key];
+    if (val != null) {
+      const roleColor = ROLE_CHIP_COLORS[String(val)];
+      if (roleColor) {
+        map.set(String(val), roleColor);
+      }
+    }
+  }
+
+  // Team name with team color
+  const teamName = placeholders.teamName;
+  const teamColor = placeholders.teamColor;
+  if (teamName && teamColor) {
+    map.set(String(teamName), {
+      style: { backgroundColor: `${teamColor}20`, color: String(teamColor) },
+    });
+  }
+
+  return map;
 }
 
 /**
@@ -186,6 +263,7 @@ export function formatAuditNarrative(log: AuditLog) {
         : null;
 
     const entityValues: string[] = [];
+    let chipColorMap: Map<string, ChipColor> | undefined;
     if (placeholders) {
       for (const [key, val] of Object.entries(placeholders)) {
         if (
@@ -196,10 +274,11 @@ export function formatAuditNarrative(log: AuditLog) {
           entityValues.push(String(val));
         }
       }
+      chipColorMap = buildChipColorMap(placeholders);
     }
 
     const segments = restOfSentence
-      ? splitIntoSegments(restOfSentence, entityValues)
+      ? splitIntoSegments(restOfSentence, entityValues, chipColorMap)
       : null;
 
     return {

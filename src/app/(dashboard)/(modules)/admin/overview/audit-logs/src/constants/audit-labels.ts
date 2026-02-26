@@ -981,6 +981,17 @@ export const ENTITY_LABELS: Record<string, string> = {
   CONSORTIUM: 'Consórcio',
   CONSORTIUM_PAYMENT: 'Pagamento de Consórcio',
 
+  // Teams
+  TEAM: 'Equipe',
+  TEAM_MEMBER: 'Membro de Equipe',
+
+  // Storage
+  STORAGE_FOLDER: 'Pasta',
+  STORAGE_FILE: 'Arquivo',
+  STORAGE_FILE_VERSION: 'Versão do Arquivo',
+  FOLDER_ACCESS_RULE: 'Regra de Acesso',
+  STORAGE_SHARE_LINK: 'Link de Compartilhamento',
+
   // System
   OTHER: 'Outro',
 };
@@ -1095,6 +1106,17 @@ export const ENTITY_ARTICLES: Record<string, string> = {
   CONSORTIUM: 'o',
   CONSORTIUM_PAYMENT: 'o',
 
+  // Teams
+  TEAM: 'a',
+  TEAM_MEMBER: 'o',
+
+  // Storage
+  STORAGE_FOLDER: 'a',
+  STORAGE_FILE: 'o',
+  STORAGE_FILE_VERSION: 'a',
+  FOLDER_ACCESS_RULE: 'a',
+  STORAGE_SHARE_LINK: 'o',
+
   // System
   OTHER: 'o',
 };
@@ -1114,6 +1136,7 @@ export const MODULE_LABELS: Record<string, string> = {
   FINANCE: 'Financeiro',
   NOTIFICATIONS: 'Notificações',
   REQUESTS: 'Solicitações',
+  STORAGE: 'Armazenamento',
   SYSTEM: 'Sistema',
   OTHER: 'Outro',
 };
@@ -1171,6 +1194,11 @@ export const MODULE_COLORS: Record<
     bg: 'bg-amber-100 dark:bg-amber-800/30',
     text: 'text-amber-800 dark:text-amber-200',
     border: 'border-amber-200 dark:border-amber-900',
+  },
+  STORAGE: {
+    bg: 'bg-teal-100 dark:bg-teal-800/30',
+    text: 'text-teal-800 dark:text-teal-200',
+    border: 'border-teal-200 dark:border-teal-900',
   },
   SYSTEM: {
     bg: 'bg-slate-100 dark:bg-slate-900/70',

@@ -7,7 +7,14 @@
 export { teamsConfig } from './config/teams.config';
 
 // Modals
-export { CreateModal, DetailModal } from './modals';
+export {
+  AddMemberDialog,
+  ColorModal,
+  CreateModal,
+  DetailModal,
+  EditModal,
+  RenameModal,
+} from './modals';
 
 // Types
 export type {

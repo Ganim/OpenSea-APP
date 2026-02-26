@@ -12,7 +12,7 @@ import type {
   RollbackPreviewResponse,
   ComparisonResponse,
   AuditEntity,
-} from '@/app/(dashboard)/admin/overview/audit-logs/src/types';
+} from '@/app/(dashboard)/(modules)/admin/overview/audit-logs/src/types';
 
 // ============================================
 // LIST AUDIT LOGS

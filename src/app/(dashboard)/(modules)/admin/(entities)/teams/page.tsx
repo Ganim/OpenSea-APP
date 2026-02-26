@@ -30,12 +30,16 @@ import {
   useEntityPage,
   type ContextMenuAction,
 } from '@/core';
+import { logger } from '@/lib/logger';
+import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { Team } from '@/types/core';
 import {
   Calendar,
   CheckCircle2,
   Clock,
+  Copy,
+  Palette,
   Pencil,
   Plus,
   Trash2,
@@ -43,17 +47,20 @@ import {
   Users2,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
+  ColorModal,
   CreateModal,
   createTeam,
   deleteTeam,
   DetailModal,
+  EditModal,
   formatMembersCount,
   getStatusBadgeVariant,
   getStatusLabel,
   getTeam,
   listTeams,
+  RenameModal,
   teamsConfig,
   updateTeam,
 } from './src';
@@ -63,7 +70,7 @@ export default function TeamsPage() {
   const searchParams = useSearchParams();
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
-  // Verificar se o usuário tem permissão para gerenciar equipes
+  // Permissions
   const canManageTeams =
     hasPermission(ADMIN_PERMISSIONS.TEAMS.MANAGE) ||
     hasPermission(ADMIN_PERMISSIONS.TEAMS.LIST);
@@ -72,6 +79,20 @@ export default function TeamsPage() {
   const canEdit = hasPermission(ADMIN_PERMISSIONS.TEAMS.UPDATE);
   const canCreate = hasPermission(ADMIN_PERMISSIONS.TEAMS.CREATE);
   const canDelete = hasPermission(ADMIN_PERMISSIONS.TEAMS.DELETE);
+
+  // Rename modal state
+  const [renameTeam, setRenameTeam] = useState<Team | null>(null);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isRenameSubmitting, setIsRenameSubmitting] = useState(false);
+
+  // Edit modal state
+  const [editTeam, setEditTeam] = useState<Team | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // Color modal state
+  const [colorTeam, setColorTeam] = useState<Team | null>(null);
+  const [isColorOpen, setIsColorOpen] = useState(false);
+  const [isColorSubmitting, setIsColorSubmitting] = useState(false);
 
   // ============================================================================
   // CRUD SETUP
@@ -126,7 +147,6 @@ export default function TeamsPage() {
   const displayedTeams = useMemo(() => {
     let items = page.filteredItems;
 
-    // Filter by isActive status
     if (activeFilter.length === 1) {
       if (activeFilter[0] === 'true') {
         items = items.filter(team => team.isActive);
@@ -176,7 +196,73 @@ export default function TeamsPage() {
 
   const handleContextEdit = (ids: string[]) => {
     if (ids.length === 1) {
-      router.push(`/admin/teams/${ids[0]}/edit`);
+      const team = page.filteredItems.find(item => item.id === ids[0]);
+      if (team) {
+        setEditTeam(team);
+        setIsEditOpen(true);
+      }
+    }
+  };
+
+  const handleContextRename = (ids: string[]) => {
+    if (ids.length === 0) return;
+    const team = page.filteredItems.find(item => item.id === ids[0]);
+    if (team) {
+      setRenameTeam(team);
+      setIsRenameOpen(true);
+    }
+  };
+
+  const handleRenameSubmit = async (id: string, data: { name: string }) => {
+    setIsRenameSubmitting(true);
+    try {
+      await updateTeam(id, data);
+      showSuccessToast('Equipe renomeada com sucesso');
+      page.crud.refetch();
+    } catch (error) {
+      logger.error('Erro ao renomear equipe', error instanceof Error ? error : undefined);
+      showErrorToast({
+        title: 'Erro ao renomear equipe',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+      });
+    } finally {
+      setIsRenameSubmitting(false);
+    }
+  };
+
+  const handleOpenColor = (ids: string[]) => {
+    if (ids.length === 0) return;
+    const team = page.filteredItems.find(item => item.id === ids[0]);
+    if (team) {
+      setColorTeam(team);
+      setIsColorOpen(true);
+    }
+  };
+
+  const handleColorSubmit = async (id: string, data: { color: string | null }) => {
+    setIsColorSubmitting(true);
+    try {
+      await updateTeam(id, data);
+      showSuccessToast('Cor atualizada com sucesso');
+      page.crud.refetch();
+    } catch (error) {
+      logger.error('Erro ao mudar cor', error instanceof Error ? error : undefined);
+      showErrorToast({
+        title: 'Erro ao mudar cor',
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+      });
+    } finally {
+      setIsColorSubmitting(false);
+    }
+  };
+
+  const handleCopySlug = (ids: string[]) => {
+    if (ids.length === 1) {
+      const team = page.filteredItems.find(item => item.id === ids[0]);
+      if (team) {
+        navigator.clipboard.writeText(team.slug);
+        showSuccessToast('Slug copiado para a área de transferência');
+      }
     }
   };
 
@@ -198,13 +284,27 @@ export default function TeamsPage() {
 
     if (canEdit) {
       actions.push({
-        id: 'edit',
-        label: 'Editar',
+        id: 'rename',
+        label: 'Renomear',
         icon: Pencil,
-        onClick: handleContextEdit,
+        onClick: handleContextRename,
         separator: 'before',
       });
+      actions.push({
+        id: 'color',
+        label: 'Mudar Cor',
+        icon: Palette,
+        onClick: handleOpenColor,
+      });
     }
+
+    actions.push({
+      id: 'copy-slug',
+      label: 'Copiar Slug',
+      icon: Copy,
+      onClick: handleCopySlug,
+      separator: 'before',
+    });
 
     if (canDelete) {
       actions.push({
@@ -300,14 +400,11 @@ export default function TeamsPage() {
           ]}
           metadata={
             <div className="space-y-2">
-              {/* Descrição */}
               {item.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {item.description}
                 </p>
               )}
-
-              {/* Membros + Criador */}
               <div className="flex flex-col gap-1 text-xs">
                 <div className="flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 shrink-0 text-blue-500" />
@@ -548,7 +645,7 @@ export default function TeamsPage() {
                 onView: page.handlers.handleItemsView,
                 onEdit: (ids: string[]) => {
                   if (ids.length === 1) {
-                    router.push(`/admin/teams/${ids[0]}/edit`);
+                    router.push(`/admin/teams/${ids[0]}`);
                   }
                 },
                 onDelete: page.handlers.handleItemsDelete,
@@ -573,6 +670,35 @@ export default function TeamsPage() {
               page.crud.refetch();
               page.modals.close('create');
             }}
+          />
+
+          {/* Rename Modal */}
+          <RenameModal
+            isOpen={isRenameOpen}
+            onClose={() => setIsRenameOpen(false)}
+            team={renameTeam}
+            isSubmitting={isRenameSubmitting}
+            onSubmit={handleRenameSubmit}
+          />
+
+          {/* Edit Modal */}
+          <EditModal
+            isOpen={isEditOpen}
+            onClose={() => setIsEditOpen(false)}
+            team={editTeam}
+            onSuccess={() => {
+              page.crud.refetch();
+              setIsEditOpen(false);
+            }}
+          />
+
+          {/* Color Modal */}
+          <ColorModal
+            isOpen={isColorOpen}
+            onClose={() => setIsColorOpen(false)}
+            team={colorTeam}
+            isSubmitting={isColorSubmitting}
+            onSubmit={handleColorSubmit}
           />
 
           {/* Confirmação de exclusão via PIN de ação */}
