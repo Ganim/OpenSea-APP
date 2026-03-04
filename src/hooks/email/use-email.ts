@@ -253,7 +253,46 @@ export function useMarkMessageRead() {
   return useMutation({
     mutationFn: ({ id, isRead }: { id: string; isRead: boolean }) =>
       emailService.markAsRead(id, isRead),
+    onMutate: async ({ id, isRead }) => {
+      // Cancel outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: ['email', 'messages'] });
+
+      // Optimistically update message in infinite query caches
+      queryClient.setQueriesData(
+        { queryKey: ['email', 'messages'] },
+        (old: unknown) => {
+          const data = old as { pages?: Array<{ data: Array<{ id: string; isRead: boolean }>; meta: unknown }> } | undefined;
+          if (!data?.pages) return old;
+          return {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              data: page.data.map((msg) =>
+                msg.id === id ? { ...msg, isRead } : msg
+              ),
+            })),
+          };
+        }
+      );
+
+      // Also update single message query if it exists
+      queryClient.setQueriesData(
+        { queryKey: ['email', 'message', id] },
+        (old: unknown) => {
+          if (!old) return old;
+          const data = old as { message?: { id: string; isRead: boolean } };
+          if (data.message) {
+            return { ...data, message: { ...data.message, isRead } };
+          }
+          return old;
+        }
+      );
+    },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['email'] });
+    },
+    onError: async () => {
+      // Revert on error by refetching
       await queryClient.invalidateQueries({ queryKey: ['email'] });
     },
   });

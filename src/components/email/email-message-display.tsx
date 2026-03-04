@@ -138,12 +138,12 @@ export function EmailMessageDisplay({
   const permanentDeleteMutation = useDeleteMessage();
   const syncMutation = useSyncEmailAccount();
 
-  // Auto-mark-as-read after 1s
+  // Auto-mark-as-read after 300ms
   useEffect(() => {
     if (selectedMessage && !selectedMessage.isRead) {
       const timer = setTimeout(() => {
         markReadMutation.mutate({ id: selectedMessage.id, isRead: true });
-      }, 1000);
+      }, 300);
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

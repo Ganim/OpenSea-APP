@@ -25,6 +25,8 @@ import {
   useMoveMessage,
   useSyncEmailAccount,
 } from '@/hooks/email/use-email';
+import { useQueryClient } from '@tanstack/react-query';
+import { emailService } from '@/services/email';
 import type { EmailMessageListItem } from '@/types/email';
 import { Card } from '@/components/ui/card';
 import { Mail, PencilLine, RefreshCw } from 'lucide-react';
@@ -61,6 +63,8 @@ export default function EmailPage() {
   const [composeMode, setComposeMode] = useState<ComposeMode>({ type: 'new' });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isCentralInbox, setIsCentralInbox] = useState(false);
+  const queryClient = useQueryClient();
+  const syncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce da busca — 300ms
   useEffect(() => {
@@ -100,6 +104,32 @@ export default function EmailPage() {
     setIsCentralInbox(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccountId]);
+
+  // ─── Debounced sync on folder/account change ──────────────────────────
+  useEffect(() => {
+    if (!selectedAccountId || !selectedFolderId || isCentralInbox) return;
+
+    if (syncDebounceRef.current) {
+      clearTimeout(syncDebounceRef.current);
+    }
+
+    syncDebounceRef.current = setTimeout(() => {
+      emailService
+        .triggerSync(selectedAccountId)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['email', 'messages'] });
+          queryClient.invalidateQueries({ queryKey: ['email', 'folders'] });
+        })
+        .catch(() => {}); // Silent — sync failure shouldn't block UI
+    }, 2000);
+
+    return () => {
+      if (syncDebounceRef.current) {
+        clearTimeout(syncDebounceRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAccountId, selectedFolderId]);
 
   // ─── Regular Messages Query ──────────────────────────────────────────────
 
@@ -178,16 +208,16 @@ export default function EmailPage() {
     [folders, selectedFolderId]
   );
 
-  /** Count unread messages per folder across all loaded pages */
+  /** Server-side unread counts per folder */
   const unreadCounts = useMemo<Record<string, number>>(() => {
     const counts: Record<string, number> = {};
-    for (const msg of messages) {
-      if (!msg.isRead && msg.folderId) {
-        counts[msg.folderId] = (counts[msg.folderId] ?? 0) + 1;
+    for (const folder of folders) {
+      if (folder.unreadMessages > 0) {
+        counts[folder.id] = folder.unreadMessages;
       }
     }
     return counts;
-  }, [messages]);
+  }, [folders]);
 
   // — Polling: detect new messages on auto-refresh —
   const prevTotalRef = useRef<number | undefined>(undefined);
@@ -397,6 +427,8 @@ export default function EmailPage() {
                   setMessageFilter(f);
                   setSelectedMessageId(null);
                 }}
+                folderTotalMessages={selectedFolder?.totalMessages}
+                folderUnreadMessages={selectedFolder?.unreadMessages}
                 folderName={
                   isCentralInbox
                     ? 'Caixa Central'
