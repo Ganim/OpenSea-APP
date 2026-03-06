@@ -34,8 +34,9 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { emailService } from '@/services/email';
 import type { EmailAccount, EmailMessageListItem } from '@/types/email';
 import { useQueryClient } from '@tanstack/react-query';
-import { Mail, PencilLine } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TbMailPlus } from 'react-icons/tb';
 import { toast } from 'sonner';
 
 type ComposeMode =
@@ -393,8 +394,8 @@ export default function EmailPage() {
       ? [
           {
             id: 'compose',
-            title: 'Escrever',
-            icon: PencilLine,
+            title: 'Novo Email',
+            icon: TbMailPlus,
             variant: 'default' as const,
             onClick: openCompose,
           },

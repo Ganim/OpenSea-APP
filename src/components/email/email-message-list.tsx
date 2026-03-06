@@ -18,6 +18,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import type { EmailMessageListItem } from '@/types/email';
@@ -369,6 +375,7 @@ export function EmailMessageList({
   ]);
 
   return (
+    <TooltipProvider delayDuration={300}>
     <div className="flex h-full flex-col" data-testid="email-message-list">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -396,19 +403,24 @@ export function EmailMessageList({
             />
           </div>
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={hasActiveFilters ? 'default' : 'ghost'}
-                size="icon"
-                className={cn(
-                  'size-9 shrink-0 rounded-xl',
-                  hasActiveFilters && 'shadow-sm'
-                )}
-                title="Filtros avançados"
-              >
-                <Filter className="size-4" />
-              </Button>
-            </PopoverTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={hasActiveFilters ? 'default' : 'ghost'}
+                    size="icon"
+                    className={cn(
+                      'size-9 shrink-0 rounded-xl',
+                      hasActiveFilters && 'shadow-sm'
+                    )}
+                    aria-label="Filtros avançados"
+                  >
+                    <Filter className="size-4" />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Filtros avançados</TooltipContent>
+            </Tooltip>
             <PopoverContent className="w-72 p-4 space-y-4" align="end">
               <div>
                 <p className="text-sm font-semibold">Filtros</p>
@@ -471,20 +483,26 @@ export function EmailMessageList({
               )}
             </PopoverContent>
           </Popover>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-9 shrink-0 rounded-xl"
-            onClick={toggleAllGroups}
-            title={allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
-            aria-label={allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
-          >
-            {allCollapsed ? (
-              <ChevronsUpDown className="size-4" />
-            ) : (
-              <ChevronsDownUp className="size-4" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 shrink-0 rounded-xl"
+                onClick={toggleAllGroups}
+                aria-label={allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
+              >
+                {allCollapsed ? (
+                  <ChevronsUpDown className="size-4" />
+                ) : (
+                  <ChevronsDownUp className="size-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Tabs */}
@@ -582,16 +600,20 @@ export function EmailMessageList({
             Excluir
           </Button>
           <div className="flex-1" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 rounded-lg"
-            onClick={() => onClearSelection?.()}
-            title="Limpar seleção"
-            aria-label="Limpar seleção"
-          >
-            <X className="size-3.5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 rounded-lg"
+                onClick={() => onClearSelection?.()}
+                aria-label="Limpar seleção"
+              >
+                <X className="size-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Limpar seleção</TooltipContent>
+          </Tooltip>
         </div>
       )}
 
@@ -783,18 +805,22 @@ export function EmailMessageList({
 
                         {/* Hover actions dropdown */}
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-6 shrink-0 rounded-md opacity-0 group-hover/header:opacity-100 focus:opacity-100 transition-opacity duration-150"
-                              onClick={e => e.stopPropagation()}
-                              title="Ações do grupo"
-                              aria-label="Ações do grupo"
-                            >
-                              <MoreHorizontal className="size-3.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-6 shrink-0 rounded-md opacity-0 group-hover/header:opacity-100 focus:opacity-100 transition-opacity duration-150"
+                                  onClick={e => e.stopPropagation()}
+                                  aria-label="Ações do grupo"
+                                >
+                                  <MoreHorizontal className="size-3.5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Ações do grupo</TooltipContent>
+                          </Tooltip>
                           <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
                               onClick={() => {
@@ -979,5 +1005,6 @@ export function EmailMessageList({
         </div>
       )}
     </div>
+    </TooltipProvider>
   );
 }

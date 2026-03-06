@@ -505,30 +505,118 @@ export function EmailMessageDisplay({
             </Tooltip>
           </div>
 
-          {/* Email header */}
-          <div className="px-6 pt-6 pb-5">
-            <h2 className="text-lg font-semibold leading-tight">
-              {selectedMessage.subject || '(sem assunto)'}
-            </h2>
+          {!detail && !messageQuery.isError ? (
+            <>
+              {/* ── Full skeleton while detail loads ── */}
+              <div className="px-6 pt-6 pb-5">
+                {/* Subject skeleton */}
+                <Skeleton className="h-6 w-72" />
 
-            <div className="mt-5 flex items-start gap-4">
-              <Avatar className="size-12 shrink-0">
-                <AvatarFallback
-                  className="text-sm font-semibold text-white"
-                  style={{ backgroundColor: avatarColor }}
-                >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+                <div className="mt-5 flex items-start gap-4">
+                  {/* Avatar skeleton */}
+                  <Skeleton className="size-12 shrink-0 rounded-full" />
 
-              <div className="min-w-0 flex-1">
-                {messageQuery.isLoading ? (
-                  <div className="space-y-2 pt-0.5">
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-3.5 w-64" />
+                  <div className="min-w-0 flex-1 space-y-2.5">
+                    {/* Sender name + email */}
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3.5 w-52" />
+                    </div>
+                    {/* Recipients */}
+                    <Skeleton className="h-3 w-64" />
+                    {/* Date */}
+                    <Skeleton className="h-3 w-44" />
                   </div>
-                ) : (
-                  <>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Attachments skeleton */}
+              <div className="px-6 py-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-4 shrink-0 rounded" />
+                  <Skeleton className="h-3.5 w-20" />
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Skeleton className="h-10 w-44 rounded-lg" />
+                  <Skeleton className="h-10 w-36 rounded-lg" />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Body skeleton — simulates a large email with paragraphs + signature */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
+                <div className="max-w-3xl space-y-6">
+                  {/* Greeting */}
+                  <Skeleton className="h-4 w-32" />
+
+                  {/* Paragraph 1 */}
+                  <div className="space-y-2.5">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-11/12" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+
+                  {/* Paragraph 2 (longer) */}
+                  <div className="space-y-2.5">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-11/12" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+
+                  {/* Paragraph 3 */}
+                  <div className="space-y-2.5">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+
+                  {/* Paragraph 4 (short closing) */}
+                  <div className="space-y-2.5">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/5" />
+                  </div>
+
+                  {/* Signature area */}
+                  <div className="space-y-2 pt-4">
+                    <Skeleton className="h-px w-28" />
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-3 w-56" />
+                    <Skeleton className="h-3 w-44" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* ── Loaded content ── */}
+
+              {/* Email header */}
+              <div className="px-6 pt-6 pb-5">
+                <h2 className="text-lg font-semibold leading-tight">
+                  {selectedMessage.subject || '(sem assunto)'}
+                </h2>
+
+                <div className="mt-5 flex items-start gap-4">
+                  <Avatar className="size-12 shrink-0">
+                    <AvatarFallback
+                      className="text-sm font-semibold text-white"
+                      style={{ backgroundColor: avatarColor }}
+                    >
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
                       <span className="text-base font-semibold">
                         {selectedMessage.fromName ||
@@ -586,119 +674,109 @@ export function EmailMessageDisplay({
                     <p className="text-xs text-muted-foreground mt-2">
                       {formatEmailDateFull(selectedMessage.receivedAt)}
                     </p>
-                  </>
-                )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <Separator />
+              <Separator />
 
-          {/* Attachments bar (Outlook-style) */}
-          {detail?.attachments && detail.attachments.length > 0 && (
-            <>
-              <div className="px-6 py-3 bg-muted/30">
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 text-left"
-                  onClick={() => setAttachmentsExpanded(prev => !prev)}
-                >
-                  <Paperclip className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm font-medium text-muted-foreground flex-1">
-                    {detail.attachments.length}{' '}
-                    {detail.attachments.length === 1 ? 'anexo' : 'anexos'}
-                  </span>
-                  {attachmentsExpanded ? (
-                    <ChevronUp className="size-4 shrink-0 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-                  )}
-                </button>
-                {attachmentsExpanded && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {detail.attachments.map(att => {
-                      const FileIcon = getFileIcon(att.contentType);
-                      const iconColor = getFileIconColor(att.contentType);
-                      const isDownloading = downloadingAttachmentId === att.id;
+              {/* Attachments bar (Outlook-style) */}
+              {detail?.attachments && detail.attachments.length > 0 && (
+                <>
+                  <div className="px-6 py-3 bg-muted/30">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 text-left cursor-pointer"
+                      onClick={() => setAttachmentsExpanded(prev => !prev)}
+                    >
+                      <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground flex-1">
+                        {detail.attachments.length}{' '}
+                        {detail.attachments.length === 1 ? 'anexo' : 'anexos'}
+                      </span>
+                      {attachmentsExpanded ? (
+                        <ChevronUp className="size-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                      )}
+                    </button>
+                    {attachmentsExpanded && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {detail.attachments.map(att => {
+                          const FileIcon = getFileIcon(att.contentType);
+                          const iconColor = getFileIconColor(att.contentType);
+                          const isDownloading =
+                            downloadingAttachmentId === att.id;
 
-                      return (
-                        <button
-                          key={att.id}
-                          className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5 text-left hover:bg-muted/40 hover:shadow-sm transition-all duration-150 group"
-                          onClick={() =>
-                            handleDownloadAttachment(detail.id, att.id)
-                          }
-                          disabled={isDownloading}
-                          title={`Baixar ${att.filename} (${formatFileSize(att.size)})`}
-                        >
-                          <div
-                            className="flex size-7 shrink-0 items-center justify-center rounded"
-                            style={{ backgroundColor: `${iconColor}15` }}
-                          >
-                            <FileIcon
-                              className="size-4"
-                              style={{ color: iconColor }}
-                            />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-medium truncate max-w-40">
-                              {att.filename}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {formatFileSize(att.size)}
-                            </p>
-                          </div>
-                          {isDownloading ? (
-                            <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
-                          ) : (
-                            <Download className="size-3.5 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
-                          )}
-                        </button>
-                      );
-                    })}
+                          return (
+                            <button
+                              key={att.id}
+                              className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5 text-left hover:bg-muted/40 hover:shadow-sm transition-all duration-150 group"
+                              onClick={() =>
+                                handleDownloadAttachment(detail.id, att.id)
+                              }
+                              disabled={isDownloading}
+                              title={`Baixar ${att.filename} (${formatFileSize(att.size)})`}
+                            >
+                              <div
+                                className="flex size-7 shrink-0 items-center justify-center rounded"
+                                style={{
+                                  backgroundColor: `${iconColor}15`,
+                                }}
+                              >
+                                <FileIcon
+                                  className="size-4"
+                                  style={{ color: iconColor }}
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium truncate max-w-40">
+                                  {att.filename}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {formatFileSize(att.size)}
+                                </p>
+                              </div>
+                              {isDownloading ? (
+                                <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
+                              ) : (
+                                <Download className="size-3.5 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  <Separator />
+                </>
+              )}
+
+              {/* Body */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
+                {(safeBodyHtml || detail?.bodyText) && (
+                  <div className="max-w-3xl">
+                    {safeBodyHtml ? (
+                      <EmailHtmlBody
+                        html={safeBodyHtml}
+                        messageId={selectedMessage.id}
+                      />
+                    ) : (
+                      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground/80">
+                        {detail?.bodyText ?? ''}
+                      </pre>
+                    )}
                   </div>
                 )}
-              </div>
-              <Separator />
-            </>
-          )}
 
-          {/* Body */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-6">
-            {messageQuery.isLoading && (
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/6" />
-              </div>
-            )}
-
-            {!messageQuery.isLoading && (safeBodyHtml || detail?.bodyText) && (
-              <div className="max-w-3xl">
-                {safeBodyHtml ? (
-                  <EmailHtmlBody
-                    html={safeBodyHtml}
-                    messageId={selectedMessage.id}
-                  />
-                ) : (
-                  <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground/80">
-                    {detail?.bodyText ?? ''}
-                  </pre>
+                {detail && !safeBodyHtml && !detail.bodyText && (
+                  <p className="text-sm text-muted-foreground italic">
+                    Sem conteúdo disponível.
+                  </p>
                 )}
               </div>
-            )}
-
-            {!messageQuery.isLoading && !safeBodyHtml && !detail?.bodyText && (
-              <p className="text-sm text-muted-foreground italic">
-                Sem conteúdo disponível.
-              </p>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </TooltipProvider>
 

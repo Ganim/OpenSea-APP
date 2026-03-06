@@ -3,6 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { EmailAccount, EmailFolder } from '@/types/email';
 import { formatDistanceToNow } from 'date-fns';
@@ -149,6 +155,7 @@ export function EmailSidebar({
   }
 
   return (
+    <TooltipProvider delayDuration={300}>
     <div
       className="flex h-full w-full flex-col"
       data-testid="email-sidebar"
@@ -160,7 +167,9 @@ export function EmailSidebar({
             variant={isCentralInbox ? 'default' : 'secondary'}
             className={cn(
               'flex-1 justify-start gap-3 rounded-xl h-10 text-sm font-medium',
-              isCentralInbox && 'shadow-md'
+              isCentralInbox
+                ? 'bg-gradient-to-r from-slate-700 to-emerald-600 hover:from-slate-600 hover:to-emerald-500 text-white border-0 shadow-md'
+                : ''
             )}
             onClick={onCentralInbox}
             data-testid="email-central-inbox"
@@ -172,7 +181,7 @@ export function EmailSidebar({
                 className={cn(
                   'inline-flex items-center justify-center rounded-full px-2 h-5.5 min-w-5.5 text-[11px] font-semibold leading-none',
                   isCentralInbox
-                    ? 'bg-primary-foreground/20 text-primary-foreground'
+                    ? 'bg-white/20 text-white'
                     : 'bg-primary text-primary-foreground'
                 )}
                 title={`${totalUnread} mensagen${totalUnread === 1 ? '' : 's'} não lida${totalUnread === 1 ? '' : 's'}`}
@@ -182,16 +191,20 @@ export function EmailSidebar({
             )}
           </Button>
 
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-10 shrink-0 rounded-xl"
-            onClick={onOpenNewAccount}
-            title="Adicionar conta"
-            aria-label="Adicionar conta"
-          >
-            <Plus className="size-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-10 shrink-0 rounded-xl"
+                onClick={onOpenNewAccount}
+                aria-label="Adicionar conta"
+              >
+                <Plus className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Adicionar conta</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -313,18 +326,23 @@ export function EmailSidebar({
 
                         {/* Settings button on hover — replaces unread badge position */}
                         {onEditAccount && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 shrink-0 absolute right-8 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/account:opacity-100 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 rounded-lg"
-                            onClick={e => {
-                              e.stopPropagation();
-                              onEditAccount(account);
-                            }}
-                            title="Configurar conta"
-                          >
-                            <Settings className="h-3.5 w-3.5" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 shrink-0 absolute right-8 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/account:opacity-100 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 rounded-lg"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  onEditAccount(account);
+                                }}
+                                aria-label="Configurar conta"
+                              >
+                                <Settings className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Configurar conta</TooltipContent>
+                          </Tooltip>
                         )}
                       </div>
 
@@ -405,6 +423,7 @@ export function EmailSidebar({
         onSync={onSyncAccount}
       />
     </div>
+    </TooltipProvider>
   );
 }
 
@@ -458,19 +477,23 @@ function SyncFooter({
             </p>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 rounded-lg"
-          disabled={disabled || isSyncing}
-          onClick={onSync}
-          title="Sincronizar conta"
-          aria-label="Sincronizar conta"
-        >
-          <RefreshCw
-            className={cn('size-3.5', isSyncing && 'animate-spin')}
-          />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-lg"
+              disabled={disabled || isSyncing}
+              onClick={onSync}
+              aria-label="Sincronizar conta"
+            >
+              <RefreshCw
+                className={cn('size-3.5', isSyncing && 'animate-spin')}
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Sincronizar conta</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

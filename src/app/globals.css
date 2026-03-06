@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -121,8 +122,8 @@
   --color-background-elevated: var(--os-white);
 
   /* === FOREGROUND (Text) === */
-  --color-foreground: var(--os-slate-700);
-  --color-foreground-muted: var(--os-slate-500);
+  --color-foreground: var(--os-slate-800);
+  --color-foreground-muted: var(--os-slate-600);
   --color-foreground-subtle: var(--os-slate-400);
   --color-foreground-inverted: var(--os-white);
 
@@ -136,7 +137,7 @@
   /* === SECONDARY === */
   --color-secondary: var(--os-slate-100);
   --color-secondary-hover: var(--os-slate-200);
-  --color-secondary-foreground: var(--os-slate-700);
+  --color-secondary-foreground: var(--os-slate-800);
 
   /* === DESTRUCTIVE === */
   --color-destructive: var(--os-red-500);
@@ -168,16 +169,16 @@
 
   /* === GLASSMORPHISM === */
   --glass-bg: var(--os-white);
-  --glass-bg-opacity: 0.9;
-  --glass-border: var(--os-gray-200);
-  --glass-border-opacity: 0.5;
+  --glass-bg-opacity: 0.92;
+  --glass-border: var(--os-gray-300);
+  --glass-border-opacity: 0.6;
   --glass-blur: 20px;
 
   /* === SHADOWS === */
   --shadow-color: var(--os-slate-900);
-  --shadow-opacity-sm: 0.05;
-  --shadow-opacity-md: 0.1;
-  --shadow-opacity-lg: 0.15;
+  --shadow-opacity-sm: 0.06;
+  --shadow-opacity-md: 0.12;
+  --shadow-opacity-lg: 0.18;
 
   /* === ANIMATED BACKGROUND === */
   --bg-from: var(--os-blue-50);
@@ -203,8 +204,8 @@
   --color-background-elevated: var(--os-white);
 
   /* === FOREGROUND (Text) === */
-  --color-foreground: var(--os-slate-700);
-  --color-foreground-muted: var(--os-slate-500);
+  --color-foreground: var(--os-slate-800);
+  --color-foreground-muted: var(--os-slate-600);
   --color-foreground-subtle: var(--os-slate-400);
   --color-foreground-inverted: var(--os-white);
 
@@ -218,7 +219,7 @@
   /* === SECONDARY === */
   --color-secondary: var(--os-slate-100);
   --color-secondary-hover: var(--os-slate-200);
-  --color-secondary-foreground: var(--os-slate-700);
+  --color-secondary-foreground: var(--os-slate-800);
 
   /* === DESTRUCTIVE === */
   --color-destructive: var(--os-red-500);
@@ -250,16 +251,16 @@
 
   /* === GLASSMORPHISM === */
   --glass-bg: var(--os-white);
-  --glass-bg-opacity: 0.9;
-  --glass-border: var(--os-gray-200);
-  --glass-border-opacity: 0.5;
+  --glass-bg-opacity: 0.92;
+  --glass-border: var(--os-gray-300);
+  --glass-border-opacity: 0.6;
   --glass-blur: 20px;
 
   /* === SHADOWS === */
   --shadow-color: var(--os-slate-900);
-  --shadow-opacity-sm: 0.05;
-  --shadow-opacity-md: 0.1;
-  --shadow-opacity-lg: 0.15;
+  --shadow-opacity-sm: 0.06;
+  --shadow-opacity-md: 0.12;
+  --shadow-opacity-lg: 0.18;
 
   /* === ANIMATED BACKGROUND === */
   --bg-from: var(--os-blue-50);
@@ -558,7 +559,7 @@
   --alert-warning-text: var(--color-warning);
 
   /* ==================== SKELETON ==================== */
-  --skeleton-bg: var(--color-background-muted);
+  --skeleton-bg: rgb(var(--color-background-muted));
   --skeleton-shimmer: rgb(var(--os-white) / 0.5);
 
   /* ==================== SIDEBAR ==================== */
@@ -574,6 +575,31 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: rgb(var(--os-slate-400) / 0.4);
   --scrollbar-thumb-hover: rgb(var(--os-slate-400) / 0.6);
+}
+
+/* Light theme component overrides */
+.light,
+:root:not(.dark) {
+  /* Badges — use darker shades for white backgrounds */
+  --badge-default-bg: rgb(var(--os-blue-500) / 0.12);
+  --badge-default-text: rgb(var(--os-blue-700));
+  --badge-default-border: rgb(var(--os-blue-500) / 0.2);
+
+  --badge-secondary-bg: rgb(var(--os-gray-500) / 0.1);
+  --badge-secondary-text: rgb(var(--os-gray-600));
+  --badge-secondary-border: rgb(var(--os-gray-500) / 0.2);
+
+  --badge-destructive-bg: rgb(var(--os-red-500) / 0.1);
+  --badge-destructive-text: rgb(var(--os-red-700));
+  --badge-destructive-border: rgb(var(--os-red-500) / 0.2);
+
+  --badge-success-bg: rgb(var(--os-green-500) / 0.1);
+  --badge-success-text: rgb(var(--os-green-700));
+  --badge-success-border: rgb(var(--os-green-500) / 0.2);
+
+  --badge-warning-bg: rgb(var(--os-orange-500) / 0.1);
+  --badge-warning-text: rgb(var(--os-orange-500));
+  --badge-warning-border: rgb(var(--os-orange-500) / 0.2);
 }
 
 /* Dark theme component overrides */
@@ -667,7 +693,7 @@
 
   /* Muted compatibility */
   --color-muted: rgb(var(--os-slate-100));
-  --color-muted-foreground: rgb(var(--os-slate-500));
+  --color-muted-foreground: rgb(var(--os-slate-600));
 
   /* Accent compatibility */
   --color-accent: rgb(var(--os-blue-50));
@@ -675,11 +701,11 @@
 
   /* Card compatibility */
   --color-card: rgb(var(--os-white));
-  --color-card-foreground: rgb(var(--os-slate-700));
+  --color-card-foreground: rgb(var(--os-slate-800));
 
   /* Popover compatibility */
   --color-popover: rgb(var(--os-white));
-  --color-popover-foreground: rgb(var(--os-slate-700));
+  --color-popover-foreground: rgb(var(--os-slate-800));
 
   /* Input compatibility */
   --color-input: rgb(var(--os-slate-100));
@@ -720,7 +746,15 @@
    =========================================== */
 
 * {
-  border-color: rgb(var(--color-border) / 0.2);
+  border-color: rgb(var(--color-border) / var(--border-default-opacity, 0.5));
+}
+
+:root {
+  --border-default-opacity: 0.5;
+}
+
+.dark {
+  --border-default-opacity: 0.2;
 }
 
 body {
@@ -1022,4 +1056,571 @@ body {
 
 .import-spreadsheet-container .Spreadsheet table {
   width: 100% !important;
+}
+
+/* ===========================================
+   FULLCALENDAR - OpenSea Custom Theme
+   =========================================== */
+
+.os-calendar {
+  /* Grid line color — softer for light, subtle for dark */
+  --fc-border: rgb(var(--os-gray-200) / 0.6);
+
+  /* === Toolbar (header) === */
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    font-weight: 600;
+    color: rgb(var(--color-foreground));
+  }
+
+  .fc .fc-button {
+    border-radius: 0.5rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    padding: 0.375rem 0.75rem !important;
+    border: 1px solid rgb(var(--color-border)) !important;
+    background: rgb(var(--color-secondary)) !important;
+    color: rgb(var(--color-foreground)) !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease !important;
+    text-transform: capitalize !important;
+  }
+
+  .fc .fc-button:hover {
+    background: color-mix(
+      in srgb,
+      rgb(var(--color-secondary)) 80%,
+      rgb(var(--color-foreground)) 10%
+    ) !important;
+  }
+
+  .fc .fc-button:focus {
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.3) !important;
+  }
+
+  .fc .fc-button-active,
+  .fc .fc-button.fc-button-active {
+    background: rgb(var(--color-primary)) !important;
+    color: white !important;
+    border-color: rgb(var(--color-primary)) !important;
+  }
+
+  .fc .fc-button-active:hover,
+  .fc .fc-button.fc-button-active:hover {
+    background: color-mix(
+      in srgb,
+      rgb(var(--color-primary)) 90%,
+      black 10%
+    ) !important;
+  }
+
+  .fc .fc-today-button {
+    background: rgb(var(--color-secondary)) !important;
+    color: rgb(var(--color-foreground)) !important;
+    border-color: rgb(var(--color-border)) !important;
+  }
+
+  .fc .fc-today-button:disabled {
+    opacity: 0.5 !important;
+  }
+
+  /* Navigation button icons */
+  .fc .fc-prev-button,
+  .fc .fc-next-button {
+    padding: 0.375rem 0.5rem !important;
+  }
+
+  /* === View Switcher Button Group (pill style) === */
+  .fc .fc-button-group {
+    background: rgb(243 244 246) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.1875rem !important;
+    gap: 0.125rem !important;
+    display: inline-flex !important;
+  }
+
+  .fc .fc-button-group .fc-button {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgb(107 114 128) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    padding: 0.3125rem 0.75rem !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .fc .fc-button-group .fc-button:first-child {
+    border-radius: 0.5rem 0 0 0.5rem !important;
+  }
+
+  .fc .fc-button-group .fc-button:last-child {
+    border-radius: 0 0.5rem 0.5rem 0 !important;
+  }
+
+  .fc .fc-button-group .fc-button:hover {
+    color: rgb(55 65 81) !important;
+    background: rgb(0 0 0 / 0.04) !important;
+  }
+
+  .fc .fc-button-group .fc-button-active,
+  .fc .fc-button-group .fc-button.fc-button-active {
+    background: white !important;
+    color: rgb(17 24 39) !important;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08) !important;
+    border: none !important;
+  }
+
+  .fc .fc-button-group .fc-button-active:first-child,
+  .fc .fc-button-group .fc-button.fc-button-active:first-child {
+    border-radius: 0.5rem 0 0 0.5rem !important;
+  }
+
+  .fc .fc-button-group .fc-button-active:last-child,
+  .fc .fc-button-group .fc-button.fc-button-active:last-child {
+    border-radius: 0 0.5rem 0.5rem 0 !important;
+  }
+
+  .fc .fc-button-group .fc-button-active:not(:first-child):not(:last-child),
+  .fc
+    .fc-button-group
+    .fc-button.fc-button-active:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
+  }
+
+  .fc .fc-button-group .fc-button-active:hover,
+  .fc .fc-button-group .fc-button.fc-button-active:hover {
+    background: white !important;
+    color: rgb(17 24 39) !important;
+  }
+
+  /* === Grid & Cells === */
+  .fc {
+    border: none !important;
+  }
+
+  .fc .fc-scrollgrid {
+    border: none !important;
+  }
+
+  /* Remove right border from month/week/day views */
+  .fc .fc-scrollgrid td:last-child,
+  .fc .fc-scrollgrid th:last-child {
+    border-right: none !important;
+  }
+
+  .fc .fc-scrollgrid td,
+  .fc .fc-scrollgrid th {
+    border-color: var(--fc-border) !important;
+  }
+
+  .fc .fc-col-header {
+    background: transparent !important;
+  }
+
+  .fc .fc-col-header-cell {
+    padding: 0.625rem 0 !important;
+    background: transparent !important;
+    border-bottom: 2px solid rgb(var(--os-gray-300) / 0.5) !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    text-transform: capitalize !important;
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    color: rgb(var(--color-foreground-muted)) !important;
+    text-decoration: none !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  .fc .fc-scrollgrid-section-header > * {
+    background: transparent !important;
+  }
+
+  .fc th {
+    background: transparent !important;
+  }
+
+  /* Today cell highlight */
+  .fc .fc-day-today {
+    background: rgb(59 130 246 / 0.04) !important;
+  }
+
+  /* Day number */
+  .fc .fc-daygrid-day-number {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: rgb(var(--color-foreground)) !important;
+    padding: 0.5rem !important;
+    text-decoration: none !important;
+  }
+
+  .fc .fc-day-today .fc-daygrid-day-number {
+    background: rgb(var(--color-primary)) !important;
+    color: white !important;
+    border-radius: 9999px !important;
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .fc .fc-day-other .fc-daygrid-day-number {
+    color: rgb(var(--color-foreground-muted)) !important;
+    opacity: 0.5 !important;
+  }
+
+  /* === Events === */
+  .fc .fc-event {
+    border-radius: 0.375rem !important;
+    font-size: 0.75rem !important;
+    padding: 2px 4px !important;
+    border: none !important;
+    border-left: 3px solid rgba(255 255 255 / 0.3) !important;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1) !important;
+    cursor: pointer !important;
+    transition:
+      box-shadow 0.15s ease,
+      transform 0.15s ease !important;
+    min-height: 1.375rem !important;
+  }
+
+  .fc .fc-event:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.18) !important;
+    transform: translateY(-1px) !important;
+    filter: brightness(1.1) !important;
+  }
+
+  .fc .fc-event .fc-event-title {
+    font-weight: 500 !important;
+  }
+
+  .fc .fc-event .fc-event-time {
+    font-size: 0.6875rem !important;
+    opacity: 0.85 !important;
+  }
+
+  .fc .fc-daygrid-event-dot {
+    display: none !important; /* dot hidden because eventDisplay='block' forces colored blocks */
+  }
+
+  /* More link */
+  .fc .fc-more-link {
+    color: rgb(var(--color-primary)) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+  }
+
+  .fc .fc-more-link:hover {
+    text-decoration: underline !important;
+  }
+
+  /* Popover */
+  .fc .fc-popover {
+    border-radius: 0.75rem !important;
+    border: 1px solid rgb(var(--color-border)) !important;
+    box-shadow: 0 10px 25px rgb(0 0 0 / 0.1) !important;
+    overflow: hidden !important;
+    background: rgb(var(--color-background)) !important;
+  }
+
+  .fc .fc-popover-header {
+    background: rgb(var(--color-secondary)) !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* === Time Grid === */
+  .fc .fc-timegrid-slot-label {
+    font-size: 0.6875rem !important;
+    color: rgb(var(--color-foreground-muted)) !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .fc .fc-timegrid-slot {
+    border-color: var(--fc-border) !important;
+    height: 3rem !important;
+  }
+
+  .fc .fc-timegrid-now-indicator-line {
+    border-color: rgb(var(--color-primary)) !important;
+    border-width: 2px !important;
+  }
+
+  .fc .fc-timegrid-now-indicator-arrow {
+    border-color: rgb(var(--color-primary)) !important;
+  }
+
+  /* === List View === */
+  .fc .fc-list {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .fc .fc-list-table {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-day-cushion {
+    background: rgb(var(--color-secondary)) !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  .fc .fc-list-day-text,
+  .fc .fc-list-day-side-text {
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    color: rgb(var(--color-foreground)) !important;
+    text-decoration: none !important;
+  }
+
+  .fc .fc-list-event:hover td {
+    background: rgb(var(--color-accent)) !important;
+  }
+
+  .fc .fc-list-event td {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-event-dot {
+    border-radius: 0.25rem !important;
+  }
+
+  .fc .fc-list-empty {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-empty-cushion {
+    color: rgb(var(--color-foreground-muted)) !important;
+    font-style: italic !important;
+    font-size: 0.875rem !important;
+    padding: 3rem 1rem !important;
+    text-align: center !important;
+  }
+}
+
+/* === Dark mode overrides === */
+.dark .os-calendar {
+  --fc-border: rgb(255 255 255 / 0.08);
+
+  .fc .fc-toolbar-title {
+    color: white;
+  }
+
+  .fc .fc-button {
+    background: rgb(255 255 255 / 0.06) !important;
+    border-color: rgb(255 255 255 / 0.1) !important;
+    color: rgb(255 255 255 / 0.85) !important;
+  }
+
+  .fc .fc-button:hover {
+    background: rgb(255 255 255 / 0.1) !important;
+  }
+
+  .fc .fc-button-active,
+  .fc .fc-button.fc-button-active {
+    background: rgb(var(--color-primary)) !important;
+    color: white !important;
+    border-color: rgb(var(--color-primary)) !important;
+  }
+
+  .fc .fc-today-button {
+    background: rgb(255 255 255 / 0.06) !important;
+    border-color: rgb(255 255 255 / 0.1) !important;
+    color: rgb(255 255 255 / 0.85) !important;
+  }
+
+  .fc .fc-button-group {
+    background: rgb(255 255 255 / 0.05) !important;
+  }
+
+  .fc .fc-button-group .fc-button {
+    color: rgb(156 163 175) !important;
+  }
+
+  .fc .fc-button-group .fc-button:hover {
+    color: rgb(229 231 235) !important;
+    background: rgb(255 255 255 / 0.05) !important;
+  }
+
+  .fc .fc-button-group .fc-button-active,
+  .fc .fc-button-group .fc-button.fc-button-active {
+    background: rgb(255 255 255 / 0.1) !important;
+    color: white !important;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2) !important;
+  }
+
+  .fc .fc-button-group .fc-button-active:hover,
+  .fc .fc-button-group .fc-button.fc-button-active:hover {
+    background: rgb(255 255 255 / 0.12) !important;
+    color: white !important;
+  }
+
+  .fc .fc-scrollgrid td,
+  .fc .fc-scrollgrid th {
+    border-color: rgb(255 255 255 / 0.08) !important;
+  }
+
+  .fc .fc-col-header,
+  .fc .fc-scrollgrid-section-header > *,
+  .fc th {
+    background: transparent !important;
+  }
+
+  .fc .fc-col-header-cell {
+    background: transparent !important;
+    border-bottom-color: rgb(255 255 255 / 0.1) !important;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    color: rgb(255 255 255 / 0.5) !important;
+  }
+
+  .fc .fc-day-today {
+    background: rgb(59 130 246 / 0.06) !important;
+  }
+
+  .fc .fc-daygrid-day-number {
+    color: rgb(255 255 255 / 0.8) !important;
+  }
+
+  .fc .fc-day-other .fc-daygrid-day-number {
+    color: rgb(255 255 255 / 0.25) !important;
+  }
+
+  .fc .fc-event {
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.3) !important;
+  }
+
+  .fc .fc-event:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.4) !important;
+  }
+
+  .fc .fc-more-link {
+    color: rgb(96 165 250) !important;
+  }
+
+  .fc .fc-popover {
+    background: rgb(30 41 59) !important;
+    border-color: rgb(255 255 255 / 0.1) !important;
+  }
+
+  .fc .fc-popover-header {
+    background: rgb(255 255 255 / 0.06) !important;
+    color: white !important;
+  }
+
+  .fc .fc-timegrid-slot-label {
+    color: rgb(255 255 255 / 0.4) !important;
+  }
+
+  .fc .fc-timegrid-slot {
+    border-color: rgb(255 255 255 / 0.06) !important;
+  }
+
+  .fc .fc-list {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-table {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-empty {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-day-cushion {
+    background: rgb(255 255 255 / 0.06) !important;
+  }
+
+  .fc .fc-list-day-text,
+  .fc .fc-list-day-side-text {
+    color: white !important;
+  }
+
+  .fc .fc-list-event td {
+    background: transparent !important;
+  }
+
+  .fc .fc-list-event:hover td {
+    background: rgb(255 255 255 / 0.05) !important;
+  }
+
+  .fc .fc-list-empty-cushion {
+    color: rgb(255 255 255 / 0.4) !important;
+  }
+}
+
+/* ── Calendar Date/Time Inputs ──────────────────────────────────────────── */
+.calendar-date-input {
+  color-scheme: light;
+}
+
+.dark .calendar-date-input {
+  color-scheme: dark;
+}
+
+.calendar-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.calendar-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ── TipTap / ProseMirror ─────────────────────────────────────────────────── */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.25rem;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 0.75rem 0;
+}
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
 }

@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 /**
@@ -31,8 +30,8 @@ export interface HeaderButton {
   id?: string;
   /** Título/label do botão */
   title: string;
-  /** Ícone Lucide React */
-  icon: LucideIcon;
+  /** Ícone (Lucide, react-icons, ou qualquer React component) */
+  icon: React.ElementType;
   /** Função chamada ao clicar */
   onClick: () => void | Promise<void>;
   /** Variante visual do botão */
