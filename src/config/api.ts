@@ -699,6 +699,13 @@ export const API_ENDPOINTS = {
         `/v1/teams/${teamId}/emails/${accountId}`,
     },
   },
+  // Notifications
+  NOTIFICATIONS: {
+    LIST: '/v1/notifications',
+    MARK_AS_READ: (id: string) => `/v1/notifications/${id}/read`,
+    MARK_ALL_AS_READ: '/v1/notifications/mark-all-read',
+    DELETE: (id: string) => `/v1/notifications/${id}`,
+  },
   // Health
   HEALTH: '/health',
 } as const;

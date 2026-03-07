@@ -6,6 +6,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/auth-context';
+import { useTenant } from '@/contexts/tenant-context';
 import {
   createPermissionMap,
   isPermissionAllowed,
@@ -53,23 +54,24 @@ interface UsePermissionsReturn {
  */
 export function usePermissions(): UsePermissionsReturn {
   const { user } = useAuth();
+  const { currentTenant } = useTenant();
 
   // Buscar permissões do usuário usando /v1/me/permissions
-  // Essa rota não requer permissão especial - qualquer usuário autenticado pode acessar
+  // Essa rota requer tenant selecionado (verifyTenant middleware)
   const {
     data: effectivePermissions = [],
     isLoading,
     error,
     refetch,
   } = useQuery<EffectivePermission[], Error>({
-    queryKey: ['my-permissions', user?.id],
+    queryKey: ['my-permissions', user?.id, currentTenant?.id],
     queryFn: async () => {
       if (!user?.id) {
         return [];
       }
       return await listMyPermissions();
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!currentTenant,
     staleTime: 15 * 60 * 1000, // 15 minutos
     gcTime: 30 * 60 * 1000, // 30 minutos (antes era cacheTime)
     retry: 2,

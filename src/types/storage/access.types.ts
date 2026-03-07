@@ -8,6 +8,8 @@ export interface FolderAccessRule {
   userName: string | null;
   groupId: string | null;
   groupName: string | null;
+  teamId: string | null;
+  teamName: string | null;
   canRead: boolean;
   canWrite: boolean;
   canDelete: boolean;
@@ -20,6 +22,7 @@ export interface FolderAccessRule {
 export interface SetFolderAccessRequest {
   userId?: string;
   groupId?: string;
+  teamId?: string;
   canRead: boolean;
   canWrite: boolean;
   canDelete: boolean;

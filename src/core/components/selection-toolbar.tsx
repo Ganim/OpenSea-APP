@@ -109,7 +109,7 @@ export function SelectionToolbar({
       label: 'Visualizar',
       icon: Eye,
       onClick: handlers.onView,
-      variant: 'outline',
+      variant: 'ghost',
     });
   }
 
@@ -119,7 +119,7 @@ export function SelectionToolbar({
       label: 'Editar',
       icon: Edit,
       onClick: handlers.onEdit,
-      variant: 'outline',
+      variant: 'ghost',
     });
   }
 
@@ -129,7 +129,7 @@ export function SelectionToolbar({
       label: 'Duplicar',
       icon: Copy,
       onClick: handlers.onDuplicate,
-      variant: 'outline',
+      variant: 'ghost',
     });
   }
 
@@ -139,7 +139,7 @@ export function SelectionToolbar({
       label: 'Exportar',
       icon: Download,
       onClick: handlers.onExport,
-      variant: 'outline',
+      variant: 'ghost',
     });
   }
 
@@ -157,8 +157,8 @@ export function SelectionToolbar({
   allActions.push(...actions);
 
   // Dividir ações em principais e secundárias
-  const primaryActions = allActions.slice(0, 3);
-  const secondaryActions = allActions.slice(3);
+  const primaryActions = allActions.slice(0, 4);
+  const secondaryActions = allActions.slice(4);
 
   if (selectedCount === 0) return null;
 
@@ -176,21 +176,21 @@ export function SelectionToolbar({
           className
         )}
       >
-        <Card className="bg-white dark:bg-slate-900 border-gray-200/50 dark:border-white/10 shadow-2xl">
-          <div className="flex items-center gap-2 px-4 py-3">
+        <Card className="bg-white dark:bg-sky-800 border-gray-200/50 dark:border-white/10 shadow-2xl py-2">
+          <div className="flex items-center gap-2 px-4">
             {/* Contador de seleção */}
-            <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">
+            <div className="flex items-center gap-2 px-3 bg-primary/10 rounded-lg">
               <span className="font-semibold text-primary">
                 {selectedCount}
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-primary">
                 {selectedCount === 1 ? 'item' : 'itens'} selecionado
                 {selectedCount > 1 ? 's' : ''}
               </span>
             </div>
 
             {/* Divider */}
-            <div className="w-px h-6 bg-border" />
+            <div className="w-px h-6 bg-white/20" />
 
             {/* Selecionar todos */}
             {onSelectAll && !isAllSelected && (
@@ -203,7 +203,7 @@ export function SelectionToolbar({
                 >
                   Selecionar todos ({totalItems})
                 </Button>
-                <div className="w-px h-6 bg-border" />
+                <div className="w-px h-6 bg-white/20" />
               </>
             )}
 
@@ -211,7 +211,7 @@ export function SelectionToolbar({
             {primaryActions.map(action => (
               <Button
                 key={action.id}
-                variant={action.variant || 'outline'}
+                variant={action.variant || 'ghost'}
                 size="sm"
                 onClick={() => action.onClick(selectedIds)}
                 disabled={action.disabled}
@@ -225,7 +225,7 @@ export function SelectionToolbar({
             {/* Ações secundárias (dropdown) */}
             {secondaryActions.length > 0 && (
               <>
-                <div className="w-px h-6 bg-border" />
+                <div className="w-px h-6 bg-white/20" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" aria-label="Mais acoes">
@@ -255,7 +255,7 @@ export function SelectionToolbar({
             )}
 
             {/* Divider */}
-            <div className="w-px h-6 bg-border" />
+            <div className="w-px h-6 bg-white/20" />
 
             {/* Botão de limpar */}
             <Button

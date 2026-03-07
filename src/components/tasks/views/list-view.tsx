@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Board, Card } from '@/types/tasks';
 import { PRIORITY_CONFIG } from '@/types/tasks';
+import { getGradientForBoard } from '../shared/board-gradients';
 import { CardInlineCreate } from '../cards/card-inline-create';
 import { MemberAvatar } from '../shared/member-avatar';
 import {
@@ -38,6 +39,8 @@ export function ListView({ board, cards, boardId, onCardClick }: ListViewProps) 
     new Set(),
   );
 
+  const gradient = getGradientForBoard(boardId);
+
   const columns = useMemo(
     () => [...(board.columns ?? [])].sort((a, b) => a.position - b.position),
     [board.columns],
@@ -68,20 +71,24 @@ export function ListView({ board, cards, boardId, onCardClick }: ListViewProps) 
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {columns.map((column) => {
         const colCards = cardsByColumn.get(column.id) ?? [];
         const isCollapsed = collapsedColumns.has(column.id);
+        const colColor = column.color || gradient.from;
 
         return (
           <div
             key={column.id}
-            className="rounded-xl border border-border bg-card overflow-hidden"
+            className="rounded-xl border border-gray-200 dark:border-white/10 bg-card overflow-hidden"
           >
-            {/* Column Header */}
+            {/* Column Header with colored accent */}
             <button
               type="button"
               className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-muted/50 transition-colors"
+              style={{
+                background: `linear-gradient(90deg, ${colColor}10, transparent)`,
+              }}
               onClick={() => toggleColumn(column.id)}
             >
               {isCollapsed ? (
@@ -90,20 +97,22 @@ export function ListView({ board, cards, boardId, onCardClick }: ListViewProps) 
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
               <span
-                className="h-2.5 w-0.5 rounded-full shrink-0"
-                style={{ backgroundColor: column.color || '#94a3b8' }}
+                className="h-3 w-3 rounded shrink-0"
+                style={{ backgroundColor: colColor }}
               />
               <span className="text-sm font-semibold">
                 {column.title}
               </span>
-              <span className="text-xs text-muted-foreground font-medium tabular-nums ml-1">
+              <span
+                className="text-xs font-medium tabular-nums ml-1 px-1.5 py-0.5 rounded-md bg-muted/50"
+              >
                 {colCards.length}
               </span>
             </button>
 
             {/* Card Rows */}
             {!isCollapsed && (
-              <div className="border-t border-border">
+              <div className="border-t border-gray-200 dark:border-white/10">
                 {colCards.length === 0 ? (
                   <div className="px-4 py-3 text-xs text-muted-foreground">
                     Nenhum cartão nesta coluna
@@ -119,9 +128,14 @@ export function ListView({ board, cards, boardId, onCardClick }: ListViewProps) 
                       <button
                         key={card.id}
                         type="button"
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted/30 transition-colors border-b border-border/50 last:border-b-0"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted/30 transition-colors border-b border-border/50 last:border-b-0 cursor-pointer"
                         onClick={() => onCardClick?.(card)}
                       >
+                        {/* Left color bar from column */}
+                        <span
+                          className="h-6 w-1 rounded-full shrink-0"
+                          style={{ backgroundColor: `${colColor}60` }}
+                        />
                         <span
                           className={cn(
                             'h-2.5 w-2.5 rounded-full shrink-0',

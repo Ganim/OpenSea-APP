@@ -71,7 +71,7 @@ export function ProtectedRoute({
           : hasAnyPermission(...permissionsToCheck);
 
         if (!hasAccess) {
-          router.push('/dashboard');
+          router.push('/');
         }
       }
     }

@@ -18,7 +18,8 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { usersService } from '@/services/auth/users.service';
 import { listPermissionGroups } from '@/services/rbac/rbac.service';
 
-import { History, Settings, Shield, UserCircle, Users2 } from 'lucide-react';
+import { History, Settings, Shield } from 'lucide-react';
+import { PiUserDuotone, PiUsersThreeDuotone } from 'react-icons/pi';
 import { useEffect, useState } from 'react';
 
 interface CardItem {
@@ -44,12 +45,23 @@ const sections: {
         id: 'users',
         title: 'Usuários',
         description: 'Gerencie contas, perfis e acessos dos usuários',
-        icon: UserCircle,
+        icon: PiUserDuotone,
         href: '/admin/users',
         gradient: 'from-blue-500 to-blue-600',
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
         permission: CORE_PERMISSIONS.USERS.LIST,
         countKey: 'users',
+      },
+      {
+        id: 'teams',
+        title: 'Equipes',
+        description: 'Gerencie equipes de trabalho e seus membros',
+        icon: PiUsersThreeDuotone,
+        href: '/admin/teams',
+        gradient: 'from-cyan-500 to-blue-600',
+        hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
+        permission: CORE_PERMISSIONS.TEAMS.LIST,
+        countKey: 'teams',
       },
       {
         id: 'permission-groups',
@@ -61,17 +73,6 @@ const sections: {
         hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
         permission: RBAC_PERMISSIONS.GROUPS.LIST,
         countKey: 'groups',
-      },
-      {
-        id: 'teams',
-        title: 'Equipes',
-        description: 'Gerencie equipes de trabalho e seus membros',
-        icon: Users2,
-        href: '/admin/teams',
-        gradient: 'from-cyan-500 to-blue-600',
-        hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
-        permission: CORE_PERMISSIONS.TEAMS.LIST,
-        countKey: 'teams',
       },
     ],
   },

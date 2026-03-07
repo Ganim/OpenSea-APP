@@ -83,9 +83,24 @@ export const companiesService = {
     if (params?.search) query.append('search', params.search);
     if (params?.status) query.append('status', params.status);
 
-    return apiClient.get<CompaniesResponse>(
+    const response = await apiClient.get<Company[] | CompaniesResponse>(
       `${API_ENDPOINTS.COMPANIES.LIST}?${query.toString()}`
     );
+
+    // Backend returns raw array; normalize to { companies, meta }
+    if (Array.isArray(response)) {
+      return {
+        companies: response,
+        meta: {
+          total: response.length,
+          page: params?.page ?? 1,
+          limit: params?.perPage ?? 20,
+          totalPages: 1,
+        },
+      };
+    }
+
+    return response;
   },
 
   async getCompany(id: string): Promise<CompanyResponse> {

@@ -16,10 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import type { StorageFile } from '@/types/storage';
 import {
   useListVersions,
-  useDownloadFile,
   useRestoreVersion,
 } from '@/hooks/storage';
 import { usePermissions } from '@/hooks/use-permissions';
+import { storageFilesService } from '@/services/storage/files.service';
 import { formatFileSize } from './utils';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -36,7 +36,6 @@ export function FileVersionPanel({
   onOpenChange,
 }: FileVersionPanelProps) {
   const { data: versionsData, isLoading } = useListVersions(file?.id ?? '');
-  const downloadMutation = useDownloadFile();
   const restoreMutation = useRestoreVersion();
   const { hasPermission } = usePermissions();
 
@@ -44,19 +43,16 @@ export function FileVersionPanel({
   const canRestore = hasPermission('storage.versions.restore');
 
   const handleDownloadVersion = useCallback(
-    async (version: number) => {
+    (version: number) => {
       if (!file) return;
       try {
-        const result = await downloadMutation.mutateAsync({
-          id: file.id,
-          version,
-        });
-        window.open(result.url, '_blank');
+        const downloadUrl = storageFilesService.getServeUrl(file.id, { version, download: true });
+        window.open(downloadUrl, '_blank');
       } catch {
         toast.error('Erro ao baixar esta versão');
       }
     },
-    [file, downloadMutation]
+    [file]
   );
 
   const handleRestore = useCallback(
@@ -139,7 +135,6 @@ export function FileVersionPanel({
                           variant="ghost"
                           className="text-xs h-7"
                           onClick={() => handleDownloadVersion(version.version)}
-                          disabled={downloadMutation.isPending}
                         >
                           <Download className="w-3 h-3" />
                           Baixar

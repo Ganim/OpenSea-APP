@@ -1,6 +1,7 @@
 'use client';
 
 import { EMAIL_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import { emailService } from '@/services/email';
 import { useQueries, useQuery } from '@tanstack/react-query';
@@ -12,15 +13,16 @@ import { useMemo } from 'react';
  * Returns 0 if no accounts or not loaded yet.
  */
 export function useEmailUnreadCount(): number {
+  const { currentTenant } = useTenant();
   const { hasPermission } = usePermissions();
   const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
   const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
 
-  // Step 1: Fetch accounts
+  // Step 1: Fetch accounts (only when tenant is selected)
   const accountsQuery = useQuery({
     queryKey: ['email', 'accounts'],
     queryFn: () => emailService.listAccounts(),
-    enabled: canList,
+    enabled: canList && !!currentTenant,
     staleTime: 60_000,
   });
 
@@ -58,6 +60,7 @@ export function useEmailUnreadCount(): number {
  * Useful for the sidebar to show per-account badges.
  */
 export function useEmailAccountUnreadCounts(): Record<string, number> {
+  const { currentTenant } = useTenant();
   const { hasPermission } = usePermissions();
   const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
   const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
@@ -65,7 +68,7 @@ export function useEmailAccountUnreadCounts(): Record<string, number> {
   const accountsQuery = useQuery({
     queryKey: ['email', 'accounts'],
     queryFn: () => emailService.listAccounts(),
-    enabled: canList,
+    enabled: canList && !!currentTenant,
     staleTime: 60_000,
   });
 

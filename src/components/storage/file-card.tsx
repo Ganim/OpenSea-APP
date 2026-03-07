@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { EyeOff, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StorageFile } from '@/types/storage';
 import { FileTypeIcon } from './file-type-icon';
@@ -23,6 +25,9 @@ interface FileCardProps {
   onMove?: (file: StorageFile) => void;
   onVersions?: (file: StorageFile) => void;
   onShare?: (file: StorageFile) => void;
+  onProtect?: (file: StorageFile) => void;
+  onHide?: (file: StorageFile) => void;
+  onProperties?: (file: StorageFile) => void;
   onDelete?: (file: StorageFile) => void;
 }
 
@@ -42,9 +47,13 @@ export function FileCard({
   onMove,
   onVersions,
   onShare,
+  onProtect,
+  onHide,
+  onProperties,
   onDelete,
 }: FileCardProps) {
   const isImage = file.fileType === 'image';
+  const [thumbError, setThumbError] = useState(false);
 
   return (
     <FileContextMenu
@@ -56,6 +65,9 @@ export function FileCard({
       onMove={onMove}
       onVersions={onVersions}
       onShare={onShare}
+      onProtect={onProtect}
+      onHide={onHide}
+      onProperties={onProperties}
       onDelete={onDelete}
     >
       <div
@@ -76,15 +88,26 @@ export function FileCard({
         onDoubleClick={onDoubleClick}
       >
         <div className="relative flex items-center justify-center w-12 h-12">
-          {isImage && file.thumbnailKey ? (
+          {isImage && file.thumbnailKey && !thumbError ? (
             <img
               src={file.thumbnailKey}
               alt={file.name}
               loading="lazy"
               className="w-12 h-12 rounded-lg object-cover"
+              onError={() => setThumbError(true)}
             />
           ) : (
             <FileTypeIcon fileType={file.fileType} size={40} />
+          )}
+          {file.isProtected && (
+            <div className="absolute -top-1 -right-1 p-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700">
+              <Lock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            </div>
+          )}
+          {file.isHidden && (
+            <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-violet-100 dark:bg-violet-900/60 border border-violet-300 dark:border-violet-700">
+              <EyeOff className="w-3 h-3 text-violet-600 dark:text-violet-400" />
+            </div>
           )}
         </div>
 

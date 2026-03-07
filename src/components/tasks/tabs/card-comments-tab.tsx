@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +16,7 @@ import {
   Trash2,
   MessageSquare,
   SmilePlus,
+  Send,
 } from 'lucide-react';
 import {
   useComments,
@@ -38,6 +39,8 @@ import type { Comment } from '@/types/tasks';
 interface CardCommentsTabProps {
   boardId: string;
   cardId: string;
+  /** Render in messaging layout: scrollable messages above, input pinned below */
+  messagingLayout?: boolean;
 }
 
 const QUICK_EMOJIS = ['👍', '👎', '❤️', '🎉', '😄', '😮', '🤔', '👀'];
@@ -131,24 +134,28 @@ function CommentItem({
   );
 
   return (
-    <div className="flex gap-3 py-3">
+    <div className="flex gap-2.5 py-2.5 group/comment">
       <MemberAvatar name={comment.authorName} size="md" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
+          <span className="text-sm font-semibold">
             {comment.authorName ?? 'Usuário'}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[10px] text-muted-foreground">
             {formatRelativeTime(comment.createdAt)}
           </span>
           {comment.updatedAt && (
-            <span className="text-xs text-muted-foreground">(editado)</span>
+            <span className="text-[10px] text-muted-foreground italic">(editado)</span>
           )}
 
           {isOwner && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 ml-auto opacity-0 group-hover/comment:opacity-100 transition-opacity"
+                >
                   <MoreHorizontal className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
@@ -170,16 +177,18 @@ function CommentItem({
         </div>
 
         {isEditing ? (
-          <div className="mt-2 space-y-2">
+          <div className="mt-1.5 space-y-1.5">
             <Textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={2}
               autoFocus
+              className="text-sm"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 size="sm"
+                className="h-7 text-xs"
                 onClick={handleSaveEdit}
                 disabled={updateComment.isPending}
               >
@@ -188,6 +197,7 @@ function CommentItem({
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-7 text-xs"
                 onClick={() => setIsEditing(false)}
               >
                 Cancelar
@@ -195,60 +205,70 @@ function CommentItem({
             </div>
           </div>
         ) : (
-          <p className="text-sm mt-1 whitespace-pre-wrap">{comment.content}</p>
+          <p className="text-sm mt-0.5 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
         )}
 
         {/* Reactions */}
-        <div className="flex items-center gap-1 mt-2 flex-wrap">
-          {Object.entries(groupedReactions).map(([emoji, data]) => (
-            <button
-              key={emoji}
-              className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs border transition-colors ${
-                data.userReacted
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border hover:bg-muted'
-              }`}
-              onClick={() => handleToggleReaction(emoji)}
-            >
-              <span>{emoji}</span>
-              <span>{data.count}</span>
-            </button>
-          ))}
-
-          <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-            <PopoverTrigger asChild>
-              <button className="inline-flex items-center justify-center rounded-full h-6 w-6 border border-dashed border-border text-muted-foreground hover:bg-muted transition-colors">
-                <SmilePlus className="h-3 w-3" />
+        {(Object.keys(groupedReactions).length > 0 || true) && (
+          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+            {Object.entries(groupedReactions).map(([emoji, data]) => (
+              <button
+                key={emoji}
+                className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] border transition-colors ${
+                  data.userReacted
+                    ? 'border-primary/50 bg-primary/10'
+                    : 'border-border hover:bg-muted'
+                }`}
+                onClick={() => handleToggleReaction(emoji)}
+              >
+                <span>{emoji}</span>
+                <span className="font-medium">{data.count}</span>
               </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="start">
-              <div className="flex gap-1">
-                {QUICK_EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted transition-colors text-base"
-                    onClick={() => handleToggleReaction(emoji)}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+            ))}
+
+            <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="inline-flex items-center justify-center rounded-full h-5 w-5 border border-dashed border-border/50 text-muted-foreground hover:bg-muted transition-colors opacity-0 group-hover/comment:opacity-100">
+                  <SmilePlus className="h-2.5 w-2.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-1.5" align="start">
+                <div className="flex gap-0.5">
+                  {QUICK_EMOJIS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted transition-colors text-sm"
+                      onClick={() => handleToggleReaction(emoji)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export function CardCommentsTab({ boardId, cardId }: CardCommentsTabProps) {
+export function CardCommentsTab({ boardId, cardId, messagingLayout }: CardCommentsTabProps) {
   const { user } = useAuth();
   const { data: commentsData, isLoading } = useComments(boardId, cardId);
   const createComment = useCreateComment(boardId, cardId);
 
   const comments = commentsData?.comments ?? [];
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const [newContent, setNewContent] = useState('');
+
+  // Auto-scroll to bottom when new comments arrive (messaging mode)
+  useEffect(() => {
+    if (messagingLayout && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [comments.length, messagingLayout]);
 
   const handleCreateComment = useCallback(() => {
     const content = newContent.trim();
@@ -259,13 +279,79 @@ export function CardCommentsTab({ boardId, cardId }: CardCommentsTabProps) {
       {
         onSuccess: () => {
           setNewContent('');
-          toast.success('Comentário adicionado');
         },
         onError: () => toast.error('Erro ao adicionar comentário'),
       },
     );
   }, [newContent, createComment]);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleCreateComment();
+      }
+    },
+    [handleCreateComment],
+  );
+
+  // Messaging layout: messages above, input pinned below
+  if (messagingLayout) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Scrollable messages area */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 min-h-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <MessageSquare className="h-8 w-8 mb-2 opacity-30" />
+              <p className="text-xs">Nenhum comentário ainda</p>
+              <p className="text-[10px] mt-1 opacity-60">Inicie uma conversa sobre esta tarefa</p>
+            </div>
+          ) : (
+            <div className="space-y-0.5 py-2">
+              {comments.map((comment) => (
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  boardId={boardId}
+                  cardId={cardId}
+                  currentUserId={user?.id}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Pinned input at bottom */}
+        <div className="shrink-0 border-t border-border/50 p-3 bg-muted/30">
+          <div className="flex items-end gap-2">
+            <Textarea
+              value={newContent}
+              onChange={(e) => setNewContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Escreva um comentário... (Enter para enviar)"
+              rows={1}
+              className="text-sm min-h-[36px] max-h-[100px] resize-none"
+            />
+            <Button
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onClick={handleCreateComment}
+              disabled={createComment.isPending || !newContent.trim()}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Original layout (used in tabs)
   return (
     <div className="space-y-4 flex-col w-full">
       {/* Comment input */}

@@ -102,3 +102,39 @@ export const FEATURE_FLAG_LABELS: Record<FeatureFlagNames, string> = {
   [FeatureFlagNames.CUSTOM_BRANDING]: 'Marca Personalizada',
   [FeatureFlagNames.API_ACCESS]: 'Acesso à API',
 };
+
+// ============================================================================
+// Calendar - Agenda
+// ============================================================================
+
+export const EventTypeLabels: Record<string, string> = {
+  MEETING: 'Reunião',
+  TASK: 'Tarefa',
+  REMINDER: 'Lembrete',
+  DEADLINE: 'Prazo',
+  HOLIDAY: 'Feriado',
+  BIRTHDAY: 'Aniversário',
+  VACATION: 'Férias',
+  ABSENCE: 'Ausência',
+  FINANCE_DUE: 'Vencimento Financeiro',
+  PURCHASE_ORDER: 'Pedido de Compra',
+  CUSTOM: 'Personalizado',
+};
+
+export const EventVisibilityLabels: Record<string, string> = {
+  PUBLIC: 'Público',
+  PRIVATE: 'Privado',
+};
+
+export const ParticipantStatusLabels: Record<string, string> = {
+  PENDING: 'Pendente',
+  ACCEPTED: 'Aceito',
+  DECLINED: 'Recusado',
+  TENTATIVE: 'Talvez',
+};
+
+export const ParticipantRoleLabels: Record<string, string> = {
+  OWNER: 'Organizador',
+  ASSIGNEE: 'Responsável',
+  GUEST: 'Convidado',
+};

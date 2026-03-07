@@ -50,12 +50,17 @@ interface FileManagerListProps {
   onManageFolderAccess?: (folder: StorageFolder) => void;
   onDeleteFolder?: (folder: StorageFolder) => void;
   onDownloadFolder?: (folder: StorageFolder) => void;
+  onProtectFolder?: (folder: StorageFolder) => void;
+  onHideFolder?: (folder: StorageFolder) => void;
   // File actions
   onDownloadFile?: (file: StorageFile) => void;
   onRenameFile?: (file: StorageFile) => void;
   onMoveFile?: (file: StorageFile) => void;
   onFileVersions?: (file: StorageFile) => void;
   onShareFile?: (file: StorageFile) => void;
+  onProtectFile?: (file: StorageFile) => void;
+  onHideFile?: (file: StorageFile) => void;
+  onProperties?: (file: StorageFile) => void;
   onDeleteFile?: (file: StorageFile) => void;
   // Permissions
   folderPermissions?: FolderPermissions;
@@ -103,11 +108,16 @@ export function FileManagerList({
   onManageFolderAccess,
   onDeleteFolder,
   onDownloadFolder,
+  onProtectFolder,
+  onHideFolder,
   onDownloadFile,
   onRenameFile,
   onMoveFile,
   onFileVersions,
   onShareFile,
+  onProtectFile,
+  onHideFile,
+  onProperties,
   onDeleteFile,
   folderPermissions,
   filePermissions,
@@ -320,6 +330,8 @@ export function FileManagerList({
                     onChangeColor={onChangeColorFolder}
                     onMove={onMoveFolder}
                     onManageAccess={onManageFolderAccess}
+                    onProtect={onProtectFolder}
+                    onHide={onHideFolder}
                     onDelete={onDeleteFolder}
                     onDownload={onDownloadFolder}
                   >
@@ -413,6 +425,9 @@ export function FileManagerList({
                   onMove={onMoveFile}
                   onVersions={onFileVersions}
                   onShare={onShareFile}
+                  onProtect={onProtectFile}
+                  onHide={onHideFile}
+                  onProperties={onProperties}
                   onDelete={onDeleteFile}
                 >
                   <div

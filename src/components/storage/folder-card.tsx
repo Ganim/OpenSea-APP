@@ -1,5 +1,6 @@
 'use client';
 
+import { EyeOff, Lock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { StorageFolder } from '@/types/storage';
@@ -27,6 +28,8 @@ interface FolderCardProps {
   onChangeColor?: (folder: StorageFolder) => void;
   onMove?: (folder: StorageFolder) => void;
   onManageAccess?: (folder: StorageFolder) => void;
+  onProtect?: (folder: StorageFolder) => void;
+  onHide?: (folder: StorageFolder) => void;
   onDelete?: (folder: StorageFolder) => void;
   onDownload?: (folder: StorageFolder) => void;
 }
@@ -51,6 +54,8 @@ export function FolderCard({
   onChangeColor,
   onMove,
   onManageAccess,
+  onProtect,
+  onHide,
   onDelete,
   onDownload,
 }: FolderCardProps) {
@@ -63,6 +68,8 @@ export function FolderCard({
       onChangeColor={onChangeColor}
       onMove={onMove}
       onManageAccess={onManageAccess}
+      onProtect={onProtect}
+      onHide={onHide}
       onDelete={onDelete}
       onDownload={onDownload}
     >
@@ -89,7 +96,19 @@ export function FolderCard({
         onClick={onClick}
         onDoubleClick={onDoubleClick}
       >
-        <FolderIcon folder={folder} size="lg" />
+        <div className="relative">
+          <FolderIcon folder={folder} size="lg" />
+          {folder.isProtected && (
+            <div className="absolute -top-1 -right-1 p-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700">
+              <Lock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            </div>
+          )}
+          {folder.isHidden && (
+            <div className="absolute -top-1 -left-1 p-0.5 rounded-full bg-violet-100 dark:bg-violet-900/60 border border-violet-300 dark:border-violet-700">
+              <EyeOff className="w-3 h-3 text-violet-600 dark:text-violet-400" />
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col items-center gap-1 w-full min-w-0">
           <span
@@ -102,10 +121,14 @@ export function FolderCard({
             {folder.name}
           </span>
 
-          {folder.fileCount !== undefined && folder.fileCount > 0 && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-              {folder.fileCount} {folder.fileCount === 1 ? 'item' : 'itens'}
-            </Badge>
+          {folder.fileCount !== undefined && (
+            folder.fileCount > 0 ? (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                {folder.fileCount} {folder.fileCount === 1 ? 'item' : 'itens'}
+              </Badge>
+            ) : (
+              <span className="text-xs text-muted-foreground">Pasta vazia</span>
+            )
           )}
         </div>
       </div>

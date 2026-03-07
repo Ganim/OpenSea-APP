@@ -4,6 +4,15 @@ import type { Permission, PermissionWithEffect } from './permission.types';
 // PERMISSION GROUP
 // ============================================
 
+export interface StorageSettings {
+  /** MIME type patterns permitidos (ex: ['image/*', 'application/pdf']) */
+  allowedFileTypes?: string[];
+  /** Tamanho máximo por arquivo em MB */
+  maxFileSizeMb?: number;
+  /** Quota total de armazenamento em MB */
+  maxStorageMb?: number;
+}
+
 export interface PermissionGroup {
   id: string;
   name: string;
@@ -11,6 +20,7 @@ export interface PermissionGroup {
   description: string | null;
   color: string | null; // hex color (#RRGGBB)
   priority: number;
+  storageSettings: StorageSettings | null;
   isActive: boolean;
   isSystem: boolean;
   parentId: string | null;
@@ -35,6 +45,7 @@ export interface CreatePermissionGroupDTO {
   color?: string; // #RRGGBB
   priority?: number; // default: 100
   parentId?: string | null;
+  storageSettings?: StorageSettings | null;
 }
 
 export interface UpdatePermissionGroupDTO {
@@ -44,6 +55,7 @@ export interface UpdatePermissionGroupDTO {
   priority?: number;
   parentId?: string | null;
   isActive?: boolean;
+  storageSettings?: StorageSettings | null;
 }
 
 export interface ListPermissionGroupsQuery {

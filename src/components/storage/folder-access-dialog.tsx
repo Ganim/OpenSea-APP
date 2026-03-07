@@ -21,7 +21,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
 import { usersService } from '@/services/auth/users.service';
-import { listPermissionGroups } from '@/services/rbac/rbac.service';
+import { teamsService } from '@/services/core/teams.service';
 import type { FolderAccessRule, StorageFolder } from '@/types/storage';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -36,6 +36,7 @@ import {
   Shield,
   Trash2,
   UserPlus,
+  Users,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -50,7 +51,7 @@ interface FolderAccessDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type SectionId = 'overview' | 'groups' | 'users';
+type SectionId = 'overview' | 'teams' | 'users';
 
 interface SectionItem {
   id: SectionId;
@@ -77,23 +78,23 @@ const EMPTY_FORM: NewRuleForm = {
 // =============================================================================
 
 function getFolderSharePermissions(folder: StorageFolder | null) {
-  if (!folder) return { shareUserCode: '', shareGroupCode: '' };
+  if (!folder) return { shareUserCode: '', shareTeamCode: '' };
 
   if (folder.isSystem) {
     return {
       shareUserCode: 'storage.system-folders.share-user',
-      shareGroupCode: 'storage.system-folders.share-group',
+      shareTeamCode: 'storage.system-folders.share-group',
     };
   }
   if (folder.isFilter) {
     return {
       shareUserCode: 'storage.filter-folders.share-user',
-      shareGroupCode: 'storage.filter-folders.share-group',
+      shareTeamCode: 'storage.filter-folders.share-group',
     };
   }
   return {
     shareUserCode: 'storage.user-folders.share-user',
-    shareGroupCode: 'storage.user-folders.share-group',
+    shareTeamCode: 'storage.user-folders.share-group',
   };
 }
 
@@ -108,10 +109,10 @@ export function FolderAccessDialog({
 }: FolderAccessDialogProps) {
   const { hasPermission } = usePermissions();
   const [activeSection, setActiveSection] = useState<SectionId>('overview');
-  const [groupSearch, setGroupSearch] = useState('');
-  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [teamSearch, setTeamSearch] = useState('');
+  const [selectedTeamId, setSelectedTeamId] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [groupForm, setGroupForm] = useState<NewRuleForm>(EMPTY_FORM);
+  const [teamForm, setTeamForm] = useState<NewRuleForm>(EMPTY_FORM);
   const [userForm, setUserForm] = useState<NewRuleForm>(EMPTY_FORM);
   const [userResetKey, setUserResetKey] = useState(0);
 
@@ -120,9 +121,9 @@ export function FolderAccessDialog({
   const removeAccessMutation = useRemoveFolderAccess();
 
   // Determine which share sections are visible
-  const { shareUserCode, shareGroupCode } = getFolderSharePermissions(folder);
+  const { shareUserCode, shareTeamCode } = getFolderSharePermissions(folder);
   const canShareWithUsers = hasPermission(shareUserCode);
-  const canShareWithGroups = hasPermission(shareGroupCode);
+  const canShareWithTeams = hasPermission(shareTeamCode);
 
   // Build available sidebar sections
   const sections = useMemo<SectionItem[]>(() => {
@@ -133,11 +134,11 @@ export function FolderAccessDialog({
         icon: <Eye className="w-4 h-4" />,
       },
     ];
-    if (canShareWithGroups) {
+    if (canShareWithTeams) {
       result.push({
-        id: 'groups',
-        label: 'Grupos',
-        icon: <Shield className="w-4 h-4" />,
+        id: 'teams',
+        label: 'Times',
+        icon: <Users className="w-4 h-4" />,
       });
     }
     if (canShareWithUsers) {
@@ -148,13 +149,16 @@ export function FolderAccessDialog({
       });
     }
     return result;
-  }, [canShareWithGroups, canShareWithUsers]);
+  }, [canShareWithTeams, canShareWithUsers]);
 
-  // Fetch groups for the groups section
-  const { data: allGroups = [], isLoading: isLoadingGroups } = useQuery({
-    queryKey: ['permission-groups-for-access'],
-    queryFn: () => listPermissionGroups({ isActive: true, limit: 500 }),
-    enabled: open && canShareWithGroups && activeSection === 'groups',
+  // Fetch teams for the teams section
+  const { data: allTeams = [], isLoading: isLoadingTeams } = useQuery({
+    queryKey: ['teams-for-access'],
+    queryFn: async () => {
+      const res = await teamsService.listTeams({ isActive: true, limit: 100 });
+      return res.data;
+    },
+    enabled: open && canShareWithTeams && activeSection === 'teams',
     staleTime: 5 * 60 * 1000,
   });
 
@@ -162,36 +166,36 @@ export function FolderAccessDialog({
   const directRules = rules.filter((r: FolderAccessRule) => !r.isInherited);
   const inheritedRules = rules.filter((r: FolderAccessRule) => r.isInherited);
 
-  // Filtered groups based on search
-  const filteredGroups = useMemo(() => {
-    if (!groupSearch.trim()) return allGroups;
-    const q = groupSearch.toLowerCase();
-    return allGroups.filter(
-      g =>
-        g.name.toLowerCase().includes(q) ||
-        g.description?.toLowerCase().includes(q)
+  // Filtered teams based on search
+  const filteredTeams = useMemo(() => {
+    if (!teamSearch.trim()) return allTeams;
+    const q = teamSearch.toLowerCase();
+    return allTeams.filter(
+      t =>
+        t.name.toLowerCase().includes(q) ||
+        t.description?.toLowerCase().includes(q)
     );
-  }, [allGroups, groupSearch]);
+  }, [allTeams, teamSearch]);
 
   // Handlers
-  const handleAddGroupRule = useCallback(async () => {
-    if (!folder || !selectedGroupId) return;
+  const handleAddTeamRule = useCallback(async () => {
+    if (!folder || !selectedTeamId) return;
 
     try {
       await setAccessMutation.mutateAsync({
         folderId: folder.id,
         data: {
-          groupId: selectedGroupId,
-          ...groupForm,
+          teamId: selectedTeamId,
+          ...teamForm,
         },
       });
-      toast.success('Acesso concedido ao grupo');
-      setSelectedGroupId('');
-      setGroupForm(EMPTY_FORM);
+      toast.success('Acesso concedido ao time');
+      setSelectedTeamId('');
+      setTeamForm(EMPTY_FORM);
     } catch {
-      toast.error('Erro ao conceder acesso ao grupo');
+      toast.error('Erro ao conceder acesso ao time');
     }
-  }, [folder, selectedGroupId, groupForm, setAccessMutation]);
+  }, [folder, selectedTeamId, teamForm, setAccessMutation]);
 
   const handleAddUserRule = useCallback(async () => {
     if (!folder || !selectedUserId) return;
@@ -235,12 +239,15 @@ export function FolderAccessDialog({
       if (!folder) return;
 
       try {
+        const subject = rule.userId
+          ? { userId: rule.userId }
+          : rule.teamId
+            ? { teamId: rule.teamId }
+            : { groupId: rule.groupId! };
         await setAccessMutation.mutateAsync({
           folderId: folder.id,
           data: {
-            ...(rule.userId
-              ? { userId: rule.userId }
-              : { groupId: rule.groupId! }),
+            ...subject,
             ...form,
           },
         });
@@ -254,10 +261,10 @@ export function FolderAccessDialog({
 
   const handleClose = useCallback(() => {
     setActiveSection('overview');
-    setGroupSearch('');
-    setSelectedGroupId('');
+    setTeamSearch('');
+    setSelectedTeamId('');
     setSelectedUserId('');
-    setGroupForm(EMPTY_FORM);
+    setTeamForm(EMPTY_FORM);
     setUserForm(EMPTY_FORM);
     onOpenChange(false);
   }, [onOpenChange]);
@@ -321,22 +328,22 @@ export function FolderAccessDialog({
                 onEditRule={handleEditRule}
                 isRemoving={removeAccessMutation.isPending}
                 isEditing={setAccessMutation.isPending}
-                canRemoveRules={canShareWithUsers || canShareWithGroups}
+                canRemoveRules={canShareWithUsers || canShareWithTeams}
               />
             )}
 
-            {activeSection === 'groups' && (
-              <ShareWithGroupsSection
+            {activeSection === 'teams' && (
+              <ShareWithTeamsSection
                 rules={rules}
-                filteredGroups={filteredGroups}
-                isLoading={isLoadingGroups}
-                search={groupSearch}
-                onSearchChange={setGroupSearch}
-                selectedGroupId={selectedGroupId}
-                onSelectGroup={setSelectedGroupId}
-                form={groupForm}
-                onFormChange={setGroupForm}
-                onAdd={handleAddGroupRule}
+                filteredTeams={filteredTeams}
+                isLoading={isLoadingTeams}
+                search={teamSearch}
+                onSearchChange={setTeamSearch}
+                selectedTeamId={selectedTeamId}
+                onSelectTeam={setSelectedTeamId}
+                form={teamForm}
+                onFormChange={setTeamForm}
+                onAdd={handleAddTeamRule}
                 onRemoveRule={handleRemoveRule}
                 isRemoving={removeAccessMutation.isPending}
                 isPending={setAccessMutation.isPending}
@@ -401,6 +408,9 @@ function OverviewSection({
     if (rule.userId) {
       return rule.userName || rule.userId;
     }
+    if (rule.teamId) {
+      return rule.teamName || rule.teamId;
+    }
     if (rule.groupId) {
       return rule.groupName || rule.groupId;
     }
@@ -409,6 +419,7 @@ function OverviewSection({
 
   const resolveType = (rule: FolderAccessRule) => {
     if (rule.userId) return 'Usuário';
+    if (rule.teamId) return 'Time';
     if (rule.groupId) return 'Grupo';
     return '';
   };
@@ -466,17 +477,17 @@ function OverviewSection({
 }
 
 // =============================================================================
-// Section: Share with Groups
+// Section: Share with Teams
 // =============================================================================
 
-function ShareWithGroupsSection({
+function ShareWithTeamsSection({
   rules,
-  filteredGroups,
+  filteredTeams,
   isLoading,
   search,
   onSearchChange,
-  selectedGroupId,
-  onSelectGroup,
+  selectedTeamId,
+  onSelectTeam,
   form,
   onFormChange,
   onAdd,
@@ -485,16 +496,17 @@ function ShareWithGroupsSection({
   isPending,
 }: {
   rules: FolderAccessRule[];
-  filteredGroups: Array<{
+  filteredTeams: Array<{
     id: string;
     name: string;
     description?: string | null;
+    color?: string | null;
   }>;
   isLoading: boolean;
   search: string;
   onSearchChange: (s: string) => void;
-  selectedGroupId: string;
-  onSelectGroup: (id: string) => void;
+  selectedTeamId: string;
+  onSelectTeam: (id: string) => void;
   form: NewRuleForm;
   onFormChange: (form: NewRuleForm) => void;
   onAdd: () => void;
@@ -502,30 +514,30 @@ function ShareWithGroupsSection({
   isRemoving: boolean;
   isPending: boolean;
 }) {
-  const groupsWithAccess = rules.filter(r => r.groupId && !r.isInherited);
-  const groupIdsWithAccess = new Set(groupsWithAccess.map(r => r.groupId));
-  const availableGroups = filteredGroups.filter(
-    g => !groupIdsWithAccess.has(g.id)
+  const teamsWithAccess = rules.filter(r => r.teamId && !r.isInherited);
+  const teamIdsWithAccess = new Set(teamsWithAccess.map(r => r.teamId));
+  const availableTeams = filteredTeams.filter(
+    t => !teamIdsWithAccess.has(t.id)
   );
 
   return (
     <div className="space-y-4">
       <h4 className="text-sm font-medium">
-        Compartilhar com grupos de permissão
+        Compartilhar com times
       </h4>
 
       {/* Search */}
       <div className="relative px-1">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
-          placeholder="Buscar grupo..."
+          placeholder="Buscar time..."
           value={search}
           onChange={e => onSearchChange(e.target.value)}
           className="pl-9"
         />
       </div>
 
-      {/* Available groups list */}
+      {/* Available teams list */}
       <div className="space-y-1 max-h-40 overflow-y-auto">
         {isLoading ? (
           <div className="space-y-2">
@@ -535,53 +547,53 @@ function ShareWithGroupsSection({
           </div>
         ) : (
           <>
-            {availableGroups.map(group => (
+            {availableTeams.map(team => (
               <button
-                key={group.id}
+                key={team.id}
                 onClick={() =>
-                  onSelectGroup(group.id === selectedGroupId ? '' : group.id)
+                  onSelectTeam(team.id === selectedTeamId ? '' : team.id)
                 }
                 className={cn(
                   'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors',
-                  selectedGroupId === group.id
+                  selectedTeamId === team.id
                     ? 'bg-primary/10 border border-primary/30'
                     : 'hover:bg-gray-100 dark:hover:bg-slate-800 border border-transparent'
                 )}
               >
-                <Shield className="w-4 h-4 text-gray-500 shrink-0" />
+                <Users className="w-4 h-4 text-gray-500 shrink-0" />
                 <div className="min-w-0">
-                  <p className="font-medium truncate">{group.name}</p>
-                  {group.description && (
+                  <p className="font-medium truncate">{team.name}</p>
+                  {team.description && (
                     <p className="text-xs text-gray-500 truncate">
-                      {group.description ?? 'Sem descrição'}
+                      {team.description}
                     </p>
                   )}
                 </div>
               </button>
             ))}
-            {availableGroups.length === 0 && (
+            {availableTeams.length === 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                 {search
-                  ? 'Nenhum grupo encontrado'
-                  : 'Todos os grupos já têm acesso'}
+                  ? 'Nenhum time encontrado'
+                  : 'Todos os times já têm acesso'}
               </p>
             )}
           </>
         )}
       </div>
 
-      {/* Permissions form (when a group is selected) */}
-      {selectedGroupId && (
+      {/* Permissions form (when a team is selected) */}
+      {selectedTeamId && (
         <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-3">
           <p className="text-sm font-medium">
-            Permissões para o grupo selecionado
+            Permissões para o time selecionado
           </p>
           <PermissionCheckboxes form={form} onChange={onFormChange} />
           <div className="flex justify-end gap-2">
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onSelectGroup('')}
+              onClick={() => onSelectTeam('')}
             >
               Cancelar
             </Button>
@@ -593,23 +605,23 @@ function ShareWithGroupsSection({
         </div>
       )}
 
-      {/* Already shared groups */}
-      {groupsWithAccess.length > 0 && (
+      {/* Already shared teams */}
+      {teamsWithAccess.length > 0 && (
         <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-slate-700">
           <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-            Grupos com acesso
+            Times com acesso
           </h4>
-          {groupsWithAccess.map(rule => {
-            const group = filteredGroups.find(g => g.id === rule.groupId) || {
-              id: rule.groupId ?? '',
-              name: rule.groupName ?? rule.groupId ?? 'Desconhecido',
+          {teamsWithAccess.map(rule => {
+            const team = filteredTeams.find(t => t.id === rule.teamId) || {
+              id: rule.teamId ?? '',
+              name: rule.teamName ?? rule.teamId ?? 'Desconhecido',
             };
             return (
               <AccessRuleRow
                 key={rule.id}
                 rule={rule}
-                label={group.name}
-                typeLabel="Grupo"
+                label={team.name}
+                typeLabel="Time"
                 onRemove={() => onRemoveRule(rule)}
                 isRemoving={isRemoving}
               />

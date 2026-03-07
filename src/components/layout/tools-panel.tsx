@@ -20,6 +20,7 @@ import {
   Calendar,
   ChevronRight,
   FolderOpen,
+  KanbanSquare,
   Layout,
   Mail,
   Search,
@@ -33,6 +34,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FolderOpen,
   Calendar,
   Mail,
+  KanbanSquare,
 };
 
 interface ToolsPanelProps {

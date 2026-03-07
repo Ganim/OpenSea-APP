@@ -21,11 +21,12 @@ import { cn } from '@/lib/utils';
 import type { Board, Card, Column } from '@/types/tasks';
 import { useMoveCard } from '@/hooks/tasks/use-cards';
 import { useCreateColumn } from '@/hooks/tasks/use-columns';
+import { getGradientForBoard } from '../shared/board-gradients';
 import { CardItem } from '../cards/card-item';
 import { CardInlineCreate } from '../cards/card-inline-create';
-import { Plus, X, MoreHorizontal } from 'lucide-react';
+import { Plus, X, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+// Native scroll with styled scrollbar (Radix ScrollArea breaks height propagation)
 
 interface KanbanViewProps {
   board: Board;
@@ -42,6 +43,7 @@ export function KanbanView({
 }: KanbanViewProps) {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const moveCard = useMoveCard(boardId);
+  const gradient = getGradientForBoard(boardId);
 
   const columns = useMemo(
     () => [...(board.columns ?? [])].sort((a, b) => a.position - b.position),
@@ -134,8 +136,8 @@ export function KanbanView({
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
     >
-      <ScrollArea className="w-full">
-        <div className="flex gap-3 pb-4 min-w-max">
+      <div className="kanban-scroll h-full overflow-x-auto overflow-y-hidden pb-2">
+        <div className="flex gap-3 min-w-max h-full">
           {columns.map((column) => {
             const colCards = cardsByColumn.get(column.id) ?? [];
             return (
@@ -144,14 +146,14 @@ export function KanbanView({
                 column={column}
                 cards={colCards}
                 boardId={boardId}
+                boardGradientFrom={gradient.from}
                 onCardClick={onCardClick}
               />
             );
           })}
           <AddColumnButton boardId={boardId} />
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
 
       <DragOverlay>
         {activeCard ? (
@@ -171,6 +173,7 @@ interface KanbanColumnProps {
   column: Column;
   cards: Card[];
   boardId: string;
+  boardGradientFrom: string;
   onCardClick?: (card: Card) => void;
 }
 
@@ -178,6 +181,7 @@ function KanbanColumn({
   column,
   cards,
   boardId,
+  boardGradientFrom,
   onCardClick,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
@@ -190,24 +194,31 @@ function KanbanColumn({
 
   const cardIds = useMemo(() => cards.map((c) => c.id), [cards]);
   const isOverWip = column.wipLimit ? cards.length >= column.wipLimit : false;
+  const colColor = column.color || boardGradientFrom;
 
   return (
     <div className="flex flex-col w-[280px] shrink-0">
-      {/* Column header */}
-      <div className="flex items-center gap-2 px-1 py-2 mb-1">
-        {/* Color indicator */}
+      {/* Column header with color accent */}
+      <div
+        className="flex items-center gap-2.5 px-3 py-2.5 rounded-t-xl border border-b-0 border-gray-200 dark:border-white/10"
+        style={{
+          background: `linear-gradient(135deg, ${colColor}12, ${colColor}06)`,
+          borderTopColor: `${colColor}30`,
+        }}
+      >
         <span
-          className="h-3 w-1 rounded-full shrink-0"
-          style={{ backgroundColor: column.color || '#94a3b8' }}
+          className="h-3 w-3 rounded shrink-0"
+          style={{ backgroundColor: colColor }}
         />
         <h3 className="text-sm font-semibold truncate flex-1">
           {column.title}
         </h3>
-        {/* Card count + WIP */}
         <span
           className={cn(
-            'text-xs font-medium tabular-nums',
-            isOverWip ? 'text-red-500' : 'text-muted-foreground',
+            'text-xs font-medium tabular-nums px-1.5 py-0.5 rounded-md',
+            isOverWip
+              ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/15'
+              : 'text-muted-foreground bg-muted/50',
           )}
         >
           {cards.length}
@@ -219,10 +230,11 @@ function KanbanColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 space-y-2 rounded-xl p-2 transition-colors min-h-[80px]',
-          'bg-muted/30 dark:bg-white/[0.02]',
-          isOver && 'bg-primary/5 dark:bg-primary/5 ring-2 ring-primary/20 ring-inset',
+          'flex-1 space-y-2 rounded-b-xl border border-gray-200 dark:border-white/10 p-2 transition-colors min-h-[80px]',
+          'bg-muted/20 dark:bg-white/[0.02]',
+          isOver && 'ring-2 ring-inset',
         )}
+        style={isOver ? { borderColor: `${colColor}40`, boxShadow: `inset 0 0 0 1px ${colColor}20` } : undefined}
       >
         <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
@@ -292,7 +304,7 @@ function AddColumnButton({ boardId }: { boardId: string }) {
   }
 
   return (
-    <div className="w-[280px] shrink-0 space-y-2 bg-muted/30 dark:bg-white/[0.02] rounded-xl p-3">
+    <div className="w-[280px] shrink-0 space-y-2 bg-muted/30 dark:bg-white/[0.02] rounded-xl p-3 border border-gray-200 dark:border-white/10">
       <input
         autoFocus
         type="text"

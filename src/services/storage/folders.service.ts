@@ -50,6 +50,8 @@ export const storageFoldersService = {
     if (query?.limit) params.limit = String(query.limit);
     if (query?.search) params.search = query.search;
     if (query?.sort) params.sort = query.sort;
+    if (query?.viewAll) params.viewAll = 'true';
+    if (query?.showHidden) params.showHidden = 'true';
 
     return apiClient.get<FolderContents>(
       API_ENDPOINTS.STORAGE.FOLDERS.CONTENTS(id),
@@ -64,6 +66,8 @@ export const storageFoldersService = {
     if (query?.limit) params.limit = String(query.limit);
     if (query?.search) params.search = query.search;
     if (query?.sort) params.sort = query.sort;
+    if (query?.viewAll) params.viewAll = 'true';
+    if (query?.showHidden) params.showHidden = 'true';
 
     return apiClient.get<FolderContents>(
       API_ENDPOINTS.STORAGE.FOLDERS.ROOT_CONTENTS,

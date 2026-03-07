@@ -3,3 +3,4 @@ export * from './files.service';
 export * from './access.service';
 export * from './trash.service';
 export * from './sharing.service';
+export * from './security.service';

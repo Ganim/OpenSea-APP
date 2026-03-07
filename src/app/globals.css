@@ -1059,6 +1059,59 @@ body {
 }
 
 /* ===========================================
+   KANBAN - Custom Scrollbar
+   =========================================== */
+
+.kanban-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--os-gray-400) / 0.4) transparent;
+}
+
+.kanban-scroll:hover {
+  scrollbar-color: rgb(var(--os-gray-400) / 0.6) transparent;
+}
+
+/* Webkit (Chrome, Edge, Safari) */
+.kanban-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.kanban-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.kanban-scroll::-webkit-scrollbar-thumb {
+  background: rgb(var(--os-gray-400) / 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--os-gray-400) / 0.55);
+  background-clip: content-box;
+}
+
+.dark .kanban-scroll {
+  scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+}
+
+.dark .kanban-scroll:hover {
+  scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+}
+
+.dark .kanban-scroll::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.2);
+  background-clip: content-box;
+}
+
+.dark .kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.35);
+  background-clip: content-box;
+}
+
+/* ===========================================
    FULLCALENDAR - OpenSea Custom Theme
    =========================================== */
 

@@ -230,7 +230,7 @@ export async function renameFolderViaApi(
 export async function moveFolderViaApi(
   token: string,
   folderId: string,
-  parentId: string
+  parentId: string | null
 ): Promise<void> {
   const res = await fetch(`${API_URL}/v1/storage/folders/${folderId}/move`, {
     method: 'PATCH',
@@ -359,7 +359,7 @@ export async function renameFileViaApi(
 export async function moveFileViaApi(
   token: string,
   fileId: string,
-  folderId: string
+  folderId: string | null
 ): Promise<void> {
   const res = await fetch(`${API_URL}/v1/storage/files/${fileId}/move`, {
     method: 'PATCH',
@@ -922,4 +922,265 @@ export async function openShareDialog(
   await expect(
     page.locator('[role="dialog"]:has-text("Compartilhar arquivo")')
   ).toBeVisible({ timeout: 5_000 });
+}
+
+// =============================================================================
+// Bulk Operations API Helpers
+// =============================================================================
+
+/**
+ * Bulk delete files and/or folders via API.
+ */
+export async function bulkDeleteViaApi(
+  token: string,
+  fileIds?: string[],
+  folderIds?: string[]
+): Promise<{ deletedFiles: number; deletedFolders: number; errors: string[] }> {
+  const res = await fetch(`${API_URL}/v1/storage/bulk/delete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fileIds: fileIds ?? [],
+      folderIds: folderIds ?? [],
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Bulk delete failed (${res.status}): ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+/**
+ * Bulk move files and/or folders to a target folder via API.
+ */
+export async function bulkMoveViaApi(
+  token: string,
+  fileIds: string[] | undefined,
+  folderIds: string[] | undefined,
+  targetFolderId: string | null
+): Promise<{ movedFiles: number; movedFolders: number; errors: string[] }> {
+  const res = await fetch(`${API_URL}/v1/storage/bulk/move`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fileIds: fileIds ?? [],
+      folderIds: folderIds ?? [],
+      targetFolderId,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Bulk move failed (${res.status}): ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+// =============================================================================
+// Storage Stats API Helper
+// =============================================================================
+
+/**
+ * Get storage stats via API.
+ */
+export async function getStorageStatsViaApi(
+  token: string
+): Promise<{
+  totalFiles: number;
+  totalSize: number;
+  filesByType: Record<string, number>;
+  usedStoragePercent: number;
+}> {
+  const res = await fetch(`${API_URL}/v1/storage/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Get storage stats failed (${res.status}): ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+// =============================================================================
+// Folder Download API Helper
+// =============================================================================
+
+/**
+ * Download a folder as ZIP via API.
+ */
+export async function downloadFolderViaApi(
+  token: string,
+  folderId: string,
+  timeoutMs = 30_000
+): Promise<{ url: string; fileName: string }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(
+      `${API_URL}/v1/storage/folders/${folderId}/download`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        `Download folder failed (${res.status}): ${await res.text()}`
+      );
+    }
+
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// =============================================================================
+// Multipart Upload API Helpers
+// =============================================================================
+
+/**
+ * Initiate a multipart upload via API.
+ */
+export async function initiateMultipartUploadViaApi(
+  token: string,
+  fileName: string,
+  mimeType: string,
+  fileSize: number,
+  folderId?: string
+): Promise<{
+  uploadId: string;
+  key: string;
+  partUrls: Array<{ partNumber: number; url: string }>;
+}> {
+  const body: Record<string, unknown> = { fileName, mimeType, fileSize };
+  if (folderId) body.folderId = folderId;
+
+  const res = await fetch(`${API_URL}/v1/storage/files/multipart/initiate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Initiate multipart upload failed (${res.status}): ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+/**
+ * Complete a multipart upload via API.
+ */
+export async function completeMultipartUploadViaApi(
+  token: string,
+  key: string,
+  uploadId: string,
+  parts: Array<{ partNumber: number; etag: string }>,
+  fileName: string,
+  mimeType: string,
+  fileSize: number
+): Promise<{ key: string; url: string; size: number; mimeType: string }> {
+  const res = await fetch(`${API_URL}/v1/storage/files/multipart/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ key, uploadId, parts, fileName, mimeType, fileSize }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Complete multipart upload failed (${res.status}): ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+/**
+ * Abort a multipart upload via API.
+ */
+export async function abortMultipartUploadViaApi(
+  token: string,
+  key: string,
+  uploadId: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/v1/storage/files/multipart/abort`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ key, uploadId }),
+  });
+
+  if (!res.ok && res.status !== 204) {
+    throw new Error(
+      `Abort multipart upload failed (${res.status}): ${await res.text()}`
+    );
+  }
+}
+
+// =============================================================================
+// Public Share API Helpers
+// =============================================================================
+
+/**
+ * Access a shared file info via public endpoint (no auth required).
+ */
+export async function accessSharedFileViaApi(
+  shareToken: string,
+  password?: string
+): Promise<{ status: number; data: unknown }> {
+  const url = new URL(`${API_URL}/v1/public/shared/${shareToken}`);
+  if (password) url.searchParams.set('password', password);
+
+  const res = await fetch(url.toString());
+  const data = await res.json().catch(() => null);
+  return { status: res.status, data };
+}
+
+/**
+ * Download a shared file via public endpoint (no auth required).
+ * Increments the download counter.
+ */
+export async function downloadSharedFileViaApi(
+  shareToken: string,
+  password?: string
+): Promise<{ status: number; data: unknown }> {
+  const body: Record<string, unknown> = {};
+  if (password) body.password = password;
+
+  const res = await fetch(`${API_URL}/v1/public/shared/${shareToken}/download`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json().catch(() => null);
+  return { status: res.status, data };
 }

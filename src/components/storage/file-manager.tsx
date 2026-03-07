@@ -8,7 +8,6 @@ import { SelectionToolbar } from '@/core/components/selection-toolbar';
 import {
   useDeleteFile,
   useDeleteFolder,
-  useDownloadFile,
   useDownloadFolder,
   useEnsureEntityFolder,
   useFileManager,
@@ -16,14 +15,18 @@ import {
 } from '@/hooks/storage';
 import { usePermissions } from '@/hooks/use-permissions';
 import { storageFilesService, storageFoldersService } from '@/services/storage';
+import { storageSecurityService } from '@/services/storage/security.service';
 import { cn } from '@/lib/utils';
 import type { StorageFile, StorageFolder } from '@/types/storage';
 import {
+  Archive,
   ArrowLeft,
   Download,
   FolderInput,
+  PackageOpen,
   Palette,
   Shield,
+  Trash2,
 } from 'lucide-react';
 import {
   forwardRef,
@@ -52,12 +55,17 @@ import type { FolderPermissions } from './folder-context-menu';
 import { MoveItemDialog } from './move-item-dialog';
 import { NewFolderDialog } from './new-folder-dialog';
 import { RenameDialog } from './rename-dialog';
+import { FilePropertiesDialog } from './file-properties-dialog';
+import { ProtectionDialog } from './protection-dialog';
+import { UnlockDialog } from './unlock-dialog';
 import { ShareLinkDialog } from './share-link-dialog';
 import { UploadDialog } from './upload-dialog';
+import { formatFileSize } from './utils';
 
 export interface FileManagerRef {
   openUpload: () => void;
   openNewFolder: () => void;
+  openTrash: () => void;
 }
 
 interface FileManagerProps {
@@ -69,6 +77,11 @@ interface FileManagerProps {
   hideToolbarActions?: boolean;
   /** DOM element ID where the toolbar should be portaled to (renders inside hero card). When set, internal toolbar is hidden. */
   toolbarPortalId?: string;
+  /** Admin-only: show all users' files and folders */
+  viewAll?: boolean;
+  /** Controlled trash view state (when managed externally) */
+  showTrash?: boolean;
+  onShowTrashChange?: (show: boolean) => void;
 }
 
 // Dialog state types
@@ -99,10 +112,13 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       className,
       hideToolbarActions,
       toolbarPortalId,
+      viewAll,
+      showTrash: showTrashProp,
+      onShowTrashChange,
     },
     ref
   ) {
-    const manager = useFileManager({ rootFolderId, entityType, entityId });
+    const manager = useFileManager({ rootFolderId, entityType, entityId, viewAll });
     const { hasPermission } = usePermissions();
 
     // Compute permission objects for context menus
@@ -153,6 +169,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     useImperativeHandle(ref, () => ({
       openUpload: () => setShowUpload(true),
       openNewFolder: () => setShowNewFolder(true),
+      openTrash: () => setShowTrash(true),
     }));
 
     // Folder type filter
@@ -167,6 +184,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const [showNewFolder, setShowNewFolder] = useState(false);
     const [previewFile, setPreviewFile] = useState<StorageFile | null>(null);
     const [showPreview, setShowPreview] = useState(false);
+    const [previewPassword, setPreviewPassword] = useState<string | undefined>(undefined);
     const [versionFile, setVersionFile] = useState<StorageFile | null>(null);
     const [showVersions, setShowVersions] = useState(false);
     const [moveState, setMoveState] = useState<MoveState | null>(null);
@@ -179,14 +197,31 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const [showColorDialog, setShowColorDialog] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [deleteState, setDeleteState] = useState<DeleteState | null>(null);
-    const [showTrash, setShowTrash] = useState(false);
+    const [showTrashInternal, setShowTrashInternal] = useState(false);
+    const showTrash = showTrashProp ?? showTrashInternal;
+    const setShowTrash = onShowTrashChange ?? setShowTrashInternal;
     const [shareFile, setShareFile] = useState<StorageFile | null>(null);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const [propertiesFile, setPropertiesFile] = useState<StorageFile | null>(null);
+    const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
+    const [protectState, setProtectState] = useState<{
+      itemId: string;
+      itemType: 'file' | 'folder';
+      itemName: string;
+      isProtected: boolean;
+    } | null>(null);
+    const [unlockState, setUnlockState] = useState<{
+      itemId: string;
+      itemType: 'file' | 'folder';
+      itemName: string;
+      onUnlocked: (password: string) => void;
+    } | null>(null);
+    // Map of folderId → password for folders unlocked during this session
+    const unlockedFoldersRef = useRef<Map<string, string>>(new Map());
 
     // Mutations
     const deleteFolderMutation = useDeleteFolder();
     const deleteFileMutation = useDeleteFile();
-    const downloadMutation = useDownloadFile();
     const downloadFolderMutation = useDownloadFolder();
     const queryClient = useQueryClient();
     const initializeFolders = useInitializeFolders();
@@ -212,6 +247,37 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Delete key handler for selected items
+    useEffect(() => {
+      const handler = (e: KeyboardEvent) => {
+        // Don't trigger when typing in inputs
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if ((e.target as HTMLElement)?.isContentEditable) return;
+
+        if (e.key === 'Delete' && manager.selectedItems.length > 0) {
+          e.preventDefault();
+          const item = manager.selectedItems[0];
+          const allFolders = manager.contents?.folders ?? [];
+          const allFiles = manager.contents?.files ?? [];
+
+          if (item.type === 'folder') {
+            const folder = allFolders.find(f => f.id === item.id);
+            if (folder && !folder.isSystem) {
+              setDeleteState({ type: 'folder', id: folder.id, name: folder.name });
+            }
+          } else {
+            const file = allFiles.find(f => f.id === item.id);
+            if (file) {
+              setDeleteState({ type: 'file', id: file.id, name: file.name });
+            }
+          }
+        }
+      };
+      window.addEventListener('keydown', handler);
+      return () => window.removeEventListener('keydown', handler);
+    }, [manager.selectedItems, manager.contents]);
+
     // Track last clicked item for shift-click range selection
     const lastClickedRef = useRef<{
       id: string;
@@ -233,23 +299,85 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       [manager]
     );
 
-    // File preview
+    // Navigate to folder — checks protection before entering
+    const handleNavigateToFolder = useCallback((folderId: string) => {
+      const folder = (manager.contents?.folders ?? []).find(f => f.id === folderId);
+      if (folder?.isProtected && !unlockedFoldersRef.current.has(folderId)) {
+        setUnlockState({
+          itemId: folderId,
+          itemType: 'folder',
+          itemName: folder.name,
+          onUnlocked: (password) => {
+            unlockedFoldersRef.current.set(folderId, password);
+            manager.navigateToFolder(folderId);
+          },
+        });
+        return;
+      }
+      manager.navigateToFolder(folderId);
+    }, [manager]);
+
+    // Resolve password for a file (file-level or folder-level)
+    const resolveFilePassword = useCallback((file: StorageFile): string | undefined => {
+      if (file.isProtected) return undefined; // Will be handled by unlock dialog
+      // Check if parent folder is protected and we have its password
+      if (manager.currentFolderId) {
+        return unlockedFoldersRef.current.get(manager.currentFolderId);
+      }
+      return undefined;
+    }, [manager.currentFolderId]);
+
+    // File preview — checks protection before opening
     const handlePreviewFile = useCallback((file: StorageFile) => {
+      if (file.isProtected) {
+        setUnlockState({
+          itemId: file.id,
+          itemType: 'file',
+          itemName: file.name,
+          onUnlocked: (password) => {
+            setPreviewPassword(password);
+            setPreviewFile(file);
+            setShowPreview(true);
+          },
+        });
+        return;
+      }
+      // Use folder-level password if available (for files inside protected folders)
+      const folderPwd = resolveFilePassword(file);
+      setPreviewPassword(folderPwd);
       setPreviewFile(file);
       setShowPreview(true);
-    }, []);
+    }, [resolveFilePassword]);
 
-    // File download
+    // File download — checks protection before downloading
     const handleDownloadFile = useCallback(
-      async (file: StorageFile) => {
+      (file: StorageFile) => {
+        if (file.isProtected) {
+          setUnlockState({
+            itemId: file.id,
+            itemType: 'file',
+            itemName: file.name,
+            onUnlocked: (password) => {
+              try {
+                const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password });
+                window.open(downloadUrl, '_blank');
+              } catch {
+                toast.error('Erro ao baixar o arquivo');
+              }
+            },
+          });
+          return;
+        }
         try {
-          const result = await downloadMutation.mutateAsync({ id: file.id });
-          window.open(result.url, '_blank');
+          // Use folder-level password if available
+          const folderPwd = resolveFilePassword(file);
+          const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password: folderPwd });
+          window.open(downloadUrl, '_blank');
         } catch {
           toast.error('Erro ao baixar o arquivo');
         }
       },
-      [downloadMutation]
+      [resolveFilePassword]
     );
 
     // Folder download as ZIP
@@ -354,11 +482,93 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       setShowShareDialog(true);
     }, []);
 
+    // File properties
+    const handleFileProperties = useCallback((file: StorageFile) => {
+      setPropertiesFile(file);
+    }, []);
+
     // File versions
     const handleFileVersions = useCallback((file: StorageFile) => {
       setVersionFile(file);
       setShowVersions(true);
     }, []);
+
+    // Protection
+    const handleProtectFile = useCallback((file: StorageFile) => {
+      setProtectState({
+        itemId: file.id,
+        itemType: 'file',
+        itemName: file.name,
+        isProtected: file.isProtected,
+      });
+    }, []);
+
+    const handleProtectFolder = useCallback((folder: StorageFolder) => {
+      setProtectState({
+        itemId: folder.id,
+        itemType: 'folder',
+        itemName: folder.name,
+        isProtected: folder.isProtected,
+      });
+    }, []);
+
+    // Hide/Unhide
+    const handleHideFile = useCallback(async (file: StorageFile) => {
+      try {
+        if (file.isHidden) {
+          await storageSecurityService.unhideItem({ itemId: file.id, itemType: 'file' });
+          toast.success('Arquivo revelado com sucesso');
+        } else {
+          await storageSecurityService.hideItem({ itemId: file.id, itemType: 'file' });
+          toast.success('Arquivo ocultado com sucesso');
+        }
+        queryClient.invalidateQueries({ queryKey: ['storage'] });
+      } catch {
+        toast.error('Erro ao alterar visibilidade do arquivo');
+      }
+    }, [queryClient]);
+
+    const handleHideFolder = useCallback(async (folder: StorageFolder) => {
+      try {
+        if (folder.isHidden) {
+          await storageSecurityService.unhideItem({ itemId: folder.id, itemType: 'folder' });
+          toast.success('Pasta revelada com sucesso');
+        } else {
+          await storageSecurityService.hideItem({ itemId: folder.id, itemType: 'folder' });
+          toast.success('Pasta ocultada com sucesso');
+        }
+        queryClient.invalidateQueries({ queryKey: ['storage'] });
+      } catch {
+        toast.error('Erro ao alterar visibilidade da pasta');
+      }
+    }, [queryClient]);
+
+    // Search bar Enter key: try to verify as security key
+    const handleSearchKeyDown = useCallback(
+      async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== 'Enter') return;
+        const query = manager.searchQuery.trim();
+        if (!query) return;
+
+        try {
+          const { valid } = await storageSecurityService.verifySecurityKey(query);
+          if (valid) {
+            manager.setShowHidden(true);
+            manager.setSearchQuery('');
+            toast.success('Itens ocultos revelados');
+          }
+        } catch {
+          // Not a valid key — treat as normal search (no-op)
+        }
+      },
+      [manager]
+    );
+
+    // Toggle hidden items off
+    const handleToggleHidden = useCallback(() => {
+      manager.setShowHidden(false);
+      queryClient.invalidateQueries({ queryKey: ['storage'] });
+    }, [manager, queryClient]);
 
     // Drag-and-drop: move items into a folder
     // Calls services directly (not mutation hooks) to avoid per-mutation
@@ -381,12 +591,14 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         const movedCount = results.filter(r => r.status === 'fulfilled').length;
         const errorCount = results.filter(r => r.status === 'rejected').length;
 
-        // Invalidate queries once after all moves complete
-        queryClient.invalidateQueries({
-          queryKey: ['storage-folder-contents'],
-        });
+        // Cancel any in-flight queries so stale data doesn't overwrite fresh data
+        await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
+        await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+        // Invalidate to trigger fresh refetch (same pattern as mutation hooks)
+        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
         queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
         queryClient.invalidateQueries({ queryKey: ['storage-breadcrumb'] });
+        queryClient.invalidateQueries({ queryKey: ['storage-search'] });
 
         if (movedCount > 0) {
           toast.success(
@@ -430,16 +642,60 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         setIsDragOver(false);
         // Ignore internal drag-and-drop (handled by folder cards)
         if (e.dataTransfer.types.includes(DRAG_MIME)) return;
-        if (
-          e.dataTransfer.files.length > 0 &&
-          manager.currentFolderId &&
-          canUpload
-        ) {
+        if (e.dataTransfer.files.length > 0 && canUpload) {
+          setDroppedFiles(Array.from(e.dataTransfer.files));
           setShowUpload(true);
         }
       },
       [manager.currentFolderId, canUpload]
     );
+
+    // Compress selected files/folders into a ZIP
+    const handleCompress = useCallback(async () => {
+      const fileIds = manager.selectedItems
+        .filter(i => i.type === 'file')
+        .map(i => i.id);
+      const folderIds = manager.selectedItems
+        .filter(i => i.type === 'folder')
+        .map(i => i.id);
+
+      try {
+        toast.info('Compactando arquivos...');
+        await storageFilesService.compressFiles({
+          fileIds,
+          folderIds,
+          targetFolderId: manager.currentFolderId,
+        });
+        manager.clearSelection();
+        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
+        queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
+        toast.success('Arquivos compactados com sucesso');
+      } catch {
+        toast.error('Erro ao compactar arquivos');
+      }
+    }, [manager, queryClient]);
+
+    // Decompress a single ZIP file
+    const handleDecompress = useCallback(async () => {
+      const selected = manager.selectedItems[0];
+      if (!selected || selected.type !== 'file') return;
+
+      try {
+        toast.info('Descompactando arquivo...');
+        const result = await storageFilesService.decompressFile(selected.id, {
+          targetFolderId: manager.currentFolderId,
+        });
+        manager.clearSelection();
+        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
+        queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
+        const msg = result.folderCount > 0
+          ? `${result.files.length} arquivo(s) e ${result.folderCount} pasta(s) extraídos`
+          : `${result.files.length} arquivo(s) extraído(s)`;
+        toast.success(msg);
+      } catch {
+        toast.error('Erro ao descompactar arquivo');
+      }
+    }, [manager, queryClient]);
 
     const allFolders = manager.contents?.folders ?? [];
     const files = manager.contents?.files ?? [];
@@ -460,6 +716,9 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         onSortByChange={manager.setSortBy}
         onSortOrderChange={manager.setSortOrder}
         onSearchChange={manager.setSearchQuery}
+        onSearchKeyDown={handleSearchKeyDown}
+        showHidden={manager.showHidden}
+        onToggleHidden={handleToggleHidden}
         onUpload={
           hideToolbarActions || !hasPermission('storage.files.create')
             ? undefined
@@ -472,12 +731,6 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         }
         folderTypeFilter={folderTypeFilter}
         onFolderTypeFilterChange={setFolderTypeFilter}
-        showTrash={showTrash}
-        onToggleTrash={
-          hasPermission('storage.files.list')
-            ? () => setShowTrash(prev => !prev)
-            : undefined
-        }
       />
     );
 
@@ -515,6 +768,8 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                 onDragMoveToFolder={handleDragMoveToFolder}
                 rootFolderId={rootFolderId ?? null}
               />
+
+              <div className="flex-1" />
             </div>
 
             {/* Content area */}
@@ -581,7 +836,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   selectedItems={manager.selectedItems}
                   onSelectItem={handleSelectItem}
                   onSelectMultiple={manager.selectMultiple}
-                  onNavigateToFolder={manager.navigateToFolder}
+                  onNavigateToFolder={handleNavigateToFolder}
                   onPreviewFile={handlePreviewFile}
                   onUpload={() => setShowUpload(true)}
                   onDragMoveToFolder={handleDragMoveToFolder}
@@ -591,11 +846,16 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
+                  onProtectFolder={hasPermission('storage.security.manage') ? handleProtectFolder : undefined}
+                  onHideFolder={hasPermission('storage.security.manage') ? handleHideFolder : undefined}
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
+                  onProtectFile={hasPermission('storage.security.manage') ? handleProtectFile : undefined}
+                  onHideFile={hasPermission('storage.security.manage') ? handleHideFile : undefined}
+                  onProperties={handleFileProperties}
                   onDeleteFile={handleDeleteFile}
                   folderPermissions={folderPermissions}
                   filePermissions={filePermissions}
@@ -607,7 +867,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   isSelected={manager.isSelected}
                   selectedItems={manager.selectedItems}
                   onSelectItem={handleSelectItem}
-                  onNavigateToFolder={manager.navigateToFolder}
+                  onNavigateToFolder={handleNavigateToFolder}
                   onPreviewFile={handlePreviewFile}
                   onUpload={() => setShowUpload(true)}
                   onDragMoveToFolder={handleDragMoveToFolder}
@@ -620,17 +880,37 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
+                  onProtectFolder={hasPermission('storage.security.manage') ? handleProtectFolder : undefined}
+                  onHideFolder={hasPermission('storage.security.manage') ? handleHideFolder : undefined}
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
+                  onProtectFile={hasPermission('storage.security.manage') ? handleProtectFile : undefined}
+                  onHideFile={hasPermission('storage.security.manage') ? handleHideFile : undefined}
+                  onProperties={handleFileProperties}
                   onDeleteFile={handleDeleteFile}
                   folderPermissions={folderPermissions}
                   filePermissions={filePermissions}
                 />
               )}
             </div>
+
+            {/* Footer — item count + size */}
+            {!manager.isLoading && !manager.error && (
+              <div className="shrink-0 px-4 py-2 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {folders.length + files.length}{' '}
+                  {folders.length + files.length === 1 ? 'item' : 'itens'}
+                </span>
+                <span>
+                  {formatFileSize(
+                    files.reduce((sum, f) => sum + f.size, 0)
+                  )}
+                </span>
+              </div>
+            )}
           </>
         )}
 
@@ -639,6 +919,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
           <FileManagerSelectionToolbar
             selectedItems={manager.selectedItems}
             allFolders={allFolders}
+            allFiles={files}
             totalItems={folders.length + files.length}
             folderPermissions={folderPermissions}
             filePermissions={filePermissions}
@@ -680,16 +961,35 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                 }
               }
             }}
+            onDelete={ids => {
+              // Bulk delete: delete first selected item (opens PIN modal)
+              const item = manager.selectedItems.find(i => ids.includes(i.id));
+              if (item) {
+                if (item.type === 'folder') {
+                  const folder = allFolders.find(f => f.id === item.id);
+                  if (folder) handleDeleteFolder(folder);
+                } else {
+                  const file = files.find(f => f.id === item.id);
+                  if (file) handleDeleteFile(file);
+                }
+              }
+            }}
+            onCompress={handleCompress}
+            onDecompress={handleDecompress}
           />
         )}
 
         {/* Dialogs */}
         <UploadDialog
           open={showUpload}
-          onOpenChange={setShowUpload}
+          onOpenChange={open => {
+            setShowUpload(open);
+            if (!open) setDroppedFiles([]);
+          }}
           folderId={manager.currentFolderId}
           entityType={entityType}
           entityId={entityId}
+          initialFiles={droppedFiles}
         />
 
         <NewFolderDialog
@@ -705,8 +1005,17 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
           file={previewFile}
           files={files}
           open={showPreview}
-          onOpenChange={setShowPreview}
-          onNavigate={file => setPreviewFile(file)}
+          onOpenChange={(open) => {
+            setShowPreview(open);
+            if (!open) setPreviewPassword(undefined);
+          }}
+          onNavigate={file => {
+            // Clear password when navigating to a different file
+            setPreviewPassword(undefined);
+            setPreviewFile(file);
+          }}
+          canDownload={filePermissions.canDownload}
+          password={previewPassword}
         />
 
         <FileVersionPanel
@@ -767,6 +1076,47 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
           }}
         />
 
+        <FilePropertiesDialog
+          file={propertiesFile}
+          open={!!propertiesFile}
+          onOpenChange={open => {
+            if (!open) setPropertiesFile(null);
+          }}
+          folderName={
+            manager.breadcrumb.length > 0
+              ? manager.breadcrumb[manager.breadcrumb.length - 1].name
+              : 'Início'
+          }
+        />
+
+        {/* Protection dialog */}
+        {protectState && (
+          <ProtectionDialog
+            open={!!protectState}
+            onOpenChange={(open) => {
+              if (!open) setProtectState(null);
+            }}
+            itemId={protectState.itemId}
+            itemType={protectState.itemType}
+            itemName={protectState.itemName}
+            isProtected={protectState.isProtected}
+          />
+        )}
+
+        {/* Unlock dialog for protected items */}
+        {unlockState && (
+          <UnlockDialog
+            open={!!unlockState}
+            onOpenChange={(open) => {
+              if (!open) setUnlockState(null);
+            }}
+            itemId={unlockState.itemId}
+            itemType={unlockState.itemType}
+            itemName={unlockState.itemName}
+            onUnlocked={unlockState.onUnlocked}
+          />
+        )}
+
         {/* PIN verification for destructive actions */}
         <VerifyActionPinModal
           isOpen={!!deleteState}
@@ -793,6 +1143,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
 interface FileManagerSelectionToolbarProps {
   selectedItems: { id: string; type: 'folder' | 'file' }[];
   allFolders: StorageFolder[];
+  allFiles: StorageFile[];
   totalItems: number;
   folderPermissions: FolderPermissions;
   filePermissions: FilePermissions;
@@ -802,11 +1153,15 @@ interface FileManagerSelectionToolbarProps {
   onShare: (ids: string[]) => void;
   onChangeColor: (ids: string[]) => void;
   onDownload: (ids: string[]) => void;
+  onDelete: (ids: string[]) => void;
+  onCompress: () => void;
+  onDecompress: () => void;
 }
 
 function FileManagerSelectionToolbar({
   selectedItems,
   allFolders,
+  allFiles,
   totalItems,
   folderPermissions,
   filePermissions,
@@ -816,6 +1171,9 @@ function FileManagerSelectionToolbar({
   onShare,
   onChangeColor,
   onDownload,
+  onDelete,
+  onCompress,
+  onDecompress,
 }: FileManagerSelectionToolbarProps) {
   const selectedIds = selectedItems.map(i => i.id);
   const selectedFolders = selectedItems.filter(i => i.type === 'folder');
@@ -909,6 +1267,50 @@ function FileManagerSelectionToolbar({
       });
     }
 
+    // Compress selected files/folders into ZIP
+    result.push({
+      id: 'compress',
+      label: 'Compactar',
+      icon: Archive,
+      onClick: onCompress,
+      variant: 'ghost',
+    });
+
+    // Decompress: only if exactly 1 .zip file is selected
+    const isSingleZip =
+      selectedItems.length === 1 &&
+      selectedItems[0].type === 'file' &&
+      allFiles
+        .find(f => f.id === selectedItems[0].id)
+        ?.name.match(/\.(zip|tar\.gz|7z)$/i);
+
+    if (isSingleZip) {
+      result.push({
+        id: 'decompress',
+        label: 'Descompactar',
+        icon: PackageOpen,
+        onClick: onDecompress,
+        variant: 'ghost',
+      });
+    }
+
+    // Delete: available if user has delete permission
+    const canDelete =
+      !hasSystemFolders &&
+      !hasFilterFolders &&
+      (hasFolders ? folderPermissions.canDeleteUserFolders : true) &&
+      (hasFiles ? filePermissions.canDelete : true);
+
+    if (canDelete) {
+      result.push({
+        id: 'delete',
+        label: 'Excluir',
+        icon: Trash2,
+        onClick: onDelete,
+        variant: 'destructive',
+      });
+    }
+
     return result;
   }, [
     hasSystemFolders,
@@ -918,10 +1320,15 @@ function FileManagerSelectionToolbar({
     onlyUserFolders,
     folderPermissions,
     filePermissions,
+    selectedItems,
+    allFiles,
     onMove,
     onShare,
     onChangeColor,
     onDownload,
+    onDelete,
+    onCompress,
+    onDecompress,
   ]);
 
   return (

@@ -42,11 +42,11 @@ export function InfoField({
       className={`flex items-start justify-between dark:bg-slate-800 p-4  rounded-lg ${className}`}
     >
       <div className="flex-1 items-center text-xs sm:text-sm">
-        <p className="font-bold uppercase text-muted-foreground flex items-center gap-2 mb-2">
+        <div className="font-bold uppercase text-muted-foreground flex items-center gap-2 mb-2">
           {icon}
           {label}
           {badge}
-        </p>
+        </div>
 
         <p
           className={`mt-1 text-sm sm:text-base ${

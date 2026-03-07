@@ -37,6 +37,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Mail } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TbMailPlus } from 'react-icons/tb';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 type ComposeMode =
@@ -65,25 +66,88 @@ type ComposeMode =
 export default function EmailPage() {
   const { hasPermission } = usePermissions();
   const canSend = hasPermission(EMAIL_PERMISSIONS.MESSAGES.SEND);
+  const searchParams = useSearchParams();
+
+  // ─── URL Params ────────────────────────────────────────────────────────────
+  //
+  //   aid  = Account ID ("central" for central inbox, or account UUID)
+  //   mid  = Message ID  (deep-link: fetches message to discover account/folder)
+  //   fid  = Folder ID   (used with aid to open a specific folder)
+  //   action = "compose" | "reply" | "forward"
+  //
+  // Combinations:
+  //   /email                         → Central Inbox (default)
+  //   /email?aid=central             → Central Inbox (explicit)
+  //   /email?aid=xxx                 → Specific account, auto-select INBOX
+  //   /email?aid=xxx&fid=yyy         → Specific account + folder
+  //   /email?mid=xxx                 → Fetch message → select account/folder/message
+  //   /email?action=compose          → Open compose dialog
+  //   /email?mid=xxx&action=reply    → Open reply for that message
+
+  const aid = searchParams.get('aid');
+  const mid = searchParams.get('mid');
+  const fid = searchParams.get('fid');
+  const action = searchParams.get('action') as
+    | 'compose'
+    | 'reply'
+    | 'forward'
+    | null;
+
+  /**
+   * When any URL param drives initial state, auto-select effects (first account,
+   * inbox folder, account-change reset) are paused so they don't overwrite the
+   * URL-driven state. The guard is lowered after one render+effects cycle once
+   * the resolved state has been applied.
+   */
+  const hasInitialParams = !!aid || !!mid || !!fid;
+  const urlParamsActiveRef = useRef(hasInitialParams);
+  const urlParamsResolvedRef = useRef(!mid); // Needs async fetch only when mid is present
+  const actionHandledRef = useRef(false);
+
+  // ─── State (initial values driven by URL params) ──────────────────────────
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
-    null
+    () => {
+      if (mid) return null; // Will be resolved by message fetch
+      if (aid && aid !== 'central') return aid;
+      return null;
+    }
   );
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  // Tracks previous accountId to detect actual changes (StrictMode-safe)
+  const prevAccountRef = useRef(selectedAccountId);
+
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    () => {
+      if (mid) return null; // Will be resolved by message fetch
+      return fid;
+    }
+  );
+
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null
+    mid
   );
+
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [messageFilter, setMessageFilter] = useState<'all' | 'unread'>('all');
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeMode, setComposeMode] = useState<ComposeMode>({ type: 'new' });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isCentralInbox, setIsCentralInbox] = useState(false);
+
+  const [isCentralInbox, setIsCentralInbox] = useState(() => {
+    if (mid) return false; // Message fetch will set account/folder
+    if (aid === 'central') return true;
+    if (aid) return false; // Specific account requested
+    return true; // ★ DEFAULT: Central Inbox
+  });
+
   const [accountWizardOpen, setAccountWizardOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<EmailAccount | null>(null);
   const queryClient = useQueryClient();
   const syncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keeps a ref to the last selected message so it persists when the message
+  // disappears from the list (e.g. deep-link before folder loads, or unread filter).
+  const lastSelectedMessageRef = useRef<EmailMessageListItem | null>(null);
 
   // Debounce da busca — 300ms
   useEffect(() => {
@@ -93,30 +157,99 @@ export default function EmailPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // ─── Message deep-link resolution (mid param) ─────────────────────────────
+  // Fetches the message by ID to discover its accountId + folderId, then sets
+  // all three selection states at once. A fallback EmailMessageListItem is
+  // built so the display panel can render immediately while the folder's
+  // message list is still loading.
+
+  useEffect(() => {
+    if (!mid || urlParamsResolvedRef.current) return;
+
+    let cancelled = false;
+
+    emailService
+      .getMessage(mid)
+      .then((response) => {
+        if (cancelled) return;
+        const msg = response.message;
+
+        // Build a minimal list item as display fallback
+        lastSelectedMessageRef.current = {
+          id: msg.id,
+          accountId: msg.accountId,
+          folderId: msg.folderId,
+          subject: msg.subject,
+          fromAddress: msg.fromAddress,
+          fromName: msg.fromName,
+          snippet: msg.snippet,
+          receivedAt: msg.receivedAt,
+          isRead: msg.isRead,
+          isAnswered: msg.isAnswered,
+          hasAttachments: msg.hasAttachments,
+        } satisfies EmailMessageListItem;
+
+        // Set all states (React batches these)
+        setSelectedAccountId(msg.accountId);
+        setSelectedFolderId(msg.folderId);
+        setSelectedMessageId(msg.id);
+        setIsCentralInbox(false);
+
+        urlParamsResolvedRef.current = true;
+      })
+      .catch(() => {
+        if (cancelled) return;
+        toast.error('Mensagem não encontrada');
+        // Allow normal behavior — fall back to Central Inbox
+        urlParamsActiveRef.current = false;
+        urlParamsResolvedRef.current = true;
+        setIsCentralInbox(true);
+        setSelectedMessageId(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mid]);
+
   // ─── Data Fetching via Hooks ─────────────────────────────────────────────
 
   const accountsQuery = useEmailAccounts();
   const accounts = accountsQuery.data?.data ?? [];
   const accountUnreadCounts = useEmailAccountUnreadCounts();
 
+  // Auto-select first account (only when NOT in Central Inbox and no URL params)
   useEffect(() => {
+    if (urlParamsActiveRef.current) return;
+    if (isCentralInbox) return;
     const firstAccount = accounts[0];
     if (!selectedAccountId && firstAccount) {
       setSelectedAccountId(firstAccount.id);
     }
-  }, [accounts, selectedAccountId]);
+  }, [accounts, selectedAccountId, isCentralInbox]);
 
   const foldersQuery = useEmailFolders(selectedAccountId);
   const folders = foldersQuery.data?.data ?? [];
 
+  // Auto-select inbox folder (only when NOT in Central Inbox and no URL params)
   useEffect(() => {
+    if (urlParamsActiveRef.current) return;
+    if (isCentralInbox) return;
     if (!selectedFolderId && folders.length > 0) {
       const inbox = folders.find(f => f.type === 'INBOX') ?? folders[0];
       setSelectedFolderId(inbox.id);
     }
-  }, [folders, selectedFolderId]);
+  }, [folders, selectedFolderId, isCentralInbox]);
 
+  // Reset selections when switching accounts (skip if value didn't actually change)
   useEffect(() => {
+    if (selectedAccountId === prevAccountRef.current) {
+      prevAccountRef.current = selectedAccountId;
+      return;
+    }
+    prevAccountRef.current = selectedAccountId;
+    if (urlParamsActiveRef.current) return;
     setSelectedFolderId(null);
     setSelectedMessageId(null);
     setSearchQuery('');
@@ -124,6 +257,19 @@ export default function EmailPage() {
     setIsCentralInbox(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccountId]);
+
+  /**
+   * Deactivate the URL params guard AFTER the account-change reset effect
+   * has had a chance to skip. React runs useEffects in declaration order,
+   * so placing this right after the reset effect guarantees it only lowers
+   * the guard once the "dangerous" reset has already been skipped.
+   */
+  useEffect(() => {
+    if (urlParamsResolvedRef.current && urlParamsActiveRef.current) {
+      urlParamsActiveRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAccountId, selectedFolderId, selectedMessageId]);
 
   // ─── Debounced sync on folder/account change ──────────────────────────
   useEffect(() => {
@@ -230,10 +376,6 @@ export default function EmailPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesQuery.data, centralInbox.messages.length]);
-
-  // Keep a ref to the last selected message so it persists when the message
-  // disappears from the list (e.g. auto-read + refetch while viewing unread filter).
-  const lastSelectedMessageRef = useRef<EmailMessageListItem | null>(null);
 
   const selectedMessage = useMemo<EmailMessageListItem | null>(() => {
     const found = messages.find(m => m.id === selectedMessageId) ?? null;
@@ -357,6 +499,52 @@ export default function EmailPage() {
     setComposeMode({ type: 'forward', message, rfcMessageId, quotedBody });
     setComposeOpen(true);
   }
+
+  // ─── URL action handling ─────────────────────────────────────────────────
+  // action=compose opens the compose dialog immediately.
+  // action=reply|forward waits for the message to load, then opens the dialog
+  // with the quoted body fetched from the full message detail.
+
+  useEffect(() => {
+    if (!action || actionHandledRef.current) return;
+
+    if (action === 'compose') {
+      actionHandledRef.current = true;
+      openCompose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action]);
+
+  useEffect(() => {
+    if (!action || action === 'compose' || actionHandledRef.current) return;
+    if (!selectedMessage) return;
+
+    actionHandledRef.current = true;
+
+    // Fetch full message detail for quoted body
+    emailService
+      .getMessage(selectedMessage.id)
+      .then((response) => {
+        const msg = response.message;
+        const quoted = msg.bodyHtmlSanitized ?? msg.bodyText;
+        const rfcId = msg.messageId;
+
+        if (action === 'reply') {
+          openReply(selectedMessage, rfcId, quoted);
+        } else if (action === 'forward') {
+          openForward(selectedMessage, rfcId, quoted);
+        }
+      })
+      .catch(() => {
+        // Fallback: open without quoted body
+        if (action === 'reply') {
+          openReply(selectedMessage);
+        } else if (action === 'forward') {
+          openForward(selectedMessage);
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, selectedMessage]);
 
   // Keyboard Delete handler (single message — bulk delete is handled by EmailMessageList)
   const handleDeleteSelected = useCallback(() => {

@@ -38,6 +38,9 @@ export interface StorageFile {
   entityId: string | null;
   expiresAt: string | null;
   uploadedBy: string;
+  isEncrypted: boolean;
+  isProtected: boolean;
+  isHidden: boolean;
   versions?: StorageFileVersion[];
   createdAt: string;
   updatedAt?: string;
@@ -99,6 +102,25 @@ export interface VersionsResponse {
 
 export interface DownloadResponse {
   url: string;
+}
+
+export interface CompressFilesRequest {
+  fileIds: string[];
+  folderIds: string[];
+  targetFolderId?: string | null;
+}
+
+export interface CompressFilesResponse {
+  file: StorageFile;
+}
+
+export interface DecompressFileRequest {
+  targetFolderId?: string | null;
+}
+
+export interface DecompressFileResponse {
+  files: StorageFile[];
+  folderCount: number;
 }
 
 export interface PreviewFileResponse {

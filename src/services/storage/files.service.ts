@@ -18,9 +18,31 @@ import type {
   MultipartInitiateResponse,
   MultipartCompleteRequest,
   MultipartCompleteResponse,
+  CompressFilesRequest,
+  CompressFilesResponse,
+  DecompressFileRequest,
+  DecompressFileResponse,
 } from '@/types/storage';
 
 export const storageFilesService = {
+  /**
+   * Returns the full proxy serve URL with auth token as query param.
+   * Used for <iframe>, <video>, <img> src attributes which cannot send Authorization headers.
+   */
+  getServeUrl(id: string, options?: { version?: number; download?: boolean; password?: string; format?: 'pdf' }): string {
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem(authConfig.tokenKey)
+      : null;
+    const base = `${apiConfig.baseURL}${API_ENDPOINTS.STORAGE.FILES.SERVE(id)}`;
+    const params = new URLSearchParams();
+    if (token) params.set('token', token);
+    if (options?.version) params.set('version', String(options.version));
+    if (options?.download) params.set('download', '1');
+    if (options?.password) params.set('password', options.password);
+    if (options?.format) params.set('format', options.format);
+    return `${base}?${params.toString()}`;
+  },
+
   // POST /v1/storage/folders/:folderId/files or POST /v1/storage/files - Upload de arquivo
   async uploadFile(
     folderId: string | null,
@@ -214,6 +236,22 @@ export const storageFilesService = {
     return apiClient.get<StorageStats>(API_ENDPOINTS.STORAGE.STATS);
   },
 
+  // POST /v1/storage/files/compress - Compactar arquivos/pastas em ZIP
+  async compressFiles(data: CompressFilesRequest): Promise<CompressFilesResponse> {
+    return apiClient.post<CompressFilesResponse>(
+      API_ENDPOINTS.STORAGE.FILES.COMPRESS,
+      data,
+    );
+  },
+
+  // POST /v1/storage/files/:id/decompress - Descompactar arquivo ZIP
+  async decompressFile(id: string, data?: DecompressFileRequest): Promise<DecompressFileResponse> {
+    return apiClient.post<DecompressFileResponse>(
+      API_ENDPOINTS.STORAGE.FILES.DECOMPRESS(id),
+      data ?? {},
+    );
+  },
+
   // --- Multipart Upload (for files > 50MB) ---
 
   // POST /v1/storage/files/multipart/initiate
@@ -359,6 +397,9 @@ export const storageFilesService = {
           entityType: null,
           entityId: null,
           expiresAt: null,
+          isEncrypted: false,
+          isProtected: false,
+          isHidden: false,
           uploadedBy: '',
           createdAt: new Date().toISOString(),
         },

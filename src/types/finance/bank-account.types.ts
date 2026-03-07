@@ -11,7 +11,7 @@ export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
 
 export interface BankAccount {
   id: string;
-  companyId: string;
+  companyId: string | null;
   companyName?: string;
   name: string;
   bankCode: string;
@@ -35,7 +35,7 @@ export interface BankAccount {
 }
 
 export interface CreateBankAccountData {
-  companyId: string;
+  companyId?: string;
   name: string;
   bankCode: string;
   bankName?: string;

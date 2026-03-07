@@ -5,3 +5,4 @@ export * from './use-finance-entries';
 export * from './use-loans';
 export * from './use-consortia';
 export * from './use-finance-dashboard';
+export * from './use-brasil-api-banks';

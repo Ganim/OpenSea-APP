@@ -1,16 +1,17 @@
 'use client';
 
 import {
-  Archive,
-  Code,
-  File,
-  FileSpreadsheet,
-  FileText,
-  Image,
-  Music,
-  Presentation,
-  Video,
-} from 'lucide-react';
+  PiFileDocDuotone,
+  PiFileImageDuotone,
+  PiFileXlsDuotone,
+  PiFilePptDuotone,
+  PiFilePdfDuotone,
+  PiFileZipDuotone,
+  PiFileVideoDuotone,
+  PiFileAudioDuotone,
+  PiFileCodeDuotone,
+  PiFileDuotone,
+} from 'react-icons/pi';
 import type { FileTypeCategory } from '@/types/storage';
 import { cn } from '@/lib/utils';
 
@@ -24,28 +25,28 @@ const FILE_TYPE_CONFIG: Record<
   FileTypeCategory,
   { icon: React.ElementType; color: string; label: string }
 > = {
-  document: { icon: FileText, color: 'text-blue-500', label: 'Documento' },
-  image: { icon: Image, color: 'text-emerald-500', label: 'Imagem' },
+  document: { icon: PiFileDocDuotone, color: 'text-blue-500', label: 'Documento' },
+  image: { icon: PiFileImageDuotone, color: 'text-emerald-500', label: 'Imagem' },
   spreadsheet: {
-    icon: FileSpreadsheet,
+    icon: PiFileXlsDuotone,
     color: 'text-green-600',
     label: 'Planilha',
   },
   presentation: {
-    icon: Presentation,
+    icon: PiFilePptDuotone,
     color: 'text-orange-500',
     label: 'Apresentação',
   },
-  pdf: { icon: FileText, color: 'text-red-500', label: 'PDF' },
+  pdf: { icon: PiFilePdfDuotone, color: 'text-red-500', label: 'PDF' },
   archive: {
-    icon: Archive,
+    icon: PiFileZipDuotone,
     color: 'text-amber-600',
     label: 'Arquivo compactado',
   },
-  video: { icon: Video, color: 'text-purple-500', label: 'Vídeo' },
-  audio: { icon: Music, color: 'text-pink-500', label: 'Áudio' },
-  code: { icon: Code, color: 'text-cyan-500', label: 'Código' },
-  other: { icon: File, color: 'text-gray-500', label: 'Arquivo' },
+  video: { icon: PiFileVideoDuotone, color: 'text-purple-500', label: 'Vídeo' },
+  audio: { icon: PiFileAudioDuotone, color: 'text-pink-500', label: 'Áudio' },
+  code: { icon: PiFileCodeDuotone, color: 'text-cyan-500', label: 'Código' },
+  other: { icon: PiFileDuotone, color: 'text-gray-500', label: 'Arquivo' },
 };
 
 export function FileTypeIcon({

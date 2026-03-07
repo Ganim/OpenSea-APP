@@ -31,6 +31,7 @@ import {
   useDeleteTenant,
   useManageFeatureFlags,
   useRemoveTenantUser,
+  useSetUserSecurityKey,
   useUpdateTenant,
 } from '@/hooks/admin/use-admin';
 import {
@@ -40,6 +41,7 @@ import {
   Calendar,
   CreditCard,
   Flag,
+  KeyRound,
   Mail,
   Plus,
   Save,
@@ -70,6 +72,7 @@ export default function TenantDetailPage() {
   const deleteTenant = useDeleteTenant();
   const createTenantUser = useCreateTenantUser();
   const removeTenantUser = useRemoveTenantUser();
+  const setSecurityKey = useSetUserSecurityKey();
 
   const [form, setForm] = useState({
     name: '',
@@ -85,6 +88,11 @@ export default function TenantDetailPage() {
     role: 'member',
   });
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [securityKeyState, setSecurityKeyState] = useState<{
+    userId: string;
+    userName: string;
+  } | null>(null);
+  const [securityKeyInput, setSecurityKeyInput] = useState('');
 
   useEffect(() => {
     if (data?.tenant) {
@@ -206,6 +214,27 @@ export default function TenantDetailPage() {
       toast.success('Usuário removido com sucesso');
     } catch {
       toast.error('Erro ao remover usuário');
+    }
+  };
+
+  const handleSetSecurityKey = async () => {
+    if (!securityKeyState) return;
+    const key = securityKeyInput.trim() || null;
+    try {
+      await setSecurityKey.mutateAsync({
+        tenantId: id,
+        userId: securityKeyState.userId,
+        securityKey: key,
+      });
+      toast.success(
+        key
+          ? 'Chave de segurança definida com sucesso'
+          : 'Chave de segurança removida com sucesso'
+      );
+      setSecurityKeyState(null);
+      setSecurityKeyInput('');
+    } catch {
+      toast.error('Erro ao definir chave de segurança');
     }
   };
 
@@ -632,6 +661,19 @@ export default function TenantDetailPage() {
                     >
                       {u.role === 'owner' ? 'Proprietário' : 'Membro'}
                     </GlassBadge>
+                    <GlassButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setSecurityKeyState({
+                          userId: u.userId,
+                          userName: u.user?.username ?? u.user?.email ?? u.userId,
+                        })
+                      }
+                      title="Chave de segurança"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </GlassButton>
                     {u.role !== 'owner' && (
                       <GlassButton
                         variant="ghost"
@@ -706,6 +748,63 @@ export default function TenantDetailPage() {
           </GlassCard>
         </TabsContent>
       </Tabs>
+
+      {/* Security Key Dialog */}
+      <Dialog
+        open={!!securityKeyState}
+        onOpenChange={open => {
+          if (!open) {
+            setSecurityKeyState(null);
+            setSecurityKeyInput('');
+          }
+        }}
+      >
+        <DialogContent className="border shadow-2xl central-glass-strong">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold central-text">
+              Chave de Segurança
+            </DialogTitle>
+            <DialogDescription className="central-text-muted">
+              Defina a chave de segurança para{' '}
+              <strong>{securityKeyState?.userName}</strong>. O usuário poderá
+              digitar esta chave na barra de pesquisa do gerenciador de arquivos
+              para revelar itens ocultos. Deixe em branco para remover.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="security-key" className="central-text">
+              Chave de segurança
+            </Label>
+            <Input
+              id="security-key"
+              type="password"
+              value={securityKeyInput}
+              onChange={e => setSecurityKeyInput(e.target.value)}
+              placeholder="Deixe em branco para remover"
+              className="mt-2 central-glass central-text placeholder:central-text-subtle"
+            />
+          </div>
+          <DialogFooter>
+            <GlassButton
+              variant="ghost"
+              onClick={() => {
+                setSecurityKeyState(null);
+                setSecurityKeyInput('');
+              }}
+            >
+              Cancelar
+            </GlassButton>
+            <GlassButton
+              onClick={handleSetSecurityKey}
+              disabled={setSecurityKey.isPending}
+              className="gap-2"
+            >
+              <KeyRound className="h-4 w-4" />
+              {securityKeyInput.trim() ? 'Definir chave' : 'Remover chave'}
+            </GlassButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

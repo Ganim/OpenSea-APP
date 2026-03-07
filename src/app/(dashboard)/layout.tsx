@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Navbar } from '@/components/layout/navbar';
-import { NavigationMenu } from '@/components/layout/navigation-menu';
+import { ToolsPanel } from '@/components/layout/tools-panel';
 import { menuItems } from '@/config/menu-items';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
@@ -98,7 +98,7 @@ export default function DashboardLayout({
             </a>
             <Navbar onMenuOpen={() => setIsMenuOpen(true)} />
 
-            <NavigationMenu
+            <ToolsPanel
               isOpen={isMenuOpen}
               onClose={() => setIsMenuOpen(false)}
               menuItems={menuItems}

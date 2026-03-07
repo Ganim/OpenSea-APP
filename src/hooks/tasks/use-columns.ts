@@ -1,0 +1,55 @@
+import { columnsService } from '@/services/tasks';
+import type {
+  CreateColumnRequest,
+  UpdateColumnRequest,
+  ReorderColumnsRequest,
+} from '@/types/tasks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { BOARD_QUERY_KEYS } from './use-boards';
+import { CARD_QUERY_KEYS } from './use-cards';
+
+export const COLUMN_QUERY_KEYS = {
+  COLUMNS: (boardId: string) => ['task-columns', boardId],
+} as const;
+
+export function useCreateColumn(boardId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateColumnRequest) => columnsService.create(boardId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
+    },
+  });
+}
+
+export function useUpdateColumn(boardId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ columnId, data }: { columnId: string; data: UpdateColumnRequest }) =>
+      columnsService.update(boardId, columnId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
+    },
+  });
+}
+
+export function useDeleteColumn(boardId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (columnId: string) => columnsService.delete(boardId, columnId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
+      qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
+    },
+  });
+}
+
+export function useReorderColumns(boardId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ReorderColumnsRequest) => columnsService.reorder(boardId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
+    },
+  });
+}

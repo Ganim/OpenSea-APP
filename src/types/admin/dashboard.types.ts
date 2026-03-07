@@ -39,6 +39,8 @@ export interface SearchResult {
   href: string;
 }
 
+// ── Legacy (frontend-only) ──
+/** @deprecated Use BackendNotification for real API data */
 export interface Notification {
   id: string;
   title: string;
@@ -47,6 +49,51 @@ export interface Notification {
   read: boolean;
   type: 'info' | 'warning' | 'error' | 'success';
   icon?: string;
+}
+
+// ── Backend-aligned notification ──
+export type NotificationType = 'INFO' | 'WARNING' | 'ERROR' | 'SUCCESS' | 'REMINDER';
+export type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+export type NotificationChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH';
+
+export interface BackendNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  priority: NotificationPriority;
+  channel: NotificationChannel;
+  actionUrl?: string | null;
+  actionText?: string | null;
+  entityType?: string | null;
+  entityId?: string | null;
+  metadata?: Record<string, unknown> | null;
+  isRead: boolean;
+  isSent: boolean;
+  scheduledFor?: string | null;
+  readAt?: string | null;
+  sentAt?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+}
+
+export interface NotificationListResponse {
+  notifications: BackendNotification[];
+  total: number;
+  totalPages: number;
+}
+
+export interface NotificationFilters {
+  page?: number;
+  limit?: number;
+  isRead?: boolean;
+  type?: NotificationType;
+  channel?: NotificationChannel;
+  priority?: NotificationPriority;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface ProductivityItem {

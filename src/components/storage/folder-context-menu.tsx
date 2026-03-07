@@ -10,8 +10,12 @@ import {
 import type { StorageFolder } from '@/types/storage';
 import {
   Download,
+  Eye,
+  EyeOff,
   FolderInput,
   FolderOpen,
+  Lock,
+  LockOpen,
   Palette,
   Pencil,
   Shield,
@@ -38,6 +42,8 @@ interface FolderContextMenuProps {
   onChangeColor?: (folder: StorageFolder) => void;
   onMove?: (folder: StorageFolder) => void;
   onManageAccess?: (folder: StorageFolder) => void;
+  onProtect?: (folder: StorageFolder) => void;
+  onHide?: (folder: StorageFolder) => void;
   onDelete?: (folder: StorageFolder) => void;
   onDownload?: (folder: StorageFolder) => void;
 }
@@ -92,6 +98,8 @@ export function FolderContextMenu({
   onChangeColor,
   onMove,
   onManageAccess,
+  onProtect,
+  onHide,
   onDelete,
   onDownload,
 }: FolderContextMenuProps) {
@@ -140,6 +148,38 @@ export function FolderContextMenu({
           <ContextMenuItem onClick={() => onManageAccess(folder)}>
             <Shield className="w-4 h-4" />
             Gerenciar acesso
+          </ContextMenuItem>
+        )}
+
+        {resolved.canEdit && onProtect && (
+          <ContextMenuItem onClick={() => onProtect(folder)}>
+            {folder.isProtected ? (
+              <>
+                <LockOpen className="w-4 h-4" />
+                Remover proteção
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4" />
+                Proteger com senha
+              </>
+            )}
+          </ContextMenuItem>
+        )}
+
+        {resolved.canEdit && onHide && (
+          <ContextMenuItem onClick={() => onHide(folder)}>
+            {folder.isHidden ? (
+              <>
+                <Eye className="w-4 h-4" />
+                Revelar
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-4 h-4" />
+                Ocultar
+              </>
+            )}
           </ContextMenuItem>
         )}
 

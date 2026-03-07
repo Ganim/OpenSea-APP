@@ -9,8 +9,9 @@ const nextConfig: NextConfig = {
   },
 
   // Turbopack is enabled by default in Next.js 16+
-  // Empty config silences webpack compatibility warning
-  turbopack: {},
+  turbopack: {
+    root: '..',
+  },
 
   // Bundle Analyzer - Enable with ANALYZE=true npm run build
   webpack: (config, { isServer }) => {

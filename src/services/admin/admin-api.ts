@@ -166,6 +166,17 @@ export const adminApi = {
     );
   },
 
+  setUserSecurityKey: async (
+    tenantId: string,
+    userId: string,
+    securityKey: string | null
+  ): Promise<{ message: string }> => {
+    return apiClient.patch<{ message: string }>(
+      API_ENDPOINTS.ADMIN.TENANTS.SET_SECURITY_KEY(tenantId, userId),
+      { securityKey }
+    );
+  },
+
   // Plans
   listPlans: async () => {
     const response = await apiClient.get<unknown>(

@@ -19,6 +19,8 @@ export interface FileManagerOptions {
   rootFolderId?: string;
   entityType?: string;
   entityId?: string;
+  /** Admin-only: show all users' files and folders */
+  viewAll?: boolean;
 }
 
 export function useFileManager(options?: FileManagerOptions) {
@@ -32,13 +34,16 @@ export function useFileManager(options?: FileManagerOptions) {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [folderHistory, setFolderHistory] = useState<(string | null)[]>([]);
+  const [showHidden, setShowHidden] = useState(false);
 
   // Parâmetros de consulta para o conteúdo da pasta (sorting is done client-side)
   const contentsQuery = useMemo(
     () => ({
       search: debouncedSearch || undefined,
+      viewAll: options?.viewAll || undefined,
+      showHidden: showHidden || undefined,
     }),
-    [debouncedSearch]
+    [debouncedSearch, options?.viewAll, showHidden]
   );
 
   // Busca conteúdo da pasta atual
@@ -253,6 +258,7 @@ export function useFileManager(options?: FileManagerOptions) {
     sortBy,
     sortOrder,
     searchQuery,
+    showHidden,
     canNavigateBack: folderHistory.length > 0,
 
     // Dados
@@ -283,5 +289,6 @@ export function useFileManager(options?: FileManagerOptions) {
     setSortBy,
     setSortOrder,
     setSearchQuery,
+    setShowHidden,
   };
 }

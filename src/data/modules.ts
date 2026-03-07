@@ -102,7 +102,7 @@ export const productivityItems: ProductivityItem[] = [
     icon: 'Calendar',
     color: 'bg-linear-to-br from-blue-500 to-blue-600',
     count: 5,
-    href: '/calendario',
+    href: '/calendar',
   },
   {
     id: 'tarefas',

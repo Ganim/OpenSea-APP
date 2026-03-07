@@ -25,10 +25,12 @@ const ROW_GAP = 12;
  * so the virtualizer stays in sync even when the container is not full-width.
  */
 function getColumnsForWidth(width: number): number {
-  if (width >= 1100) return 6;
-  if (width >= 900) return 5;
-  if (width >= 700) return 4;
-  if (width >= 500) return 3;
+  // Use slightly lower thresholds to account for scrollbar width (~17px)
+  // preventing column jumps when scrollbar appears/disappears.
+  if (width >= 1080) return 6;
+  if (width >= 880) return 5;
+  if (width >= 680) return 4;
+  if (width >= 480) return 3;
   return 2;
 }
 
@@ -62,12 +64,17 @@ interface FileManagerGridProps {
   onManageFolderAccess?: (folder: StorageFolder) => void;
   onDeleteFolder?: (folder: StorageFolder) => void;
   onDownloadFolder?: (folder: StorageFolder) => void;
+  onProtectFolder?: (folder: StorageFolder) => void;
+  onHideFolder?: (folder: StorageFolder) => void;
   // File actions
   onDownloadFile?: (file: StorageFile) => void;
   onRenameFile?: (file: StorageFile) => void;
   onMoveFile?: (file: StorageFile) => void;
   onFileVersions?: (file: StorageFile) => void;
   onShareFile?: (file: StorageFile) => void;
+  onProtectFile?: (file: StorageFile) => void;
+  onHideFile?: (file: StorageFile) => void;
+  onProperties?: (file: StorageFile) => void;
   onDeleteFile?: (file: StorageFile) => void;
   // Permissions
   folderPermissions?: FolderPermissions;
@@ -112,11 +119,16 @@ export function FileManagerGrid({
   onManageFolderAccess,
   onDeleteFolder,
   onDownloadFolder,
+  onProtectFolder,
+  onHideFolder,
   onDownloadFile,
   onRenameFile,
   onMoveFile,
   onFileVersions,
   onShareFile,
+  onProtectFile,
+  onHideFile,
+  onProperties,
   onDeleteFile,
   folderPermissions,
   filePermissions,
@@ -131,25 +143,44 @@ export function FileManagerGrid({
   const [draggedItemIds, setDraggedItemIds] = useState<Set<string>>(new Set());
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
 
-  // Dynamic column count based on container width
-  const [columns, setColumns] = useState(4);
+  // Dynamic column count based on container width.
+  // Uses a ref to avoid unnecessary re-renders when the column count hasn't changed
+  // (e.g., scrollbar toggling, dialog open/close causing minor width fluctuations).
+  const columnsRef = useRef(6);
+  const [columns, setColumns] = useState(6);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const width = entry.contentRect.width;
-        setColumns(getColumnsForWidth(width));
-      }
+      // Debounce: only update columns after width stabilizes for 100ms
+      // This prevents flickering during folder navigation transitions
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        for (const entry of entries) {
+          const newCols = getColumnsForWidth(entry.contentRect.width);
+          if (newCols !== columnsRef.current) {
+            columnsRef.current = newCols;
+            setColumns(newCols);
+          }
+        }
+      }, 100);
     });
 
-    observer.observe(el);
-    // Set initial value
-    setColumns(getColumnsForWidth(el.clientWidth));
+    // Set initial value synchronously (no debounce for first render)
+    const initialCols = getColumnsForWidth(el.clientWidth);
+    columnsRef.current = initialCols;
+    setColumns(initialCols);
 
-    return () => observer.disconnect();
+    observer.observe(el);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, []);
 
   // Flatten folders + files into a single array
@@ -366,7 +397,7 @@ export function FileManagerGrid({
     <>
       <div
         ref={scrollRef}
-        className={cn('h-full overflow-y-auto select-none', className)}
+        className={cn('h-full overflow-y-auto select-none p-1', className)}
         onMouseDown={handleMouseDown}
       >
         <div
@@ -452,6 +483,8 @@ export function FileManagerGrid({
                             onChangeColor={onChangeColorFolder}
                             onMove={onMoveFolder}
                             onManageAccess={onManageFolderAccess}
+                            onProtect={onProtectFolder}
+                            onHide={onHideFolder}
                             onDelete={onDeleteFolder}
                             onDownload={onDownloadFolder}
                           />
@@ -484,6 +517,9 @@ export function FileManagerGrid({
                           onMove={onMoveFile}
                           onVersions={onFileVersions}
                           onShare={onShareFile}
+                          onProtect={onProtectFile}
+                          onHide={onHideFile}
+                          onProperties={onProperties}
                           onDelete={onDeleteFile}
                         />
                       </div>

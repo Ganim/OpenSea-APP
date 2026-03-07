@@ -55,6 +55,12 @@ export const CORE_PERMISSIONS = {
       REMOVE: 'core.teams.members.remove',
       MANAGE: 'core.teams.members.manage',
     },
+    EMAILS: {
+      LINK: 'core.teams.emails.link',
+      READ: 'core.teams.emails.read',
+      MANAGE: 'core.teams.emails.manage',
+      UNLINK: 'core.teams.emails.unlink',
+    },
   },
 } as const;
 
@@ -735,6 +741,9 @@ export const CALENDAR_PERMISSIONS = {
     DELETE: 'calendar.events.delete',
     LIST: 'calendar.events.list',
     MANAGE: 'calendar.events.manage',
+    SHARE_USERS: 'calendar.events.share-users',
+    SHARE_TEAMS: 'calendar.events.share-teams',
+    EXPORT: 'calendar.events.export',
   },
   PARTICIPANTS: {
     INVITE: 'calendar.participants.invite',

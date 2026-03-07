@@ -60,14 +60,14 @@ export function StepWizardDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-[800px] max-w-[800px] h-[420px] p-0 gap-0 overflow-hidden flex flex-row"
+        className="sm:max-w-[800px] max-w-[800px] h-[480px] p-0 gap-0 overflow-hidden flex flex-row"
         data-testid="email-account-wizard"
       >
         <VisuallyHidden>
           <DialogTitle>{step.title}</DialogTitle>
         </VisuallyHidden>
         {/* Left icon column */}
-        <div className="w-[200px] shrink-0 bg-white/5 flex items-center justify-center border-r border-border/50">
+        <div className="w-[200px] shrink-0 bg-slate-50 dark:bg-white/5 flex items-center justify-center border-r border-border/50">
           {step.icon}
         </div>
 

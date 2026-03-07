@@ -60,5 +60,8 @@ export * from './sales';
 // Finance hooks
 export * from './finance';
 
+// Storage hooks
+export * from './storage';
+
 // Utility hooks
 export { useMediaQuery } from './use-media-query';

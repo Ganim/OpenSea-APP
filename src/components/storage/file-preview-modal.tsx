@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Download, Loader2, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,13 +9,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { StorageFile } from '@/types/storage';
-import { useDownloadFile, usePreviewFile } from '@/hooks/storage';
+import { useAuth } from '@/contexts/auth-context';
+import { storageFilesService } from '@/services/storage/files.service';
 import { FileTypeIcon } from './file-type-icon';
-import { formatFileSize } from './utils';
-import { formatDate } from '@/lib/utils';
+import { OfficeViewer, isOfficePreviewable } from './office-viewer';
+import { PdfViewer } from './pdf-viewer';
+import { ProtectedImageCanvas } from './protected-image-canvas';
+import { VideoPlayer, isVideoPreviewable } from './video-player';
 import { toast } from 'sonner';
 
 interface FilePreviewModalProps {
@@ -24,6 +25,9 @@ interface FilePreviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNavigate?: (file: StorageFile) => void;
+  canDownload?: boolean;
+  /** Password for protected files — passed to serve URL */
+  password?: string;
 }
 
 export function FilePreviewModal({
@@ -32,11 +36,32 @@ export function FilePreviewModal({
   open,
   onOpenChange,
   onNavigate,
+  canDownload = false,
+  password,
 }: FilePreviewModalProps) {
-  const downloadMutation = useDownloadFile();
-  const { data: preview, isLoading: isPreviewLoading } = usePreviewFile(
-    open && file ? file.id : null,
+  const { user } = useAuth();
+  const userName = user?.username ?? user?.email ?? 'Usuário';
+
+  // When server-side PDF conversion fails (e.g. LibreOffice not installed),
+  // fall back to the client-side OfficeViewer (docx-preview / xlsx)
+  const [pdfConversionFailed, setPdfConversionFailed] = useState(false);
+
+  // Proxy serve URL — streams through backend, no direct S3 exposure
+  const serveUrl = useMemo(
+    () => (file ? storageFilesService.getServeUrl(file.id, { password }) : ''),
+    [file, password],
   );
+
+  // Office files are converted to PDF server-side (LibreOffice headless)
+  const serveUrlPdf = useMemo(
+    () => (file ? storageFilesService.getServeUrl(file.id, { password, format: 'pdf' }) : ''),
+    [file, password],
+  );
+
+  // Reset fallback state when navigating between files
+  useEffect(() => {
+    setPdfConversionFailed(false);
+  }, [file?.id]);
 
   const currentIndex = file ? files.findIndex(f => f.id === file.id) : -1;
   const hasPrevious = currentIndex > 0;
@@ -54,30 +79,51 @@ export function FilePreviewModal({
     }
   }, [hasNext, files, currentIndex, onNavigate]);
 
-  const handleDownload = useCallback(async () => {
+  const handleDownload = useCallback(() => {
     if (!file) return;
     try {
-      const result = await downloadMutation.mutateAsync({ id: file.id });
-      window.open(result.url, '_blank');
+      const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password });
+      window.open(downloadUrl, '_blank');
     } catch {
       toast.error('Erro ao baixar o arquivo');
     }
-  }, [file, downloadMutation]);
+  }, [file, password]);
 
   if (!file) return null;
 
   const isImage = file.fileType === 'image';
   const isPdf = file.fileType === 'pdf';
-  const isPreviewable = isImage || isPdf;
+  const isOffice = isOfficePreviewable(file.mimeType);
+  const isVideo = isVideoPreviewable(file.mimeType);
+  const isPresentation = file.fileType === 'presentation';
+  const isDocument = isPdf || isOffice || isPresentation;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 pr-8">
-            <FileTypeIcon fileType={file.fileType} size={20} />
-            <span className="truncate">{file.name}</span>
-          </DialogTitle>
+      <DialogContent className={`max-h-[95vh] flex flex-col [&>button]:hidden ${isDocument ? 'sm:max-w-4xl' : 'sm:max-w-3xl'}`}>
+        <DialogHeader className="flex flex-row items-center gap-2 space-y-0">
+          <FileTypeIcon fileType={file.fileType} size={20} />
+          <DialogTitle className="flex-1 truncate">{file.name}</DialogTitle>
+          <div className="flex items-center gap-1 shrink-0">
+            {canDownload && (
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                onClick={handleDownload}
+                title="Baixar"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+            )}
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              title="Fechar"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Preview area */}
@@ -108,29 +154,24 @@ export function FilePreviewModal({
             </>
           )}
 
-          {isPreviewable && isPreviewLoading ? (
-            <div className="flex items-center justify-center w-full h-[50vh] rounded-lg bg-gray-50 dark:bg-slate-800/50">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Carregando visualização...</p>
-              </div>
-            </div>
-          ) : isImage && preview?.url ? (
+          {isImage && serveUrl ? (
             <div className="flex items-center justify-center w-full max-h-[50vh] overflow-hidden rounded-lg bg-gray-50 dark:bg-slate-800/50">
-              <img
-                src={preview.thumbnailUrl ?? preview.url}
+              <ProtectedImageCanvas
+                src={serveUrl}
                 alt={file.name}
-                className="max-w-full max-h-[50vh] object-contain"
+                watermarkText={`${userName} · ${new Date().toLocaleDateString('pt-BR')}`}
+                className="print-hidden"
+                maxHeight={500}
               />
             </div>
-          ) : isPdf && preview?.url ? (
-            <div className="w-full h-[50vh] rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-800/50">
-              <iframe
-                src={preview.url}
-                title={file.name}
-                className="w-full h-full border-0"
-              />
-            </div>
+          ) : isPdf && serveUrl ? (
+            <PdfViewer url={serveUrl} />
+          ) : (isOffice || isPresentation) && serveUrlPdf && !pdfConversionFailed ? (
+            <PdfViewer url={serveUrlPdf} onError={() => setPdfConversionFailed(true)} />
+          ) : isOffice && pdfConversionFailed && serveUrl ? (
+            <OfficeViewer url={serveUrl} fileName={file.name} mimeType={file.mimeType} />
+          ) : isVideo && serveUrl ? (
+            <VideoPlayer url={serveUrl} name={file.name} />
           ) : (
             <div className="flex flex-col items-center gap-4 py-12">
               <FileTypeIcon fileType={file.fileType} size={64} />
@@ -141,57 +182,6 @@ export function FilePreviewModal({
           )}
         </div>
 
-        <Separator />
-
-        {/* Metadata */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-          <div>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">
-              Nome
-            </p>
-            <p className="font-medium truncate" title={file.originalName}>
-              {file.originalName}
-            </p>
-          </div>
-          <div>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">
-              Tamanho
-            </p>
-            <p className="font-medium">{formatFileSize(file.size)}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">
-              Tipo
-            </p>
-            <p className="font-medium">{file.mimeType}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">
-              Criado em
-            </p>
-            <p className="font-medium">{formatDate(file.createdAt)}</p>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="w-4 h-4" />
-            Fechar
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleDownload}
-            disabled={downloadMutation.isPending}
-          >
-            <Download className="w-4 h-4" />
-            Baixar
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );

@@ -9,10 +9,13 @@ import type {
   AddTeamMembersData,
   ChangeTeamMemberRoleData,
   CreateTeamData,
+  LinkTeamEmailData,
   Team,
+  TeamEmailAccount,
   TeamMember,
   TransferOwnershipData,
   UpdateTeamData,
+  UpdateTeamEmailPermissionsData,
 } from '@/types/core';
 
 // ============================================================================
@@ -50,6 +53,14 @@ export interface TeamMembersListResponse {
 export interface BulkAddMembersResponse {
   added: TeamMember[];
   skipped: string[];
+}
+
+export interface TeamEmailsListResponse {
+  emailAccounts: TeamEmailAccount[];
+}
+
+export interface TeamEmailResponse {
+  teamEmail: TeamEmailAccount;
 }
 
 export interface ListTeamMembersParams {
@@ -175,5 +186,45 @@ export const teamsService = {
     data: TransferOwnershipData,
   ): Promise<void> {
     await apiClient.post(API_ENDPOINTS.TEAMS.TRANSFER_OWNERSHIP(teamId), data);
+  },
+
+  // GET /v1/teams/:teamId/emails
+  async listTeamEmails(teamId: string): Promise<TeamEmailsListResponse> {
+    return apiClient.get<TeamEmailsListResponse>(
+      API_ENDPOINTS.TEAMS.EMAILS.LIST(teamId),
+    );
+  },
+
+  // POST /v1/teams/:teamId/emails
+  async linkEmailToTeam(
+    teamId: string,
+    data: LinkTeamEmailData,
+  ): Promise<TeamEmailResponse> {
+    return apiClient.post<TeamEmailResponse>(
+      API_ENDPOINTS.TEAMS.EMAILS.LINK(teamId),
+      data,
+    );
+  },
+
+  // PATCH /v1/teams/:teamId/emails/:accountId
+  async updateTeamEmailPermissions(
+    teamId: string,
+    accountId: string,
+    data: UpdateTeamEmailPermissionsData,
+  ): Promise<TeamEmailResponse> {
+    return apiClient.patch<TeamEmailResponse>(
+      API_ENDPOINTS.TEAMS.EMAILS.UPDATE_PERMISSIONS(teamId, accountId),
+      data,
+    );
+  },
+
+  // DELETE /v1/teams/:teamId/emails/:accountId
+  async unlinkEmailFromTeam(
+    teamId: string,
+    accountId: string,
+  ): Promise<void> {
+    await apiClient.delete(
+      API_ENDPOINTS.TEAMS.EMAILS.UNLINK(teamId, accountId),
+    );
   },
 };

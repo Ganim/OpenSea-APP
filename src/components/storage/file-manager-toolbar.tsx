@@ -25,12 +25,13 @@ import type { SortBy, SortOrder, ViewMode } from '@/hooks/storage';
 import { cn } from '@/lib/utils';
 import {
   ArrowUpDown,
+  Eye,
+  EyeOff,
   FolderPlus,
   Grid3X3,
   List,
   Search,
   SlidersHorizontal,
-  Trash2,
   Upload,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -50,12 +51,13 @@ interface FileManagerToolbarProps {
   onSortByChange: (sortBy: SortBy) => void;
   onSortOrderChange: (order: SortOrder) => void;
   onSearchChange: (query: string) => void;
+  onSearchKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  showHidden?: boolean;
+  onToggleHidden?: () => void;
   onUpload?: () => void;
   onNewFolder?: () => void;
   folderTypeFilter?: FolderTypeFilter;
   onFolderTypeFilterChange?: (filter: FolderTypeFilter) => void;
-  showTrash?: boolean;
-  onToggleTrash?: () => void;
   className?: string;
 }
 
@@ -81,12 +83,13 @@ export function FileManagerToolbar({
   onSortByChange,
   onSortOrderChange,
   onSearchChange,
+  onSearchKeyDown,
+  showHidden,
+  onToggleHidden,
   onUpload,
   onNewFolder,
   folderTypeFilter,
   onFolderTypeFilterChange,
-  showTrash,
-  onToggleTrash,
   className,
 }: FileManagerToolbarProps) {
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -137,25 +140,6 @@ export function FileManagerToolbar({
         </Button>
       )}
 
-      {onToggleTrash && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              variant={showTrash ? 'default' : 'outline'}
-              onClick={onToggleTrash}
-              className={cn(showTrash && 'bg-red-600 hover:bg-red-700 text-white')}
-            >
-              <Trash2 className="w-4 h-4" />
-              Lixeira
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {showTrash ? 'Voltar ao gerenciador' : 'Abrir lixeira'}
-          </TooltipContent>
-        </Tooltip>
-      )}
-
       {/* Spacer */}
       <div className="flex-1" />
 
@@ -166,9 +150,27 @@ export function FileManagerToolbar({
           placeholder="Pesquisar..."
           value={localSearch}
           onChange={e => setLocalSearch(e.target.value)}
+          onKeyDown={onSearchKeyDown}
           className="h-9 pl-9 text-sm"
         />
       </div>
+
+      {/* Hidden items toggle */}
+      {showHidden && onToggleHidden && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onToggleHidden}
+              className="text-amber-600 dark:text-amber-400"
+            >
+              <EyeOff className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Ocultar itens revelados</TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Folder type filter */}
       {folderTypeFilter && onFolderTypeFilterChange && (

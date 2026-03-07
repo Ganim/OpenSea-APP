@@ -16,6 +16,8 @@ export interface StorageFolder {
   entityType: string | null;
   entityId: string | null;
   depth: number;
+  isProtected: boolean;
+  isHidden: boolean;
   createdBy: string | null;
   fileCount?: number;
   createdAt: string;
@@ -64,6 +66,10 @@ export interface FolderContentsQuery {
   limit?: number;
   search?: string;
   sort?: string;
+  /** Admin-only: show all users' files and folders */
+  viewAll?: boolean;
+  /** Show hidden items (requires verified security key) */
+  showHidden?: boolean;
 }
 
 export interface FolderResponse {

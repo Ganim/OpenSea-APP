@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Board, Card } from '@/types/tasks';
 import { PRIORITY_CONFIG } from '@/types/tasks';
+import { getGradientForBoard } from '../shared/board-gradients';
 import { PriorityBadge } from '../shared/priority-badge';
 import { MemberAvatar } from '../shared/member-avatar';
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
@@ -42,6 +43,7 @@ function isOverdue(dateStr: string | null): boolean {
 export function TableView({ board, cards, boardId, onCardClick }: TableViewProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const gradient = getGradientForBoard(boardId);
 
   const columns = useMemo(
     () => [...(board.columns ?? [])].sort((a, b) => a.position - b.position),
@@ -49,8 +51,8 @@ export function TableView({ board, cards, boardId, onCardClick }: TableViewProps
   );
 
   const columnMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const col of columns) map.set(col.id, col.title);
+    const map = new Map<string, { title: string; color: string | null }>();
+    for (const col of columns) map.set(col.id, { title: col.title, color: col.color });
     return map;
   }, [columns]);
 
@@ -64,8 +66,8 @@ export function TableView({ board, cards, boardId, onCardClick }: TableViewProps
           cmp = a.title.localeCompare(b.title, 'pt-BR');
           break;
         case 'status': {
-          const nameA = columnMap.get(a.columnId) ?? '';
-          const nameB = columnMap.get(b.columnId) ?? '';
+          const nameA = columnMap.get(a.columnId)?.title ?? '';
+          const nameB = columnMap.get(b.columnId)?.title ?? '';
           cmp = nameA.localeCompare(nameB, 'pt-BR');
           break;
         }
@@ -109,11 +111,14 @@ export function TableView({ board, cards, boardId, onCardClick }: TableViewProps
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-card overflow-hidden">
+      {/* Colored top accent bar */}
+      <div className="h-1 w-full" style={gradient.style} />
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30">
+            <tr className="border-b border-gray-200 dark:border-white/10 bg-muted/30">
               <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-10">
                 #
               </th>
@@ -147,7 +152,9 @@ export function TableView({ board, cards, boardId, onCardClick }: TableViewProps
               </tr>
             ) : (
               sortedCards.map((card, index) => {
-                const columnName = columnMap.get(card.columnId) ?? '--';
+                const colInfo = columnMap.get(card.columnId);
+                const columnName = colInfo?.title ?? '--';
+                const colColor = colInfo?.color || gradient.from;
                 const overdue = isOverdue(card.dueDate);
 
                 return (
@@ -162,7 +169,15 @@ export function TableView({ board, cards, boardId, onCardClick }: TableViewProps
                     <td className="px-4 py-2.5">
                       <span className="font-medium line-clamp-1">{card.title}</span>
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{columnName}</td>
+                    <td className="px-4 py-2.5">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          className="h-2.5 w-2.5 rounded shrink-0"
+                          style={{ backgroundColor: colColor }}
+                        />
+                        <span className="text-sm text-muted-foreground">{columnName}</span>
+                      </span>
+                    </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex items-center gap-1.5">
                         <PriorityBadge priority={card.priority} />

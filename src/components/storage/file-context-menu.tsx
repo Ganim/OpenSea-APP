@@ -9,8 +9,12 @@ import {
 } from '@/components/ui/context-menu';
 import {
   Eye,
+  EyeOff,
   Download,
+  Info,
   Link2,
+  Lock,
+  LockOpen,
   Pencil,
   FolderInput,
   History,
@@ -36,6 +40,9 @@ interface FileContextMenuProps {
   onMove?: (file: StorageFile) => void;
   onVersions?: (file: StorageFile) => void;
   onShare?: (file: StorageFile) => void;
+  onProperties?: (file: StorageFile) => void;
+  onProtect?: (file: StorageFile) => void;
+  onHide?: (file: StorageFile) => void;
   onDelete?: (file: StorageFile) => void;
 }
 
@@ -49,6 +56,9 @@ export function FileContextMenu({
   onMove,
   onVersions,
   onShare,
+  onProperties,
+  onProtect,
+  onHide,
   onDelete,
 }: FileContextMenuProps) {
   const canRead = permissions?.canRead ?? true;
@@ -113,6 +123,51 @@ export function FileContextMenu({
             <Link2 className="w-4 h-4" />
             Compartilhar
           </ContextMenuItem>
+        )}
+
+        {canUpdate && onProtect && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => onProtect(file)}>
+              {file.isProtected ? (
+                <>
+                  <LockOpen className="w-4 h-4" />
+                  Remover proteção
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Proteger com senha
+                </>
+              )}
+            </ContextMenuItem>
+          </>
+        )}
+
+        {canUpdate && onHide && (
+          <ContextMenuItem onClick={() => onHide(file)}>
+            {file.isHidden ? (
+              <>
+                <Eye className="w-4 h-4" />
+                Revelar
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-4 h-4" />
+                Ocultar
+              </>
+            )}
+          </ContextMenuItem>
+        )}
+
+        {onProperties && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => onProperties(file)}>
+              <Info className="w-4 h-4" />
+              Propriedades
+            </ContextMenuItem>
+          </>
         )}
 
         {showDelete && (

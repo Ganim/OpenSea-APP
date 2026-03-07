@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Upload, X, FileIcon, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
 import {
   Dialog,
@@ -27,6 +27,7 @@ interface UploadDialogProps {
   folderId: string | null;
   entityType?: string;
   entityId?: string;
+  initialFiles?: File[];
 }
 
 interface FileUploadState {
@@ -42,6 +43,7 @@ export function UploadDialog({
   folderId,
   entityType,
   entityId,
+  initialFiles,
 }: UploadDialogProps) {
   const [files, setFiles] = useState<FileUploadState[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -89,6 +91,14 @@ export function UploadDialog({
       setFiles(prev => [...prev, ...accepted]);
     }
   }, []);
+
+  // Pre-populate files from drag-and-drop on the main area
+  useEffect(() => {
+    if (open && initialFiles && initialFiles.length > 0) {
+      addFiles(initialFiles);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const removeFile = useCallback((index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
@@ -262,6 +272,20 @@ export function UploadDialog({
             type="file"
             multiple
             className="hidden"
+            accept={[
+              // Imagens
+              '.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico',
+              // Documentos
+              '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.txt,.csv,.rtf',
+              // Vídeos
+              '.mp4,.webm,.mov,.avi,.mkv',
+              // Áudio
+              '.mp3,.wav,.ogg,.flac,.aac',
+              // Arquivos compactados
+              '.zip,.rar,.7z,.tar,.gz',
+              // Código
+              '.json,.xml,.html,.css,.js,.ts,.py,.md',
+            ].join(',')}
             onChange={handleFileSelect}
           />
           <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400 dark:text-slate-500" />

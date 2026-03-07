@@ -159,6 +159,20 @@ export function useRemoveTenantUser() {
   });
 }
 
+export function useSetUserSecurityKey() {
+  return useMutation({
+    mutationFn: ({
+      tenantId,
+      userId,
+      securityKey,
+    }: {
+      tenantId: string;
+      userId: string;
+      securityKey: string | null;
+    }) => adminApi.setUserSecurityKey(tenantId, userId, securityKey),
+  });
+}
+
 // Plans
 export function useAdminPlans() {
   return useQuery({

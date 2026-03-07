@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/tasks/shared/empty-states';
 import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
 import { getGradientForBoard } from '@/components/tasks/shared/board-gradients';
 import type { Board } from '@/types/tasks';
-import { KanbanSquare, Users, LayoutGrid } from 'lucide-react';
+import { KanbanSquare, Users, LayoutGrid, ArrowRight } from 'lucide-react';
 
 interface BoardListProps {
   boards: Board[];
@@ -51,12 +51,17 @@ export function BoardList({
           <button
             key={board.id}
             type="button"
-            className="group relative overflow-hidden rounded-xl h-32 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="group relative overflow-hidden rounded-xl h-32 text-left cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             style={gradient.style}
             onClick={() => router.push(`/tasks/${board.id}`)}
           >
             {/* Overlay for readability */}
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+            {/* Hover arrow */}
+            <div className="absolute right-3 bottom-3 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+              <ArrowRight className="h-5 w-5 text-white drop-shadow-md" />
+            </div>
 
             {/* Content */}
             <div className="relative h-full flex flex-col justify-between p-4">
