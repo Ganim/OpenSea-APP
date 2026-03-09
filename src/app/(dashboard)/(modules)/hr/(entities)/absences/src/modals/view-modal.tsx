@@ -7,6 +7,7 @@
  */
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   Dialog,
@@ -14,9 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Absence } from '@/types/hr';
-import { Calendar, Clock, FileText, UserX } from 'lucide-react';
+import { Calendar, Clock, ExternalLink, FileText, UserX, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   getTypeLabel,
   getStatusLabel,
@@ -51,6 +58,7 @@ function formatDateTime(dateStr?: string | null): string {
 }
 
 export function ViewModal({ isOpen, onClose, absence }: ViewModalProps) {
+  const router = useRouter();
   const idsToResolve = absence
     ? [absence.employeeId, ...(absence.approvedBy ? [absence.approvedBy] : [])]
     : [];
@@ -73,6 +81,42 @@ export function ViewModal({ isOpen, onClose, absence }: ViewModalProps) {
               </div>
             </div>
           </DialogTitle>
+          <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/absences/${absence.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onClose()}
+                  className="gap-2"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Fechar</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

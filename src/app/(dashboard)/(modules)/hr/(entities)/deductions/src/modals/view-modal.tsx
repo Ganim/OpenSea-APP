@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Deduction } from '@/types/hr';
-import { Calendar, MinusCircle, RefreshCcwDot, X } from 'lucide-react';
+import { Calendar, ExternalLink, MinusCircle, RefreshCcwDot, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   formatCurrency,
   formatDate,
@@ -32,6 +33,7 @@ interface ViewModalProps {
 }
 
 export function ViewModal({ isOpen, onClose, deduction }: ViewModalProps) {
+  const router = useRouter();
   const { getName } = useEmployeeMap(deduction ? [deduction.employeeId] : []);
 
   if (!deduction) return null;
@@ -56,6 +58,25 @@ export function ViewModal({ isOpen, onClose, deduction }: ViewModalProps) {
             </div>
           </DialogTitle>
           <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/deductions/${deduction.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

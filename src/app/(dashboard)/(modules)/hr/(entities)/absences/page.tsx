@@ -36,6 +36,7 @@ import {
   Calendar,
   Check,
   Clock,
+  ExternalLink,
   Eye,
   Plus,
   User,
@@ -195,6 +196,14 @@ export default function AbsencesPage() {
   const contextActions: ContextMenuAction[] = useMemo(() => {
     const actions: ContextMenuAction[] = [];
     if (canView) {
+      actions.push({
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/absences/${ids[0]}`);
+        },
+      });
       actions.push({
         id: 'view',
         label: 'Visualizar',

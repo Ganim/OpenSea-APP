@@ -1,14 +1,22 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { TimeBank } from '@/types/hr';
+import { ExternalLink, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { formatBalance, getBalanceColor, formatYear } from '../utils';
 
 interface ViewModalProps {
@@ -18,6 +26,7 @@ interface ViewModalProps {
 }
 
 export function ViewModal({ isOpen, onClose, timeBank }: ViewModalProps) {
+  const router = useRouter();
   const { getName } = useEmployeeMap(timeBank ? [timeBank.employeeId] : []);
 
   if (!timeBank) return null;
@@ -26,9 +35,45 @@ export function ViewModal({ isOpen, onClose, timeBank }: ViewModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0">
           <DialogTitle>Detalhes do Banco de Horas</DialogTitle>
+          <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/time-bank/${timeBank!.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onClose()}
+                  className="gap-2"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Fechar</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

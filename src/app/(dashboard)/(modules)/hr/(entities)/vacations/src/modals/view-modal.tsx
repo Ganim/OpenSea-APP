@@ -7,6 +7,7 @@
  */
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   Dialog,
@@ -15,14 +16,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { VacationPeriod } from '@/types/hr';
 import {
   Calendar,
   CalendarDays,
   Clock,
+  ExternalLink,
   FileText,
   Palmtree,
+  X,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { formatDate, getStatusLabel, getStatusColor } from '../utils';
 
 interface ViewModalProps {
@@ -43,6 +52,8 @@ function formatDateTime(dateStr?: string | null): string {
 }
 
 export function ViewModal({ isOpen, onClose, vacation }: ViewModalProps) {
+  const router = useRouter();
+
   if (!vacation) return null;
 
   const usedPercent =
@@ -67,6 +78,42 @@ export function ViewModal({ isOpen, onClose, vacation }: ViewModalProps) {
               </div>
             </div>
           </DialogTitle>
+          <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/vacations/${vacation.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onClose()}
+                  className="gap-2"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Fechar</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

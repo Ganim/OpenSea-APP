@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Deduction } from '@/types/hr';
-import { Calendar, Eye, MinusCircle, Plus, Trash2, User } from 'lucide-react';
+import { Calendar, ExternalLink, Eye, MinusCircle, Plus, Trash2, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -188,6 +188,14 @@ export default function DeductionsPage() {
     const actions: ContextMenuAction[] = [];
 
     if (canView) {
+      actions.push({
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/deductions/${ids[0]}`);
+        },
+      });
       actions.push({
         id: 'view',
         label: 'Visualizar',

@@ -18,12 +18,14 @@ import type { Payroll } from '@/types/hr';
 import {
   CalendarDays,
   Calendar,
+  ExternalLink,
   RefreshCcwDot,
   X,
   User,
   CheckCircle,
   DollarSign,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   formatCurrency,
   formatDate,
@@ -39,6 +41,8 @@ interface ViewModalProps {
 }
 
 export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
+  const router = useRouter();
+
   if (!payroll) return null;
 
   return (
@@ -59,6 +63,25 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
             </div>
           </DialogTitle>
           <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/payroll/${payroll.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

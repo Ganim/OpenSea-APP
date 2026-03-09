@@ -22,7 +22,7 @@ import {
 import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { TimeBank } from '@/types/hr';
-import { Eye, Hourglass, Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import { ExternalLink, Eye, Hourglass, Minus, Plus, SlidersHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import {
@@ -145,6 +145,14 @@ function TimeBankPageContent() {
 
   const contextActions: ContextMenuAction[] = useMemo(
     () => [
+      {
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/time-bank/${ids[0]}`);
+        },
+      },
       {
         id: 'view',
         label: 'Visualizar',

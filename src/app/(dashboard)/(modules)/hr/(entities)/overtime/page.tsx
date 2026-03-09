@@ -32,7 +32,7 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { Overtime } from '@/types/hr';
-import { Check, Clock, Coffee, Eye, Plus, User } from 'lucide-react';
+import { Check, Clock, Coffee, ExternalLink, Eye, Plus, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -164,6 +164,14 @@ export default function OvertimePage() {
   const contextActions: ContextMenuAction[] = useMemo(() => {
     const actions: ContextMenuAction[] = [];
     if (canView) {
+      actions.push({
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/overtime/${ids[0]}`);
+        },
+      });
       actions.push({
         id: 'view',
         label: 'Visualizar',

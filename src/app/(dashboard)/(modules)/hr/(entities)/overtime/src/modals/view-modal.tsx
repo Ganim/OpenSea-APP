@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Overtime } from '@/types/hr';
-import { Calendar, Coffee, RefreshCcwDot, X } from 'lucide-react';
+import { Calendar, Coffee, ExternalLink, RefreshCcwDot, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   formatDate,
   formatHours,
@@ -31,6 +32,7 @@ interface ViewModalProps {
 }
 
 export function ViewModal({ isOpen, onClose, overtime }: ViewModalProps) {
+  const router = useRouter();
   const { getName } = useEmployeeMap(
     overtime ? [overtime.employeeId, ...(overtime.approvedBy ? [overtime.approvedBy] : [])] : []
   );
@@ -55,6 +57,25 @@ export function ViewModal({ isOpen, onClose, overtime }: ViewModalProps) {
             </div>
           </DialogTitle>
           <div className="flex items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    router.push(`/hr/overtime/${overtime.id}`);
+                  }}
+                  className="gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ver Detalhes</p>
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

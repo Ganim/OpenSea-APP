@@ -35,6 +35,7 @@ import {
   CalendarDays,
   Check,
   DollarSign,
+  ExternalLink,
   Eye,
   Plus,
 } from 'lucide-react';
@@ -220,6 +221,14 @@ export default function PayrollPage() {
   const contextActions: ContextMenuAction[] = useMemo(() => {
     const actions: ContextMenuAction[] = [];
     if (canView) {
+      actions.push({
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/payroll/${ids[0]}`);
+        },
+      });
       actions.push({
         id: 'view',
         label: 'Visualizar',
