@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     UPDATE_USERNAME: '/v1/me/username',
     UPDATE_PASSWORD: '/v1/me/password',
     DELETE: '/v1/me',
+    UPLOAD_AVATAR: '/v1/me/avatar',
     // PIN
     SET_ACCESS_PIN: '/v1/me/access-pin',
     SET_ACTION_PIN: '/v1/me/action-pin',
@@ -84,6 +85,8 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/v1/hr/employees/${id}`,
     DELETE: (id: string) => `/v1/hr/employees/${id}`,
     LABEL_DATA: '/v1/hr/employees/label-data',
+    UPLOAD_PHOTO: (id: string) => `/v1/hr/employees/${id}/photo`,
+    DELETE_PHOTO: (id: string) => `/v1/hr/employees/${id}/photo`,
   },
   // HR - Companies
   COMPANIES: {
@@ -334,6 +337,9 @@ export const API_ENDPOINTS = {
       DELETE: (id: string) => `/v1/email/messages/${id}`,
       ATTACHMENT_DOWNLOAD: (messageId: string, attachmentId: string) =>
         `/v1/email/messages/${messageId}/attachments/${attachmentId}/download`,
+      TOGGLE_FLAG: (id: string) => `/v1/email/messages/${id}/flag`,
+      THREAD: (id: string) => `/v1/email/messages/${id}/thread`,
+      SUGGEST_CONTACTS: '/v1/email/messages/contacts/suggest',
     },
   },
   // RBAC - Permissions

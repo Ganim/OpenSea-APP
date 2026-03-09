@@ -12,6 +12,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { InfoField } from '@/components/shared/info-field';
+import { PhotoUploadDialog } from '@/components/shared/photo-upload-dialog';
 import { FileManager } from '@/components/storage';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePrintQueue } from '@/core/print-queue';
+import { storageFilesService } from '@/services/storage/files.service';
 import { usersService } from '@/services/auth';
 import { listPermissionGroups } from '@/services/rbac/rbac.service';
 import type { Employee } from '@/types/hr';
@@ -44,6 +46,7 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  Camera,
   Clock,
   CreditCard,
   Edit,
@@ -64,8 +67,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { FaCameraRetro } from 'react-icons/fa';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   employeesApi,
@@ -92,6 +94,7 @@ export default function EmployeeDetailPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -155,6 +158,48 @@ export default function EmployeeDetailPage() {
       });
     },
   });
+
+  // Photo URL resolver
+  const photoDisplayUrl = useMemo(() => {
+    if (!employee?.photoUrl) return null;
+    const match = employee.photoUrl.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (!match) return null;
+    return storageFilesService.getServeUrl(match[1]);
+  }, [employee?.photoUrl]);
+
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async ({ file, crop }: { file: File; crop: { x: number; y: number; width: number; height: number } }) => {
+      return employeesApi.uploadPhoto(employeeId, file, crop);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees', employeeId] });
+      toast.success('Foto atualizada com sucesso!');
+    },
+    onError: (error: Error) => {
+      toast.error('Erro ao enviar foto', {
+        description: error.message || 'Tente novamente mais tarde',
+      });
+    },
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async () => {
+      return employeesApi.deletePhoto(employeeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees', employeeId] });
+      toast.success('Foto removida com sucesso!');
+    },
+    onError: (error: Error) => {
+      toast.error('Erro ao remover foto', {
+        description: error.message || 'Tente novamente mais tarde',
+      });
+    },
+  });
+
+  const handlePhotoUpload = useCallback(async (file: File, crop: { x: number; y: number; width: number; height: number }) => {
+    await uploadPhotoMutation.mutateAsync({ file, crop });
+  }, [uploadPhotoMutation]);
 
   // ============================================================================
   // VALIDATION
@@ -359,9 +404,17 @@ export default function EmployeeDetailPage() {
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
           <div className="flex items-start gap-5">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
-              <Users className="h-7 w-7 text-white" />
-            </div>
+            {photoDisplayUrl ? (
+              <img
+                src={photoDisplayUrl}
+                alt={employee.fullName}
+                className="h-14 w-14 rounded-xl shrink-0 object-cover"
+              />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
+                <Users className="h-7 w-7 text-white" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">
@@ -418,9 +471,42 @@ export default function EmployeeDetailPage() {
               </h3>
               <div className="grid md:grid-cols-6 gap-6">
                 <div className="col-span-1">
-                  <div className="flex flex-col text-gray-400  gap-2 items-center justify-center dark:bg-slate-800 p-4  rounded-lg h-full">
-                    <FaCameraRetro className="h-10 w-10" />
-                    Sem Foto
+                  <div className="relative group flex flex-col items-center justify-center dark:bg-slate-800 rounded-lg h-full overflow-hidden">
+                    {photoDisplayUrl ? (
+                      <img
+                        src={photoDisplayUrl}
+                        alt={employee.fullName}
+                        className="w-full h-full object-cover aspect-square rounded-lg"
+                      />
+                    ) : (
+                      <div className="flex flex-col text-gray-400 gap-2 items-center justify-center p-4 w-full h-full aspect-square">
+                        <Camera className="h-10 w-10" />
+                        <span className="text-sm">Sem Foto</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-lg">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="text-xs"
+                        onClick={() => setIsPhotoDialogOpen(true)}
+                      >
+                        <Camera className="h-3 w-3 mr-1" />
+                        {photoDisplayUrl ? 'Trocar Foto' : 'Enviar Foto'}
+                      </Button>
+                      {photoDisplayUrl && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="text-xs"
+                          onClick={() => deletePhotoMutation.mutate()}
+                          disabled={deletePhotoMutation.isPending}
+                        >
+                          <Trash className="h-3 w-3 mr-1" />
+                          Remover
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6 col-span-5">
@@ -765,6 +851,14 @@ export default function EmployeeDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de upload de foto */}
+      <PhotoUploadDialog
+        open={isPhotoDialogOpen}
+        onOpenChange={setIsPhotoDialogOpen}
+        onUpload={handlePhotoUpload}
+        title="Foto do Funcionário"
+      />
     </PageLayout>
   );
 }

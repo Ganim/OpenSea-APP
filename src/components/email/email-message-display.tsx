@@ -18,6 +18,8 @@ import {
   useMarkMessageRead,
   useMoveMessage,
   useSyncEmailAccount,
+  useThreadMessages,
+  useToggleMessageFlag,
 } from '@/hooks/email/use-email';
 import { emailService } from '@/services/email';
 import type { EmailFolder, EmailMessageListItem } from '@/types/email';
@@ -35,9 +37,11 @@ import {
   Loader2,
   Mail,
   MailOpen,
+  MessageSquare,
   Paperclip,
   Reply,
   ReplyAll,
+  Star,
   Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -196,6 +200,7 @@ export function EmailMessageDisplay({
   const moveMutation = useMoveMessage();
   const permanentDeleteMutation = useDeleteMessage();
   const syncMutation = useSyncEmailAccount();
+  const flagMutation = useToggleMessageFlag();
 
   // Auto-mark-as-read after 300ms
   useEffect(() => {
@@ -314,6 +319,22 @@ export function EmailMessageDisplay({
   }
 
   const detail = messageQuery.data?.message;
+
+  // Thread query — only fetch when message has threading headers
+  const shouldFetchThread =
+    detail?.messageId && (detail?.threadId || detail?.isAnswered);
+  const threadQuery = useThreadMessages(
+    shouldFetchThread ? selectedMessage?.id ?? null : null
+  );
+  const threadMessages = threadQuery.data?.messages ?? [];
+  const hasThread = threadMessages.length > 1;
+  const [threadExpanded, setThreadExpanded] = useState(false);
+
+  // Reset thread view on message change
+  useEffect(() => {
+    setThreadExpanded(false);
+  }, [selectedMessage?.id]);
+
   const safeBodyHtml = useMemo(() => {
     if (!detail?.bodyHtmlSanitized) return null;
     return stripGlobalEmailStyles(detail.bodyHtmlSanitized);
@@ -436,6 +457,36 @@ export function EmailMessageDisplay({
             </Tooltip>
 
             <div className="flex-1" />
+
+            {/* Star toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-9 rounded-lg"
+                  onClick={() =>
+                    flagMutation.mutate({
+                      id: selectedMessage.id,
+                      isFlagged: !selectedMessage.isFlagged,
+                    })
+                  }
+                >
+                  <Star
+                    className={
+                      selectedMessage.isFlagged
+                        ? 'size-4 text-amber-500 fill-amber-500'
+                        : 'size-4 text-muted-foreground'
+                    }
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {selectedMessage.isFlagged
+                  ? 'Remover estrela'
+                  : 'Marcar com estrela'}
+              </TooltipContent>
+            </Tooltip>
 
             {/* Right side: reply/forward actions */}
             <Tooltip>
@@ -752,27 +803,116 @@ export function EmailMessageDisplay({
                 </>
               )}
 
-              {/* Body */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-6">
-                {(safeBodyHtml || detail?.bodyText) && (
-                  <div className="max-w-3xl">
-                    {safeBodyHtml ? (
-                      <EmailHtmlBody
-                        html={safeBodyHtml}
-                        messageId={selectedMessage.id}
-                      />
+              {/* Thread indicator */}
+              {hasThread && (
+                <div className="px-6 py-2 border-b">
+                  <button
+                    type="button"
+                    onClick={() => setThreadExpanded(prev => !prev)}
+                    className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    <MessageSquare className="size-3.5" />
+                    <span>
+                      {threadMessages.length} mensagens na conversa
+                    </span>
+                    {threadExpanded ? (
+                      <ChevronUp className="size-3" />
                     ) : (
-                      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground/80">
-                        {detail?.bodyText ?? ''}
-                      </pre>
+                      <ChevronDown className="size-3" />
                     )}
-                  </div>
-                )}
+                  </button>
+                </div>
+              )}
 
-                {detail && !safeBodyHtml && !detail.bodyText && (
-                  <p className="text-sm text-muted-foreground italic">
-                    Sem conteúdo disponível.
-                  </p>
+              {/* Body / Thread conversation */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
+                {hasThread && threadExpanded ? (
+                  /* ═══ Thread conversation view ═══ */
+                  <div className="max-w-3xl space-y-6">
+                    {threadMessages.map((threadMsg) => {
+                      const isCurrent = threadMsg.id === selectedMessage.id;
+                      const msgHtml = threadMsg.bodyHtmlSanitized
+                        ? stripGlobalEmailStyles(threadMsg.bodyHtmlSanitized)
+                        : null;
+                      return (
+                        <div
+                          key={threadMsg.id}
+                          className={`rounded-xl border p-4 ${
+                            isCurrent
+                              ? 'border-blue-300 dark:border-blue-500/40 bg-blue-50/50 dark:bg-blue-500/5'
+                              : 'border-border bg-muted/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Avatar className="size-6 text-[10px]">
+                              <AvatarFallback
+                                className="text-white font-semibold"
+                                style={{
+                                  backgroundColor: getAvatarColor(
+                                    threadMsg.fromAddress
+                                  ),
+                                }}
+                              >
+                                {getInitials(
+                                  threadMsg.fromName,
+                                  threadMsg.fromAddress
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-medium truncate">
+                                {threadMsg.fromName ?? threadMsg.fromAddress}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground ml-2">
+                                {formatEmailDateFull(threadMsg.receivedAt)}
+                              </span>
+                            </div>
+                            {isCurrent && (
+                              <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20">
+                                atual
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm">
+                            {msgHtml ? (
+                              <EmailHtmlBody
+                                html={msgHtml}
+                                messageId={threadMsg.id}
+                              />
+                            ) : (
+                              <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground/80">
+                                {threadMsg.bodyText ?? ''}
+                              </pre>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* ═══ Single message view ═══ */
+                  <>
+                    {(safeBodyHtml || detail?.bodyText) && (
+                      <div className="max-w-3xl">
+                        {safeBodyHtml ? (
+                          <EmailHtmlBody
+                            html={safeBodyHtml}
+                            messageId={selectedMessage.id}
+                          />
+                        ) : (
+                          <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground/80">
+                            {detail?.bodyText ?? ''}
+                          </pre>
+                        )}
+                      </div>
+                    )}
+
+                    {detail && !safeBodyHtml && !detail.bodyText && (
+                      <p className="text-sm text-muted-foreground italic">
+                        Sem conteúdo disponível.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </>

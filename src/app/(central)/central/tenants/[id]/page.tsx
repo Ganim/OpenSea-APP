@@ -1,6 +1,6 @@
 'use client';
 
-import { GlassBadge, GlassButton, GlassCard } from '@/components/central';
+import { GlassBadge, GlassButton, GlassCard, GlassInput } from '@/components/central';
 import {
   Dialog,
   DialogContent,
@@ -20,10 +20,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useAdminPlans,
   useAdminTenantDetails,
+  useAdminTenantFlags,
   useAdminTenantUsers,
   useChangeTenantPlan,
   useChangeTenantStatus,
@@ -65,6 +67,7 @@ export default function TenantDetailPage() {
   const { data, isLoading } = useAdminTenantDetails(id);
   const { data: usersData } = useAdminTenantUsers(id);
   const { data: plansData } = useAdminPlans();
+  const { data: flagsData, isLoading: flagsLoading } = useAdminTenantFlags(id);
   const changeStatus = useChangeTenantStatus();
   const changePlan = useChangeTenantPlan();
   const manageFlags = useManageFeatureFlags();
@@ -88,6 +91,7 @@ export default function TenantDetailPage() {
     role: 'member',
   });
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [customFlagName, setCustomFlagName] = useState('');
   const [securityKeyState, setSecurityKeyState] = useState<{
     userId: string;
     userName: string;
@@ -736,16 +740,162 @@ export default function TenantDetailPage() {
         </TabsContent>
 
         {/* Flags Tab */}
-        <TabsContent value="flags" className="space-y-6 mt-8 w-full">
-          <GlassCard className="p-12 text-center w-full">
-            <Flag className="h-16 w-16 mx-auto mb-4 central-text-subtle" />
-            <p className="text-lg central-text-muted">
-              Feature flags não disponíveis
-            </p>
-            <p className="text-sm mt-2 central-text-subtle">
-              Esta funcionalidade será implementada em breve
-            </p>
-          </GlassCard>
+        <TabsContent value="flags" className="space-y-6 w-full">
+          {flagsLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-20 rounded-xl central-glass-subtle animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* System Flags by Category */}
+              {(() => {
+                const systemFlags = flagsData?.systemFlags ?? [];
+                const tenantFlags = flagsData?.featureFlags ?? [];
+                const tenantFlagMap = new Map(
+                  tenantFlags.map((f) => [f.flag, f])
+                );
+
+                const categories = [
+                  { key: 'core', label: 'Core', color: 'blue' },
+                  { key: 'stock', label: 'Estoque', color: 'green' },
+                  { key: 'sales', label: 'Vendas', color: 'purple' },
+                  { key: 'hr', label: 'Recursos Humanos', color: 'amber' },
+                  {
+                    key: 'experimental',
+                    label: 'Experimental',
+                    color: 'red',
+                  },
+                ];
+
+                const grouped = categories
+                  .map((cat) => ({
+                    ...cat,
+                    flags: systemFlags.filter((f) => f.category === cat.key),
+                  }))
+                  .filter((cat) => cat.flags.length > 0);
+
+                // Custom flags: flags in tenantFlags that aren't in systemFlags
+                const systemFlagNames = new Set(
+                  systemFlags.map((f) => f.flag)
+                );
+                const customFlags = tenantFlags.filter(
+                  (f) => !systemFlagNames.has(f.flag)
+                );
+
+                return (
+                  <>
+                    {grouped.map((cat) => (
+                      <GlassCard key={cat.key} className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <GlassBadge variant="default">
+                            {cat.label}
+                          </GlassBadge>
+                        </div>
+                        <div className="space-y-3">
+                          {cat.flags.map((sf) => {
+                            const tenantFlag = tenantFlagMap.get(sf.flag);
+                            const isEnabled = tenantFlag?.enabled ?? false;
+
+                            return (
+                              <div
+                                key={sf.flag}
+                                className="flex items-center justify-between p-4 rounded-xl central-glass-subtle central-transition hover:bg-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*1.5))]"
+                              >
+                                <div className="flex-1">
+                                  <p className="font-medium central-text">
+                                    {sf.label}
+                                  </p>
+                                  <p className="text-sm central-text-muted mt-0.5">
+                                    {sf.description}
+                                  </p>
+                                  <p className="text-xs font-mono central-text-subtle mt-1">
+                                    {sf.flag}
+                                  </p>
+                                </div>
+                                <Switch
+                                  checked={isEnabled}
+                                  onCheckedChange={(checked) =>
+                                    handleFlagToggle(sf.flag, checked)
+                                  }
+                                  disabled={manageFlags.isPending}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </GlassCard>
+                    ))}
+
+                    {/* Custom Flags */}
+                    <GlassCard className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <GlassBadge variant="info">Customizadas</GlassBadge>
+                        </div>
+                      </div>
+
+                      {customFlags.length > 0 && (
+                        <div className="space-y-3 mb-4">
+                          {customFlags.map((cf) => (
+                            <div
+                              key={cf.flag}
+                              className="flex items-center justify-between p-4 rounded-xl central-glass-subtle"
+                            >
+                              <div className="flex-1">
+                                <p className="font-medium central-text font-mono">
+                                  {cf.flag}
+                                </p>
+                              </div>
+                              <Switch
+                                checked={cf.enabled}
+                                onCheckedChange={(checked) =>
+                                  handleFlagToggle(cf.flag, checked)
+                                }
+                                disabled={manageFlags.isPending}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <GlassInput
+                          value={customFlagName}
+                          onChange={(e) =>
+                            setCustomFlagName(
+                              e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '')
+                            )
+                          }
+                          placeholder="NOME_DA_FLAG"
+                          className="flex-1 font-mono"
+                        />
+                        <GlassButton
+                          variant="secondary"
+                          size="sm"
+                          disabled={
+                            !customFlagName.trim() || manageFlags.isPending
+                          }
+                          onClick={() => {
+                            handleFlagToggle(customFlagName.trim(), true);
+                            setCustomFlagName('');
+                          }}
+                          className="gap-1 whitespace-nowrap"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Adicionar Flag
+                        </GlassButton>
+                      </div>
+                    </GlassCard>
+                  </>
+                );
+              })()}
+            </>
+          )}
         </TabsContent>
       </Tabs>
 

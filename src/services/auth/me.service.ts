@@ -87,6 +87,29 @@ export const meService = {
     return apiClient.get<EmployeeResponse>(API_ENDPOINTS.ME.EMPLOYEE);
   },
 
+  // POST /v1/me/avatar (multipart)
+  async uploadAvatar(
+    file: File,
+    crop: { x: number; y: number; width: number; height: number }
+  ): Promise<{ avatarUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('cropX', String(Math.round(crop.x)));
+    formData.append('cropY', String(Math.round(crop.y)));
+    formData.append('cropWidth', String(Math.round(crop.width)));
+    formData.append('cropHeight', String(Math.round(crop.height)));
+
+    return apiClient.post<{ avatarUrl: string }>(
+      API_ENDPOINTS.ME.UPLOAD_AVATAR,
+      formData
+    );
+  },
+
+  // DELETE /v1/me/avatar
+  async deleteAvatar(): Promise<void> {
+    return apiClient.delete(API_ENDPOINTS.ME.UPLOAD_AVATAR);
+  },
+
   // GET /v1/me/audit-logs
   async getMyAuditLogs(query?: AuditLogsQuery): Promise<AuditLogsResponse> {
     const params: Record<string, string> = {};

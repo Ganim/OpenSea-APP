@@ -48,8 +48,13 @@ import {
   Strikethrough,
   Trash2,
   Underline,
+  Upload,
+  Loader2,
 } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useRef, useMemo, useState } from 'react';
+import { labelTemplatesService } from '@/services/stock/label-templates.service';
+import { storageFilesService } from '@/services/storage/files.service';
+import { toast } from 'sonner';
 import { useEditorStore } from '../stores/editorStore';
 import type { LabelElement, TextStyle } from '../studio-types';
 import { BarcodeConfigPanel } from './BarcodeConfigPanel';
@@ -333,6 +338,158 @@ function TextStyleFields({
 }
 
 /**
+ * Image section with file upload support
+ */
+function ImageSection({
+  element,
+  onUpdate,
+}: {
+  element: LabelElement & { type: 'image' };
+  onUpdate: (updates: Partial<LabelElement>) => void;
+}) {
+  const templateId = useEditorStore(s => s.templateId);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resolvedSrc = useMemo(() => {
+    if (!element.src) return '';
+    const match = element.src.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (match) {
+      return storageFilesService.getServeUrl(match[1]);
+    }
+    return element.src;
+  }, [element.src]);
+
+  const handleFileUpload = useCallback(
+    async (file: File) => {
+      if (!templateId) {
+        toast.error('Salve o template antes de enviar imagens.');
+        return;
+      }
+      setIsUploading(true);
+      try {
+        const { imageUrl } = await labelTemplatesService.uploadImage(
+          templateId,
+          file,
+        );
+        onUpdate({ src: imageUrl });
+        toast.success('Imagem enviada com sucesso');
+      } catch {
+        toast.error('Erro ao enviar imagem');
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [templateId, onUpdate],
+  );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handleFileUpload(file);
+        e.target.value = '';
+      }
+    },
+    [handleFileUpload],
+  );
+
+  return (
+    <Section title="Imagem">
+      <div className="space-y-2">
+        <div>
+          <Label className="text-xs">Origem da imagem</Label>
+          <div className="flex gap-1">
+            <Input
+              value={element.src}
+              onChange={e => onUpdate({ src: e.target.value })}
+              placeholder="URL ou envie um arquivo..."
+              className="h-7 text-xs flex-1"
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || !templateId}
+              title={
+                templateId
+                  ? 'Enviar imagem'
+                  : 'Salve o template antes de enviar imagens'
+              }
+            >
+              {isUploading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Upload className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+        {resolvedSrc && (
+          <div className="rounded border border-slate-200 dark:border-slate-600 overflow-hidden">
+            <img
+              src={resolvedSrc}
+              alt="Preview"
+              className="w-full h-20 object-contain bg-slate-50 dark:bg-slate-900"
+              onError={e => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs">Ajuste</Label>
+            <Select
+              value={element.objectFit}
+              onValueChange={v =>
+                onUpdate({
+                  objectFit: v as 'contain' | 'cover' | 'fill' | 'none',
+                })
+              }
+            >
+              <SelectTrigger className="h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="contain">Conter</SelectItem>
+                <SelectItem value="cover">Cobrir</SelectItem>
+                <SelectItem value="fill">Preencher</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Borda (mm)</Label>
+            <Input
+              type="number"
+              value={element.borderRadius ?? 0}
+              onChange={e =>
+                onUpdate({
+                  borderRadius: parseFloat(e.target.value) || 0,
+                })
+              }
+              className="h-7 text-xs"
+              step={0.5}
+              min={0}
+            />
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/**
  * Render properties based on element type (unified, no tabs)
  */
 function ElementProperties({
@@ -406,57 +563,10 @@ function ElementProperties({
 
       {/* === IMAGE === */}
       {element.type === 'image' && (
-        <Section title="Imagem">
-          <div className="space-y-2">
-            <div>
-              <Label className="text-xs">URL</Label>
-              <Input
-                value={element.src}
-                onChange={e => onUpdate({ src: e.target.value })}
-                placeholder="https://..."
-                className="h-7 text-xs"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs">Ajuste</Label>
-                <Select
-                  value={element.objectFit}
-                  onValueChange={v =>
-                    onUpdate({
-                      objectFit: v as 'contain' | 'cover' | 'fill' | 'none',
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="contain">Conter</SelectItem>
-                    <SelectItem value="cover">Cobrir</SelectItem>
-                    <SelectItem value="fill">Preencher</SelectItem>
-                    <SelectItem value="none">Nenhum</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs">Borda (mm)</Label>
-                <Input
-                  type="number"
-                  value={element.borderRadius ?? 0}
-                  onChange={e =>
-                    onUpdate({
-                      borderRadius: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="h-7 text-xs"
-                  step={0.5}
-                  min={0}
-                />
-              </div>
-            </div>
-          </div>
-        </Section>
+        <ImageSection
+          element={element}
+          onUpdate={onUpdate}
+        />
       )}
 
       {/* === ICON === */}

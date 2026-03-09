@@ -54,6 +54,18 @@ export const employeesApi = {
     const { employee } = await employeesService.createUserForEmployee(id, data);
     return employee;
   },
+
+  async uploadPhoto(
+    id: string,
+    file: File,
+    crop: { x: number; y: number; width: number; height: number }
+  ): Promise<{ photoUrl: string }> {
+    return employeesService.uploadPhoto(id, file, crop);
+  },
+
+  async deletePhoto(id: string): Promise<void> {
+    return employeesService.deletePhoto(id);
+  },
 };
 
 export type { EmployeeResponse, EmployeesResponse, ListEmployeesParams };

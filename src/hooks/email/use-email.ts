@@ -443,6 +443,77 @@ export function useDeleteMessage() {
   });
 }
 
+export function useToggleMessageFlag() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isFlagged }: { id: string; isFlagged: boolean }) =>
+      emailService.toggleFlag(id, isFlagged),
+    onMutate: async ({ id, isFlagged }) => {
+      await queryClient.cancelQueries({ queryKey: ['email', 'messages'] });
+
+      // Optimistic update in list caches
+      queryClient.setQueriesData(
+        { queryKey: ['email', 'messages'] },
+        (old: unknown) => {
+          const data = old as
+            | {
+                pages?: Array<{
+                  data: Array<{ id: string; isFlagged: boolean }>;
+                  meta: unknown;
+                }>;
+              }
+            | undefined;
+          if (!data?.pages) return old;
+          return {
+            ...data,
+            pages: data.pages.map(page => ({
+              ...page,
+              data: page.data.map(msg =>
+                msg.id === id ? { ...msg, isFlagged } : msg
+              ),
+            })),
+          };
+        }
+      );
+
+      // Update single message cache
+      queryClient.setQueriesData(
+        { queryKey: ['email', 'message', id] },
+        (old: unknown) => {
+          if (!old) return old;
+          const data = old as { message?: { id: string; isFlagged: boolean } };
+          if (data.message) {
+            return { ...data, message: { ...data.message, isFlagged } };
+          }
+          return old;
+        }
+      );
+    },
+    onError: async () => {
+      toast.error('Erro ao alterar estrela');
+      await queryClient.invalidateQueries({ queryKey: ['email'] });
+    },
+  });
+}
+
+export function useThreadMessages(messageId: string | null) {
+  return useQuery({
+    queryKey: ['email', 'thread', messageId],
+    queryFn: () => emailService.getThreadMessages(messageId!),
+    enabled: Boolean(messageId),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useSuggestContacts(query: string) {
+  return useQuery({
+    queryKey: ['email', 'contacts', 'suggest', query],
+    queryFn: () => emailService.suggestContacts(query),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({

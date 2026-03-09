@@ -2,12 +2,15 @@ export interface EmailMessageListItem {
   id: string;
   accountId: string;
   folderId: string;
+  messageId?: string | null;
+  threadId?: string | null;
   subject: string;
   fromAddress: string;
   fromName: string | null;
   snippet: string | null;
   receivedAt: string;
   isRead: boolean;
+  isFlagged: boolean;
   isAnswered: boolean;
   hasAttachments: boolean;
 }
@@ -109,4 +112,18 @@ export interface SaveEmailDraftRequest {
 
 export interface SaveEmailDraftResponse {
   draftId: string;
+}
+
+export interface EmailThreadResponse {
+  messages: EmailMessageDetail[];
+}
+
+export interface EmailContactSuggestion {
+  email: string;
+  name: string | null;
+  frequency: number;
+}
+
+export interface EmailContactSuggestResponse {
+  contacts: EmailContactSuggestion[];
 }

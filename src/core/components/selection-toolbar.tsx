@@ -263,7 +263,7 @@ export function SelectionToolbar({
               size="icon"
               onClick={onClear}
               className="text-muted-foreground hover:text-foreground"
-              aria-label="Limpar selecao"
+              aria-label="Limpar seleção"
             >
               <X className="w-4 h-4" />
             </Button>

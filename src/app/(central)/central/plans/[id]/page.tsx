@@ -48,6 +48,11 @@ const ALL_MODULES = [
   'AUDIT',
   'REQUESTS',
   'NOTIFICATIONS',
+  'FINANCE',
+  'CALENDAR',
+  'STORAGE',
+  'EMAIL',
+  'TASKS',
 ];
 const TIERS = ['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'];
 

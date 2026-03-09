@@ -45,6 +45,7 @@ import {
   Reply,
   Search,
   Settings,
+  Star,
   Trash2,
   X,
 } from 'lucide-react';
@@ -113,6 +114,7 @@ interface EmailMessageListProps {
   onBulkMarkRead?: (ids: string[], isRead: boolean) => void;
   onBulkArchive?: (ids: string[]) => void;
   onBulkDelete?: (ids: string[]) => void;
+  onToggleFlag?: (id: string, isFlagged: boolean) => void;
 }
 
 export function EmailMessageList({
@@ -141,6 +143,7 @@ export function EmailMessageList({
   onBulkMarkRead,
   onBulkArchive,
   onBulkDelete,
+  onToggleFlag,
 }: EmailMessageListProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
@@ -311,7 +314,7 @@ export function EmailMessageList({
     ]
   );
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (arrow navigation + bulk actions)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
@@ -321,6 +324,41 @@ export function EmailMessageList({
         target.isContentEditable
       ) {
         return;
+      }
+
+      // Arrow Up/Down — navigate between messages
+      if (
+        (e.key === 'ArrowDown' || e.key === 'ArrowUp') &&
+        filteredMessages.length > 0
+      ) {
+        e.preventDefault();
+        const currentIdx = selectedMessageId
+          ? filteredMessages.findIndex(m => m.id === selectedMessageId)
+          : -1;
+        let nextIdx: number;
+        if (e.key === 'ArrowDown') {
+          nextIdx =
+            currentIdx < filteredMessages.length - 1 ? currentIdx + 1 : currentIdx;
+        } else {
+          nextIdx = currentIdx > 0 ? currentIdx - 1 : 0;
+        }
+        const nextMessage = filteredMessages[nextIdx];
+        if (nextMessage && nextMessage.id !== selectedMessageId) {
+          onSelectMessage(nextMessage.id);
+          // Scroll the virtual list to make the selected item visible
+          const flatIdx = flatItems.findIndex(
+            item => item.type === 'message' && item.message.id === nextMessage.id
+          );
+          if (flatIdx !== -1) {
+            virtualizer.scrollToIndex(flatIdx, { align: 'auto' });
+          }
+        }
+      }
+
+      // Enter — open selected message (useful after arrow navigation)
+      if (e.key === 'Enter' && selectedMessageId && selectedIds.size === 0) {
+        e.preventDefault();
+        onSelectMessage(selectedMessageId);
       }
 
       if (e.key === 'Escape' && selectedIds.size > 0) {
@@ -348,7 +386,11 @@ export function EmailMessageList({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     selectedIds,
+    selectedMessageId,
     filteredMessages,
+    flatItems,
+    virtualizer,
+    onSelectMessage,
     onClearSelection,
     onSelectedIdsChange,
     onBulkDelete,
@@ -729,7 +771,13 @@ export function EmailMessageList({
 
       {/* Virtualized list with date groups */}
       {!isLoading && !isError && !noAccount && filteredMessages.length > 0 && (
-        <div ref={parentRef} className="flex-1 overflow-y-auto">
+        <div
+          ref={parentRef}
+          className="flex-1 overflow-y-auto"
+          role="listbox"
+          aria-label={folderName ?? 'Mensagens'}
+          tabIndex={0}
+        >
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
@@ -884,6 +932,9 @@ export function EmailMessageList({
                 >
                   <div className="px-2">
                     <div
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-label={`${!message.isRead ? 'Não lido: ' : ''}${message.fromName || message.fromAddress}: ${message.subject || '(sem assunto)'}`}
                       className={cn(
                         'group flex w-full items-start gap-3 px-3 py-3 text-left cursor-pointer transition-all duration-150 rounded-xl',
                         isSelected && 'bg-accent shadow-sm',
@@ -969,7 +1020,7 @@ export function EmailMessageList({
                           </span>
                         </div>
 
-                        {/* Row 2: Subject (with attachment icon) */}
+                        {/* Row 2: Subject (with star + attachment icons) */}
                         <div className="flex items-center justify-between gap-1 mt-0.5">
                           <p
                             className={cn(
@@ -987,6 +1038,33 @@ export function EmailMessageList({
                             )}
                           </p>
                           <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              className={cn(
+                                'shrink-0 transition-opacity duration-150',
+                                message.isFlagged
+                                  ? 'opacity-100'
+                                  : 'opacity-0 group-hover:opacity-100'
+                              )}
+                              onClick={e => {
+                                e.stopPropagation();
+                                onToggleFlag?.(message.id, !message.isFlagged);
+                              }}
+                              aria-label={
+                                message.isFlagged
+                                  ? 'Remover estrela'
+                                  : 'Marcar com estrela'
+                              }
+                            >
+                              <Star
+                                className={cn(
+                                  'size-3.5',
+                                  message.isFlagged
+                                    ? 'text-amber-500 fill-amber-500'
+                                    : 'text-muted-foreground hover:text-amber-400'
+                                )}
+                              />
+                            </button>
                             {message.isAnswered && (
                               <Reply className="size-3 shrink-0 text-muted-foreground" />
                             )}

@@ -21,6 +21,7 @@ import {
   type SavedAccount,
 } from '@/lib/saved-accounts';
 import { authService } from '@/services/auth/auth.service';
+import { storageFilesService } from '@/services/storage/files.service';
 import { Lock, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -100,7 +101,7 @@ export default function FastLoginPage() {
     }
 
     if (user.isSuperAdmin) {
-      router.push('/');
+      router.push('/central');
       return;
     }
 
@@ -151,7 +152,7 @@ export default function FastLoginPage() {
         });
         if (!result.redirected) {
           if (result.isSuperAdmin) {
-            router.push('/');
+            router.push('/central');
             return;
           }
 
@@ -170,6 +171,15 @@ export default function FastLoginPage() {
       setError(translateError(err));
       logger.error('Erro no login', err instanceof Error ? err : undefined);
     }
+  };
+
+  const resolveAvatarUrl = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined;
+    const match = url.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (match) {
+      return storageFilesService.getServeUrl(match[1]);
+    }
+    return url;
   };
 
   const getInitials = (name: string) => {
@@ -258,7 +268,7 @@ export default function FastLoginPage() {
 
                   {/* Large avatar */}
                   <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-3 ring-transparent group-hover:ring-blue-500/50 transition-all duration-300 shadow-lg group-hover:shadow-blue-500/20">
-                    <AvatarImage src={account.avatarUrl || undefined} />
+                    <AvatarImage src={resolveAvatarUrl(account.avatarUrl)} />
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl sm:text-3xl font-bold">
                       {getInitials(account.displayName)}
                     </AvatarFallback>
@@ -292,7 +302,7 @@ export default function FastLoginPage() {
           >
             {/* Avatar of selected user */}
             <Avatar className="h-20 w-20 mb-6 ring-3 ring-blue-500/30 shadow-lg shadow-blue-500/10">
-              <AvatarImage src={selectedAccount.avatarUrl || undefined} />
+              <AvatarImage src={resolveAvatarUrl(selectedAccount.avatarUrl)} />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-bold">
                 {getInitials(selectedAccount.displayName)}
               </AvatarFallback>
@@ -374,7 +384,7 @@ export default function FastLoginPage() {
           >
             {/* Avatar of selected user */}
             <Avatar className="h-20 w-20 mb-6 ring-3 ring-blue-500/30 shadow-lg shadow-blue-500/10">
-              <AvatarImage src={selectedAccount.avatarUrl || undefined} />
+              <AvatarImage src={resolveAvatarUrl(selectedAccount.avatarUrl)} />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl font-bold">
                 {getInitials(selectedAccount.displayName)}
               </AvatarFallback>

@@ -5,6 +5,7 @@ import type {
     CreateEmailAccountRequest,
     EmailAccountResponse,
     EmailAccountsResponse,
+    EmailContactSuggestResponse,
     EmailFoldersResponse,
     EmailMessageResponse,
     EmailMessagesQuery,
@@ -14,6 +15,7 @@ import type {
     SendEmailMessageRequest,
     SendEmailMessageResponse,
     ShareEmailAccountRequest,
+    EmailThreadResponse,
     UpdateEmailAccountRequest,
 } from '@/types/email';
 
@@ -164,6 +166,28 @@ export const emailService = {
   async unshareAccount(id: string, userId: string): Promise<void> {
     return apiClient.delete<void>(
       API_ENDPOINTS.EMAIL.ACCOUNTS.UNSHARE(id, userId),
+    );
+  },
+
+  async getThreadMessages(id: string): Promise<EmailThreadResponse> {
+    return apiClient.get<EmailThreadResponse>(
+      API_ENDPOINTS.EMAIL.MESSAGES.THREAD(id),
+    );
+  },
+
+  async toggleFlag(id: string, isFlagged: boolean): Promise<void> {
+    return apiClient.patch<void>(API_ENDPOINTS.EMAIL.MESSAGES.TOGGLE_FLAG(id), {
+      isFlagged,
+    });
+  },
+
+  async suggestContacts(
+    query: string,
+    limit = 10,
+  ): Promise<EmailContactSuggestResponse> {
+    return apiClient.get<EmailContactSuggestResponse>(
+      API_ENDPOINTS.EMAIL.MESSAGES.SUGGEST_CONTACTS,
+      { params: { q: query, limit: String(limit) } },
     );
   },
 

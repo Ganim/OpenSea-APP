@@ -6,10 +6,14 @@
  */
 
 import { Button } from '@/components/ui/button';
-import type { LabelStudioSaveData } from '@/core/print-queue/editor';
+import type {
+  LabelStudioSaveData,
+  LabelStudioTemplate,
+} from '@/core/print-queue/editor';
 import { useEditorStore } from '@/core/print-queue/editor';
 import { useCreateLabelTemplate } from '@/hooks/stock/use-label-templates';
 import { logger } from '@/lib/logger';
+import { labelTemplatesService } from '@/services/stock/label-templates.service';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -34,6 +38,51 @@ const LabelStudioEditor = dynamic(
     ),
   }
 );
+
+/**
+ * Gera thumbnail do template via DOM offscreen e envia ao backend
+ */
+async function generateAndUploadThumbnail(
+  templateId: string,
+  studioTemplate: LabelStudioTemplate,
+) {
+  const { toPng } = await import('html-to-image');
+  const { StudioLabelRenderer } = await import(
+    '@/core/print-queue/components/studio-label-renderer'
+  );
+  const { createRoot } = await import('react-dom/client');
+
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '-9999px';
+  document.body.appendChild(container);
+
+  const root = createRoot(container);
+  root.render(
+    React.createElement(StudioLabelRenderer, {
+      template: studioTemplate,
+      scale: 2,
+    }),
+  );
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const renderedEl = container.firstElementChild as HTMLElement;
+  if (!renderedEl) {
+    root.unmount();
+    container.remove();
+    return;
+  }
+
+  const dataUrl = await toPng(renderedEl, { quality: 0.9, pixelRatio: 1 });
+  root.unmount();
+  container.remove();
+
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  await labelTemplatesService.updateThumbnail(templateId, blob, 'thumbnail.png');
+}
 
 export default function NewLabelStudioPage() {
   const router = useRouter();
@@ -60,13 +109,27 @@ export default function NewLabelStudioPage() {
           editorType: 'label-studio',
           ...data.studioTemplate,
         });
-        await createTemplate({
+        const result = await createTemplate({
           name: data.name,
           description: data.description,
           width: data.width,
           height: data.height,
           grapesJsData,
         });
+
+        // Generate thumbnail in background after creation
+        if (result?.template?.id) {
+          generateAndUploadThumbnail(
+            result.template.id,
+            data.studioTemplate,
+          ).catch(err =>
+            logger.error(
+              'Failed to generate thumbnail',
+              err instanceof Error ? err : undefined,
+            ),
+          );
+        }
+
         router.push('/print/studio');
       } catch (error) {
         logger.error(

@@ -1,5 +1,6 @@
 'use client';
 
+import { PhotoUploadDialog } from '@/components/shared/photo-upload-dialog';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,18 +8,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useUpdateProfile } from '@/hooks/use-me';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useMyEmployee, useUpdateProfile } from '@/hooks/use-me';
 import { translateError } from '@/lib/error-messages';
+import { meService } from '@/services/auth/me.service';
 import type { User } from '@/types/auth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
+  Camera,
+  Info,
   Loader2,
   Mail,
   MapPin,
   Save,
   User as UserIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ProfileTabProps {
@@ -27,6 +38,9 @@ interface ProfileTabProps {
 
 export function ProfileTab({ user }: ProfileTabProps) {
   const updateProfile = useUpdateProfile();
+  const queryClient = useQueryClient();
+  const { data: employeeData } = useMyEmployee();
+  const hasEmployee = !!employeeData?.employee;
 
   const [formData, setFormData] = useState({
     name: user?.profile?.name || '',
@@ -34,6 +48,32 @@ export function ProfileTab({ user }: ProfileTabProps) {
     location: user?.profile?.location || '',
     bio: user?.profile?.bio || '',
   });
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async ({ file, crop }: { file: File; crop: { x: number; y: number; width: number; height: number } }) => {
+      return meService.uploadAvatar(file, crop);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.success('Foto atualizada com sucesso!');
+    },
+    onError: (error: Error) => {
+      toast.error('Erro ao enviar foto', {
+        description: error.message || 'Tente novamente mais tarde',
+      });
+    },
+  });
+
+  const handleAvatarUpload = useCallback(async (file: File, crop: { x: number; y: number; width: number; height: number }) => {
+    await uploadAvatarMutation.mutateAsync({ file, crop });
+  }, [uploadAvatarMutation]);
+
+  const handleAvatarRemove = useCallback(async () => {
+    await meService.deleteAvatar();
+    queryClient.invalidateQueries({ queryKey: ['me'] });
+    toast.success('Foto removida com sucesso!');
+  }, [queryClient]);
 
   const handleSave = async () => {
     try {
@@ -55,13 +95,36 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Avatar Card */}
       <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          <UserAvatar
-            name={user?.profile?.name}
-            surname={user?.profile?.surname}
-            email={user?.email}
-            avatarUrl={user?.profile?.avatarUrl}
-            size="xl"
-          />
+          <div className="relative group">
+            <UserAvatar
+              name={user?.profile?.name}
+              surname={user?.profile?.surname}
+              email={user?.email}
+              avatarUrl={user?.profile?.avatarUrl}
+              size="xl"
+            />
+            {hasEmployee ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="absolute -bottom-1 -right-1 bg-amber-100 dark:bg-amber-900 rounded-full p-1">
+                      <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="text-xs">Sua foto é gerenciada pelo RH</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <button
+                onClick={() => setIsAvatarDialogOpen(true)}
+                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center cursor-pointer"
+              >
+                <Camera className="h-6 w-6 text-white" />
+              </button>
+            )}
+          </div>
           <div className="text-center sm:text-left flex-1">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {displayName}
@@ -70,6 +133,11 @@ export function ProfileTab({ user }: ProfileTabProps) {
             {user?.username && (
               <p className="text-sm text-gray-500 dark:text-white/40">
                 @{user.username}
+              </p>
+            )}
+            {hasEmployee && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                Foto gerenciada pelo RH
               </p>
             )}
           </div>
@@ -207,6 +275,16 @@ export function ProfileTab({ user }: ProfileTabProps) {
           </div>
         </div>
       </Card>
+
+      {/* Modal de upload de avatar */}
+      <PhotoUploadDialog
+        open={isAvatarDialogOpen}
+        onOpenChange={setIsAvatarDialogOpen}
+        onUpload={handleAvatarUpload}
+        onRemove={handleAvatarRemove}
+        hasPhoto={!!user?.profile?.avatarUrl}
+        title="Alterar Foto de Perfil"
+      />
     </div>
   );
 }

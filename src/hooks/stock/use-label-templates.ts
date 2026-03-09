@@ -159,8 +159,15 @@ export function useUpdateThumbnail() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, thumbnailUrl }: { id: string; thumbnailUrl: string }) =>
-      labelTemplatesService.updateThumbnail(id, thumbnailUrl),
+    mutationFn: ({
+      id,
+      file,
+      filename,
+    }: {
+      id: string;
+      file: Blob;
+      filename?: string;
+    }) => labelTemplatesService.updateThumbnail(id, file, filename),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY, 'detail', variables.id],

@@ -63,6 +63,7 @@ export function UserDropdown() {
           <UserAvatar
             name={user?.profile?.name || user?.username || 'U'}
             surname={user?.profile?.surname}
+            avatarUrl={user?.profile?.avatarUrl}
             size="sm"
           />
         </Button>

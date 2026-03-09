@@ -45,9 +45,9 @@ export default function LoginPage() {
           password: value.password,
         });
         if (!result.redirected) {
-          // Super admins vão direto para o dashboard
+          // Super admins vão direto para o Central
           if (result.isSuperAdmin) {
-            router.push('/');
+            router.push('/central');
             return;
           }
 

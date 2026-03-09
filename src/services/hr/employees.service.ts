@@ -296,4 +296,28 @@ export const employeesService = {
       `/v1/hr/employees/${employeeId}/unlink-user`
     );
   },
+
+  // POST /v1/hr/employees/:id/photo (multipart)
+  async uploadPhoto(
+    employeeId: string,
+    file: File,
+    crop: { x: number; y: number; width: number; height: number }
+  ): Promise<{ photoUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('cropX', String(Math.round(crop.x)));
+    formData.append('cropY', String(Math.round(crop.y)));
+    formData.append('cropWidth', String(Math.round(crop.width)));
+    formData.append('cropHeight', String(Math.round(crop.height)));
+
+    return apiClient.post<{ photoUrl: string }>(
+      `/v1/hr/employees/${employeeId}/photo`,
+      formData
+    );
+  },
+
+  // DELETE /v1/hr/employees/:id/photo
+  async deletePhoto(employeeId: string): Promise<void> {
+    return apiClient.delete<void>(`/v1/hr/employees/${employeeId}/photo`);
+  },
 };

@@ -6,6 +6,7 @@ export interface BoardMember {
   userId: string;
   userName: string | null;
   userEmail: string | null;
+  userAvatarUrl: string | null;
   role: BoardMemberRole;
   joinedAt: string;
 }

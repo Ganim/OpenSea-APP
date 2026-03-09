@@ -17,11 +17,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Filter,
   Plus,
   Search,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const statusVariants: Record<
   string,
@@ -32,17 +34,46 @@ const statusVariants: Record<
   SUSPENDED: 'error',
 };
 
+const STATUS_OPTIONS = [
+  { value: '', label: 'Todos os status' },
+  { value: 'ACTIVE', label: 'Ativas' },
+  { value: 'INACTIVE', label: 'Inativas' },
+  { value: 'SUSPENDED', label: 'Suspensas' },
+];
+
 export default function TenantsListPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const { data, isLoading } = useAdminTenants(page, 20);
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const filteredTenants =
-    data?.tenants.filter(
-      t =>
-        t.name.toLowerCase().includes(search.toLowerCase()) ||
-        t.slug.toLowerCase().includes(search.toLowerCase())
-    ) ?? [];
+  // Debounce search input
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      debounceTimer.current = setTimeout(() => {
+        setDebouncedSearch(value);
+        setPage(1); // Reset to first page on search
+      }, 300);
+    },
+    [],
+  );
+
+  // Reset page on status filter change
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
+  const { data, isLoading } = useAdminTenants(
+    page,
+    20,
+    debouncedSearch || undefined,
+    statusFilter || undefined,
+  );
+
+  const tenants = data?.tenants ?? [];
 
   return (
     <div className="space-y-6 pb-8">
@@ -64,20 +95,52 @@ export default function TenantsListPage() {
         </Link>
       </div>
 
-      {/* Search Bar */}
-      <div className="max-w-md">
-        <GlassInput
-          placeholder="Buscar por nome ou slug..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          icon={<Search className="h-4 w-4" />}
-        />
+      {/* Search + Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1 max-w-md">
+          <GlassInput
+            placeholder="Buscar por nome ou slug..."
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            icon={<Search className="h-4 w-4" />}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 central-text-muted" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 px-3 rounded-lg central-glass-strong border border-[rgb(var(--central-border)/0.15)] central-text text-sm outline-none focus:ring-2 focus:ring-[rgb(var(--os-blue-500)/0.3)] transition-all appearance-none cursor-pointer bg-transparent"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {(debouncedSearch || statusFilter) && (
+            <GlassButton
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchInput('');
+                setDebouncedSearch('');
+                setStatusFilter('');
+                setPage(1);
+              }}
+              className="gap-1"
+            >
+              <X className="h-3 w-3" />
+              Limpar
+            </GlassButton>
+          )}
+        </div>
       </div>
 
       {/* Table */}
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map(i => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
               className="h-16 rounded-xl central-glass-subtle animate-pulse"
@@ -96,7 +159,7 @@ export default function TenantsListPage() {
             </GlassTableRow>
           </GlassTableHeader>
           <GlassTableBody>
-            {filteredTenants.map(tenant => (
+            {tenants.map((tenant) => (
               <GlassTableRow key={tenant.id}>
                 <GlassTableCell>
                   <div className="flex items-center gap-3">
@@ -134,13 +197,15 @@ export default function TenantsListPage() {
                 </GlassTableCell>
               </GlassTableRow>
             ))}
-            {filteredTenants.length === 0 && (
+            {tenants.length === 0 && (
               <GlassTableRow>
                 <GlassTableCell colSpan={5} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Building2 className="h-12 w-12 central-text-subtle" />
                     <p className="central-text-subtle">
-                      Nenhuma empresa encontrada
+                      {debouncedSearch || statusFilter
+                        ? 'Nenhuma empresa encontrada com os filtros aplicados'
+                        : 'Nenhuma empresa encontrada'}
                     </p>
                   </div>
                 </GlassTableCell>
@@ -154,14 +219,15 @@ export default function TenantsListPage() {
       {data?.meta && data.meta.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm central-text-muted">
-            {data.meta.total} empresas no total
+            {data.meta.total} empresas no total • Página {page} de{' '}
+            {data.meta.totalPages}
           </p>
           <div className="flex gap-2">
             <GlassButton
               variant="secondary"
               size="sm"
               disabled={page <= 1}
-              onClick={() => setPage(p => p - 1)}
+              onClick={() => setPage((p) => p - 1)}
               className="gap-2"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -171,7 +237,7 @@ export default function TenantsListPage() {
               variant="secondary"
               size="sm"
               disabled={page >= data.meta.totalPages}
-              onClick={() => setPage(p => p + 1)}
+              onClick={() => setPage((p) => p + 1)}
               className="gap-2"
             >
               Próximo

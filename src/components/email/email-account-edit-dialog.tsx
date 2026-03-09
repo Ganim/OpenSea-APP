@@ -27,7 +27,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import {
@@ -56,8 +55,6 @@ import {
   ImageIcon,
   Italic,
   Link2,
-  List,
-  ListOrdered,
   Loader2,
   Palette,
   Settings2,
@@ -325,8 +322,8 @@ export function EmailAccountEditDialog({
           </nav>
 
           {/* Content area */}
-          <ScrollArea className="flex-1">
-            <div className="p-6 space-y-5">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-5 h-full flex flex-col">
               {/* ─── GERAL ──────────────────────────────────────── */}
               {activeSection === 'general' && (
                 <>
@@ -441,17 +438,29 @@ export function EmailAccountEditDialog({
 
               {/* ─── ASSINATURA ──────────────────────────────────── */}
               {activeSection === 'signature' && (
-                <>
-                  <div>
-                    <Label>Assinatura de e-mail</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5 mb-3">
-                      Adicionada automaticamente ao final dos e-mails enviados.
-                    </p>
+                <div className="flex flex-col flex-1 min-h-0">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <Label>Assinatura de e-mail</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Adicionada automaticamente ao final dos e-mails enviados.
+                      </p>
+                    </div>
+                    {editor && editor.getHTML() !== '<p></p>' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-muted-foreground hover:text-destructive gap-1.5 shrink-0"
+                        onClick={() => editor.commands.setContent('')}
+                      >
+                        <Trash2 className="size-3" />
+                        Limpar
+                      </Button>
+                    )}
                   </div>
-
-                  {/* Toolbar */}
                   {editor && (
-                    <div className="rounded-xl border overflow-hidden">
+                    <div className="rounded-xl border overflow-hidden bg-gray-50 dark:bg-white/[0.03] flex-1 flex flex-col min-h-0">
                       {/* Hidden image input */}
                       <input
                         ref={sigImageInputRef}
@@ -615,39 +624,6 @@ export function EmailAccountEditDialog({
                           size="icon"
                           className={cn(
                             'size-8 rounded-lg',
-                            editor.isActive('bulletList') && 'bg-accent'
-                          )}
-                          onClick={() =>
-                            editor.chain().focus().toggleBulletList().run()
-                          }
-                          title="Lista"
-                        >
-                          <List className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            'size-8 rounded-lg',
-                            editor.isActive('orderedList') && 'bg-accent'
-                          )}
-                          onClick={() =>
-                            editor.chain().focus().toggleOrderedList().run()
-                          }
-                          title="Lista numerada"
-                        >
-                          <ListOrdered className="size-4" />
-                        </Button>
-
-                        <div className="w-px h-5 bg-border mx-1" />
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            'size-8 rounded-lg',
                             editor.isActive({ textAlign: 'left' }) &&
                               'bg-accent'
                           )}
@@ -742,10 +718,10 @@ export function EmailAccountEditDialog({
                       </div>
 
                       {/* Editor */}
-                      <EditorContent editor={editor} />
+                      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
                     </div>
                   )}
-                </>
+                </div>
               )}
 
               {/* ─── CONEXÃO ──────────────────────────────────── */}
@@ -911,7 +887,7 @@ export function EmailAccountEditDialog({
                 </>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </div>
 
         <DialogFooter className="px-6 py-4 border-t">

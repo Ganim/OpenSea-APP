@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { storageFilesService } from '@/services/storage/files.service';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,13 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+}
+
+function resolveAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const match = url.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+  if (match) return storageFilesService.getServeUrl(match[1]);
+  return url;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -260,15 +268,26 @@ export function InviteShareDialog({
                       style={isSelected ? { backgroundColor: `${eventColor}10`, borderColor: `${eventColor}35` } : undefined}
                     >
                       {/* Avatar */}
-                      <div
-                        className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
-                        style={isSelected
-                          ? { backgroundColor: `${eventColor}cc`, color: 'white' }
-                          : { backgroundColor: `${eventColor}18`, color: eventColor }
-                        }
-                      >
-                        {getInitials(name)}
-                      </div>
+                      {(() => {
+                        const avatarSrc = resolveAvatarUrl(u.profile?.avatarUrl);
+                        return avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt={name}
+                            className="h-9 w-9 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+                            style={isSelected
+                              ? { backgroundColor: `${eventColor}cc`, color: 'white' }
+                              : { backgroundColor: `${eventColor}18`, color: eventColor }
+                            }
+                          >
+                            {getInitials(name)}
+                          </div>
+                        );
+                      })()}
 
                       {/* Name + email */}
                       <div className="flex-1 min-w-0">

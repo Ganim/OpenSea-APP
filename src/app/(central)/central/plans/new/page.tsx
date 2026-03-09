@@ -1,19 +1,18 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { GlassButton } from '@/components/central/glass-button';
+import { GlassCard } from '@/components/central/glass-card';
+import { GlassInput } from '@/components/central/glass-input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  GlassSelect,
+  GlassSelectContent,
+  GlassSelectItem,
+  GlassSelectTrigger,
+  GlassSelectValue,
+} from '@/components/central/glass-select';
+import { GlassTextarea } from '@/components/central/glass-textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Tooltip,
   TooltipContent,
@@ -38,8 +37,19 @@ const ALL_MODULES = [
   'AUDIT',
   'REQUESTS',
   'NOTIFICATIONS',
+  'FINANCE',
+  'CALENDAR',
+  'STORAGE',
+  'EMAIL',
+  'TASKS',
 ];
-const TIERS = ['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'];
+
+const TIER_OPTIONS = [
+  { value: 'FREE', label: 'Free' },
+  { value: 'STARTER', label: 'Starter' },
+  { value: 'PROFESSIONAL', label: 'Professional' },
+  { value: 'ENTERPRISE', label: 'Enterprise' },
+];
 
 export default function NewPlanPage() {
   const router = useRouter();
@@ -90,61 +100,89 @@ export default function NewPlanPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       <div className="flex items-center gap-4">
         <Link href="/central/plans">
-          <Button variant="ghost" size="icon" aria-label="Voltar para planos">
+          <GlassButton
+            variant="ghost"
+            size="sm"
+            aria-label="Voltar para planos"
+          >
             <ArrowLeft className="h-4 w-4" />
-          </Button>
+          </GlassButton>
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight">Novo Plano</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight central-text">
+            Novo Plano
+          </h1>
+          <p className="central-text-muted text-sm mt-1">
+            Configure o plano com limites e módulos
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Informacoes</h2>
+        <GlassCard className="p-6 space-y-5">
+          <h2 className="text-lg font-semibold central-text">Informações</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nome</Label>
-              <Input
+            <div className="space-y-1.5">
+              <label
+                htmlFor="name"
+                className="text-sm font-medium central-text"
+              >
+                Nome
+              </label>
+              <GlassInput
                 id="name"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Nome do plano"
               />
             </div>
-            <div>
-              <Label htmlFor="tier">Tier</Label>
-              <Select
+            <div className="space-y-1.5">
+              <label htmlFor="plan-tier" className="text-sm font-medium central-text">Tier</label>
+              <GlassSelect
                 value={form.tier}
                 onValueChange={v =>
                   setForm(f => ({ ...f, tier: v as PlanTier }))
                 }
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIERS.map(t => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
+                <GlassSelectTrigger>
+                  <GlassSelectValue />
+                </GlassSelectTrigger>
+                <GlassSelectContent>
+                  {TIER_OPTIONS.map(t => (
+                    <GlassSelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </GlassSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </GlassSelectContent>
+              </GlassSelect>
             </div>
-            <div>
-              <Label htmlFor="description">Descricao</Label>
-              <Textarea
+            <div className="space-y-1.5">
+              <label
+                htmlFor="description"
+                className="text-sm font-medium central-text"
+              >
+                Descrição
+              </label>
+              <GlassTextarea
                 id="description"
                 value={form.description}
                 onChange={e =>
                   setForm(f => ({ ...f, description: e.target.value }))
                 }
+                placeholder="Descreva os benefícios do plano"
               />
             </div>
-            <div>
-              <Label htmlFor="price">Preco (R$)</Label>
-              <Input
+            <div className="space-y-1.5">
+              <label
+                htmlFor="price"
+                className="text-sm font-medium central-text"
+              >
+                Preço (R$)
+              </label>
+              <GlassInput
                 id="price"
                 type="number"
                 step="0.01"
@@ -154,34 +192,48 @@ export default function NewPlanPage() {
                 }
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Switch
+                id="plan-active"
                 checked={form.isActive}
                 onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))}
               />
-              <Label>Ativo</Label>
+              <label htmlFor="plan-active" className="text-sm font-medium central-text">Ativo</label>
             </div>
           </div>
-        </Card>
+        </GlassCard>
 
         <div className="space-y-6">
-          <Card className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold">Limites</h2>
+          <GlassCard className="p-6 space-y-5">
+            <h2 className="text-lg font-semibold central-text">Limites</h2>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="maxUsers">Max Usuarios</Label>
-                <Input
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="maxUsers"
+                  className="text-sm font-medium central-text"
+                >
+                  Máximo de Usuários
+                </label>
+                <GlassInput
                   id="maxUsers"
                   type="number"
                   value={form.maxUsers}
                   onChange={e =>
-                    setForm(f => ({ ...f, maxUsers: Number(e.target.value) }))
+                    setForm(f => ({
+                      ...f,
+                      maxUsers: Number(e.target.value),
+                    }))
                   }
                 />
               </div>
-              <div>
-                <Label htmlFor="maxWarehouses">Max Armazens</Label>
-                <Input
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="maxWarehouses"
+                  className="text-sm font-medium central-text"
+                >
+                  Máximo de Armazéns
+                </label>
+                <GlassInput
                   id="maxWarehouses"
                   type="number"
                   value={form.maxWarehouses}
@@ -193,9 +245,14 @@ export default function NewPlanPage() {
                   }
                 />
               </div>
-              <div>
-                <Label htmlFor="maxProducts">Max Produtos</Label>
-                <Input
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="maxProducts"
+                  className="text-sm font-medium central-text"
+                >
+                  Máximo de Produtos
+                </label>
+                <GlassInput
                   id="maxProducts"
                   type="number"
                   value={form.maxProducts}
@@ -208,10 +265,10 @@ export default function NewPlanPage() {
                 />
               </div>
             </div>
-          </Card>
+          </GlassCard>
 
-          <Card className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold">Modulos</h2>
+          <GlassCard className="p-6 space-y-5">
+            <h2 className="text-lg font-semibold central-text">Módulos</h2>
             <div className="space-y-3">
               {ALL_MODULES.map(mod => (
                 <div
@@ -230,13 +287,13 @@ export default function NewPlanPage() {
                               disabled
                               checked={false}
                             />
-                            <Label
+                            <label
                               htmlFor={`new-${mod}`}
-                              className="cursor-not-allowed flex items-center gap-2"
+                              className="cursor-not-allowed flex items-center gap-2 text-sm central-text"
                             >
                               {mod}
                               <AlertCircle className="h-4 w-4 text-orange-500" />
-                            </Label>
+                            </label>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -254,26 +311,31 @@ export default function NewPlanPage() {
                         checked={selectedModules.includes(mod)}
                         onCheckedChange={() => toggleModule(mod)}
                       />
-                      <Label htmlFor={`new-${mod}`} className="cursor-pointer">
+                      <label
+                        htmlFor={`new-${mod}`}
+                        className="cursor-pointer text-sm central-text"
+                      >
                         {mod}
-                      </Label>
+                      </label>
                     </>
                   )}
                 </div>
               ))}
             </div>
-          </Card>
+          </GlassCard>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <Button
+        <GlassButton
+          variant="primary"
           onClick={handleCreate}
           disabled={createPlan.isPending || !form.name}
+          isLoading={createPlan.isPending}
           className="gap-2"
         >
           <Save className="h-4 w-4" /> Criar Plano
-        </Button>
+        </GlassButton>
       </div>
     </div>
   );

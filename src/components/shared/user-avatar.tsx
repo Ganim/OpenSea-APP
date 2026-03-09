@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { storageFilesService } from '@/services/storage/files.service';
 
 interface UserAvatarProps {
   name?: string | null;
@@ -86,9 +88,17 @@ export function UserAvatar({
   const displayName = name || surname || email || 'User';
   const bgColor = generateColorFromName(displayName);
 
+  // Resolve storage serve URLs (e.g. /v1/storage/files/:id/serve) to full URLs with auth token
+  const resolvedAvatarUrl = useMemo(() => {
+    if (!avatarUrl) return null;
+    const match = avatarUrl.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (match) return storageFilesService.getServeUrl(match[1]);
+    return avatarUrl;
+  }, [avatarUrl]);
+
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
-      {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+      {resolvedAvatarUrl && <AvatarImage src={resolvedAvatarUrl} alt={displayName} />}
       <AvatarFallback
         className={cn(
           bgColor,

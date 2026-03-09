@@ -5,7 +5,8 @@
  * Renderiza elementos de imagem
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { storageFilesService } from '@/services/storage/files.service';
 import type { ImageElement } from '../studio-types';
 import { mmToPx } from '../utils/unitConverter';
 import { ImageIcon } from 'lucide-react';
@@ -26,10 +27,20 @@ export function ImageElementRenderer({
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(!!src);
 
+  // Resolve storage URLs to full API URLs with auth token
+  const resolvedSrc = useMemo(() => {
+    if (!src) return src;
+    const match = src.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (match) {
+      return storageFilesService.getServeUrl(match[1]);
+    }
+    return src;
+  }, [src]);
+
   const borderRadiusPx = borderRadius ? mmToPx(borderRadius, zoom) : 0;
 
   // Placeholder quando não há imagem ou erro
-  if (!src || hasError) {
+  if (!resolvedSrc || hasError) {
     return (
       <div
         className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-600 text-slate-400"
@@ -64,7 +75,7 @@ export function ImageElementRenderer({
 
       {/* Imagem */}
       <img
-        src={src}
+        src={resolvedSrc}
         alt={alt || ''}
         className="w-full h-full"
         style={{

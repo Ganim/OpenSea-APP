@@ -24,6 +24,7 @@ import {
   useUpdateLabelTemplate,
 } from '@/hooks/stock/use-label-templates';
 import { logger } from '@/lib/logger';
+import { labelTemplatesService } from '@/services/stock/label-templates.service';
 import { Loader2, Save, Tag } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
@@ -93,6 +94,62 @@ function extractLabelStudioTemplate(
   return null;
 }
 
+/**
+ * Gera thumbnail do template via DOM offscreen e envia ao backend
+ */
+async function generateAndUploadThumbnail(
+  templateId: string,
+  studioTemplate: LabelStudioTemplate,
+) {
+  const { toPng } = await import('html-to-image');
+  const { StudioLabelRenderer } = await import(
+    '@/core/print-queue/components/studio-label-renderer'
+  );
+  const { createRoot } = await import('react-dom/client');
+
+  // Create offscreen container
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '-9999px';
+  document.body.appendChild(container);
+
+  // Render the label template
+  const root = createRoot(container);
+  root.render(
+    React.createElement(StudioLabelRenderer, {
+      template: studioTemplate,
+      scale: 2, // 2x for higher quality thumbnail
+    }),
+  );
+
+  // Wait for rendering and images to load
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // Capture as PNG
+  const renderedEl = container.firstElementChild as HTMLElement;
+  if (!renderedEl) {
+    root.unmount();
+    container.remove();
+    return;
+  }
+
+  const dataUrl = await toPng(renderedEl, {
+    quality: 0.9,
+    pixelRatio: 1,
+  });
+
+  root.unmount();
+  container.remove();
+
+  // Convert data URL to Blob
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+
+  // Upload to backend
+  await labelTemplatesService.updateThumbnail(templateId, blob, 'thumbnail.png');
+}
+
 export default function EditLabelStudioPage() {
   const router = useRouter();
   const params = useParams();
@@ -145,6 +202,16 @@ export default function EditLabelStudioPage() {
             grapesJsData,
           },
         });
+
+        // Generate and upload thumbnail in background (don't block navigation)
+        generateAndUploadThumbnail(templateId, data.studioTemplate).catch(
+          err =>
+            logger.error(
+              'Failed to generate thumbnail',
+              err instanceof Error ? err : undefined,
+            ),
+        );
+
         router.push('/print/studio');
       } catch (error) {
         logger.error(

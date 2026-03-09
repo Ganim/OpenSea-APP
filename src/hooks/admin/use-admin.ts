@@ -11,6 +11,7 @@ export const adminKeys = {
   tenantUsers: (id: string) => [...adminKeys.all, 'tenant-users', id] as const,
   plans: () => [...adminKeys.all, 'plans'] as const,
   plan: (id: string) => [...adminKeys.all, 'plan', id] as const,
+  tenantFlags: (id: string) => [...adminKeys.all, 'tenant-flags', id] as const,
 };
 
 // Dashboard
@@ -22,10 +23,15 @@ export function useDashboardStats() {
 }
 
 // Tenants
-export function useAdminTenants(page = 1, limit = 20) {
+export function useAdminTenants(
+  page = 1,
+  limit = 20,
+  search?: string,
+  status?: string,
+) {
   return useQuery({
-    queryKey: [...adminKeys.tenants(), page, limit],
-    queryFn: () => adminApi.listTenants(page, limit),
+    queryKey: [...adminKeys.tenants(), page, limit, search, status],
+    queryFn: () => adminApi.listTenants(page, limit, search, status),
   });
 }
 
@@ -69,6 +75,14 @@ export function useChangeTenantPlan() {
   });
 }
 
+export function useAdminTenantFlags(id: string) {
+  return useQuery({
+    queryKey: adminKeys.tenantFlags(id),
+    queryFn: () => adminApi.listFeatureFlags(id),
+    enabled: !!id,
+  });
+}
+
 export function useManageFeatureFlags() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -83,6 +97,7 @@ export function useManageFeatureFlags() {
     }) => adminApi.manageFeatureFlags(id, flag, enabled),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.tenant(id) });
+      queryClient.invalidateQueries({ queryKey: adminKeys.tenantFlags(id) });
     },
   });
 }

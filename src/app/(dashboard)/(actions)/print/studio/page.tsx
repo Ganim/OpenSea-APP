@@ -38,6 +38,7 @@ import {
 } from '@/core';
 import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { parseStudioTemplate } from '@/core/print-queue/components/studio-label-renderer';
+import { storageFilesService } from '@/services/storage/files.service';
 import { TestPrintModal } from '@/core/print-queue/components/test-print-modal';
 import type { LabelTemplate } from '@/core/print-queue/editor';
 import { LABEL_SIZE_PRESETS } from '@/core/print-queue/editor';
@@ -151,6 +152,18 @@ function RenameModal({
       </DialogContent>
     </Dialog>
   );
+}
+
+/**
+ * Resolve thumbnailUrl relativa para URL completa com token
+ */
+function resolveThumbnailUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const match = url.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+  if (match) {
+    return storageFilesService.getServeUrl(match[1]);
+  }
+  return url;
 }
 
 // =============================================================================
@@ -538,7 +551,7 @@ export default function PrintStudioPage() {
           subtitle={item.description || `${item.width}mm x ${item.height}mm`}
           icon={Tag}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
-          thumbnail={item.thumbnailUrl || undefined}
+          thumbnail={resolveThumbnailUrl(item.thumbnailUrl)}
           thumbnailFallback={
             <div className="flex flex-col items-center text-muted-foreground">
               <Tag className="w-8 h-8 mb-2" />

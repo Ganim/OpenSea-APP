@@ -240,7 +240,7 @@ export function RichTextField<T = unknown>({
               onClick={() => insertMarkdown('quote', 'citação')}
               disabled={isDisabled}
               title="Citação"
-              aria-label="Citacao"
+              aria-label="Citação"
             >
               <Quote className="w-4 h-4" />
             </Button>

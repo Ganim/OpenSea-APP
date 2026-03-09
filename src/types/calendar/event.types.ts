@@ -27,6 +27,7 @@ export interface EventParticipant {
   respondedAt: string | null;
   userName: string | null;
   userEmail: string | null;
+  userAvatarUrl: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

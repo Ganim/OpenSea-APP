@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { storageFilesService } from '@/services/storage/files.service';
 import {
   Sheet,
   SheetContent,
@@ -77,6 +78,13 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+}
+
+function resolveAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const match = url.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+  if (match) return storageFilesService.getServeUrl(match[1]);
+  return url;
 }
 
 // Participant status colors for avatar rings
@@ -528,7 +536,16 @@ export function EventDetailSheet({
                         {participants.slice(0, 8).map((p) => {
                           const displayName = p.userName ?? p.userEmail ?? p.userId;
                           const statusRing = STATUS_RING_COLORS[p.status] ?? STATUS_RING_COLORS.PENDING;
-                          return (
+                          const avatarSrc = resolveAvatarUrl(p.userAvatarUrl);
+                          return avatarSrc ? (
+                            <img
+                              key={p.id}
+                              src={avatarSrc}
+                              alt={displayName}
+                              title={`${displayName} — ${ParticipantRoleLabels[p.role] ?? p.role} · ${ParticipantStatusLabels[p.status] ?? p.status}`}
+                              className={`w-8 h-8 rounded-full ring-2 ${statusRing} object-cover cursor-default`}
+                            />
+                          ) : (
                             <div
                               key={p.id}
                               title={`${displayName} — ${ParticipantRoleLabels[p.role] ?? p.role} · ${ParticipantStatusLabels[p.status] ?? p.status}`}
@@ -564,17 +581,26 @@ export function EventDetailSheet({
                       {participants.map((p) => {
                         const displayName = p.userName ?? p.userEmail ?? p.userId;
                         const statusRing = STATUS_RING_COLORS[p.status] ?? STATUS_RING_COLORS.PENDING;
+                        const avatarSrc = resolveAvatarUrl(p.userAvatarUrl);
                         return (
                           <div
                             key={p.id}
                             className="flex items-center gap-2.5 py-1 px-2 rounded-md hover:bg-muted/50 dark:hover:bg-white/5 transition-colors"
                           >
-                            <div
-                              className={`w-7 h-7 rounded-full ring-2 ${statusRing} flex items-center justify-center text-[0.55rem] font-semibold text-white shrink-0`}
-                              style={{ backgroundColor: `${eventColor}cc` }}
-                            >
-                              {getInitials(displayName)}
-                            </div>
+                            {avatarSrc ? (
+                              <img
+                                src={avatarSrc}
+                                alt={displayName}
+                                className={`w-7 h-7 rounded-full ring-2 ${statusRing} object-cover shrink-0`}
+                              />
+                            ) : (
+                              <div
+                                className={`w-7 h-7 rounded-full ring-2 ${statusRing} flex items-center justify-center text-[0.55rem] font-semibold text-white shrink-0`}
+                                style={{ backgroundColor: `${eventColor}cc` }}
+                              >
+                                {getInitials(displayName)}
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
                               <div className="text-sm truncate font-medium">{displayName}</div>
                               <div className="text-[0.65rem] text-muted-foreground">

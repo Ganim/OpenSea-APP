@@ -12,6 +12,7 @@ export interface Comment {
   cardId: string;
   authorId: string;
   authorName: string | null;
+  authorAvatarUrl: string | null;
   content: string;
   createdAt: string;
   updatedAt: string | null;

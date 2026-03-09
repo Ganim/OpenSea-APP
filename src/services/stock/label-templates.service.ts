@@ -116,16 +116,36 @@ async function listSystemTemplates(): Promise<{
 }
 
 /**
- * Atualiza thumbnail de um template
- * POST /v1/label-templates/:id/thumbnail
+ * Gera/atualiza thumbnail de um template (upload de arquivo)
+ * POST /v1/label-templates/:id/generate-thumbnail
  */
 async function updateThumbnail(
   id: string,
-  thumbnailUrl: string
-): Promise<LabelTemplateResponse> {
-  return apiClient.post<LabelTemplateResponse>(`${BASE_URL}/${id}/thumbnail`, {
-    thumbnailUrl,
-  });
+  file: Blob,
+  filename?: string
+): Promise<{ thumbnailUrl: string }> {
+  const formData = new FormData();
+  formData.append('file', file, filename || 'thumbnail.png');
+  return apiClient.post<{ thumbnailUrl: string }>(
+    `${BASE_URL}/${id}/generate-thumbnail`,
+    formData,
+  );
+}
+
+/**
+ * Upload de imagem para uso no editor de etiquetas
+ * POST /v1/label-templates/:id/upload-image
+ */
+async function uploadImage(
+  id: string,
+  file: File
+): Promise<{ imageUrl: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiClient.post<{ imageUrl: string }>(
+    `${BASE_URL}/${id}/upload-image`,
+    formData,
+  );
 }
 
 export const labelTemplatesService = {
@@ -137,6 +157,7 @@ export const labelTemplatesService = {
   duplicateTemplate,
   listSystemTemplates,
   updateThumbnail,
+  uploadImage,
 };
 
 export default labelTemplatesService;

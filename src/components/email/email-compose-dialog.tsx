@@ -1,5 +1,15 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -32,8 +42,10 @@ import { useAuth } from '@/contexts/auth-context';
 import {
   useSaveDraft,
   useSendMessage,
+  useSuggestContacts,
   useSyncEmailAccount,
 } from '@/hooks/email/use-email';
+import { cn } from '@/lib/utils';
 import { emailService } from '@/services/email';
 import type { EmailAccount, EmailMessageListItem } from '@/types/email';
 import { Color, FontSize } from '@tiptap/extension-text-style';
@@ -59,6 +71,7 @@ import {
   Loader2,
   Palette,
   Paperclip,
+  PenLine,
   Send,
   UnderlineIcon,
   X,
@@ -75,10 +88,12 @@ function parseAddresses(value: string): string[] {
 
 function buildSignatureHtml(signature: string | null): string {
   if (!signature) return '';
-  return `<hr/><p>${signature.replace(/\n/g, '<br/>')}</p>`;
+  // Signature is stored as HTML from TipTap editor — render it directly
+  // with a visual separator. No wrapping in <p> to avoid invalid nesting.
+  return `<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0"/><div class="email-signature">${signature}</div>`;
 }
 
-// TipTap toolbar button
+// TipTap toolbar button (for toggle-style formatting buttons)
 function ToolbarButton({
   onClick,
   active,
@@ -101,6 +116,34 @@ function ToolbarButton({
         >
           {children}
         </Toggle>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+// Action button for toolbar (non-toggle, preserves user gesture for file inputs)
+function ToolbarActionButton({
+  onClick,
+  tooltip,
+  children,
+}: {
+  onClick: () => void;
+  tooltip: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-muted hover:text-muted-foreground size-7 p-0 bg-transparent transition-[color,box-shadow] [&_svg]:pointer-events-none [&_svg]:shrink-0"
+        >
+          {children}
+        </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
         {tooltip}
@@ -135,21 +178,38 @@ function EmailChip({
   );
 }
 
-// Chip input for email addresses
+// Contact suggestion type
+interface ContactSuggestion {
+  email: string;
+  name: string | null;
+}
+
+// Chip input for email addresses with optional autocomplete
 function ChipInput({
   chips,
   onChipsChange,
   placeholder,
   inputRef,
+  suggestions = [],
+  onInputChange,
 }: {
   chips: string[];
   onChipsChange: (chips: string[]) => void;
   placeholder?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
+  suggestions?: ContactSuggestion[];
+  onInputChange?: (value: string) => void;
 }) {
   const [inputValue, setInputValue] = useState('');
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const localRef = useRef<HTMLInputElement>(null);
   const ref = inputRef ?? localRef;
+
+  // Filter out already-added chips from suggestions
+  const filteredSuggestions = suggestions.filter(
+    s => !chips.includes(s.email)
+  );
 
   function addChip(value: string) {
     const trimmed = value.trim();
@@ -157,9 +217,37 @@ function ChipInput({
       onChipsChange([...chips, trimmed]);
     }
     setInputValue('');
+    setShowSuggestions(false);
+    setHighlightIdx(-1);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (showSuggestions && filteredSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightIdx(prev =>
+          prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+        );
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightIdx(prev =>
+          prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+        );
+        return;
+      }
+      if (
+        (e.key === 'Enter' || e.key === 'Tab') &&
+        highlightIdx >= 0 &&
+        highlightIdx < filteredSuggestions.length
+      ) {
+        e.preventDefault();
+        addChip(filteredSuggestions[highlightIdx].email);
+        return;
+      }
+    }
+
     if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
       e.preventDefault();
       if (inputValue.trim()) {
@@ -167,13 +255,19 @@ function ChipInput({
       }
     } else if (e.key === 'Backspace' && inputValue === '' && chips.length > 0) {
       onChipsChange(chips.slice(0, -1));
+    } else if (e.key === 'Escape' && showSuggestions) {
+      setShowSuggestions(false);
     }
   }
 
   function handleBlur() {
-    if (inputValue.trim()) {
-      addChip(inputValue);
-    }
+    // Delay to allow suggestion click to fire
+    setTimeout(() => {
+      if (inputValue.trim()) {
+        addChip(inputValue);
+      }
+      setShowSuggestions(false);
+    }, 150);
   }
 
   function handlePaste(e: React.ClipboardEvent) {
@@ -191,27 +285,68 @@ function ChipInput({
   }
 
   return (
-    <div
-      className="flex flex-wrap items-center gap-1 rounded-(--input-radius) border border-[rgb(var(--color-border))] bg-(--input-bg) px-2 py-1 min-h-[32px] cursor-text transition-all duration-(--transition-normal) focus-within:border-[rgb(var(--color-border-focus))] focus-within:ring-[3px] focus-within:ring-[rgb(var(--color-ring)/0.5)]"
-      onClick={() => ref.current?.focus()}
-    >
-      {chips.map((chip, idx) => (
-        <EmailChip
-          key={`${chip}-${idx}`}
-          email={chip}
-          onRemove={() => onChipsChange(chips.filter((_, i) => i !== idx))}
+    <div className="relative">
+      <div
+        className="flex flex-wrap items-center gap-1 rounded-(--input-radius) border border-[rgb(var(--color-border))] bg-(--input-bg) px-2 py-1 min-h-[32px] cursor-text transition-all duration-(--transition-normal) focus-within:border-[rgb(var(--color-border-focus))] focus-within:ring-[3px] focus-within:ring-[rgb(var(--color-ring)/0.5)]"
+        onClick={() => ref.current?.focus()}
+      >
+        {chips.map((chip, idx) => (
+          <EmailChip
+            key={`${chip}-${idx}`}
+            email={chip}
+            onRemove={() => onChipsChange(chips.filter((_, i) => i !== idx))}
+          />
+        ))}
+        <input
+          ref={ref}
+          className="flex-1 min-w-[100px] bg-transparent text-sm outline-none placeholder:text-muted-foreground py-0.5"
+          placeholder={chips.length === 0 ? placeholder : ''}
+          value={inputValue}
+          onChange={e => {
+            const val = e.target.value;
+            setInputValue(val);
+            setShowSuggestions(val.length >= 2);
+            setHighlightIdx(-1);
+            onInputChange?.(val);
+          }}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          onPaste={handlePaste}
+          role="combobox"
+          aria-expanded={showSuggestions && filteredSuggestions.length > 0}
+          aria-autocomplete="list"
         />
-      ))}
-      <input
-        ref={ref}
-        className="flex-1 min-w-[100px] bg-transparent text-sm outline-none placeholder:text-muted-foreground py-0.5"
-        placeholder={chips.length === 0 ? placeholder : ''}
-        value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-        onPaste={handlePaste}
-      />
+      </div>
+
+      {/* Suggestions dropdown */}
+      {showSuggestions && filteredSuggestions.length > 0 && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {filteredSuggestions.map((suggestion, idx) => (
+            <button
+              key={suggestion.email}
+              type="button"
+              className={cn(
+                'w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors flex flex-col gap-0.5',
+                highlightIdx === idx && 'bg-accent'
+              )}
+              onMouseDown={e => {
+                e.preventDefault();
+                addChip(suggestion.email);
+              }}
+              onMouseEnter={() => setHighlightIdx(idx)}
+            >
+              {suggestion.name && (
+                <span className="font-medium text-foreground truncate">
+                  {suggestion.name}
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground truncate">
+                {suggestion.email}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -262,6 +397,9 @@ export function EmailComposeDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const toInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounterRef = useRef(0);
+  const [includeSignature, setIncludeSignature] = useState(true);
 
   const selectedAccount = accounts.find(a => a.id === accountId);
 
@@ -295,7 +433,9 @@ export function EmailComposeDialog({
   useEffect(() => {
     if (!open || !editor) return;
     const account = accounts.find(a => a.id === accountId);
-    const sigHtml = buildSignatureHtml(account?.signature ?? null);
+    const sigHtml = includeSignature
+      ? buildSignatureHtml(account?.signature ?? null)
+      : '';
 
     if (mode.type === 'reply' && mode.message) {
       setToChips([mode.message.fromAddress]);
@@ -371,7 +511,7 @@ export function EmailComposeDialog({
       editor.commands.setContent(`<p></p>${sigHtml}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, mode, accountId]);
+  }, [open, mode, accountId, includeSignature]);
 
   useEffect(() => {
     if (defaultAccountId) setAccountId(defaultAccountId);
@@ -389,6 +529,26 @@ export function EmailComposeDialog({
   useEffect(() => {
     if (!open) setAttachmentFiles([]);
   }, [open]);
+
+  // ─── Contact autocomplete ─────────────────────────────────────────────
+  const [contactQuery, setContactQuery] = useState('');
+  const [debouncedContactQuery, setDebouncedContactQuery] = useState('');
+
+  useEffect(() => {
+    if (contactQuery.length < 2) {
+      setDebouncedContactQuery('');
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedContactQuery(contactQuery), 300);
+    return () => clearTimeout(timer);
+  }, [contactQuery]);
+
+  const suggestQuery = useSuggestContacts(debouncedContactQuery);
+  const contactSuggestions: ContactSuggestion[] =
+    suggestQuery.data?.contacts?.map(c => ({
+      email: c.email,
+      name: c.name,
+    })) ?? [];
 
   // Mutations via hooks
   const sendMutation = useSendMessage();
@@ -484,6 +644,41 @@ export function EmailComposeDialog({
   const isBusy = sendMutation.isPending || draftMutation.isPending;
 
   const DRAFT_STORAGE_KEY = 'opensea-email-draft';
+  const [lastDraftSavedAt, setLastDraftSavedAt] = useState<Date | null>(null);
+
+  // Periodic auto-save to localStorage every 30s while editing
+  useEffect(() => {
+    if (!open || !editor) return;
+    const interval = setInterval(() => {
+      const hasContent =
+        toChips.length > 0 ||
+        subject.trim() !== '' ||
+        (editor.getHTML() !== '<p></p>' && editor.getText().trim() !== '');
+      if (!hasContent) return;
+      try {
+        localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            accountId,
+            to: toChips,
+            cc: ccChips.length ? ccChips : undefined,
+            bcc: bccChips.length ? bccChips : undefined,
+            subject,
+            bodyHtml: editor.getHTML(),
+          })
+        );
+        setLastDraftSavedAt(new Date());
+      } catch {
+        // Storage full — silently ignore
+      }
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [open, editor, accountId, toChips, ccChips, bccChips, subject]);
+
+  // Clear draft saved indicator when dialog closes
+  useEffect(() => {
+    if (!open) setLastDraftSavedAt(null);
+  }, [open]);
 
   // Detect unsaved content for beforeunload warning
   const hasUnsavedContent = useCallback(() => {
@@ -541,53 +736,49 @@ export function EmailComposeDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editor]);
 
-  // Auto-save draft on close if content exists
-  const handleClose = useCallback(() => {
-    const hasContent = hasUnsavedContent();
+  // ─── Close with draft discard confirmation ──────────────────────────────
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
 
-    if (hasContent && accountId && !isBusy) {
-      const draftData = {
-        accountId,
-        to: toChips,
-        cc: ccChips.length ? ccChips : undefined,
-        bcc: bccChips.length ? bccChips : undefined,
-        subject,
-        bodyHtml: editor?.getHTML() ?? '',
-      };
+  const saveDraftAndClose = useCallback(() => {
+    const draftData = {
+      accountId,
+      to: toChips,
+      cc: ccChips.length ? ccChips : undefined,
+      bcc: bccChips.length ? bccChips : undefined,
+      subject,
+      bodyHtml: editor?.getHTML() ?? '',
+    };
 
-      emailService
-        .saveDraft(draftData)
-        .then(() => {
-          localStorage.removeItem(DRAFT_STORAGE_KEY);
-          toast.success('Rascunho salvo automaticamente');
-          // Fire-and-forget sync so the draft appears in the folder list.
-          // The backend also queues a sync, but triggering from here ensures
-          // the frontend query cache is invalidated via the mutation hook.
-          syncMutation.mutate(accountId, { onError: () => {} });
-        })
-        .catch(() => {
-          // API failed — persist to localStorage as fallback
-          try {
-            localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
-            toast.warning('Rascunho salvo localmente (offline)');
-          } catch {
-            // Storage full — silently ignore
-          }
-        });
-    }
+    emailService
+      .saveDraft(draftData)
+      .then(() => {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        toast.success('Rascunho salvo');
+        syncMutation.mutate(accountId, { onError: () => {} });
+      })
+      .catch(() => {
+        try {
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+          toast.warning('Rascunho salvo localmente (offline)');
+        } catch {
+          // Storage full
+        }
+      });
     onClose();
-  }, [
-    toChips,
-    ccChips,
-    bccChips,
-    subject,
-    editor,
-    accountId,
-    isBusy,
-    onClose,
-    hasUnsavedContent,
-    syncMutation,
-  ]);
+  }, [toChips, ccChips, bccChips, subject, editor, accountId, onClose, syncMutation]);
+
+  const discardAndClose = useCallback(() => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    onClose();
+  }, [onClose]);
+
+  const handleClose = useCallback(() => {
+    if (hasUnsavedContent() && !isBusy) {
+      setDiscardConfirmOpen(true);
+    } else {
+      onClose();
+    }
+  }, [hasUnsavedContent, isBusy, onClose]);
 
   const FONT_SIZES = [
     { label: 'Pequeno', value: '12px' },
@@ -684,8 +875,8 @@ export function EmailComposeDialog({
     '.wsf',
   ]);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
+  /** Validates and adds files to attachments (shared by input + drag-drop) */
+  function addFiles(files: File[]) {
     if (!files.length) return;
 
     const rejected: string[] = [];
@@ -724,7 +915,43 @@ export function EmailComposeDialog({
         return [...prev, ...unique];
       });
     }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    addFiles(Array.from(e.target.files ?? []));
     e.target.value = '';
+  }
+
+  // G2: Drag & drop handlers for the compose area
+  function handleDragEnter(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDragOver(true);
+    }
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragOver(false);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragOver(false);
+    addFiles(Array.from(e.dataTransfer.files));
   }
 
   function removeAttachment(idx: number) {
@@ -817,6 +1044,8 @@ export function EmailComposeDialog({
                       onChipsChange={setToChips}
                       placeholder="destinatário@email.com"
                       inputRef={toInputRef}
+                      suggestions={contactSuggestions}
+                      onInputChange={setContactQuery}
                     />
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
@@ -850,6 +1079,8 @@ export function EmailComposeDialog({
                     chips={ccChips}
                     onChipsChange={setCcChips}
                     placeholder="cc@email.com"
+                    suggestions={contactSuggestions}
+                    onInputChange={setContactQuery}
                   />
                 </div>
               </div>
@@ -866,6 +1097,8 @@ export function EmailComposeDialog({
                     chips={bccChips}
                     onChipsChange={setBccChips}
                     placeholder="cco@email.com"
+                    suggestions={contactSuggestions}
+                    onInputChange={setContactQuery}
                   />
                 </div>
               </div>
@@ -1169,17 +1402,36 @@ export function EmailComposeDialog({
 
             <Separator orientation="vertical" className="h-5 mx-0.5" />
 
-            <ToolbarButton
+            <ToolbarActionButton
               onClick={() => fileInputRef.current?.click()}
               tooltip="Anexar arquivo"
             >
               <Paperclip className="size-3.5" />
-            </ToolbarButton>
+            </ToolbarActionButton>
           </div>
 
-          {/* TipTap editor body - fills remaining space */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+          {/* TipTap editor body - fills remaining space, with drag-drop zone */}
+          <div
+            className={cn(
+              'flex-1 min-h-0 overflow-y-auto px-6 py-4 relative transition-colors bg-gray-50 dark:bg-white/[0.03]',
+              isDragOver && 'bg-blue-50 dark:bg-blue-500/10'
+            )}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
             <EditorContent editor={editor} className="h-full" />
+            {isDragOver && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-xl p-6 bg-blue-50/80 dark:bg-blue-500/15 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <Paperclip className="size-5" />
+                    <span className="text-sm font-medium">Solte os arquivos para anexar</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Attachment chips */}
@@ -1215,11 +1467,30 @@ export function EmailComposeDialog({
           {/* Footer: actions */}
           <div className="flex items-center justify-between px-6 py-3 shrink-0">
             <div className="flex items-center gap-2">
-              {selectedAccount?.signature && (
-                <span className="text-xs text-muted-foreground hidden sm:inline">
-                  Assinatura:{' '}
-                  {selectedAccount.displayName ?? selectedAccount.address}
+              {lastDraftSavedAt && (
+                <span className="text-[11px] text-muted-foreground/70 hidden sm:inline">
+                  Rascunho salvo às{' '}
+                  {lastDraftSavedAt.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </span>
+              )}
+              {selectedAccount?.signature && (
+                <button
+                  type="button"
+                  onClick={() => setIncludeSignature(prev => !prev)}
+                  className={cn(
+                    'text-xs hidden sm:inline-flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors',
+                    includeSignature
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20'
+                      : 'text-muted-foreground hover:bg-muted'
+                  )}
+                  title={includeSignature ? 'Clique para remover assinatura' : 'Clique para incluir assinatura'}
+                >
+                  <PenLine className="size-3" />
+                  {includeSignature ? 'Assinatura incluída' : 'Sem assinatura'}
+                </button>
               )}
             </div>
 
@@ -1256,6 +1527,39 @@ export function EmailComposeDialog({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Draft discard confirmation */}
+      <AlertDialog open={discardConfirmOpen} onOpenChange={setDiscardConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar rascunho?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você tem conteúdo não salvo. Deseja salvar como rascunho ou
+              descartar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => {
+                setDiscardConfirmOpen(false);
+                discardAndClose();
+              }}
+            >
+              Descartar
+            </AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                setDiscardConfirmOpen(false);
+                saveDraftAndClose();
+              }}
+            >
+              Salvar rascunho
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 }

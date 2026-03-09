@@ -28,6 +28,11 @@ export const AdminModulesEnum = z.enum([
   'AUDIT',
   'REQUESTS',
   'NOTIFICATIONS',
+  'FINANCE',
+  'CALENDAR',
+  'STORAGE',
+  'EMAIL',
+  'TASKS',
 ]);
 
 // =====================================
@@ -158,14 +163,53 @@ export const AdminFeatureFlagSchema = z.object({
 
 export type AdminFeatureFlag = z.infer<typeof AdminFeatureFlagSchema>;
 
+export const SystemFeatureFlagSchema = z.object({
+  flag: z.string(),
+  label: z.string(),
+  description: z.string(),
+  category: z.string(),
+});
+
+export type SystemFeatureFlag = z.infer<typeof SystemFeatureFlagSchema>;
+
+export const FeatureFlagsListResponseSchema = z.object({
+  featureFlags: z.array(AdminFeatureFlagSchema),
+  systemFlags: z.array(SystemFeatureFlagSchema),
+});
+
+export type FeatureFlagsListResponse = z.infer<
+  typeof FeatureFlagsListResponseSchema
+>;
+
 // =====================================
 // DASHBOARD
 // =====================================
+
+export const RecentActivitySchema = z.object({
+  id: z.string(),
+  action: z.string(),
+  entity: z.string(),
+  description: z.string().nullable(),
+  createdAt: z.coerce.date(),
+});
+
+export type RecentActivity = z.infer<typeof RecentActivitySchema>;
 
 export const DashboardStatsSchema = z.object({
   totalTenants: z.number().int().nonnegative(),
   totalPlans: z.number().int().nonnegative(),
   activePlans: z.number().int().nonnegative(),
+  tenantsByStatus: z.record(z.string(), z.number()),
+  tenantsByTier: z.record(z.string(), z.number()),
+  monthlyGrowth: z.array(
+    z.object({
+      month: z.string(),
+      count: z.number(),
+    }),
+  ),
+  recentActivity: z.array(RecentActivitySchema),
+  totalUsers: z.number().int().nonnegative(),
+  mrr: z.number().nonnegative(),
 });
 
 export type DashboardStats = z.infer<typeof DashboardStatsSchema>;

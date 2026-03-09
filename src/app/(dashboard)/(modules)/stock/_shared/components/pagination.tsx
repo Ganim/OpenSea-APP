@@ -79,7 +79,8 @@ export function Pagination({
   };
 
   return (
-    <div
+    <nav
+      aria-label="Paginação"
       className={cn(
         'flex flex-col sm:flex-row items-center justify-between gap-4',
         className
@@ -131,7 +132,7 @@ export function Pagination({
             onClick={() => onPageChange(1)}
             disabled={!hasPrev}
             title="Primeira página"
-            aria-label="Primeira pagina"
+            aria-label="Primeira página"
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
@@ -144,7 +145,7 @@ export function Pagination({
             onClick={() => onPageChange(page - 1)}
             disabled={!hasPrev}
             title="Página anterior"
-            aria-label="Pagina anterior"
+            aria-label="Página anterior"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -166,6 +167,8 @@ export function Pagination({
                   size="icon"
                   className="h-9 w-9"
                   onClick={() => onPageChange(pageNum)}
+                  aria-label={`Página ${pageNum}`}
+                  aria-current={pageNum === page ? 'page' : undefined}
                 >
                   {pageNum}
                 </Button>
@@ -186,7 +189,7 @@ export function Pagination({
             onClick={() => onPageChange(page + 1)}
             disabled={!hasNext}
             title="Próxima página"
-            aria-label="Proxima pagina"
+            aria-label="Próxima página"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -199,13 +202,13 @@ export function Pagination({
             onClick={() => onPageChange(totalPages)}
             disabled={!hasNext}
             title="Última página"
-            aria-label="Ultima pagina"
+            aria-label="Última página"
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
 

@@ -206,6 +206,7 @@ export function useInviteParticipants() {
           respondedAt: null,
           userName: null,
           userEmail: null,
+          userAvatarUrl: null,
           createdAt: new Date().toISOString(),
           updatedAt: null,
         }));

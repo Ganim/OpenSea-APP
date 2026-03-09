@@ -10,6 +10,7 @@ import {
   AdminTenantUserSchema,
   AdminTenantUsersListResponseSchema,
   DashboardStatsSchema,
+  FeatureFlagsListResponseSchema,
   TenantDetailSchema,
   type AdminFeatureFlag,
   type AdminPlan,
@@ -21,6 +22,7 @@ import {
   type AdminTenantUser,
   type AdminTenantUsersListResponse,
   type DashboardStats,
+  type FeatureFlagsListResponse,
   type TenantDetail,
 } from '@/schemas/admin.schemas';
 
@@ -36,6 +38,7 @@ export type {
   AdminTenantUser,
   AdminTenantUsersListResponse,
   DashboardStats,
+  FeatureFlagsListResponse,
   TenantDetail,
 };
 
@@ -50,9 +53,20 @@ export const adminApi = {
   },
 
   // Tenants
-  listTenants: async (page = 1, limit = 20) => {
+  listTenants: async (
+    page = 1,
+    limit = 20,
+    search?: string,
+    status?: string,
+  ) => {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('limit', String(limit));
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+
     const response = await apiClient.get<unknown>(
-      `${API_ENDPOINTS.ADMIN.TENANTS.LIST}?page=${page}&limit=${limit}`
+      `${API_ENDPOINTS.ADMIN.TENANTS.LIST}?${params.toString()}`
     );
     return AdminTenantsListResponseSchema.parse(response);
   },
@@ -80,6 +94,13 @@ export const adminApi = {
       { planId }
     );
     return response;
+  },
+
+  listFeatureFlags: async (id: string) => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.TENANTS.FEATURE_FLAGS(id)
+    );
+    return FeatureFlagsListResponseSchema.parse(response);
   },
 
   manageFeatureFlags: async (id: string, flag: string, enabled: boolean) => {
