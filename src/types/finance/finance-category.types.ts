@@ -12,6 +12,8 @@ export interface FinanceCategory {
   parentName?: string;
   displayOrder: number;
   isActive: boolean;
+  interestRate?: number | null;
+  penaltyRate?: number | null;
   isSystem: boolean;
   childrenCount?: number;
   entryCount?: number;
@@ -30,6 +32,8 @@ export interface CreateFinanceCategoryData {
   parentId?: string;
   displayOrder?: number;
   isActive?: boolean;
+  interestRate?: number;
+  penaltyRate?: number;
 }
 
 export type UpdateFinanceCategoryData = Partial<CreateFinanceCategoryData>;

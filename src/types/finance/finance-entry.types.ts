@@ -1,3 +1,5 @@
+export type PayableSubType = 'BOLETO' | 'NOTA_FISCAL' | 'TRANSFERENCIA' | 'CARTAO' | 'OUTROS';
+
 export type FinanceEntryType = 'PAYABLE' | 'RECEIVABLE';
 export type FinanceEntryRecurrence = 'SINGLE' | 'RECURRING' | 'INSTALLMENT';
 export type FinanceEntryStatus =
@@ -78,11 +80,19 @@ export interface FinanceEntry {
   deletedAt?: string | null;
 }
 
+export interface CostCenterAllocation {
+  costCenterId: string;
+  percentage: number;
+  amount?: number;
+  costCenterName?: string;
+}
+
 export interface CreateFinanceEntryData {
   type: FinanceEntryType;
   description: string;
   categoryId: string;
-  costCenterId: string;
+  costCenterId?: string;
+  costCenterAllocations?: CostCenterAllocation[];
   bankAccountId?: string;
   expectedAmount: number;
   discount?: number;
@@ -115,6 +125,8 @@ export interface RegisterPaymentData {
   method?: PaymentMethod;
   reference?: string;
   notes?: string;
+  interest?: number;
+  penalty?: number;
 }
 
 export interface FinanceEntryPayment {
@@ -236,4 +248,12 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Dinheiro',
   CHECK: 'Cheque',
   CARD: 'Cartão',
+};
+
+export const PAYABLE_SUBTYPE_LABELS: Record<PayableSubType, string> = {
+  BOLETO: 'Boleto',
+  NOTA_FISCAL: 'Nota Fiscal',
+  TRANSFERENCIA: 'Transferência',
+  CARTAO: 'Cartão',
+  OUTROS: 'Outros',
 };
