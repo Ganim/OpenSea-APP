@@ -26,6 +26,7 @@ import type { BoardMemberRole } from '@/types/tasks';
 import { toast } from 'sonner';
 import { Loader2, UserPlus, Trash2, Crown, Eye, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
 
 interface BoardMembersDialogProps {
   open: boolean;
@@ -106,19 +107,6 @@ export function BoardMembersDialog({
     }
   }
 
-  function getMemberInitials(name: string | null, email: string | null) {
-    if (name) {
-      return name
-        .split(' ')
-        .map(n => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase();
-    }
-    if (email) return email[0].toUpperCase();
-    return '?';
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
@@ -145,9 +133,7 @@ export function BoardMembersDialog({
                     className="flex items-center gap-3 rounded-md border px-3 py-2"
                   >
                     {/* Avatar */}
-                    <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
-                      {getMemberInitials(member.userName, member.userEmail)}
-                    </div>
+                    <MemberAvatar name={member.userName ?? member.userEmail} avatarUrl={member.userAvatarUrl} size="md" />
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">

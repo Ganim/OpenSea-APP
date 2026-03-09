@@ -100,13 +100,13 @@ export const BoardList = memo(function BoardList({
                 {board.members && board.members.length > 0 && (
                   <div className="flex items-center -space-x-1.5">
                     {board.members.slice(0, 3).map(member => (
-                      <div
+                      <MemberAvatar
                         key={member.id}
-                        className="h-6 w-6 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-white/30"
-                        title={member.userName ?? undefined}
-                      >
-                        {(member.userName ?? '?').charAt(0).toUpperCase()}
-                      </div>
+                        name={member.userName}
+                        avatarUrl={member.userAvatarUrl}
+                        size="sm"
+                        className="ring-2 ring-white/30"
+                      />
                     ))}
                     {board.members.length > 3 && (
                       <div className="h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-white/30">

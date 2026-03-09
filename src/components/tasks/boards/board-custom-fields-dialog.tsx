@@ -316,8 +316,9 @@ export function BoardCustomFieldsDialog({
             <div className="space-y-3">
               {/* Nome */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Nome</label>
+                <label htmlFor="custom-field-name" className="text-sm font-medium">Nome</label>
                 <Input
+                  id="custom-field-name"
                   placeholder="Ex: Estimativa de horas"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
@@ -326,7 +327,7 @@ export function BoardCustomFieldsDialog({
 
               {/* Tipo */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Tipo</label>
+                <label htmlFor="custom-field-type" className="text-sm font-medium">Tipo</label>
                 <Select
                   value={newType}
                   onValueChange={v => setNewType(v as CustomFieldType)}
@@ -352,8 +353,9 @@ export function BoardCustomFieldsDialog({
               {/* Opções (only for SELECT/MULTI_SELECT) */}
               {isSelectType(newType) && (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Opções</label>
+                  <label htmlFor="custom-field-options" className="text-sm font-medium">Opções</label>
                   <Input
+                    id="custom-field-options"
                     placeholder="Opção 1, Opção 2, Opção 3"
                     value={newOptions}
                     onChange={e => setNewOptions(e.target.value)}

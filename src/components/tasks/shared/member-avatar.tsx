@@ -1,14 +1,17 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { storageFilesService } from '@/services/storage/files.service';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useMemo } from 'react';
 
 interface MemberAvatarProps {
   name?: string | null;
+  avatarUrl?: string | null;
   size?: 'sm' | 'md';
   className?: string;
 }
@@ -53,6 +56,7 @@ const sizeClasses = {
 
 export function MemberAvatar({
   name,
+  avatarUrl,
   size = 'sm',
   className,
 }: MemberAvatarProps) {
@@ -60,7 +64,24 @@ export function MemberAvatar({
   const initials = getInitials(displayName);
   const colorClass = getColorFromName(displayName);
 
-  const avatar = (
+  const resolvedAvatarUrl = useMemo(() => {
+    if (!avatarUrl) return null;
+    const match = avatarUrl.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    if (match) return storageFilesService.getServeUrl(match[1]);
+    return avatarUrl;
+  }, [avatarUrl]);
+
+  const avatar = resolvedAvatarUrl ? (
+    <img
+      src={resolvedAvatarUrl}
+      alt={displayName}
+      className={cn(
+        'rounded-full object-cover shrink-0',
+        sizeClasses[size],
+        className
+      )}
+    />
+  ) : (
     <div
       className={cn(
         'rounded-full flex items-center justify-center font-medium text-white shrink-0',

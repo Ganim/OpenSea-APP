@@ -60,7 +60,7 @@ export function BoardSettingsGeneral({
 
       {/* Visibilidade */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium">Visibilidade</label>
+        <label htmlFor="board-visibility" className="text-sm font-medium">Visibilidade</label>
         <Select
           value={visibility}
           onValueChange={v => onVisibilityChange(v as BoardVisibility)}

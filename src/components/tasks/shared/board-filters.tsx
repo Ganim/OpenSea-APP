@@ -134,6 +134,7 @@ export function BoardFilters({
                     >
                       <MemberAvatar
                         name={m.userName}
+                        avatarUrl={m.userAvatarUrl}
                         size="sm"
                         className="h-4 w-4 text-[8px]"
                       />
