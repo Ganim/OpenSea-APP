@@ -1,4 +1,5 @@
 import { columnsService } from '@/services/tasks';
+import type { BoardResponse } from '@/services/tasks/boards-service';
 import type {
   CreateColumnRequest,
   UpdateColumnRequest,
@@ -48,7 +49,38 @@ export function useReorderColumns(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: ReorderColumnsRequest) => columnsService.reorder(boardId, data),
-    onSuccess: () => {
+    onMutate: async ({ columnIds }) => {
+      await qc.cancelQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
+      const previousBoard = qc.getQueryData<BoardResponse>(
+        BOARD_QUERY_KEYS.BOARD(boardId)
+      );
+
+      qc.setQueryData<BoardResponse>(
+        BOARD_QUERY_KEYS.BOARD(boardId),
+        old => {
+          if (!old?.board?.columns) return old;
+          const colMap = new Map(old.board.columns.map(c => [c.id, c]));
+          const reordered = columnIds
+            .map((id, i) => {
+              const col = colMap.get(id);
+              return col ? { ...col, position: i } : null;
+            })
+            .filter(Boolean);
+          return {
+            ...old,
+            board: { ...old.board, columns: reordered as typeof old.board.columns },
+          };
+        }
+      );
+
+      return { previousBoard };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousBoard) {
+        qc.setQueryData(BOARD_QUERY_KEYS.BOARD(boardId), context.previousBoard);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });

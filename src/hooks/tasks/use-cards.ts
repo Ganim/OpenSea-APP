@@ -70,7 +70,7 @@ export function useUpdateCard(boardId: string) {
       qc.setQueriesData<CardsResponse>(
         { queryKey: CARD_QUERY_KEYS.CARDS(boardId) },
         old => {
-          if (!old) return old;
+          if (!old?.cards) return old;
           return {
             ...old,
             cards: old.cards.map(c =>
@@ -111,7 +111,7 @@ export function useDeleteCard(boardId: string) {
       qc.setQueriesData<CardsResponse>(
         { queryKey: CARD_QUERY_KEYS.CARDS(boardId) },
         old => {
-          if (!old) return old;
+          if (!old?.cards) return old;
           return {
             ...old,
             cards: old.cards.filter(c => c.id !== cardId),
@@ -149,14 +149,44 @@ export function useMoveCard(boardId: string) {
       qc.setQueriesData<CardsResponse>(
         { queryKey: CARD_QUERY_KEYS.CARDS(boardId) },
         old => {
-          if (!old) return old;
+          if (!old?.cards) return old;
+          const cards = old.cards;
+          const movedCard = cards.find(c => c.id === cardId);
+          if (!movedCard) return old;
+
+          const srcColumnId = movedCard.columnId;
+          const dstColumnId = data.columnId;
+          const dstPosition = data.position;
+
+          // Remove card from source column and reindex
+          const srcCards = cards
+            .filter(c => c.columnId === srcColumnId && c.id !== cardId)
+            .sort((a, b) => a.position - b.position);
+
+          // Build destination column cards (without the moved card)
+          const dstCards =
+            srcColumnId === dstColumnId
+              ? srcCards // same column — already removed
+              : cards
+                  .filter(c => c.columnId === dstColumnId && c.id !== cardId)
+                  .sort((a, b) => a.position - b.position);
+
+          // Insert moved card at destination position
+          const updatedCard = { ...movedCard, columnId: dstColumnId, position: dstPosition };
+          dstCards.splice(dstPosition, 0, updatedCard);
+
+          // Build lookup of new positions: columnId+cardId → position
+          const positionMap = new Map<string, { columnId: string; position: number }>();
+          srcCards.forEach((c, i) => positionMap.set(c.id, { columnId: srcColumnId, position: i }));
+          dstCards.forEach((c, i) => positionMap.set(c.id, { columnId: dstColumnId, position: i }));
+
           return {
             ...old,
-            cards: old.cards.map(c =>
-              c.id === cardId
-                ? { ...c, columnId: data.columnId, position: data.position }
-                : c
-            ),
+            cards: cards.map(c => {
+              const update = positionMap.get(c.id);
+              if (update) return { ...c, ...update };
+              return c;
+            }),
           };
         }
       );
@@ -173,19 +203,6 @@ export function useMoveCard(boardId: string) {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
     },
-  });
-}
-
-/**
- * Fire-and-forget move card mutation for Kanban view.
- * No onMutate, no onSettled — the Kanban manages optimistic UI by writing
- * directly to the TanStack Query cache and controls invalidation timing
- * via a debounced refetch to avoid race conditions on rapid drags.
- */
-export function useMoveCardLocal(boardId: string) {
-  return useMutation({
-    mutationFn: ({ cardId, data }: { cardId: string; data: MoveCardRequest }) =>
-      cardsService.move(boardId, cardId, data),
   });
 }
 

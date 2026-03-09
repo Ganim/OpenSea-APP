@@ -9,11 +9,8 @@ import {
 } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import type { Board, Card, Column } from '@/types/tasks';
-import type { CardsResponse } from '@/services/tasks';
-import { useMoveCardLocal, CARD_QUERY_KEYS } from '@/hooks/tasks/use-cards';
+import { useMoveCard } from '@/hooks/tasks/use-cards';
 import { useUpdateColumn, useReorderColumns } from '@/hooks/tasks/use-columns';
-import { BOARD_QUERY_KEYS } from '@/hooks/tasks/use-boards';
-import { useQueryClient } from '@tanstack/react-query';
 import { getGradientForBoard } from '../shared/board-gradients';
 import { CardItem } from '../cards/card-item';
 import { CardInlineCreate } from '../cards/card-inline-create';
@@ -55,51 +52,23 @@ export function KanbanView({
   boardId,
   onCardClick,
 }: KanbanViewProps) {
-  const qc = useQueryClient();
-  const moveCard = useMoveCardLocal(boardId);
+  const moveCard = useMoveCard(boardId);
   const reorderColumns = useReorderColumns(boardId);
   const gradient = getGradientForBoard(boardId);
 
-  // ─── Columns: optimistic local state (infrequent operation) ───
-
-  const propsColumns = useMemo(
+  const columns = useMemo(
     () => [...(board.columns ?? [])].sort((a, b) => a.position - b.position),
     [board.columns]
   );
 
-  const [optimisticColumns, setOptimisticColumns] = useState<Column[] | null>(
-    null
-  );
-
-  const displayColumns = optimisticColumns ?? propsColumns;
-
-  // ─── Cards: always from TanStack Query cache (no local state!) ───
-  // Optimistic card updates are written directly to the query cache
-  // via qc.setQueriesData(), so multiple rapid drags build on top of
-  // each other without race conditions.
-
-  // Debounced cache sync: only refetch from server 1.5s after the LAST drag.
-  // This prevents early refetches from overwriting subsequent drags' optimistic data.
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scheduleSync = useCallback(() => {
-    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-    syncTimerRef.current = setTimeout(() => {
-      qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
-      syncTimerRef.current = null;
-    }, 1500);
-  }, [qc, boardId]);
-
-  const columnIds = useMemo(
-    () => displayColumns.map(c => c.id),
-    [displayColumns]
-  );
+  const columnIds = useMemo(() => columns.map(c => c.id), [columns]);
 
   const cardsByColumn = useMemo(
     () => buildCardMap(columnIds, cards),
     [cards, columnIds]
   );
 
-  // ─── Drag End (the only handler needed) ───
+  // ─── Drag End ───
 
   const handleDragEnd = useCallback(
     (result: DropResult) => {
@@ -113,96 +82,25 @@ export function KanbanView({
 
       // ── Column reorder ──
       if (type === 'COLUMN') {
-        const cols = [...displayColumns];
-        const [moved] = cols.splice(source.index, 1);
-        cols.splice(destination.index, 0, moved);
-        const reordered = cols.map((c, i) => ({ ...c, position: i }));
-
-        setOptimisticColumns(reordered);
-        reorderColumns.mutate(
-          { columnIds: reordered.map(c => c.id) },
-          {
-            onSettled: () => {
-              qc.invalidateQueries({
-                queryKey: BOARD_QUERY_KEYS.BOARD(boardId),
-              });
-              setOptimisticColumns(null);
-            },
-          }
-        );
+        const reordered = [...columns];
+        const [moved] = reordered.splice(source.index, 1);
+        reordered.splice(destination.index, 0, moved);
+        reorderColumns.mutate({
+          columnIds: reordered.map(c => c.id),
+        });
         return;
       }
 
       // ── Card move ──
-      const sourceColId = source.droppableId;
-      const destColId = destination.droppableId;
-      const cardId = draggableId;
-
-      // Cancel any in-flight card queries so stale refetches don't
-      // overwrite the optimistic cache update we're about to make.
-      qc.cancelQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
-
-      // Compute new cards array with correct positions
-      qc.setQueriesData<CardsResponse>(
-        { queryKey: CARD_QUERY_KEYS.CARDS(boardId) },
-        old => {
-          if (!old) return old;
-          const currentCards = old.cards;
-          const currentColIds = displayColumns.map(c => c.id);
-          const currentMap = buildCardMap(currentColIds, currentCards);
-
-          let newCards: Card[];
-
-          if (sourceColId === destColId) {
-            // Same-column reorder
-            const colCards = [...(currentMap.get(sourceColId) ?? [])];
-            const [moved] = colCards.splice(source.index, 1);
-            colCards.splice(destination.index, 0, moved);
-            const reindexed = colCards.map((c, i) => ({ ...c, position: i }));
-            const otherCards = currentCards.filter(
-              c => c.columnId !== sourceColId
-            );
-            newCards = [...otherCards, ...reindexed];
-          } else {
-            // Cross-column move
-            const sourceCards = [...(currentMap.get(sourceColId) ?? [])];
-            const destCards = [...(currentMap.get(destColId) ?? [])];
-
-            const [moved] = sourceCards.splice(source.index, 1);
-            destCards.splice(destination.index, 0, {
-              ...moved,
-              columnId: destColId,
-            });
-
-            const reindexedSource = sourceCards.map((c, i) => ({
-              ...c,
-              position: i,
-            }));
-            const reindexedDest = destCards.map((c, i) => ({
-              ...c,
-              position: i,
-              columnId: destColId,
-            }));
-
-            const touchedCols = new Set([sourceColId, destColId]);
-            const otherCards = currentCards.filter(
-              c => !touchedCols.has(c.columnId)
-            );
-            newCards = [...otherCards, ...reindexedSource, ...reindexedDest];
-          }
-
-          return { ...old, cards: newCards };
-        }
-      );
-
-      // Fire API call, then schedule a debounced sync with server
       moveCard.mutate({
-        cardId,
-        data: { columnId: destColId, position: destination.index },
+        cardId: draggableId,
+        data: {
+          columnId: destination.droppableId,
+          position: destination.index,
+        },
       });
-      scheduleSync();
     },
-    [displayColumns, moveCard, reorderColumns, qc, boardId, scheduleSync]
+    [columns, moveCard, reorderColumns]
   );
 
   return (
@@ -219,7 +117,7 @@ export function KanbanView({
               {...boardProvided.droppableProps}
               className="flex flex-col sm:flex-row gap-3 sm:min-w-max h-full"
             >
-              {displayColumns.map((column, colIndex) => {
+              {columns.map((column, colIndex) => {
                 const colCards = cardsByColumn.get(column.id) ?? [];
                 return (
                   <Draggable
@@ -233,7 +131,7 @@ export function KanbanView({
                         cards={colCards}
                         boardId={boardId}
                         boardGradientFrom={gradient.from}
-                        allColumns={displayColumns}
+                        allColumns={columns}
                         onCardClick={onCardClick}
                         provided={colProvided}
                         isDragging={colSnapshot.isDragging}
