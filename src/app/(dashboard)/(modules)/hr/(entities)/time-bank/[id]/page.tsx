@@ -18,18 +18,28 @@ import {
   Calendar,
   Clock,
   Hourglass,
+  Minus,
   NotebookText,
   FileText,
   ArrowUpCircle,
   ArrowDownCircle,
+  Plus,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   timeBankApi,
   timeBankKeys,
   formatBalance,
   getBalanceColor,
   formatYear,
+  useCreditTimeBank,
+  useDebitTimeBank,
+  useAdjustTimeBank,
+  CreditModal,
+  DebitModal,
+  AdjustModal,
 } from '../src';
 
 export default function TimeBankDetailPage() {
@@ -50,6 +60,22 @@ export default function TimeBankDetailPage() {
       return timeBanks.find((tb) => tb.id === timeBankId);
     },
   });
+
+  // ============================================================================
+  // MODAL STATE
+  // ============================================================================
+
+  const [creditOpen, setCreditOpen] = useState(false);
+  const [debitOpen, setDebitOpen] = useState(false);
+  const [adjustOpen, setAdjustOpen] = useState(false);
+
+  // ============================================================================
+  // MUTATIONS
+  // ============================================================================
+
+  const credit = useCreditTimeBank({ onSuccess: () => setCreditOpen(false) });
+  const debit = useDebitTimeBank({ onSuccess: () => setDebitOpen(false) });
+  const adjust = useAdjustTimeBank({ onSuccess: () => setAdjustOpen(false) });
 
   const { getName } = useEmployeeMap(timeBank ? [timeBank.employeeId] : []);
 
@@ -124,6 +150,31 @@ export default function TimeBankDetailPage() {
             { label: 'RH', href: '/hr' },
             { label: 'Banco de Horas', href: '/hr/time-bank' },
             { label: getName(timeBank.employeeId) },
+          ]}
+          buttons={[
+            {
+              id: 'adjust',
+              title: 'Ajustar',
+              icon: SlidersHorizontal,
+              onClick: () => setAdjustOpen(true),
+              variant: 'outline',
+            },
+            {
+              id: 'debit',
+              title: 'Debitar',
+              icon: Minus,
+              onClick: () => setDebitOpen(true),
+              variant: 'outline',
+              className:
+                'border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950',
+            },
+            {
+              id: 'credit',
+              title: 'Creditar',
+              icon: Plus,
+              onClick: () => setCreditOpen(true),
+              className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+            },
           ]}
         />
 
@@ -256,6 +307,28 @@ export default function TimeBankDetailPage() {
           </div>
         </Card>
       </PageBody>
+
+      {/* Action Modals */}
+      <CreditModal
+        isOpen={creditOpen}
+        onClose={() => setCreditOpen(false)}
+        onSubmit={async (data) => { await credit.mutateAsync(data); }}
+        isLoading={credit.isPending}
+      />
+
+      <DebitModal
+        isOpen={debitOpen}
+        onClose={() => setDebitOpen(false)}
+        onSubmit={async (data) => { await debit.mutateAsync(data); }}
+        isLoading={debit.isPending}
+      />
+
+      <AdjustModal
+        isOpen={adjustOpen}
+        onClose={() => setAdjustOpen(false)}
+        onSubmit={async (data) => { await adjust.mutateAsync(data); }}
+        isLoading={adjust.isPending}
+      />
     </PageLayout>
   );
 }

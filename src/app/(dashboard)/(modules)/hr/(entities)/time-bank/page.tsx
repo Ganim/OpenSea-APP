@@ -23,6 +23,7 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { TimeBank } from '@/types/hr';
 import { Eye, Hourglass, Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import {
   formatBalance,
@@ -50,6 +51,8 @@ export default function TimeBankPage() {
 }
 
 function TimeBankPageContent() {
+  const router = useRouter();
+
   // ============================================================================
   // FILTERS
   // ============================================================================
@@ -188,7 +191,8 @@ function TimeBankPageContent() {
         }
         isSelected={isSelected}
         showSelection={false}
-        clickable={false}
+        clickable
+        onClick={() => router.push(`/hr/time-bank/${item.id}`)}
         createdAt={item.createdAt}
         updatedAt={item.updatedAt}
       />
@@ -224,7 +228,8 @@ function TimeBankPageContent() {
         }
         isSelected={isSelected}
         showSelection={false}
-        clickable={false}
+        clickable
+        onClick={() => router.push(`/hr/time-bank/${item.id}`)}
         createdAt={item.createdAt}
         updatedAt={item.updatedAt}
       />

@@ -148,6 +148,35 @@ export default function AbsenceDetailPage() {
             { label: 'Ausências', href: '/hr/absences' },
             { label: getTypeLabel(absence.type) },
           ]}
+          buttons={
+            isPending
+              ? [
+                  {
+                    id: 'approve',
+                    title: approveAbsence.isPending ? 'Aprovando...' : 'Aprovar',
+                    icon: Check,
+                    onClick: () => approveAbsence.mutate(absenceId),
+                    className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                    disabled: approveAbsence.isPending,
+                  },
+                  {
+                    id: 'reject',
+                    title: 'Rejeitar',
+                    icon: XCircle,
+                    onClick: () => setRejectModalOpen(true),
+                    variant: 'destructive',
+                  },
+                  {
+                    id: 'cancel',
+                    title: cancelAbsence.isPending ? 'Cancelando...' : 'Cancelar',
+                    icon: Ban,
+                    onClick: () => cancelAbsence.mutate(absenceId),
+                    variant: 'outline',
+                    disabled: cancelAbsence.isPending,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -169,6 +198,7 @@ export default function AbsenceDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
+                {getName(absence.employeeId)} ·{' '}
                 {formatDate(absence.startDate)} — {formatDate(absence.endDate)}
                 {' · '}
                 {absence.totalDays} {absence.totalDays === 1 ? 'dia' : 'dias'}
@@ -323,41 +353,6 @@ export default function AbsenceDetailPage() {
           </Card>
         )}
 
-        {/* Action Buttons (only for PENDING status) */}
-        {isPending && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant="default"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-                onClick={() => approveAbsence.mutate(absenceId)}
-                disabled={approveAbsence.isPending}
-              >
-                <Check className="h-4 w-4" />
-                {approveAbsence.isPending ? 'Aprovando...' : 'Aprovar'}
-              </Button>
-
-              <Button
-                variant="destructive"
-                className="gap-2"
-                onClick={() => setRejectModalOpen(true)}
-              >
-                <XCircle className="h-4 w-4" />
-                Rejeitar
-              </Button>
-
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => cancelAbsence.mutate(absenceId)}
-                disabled={cancelAbsence.isPending}
-              >
-                <Ban className="h-4 w-4" />
-                {cancelAbsence.isPending ? 'Cancelando...' : 'Cancelar'}
-              </Button>
-            </div>
-          </Card>
-        )}
       </PageBody>
 
       {/* Reject Modal */}

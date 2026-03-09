@@ -164,7 +164,41 @@ export default function VacationDetailPage() {
   return (
     <PageLayout>
       <PageHeader>
-        <PageActionBar breadcrumbItems={breadcrumbItems} />
+        <PageActionBar
+          breadcrumbItems={breadcrumbItems}
+          buttons={
+            vacation.status === 'AVAILABLE'
+              ? [
+                  {
+                    id: 'schedule',
+                    title: 'Agendar',
+                    icon: CalendarDays,
+                    onClick: () => setIsScheduleOpen(true),
+                  },
+                  {
+                    id: 'sell',
+                    title: 'Vender Dias',
+                    icon: DollarSign,
+                    onClick: () => setIsSellOpen(true),
+                    variant: 'outline',
+                  },
+                ]
+              : vacation.status === 'SCHEDULED'
+                ? [
+                    {
+                      id: 'cancel-schedule',
+                      title: cancelScheduleMutation.isPending
+                        ? 'Cancelando...'
+                        : 'Cancelar Agendamento',
+                      icon: CalendarX2,
+                      onClick: () => cancelScheduleMutation.mutate(vacation.id),
+                      variant: 'destructive',
+                      disabled: cancelScheduleMutation.isPending,
+                    },
+                  ]
+                : []
+          }
+        />
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
@@ -183,6 +217,7 @@ export default function VacationDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
+                {getName(vacation.employeeId)} ·{' '}
                 {formatDaysInfo(
                   vacation.totalDays,
                   vacation.usedDays,
@@ -214,19 +249,25 @@ export default function VacationDetailPage() {
       </PageHeader>
 
       <PageBody className="space-y-6">
-        {/* Período Aquisitivo */}
+        {/* Funcionário */}
         <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
             <Calendar className="h-5 w-5" />
-            Período Aquisitivo
+            Dados Gerais
           </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <InfoField
-              label="Início"
+              label="Funcionário"
+              value={getName(vacation.employeeId)}
+              showCopyButton
+              copyTooltip="Copiar nome do funcionário"
+            />
+            <InfoField
+              label="Início do Período Aquisitivo"
               value={formatDate(vacation.acquisitionStart)}
             />
             <InfoField
-              label="Fim"
+              label="Fim do Período Aquisitivo"
               value={formatDate(vacation.acquisitionEnd)}
             />
           </div>
@@ -315,37 +356,6 @@ export default function VacationDetailPage() {
           </Card>
         )}
 
-        {/* Action Buttons */}
-        {vacation.status === 'AVAILABLE' && (
-          <div className="flex gap-3">
-            <Button onClick={() => setIsScheduleOpen(true)} className="gap-2">
-              <CalendarDays className="h-4 w-4" />
-              Agendar
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsSellOpen(true)}
-              className="gap-2"
-            >
-              <DollarSign className="h-4 w-4" />
-              Vender Dias
-            </Button>
-          </div>
-        )}
-
-        {vacation.status === 'SCHEDULED' && (
-          <div className="flex gap-3">
-            <Button
-              variant="destructive"
-              onClick={() => cancelScheduleMutation.mutate(vacation.id)}
-              disabled={cancelScheduleMutation.isPending}
-              className="gap-2"
-            >
-              <CalendarX2 className="h-4 w-4" />
-              Cancelar Agendamento
-            </Button>
-          </div>
-        )}
       </PageBody>
 
       {/* Modals */}

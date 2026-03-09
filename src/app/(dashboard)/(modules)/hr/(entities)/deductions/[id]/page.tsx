@@ -202,7 +202,7 @@ export default function DeductionDetailPage() {
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {formatCurrency(deduction.amount)}
+                {getName(deduction.employeeId)} · {formatCurrency(deduction.amount)}
               </p>
             </div>
             <div className="flex flex-col gap-2 shrink-0 text-sm">

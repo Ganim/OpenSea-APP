@@ -173,7 +173,7 @@ export default function OvertimeDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {formatHours(overtime.hours)} registrada(s)
+                {getName(overtime.employeeId)} · {formatHours(overtime.hours)} registrada(s)
               </p>
             </div>
             <div className="flex flex-col gap-2 shrink-0 text-sm">
