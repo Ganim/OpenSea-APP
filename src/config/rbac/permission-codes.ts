@@ -501,6 +501,30 @@ export const HR_PERMISSIONS = {
     APPROVE: 'hr.payroll.approve',
     MANAGE: 'hr.payroll.manage',
   },
+  WORK_SCHEDULES: {
+    CREATE: 'hr.work-schedules.create',
+    READ: 'hr.work-schedules.read',
+    UPDATE: 'hr.work-schedules.update',
+    DELETE: 'hr.work-schedules.delete',
+    LIST: 'hr.work-schedules.list',
+    MANAGE: 'hr.work-schedules.manage',
+  },
+  BONUSES: {
+    CREATE: 'hr.bonuses.create',
+    READ: 'hr.bonuses.read',
+    UPDATE: 'hr.bonuses.update',
+    DELETE: 'hr.bonuses.delete',
+    LIST: 'hr.bonuses.list',
+    MANAGE: 'hr.bonuses.manage',
+  },
+  DEDUCTIONS: {
+    CREATE: 'hr.deductions.create',
+    READ: 'hr.deductions.read',
+    UPDATE: 'hr.deductions.update',
+    DELETE: 'hr.deductions.delete',
+    LIST: 'hr.deductions.list',
+    MANAGE: 'hr.deductions.manage',
+  },
 } as const;
 
 // =============================================================================
@@ -847,6 +871,10 @@ export const UI_PERMISSIONS = {
     PAYROLL: 'ui.menu.hr.payroll',
     TIME_BANK: 'ui.menu.hr.time-bank',
     COMPANIES: 'ui.menu.hr.companies',
+    WORK_SCHEDULES: 'ui.menu.hr.work-schedules',
+    BONUSES: 'ui.menu.hr.bonuses',
+    DEDUCTIONS: 'ui.menu.hr.deductions',
+    TIME_CONTROL: 'ui.menu.hr.time-control',
   },
   FINANCE_SUBMENUS: {
     OVERVIEW: 'ui.menu.finance.overview',

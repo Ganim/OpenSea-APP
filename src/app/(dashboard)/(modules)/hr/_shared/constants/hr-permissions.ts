@@ -285,11 +285,73 @@ export const HR_PERMISSIONS = {
     /** Imprimir holerites */
     PRINT_PAYSLIPS: DATA_PERMISSIONS.PRINT.PAYSLIPS,
   },
+  /**
+   * Permissões de Escalas de Trabalho (Work Schedules)
+   */
+  WORK_SCHEDULES: {
+    /** Listar escalas */
+    LIST: HR_CODES.WORK_SCHEDULES.LIST,
+    /** Visualizar detalhes de escala */
+    VIEW: HR_CODES.WORK_SCHEDULES.READ,
+    /** Criar nova escala */
+    CREATE: HR_CODES.WORK_SCHEDULES.CREATE,
+    /** Atualizar escala existente */
+    UPDATE: HR_CODES.WORK_SCHEDULES.UPDATE,
+    /** Excluir escala */
+    DELETE: HR_CODES.WORK_SCHEDULES.DELETE,
+    /** Gerenciamento completo */
+    MANAGE: HR_CODES.WORK_SCHEDULES.MANAGE,
+  },
+
+  /**
+   * Permissões de Bonificações (Bonuses)
+   */
+  BONUSES: {
+    /** Listar bonificações */
+    LIST: HR_CODES.BONUSES.LIST,
+    /** Visualizar detalhes de bonificação */
+    VIEW: HR_CODES.BONUSES.READ,
+    /** Criar nova bonificação */
+    CREATE: HR_CODES.BONUSES.CREATE,
+    /** Atualizar bonificação existente */
+    UPDATE: HR_CODES.BONUSES.UPDATE,
+    /** Excluir bonificação */
+    DELETE: HR_CODES.BONUSES.DELETE,
+    /** Gerenciamento completo */
+    MANAGE: HR_CODES.BONUSES.MANAGE,
+  },
+
+  /**
+   * Permissões de Deduções (Deductions)
+   */
+  DEDUCTIONS: {
+    /** Listar deduções */
+    LIST: HR_CODES.DEDUCTIONS.LIST,
+    /** Visualizar detalhes de dedução */
+    VIEW: HR_CODES.DEDUCTIONS.READ,
+    /** Criar nova dedução */
+    CREATE: HR_CODES.DEDUCTIONS.CREATE,
+    /** Atualizar dedução existente */
+    UPDATE: HR_CODES.DEDUCTIONS.UPDATE,
+    /** Excluir dedução */
+    DELETE: HR_CODES.DEDUCTIONS.DELETE,
+    /** Gerenciamento completo */
+    MANAGE: HR_CODES.DEDUCTIONS.MANAGE,
+  },
 } as const;
 
 /* ===========================================
    TYPE EXPORTS
    =========================================== */
+
+export type WorkSchedulePermission =
+  (typeof HR_PERMISSIONS.WORK_SCHEDULES)[keyof typeof HR_PERMISSIONS.WORK_SCHEDULES];
+
+export type BonusPermission =
+  (typeof HR_PERMISSIONS.BONUSES)[keyof typeof HR_PERMISSIONS.BONUSES];
+
+export type DeductionPermission =
+  (typeof HR_PERMISSIONS.DEDUCTIONS)[keyof typeof HR_PERMISSIONS.DEDUCTIONS];
 
 export type CompanyPermission =
   (typeof HR_PERMISSIONS.COMPANIES)[keyof typeof HR_PERMISSIONS.COMPANIES];
@@ -331,7 +393,10 @@ export type HRPermission =
   | TimeEntryPermission
   | OvertimePermission
   | TimeBankPermission
-  | PayrollPermission;
+  | PayrollPermission
+  | WorkSchedulePermission
+  | BonusPermission
+  | DeductionPermission;
 
 /* ===========================================
    HELPER FUNCTIONS
