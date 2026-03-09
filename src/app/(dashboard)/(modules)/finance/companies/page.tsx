@@ -1,6 +1,6 @@
 /**
  * Finance Companies Page - Read-Only
- * Visualizacao somente leitura das empresas via /v1/admin/companies
+ * Visualização somente leitura das empresas via /v1/hr/companies
  */
 
 'use client';
@@ -107,7 +107,7 @@ export default function FinanceCompaniesPage() {
       <PageBody>
         {/* Search Bar */}
         <SearchBar
-          placeholder="Buscar por razao social, nome fantasia ou CNPJ..."
+          placeholder="Buscar por razão social, nome fantasia ou CNPJ..."
           value={searchQuery}
           onSearch={setSearchQuery}
           onClear={() => setSearchQuery('')}
@@ -145,10 +145,10 @@ export default function FinanceCompaniesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Razao Social</TableHead>
-                  <TableHead>Nome Fantasia</TableHead>
-                  <TableHead>CNPJ</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[35%]">Razão Social</TableHead>
+                  <TableHead className="w-[25%]">Nome Fantasia</TableHead>
+                  <TableHead className="w-[180px]">CNPJ</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

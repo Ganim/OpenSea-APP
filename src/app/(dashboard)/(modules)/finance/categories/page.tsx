@@ -207,7 +207,7 @@ export default function FinanceCategoriesPage() {
     if (!deleteTarget) return;
     try {
       await deleteMutation.mutateAsync(deleteTarget);
-      toast.success('Categoria excluida com sucesso!');
+      toast.success('Categoria excluída com sucesso!');
       setDeleteTarget(null);
     } catch {
       toast.error('Erro ao excluir categoria.');
@@ -251,41 +251,39 @@ export default function FinanceCategoriesPage() {
       </PageHeader>
 
       <PageBody>
-        {/* Search + Type Filter */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <SearchBar
-              placeholder="Buscar por nome, descricao ou tipo..."
-              value={searchQuery}
-              onSearch={setSearchQuery}
-              onClear={() => setSearchQuery('')}
-              showClear
-              size="md"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant={typeFilter === '' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('')}
-            >
-              Todos
-            </Button>
-            <Button
-              variant={typeFilter === 'REVENUE' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('REVENUE')}
-            >
-              Receita
-            </Button>
-            <Button
-              variant={typeFilter === 'EXPENSE' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('EXPENSE')}
-            >
-              Despesa
-            </Button>
-          </div>
+        {/* Search */}
+        <SearchBar
+          placeholder="Buscar por nome, descrição ou tipo..."
+          value={searchQuery}
+          onSearch={setSearchQuery}
+          onClear={() => setSearchQuery('')}
+          showClear
+          size="md"
+        />
+
+        {/* Type Filter */}
+        <div className="flex gap-2">
+          <Button
+            variant={typeFilter === '' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTypeFilter('')}
+          >
+            Todos
+          </Button>
+          <Button
+            variant={typeFilter === 'REVENUE' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTypeFilter('REVENUE')}
+          >
+            Receita
+          </Button>
+          <Button
+            variant={typeFilter === 'EXPENSE' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTypeFilter('EXPENSE')}
+          >
+            Despesa
+          </Button>
         </div>
 
         {/* Table */}
@@ -319,8 +317,8 @@ export default function FinanceCategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50%]">Nome</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[120px]">Tipo</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead className="w-[60px]" />
                 </TableRow>
               </TableHeader>
@@ -440,7 +438,7 @@ export default function FinanceCategoriesPage() {
           }}
           onSuccess={handleDeleteConfirm}
           title="Excluir Categoria"
-          description="Digite seu PIN de Acao para confirmar a exclusao desta categoria."
+          description="Digite seu PIN de Ação para confirmar a exclusão desta categoria."
         />
       </PageBody>
     </PageLayout>
