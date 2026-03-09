@@ -297,6 +297,70 @@ export function KanbanView({
     setLocalCards(cards);
   }, [propsColumns, cards]);
 
+  // ─── Accessibility: Portuguese announcements for screen readers ───
+
+  const getColumnTitle = useCallback(
+    (columnId: string | undefined) => {
+      if (!columnId) return '';
+      const col = orderedColumns.find(c => c.id === columnId);
+      return col?.title ?? '';
+    },
+    [orderedColumns]
+  );
+
+  const dndAccessibility = useMemo(
+    () => ({
+      screenReaderInstructions: {
+        draggable:
+          'Para mover um cartão, pressione Espaço ou Enter. Use as setas para mover. Pressione Espaço ou Enter novamente para soltar, ou Escape para cancelar.',
+      },
+      announcements: {
+        onDragStart({ active }: DragStartEvent) {
+          const data = active.data.current;
+          if (data?.type === 'column') {
+            return `Coluna ${getColumnTitle(active.id as string)} selecionada`;
+          }
+          const card = data?.card as Card | undefined;
+          return `Cartão ${card?.title ?? ''} selecionado`;
+        },
+        onDragOver({ active, over }: DragOverEvent) {
+          if (!over) return '';
+          const data = active.data.current;
+          if (data?.type === 'column') return '';
+          const card = data?.card as Card | undefined;
+          const overData = over.data.current;
+          const targetColId =
+            overData?.type === 'column'
+              ? (over.id as string)
+              : overData?.type === 'card'
+                ? (overData.columnId as string)
+                : (over.id as string);
+          return `Cartão ${card?.title ?? ''} movido para ${getColumnTitle(targetColId)}`;
+        },
+        onDragEnd({ active, over }: DragEndEvent) {
+          if (!over) return 'Movimentação cancelada';
+          const data = active.data.current;
+          if (data?.type === 'column') {
+            return `Coluna ${getColumnTitle(active.id as string)} solta`;
+          }
+          const card = data?.card as Card | undefined;
+          const overData = over.data.current;
+          const targetColId =
+            overData?.type === 'column'
+              ? (over.id as string)
+              : overData?.type === 'card'
+                ? (overData.columnId as string)
+                : (over.id as string);
+          return `Cartão ${card?.title ?? ''} solto em ${getColumnTitle(targetColId)}`;
+        },
+        onDragCancel() {
+          return 'Movimentação cancelada';
+        },
+      },
+    }),
+    [getColumnTitle]
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -305,6 +369,7 @@ export function KanbanView({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      accessibility={dndAccessibility}
     >
       <div role="region" aria-label="Quadro Kanban" className="kanban-scroll h-full overflow-x-auto sm:overflow-y-hidden overflow-y-auto pb-2">
         <div className="flex flex-col sm:flex-row gap-3 sm:min-w-max h-full">
@@ -466,6 +531,8 @@ function KanbanColumn({
         <button
           type="button"
           className="cursor-grab active:cursor-grabbing opacity-0 group-hover/header:opacity-60 hover:!opacity-100 transition-opacity shrink-0 -ml-1 p-0.5 rounded"
+          aria-roledescription="Arrastar para reordenar"
+          aria-label={`Arrastar coluna ${column.title}`}
           {...attributes}
           {...listeners}
         >

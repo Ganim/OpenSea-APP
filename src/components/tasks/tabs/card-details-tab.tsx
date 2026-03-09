@@ -52,7 +52,10 @@ export function CardDetailsTab({ card, boardId }: CardDetailsTabProps) {
           toast.success('Descrição atualizada');
           setIsEditingDesc(false);
         },
-        onError: () => toast.error('Erro ao atualizar descrição'),
+        onError: () =>
+          toast.error(
+            'Não foi possível atualizar a descrição. Tente novamente.'
+          ),
       }
     );
   }, [card.id, card.description, editDesc, updateCard]);
@@ -61,7 +64,8 @@ export function CardDetailsTab({ card, boardId }: CardDetailsTabProps) {
     (attachmentId: string) => {
       deleteAttachment.mutate(attachmentId, {
         onSuccess: () => toast.success('Anexo removido'),
-        onError: () => toast.error('Erro ao remover anexo'),
+        onError: () =>
+          toast.error('Não foi possível remover o anexo. Tente novamente.'),
       });
     },
     [deleteAttachment]

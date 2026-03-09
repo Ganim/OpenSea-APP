@@ -42,7 +42,11 @@ export function CardDetailModal({
   boardId,
   cardId,
 }: CardDetailModalProps) {
-  const { data: cardData, isLoading: isLoadingCard, isError: isCardError } = useCard(boardId, cardId);
+  const {
+    data: cardData,
+    isLoading: isLoadingCard,
+    isError: isCardError,
+  } = useCard(boardId, cardId);
   const { data: boardData } = useBoard(boardId);
   const { data: labelsData } = useLabels(boardId);
 
@@ -87,7 +91,8 @@ export function CardDetailModal({
           toast.success('Título atualizado');
           setIsEditingTitle(false);
         },
-        onError: () => toast.error('Erro ao atualizar título'),
+        onError: () =>
+          toast.error('Não foi possível atualizar o título. Tente novamente.'),
       }
     );
   }, [card, cardId, editTitle, updateCard]);
@@ -112,7 +117,8 @@ export function CardDetailModal({
         { cardId, data: { columnId, position: 0 } },
         {
           onSuccess: () => toast.success('Cartão movido'),
-          onError: () => toast.error('Erro ao mover cartão'),
+          onError: () =>
+            toast.error('Não foi possível mover o cartão. Tente novamente.'),
         }
       );
     },
@@ -125,7 +131,10 @@ export function CardDetailModal({
         { cardId, data: { priority: priority as CardPriority } },
         {
           onSuccess: () => toast.success('Prioridade atualizada'),
-          onError: () => toast.error('Erro ao atualizar prioridade'),
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar a prioridade. Tente novamente.'
+            ),
         }
       );
     },
@@ -143,7 +152,10 @@ export function CardDetailModal({
             );
             setAssigneeOpen(false);
           },
-          onError: () => toast.error('Erro ao atribuir responsável'),
+          onError: () =>
+            toast.error(
+              'Não foi possível atribuir o responsável. Tente novamente.'
+            ),
         }
       );
     },
@@ -159,7 +171,8 @@ export function CardDetailModal({
             toast.success(date ? 'Prazo definido' : 'Prazo removido');
             setDueDateOpen(false);
           },
-          onError: () => toast.error('Erro ao atualizar prazo'),
+          onError: () =>
+            toast.error('Não foi possível atualizar o prazo. Tente novamente.'),
         }
       );
     },
@@ -175,7 +188,12 @@ export function CardDetailModal({
         : [...currentLabelIds, labelId];
       manageLabels.mutate(
         { cardId, labelIds: newLabelIds },
-        { onError: () => toast.error('Erro ao atualizar etiquetas') }
+        {
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar as etiquetas. Tente novamente.'
+            ),
+        }
       );
     },
     [card, cardId, manageLabels]
@@ -189,7 +207,10 @@ export function CardDetailModal({
         { cardId, data: { estimatedHours: hours } },
         {
           onSuccess: () => toast.success('Estimativa atualizada'),
-          onError: () => toast.error('Erro ao atualizar estimativa'),
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar a estimativa. Tente novamente.'
+            ),
         }
       );
     },
@@ -207,7 +228,10 @@ export function CardDetailModal({
         },
         {
           onSuccess: () => toast.success('Status atualizado'),
-          onError: () => toast.error('Erro ao atualizar status'),
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar o status. Tente novamente.'
+            ),
         }
       );
     },
@@ -226,7 +250,8 @@ export function CardDetailModal({
           );
           if (!isArchived) onOpenChange(false);
         },
-        onError: () => toast.error('Erro ao arquivar cartão'),
+        onError: () =>
+          toast.error('Não foi possível arquivar o cartão. Tente novamente.'),
       }
     );
   }, [card, cardId, archiveCard, onOpenChange]);
@@ -237,7 +262,8 @@ export function CardDetailModal({
         toast.success('Cartão excluído');
         onOpenChange(false);
       },
-      onError: () => toast.error('Erro ao excluir cartão'),
+      onError: () =>
+        toast.error('Não foi possível excluir o cartão. Tente novamente.'),
     });
   }, [cardId, deleteCard, onOpenChange]);
 
@@ -245,7 +271,7 @@ export function CardDetailModal({
     const url = `${window.location.origin}${window.location.pathname}?card=${cardId}`;
     navigator.clipboard.writeText(url).then(
       () => toast.success('Link copiado'),
-      () => toast.error('Erro ao copiar link')
+      () => toast.error('Não foi possível copiar o link. Tente novamente.')
     );
   }, [cardId]);
 
@@ -254,8 +280,7 @@ export function CardDetailModal({
   const currentColumn = columns.find(c => c.id === card?.columnId);
 
   const headerColor =
-    card?.labels?.[0]?.color ??
-    PRIORITY_HEX[card?.priority ?? 'NONE'];
+    card?.labels?.[0]?.color ?? PRIORITY_HEX[card?.priority ?? 'NONE'];
 
   const isOverdue = card?.dueDate
     ? new Date(card.dueDate) < new Date() && card.status !== 'DONE'
@@ -271,7 +296,7 @@ export function CardDetailModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 gap-0"
+        className="h-[100dvh] w-full max-w-full sm:h-auto sm:max-w-6xl sm:max-h-[90vh] overflow-hidden p-0 gap-0 rounded-none sm:rounded-lg"
         showCloseButton={false}
       >
         {isCardError ? (
@@ -286,7 +311,11 @@ export function CardDetailModal({
             <p className="text-sm text-muted-foreground">
               Erro ao carregar o cartão. Tente novamente.
             </p>
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
               Fechar
             </Button>
           </div>
@@ -324,10 +353,10 @@ export function CardDetailModal({
               onClose={() => onOpenChange(false)}
             />
 
-            {/* 3-column layout */}
+            {/* 3-column layout — stacks vertically on mobile */}
             <div
-              className="flex overflow-hidden flex-1 min-h-0 border-t border-border mt-3"
-              style={{ height: 'calc(90vh - 120px)' }}
+              className="flex flex-col sm:flex-row overflow-hidden flex-1 min-h-0 border-t border-border mt-3"
+              style={{ height: 'calc(100dvh - 120px)' }}
             >
               <CardDetailTabs
                 card={card}

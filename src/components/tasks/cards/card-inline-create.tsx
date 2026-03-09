@@ -38,7 +38,8 @@ export function CardInlineCreate({ boardId, columnId }: CardInlineCreateProps) {
           setTitle('');
           inputRef.current?.focus();
         },
-        onError: () => toast.error('Erro ao criar cartão'),
+        onError: () =>
+          toast.error('Não foi possível criar o cartão. Tente novamente.'),
       }
     );
   }, [title, columnId, createCard]);

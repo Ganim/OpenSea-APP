@@ -98,7 +98,7 @@ export function CardDetailSidebar({
   onDelete,
 }: CardDetailSidebarProps) {
   return (
-    <div className="w-56 shrink-0 border-l border-border bg-muted/20 dark:bg-white/[0.02] overflow-y-auto hidden sm:block">
+    <div className="w-full sm:w-56 shrink-0 border-t sm:border-t-0 sm:border-l border-border bg-muted/20 dark:bg-white/[0.02] overflow-y-auto">
       <div className="p-3 space-y-3">
         {/* Section: Status & Priority */}
         <div className="rounded-lg bg-background/50 dark:bg-white/[0.03] border border-border/40 p-3 space-y-2.5">
@@ -111,10 +111,7 @@ export function CardDetailSidebar({
             <p className="text-[10px] text-muted-foreground font-medium">
               Coluna
             </p>
-            <Select
-              value={card.columnId}
-              onValueChange={onColumnChange}
-            >
+            <Select value={card.columnId} onValueChange={onColumnChange}>
               <SelectTrigger className="h-8 text-xs w-full">
                 <Columns3 className="h-3.5 w-3.5 mr-1.5 text-muted-foreground shrink-0" />
                 <SelectValue />
@@ -142,10 +139,7 @@ export function CardDetailSidebar({
             <p className="text-[10px] text-muted-foreground font-medium">
               Status
             </p>
-            <Select
-              value={card.status}
-              onValueChange={onStatusChange}
-            >
+            <Select value={card.status} onValueChange={onStatusChange}>
               <SelectTrigger className="h-8 text-xs w-full">
                 <SelectValue>
                   <span
@@ -158,8 +152,7 @@ export function CardDetailSidebar({
                       className={cn(
                         'h-2 w-2 rounded-full shrink-0',
                         card.status === 'DONE' && 'bg-green-500',
-                        card.status === 'IN_PROGRESS' &&
-                          'bg-blue-500',
+                        card.status === 'IN_PROGRESS' && 'bg-blue-500',
                         card.status === 'CANCELED' && 'bg-red-500',
                         card.status === 'OPEN' && 'bg-gray-400'
                       )}
@@ -203,10 +196,7 @@ export function CardDetailSidebar({
             <p className="text-[10px] text-muted-foreground font-medium">
               Prioridade
             </p>
-            <Select
-              value={card.priority}
-              onValueChange={onPriorityChange}
-            >
+            <Select value={card.priority} onValueChange={onPriorityChange}>
               <SelectTrigger className="h-8 text-xs w-full">
                 <SelectValue>
                   <span className="flex items-center gap-1.5">
@@ -216,16 +206,14 @@ export function CardDetailSidebar({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(PRIORITY_CONFIG) as CardPriority[]).map(
-                  p => (
-                    <SelectItem key={p} value={p}>
-                      <span className="flex items-center gap-1.5">
-                        <PriorityBadge priority={p} />
-                        {PRIORITY_CONFIG[p].label}
-                      </span>
-                    </SelectItem>
-                  )
-                )}
+                {(Object.keys(PRIORITY_CONFIG) as CardPriority[]).map(p => (
+                  <SelectItem key={p} value={p}>
+                    <span className="flex items-center gap-1.5">
+                      <PriorityBadge priority={p} />
+                      {PRIORITY_CONFIG[p].label}
+                    </span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -242,10 +230,7 @@ export function CardDetailSidebar({
             <p className="text-[10px] text-muted-foreground font-medium">
               Responsável
             </p>
-            <Popover
-              open={assigneeOpen}
-              onOpenChange={onAssigneeOpenChange}
-            >
+            <Popover open={assigneeOpen} onOpenChange={onAssigneeOpenChange}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -259,16 +244,12 @@ export function CardDetailSidebar({
                         size="sm"
                         className="h-4 w-4 text-[8px]"
                       />
-                      <span className="truncate">
-                        {card.assigneeName}
-                      </span>
+                      <span className="truncate">{card.assigneeName}</span>
                     </>
                   ) : (
                     <>
                       <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">
-                        Nenhum
-                      </span>
+                      <span className="text-muted-foreground">Nenhum</span>
                     </>
                   )}
                 </Button>
@@ -282,9 +263,7 @@ export function CardDetailSidebar({
                     <span className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px]">
                       --
                     </span>
-                    <span className="text-muted-foreground">
-                      Nenhum
-                    </span>
+                    <span className="text-muted-foreground">Nenhum</span>
                   </button>
                   {members.map(m => (
                     <button
@@ -295,7 +274,11 @@ export function CardDetailSidebar({
                       )}
                       onClick={() => onAssigneeChange(m.userId)}
                     >
-                      <MemberAvatar name={m.userName} size="sm" />
+                      <MemberAvatar
+                        name={m.userName}
+                        avatarUrl={m.userAvatarUrl}
+                        size="sm"
+                      />
                       <span className="truncate">
                         {m.userName ?? m.userEmail}
                       </span>
@@ -335,9 +318,7 @@ export function CardDetailSidebar({
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={
-                    card.dueDate ? new Date(card.dueDate) : undefined
-                  }
+                  selected={card.dueDate ? new Date(card.dueDate) : undefined}
                   onSelect={onDueDateChange}
                   locale={ptBR}
                 />
@@ -404,8 +385,7 @@ export function CardDetailSidebar({
                 ) : (
                   allLabels.map(label => {
                     const isSelected =
-                      card.labels?.some(l => l.id === label.id) ??
-                      false;
+                      card.labels?.some(l => l.id === label.id) ?? false;
                     return (
                       <button
                         key={label.id}
@@ -416,10 +396,7 @@ export function CardDetailSidebar({
                           checked={isSelected}
                           className="pointer-events-none"
                         />
-                        <LabelBadge
-                          name={label.name}
-                          color={label.color}
-                        />
+                        <LabelBadge name={label.name} color={label.color} />
                       </button>
                     );
                   })
@@ -482,8 +459,8 @@ export function CardDetailSidebar({
               <AlertDialogHeader>
                 <AlertDialogTitle>Excluir cartão?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta ação é irreversível. Subtarefas, comentários e
-                  anexos também serão removidos.
+                  Esta ação é irreversível. Subtarefas, comentários e anexos
+                  também serão removidos.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

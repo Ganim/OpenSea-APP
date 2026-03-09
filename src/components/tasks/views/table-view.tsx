@@ -139,20 +139,33 @@ export function TableView({
                   key: 'priority' as const,
                   label: 'Prioridade',
                   width: 'w-32',
+                  hiddenOnMobile: true,
                 },
                 {
                   key: 'assignee' as const,
                   label: 'Responsável',
                   width: 'w-40',
+                  hiddenOnMobile: true,
                 },
-                { key: 'dueDate' as const, label: 'Prazo', width: 'w-36' },
-                { key: 'labels' as const, label: 'Etiquetas', width: 'w-32' },
-              ].map(({ key, label, width }) => (
+                {
+                  key: 'dueDate' as const,
+                  label: 'Prazo',
+                  width: 'w-36',
+                  hiddenOnMobile: true,
+                },
+                {
+                  key: 'labels' as const,
+                  label: 'Etiquetas',
+                  width: 'w-32',
+                  hiddenOnMobile: true,
+                },
+              ].map(({ key, label, width, hiddenOnMobile }) => (
                 <th
                   key={key}
                   className={cn(
                     'px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider',
-                    width
+                    width,
+                    hiddenOnMobile && 'hidden sm:table-cell'
                   )}
                 >
                   <button
@@ -210,7 +223,7 @@ export function TableView({
                         </span>
                       </span>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="hidden sm:table-cell px-4 py-2.5">
                       <span className="inline-flex items-center gap-1.5">
                         <PriorityBadge priority={card.priority} />
                         <span
@@ -223,7 +236,7 @@ export function TableView({
                         </span>
                       </span>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="hidden sm:table-cell px-4 py-2.5">
                       {card.assigneeName ? (
                         <span className="inline-flex items-center gap-2">
                           <MemberAvatar name={card.assigneeName} size="sm" />
@@ -235,7 +248,7 @@ export function TableView({
                         <span className="text-muted-foreground">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="hidden sm:table-cell px-4 py-2.5">
                       {card.dueDate ? (
                         <span
                           className={cn(
@@ -251,7 +264,7 @@ export function TableView({
                         <span className="text-muted-foreground">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="hidden sm:table-cell px-4 py-2.5">
                       {card.labels && card.labels.length > 0 ? (
                         <div className="flex items-center gap-1">
                           {card.labels.slice(0, 3).map(label => (

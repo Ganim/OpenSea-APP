@@ -40,7 +40,8 @@ export function CardSubtasksTab({ boardId, cardId }: CardSubtasksTabProps) {
           setNewTitle('');
           toast.success('Subtarefa criada');
         },
-        onError: () => toast.error('Erro ao criar subtarefa'),
+        onError: () =>
+          toast.error('Não foi possível criar a subtarefa. Tente novamente.'),
       }
     );
   }, [newTitle, createSubtask]);
@@ -61,7 +62,10 @@ export function CardSubtasksTab({ boardId, cardId }: CardSubtasksTabProps) {
       completeSubtask.mutate(
         { subtaskId, completed },
         {
-          onError: () => toast.error('Erro ao atualizar subtarefa'),
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar a subtarefa. Tente novamente.'
+            ),
         }
       );
     },
@@ -72,7 +76,8 @@ export function CardSubtasksTab({ boardId, cardId }: CardSubtasksTabProps) {
     (subtaskId: string) => {
       deleteSubtask.mutate(subtaskId, {
         onSuccess: () => toast.success('Subtarefa removida'),
-        onError: () => toast.error('Erro ao remover subtarefa'),
+        onError: () =>
+          toast.error('Não foi possível remover a subtarefa. Tente novamente.'),
       });
     },
     [deleteSubtask]

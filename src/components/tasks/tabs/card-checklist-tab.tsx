@@ -69,7 +69,10 @@ function ChecklistSection({
       { checklistId: checklist.id, data: { title } },
       {
         onSuccess: () => setIsEditingTitle(false),
-        onError: () => toast.error('Erro ao atualizar checklist'),
+        onError: () =>
+          toast.error(
+            'Não foi possível atualizar o checklist. Tente novamente.'
+          ),
       }
     );
   }, [checklist.id, checklist.title, editTitle, updateChecklist]);
@@ -77,7 +80,8 @@ function ChecklistSection({
   const handleDeleteChecklist = useCallback(() => {
     deleteChecklist.mutate(checklist.id, {
       onSuccess: () => toast.success('Checklist removido'),
-      onError: () => toast.error('Erro ao remover checklist'),
+      onError: () =>
+        toast.error('Não foi possível remover o checklist. Tente novamente.'),
     });
   }, [checklist.id, deleteChecklist]);
 
@@ -90,7 +94,8 @@ function ChecklistSection({
         onSuccess: () => {
           setNewItemTitle('');
         },
-        onError: () => toast.error('Erro ao adicionar item'),
+        onError: () =>
+          toast.error('Não foi possível adicionar o item. Tente novamente.'),
       }
     );
   }, [checklist.id, newItemTitle, addItem]);
@@ -100,7 +105,8 @@ function ChecklistSection({
       toggleItem.mutate(
         { checklistId: checklist.id, itemId },
         {
-          onError: () => toast.error('Erro ao atualizar item'),
+          onError: () =>
+            toast.error('Não foi possível atualizar o item. Tente novamente.'),
         }
       );
     },
@@ -112,7 +118,8 @@ function ChecklistSection({
       deleteItem.mutate(
         { checklistId: checklist.id, itemId },
         {
-          onError: () => toast.error('Erro ao remover item'),
+          onError: () =>
+            toast.error('Não foi possível remover o item. Tente novamente.'),
         }
       );
     },
@@ -252,7 +259,8 @@ export function CardChecklistTab({
           setShowCreate(false);
           toast.success('Checklist criado');
         },
-        onError: () => toast.error('Erro ao criar checklist'),
+        onError: () =>
+          toast.error('Não foi possível criar o checklist. Tente novamente.'),
       }
     );
   }, [newChecklistTitle, createChecklist]);

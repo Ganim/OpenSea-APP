@@ -234,7 +234,8 @@ export function CardCustomFieldsTab({
           setIsDirty(false);
           toast.success('Campos atualizados');
         },
-        onError: () => toast.error('Erro ao salvar campos'),
+        onError: () =>
+          toast.error('Não foi possível salvar os campos. Tente novamente.'),
       }
     );
   }, [customFields, localValues, existingValues, cardId, setValues]);

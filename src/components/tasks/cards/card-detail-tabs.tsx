@@ -1,5 +1,6 @@
 'use client';
 
+import { lazy, Suspense } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   FileText,
@@ -10,13 +11,40 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CardDetailErrorBoundary } from './card-detail-error-boundary';
 import { CardDetailsTab } from '@/components/tasks/tabs/card-details-tab';
-import { CardSubtasksTab } from '@/components/tasks/tabs/card-subtasks-tab';
-import { CardChecklistTab } from '@/components/tasks/tabs/card-checklist-tab';
 import { CardCommentsTab } from '@/components/tasks/tabs/card-comments-tab';
-import { CardCustomFieldsTab } from '@/components/tasks/tabs/card-custom-fields-tab';
-import { CardActivityTab } from '@/components/tasks/tabs/card-activity-tab';
 import type { Card } from '@/types/tasks';
+
+// Lazy-loaded tabs (only loaded when the user clicks on that tab)
+const CardSubtasksTab = lazy(() =>
+  import('../tabs/card-subtasks-tab').then(m => ({
+    default: m.CardSubtasksTab,
+  }))
+);
+const CardChecklistTab = lazy(() =>
+  import('../tabs/card-checklist-tab').then(m => ({
+    default: m.CardChecklistTab,
+  }))
+);
+const CardCustomFieldsTab = lazy(() =>
+  import('../tabs/card-custom-fields-tab').then(m => ({
+    default: m.CardCustomFieldsTab,
+  }))
+);
+const CardActivityTab = lazy(() =>
+  import('../tabs/card-activity-tab').then(m => ({
+    default: m.CardActivityTab,
+  }))
+);
+
+function TabSkeleton() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    </div>
+  );
+}
 
 type CardTab = 'geral' | 'subtarefas' | 'checklists' | 'campos' | 'atividade';
 
@@ -82,17 +110,13 @@ export function CardDetailTabs({
         </div>
 
         {/* Messages area + input */}
-        <CardCommentsTab
-          boardId={boardId}
-          cardId={cardId}
-          messagingLayout
-        />
+        <CardCommentsTab boardId={boardId} cardId={cardId} messagingLayout />
       </div>
 
       {/* ─── Column 2: Tab content (center) ─── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Tab bar */}
-        <div className="shrink-0 flex items-center gap-0.5 px-4 border-b border-border bg-muted/20 dark:bg-white/[0.02]">
+        {/* Tab bar — scrollable on mobile */}
+        <div className="shrink-0 flex items-center gap-0.5 px-4 border-b border-border bg-muted/20 dark:bg-white/[0.02] overflow-x-auto scrollbar-none">
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -101,7 +125,7 @@ export function CardDetailTabs({
                 key={tab.key}
                 type="button"
                 className={cn(
-                  'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors',
+                  'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors whitespace-nowrap',
                   isActive
                     ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
@@ -109,10 +133,7 @@ export function CardDetailTabs({
                 onClick={() => onTabChange(tab.key)}
               >
                 <Icon
-                  className={cn(
-                    'h-3.5 w-3.5',
-                    isActive ? tab.color : ''
-                  )}
+                  className={cn('h-3.5 w-3.5', isActive ? tab.color : '')}
                 />
                 {tab.label}
                 {isActive && (
@@ -125,57 +146,67 @@ export function CardDetailTabs({
 
         {/* Tab content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          {activeTab === 'geral' && (
-            <CardDetailsTab card={card} boardId={boardId} />
-          )}
+          <CardDetailErrorBoundary>
+            {activeTab === 'geral' && (
+              <CardDetailsTab card={card} boardId={boardId} />
+            )}
 
-          {activeTab === 'subtarefas' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <ListChecks className="h-4 w-4 text-emerald-500" />
-                <h4 className="text-sm font-semibold">Subtarefas</h4>
+            {activeTab === 'subtarefas' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="h-4 w-4 text-emerald-500" />
+                  <h4 className="text-sm font-semibold">Subtarefas</h4>
+                </div>
+                <Suspense fallback={<TabSkeleton />}>
+                  <CardSubtasksTab boardId={boardId} cardId={cardId} />
+                </Suspense>
               </div>
-              <CardSubtasksTab boardId={boardId} cardId={cardId} />
-            </div>
-          )}
+            )}
 
-          {activeTab === 'checklists' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-violet-500" />
-                <h4 className="text-sm font-semibold">Checklists</h4>
+            {activeTab === 'checklists' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4 text-violet-500" />
+                  <h4 className="text-sm font-semibold">Checklists</h4>
+                </div>
+                <Suspense fallback={<TabSkeleton />}>
+                  <CardChecklistTab
+                    boardId={boardId}
+                    cardId={cardId}
+                    checklists={card.checklists ?? []}
+                  />
+                </Suspense>
               </div>
-              <CardChecklistTab
-                boardId={boardId}
-                cardId={cardId}
-                checklists={card.checklists ?? []}
-              />
-            </div>
-          )}
+            )}
 
-          {activeTab === 'campos' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Settings2 className="h-4 w-4 text-amber-500" />
-                <h4 className="text-sm font-semibold">
-                  Campos personalizados
-                </h4>
+            {activeTab === 'campos' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-amber-500" />
+                  <h4 className="text-sm font-semibold">
+                    Campos personalizados
+                  </h4>
+                </div>
+                <Suspense fallback={<TabSkeleton />}>
+                  <CardCustomFieldsTab boardId={boardId} cardId={cardId} />
+                </Suspense>
               </div>
-              <CardCustomFieldsTab boardId={boardId} cardId={cardId} />
-            </div>
-          )}
+            )}
 
-          {activeTab === 'atividade' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-orange-500" />
-                <h4 className="text-sm font-semibold">
-                  Histórico de atividades
-                </h4>
+            {activeTab === 'atividade' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-orange-500" />
+                  <h4 className="text-sm font-semibold">
+                    Histórico de atividades
+                  </h4>
+                </div>
+                <Suspense fallback={<TabSkeleton />}>
+                  <CardActivityTab boardId={boardId} cardId={cardId} />
+                </Suspense>
               </div>
-              <CardActivityTab boardId={boardId} cardId={cardId} />
-            </div>
-          )}
+            )}
+          </CardDetailErrorBoundary>
 
           {/* Show comments inline on mobile (no left column) */}
           <div className="md:hidden space-y-3 border-t border-border pt-4">
