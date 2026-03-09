@@ -70,6 +70,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import { PayableWizardModal } from '@/components/finance/payable-wizard-modal';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -178,6 +179,12 @@ export default function PayablePage() {
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
+
+  // --------------------------------------------------------------------------
+  // Wizard modal state
+  // --------------------------------------------------------------------------
+
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // --------------------------------------------------------------------------
   // Delete state
@@ -317,8 +324,8 @@ export default function PayablePage() {
   // --------------------------------------------------------------------------
 
   const handleCreateClick = useCallback(() => {
-    router.push('/finance/payable/new');
-  }, [router]);
+    setWizardOpen(true);
+  }, []);
 
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
@@ -853,6 +860,15 @@ export default function PayablePage() {
             </>
           )}
         </Card>
+
+        {/* Payable Wizard Modal */}
+        <PayableWizardModal
+          open={wizardOpen}
+          onOpenChange={setWizardOpen}
+          onCreated={() => {
+            refetch();
+          }}
+        />
 
         {/* Delete PIN Confirmation Modal */}
         <VerifyActionPinModal

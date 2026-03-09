@@ -17,7 +17,10 @@ import type {
 import { Check } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { WizardStepAttachment } from './wizard-step-attachment';
 import { WizardStepConfirmation } from './wizard-step-confirmation';
+import { WizardStepData } from './wizard-step-data';
+import { WizardStepInstallments } from './wizard-step-installments';
 import { WizardStepType } from './wizard-step-type';
 
 // ============================================================================
@@ -272,21 +275,27 @@ export function PayableWizardModal({
         )}
 
         {currentStep === 2 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Etapa 2 - Dados (em construcao)
-          </div>
+          <WizardStepData
+            wizardData={wizardData}
+            updateWizardData={updateWizardData}
+            goToStep={goToStep}
+          />
         )}
 
         {currentStep === 3 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Etapa 3 - Parcelas (em construcao)
-          </div>
+          <WizardStepInstallments
+            wizardData={wizardData}
+            updateWizardData={updateWizardData}
+            goToStep={goToStep}
+          />
         )}
 
         {currentStep === 4 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Etapa 4 - Anexo (em construcao)
-          </div>
+          <WizardStepAttachment
+            wizardData={wizardData}
+            updateWizardData={updateWizardData}
+            goToStep={goToStep}
+          />
         )}
 
         {currentStep === 5 && (
