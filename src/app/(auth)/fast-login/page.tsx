@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/input-otp';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
-import { useTenant } from '@/contexts/tenant-context';
+// Tenant auto-selection is now handled by the backend during login
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import {
@@ -29,7 +29,6 @@ import { useEffect, useState } from 'react';
 
 export default function FastLoginPage() {
   const { login, isLoading } = useAuth();
-  const { refreshTenants, selectTenant } = useTenant();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
@@ -105,14 +104,14 @@ export default function FastLoginPage() {
       return;
     }
 
-    const tenantsList = await refreshTenants();
-
-    if (tenantsList.length === 1) {
-      await selectTenant(tenantsList[0].id);
+    // Se o backend auto-selecionou o tenant, vai direto
+    if (response.tenant) {
       router.push('/');
-    } else {
-      router.push('/select-tenant');
+      return;
     }
+
+    // Se tem 0 ou 2+ tenants, vai para a página de seleção
+    router.push('/select-tenant');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -156,14 +155,13 @@ export default function FastLoginPage() {
             return;
           }
 
-          const tenantsList = await refreshTenants();
-
-          if (tenantsList.length === 1) {
-            await selectTenant(tenantsList[0].id);
+          // Backend auto-selecionou tenant
+          if (result.autoSelectedTenant) {
             router.push('/');
-          } else {
-            router.push('/select-tenant');
+            return;
           }
+
+          router.push('/select-tenant');
         }
       }
     } catch (err: unknown) {

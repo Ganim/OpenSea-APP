@@ -18,6 +18,7 @@ import React, {
 interface LoginResult {
   redirected: boolean;
   isSuperAdmin?: boolean;
+  autoSelectedTenant?: boolean;
 }
 
 interface AuthContextType {
@@ -195,6 +196,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (response.sessionId) {
           localStorage.setItem('session_id', response.sessionId);
         }
+
+        // Se o backend auto-selecionou o tenant, salvar o tenant id e disparar evento
+        if (response.tenant) {
+          localStorage.setItem('selected_tenant_id', response.tenant.id);
+          logger.info('✅ Tenant auto-selecionado pelo backend', { tenantId: response.tenant.id });
+          // Dispatch event so TenantContext picks up the change
+          window.dispatchEvent(new CustomEvent('tenant-refreshed', { detail: response.tenant }));
+        }
+
         setHasToken(true);
         logger.debug('💾 Tokens salvos no localStorage');
 
@@ -233,6 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return {
           redirected: false,
           isSuperAdmin: userResult.data?.user?.isSuperAdmin ?? false,
+          autoSelectedTenant: !!response.tenant,
         };
       } catch (error) {
         const err = error as Error & {

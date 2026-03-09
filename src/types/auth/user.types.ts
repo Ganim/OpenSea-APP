@@ -108,11 +108,25 @@ export interface VerifyActionPinResponse {
 }
 
 // Auth Responses
+export interface AuthTenantSummary {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  status: string;
+  role: string;
+  joinedAt: string;
+}
+
 export interface AuthResponse {
   user: User;
   sessionId: string;
   token: string;
   refreshToken: string;
+  /** Auto-selected tenant (when user has exactly 1 tenant). Token is already tenant-scoped. */
+  tenant: AuthTenantSummary | null;
+  /** All available tenants for this user */
+  tenants: AuthTenantSummary[];
 }
 
 export interface RegisterResponse {
