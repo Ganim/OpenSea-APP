@@ -5,8 +5,7 @@ import { cn } from '@/lib/utils';
 import type { Card } from '@/types/tasks';
 import { PRIORITY_CONFIG } from '@/types/tasks';
 import { isOverdue, formatDueDate, PRIORITY_HEX } from '../_utils';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { MessageSquare, Paperclip, CalendarClock } from 'lucide-react';
 import { MemberAvatar } from '../shared/member-avatar';
 
@@ -14,7 +13,8 @@ interface CardItemProps {
   card: Card;
   onClick: () => void;
   boardId: string;
-  isDragOverlay?: boolean;
+  provided?: DraggableProvided;
+  isDragging?: boolean;
 }
 
 function getCardTopColor(card: Card): string | null {
@@ -31,30 +31,9 @@ export const CardItem = memo(function CardItem({
   card,
   onClick,
   boardId,
-  isDragOverlay = false,
+  provided,
+  isDragging = false,
 }: CardItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: card.id,
-    data: {
-      type: 'card',
-      card,
-      columnId: card.columnId,
-    },
-  });
-
-  const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    willChange: isDragging ? 'transform' : undefined,
-  };
-
   const topColor = getCardTopColor(card);
   const overdue = isOverdue(card.dueDate, card.status);
   const counts = card._count;
@@ -70,10 +49,9 @@ export const CardItem = memo(function CardItem({
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
+      ref={provided?.innerRef}
+      {...provided?.draggableProps}
+      {...provided?.dragHandleProps}
       role="button"
       tabIndex={0}
       aria-label={`Abrir cartão ${card.title}`}
@@ -81,11 +59,8 @@ export const CardItem = memo(function CardItem({
       className={cn(
         'group relative rounded-lg border bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/10 overflow-hidden cursor-grab active:cursor-grabbing',
         'transition-[box-shadow,opacity] duration-150',
-        isDragging && 'opacity-30 !cursor-grabbing',
-        isDragOverlay && 'shadow-2xl rotate-1 scale-105',
-        !isDragging &&
-          !isDragOverlay &&
-          'hover:shadow-md'
+        isDragging && 'opacity-50 shadow-2xl rotate-1 scale-[1.02]',
+        !isDragging && 'hover:shadow-md'
       )}
       onClick={e => {
         if (isDragging) return;
