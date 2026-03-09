@@ -9,6 +9,8 @@ import {
   type DragStartEvent,
   type DragOverEvent,
   PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   type UniqueIdentifier,
@@ -17,6 +19,7 @@ import {
   SortableContext,
   horizontalListSortingStrategy,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable';
@@ -126,6 +129,12 @@ export function KanbanView({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 

@@ -1,11 +1,20 @@
 import { boardsService } from '@/services/tasks';
-import type { BoardsResponse, BoardResponse } from '@/services/tasks/boards-service';
+import type {
+  BoardsResponse,
+  BoardResponse,
+} from '@/services/tasks/boards-service';
 import type {
   BoardsQuery,
   CreateBoardRequest,
   UpdateBoardRequest,
 } from '@/types/tasks';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 export const BOARD_QUERY_KEYS = {
   BOARDS: ['task-boards'],
@@ -17,6 +26,19 @@ export function useBoards(params?: BoardsQuery) {
     queryKey: [...BOARD_QUERY_KEYS.BOARDS, params],
     queryFn: () => boardsService.list(params),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useBoardsInfinite(params?: Omit<BoardsQuery, 'page'>) {
+  return useInfiniteQuery({
+    queryKey: [...BOARD_QUERY_KEYS.BOARDS, 'infinite', params],
+    queryFn: ({ pageParam }) =>
+      boardsService.list({ ...params, page: pageParam }),
+    getNextPageParam: lastPage =>
+      lastPage.meta.page < lastPage.meta.pages
+        ? lastPage.meta.page + 1
+        : undefined,
+    initialPageParam: 1,
   });
 }
 
@@ -41,11 +63,18 @@ export function useCreateBoard() {
 export function useUpdateBoard() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ boardId, data }: { boardId: string; data: UpdateBoardRequest }) =>
-      boardsService.update(boardId, data),
+    mutationFn: ({
+      boardId,
+      data,
+    }: {
+      boardId: string;
+      data: UpdateBoardRequest;
+    }) => boardsService.update(boardId, data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARDS });
-      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(variables.boardId) });
+      qc.invalidateQueries({
+        queryKey: BOARD_QUERY_KEYS.BOARD(variables.boardId),
+      });
     },
   });
 }
@@ -54,7 +83,7 @@ export function useDeleteBoard() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (boardId: string) => boardsService.delete(boardId),
-    onMutate: async (boardId) => {
+    onMutate: async boardId => {
       await qc.cancelQueries({ queryKey: BOARD_QUERY_KEYS.BOARDS });
       const previousQueries = qc.getQueriesData<BoardsResponse>({
         queryKey: BOARD_QUERY_KEYS.BOARDS,
@@ -62,13 +91,13 @@ export function useDeleteBoard() {
 
       qc.setQueriesData<BoardsResponse>(
         { queryKey: BOARD_QUERY_KEYS.BOARDS },
-        (old) => {
+        old => {
           if (!old) return old;
           return {
             ...old,
-            boards: old.boards.filter((b) => b.id !== boardId),
+            boards: old.boards.filter(b => b.id !== boardId),
           };
-        },
+        }
       );
 
       return { previousQueries };
@@ -93,7 +122,9 @@ export function useArchiveBoard() {
       boardsService.archive(boardId, archive),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARDS });
-      qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(variables.boardId) });
+      qc.invalidateQueries({
+        queryKey: BOARD_QUERY_KEYS.BOARD(variables.boardId),
+      });
     },
   });
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   ArrowRight,
@@ -14,10 +14,9 @@ import {
   FileText,
   Activity,
 } from 'lucide-react';
-import { useCardActivity } from '@/hooks/tasks/use-activity';
-import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
+import { useCardActivityInfinite } from '@/hooks/tasks/use-activity';
 import { formatRelativeTime } from '@/components/tasks/tabs/_utils';
-import type { CardActivity, CardActivityType } from '@/types/tasks';
+import type { CardActivityType } from '@/types/tasks';
 
 interface CardActivityTabProps {
   boardId: string;
@@ -50,44 +49,35 @@ const ACTIVITY_ICON: Record<CardActivityType, React.ReactNode> = {
 const PAGE_SIZE = 20;
 
 export function CardActivityTab({ boardId, cardId }: CardActivityTabProps) {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useCardActivity(boardId, cardId, {
-    page,
-    limit: PAGE_SIZE,
-  });
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useCardActivityInfinite(boardId, cardId, PAGE_SIZE);
 
-  const accumulatedRef = useRef<CardActivity[]>([]);
-  const lastPageRef = useRef(0);
+  const activities = useMemo(
+    () => data?.pages.flatMap(p => p.activities) ?? [],
+    [data]
+  );
 
-  const currentPageActivities = data?.activities ?? [];
-  const meta = data?.meta;
-  const hasMore = meta ? meta.page < meta.pages : false;
+  // Intersection observer for auto-load
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (!node || !hasNextPage || isFetchingNextPage) return;
 
-  useEffect(() => {
-    if (data && meta && meta.page > lastPageRef.current) {
-      accumulatedRef.current = [
-        ...accumulatedRef.current,
-        ...currentPageActivities,
-      ];
-      lastPageRef.current = meta.page;
-    }
-  }, [data, meta, currentPageActivities]);
+      observerRef.current = new IntersectionObserver(
+        entries => {
+          if (entries[0].isIntersecting) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.1 }
+      );
+      observerRef.current.observe(node);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
 
-  // Reset accumulation when card changes
-  useEffect(() => {
-    accumulatedRef.current = [];
-    lastPageRef.current = 0;
-    setPage(1);
-  }, [cardId]);
-
-  const activities =
-    page === 1 ? currentPageActivities : accumulatedRef.current;
-
-  const handleLoadMore = useCallback(() => {
-    setPage(p => p + 1);
-  }, []);
-
-  if (isLoading && page === 1) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8 w-full">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -140,16 +130,16 @@ export function CardActivityTab({ boardId, cardId }: CardActivityTabProps) {
         </div>
       </div>
 
-      {/* Load more */}
-      {hasMore && (
-        <div className="flex justify-center pt-3">
+      {/* Auto-load sentinel + manual fallback button */}
+      {hasNextPage && (
+        <div ref={loadMoreRef} className="flex justify-center pt-3">
           <Button
             variant="outline"
             size="sm"
-            onClick={handleLoadMore}
-            disabled={isLoading}
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
           >
-            {isLoading ? 'Carregando...' : 'Carregar mais'}
+            {isFetchingNextPage ? 'Carregando...' : 'Carregar mais'}
           </Button>
         </div>
       )}

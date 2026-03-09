@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { BoardList } from '@/components/tasks/boards/board-list';
 import { BoardCreateDialog } from '@/components/tasks/boards/board-create-dialog';
-import { useBoards } from '@/hooks/tasks/use-boards';
+import { useBoardsInfinite } from '@/hooks/tasks/use-boards';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useDebounce } from '@/core/hooks/use-debounce';
 import {
   Plus,
   Search,
@@ -17,8 +19,11 @@ import {
   KanbanSquare,
   User,
   Users,
+  Loader2,
 } from 'lucide-react';
 import type { Board } from '@/types/tasks';
+
+const BOARDS_PER_PAGE = 24;
 
 /** Collapsible section for board groups */
 function BoardSection({
@@ -70,35 +75,39 @@ export default function TasksPage() {
 
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const debouncedSearch = useDebounce(search, 300);
 
-  // Fetch all boards (limit: 100 is the API max) including archived
-  const { data, isLoading } = useBoards({
-    search: search || undefined,
-    includeArchived: true,
-    limit: 100,
-  });
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useBoardsInfinite({
+      search: debouncedSearch || undefined,
+      includeArchived: true,
+      limit: BOARDS_PER_PAGE,
+    });
 
-  const boards = data?.boards ?? [];
+  const boards = useMemo(
+    () => data?.pages.flatMap(p => p.boards) ?? [],
+    [data]
+  );
 
   // Separate active from archived
   const activeBoards = useMemo(
-    () => boards.filter((b) => !b.archivedAt),
-    [boards],
+    () => boards.filter(b => !b.archivedAt),
+    [boards]
   );
   const archivedBoards = useMemo(
-    () => boards.filter((b) => !!b.archivedAt),
-    [boards],
+    () => boards.filter(b => !!b.archivedAt),
+    [boards]
   );
 
   // Group active boards: personal vs team
   const personalBoards = useMemo(
-    () => activeBoards.filter((b) => b.type === 'PERSONAL'),
-    [activeBoards],
+    () => activeBoards.filter(b => b.type === 'PERSONAL'),
+    [activeBoards]
   );
 
   // Group team boards by teamId
   const teamBoardGroups = useMemo(() => {
-    const teamBoards = activeBoards.filter((b) => b.type === 'TEAM');
+    const teamBoards = activeBoards.filter(b => b.type === 'TEAM');
     const groups: Record<string, { teamId: string; boards: Board[] }> = {};
 
     for (const board of teamBoards) {
@@ -111,6 +120,26 @@ export default function TasksPage() {
 
     return Object.values(groups);
   }, [activeBoards]);
+
+  // Intersection observer for auto-load
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (!node || !hasNextPage || isFetchingNextPage) return;
+
+      observerRef.current = new IntersectionObserver(
+        entries => {
+          if (entries[0].isIntersecting) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.1 }
+      );
+      observerRef.current.observe(node);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
 
   const actionButtons = canCreate
     ? [
@@ -132,7 +161,7 @@ export default function TasksPage() {
         buttons={actionButtons}
       />
 
-      {/* ═══════ Hero Banner ═══════ */}
+      {/* Hero Banner */}
       <Card className="relative overflow-hidden px-5 py-4 bg-white shadow-sm dark:shadow-none dark:bg-white/5 border-gray-200 dark:border-white/10 shrink-0">
         {/* Decorative blobs */}
         <div className="absolute top-0 right-0 w-44 h-44 bg-violet-500/15 dark:bg-violet-500/10 rounded-full opacity-80 -translate-y-1/2 translate-x-1/2" />
@@ -163,7 +192,7 @@ export default function TasksPage() {
               <Input
                 placeholder="Buscar quadros por nome..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
                 className="pl-9 w-full bg-white dark:bg-white/10 border-gray-200 dark:border-white/10"
               />
             </div>
@@ -171,7 +200,7 @@ export default function TasksPage() {
         </div>
       </Card>
 
-      {/* ═══════ Board sections ═══════ */}
+      {/* Board sections */}
       {isLoading ? (
         <BoardList boards={[]} isLoading={true} />
       ) : (
@@ -190,16 +219,17 @@ export default function TasksPage() {
             <BoardSection
               key={group.teamId}
               icon={Users}
-              title={teamBoardGroups.length > 1
-                ? `Quadros de Equipe ${index + 1}`
-                : 'Quadros de Equipe'
+              title={
+                teamBoardGroups.length > 1
+                  ? `Quadros de Equipe ${index + 1}`
+                  : 'Quadros de Equipe'
               }
               boards={group.boards}
             />
           ))}
 
           {/* Empty state: no active boards at all */}
-          {activeBoards.length === 0 && !search && (
+          {activeBoards.length === 0 && !debouncedSearch && (
             <BoardList
               boards={[]}
               isLoading={false}
@@ -209,12 +239,12 @@ export default function TasksPage() {
           )}
 
           {/* Empty state: search returned nothing */}
-          {activeBoards.length === 0 && search && (
+          {activeBoards.length === 0 && debouncedSearch && (
             <BoardList
               boards={[]}
               isLoading={false}
               emptyTitle="Nenhum resultado"
-              emptyDescription={`Nenhum quadro encontrado para "${search}".`}
+              emptyDescription={`Nenhum quadro encontrado para "${debouncedSearch}".`}
             />
           )}
 
@@ -226,6 +256,27 @@ export default function TasksPage() {
               boards={archivedBoards}
               defaultOpen={false}
             />
+          )}
+
+          {/* Load more sentinel */}
+          {hasNextPage && (
+            <div ref={loadMoreRef} className="flex justify-center py-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Carregando...
+                  </>
+                ) : (
+                  'Carregar mais quadros'
+                )}
+              </Button>
+            </div>
           )}
         </div>
       )}
