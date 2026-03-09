@@ -14,6 +14,7 @@ export interface Board {
   defaultView: string;
   ownerId: string;
   position: number;
+  gradientId: string | null;
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string | null;
@@ -32,6 +33,7 @@ export interface CreateBoardRequest {
   type?: BoardType;
   visibility?: BoardVisibility;
   defaultView?: string;
+  gradientId?: string | null;
 }
 
 export interface UpdateBoardRequest {
@@ -39,6 +41,7 @@ export interface UpdateBoardRequest {
   description?: string | null;
   visibility?: BoardVisibility;
   defaultView?: string;
+  gradientId?: string | null;
 }
 
 export interface BoardsQuery {

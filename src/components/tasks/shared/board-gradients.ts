@@ -103,7 +103,14 @@ function hashBoardId(boardId: string): number {
   return Math.abs(hash);
 }
 
-export function getGradientForBoard(boardId: string): BoardGradient {
+export function getGradientForBoard(boardId: string, serverGradientId?: string | null): BoardGradient {
+  // Server-persisted gradient takes precedence
+  if (serverGradientId) {
+    const found = BOARD_GRADIENTS.find((g) => g.id === serverGradientId);
+    if (found) return found;
+  }
+
+  // Fallback to localStorage
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(`${STORAGE_PREFIX}${boardId}`);
     if (stored) {

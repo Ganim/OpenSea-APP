@@ -220,7 +220,7 @@ export function BoardSettingsDialog({
             <label className="text-sm font-medium">Cor de fundo</label>
             <div className="grid grid-cols-6 gap-2">
               {BOARD_GRADIENTS.map((gradient) => {
-                const current = getGradientForBoard(boardId);
+                const current = getGradientForBoard(boardId, board?.gradientId);
                 const isSelected = current.id === gradient.id;
                 return (
                   <button
@@ -233,7 +233,10 @@ export function BoardSettingsDialog({
                     style={gradient.style}
                     onClick={() => {
                       setGradientForBoard(boardId, gradient.id);
-                      toast.success('Cor atualizada!');
+                      updateBoard.mutate(
+                        { boardId, data: { gradientId: gradient.id } },
+                        { onSuccess: () => toast.success('Cor atualizada!') },
+                      );
                     }}
                   >
                     {isSelected && (

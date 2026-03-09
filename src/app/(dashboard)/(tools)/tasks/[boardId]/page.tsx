@@ -92,7 +92,7 @@ function BoardPageContent() {
   };
 
   const isArchived = !!board?.archivedAt;
-  const gradient = getGradientForBoard(boardId);
+  const gradient = getGradientForBoard(boardId, board?.gradientId);
 
   // Dynamically measure remaining viewport height for kanban
   const viewRef = useRef<HTMLDivElement>(null);
