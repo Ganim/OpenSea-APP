@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -53,13 +54,11 @@ export function AdjustModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <Label htmlFor="adjust-employee">ID do Funcionário</Label>
-            <Input
-              id="adjust-employee"
-              placeholder="ID do funcionário"
+            <Label>Funcionário *</Label>
+            <EmployeeSelector
               value={employeeId}
-              onChange={e => setEmployeeId(e.target.value)}
-              required
+              onChange={id => setEmployeeId(id)}
+              placeholder="Selecionar funcionário..."
             />
           </div>
           <div className="space-y-1">

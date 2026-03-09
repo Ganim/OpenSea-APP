@@ -3,6 +3,7 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -393,13 +394,13 @@ export default function DeductionsPage() {
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="text"
-              placeholder="Filtrar por funcionário..."
-              value={filterEmployeeId}
-              onChange={e => setFilterEmployeeId(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
-            />
+            <div className="w-64">
+              <EmployeeSelector
+                value={filterEmployeeId}
+                onChange={id => setFilterEmployeeId(id)}
+                placeholder="Filtrar por funcionário..."
+              />
+            </div>
 
             <select
               value={

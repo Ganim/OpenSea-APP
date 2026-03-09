@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -90,13 +91,11 @@ export function RequestSickLeaveModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {!employeeId && (
             <div className="space-y-2">
-              <Label htmlFor="sick-employee-id">ID do Funcionário</Label>
-              <Input
-                id="sick-employee-id"
+              <Label>Funcionário *</Label>
+              <EmployeeSelector
                 value={formEmployeeId}
-                onChange={e => setFormEmployeeId(e.target.value)}
-                placeholder="ID do funcionário"
-                required
+                onChange={id => setFormEmployeeId(id)}
+                placeholder="Selecionar funcionário..."
               />
             </div>
           )}

@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,16 +85,13 @@ export function CreateModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {/* Funcionario */}
+          {/* Funcionário */}
           <div className="space-y-2">
-            <Label htmlFor="ot-employee">Funcionário *</Label>
-            <Input
-              id="ot-employee"
+            <Label>Funcionário *</Label>
+            <EmployeeSelector
               value={employeeId}
-              onChange={e => setEmployeeId(e.target.value)}
-              placeholder="ID do funcionário"
-              required
-              autoFocus
+              onChange={id => setEmployeeId(id)}
+              placeholder="Selecionar funcionário..."
             />
           </div>
 

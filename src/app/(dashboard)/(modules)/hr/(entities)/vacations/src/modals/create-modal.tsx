@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -107,13 +108,11 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="vacation-employee-id">ID do Funcionário</Label>
-            <Input
-              id="vacation-employee-id"
+            <Label>Funcionário *</Label>
+            <EmployeeSelector
               value={employeeId}
-              onChange={e => setEmployeeId(e.target.value)}
-              placeholder="ID do funcionário"
-              required
+              onChange={id => setEmployeeId(id)}
+              placeholder="Selecionar funcionário..."
             />
           </div>
 

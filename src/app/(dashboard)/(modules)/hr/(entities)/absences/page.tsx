@@ -7,6 +7,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -172,12 +173,13 @@ export default function AbsencesPage() {
       <PageBody>
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
-          <Input
-            placeholder="Filtrar por funcionário..."
-            value={employeeFilter}
-            onChange={e => setEmployeeFilter(e.target.value)}
-            className="w-56"
-          />
+          <div className="w-64">
+            <EmployeeSelector
+              value={employeeFilter}
+              onChange={id => setEmployeeFilter(id)}
+              placeholder="Filtrar por funcionário..."
+            />
+          </div>
 
           <Select
             value={typeFilter}
