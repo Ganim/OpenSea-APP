@@ -49,9 +49,10 @@ export const CardItem = memo(function CardItem({
     },
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition,
+    willChange: isDragging ? 'transform' : undefined,
   };
 
   const topColor = getCardTopColor(card);
@@ -78,12 +79,13 @@ export const CardItem = memo(function CardItem({
       aria-label={`Abrir cartão ${card.title}`}
       aria-roledescription="Arrastar para reordenar"
       className={cn(
-        'group relative rounded-lg border bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/10 overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-150',
-        isDragging && 'opacity-30',
+        'group relative rounded-lg border bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/10 overflow-hidden cursor-grab active:cursor-grabbing',
+        'transition-[box-shadow,opacity] duration-150',
+        isDragging && 'opacity-30 !cursor-grabbing',
         isDragOverlay && 'shadow-2xl rotate-1 scale-105',
         !isDragging &&
           !isDragOverlay &&
-          'hover:shadow-md hover:-translate-y-0.5'
+          'hover:shadow-md'
       )}
       onClick={e => {
         if (isDragging) return;
