@@ -48,7 +48,7 @@ export function InlineCreateModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center" onKeyDown={handleKeyDown}>
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0" style={{ backgroundColor: 'var(--modal-overlay)' }} />
 
       {/* Panel */}
       <div
@@ -58,9 +58,15 @@ export function InlineCreateModal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative z-10 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg',
+          'relative z-10 w-full max-w-md rounded-lg border p-6 shadow-lg',
           'animate-in fade-in-0 zoom-in-95 duration-200'
         )}
+        style={{
+          backgroundColor: 'var(--modal-bg)',
+          color: 'var(--modal-text)',
+          borderColor: 'var(--modal-border)',
+          borderRadius: 'var(--modal-radius)',
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
