@@ -9,3 +9,4 @@ export * from './contracts.service';
 export * from './finance-recurring.service';
 export * from './finance-ocr.service';
 export * from './finance-analytics.service';
+export * from './finance-reports.service';

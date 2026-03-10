@@ -13,3 +13,4 @@ export * from './use-recurring';
 export * from './use-notifications';
 export * from './use-ocr';
 export * from './use-analytics';
+export * from './use-reports';
