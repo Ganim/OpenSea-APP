@@ -113,7 +113,11 @@ export default function TagsPage() {
 
   const handleContextEdit = (ids: string[]) => {
     if (ids.length === 1) {
-      router.push(`/stock/tags/${ids[0]}`);
+      const item = page.filteredItems.find(i => i.id === ids[0]);
+      if (item) {
+        page.modals.setEditingItem(item);
+        page.modals.open('edit');
+      }
     }
   };
 

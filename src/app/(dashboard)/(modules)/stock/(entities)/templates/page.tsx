@@ -72,8 +72,8 @@ export default function TemplatesPage() {
   // ============================================================================
 
   const crud = useEntityCrud<Template>({
-    entityName: 'Template',
-    entityNamePlural: 'Templates',
+    entityName: 'Modelo',
+    entityNamePlural: 'Modelos',
     queryKey: ['templates'],
     baseUrl: '/api/v1/templates',
     listFn: async () => {
@@ -93,8 +93,8 @@ export default function TemplatesPage() {
   // ============================================================================
 
   const page = useEntityPage<Template>({
-    entityName: 'Template',
-    entityNamePlural: 'Templates',
+    entityName: 'Modelo',
+    entityNamePlural: 'Modelos',
     queryKey: ['templates'],
     crud,
     viewRoute: id => `/stock/templates/${id}`,
@@ -110,7 +110,7 @@ export default function TemplatesPage() {
         productAttributes: item.productAttributes,
         variantAttributes: item.variantAttributes,
         itemAttributes: item.itemAttributes,
-        careLabel: item.careLabel,
+        specialModules: item.specialModules,
       }),
     },
   });

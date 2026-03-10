@@ -68,7 +68,6 @@ export function VariantForm({
         sku: variant.sku || '',
         name: variant.name,
         price: variant.price,
-        imageUrl: variant.imageUrl || '',
         reference: variant.reference || '',
         colorHex: variant.colorHex || '',
         colorPantone: variant.colorPantone || '',
@@ -211,7 +210,6 @@ export function VariantForm({
           definedSalePrice > 0 ? definedSalePrice : calculatedSalePrice || 0,
         costPrice: informedCostPrice || undefined,
         profitMargin: profitMarginPercent || undefined,
-        imageUrl: formData.imageUrl?.trim() || undefined,
         sku: formData.sku?.trim() || undefined,
         barcode: formData.barcode?.trim() || undefined,
         qrCode: formData.qrCode?.trim() || undefined,
@@ -371,22 +369,8 @@ export function VariantForm({
 
           {/* Linha 1.5: Fora de Linha, Ativo */}
 
-          {/* Linha 2: URL Imagem, Cor, Pantone */}
+          {/* Linha 2: Cor, Pantone */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="imageUrl">URL da Imagem</Label>
-              <Input
-                id="imageUrl"
-                name="imageUrl"
-                value={
-                  ((formData as CreateVariantRequest).imageUrl as string) || ''
-                }
-                onChange={handleInputChange}
-                placeholder="https://exemplo.com/imagem.jpg"
-                disabled={isLoading}
-              />
-            </div>
-
             <div className="grid gap-2">
               <Label htmlFor="colorHex">Cor de Exibição</Label>
               <div className="flex gap-2">

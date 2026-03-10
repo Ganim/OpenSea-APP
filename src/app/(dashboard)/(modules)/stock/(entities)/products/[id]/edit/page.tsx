@@ -200,12 +200,11 @@ export default function EditProductPage() {
   }, [categoriesData]);
 
   // Seleções de cuidado atuais do produto para exibir ícones no cabeçalho
-  const selectedCareOptions = useMemo(() => {
-    if (!careOptions || !product?.careInstructionIds) return [];
-    const allOptions = Object.values(careOptions).flat();
-    const selectedSet = new Set(product.careInstructionIds);
-    return allOptions.filter(option => selectedSet.has(option.code));
-  }, [careOptions, product?.careInstructionIds]);
+  // TODO: migrate to ProductCareInstruction API
+  const selectedCareOptions = useMemo((): Array<{ code: string; assetPath: string; label: string }> => {
+    if (!careOptions) return [];
+    return [];
+  }, [careOptions]);
 
   // ============================================================================
   // HANDLERS
@@ -660,7 +659,7 @@ export default function EditProductPage() {
             <div className="space-y-6">
               <CareSelector
                 productId={productId}
-                initialSelectedIds={product?.careInstructionIds || []}
+                initialSelectedIds={[]}
               />
             </div>
           </Card>

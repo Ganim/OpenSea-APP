@@ -62,12 +62,12 @@ function WorkSchedulesPageContent() {
   // ============================================================================
 
   const crud = useEntityCrud<WorkSchedule>({
-    entityName: 'WorkSchedule',
-    entityNamePlural: 'WorkSchedules',
+    entityName: 'Escala de Trabalho',
+    entityNamePlural: 'Escalas de Trabalho',
     queryKey: ['work-schedules'],
     baseUrl: '/api/v1/hr/work-schedules',
     listFn: async () => {
-      const response = await workSchedulesApi.list({});
+      const response = await workSchedulesApi.list({ perPage: 100 });
       return response.workSchedules;
     },
     getFn: (id: string) => workSchedulesApi.get(id),
@@ -82,8 +82,8 @@ function WorkSchedulesPageContent() {
   // ============================================================================
 
   const page = useEntityPage<WorkSchedule>({
-    entityName: 'WorkSchedule',
-    entityNamePlural: 'WorkSchedules',
+    entityName: 'Escala de Trabalho',
+    entityNamePlural: 'Escalas de Trabalho',
     queryKey: ['work-schedules'],
     crud,
     viewRoute: id => `/hr/work-schedules/${id}`,

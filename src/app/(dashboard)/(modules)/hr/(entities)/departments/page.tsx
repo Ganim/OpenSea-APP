@@ -111,12 +111,12 @@ function DepartmentsPageContent() {
   // ============================================================================
 
   const crud = useEntityCrud<Department>({
-    entityName: 'Department',
-    entityNamePlural: 'Departments',
+    entityName: 'Departamento',
+    entityNamePlural: 'Departamentos',
     queryKey: ['departments'],
     baseUrl: '/api/v1/hr/departments',
     listFn: async () => {
-      const deptResponse = await departmentsApi.list({});
+      const deptResponse = await departmentsApi.list({ perPage: 100 });
       return deptResponse.departments;
     },
     getFn: (id: string) => departmentsApi.get(id),
@@ -131,8 +131,8 @@ function DepartmentsPageContent() {
   // ============================================================================
 
   const page = useEntityPage<Department>({
-    entityName: 'Department',
-    entityNamePlural: 'Departments',
+    entityName: 'Departamento',
+    entityNamePlural: 'Departamentos',
     queryKey: ['departments'],
     crud,
     viewRoute: id => `/hr/departments/${id}`,

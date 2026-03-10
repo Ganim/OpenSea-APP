@@ -105,7 +105,7 @@ export function CreateProductForm({
     queryKey: ['templates'],
     queryFn: async () => {
       const response = await templatesService.listTemplates();
-      return response.templates;
+      return response?.templates ?? [];
     },
   });
 
@@ -114,7 +114,7 @@ export function CreateProductForm({
       queryKey: ['manufacturers'],
       queryFn: async () => {
         const response = await manufacturersService.listManufacturers();
-        return response.manufacturers;
+        return response?.manufacturers ?? [];
       },
     });
 

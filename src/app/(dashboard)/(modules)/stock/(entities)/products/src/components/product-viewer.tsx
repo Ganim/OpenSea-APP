@@ -328,15 +328,11 @@ export function ProductViewer({
   );
 
   // Mapear care options selecionadas
-  const selectedCareOptions = useMemo(() => {
-    const careInstructionIds = product.careInstructionIds || [];
-    if (!careOptionsData || careInstructionIds.length === 0) return [];
-
-    const allOptions = Object.values(careOptionsData).flat();
-    return allOptions.filter(option =>
-      careInstructionIds.includes(option.code)
-    );
-  }, [product, careOptionsData]);
+  // TODO: migrate to ProductCareInstruction API
+  const selectedCareOptions = useMemo((): Array<{ code: string; assetPath: string; label: string }> => {
+    if (!careOptionsData) return [];
+    return [];
+  }, [careOptionsData]);
 
   // ============================================================================
   // HANDLERS

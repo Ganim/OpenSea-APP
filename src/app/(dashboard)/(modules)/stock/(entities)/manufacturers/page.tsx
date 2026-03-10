@@ -81,8 +81,8 @@ export default function ManufacturersPage() {
   // ============================================================================
 
   const crud = useEntityCrud<Manufacturer>({
-    entityName: 'Manufacturer',
-    entityNamePlural: 'Manufacturers',
+    entityName: 'Fabricante',
+    entityNamePlural: 'Fabricantes',
     queryKey: ['manufacturers'],
     baseUrl: '/api/v1/manufacturers',
     listFn: async () => {
@@ -133,8 +133,8 @@ export default function ManufacturersPage() {
   // ============================================================================
 
   const page = useEntityPage<Manufacturer>({
-    entityName: 'Manufacturer',
-    entityNamePlural: 'Manufacturers',
+    entityName: 'Fabricante',
+    entityNamePlural: 'Fabricantes',
     queryKey: ['manufacturers'],
     crud,
     viewRoute: id => `/stock/manufacturers/${id}`,

@@ -16,6 +16,7 @@ import {
   costCentersService,
   loansService,
   consortiaService,
+  contractsService,
 } from '@/services/finance';
 import { companiesService } from '@/services/hr';
 
@@ -26,6 +27,7 @@ import {
   Building2,
   DollarSign,
   FileSpreadsheet,
+  FileText,
   FolderTree,
   Landmark,
   LayoutDashboard,
@@ -153,6 +155,16 @@ const sections: {
         hoverBg: 'hover:bg-pink-50 dark:hover:bg-pink-500/10',
         countKey: 'consortia',
       },
+      {
+        id: 'contracts',
+        title: 'Contratos',
+        description: 'Gestão de contratos com fornecedores',
+        icon: FileText,
+        href: '/finance/contracts',
+        gradient: 'from-teal-500 to-teal-600',
+        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
+        countKey: 'contracts',
+      },
     ],
   },
   {
@@ -213,6 +225,7 @@ export default function FinanceLandingPage() {
         loans,
         consortia,
         companies,
+        contracts,
       ] = await Promise.allSettled([
         financeEntriesService.list({
           type: 'PAYABLE',
@@ -232,6 +245,7 @@ export default function FinanceLandingPage() {
         loansService.list({ page: 1, perPage: 1 }),
         consortiaService.list({ page: 1, perPage: 1 }),
         companiesService.listCompanies({ perPage: 1 }),
+        contractsService.list({ page: 1, perPage: 1 }),
       ]);
 
       setCounts({
@@ -279,6 +293,12 @@ export default function FinanceLandingPage() {
           companies.status === 'fulfilled'
             ? (companies.value.meta?.total ??
               companies.value.companies?.length ??
+              null)
+            : null,
+        contracts:
+          contracts.status === 'fulfilled'
+            ? (contracts.value.meta?.total ??
+              contracts.value.contracts?.length ??
               null)
             : null,
       });

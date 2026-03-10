@@ -163,12 +163,12 @@ function EmployeesPageContent() {
   // ============================================================================
 
   const crud = useEntityCrud<Employee>({
-    entityName: 'Employee',
-    entityNamePlural: 'Employees',
+    entityName: 'Funcionário',
+    entityNamePlural: 'Funcionários',
     queryKey: ['employees'],
     baseUrl: '/api/v1/hr/employees',
     listFn: async () => {
-      const empResponse = await employeesApi.list({ includeDeleted: false });
+      const empResponse = await employeesApi.list({ includeDeleted: false, perPage: 100 });
 
       // Normalize employees
       const maybeEmployees = empResponse as {
@@ -195,8 +195,8 @@ function EmployeesPageContent() {
   // ============================================================================
 
   const page = useEntityPage<Employee>({
-    entityName: 'Employee',
-    entityNamePlural: 'Employees',
+    entityName: 'Funcionário',
+    entityNamePlural: 'Funcionários',
     queryKey: ['employees'],
     crud,
     viewRoute: id => `/hr/employees/${id}`,
@@ -766,23 +766,22 @@ function EmployeesPageContent() {
                     userEmail,
                     userPassword,
                   });
-                  await crud.refetch();
-                  toast.success('Funcionario e usuario criados com sucesso!', {
+                  await crud.invalidate();
+                  toast.success('Funcionário e usuário criados com sucesso!', {
                     description:
-                      'O usuario foi criado automaticamente com as permissoes selecionadas.',
+                      'O usuário foi criado automaticamente com as permissões selecionadas.',
                     duration: 5000,
                   });
                 } else {
-                  // Criar apenas o funcionario
+                  // Criar apenas o funcionário (toast é exibido pelo useEntityCrud)
                   await crud.create(employeeData);
-                  toast.success('Funcionario criado com sucesso!');
                 }
               } catch (error) {
                 logger.error(
-                  'Erro ao criar funcionario',
+                  'Erro ao criar funcionário',
                   error instanceof Error ? error : undefined
                 );
-                toast.error('Erro ao criar funcionario');
+                toast.error('Erro ao criar funcionário');
               }
             }}
           />

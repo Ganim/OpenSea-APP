@@ -48,7 +48,7 @@ export const variantsConfig = defineEntityConfig<Variant>()({
     gradient: 'from-violet-500 to-purple-600',
     titleField: 'name',
     subtitleField: 'sku',
-    imageField: 'imageUrl',
+    imageField: undefined,
     labels: {
       singular: 'Variante',
       plural: 'Variantes',

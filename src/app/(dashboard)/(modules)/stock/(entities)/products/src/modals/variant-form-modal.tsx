@@ -86,7 +86,6 @@ interface FormData {
   reference: string;
   colorHex: string;
   colorPantone: string;
-  imageUrl: string;
   outOfLine: boolean;
   isActive: boolean;
   // Pricing
@@ -138,7 +137,6 @@ const INITIAL_FORM: FormData = {
   reference: '',
   colorHex: '',
   colorPantone: '',
-  imageUrl: '',
   outOfLine: false,
   isActive: true,
   informedCostPrice: 0,
@@ -189,7 +187,6 @@ export function VariantFormModal({
         reference: variant.reference || '',
         colorHex: variant.colorHex || '',
         colorPantone: variant.colorPantone || '',
-        imageUrl: variant.imageUrl || '',
         outOfLine: variant.outOfLine ?? false,
         isActive: variant.isActive ?? true,
         informedCostPrice: variant.costPrice || 0,
@@ -314,7 +311,6 @@ export function VariantFormModal({
         reference: formData.reference.trim() || undefined,
         colorHex: formData.colorHex.trim() || undefined,
         colorPantone: formData.colorPantone.trim() || undefined,
-        imageUrl: formData.imageUrl.trim() || undefined,
         outOfLine: formData.outOfLine,
         isActive: formData.isActive,
         price: salePrice,
@@ -611,18 +607,6 @@ function BasicSection({ formData, updateField, isPending }: SectionProps) {
             disabled={isPending}
           />
         </div>
-      </div>
-
-      {/* URL da Imagem */}
-      <div className="space-y-1.5">
-        <Label htmlFor="vfm-imageUrl">URL da Imagem</Label>
-        <Input
-          id="vfm-imageUrl"
-          value={formData.imageUrl}
-          onChange={e => updateField('imageUrl', e.target.value)}
-          placeholder="https://exemplo.com/imagem.jpg"
-          disabled={isPending}
-        />
       </div>
 
       {/* Switches: Fora de Linha + Ativo */}

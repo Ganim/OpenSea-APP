@@ -135,12 +135,12 @@ function PositionsPageContent() {
   // ============================================================================
 
   const crud = useEntityCrud<Position>({
-    entityName: 'Position',
-    entityNamePlural: 'Positions',
+    entityName: 'Cargo',
+    entityNamePlural: 'Cargos',
     queryKey: ['positions'],
     baseUrl: '/api/v1/hr/positions',
     listFn: async () => {
-      const posResponse = await positionsApi.list({});
+      const posResponse = await positionsApi.list({ perPage: 100 });
       return posResponse.positions;
     },
     getFn: (id: string) => positionsApi.get(id),
@@ -155,8 +155,8 @@ function PositionsPageContent() {
   // ============================================================================
 
   const page = useEntityPage<Position>({
-    entityName: 'Position',
-    entityNamePlural: 'Positions',
+    entityName: 'Cargo',
+    entityNamePlural: 'Cargos',
     queryKey: ['positions'],
     crud,
     viewRoute: id => `/hr/positions/${id}`,

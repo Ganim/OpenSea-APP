@@ -71,8 +71,8 @@ export default function CompaniesPage() {
   // ============================================================================
 
   const crud = useEntityCrud<Company>({
-    entityName: 'Company',
-    entityNamePlural: 'Companies',
+    entityName: 'Empresa',
+    entityNamePlural: 'Empresas',
     queryKey: ['companies'],
     baseUrl: '/api/v1/hr/companies',
     listFn: async () => {
@@ -110,8 +110,8 @@ export default function CompaniesPage() {
   // ============================================================================
 
   const page = useEntityPage<Company>({
-    entityName: 'Company',
-    entityNamePlural: 'Companies',
+    entityName: 'Empresa',
+    entityNamePlural: 'Empresas',
     queryKey: ['companies'],
     crud,
     viewRoute: id => `/hr/companies/${id}`,
