@@ -14,7 +14,6 @@ export type VacationStatus =
 
 export interface VacationPeriod {
   id: string;
-  tenantId: string;
   employeeId: string;
   acquisitionStart: string;
   acquisitionEnd: string;

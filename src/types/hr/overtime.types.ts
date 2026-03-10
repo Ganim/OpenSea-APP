@@ -5,7 +5,6 @@
 
 export interface Overtime {
   id: string;
-  tenantId: string;
   employeeId: string;
   date: string;
   hours: number;

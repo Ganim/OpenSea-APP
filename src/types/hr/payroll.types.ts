@@ -37,7 +37,6 @@ export type PayrollItemType =
 
 export interface Payroll {
   id: string;
-  tenantId: string;
   referenceMonth: number;
   referenceYear: number;
   status: PayrollStatus;

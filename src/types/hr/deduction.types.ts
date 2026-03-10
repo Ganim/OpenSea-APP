@@ -5,7 +5,6 @@
 
 export interface Deduction {
   id: string;
-  tenantId: string;
   employeeId: string;
   name: string;
   amount: number;

@@ -96,7 +96,7 @@ class CompaniesService {
     id: string,
     data: UpdateCompanyRequest
   ): Promise<CompanyResponse> {
-    const response = await apiClient.put<CompanyResponse>(
+    const response = await apiClient.patch<CompanyResponse>(
       API_ENDPOINTS.COMPANIES.UPDATE(id),
       data
     );

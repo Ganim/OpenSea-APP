@@ -26,7 +26,6 @@ export type AbsenceStatus =
 
 export interface Absence {
   id: string;
-  tenantId: string;
   employeeId: string;
   type: AbsenceType;
   status: AbsenceStatus;

@@ -5,7 +5,6 @@
 
 export interface TimeBank {
   id: string;
-  tenantId: string;
   employeeId: string;
   balance: number;
   year: number;

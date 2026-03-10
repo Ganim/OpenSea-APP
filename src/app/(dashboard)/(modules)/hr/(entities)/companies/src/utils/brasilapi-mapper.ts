@@ -97,7 +97,7 @@ export function mapBrasilAPIToCompanyData(
         name: socio.nome_socio,
         role: mapQsaQualificacao(socio.qualificacao_socio),
         personDocumentMasked: socio.cnpj_cpf_do_socio,
-        entranceDate: socio.data_entrada_sociedade || undefined,
+        entryDate: socio.data_entrada_sociedade || undefined,
         status: 'ACTIVE',
       });
     });

@@ -5,7 +5,6 @@
 
 export interface Bonus {
   id: string;
-  tenantId: string;
   employeeId: string;
   name: string;
   amount: number;

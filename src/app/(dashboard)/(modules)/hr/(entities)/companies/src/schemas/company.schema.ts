@@ -312,14 +312,11 @@ export const companyStakeholderSchema = z.object({
     .optional()
     .nullable(),
 
-  email: optionalEmailValidator,
-  phone: optionalPhoneValidator,
-
   isLegalRepresentative: z.boolean().default(false),
 
   status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
 
-  entranceDate: z.string().optional().nullable(),
+  entryDate: z.string().optional().nullable(),
   exitDate: z.string().optional().nullable(),
   source: z.string().max(50, 'Fonte muito longa').optional().nullable(),
 });

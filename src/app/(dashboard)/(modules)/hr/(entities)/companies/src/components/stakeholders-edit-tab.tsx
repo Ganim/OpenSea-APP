@@ -187,14 +187,6 @@ export function StakeholdersEditTab({ companyId }: StakeholdersEditTabProps) {
                         </p>
                       </div>
                     )}
-                    {stakeholder.email && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Email</p>
-                        <p className="text-sm font-medium">
-                          {stakeholder.email}
-                        </p>
-                      </div>
-                    )}
                     {stakeholder.isLegalRepresentative && (
                       <div>
                         <Badge variant="default">Representante Legal</Badge>

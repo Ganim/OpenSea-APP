@@ -69,11 +69,9 @@ export function StakeholderModal({
         name: stakeholder.name || '',
         role: stakeholder.role || '',
         personDocumentMasked: stakeholder.personDocumentMasked || '',
-        email: stakeholder.email || '',
-        phone: stakeholder.phone || '',
         isLegalRepresentative: stakeholder.isLegalRepresentative ?? false,
         status: stakeholder.status || 'ACTIVE',
-        entranceDate: stakeholder.entranceDate || '',
+        entryDate: stakeholder.entryDate || '',
         exitDate: stakeholder.exitDate || '',
       });
     } else {
@@ -156,29 +154,10 @@ export function StakeholderModal({
           </div>
 
           <div>
-            <Label className="mb-1.5">Email</Label>
-            <Input
-              value={form.email || ''}
-              onChange={e => handleChange('email', e.target.value)}
-              placeholder="socio@empresa.com.br"
-              type="email"
-            />
-          </div>
-
-          <div>
-            <Label className="mb-1.5">Telefone</Label>
-            <Input
-              value={form.phone || ''}
-              onChange={e => handleChange('phone', e.target.value)}
-              placeholder="(11) 98888-7777"
-            />
-          </div>
-
-          <div>
             <Label className="mb-1.5">Data de Entrada</Label>
             <Input
-              value={form.entranceDate || ''}
-              onChange={e => handleChange('entranceDate', e.target.value)}
+              value={form.entryDate || ''}
+              onChange={e => handleChange('entryDate', e.target.value)}
               type="date"
             />
           </div>

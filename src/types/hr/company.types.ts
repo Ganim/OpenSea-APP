@@ -209,13 +209,12 @@ export interface CompanyStakeholder {
   name: string;
   role?: string | null;
   personDocumentMasked?: string | null;
-  email?: string | null;
-  phone?: string | null;
   isLegalRepresentative?: boolean;
   status: 'ACTIVE' | 'INACTIVE';
-  entranceDate?: string | null;
+  entryDate?: string | null;
   exitDate?: string | null;
-  source?: string | null;
+  source: string;
+  rawPayloadRef?: string | null;
   metadata?: Record<string, unknown>;
   pendingIssues?: string[];
   createdAt: string;
@@ -227,13 +226,12 @@ export interface CreateCompanyStakeholderData {
   name: string;
   role?: string | null;
   personDocumentMasked?: string | null;
-  email?: string | null;
-  phone?: string | null;
   isLegalRepresentative?: boolean;
   status?: 'ACTIVE' | 'INACTIVE';
-  entranceDate?: string | null;
+  entryDate?: string | null;
   exitDate?: string | null;
   source?: string | null;
+  rawPayloadRef?: string | null;
   metadata?: Record<string, unknown>;
 }
 
