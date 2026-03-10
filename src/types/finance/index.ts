@@ -7,3 +7,4 @@ export * from './consortium.types';
 export * from './dashboard.types';
 export * from './receivable.types';
 export * from './contract.types';
+export * from './recurring.types';

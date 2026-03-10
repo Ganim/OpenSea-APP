@@ -6,3 +6,5 @@ export * from './loans.service';
 export * from './consortia.service';
 export * from './dashboard.service';
 export * from './contracts.service';
+export * from './finance-recurring.service';
+export * from './finance-ocr.service';

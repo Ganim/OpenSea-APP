@@ -9,3 +9,5 @@ export * from './use-brasil-api-banks';
 export * from './use-suppliers';
 export * from './use-customers';
 export * from './use-contracts';
+export * from './use-recurring';
+export * from './use-ocr';

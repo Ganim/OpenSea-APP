@@ -453,6 +453,9 @@ export const API_ENDPOINTS = {
     UPLOAD_ATTACHMENT: (id: string) => `/v1/finance/entries/${id}/attachments`,
     DELETE_ATTACHMENT: (id: string, attachmentId: string) =>
       `/v1/finance/entries/${id}/attachments/${attachmentId}`,
+    OCR_TEXT: '/v1/finance/entries/ocr',
+    OCR_UPLOAD: '/v1/finance/entries/ocr/upload',
+    LAST_SUPPLIER: '/v1/finance/entries/last-supplier',
   },
   // Finance - Dashboard & Reports
   FINANCE_DASHBOARD: {
@@ -484,6 +487,27 @@ export const API_ENDPOINTS = {
     REGISTER_PAYMENT: (id: string) => `/v1/finance/consortia/${id}/payments`,
     MARK_CONTEMPLATED: (id: string) =>
       `/v1/finance/consortia/${id}/contemplated`,
+  },
+  // Finance - Contracts
+  CONTRACTS: {
+    LIST: '/v1/finance/contracts',
+    GET: (id: string) => `/v1/finance/contracts/${id}`,
+    CREATE: '/v1/finance/contracts',
+    UPDATE: (id: string) => `/v1/finance/contracts/${id}`,
+    DELETE: (id: string) => `/v1/finance/contracts/${id}`,
+    GENERATE_ENTRIES: (id: string) =>
+      `/v1/finance/contracts/${id}/generate-entries`,
+    SUPPLIER_HISTORY: '/v1/finance/contracts/supplier-history',
+  },
+  // Finance - Recurring
+  FINANCE_RECURRING: {
+    LIST: '/v1/finance/recurring',
+    GET: (id: string) => `/v1/finance/recurring/${id}`,
+    CREATE: '/v1/finance/recurring',
+    UPDATE: (id: string) => `/v1/finance/recurring/${id}`,
+    PAUSE: (id: string) => `/v1/finance/recurring/${id}/pause`,
+    RESUME: (id: string) => `/v1/finance/recurring/${id}/resume`,
+    CANCEL: (id: string) => `/v1/finance/recurring/${id}/cancel`,
   },
   // Storage - Folders
   STORAGE: {
