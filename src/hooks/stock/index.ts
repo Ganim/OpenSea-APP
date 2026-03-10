@@ -2,9 +2,12 @@ export * from './use-care-options';
 export * from './use-categories';
 export * from './use-items';
 export * from './use-label-templates';
+export * from './use-product-attachments';
 export * from './use-product-care';
+export * from './use-product-care-instructions';
 export * from './use-products';
 export * from './use-stock-other';
+export * from './use-variant-attachments';
 export * from './use-variants';
 
 // New hooks for extended stock functionality
