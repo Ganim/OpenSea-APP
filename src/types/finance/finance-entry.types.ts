@@ -199,7 +199,20 @@ export interface ForecastDataPoint {
   date: string;
   payable: number;
   receivable: number;
-  balance: number;
+  net: number;
+  cumulativeNet: number;
+}
+
+export interface CategorySum {
+  categoryId: string;
+  categoryName: string;
+  total: number;
+}
+
+export interface CostCenterSum {
+  costCenterId: string;
+  costCenterName: string;
+  total: number;
 }
 
 export interface ForecastResponse {
@@ -209,6 +222,8 @@ export interface ForecastResponse {
     totalReceivable: number;
     netBalance: number;
   };
+  byCategory: CategorySum[];
+  byCostCenter: CostCenterSum[];
 }
 
 export const FINANCE_ENTRY_STATUS_LABELS: Record<FinanceEntryStatus, string> = {
