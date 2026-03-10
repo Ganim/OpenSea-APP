@@ -5,3 +5,4 @@ export * from './finance-entry.types';
 export * from './loan.types';
 export * from './consortium.types';
 export * from './dashboard.types';
+export * from './receivable.types';
