@@ -91,7 +91,7 @@ FinanceLandingPage
       │   ├── Card Contas Bancárias  # countKey: bankAccounts
       │   ├── Card Centros de Custo  # countKey: costCenters
       │   ├── Card Categorias        # sem contador
-      │   └── Card Empresas          # countKey: companies
+      │   └── Card Empresas          # sem contador (empresas sendo migradas para admin)
       ├── Seção "Crédito"
       │   ├── Card Empréstimos       # countKey: loans
       │   ├── Card Consórcios        # countKey: consortia
@@ -100,7 +100,7 @@ FinanceLandingPage
           └── Card Exportação Contábil
 ```
 
-Os contadores são carregados via `Promise.allSettled()` paralelo na montagem da página, consultando diretamente os services de finance com `page=1, perPage=1` e lendo `meta.total`.
+Os contadores são carregados via um único endpoint consolidado `GET /v1/finance/overview` que retorna todas as contagens em uma só requisição. O service `financeDashboardService.getOverview()` é utilizado na montagem da página.
 
 #### `/finance/payable` — Contas a Pagar
 
@@ -324,6 +324,14 @@ Todos os tipos de finance estão em `src/types/finance/` com barrel re-export vi
 | `ReceivableSubType` | `VENDA`, `SERVICO`, `ALUGUEL`, `OUTROS` — subtipo para wizard de contas a receber |
 | `RECEIVABLE_SUBTYPE_LABELS` | Mapa PT-BR |
 
+### dashboard.types.ts (Overview)
+
+| Interface/Type | Descrição |
+|----------------|-----------|
+| `FinanceOverview` | Contagens consolidadas da landing page: `entries` (`payable`, `receivable`, `overdue`), `entities` (`bankAccounts`, `costCenters`, `categories`, `loans`, `consortia`, `contracts`) |
+| `FinanceOverviewEntryTypeCounts` | `{ pending: number; total: number }` — contadores por tipo de lançamento |
+| `FinanceOverviewEntityCounts` | `{ total: number }` — contador por entidade cadastral |
+
 ### Sincronização com Backend
 
 | Arquivo | Backend Schema | Sincronizado? |
@@ -437,6 +445,7 @@ Todos os hooks de finance estão em `src/hooks/finance/` com barrel via `src/hoo
 
 | Hook | Arquivo | Propósito |
 |------|---------|-----------|
+| `useFinanceNotificationPreferences()` | `use-notifications.ts` | Preferências de notificação do módulo financeiro (renomeado de `useNotificationPreferences` para evitar conflito com hook de sales). |
 | `useBrasilApiBanks()` | `use-brasil-api-banks.ts` | Lista bancos da BrasilAPI. Query key: `['brasilapi-banks']`. Cache de 24h. Usado no formulário de conta bancária para autocomplete de código/nome do banco. |
 | `useFinanceSuppliers(params?)` | `use-suppliers.ts` | Proxy sobre `suppliersService` do módulo stock. Query key: `['finance-suppliers', params]`. Filtro client-side por nome. Evita conflito de nomes com `useSuppliers` do módulo stock. |
 | `useCreateFinanceSupplier()` | `use-suppliers.ts` | Cria fornecedor inline no wizard de payable. Invalida `['finance-suppliers']` e `['suppliers']` simultaneamente. |
@@ -540,7 +549,7 @@ O módulo se comunica com o backend exclusivamente via services em `src/services
 | `loansService` | `loans.service.ts` | `list`, `get`, `create`, `update`, `delete`, `registerPayment` |
 | `consortiaService` | `consortia.service.ts` | `list`, `get`, `create`, `update`, `delete`, `registerPayment`, `markContemplated` |
 | `contractsService` | `contracts.service.ts` | `list`, `get`, `create`, `update`, `delete`, `generateEntries`, `getSupplierHistory` |
-| `financeDashboardService` | `dashboard.service.ts` | `getDashboard`, `getForecast`, `getCashflow`, `exportAccounting` |
+| `financeDashboardService` | `dashboard.service.ts` | `getOverview`, `getDashboard`, `getForecast`, `getCashflow`, `exportAccounting`, `getDreInteractive` |
 
 Todos os services utilizam `apiClient` de `src/lib/api-client.ts`, que injeta automaticamente o JWT de tenant em cada requisição.
 
@@ -622,3 +631,6 @@ O `exportAccounting` retorna um `Blob` que deve ser tratado pelo chamador para d
 | Data | Dimensão | Score | Relatório |
 |------|----------|-------|-----------|
 | 2026-03-10 | Documentação inicial | — | Criação da documentação completa do módulo finance (frontend) |
+| 2026-03-10 | Auditoria consolidada | 7.8/10 | 12 dimensões auditadas (`docs/audits/2026-03-10-finance-consolidated.md`) |
+| 2026-03-11 | Correções de auditoria | ~9.0/10 | RBAC em 63 controllers, overview endpoint, union types, aria-labels (22 tabelas), PT-BR acentos (~90 correções), TransactionManager, generateNextCode atômico, ADRs, date validation |
+| 2026-03-11 | Companies reorganization | — | Empresas sendo migradas de HR/Finance para Admin (ver `docs/superpowers/specs/2026-03-11-admin-companies-reorganization-design.md`) — implementação em andamento |
