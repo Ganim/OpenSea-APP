@@ -160,7 +160,7 @@ import type { EmailAccount, EmailMessageListItem } from '@/types/email';
 import type { CreateShareLinkRequest } from '@/types/storage';
 
 // src/hooks/admin/use-admin-companies.ts
-import type { Company } from '@/types/hr';
+import type { Company } from '@/types/admin';
 
 // src/hooks/use-permissions.ts
 import type { EffectivePermission } from '@/types/rbac';

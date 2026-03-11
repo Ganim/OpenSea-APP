@@ -716,7 +716,7 @@ import { PermissionGate, CanCreate, CanDelete } from '@/components/auth/permissi
 </PermissionGate>
 
 // Todas as permissões (AND)
-<PermissionGate permission={['hr.companies.view', 'hr.companies.update']} requireAll>
+<PermissionGate permission={['admin.companies.read', 'admin.companies.update']} requireAll>
   <FullEditor />
 </PermissionGate>
 

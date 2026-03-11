@@ -10,7 +10,7 @@ O módulo está organizado sob o route group `(dashboard)/(modules)/finance`. To
 
 - `stock/` — Os fornecedores cadastrados no módulo de estoque são reutilizados no wizard de contas a pagar via `useFinanceSuppliers()` (proxy sobre `suppliersService`)
 - `sales/` — Os clientes cadastrados no módulo de vendas são reutilizados no wizard de contas a receber via `useFinanceCustomers()` (proxy sobre `customersService`)
-- `hr/` — Empresas cadastradas no módulo de RH são compartilhadas com contas bancárias e centros de custo do módulo financeiro via `companiesService`
+- `admin/` — Empresas cadastradas no módulo Admin são compartilhadas com contas bancárias e centros de custo do módulo financeiro via `services/admin/companies.service.ts`
 - `stock/` — Ordens de compra aprovadas criam entradas financeiras automaticamente via integração de backend (hook `CalendarSyncService`)
 
 ---
@@ -633,4 +633,4 @@ O `exportAccounting` retorna um `Blob` que deve ser tratado pelo chamador para d
 | 2026-03-10 | Documentação inicial | — | Criação da documentação completa do módulo finance (frontend) |
 | 2026-03-10 | Auditoria consolidada | 7.8/10 | 12 dimensões auditadas (`docs/audits/2026-03-10-finance-consolidated.md`) |
 | 2026-03-11 | Correções de auditoria | ~9.0/10 | RBAC em 63 controllers, overview endpoint, union types, aria-labels (22 tabelas), PT-BR acentos (~90 correções), TransactionManager, generateNextCode atômico, ADRs, date validation |
-| 2026-03-11 | Companies reorganization | — | Empresas sendo migradas de HR/Finance para Admin (ver `docs/superpowers/specs/2026-03-11-admin-companies-reorganization-design.md`) — implementação em andamento |
+| 2026-03-11 | Companies reorganization | — | Empresas migradas de HR/Finance para Admin (`/v1/admin/companies`). Finance consome via `services/admin/companies.service.ts` com `admin.companies.*` permissions |

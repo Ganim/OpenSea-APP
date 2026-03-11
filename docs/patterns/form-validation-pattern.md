@@ -149,7 +149,7 @@ resolver: zodResolver(quickStockSchema) as never,
 ### 3. Schemas Zod com validação de documentos brasileiros
 
 O único schema Zod dedicado a formulário de domínio complexo está em:
-`src/app/(dashboard)/(modules)/hr/(entities)/companies/src/schemas/company.schema.ts`
+`src/app/(dashboard)/(modules)/admin/(entities)/companies/src/schemas/company.schema.ts`
 
 Este arquivo demonstra o padrão canônico para validação de documentos brasileiros.
 
@@ -748,7 +748,7 @@ try {
 | `src/components/finance/inline-supplier-form.tsx` | Formulário inline com lookup BrasilAPI |
 | `src/components/finance/inline-bank-account-form.tsx` | Formulário inline com grid 2 colunas |
 | `src/app/(dashboard)/(modules)/stock/(entities)/products/src/components/workspace/quick-stock-entry.tsx` | Formulário react-hook-form + Zod completo |
-| `src/app/(dashboard)/(modules)/hr/(entities)/companies/src/schemas/company.schema.ts` | Schema Zod canônico com validação de CNPJ/CPF/telefone/CEP |
+| `src/app/(dashboard)/(modules)/admin/(entities)/companies/src/schemas/company.schema.ts` | Schema Zod canônico com validação de CNPJ/CPF/telefone/CEP |
 | `src/app/(dashboard)/(modules)/finance/companies/src/modals/cnpj-lookup-modal.tsx` | Modal com máscara CNPJ na digitação |
 | `src/app/(dashboard)/(modules)/finance/payable/new/page.tsx` | Página de formulário manual com useState para entidade financeira |
 

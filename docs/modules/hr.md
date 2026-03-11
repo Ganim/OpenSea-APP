@@ -23,9 +23,8 @@ O módulo está organizado sob o route group `(dashboard)/(modules)/hr` e integr
 /hr/overview                                        # Visão Geral — dashboard analítico (KPIs + gráficos Recharts)
 
 # Cadastros
-/hr/companies                                       # Lista de empresas
-/hr/companies/[id]                                  # Detalhe de empresa (abas: Geral, Equipe, CNAEs, Fiscal, Documentos)
-/hr/companies/[id]/edit                             # Edição de empresa (formulário completo com sub-recursos)
+/hr/companies                                       # Lista de empresas (somente leitura — CRUD migrado para /admin/companies)
+/hr/companies/[id]                                  # Detalhe de empresa (somente leitura)
 /hr/departments                                     # Lista de departamentos
 /hr/departments/[id]                                # Detalhe de departamento
 /hr/departments/[id]/edit                           # Edição de departamento
@@ -64,7 +63,7 @@ O módulo está organizado sob o route group `(dashboard)/(modules)/hr` e integr
 /import/hr/employees                                # Importação de funcionários (planilha CSV/XLSX)
 /import/hr/departments                              # Importação de departamentos
 /import/hr/positions                                # Importação de cargos
-/import/hr/companies                                # Importação de empresas
+/import/admin/companies                             # Importação de empresas (migrado para Admin)
 ```
 
 ### Layout Hierarchy
@@ -144,21 +143,20 @@ EmployeeDetailPage
 
 A funcionalidade de "Criar Usuário" abre um `Dialog` com formulário de email, senha e seleção de grupo de permissão. A foto aceita upload com recorte via `PhotoUploadDialog` (multipart para `POST /v1/hr/employees/:id/photo`).
 
-#### `/hr/companies/[id]` — Detalhe de Empresa
+#### `/hr/companies/[id]` — Detalhe de Empresa (somente leitura)
+
+> **Nota:** O CRUD completo de empresas foi migrado para `/admin/companies`. A visualização em HR é somente leitura.
 
 ```
-CompanyDetailPage
+CompanyDetailPage (read-only)
   ├── PageHeader
-  │   ├── PageActionBar             # Breadcrumb + botões: Excluir, Editar
+  │   ├── PageActionBar             # Breadcrumb (sem botões de edição/exclusão)
   │   └── Identity Card             # Ícone, razão social, nome fantasia, status, datas
   └── PageBody
-      └── Tabs (5 abas)
-          ├── "Geral"       → GeneralTab    # Dados cadastrais, endereços (CompanyAddress), sócios (Stakeholder)
-          ├── "Equipe"                       # Lista de departamentos + funcionários desta empresa
-          ├── "CNAEs"       → CnaesTab      # Lista de CNAEs, marcação de primário
-          ├── "Fiscal"      → FiscalTab     # CompanyFiscalSettings (NF-e, NFC-e, certificado digital)
-          └── "Documentos"                  # FileManager (entityType="company", entityId)
+      └── Dados cadastrais da empresa (somente leitura)
 ```
+
+Para CRUD completo com edição, abas de subrecursos e importação, ver `/admin/companies/[id]`.
 
 ---
 
@@ -191,7 +189,9 @@ Todos os tipos de HR estão em `src/types/hr/` com barrel re-export via `src/typ
 | `CreatePositionData` | Campos obrigatórios: `name`, `code` |
 | `UpdatePositionData` | Atualização parcial |
 
-### company.types.ts
+### company.types.ts (migrado para `src/types/admin/company.types.ts`)
+
+> **Nota:** Os tipos de empresa foram migrados para o módulo Admin. Importar via `import type { Company } from '@/types/admin'`.
 
 | Interface/Type | Descrição |
 |----------------|-----------|
@@ -284,7 +284,7 @@ Todos os tipos de HR estão em `src/types/hr/` com barrel re-export via `src/typ
 |---------|---------------|---------------|
 | `employee.types.ts` | `employee.schema.ts` | Sim |
 | `department.types.ts` | `department.schema.ts` | Sim |
-| `company.types.ts` | `company.schema.ts` | Sim |
+| `company.types.ts` | `company.schema.ts` | Sim (migrado para `src/types/admin/`) |
 | `work-schedule.types.ts` | `work-schedule.schema.ts` | Sim |
 | `time-entry.types.ts` | `time-entry.schema.ts` | Sim |
 | `time-bank.types.ts` | `time-bank.schema.ts` | Sim |
@@ -332,32 +332,9 @@ O módulo de HR não possui um diretório `src/hooks/hr/`. Os hooks são impleme
 
 O `HRSelectionToolbar` utiliza `useSelectionContext()` do core e delega para o `SelectionToolbar` genérico. Só é renderizado quando há itens selecionados (`selectedIds.length === 0` retorna `null`).
 
-### Componentes de Empresa
+### Componentes de Empresa (migrados para Admin)
 
-| Componente | Arquivo | Responsabilidade |
-|------------|---------|-----------------|
-| `GeneralTab` | `companies/src/components/general-tab.tsx` | Aba de dados gerais: informações cadastrais, endereços e sócios em modo visualização |
-| `CnaesTab` | `companies/src/components/cnaes-tab.tsx` | Aba de CNAEs: lista com marcação de primário e status |
-| `FiscalTab` | `companies/src/components/fiscal-tab.tsx` | Aba de configurações fiscais: NF-e, NFC-e, certificado digital |
-| `AddressesEditTab` | `companies/src/components/addresses-edit-tab.tsx` | Aba de edição de endereços (usada na página de edição) |
-| `CnaesEditTab` | `companies/src/components/cnaes-edit-tab.tsx` | Aba de edição de CNAEs |
-| `FiscalEditTab` | `companies/src/components/fiscal-edit-tab.tsx` | Aba de edição de configurações fiscais |
-| `StakeholdersEditTab` | `companies/src/components/stakeholders-edit-tab.tsx` | Aba de edição de sócios |
-
-#### Modais de Empresa
-
-| Modal | Responsabilidade |
-|-------|-----------------|
-| `CreateModal` | Criação de nova empresa com CNPJ e consulta automática |
-| `EditModal` | Edição dos dados básicos da empresa |
-| `CnpjLookupModal` | Busca de dados na API pública de CNPJ (BrasilAPI / Receita Federal) |
-| `CnaeModal` | Adição ou edição de CNAE |
-| `FiscalSettingsModal` | Edição das configurações fiscais |
-| `StakeholderModal` | Adição ou edição de sócio/representante legal |
-| `AddressModal` | Adição ou edição de endereço |
-| `DeleteConfirmModal` | Confirmação de exclusão |
-| `DuplicateConfirmModal` | Confirmação de duplicação |
-| `ViewModal` | Visualização rápida (quick view) |
+> **Nota:** Os componentes de empresa com CRUD completo foram migrados para o módulo Admin em `admin/(entities)/companies/`. O módulo HR mantém apenas uma visualização somente leitura de empresas.
 
 ### Componentes de Funcionário
 
@@ -401,7 +378,7 @@ O módulo se comunica com o backend exclusivamente via services em `src/services
 | Service | Arquivo | Base Path | Operações Principais |
 |---------|---------|-----------|---------------------|
 | `employeesService` | `employees.service.ts` | `/v1/hr/employees` | CRUD + upload de foto (multipart) + create-user + link-user + unlink-user + label-data |
-| `companiesService` | `companies.service.ts` | `/v1/hr/companies` | CRUD + check-cnpj + addresses + cnaes + fiscal-settings + stakeholders (cada sub-recurso com CRUD completo) |
+| `companiesService` | `services/admin/companies.service.ts` | `/v1/admin/companies` | CRUD migrado para Admin; HR consome via `hr.companies.read` (somente leitura) |
 | `departmentsService` | `departments.service.ts` | `/v1/hr/departments` | CRUD com populate=company |
 | `positionsService` | `positions.service.ts` | `/v1/hr/positions` | CRUD |
 | `workSchedulesService` | `work-schedules.service.ts` | `/v1/hr/work-schedules` | CRUD |
@@ -427,13 +404,9 @@ O módulo se comunica com o backend exclusivamente via services em `src/services
 - `GET /v1/hr/employees/by-user/:userId` — Busca funcionário pelo ID do usuário do sistema
 - `GET /v1/hr/employees/:id?populate=department,position,company` — Detalhe com relações expandidas
 
-**Empresas — Sub-recursos aninhados:**
-- `GET|POST /v1/hr/companies/:id/addresses` — Lista e cria endereços
-- `GET|PUT|DELETE /v1/hr/companies/:id/addresses/:addressId` — Detalhe, atualização e exclusão
-- `GET|POST /v1/hr/companies/:id/cnaes` + `GET /v1/hr/companies/:id/cnaes/primary`
-- `GET|POST|PATCH|DELETE /v1/hr/companies/:id/fiscal-settings`
-- `GET|POST /v1/hr/companies/:id/stakeholders` + `GET /v1/hr/companies/:id/stakeholders/legal-representative`
-- `POST /v1/hr/companies/:id/stakeholders/sync-from-cnpj-api` — Sincroniza sócios da API pública de CNPJ
+**Empresas — Migrado para Admin:**
+- CRUD completo e sub-recursos agora em `/v1/admin/companies` (ver módulo Admin)
+- HR mantém apenas `GET /v1/hr/companies` e `GET /v1/hr/companies/:id` (somente leitura)
 
 **Férias:**
 - `PATCH /v1/hr/vacation-periods/:id/schedule` — Agenda o início das férias
@@ -477,7 +450,7 @@ O módulo oferece importação em lote via planilha CSV ou XLSX para as 4 entida
 | Funcionários | `/import/hr/employees` | `EntityImportPage` (entityType="employees") |
 | Departamentos | `/import/hr/departments` | `EntityImportPage` (entityType="departments") + rotas `config/` e `sheets/` |
 | Cargos | `/import/hr/positions` | `EntityImportPage` (entityType="positions") + rotas `config/` e `sheets/` |
-| Empresas | `/import/hr/companies` | `EntityImportPage` (entityType="companies") |
+| Empresas | `/import/admin/companies` | `EntityImportPage` (entityType="companies") — migrado para Admin |
 
 Todas as importações utilizam o componente genérico `EntityImportPage` do módulo de importações compartilhado em `(dashboard)/(actions)/import/_shared/`. O fluxo padrão é: Upload de arquivo → Configuração de campos (mapeamento de colunas) → Execução com barra de progresso.
 

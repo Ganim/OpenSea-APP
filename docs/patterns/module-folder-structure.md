@@ -126,7 +126,7 @@ hr/
 │   ├── employees/              # /hr/employees
 │   ├── departments/            # /hr/departments
 │   ├── positions/              # /hr/positions
-│   ├── companies/              # /hr/companies (sendo migrado para admin)
+│   ├── companies/              # /hr/companies (somente leitura — CRUD migrado para /admin/companies)
 │   ├── absences/               # /hr/absences
 │   ├── bonuses/                # /hr/bonuses
 │   ├── deductions/             # /hr/deductions
@@ -149,7 +149,8 @@ admin/
 ├── (entities)/
 │   ├── users/                  # /admin/users
 │   ├── teams/                  # /admin/teams
-│   └── permission-groups/      # /admin/permission-groups
+│   ├── permission-groups/      # /admin/permission-groups
+│   └── companies/              # /admin/companies — CRUD completo de empresas (migrado de HR)
 └── overview/
     └── audit-logs/             # /admin/overview/audit-logs
 ```
@@ -171,7 +172,7 @@ finance/
 │   ├── consortia/              # /finance/consortia — consórcios
 │   ├── contracts/              # /finance/contracts
 │   ├── recurring/              # /finance/recurring — recorrências
-│   └── companies/              # /finance/companies (sendo migrado para admin)
+│   └── companies/              # /finance/companies (usa admin service, somente leitura)
 ├── overview/
 │   ├── overdue/                # /finance/overview/overdue — títulos vencidos
 │   └── cashflow/               # /finance/overview/cashflow — fluxo de caixa
