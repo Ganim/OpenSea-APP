@@ -71,6 +71,7 @@ export default function EmployeeEditPage() {
   const [weeklyHours, setWeeklyHours] = useState<string>('44');
   const [status, setStatus] = useState<string>('ACTIVE');
   const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // ============================================================================
   // DATA FETCHING
@@ -227,8 +228,42 @@ export default function EmployeeEditPage() {
     setSearchQuery('');
   };
 
+  const validateField = (field: string, value: string) => {
+    if (!value.trim()) {
+      const labels: Record<string, string> = {
+        fullName: 'Nome completo',
+        registrationNumber: 'Matrícula',
+        cpf: 'CPF',
+      };
+      return `${labels[field] || field} é obrigatório`;
+    }
+    if (field === 'cpf' && value.replace(/\D/g, '').length < 11) {
+      return 'CPF deve ter 11 dígitos';
+    }
+    return '';
+  };
+
+  const handleBlur = (field: string, value: string) => {
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const validateAll = () => {
+    const newErrors: Record<string, string> = {};
+    newErrors.fullName = validateField('fullName', fullName);
+    newErrors.registrationNumber = validateField('registrationNumber', registrationNumber);
+    newErrors.cpf = validateField('cpf', cpf);
+
+    // Remove empty errors
+    const filtered = Object.fromEntries(
+      Object.entries(newErrors).filter(([, v]) => v)
+    );
+    setErrors(filtered);
+    return Object.keys(filtered).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!employee || !fullName || !registrationNumber || !cpf) return;
+    if (!employee || !validateAll()) return;
 
     setIsSaving(true);
     try {
@@ -360,7 +395,7 @@ export default function EmployeeEditPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
               <Users className="h-7 w-7 text-white" />
             </div>
@@ -426,7 +461,15 @@ export default function EmployeeEditPage() {
                     <Card
                       key={department.id}
                       className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleSelectDepartment(department)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectDepartment(department);
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
@@ -494,7 +537,15 @@ export default function EmployeeEditPage() {
                     <Card
                       key={position.id}
                       className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleSelectPosition(position)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectPosition(position);
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
@@ -586,9 +637,17 @@ export default function EmployeeEditPage() {
                       id="fullName"
                       placeholder="Ex: João da Silva"
                       value={fullName}
-                      onChange={e => setFullName(e.target.value)}
+                      onChange={e => {
+                        setFullName(e.target.value);
+                        if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
+                      }}
+                      onBlur={() => handleBlur('fullName', fullName)}
+                      className={errors.fullName ? 'border-red-500 focus-visible:ring-red-500' : ''}
                       required
                     />
+                    {errors.fullName && (
+                      <p className="text-xs text-red-500">{errors.fullName}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -597,9 +656,17 @@ export default function EmployeeEditPage() {
                       id="registrationNumber"
                       placeholder="Ex: 00001"
                       value={registrationNumber}
-                      onChange={e => setRegistrationNumber(e.target.value)}
+                      onChange={e => {
+                        setRegistrationNumber(e.target.value);
+                        if (errors.registrationNumber) setErrors(prev => ({ ...prev, registrationNumber: '' }));
+                      }}
+                      onBlur={() => handleBlur('registrationNumber', registrationNumber)}
+                      className={errors.registrationNumber ? 'border-red-500 focus-visible:ring-red-500' : ''}
                       required
                     />
+                    {errors.registrationNumber && (
+                      <p className="text-xs text-red-500">{errors.registrationNumber}</p>
+                    )}
                   </div>
                 </div>
 
@@ -610,9 +677,17 @@ export default function EmployeeEditPage() {
                       id="cpf"
                       placeholder="Ex: 000.000.000-00"
                       value={cpf}
-                      onChange={e => setCpf(e.target.value)}
+                      onChange={e => {
+                        setCpf(e.target.value);
+                        if (errors.cpf) setErrors(prev => ({ ...prev, cpf: '' }));
+                      }}
+                      onBlur={() => handleBlur('cpf', cpf)}
+                      className={errors.cpf ? 'border-red-500 focus-visible:ring-red-500' : ''}
                       required
                     />
+                    {errors.cpf && (
+                      <p className="text-xs text-red-500">{errors.cpf}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

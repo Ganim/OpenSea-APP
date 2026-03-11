@@ -151,7 +151,7 @@ export default function BonusDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-lime-500 to-lime-600">
               <PlusCircle className="h-7 w-7 text-white" />
             </div>

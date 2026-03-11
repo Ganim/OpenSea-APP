@@ -11,10 +11,17 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { InfoField } from '@/components/shared/info-field';
 import dynamic from 'next/dynamic';
 
-const PhotoUploadDialog = dynamic(() => import('@/components/shared/photo-upload-dialog').then(m => ({ default: m.PhotoUploadDialog })), { ssr: false });
+const PhotoUploadDialog = dynamic(
+  () =>
+    import('@/components/shared/photo-upload-dialog').then(m => ({
+      default: m.PhotoUploadDialog,
+    })),
+  { ssr: false }
+);
 import { FileManager } from '@/components/storage';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -97,6 +104,7 @@ export default function EmployeeDetailPage() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -164,13 +172,21 @@ export default function EmployeeDetailPage() {
   // Photo URL resolver
   const photoDisplayUrl = useMemo(() => {
     if (!employee?.photoUrl) return null;
-    const match = employee.photoUrl.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
+    const match = employee.photoUrl.match(
+      /\/v1\/storage\/files\/([^/]+)\/serve/
+    );
     if (!match) return null;
     return storageFilesService.getServeUrl(match[1]);
   }, [employee?.photoUrl]);
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async ({ file, crop }: { file: File; crop: { x: number; y: number; width: number; height: number } }) => {
+    mutationFn: async ({
+      file,
+      crop,
+    }: {
+      file: File;
+      crop: { x: number; y: number; width: number; height: number };
+    }) => {
       return employeesApi.uploadPhoto(employeeId, file, crop);
     },
     onSuccess: () => {
@@ -199,9 +215,15 @@ export default function EmployeeDetailPage() {
     },
   });
 
-  const handlePhotoUpload = useCallback(async (file: File, crop: { x: number; y: number; width: number; height: number }) => {
-    await uploadPhotoMutation.mutateAsync({ file, crop });
-  }, [uploadPhotoMutation]);
+  const handlePhotoUpload = useCallback(
+    async (
+      file: File,
+      crop: { x: number; y: number; width: number; height: number }
+    ) => {
+      await uploadPhotoMutation.mutateAsync({ file, crop });
+    },
+    [uploadPhotoMutation]
+  );
 
   // ============================================================================
   // VALIDATION
@@ -240,9 +262,24 @@ export default function EmployeeDetailPage() {
     router.push(`/hr/employees/${employeeId}/edit`);
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await employeesApi.delete(employeeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast.success('Funcionário excluído com sucesso!');
+      router.push('/hr/employees');
+    },
+    onError: (error: Error) => {
+      toast.error('Erro ao excluir funcionário', {
+        description: error.message || 'Tente novamente mais tarde',
+      });
+    },
+  });
+
   const handleDelete = () => {
-    // TODO: Implement delete
-    router.push(`/hr/employees/${employeeId}`);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleViewUser = () => {
@@ -405,7 +442,7 @@ export default function EmployeeDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             {photoDisplayUrl ? (
               <img
                 src={photoDisplayUrl}
@@ -765,6 +802,7 @@ export default function EmployeeDetailPage() {
                   size="sm"
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -860,6 +898,18 @@ export default function EmployeeDetailPage() {
         onOpenChange={setIsPhotoDialogOpen}
         onUpload={handlePhotoUpload}
         title="Foto do Funcionário"
+      />
+
+      {/* Modal de confirmação de exclusão */}
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir Funcionário"
+        description={`Tem certeza que deseja excluir o funcionário "${employee?.fullName}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={() => deleteMutation.mutate()}
+        variant="destructive"
+        icon={<Trash className="h-5 w-5" />}
       />
     </PageLayout>
   );

@@ -238,7 +238,7 @@ export default function DepartmentEditPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-blue-500 to-cyan-600">
               <Building2 className="h-7 w-7 text-white" />
             </div>
@@ -342,7 +342,15 @@ export default function DepartmentEditPage() {
                         <div
                           key={company.id}
                           className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => handleSelectCompany(company)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleSelectCompany(company);
+                            }
+                          }}
                         >
                           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
                             <Building2 className="h-4 w-4 text-white" />

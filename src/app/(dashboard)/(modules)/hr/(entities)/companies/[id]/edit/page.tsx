@@ -161,7 +161,7 @@ export default function CompanyEditPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
               <Building2 className="h-7 w-7 text-white" />
             </div>
@@ -180,7 +180,7 @@ export default function CompanyEditPage() {
 
       <PageBody>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-4 p-2 h-12">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 mb-4 p-2 h-12 overflow-x-auto">
             <TabsTrigger value="general" className="gap-2">
               <Building2 className="h-4 w-4 hidden sm:inline" />
               <span>Dados</span>

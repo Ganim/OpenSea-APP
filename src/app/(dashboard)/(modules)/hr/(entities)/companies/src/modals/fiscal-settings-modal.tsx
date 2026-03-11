@@ -95,7 +95,13 @@ export function FiscalSettingsModal({
             </div>
             Configurações Fiscais
           </DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-2"
+            aria-label="Fechar"
+          >
             <X className="w-4 h-4" />
           </Button>
         </DialogHeader>
@@ -106,12 +112,12 @@ export function FiscalSettingsModal({
           </div>
 
           <div>
-            <Label>Ambiente NF-e</Label>
+            <Label htmlFor="fiscal-nfe-env">Ambiente NF-e</Label>
             <Select
               value={String(form.nfeEnvironment || 'HOMOLOGATION')}
               onValueChange={value => handleChange('nfeEnvironment', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="fiscal-nfe-env">
                 <SelectValue placeholder="Selecione o ambiente" />
               </SelectTrigger>
               <SelectContent>
@@ -122,8 +128,9 @@ export function FiscalSettingsModal({
           </div>
 
           <div>
-            <Label>Série NF-e</Label>
+            <Label htmlFor="fiscal-nfe-series">Série NF-e</Label>
             <Input
+              id="fiscal-nfe-series"
               value={form.nfeSeries || ''}
               onChange={e => handleChange('nfeSeries', e.target.value)}
               placeholder="1"
@@ -131,8 +138,9 @@ export function FiscalSettingsModal({
           </div>
 
           <div>
-            <Label>Último Número NF-e</Label>
+            <Label htmlFor="fiscal-nfe-last">Último Número NF-e</Label>
             <Input
+              id="fiscal-nfe-last"
               value={form.nfeLastNumber || 0}
               onChange={e =>
                 handleChange('nfeLastNumber', Number(e.target.value))
@@ -143,8 +151,9 @@ export function FiscalSettingsModal({
           </div>
 
           <div>
-            <Label>CFOP Padrão</Label>
+            <Label htmlFor="fiscal-cfop">CFOP Padrão</Label>
             <Input
+              id="fiscal-cfop"
               value={form.nfeDefaultCfop || ''}
               onChange={e => handleChange('nfeDefaultCfop', e.target.value)}
               placeholder="5102"
@@ -152,8 +161,11 @@ export function FiscalSettingsModal({
           </div>
 
           <div className="col-span-2">
-            <Label>Natureza da Operação Padrão</Label>
+            <Label htmlFor="fiscal-op-nature">
+              Natureza da Operação Padrão
+            </Label>
             <Input
+              id="fiscal-op-nature"
               value={form.nfeDefaultOperationNature || ''}
               onChange={e =>
                 handleChange('nfeDefaultOperationNature', e.target.value)
@@ -167,14 +179,14 @@ export function FiscalSettingsModal({
           </div>
 
           <div className="col-span-2">
-            <Label>Tipo de Certificado</Label>
+            <Label htmlFor="fiscal-cert-type">Tipo de Certificado</Label>
             <Select
               value={String(form.digitalCertificateType || 'NONE')}
               onValueChange={value =>
                 handleChange('digitalCertificateType', value)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger id="fiscal-cert-type">
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -187,8 +199,11 @@ export function FiscalSettingsModal({
 
           {form.digitalCertificateType === 'A1' && (
             <div className="col-span-2">
-              <Label>Data de Expiração (A1)</Label>
+              <Label htmlFor="fiscal-cert-expires">
+                Data de Expiração (A1)
+              </Label>
               <Input
+                id="fiscal-cert-expires"
                 value={form.certificateA1ExpiresAt || ''}
                 onChange={e =>
                   handleChange('certificateA1ExpiresAt', e.target.value)
@@ -204,12 +219,18 @@ export function FiscalSettingsModal({
 
           <div className="flex items-center justify-between col-span-2 rounded-md border px-4 py-3">
             <div>
-              <Label className="text-sm font-medium">NFC-e Habilitado?</Label>
+              <Label
+                htmlFor="fiscal-nfce-enabled"
+                className="text-sm font-medium"
+              >
+                NFC-e Habilitado?
+              </Label>
               <p className="text-xs text-muted-foreground">
                 Ativar emissão de NFC-e (cupom fiscal eletrônico).
               </p>
             </div>
             <Switch
+              id="fiscal-nfce-enabled"
               checked={!!form.nfceEnabled}
               onCheckedChange={value => handleChange('nfceEnabled', value)}
             />
@@ -217,8 +238,9 @@ export function FiscalSettingsModal({
 
           {form.nfceEnabled && (
             <div className="col-span-2">
-              <Label>CSC ID (NFC-e)</Label>
+              <Label htmlFor="fiscal-csc-id">CSC ID (NFC-e)</Label>
               <Input
+                id="fiscal-csc-id"
                 value={form.nfceCscId || ''}
                 onChange={e => handleChange('nfceCscId', e.target.value)}
                 placeholder="Código de Segurança do Contribuinte"

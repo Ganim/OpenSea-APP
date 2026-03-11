@@ -202,7 +202,7 @@ export default function VacationDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-green-500 to-green-600">
               <Palmtree className="h-7 w-7 text-white" />
             </div>
@@ -301,7 +301,7 @@ export default function VacationDetailPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Usados</p>
-              <p className="text-lg font-semibold mt-1 text-blue-600">
+              <p className="text-lg font-semibold mt-1 text-primary">
                 {vacation.usedDays}
               </p>
             </div>

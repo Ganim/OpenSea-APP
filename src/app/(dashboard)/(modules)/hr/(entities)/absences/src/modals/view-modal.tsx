@@ -72,7 +72,7 @@ export function ViewModal({ isOpen, onClose, absence }: ViewModalProps) {
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
           <DialogTitle className="text-lg font-semibold">
             <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-gradient-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
+              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
                 <UserX className="h-5 w-5" />
               </div>
               <div className="flex-col flex">

@@ -341,7 +341,7 @@ function TimeBankPageContent() {
 
         <PageBody>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <EmployeeSelector
                 value={filterEmployeeId}
                 onChange={id => setFilterEmployeeId(id)}

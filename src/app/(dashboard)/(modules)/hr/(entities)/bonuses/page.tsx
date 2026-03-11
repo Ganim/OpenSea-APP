@@ -436,7 +436,7 @@ export default function BonusesPage() {
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <EmployeeSelector
                 value={filterEmployeeId}
                 onChange={id => setFilterEmployeeId(id)}
@@ -456,7 +456,7 @@ export default function BonusesPage() {
                 setFilterIsPaid(v === 'ALL' ? undefined : v === 'true')
               }
             >
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

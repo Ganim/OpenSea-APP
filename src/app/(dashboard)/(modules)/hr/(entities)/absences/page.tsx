@@ -291,7 +291,7 @@ export default function AbsencesPage() {
         title={getTypeLabel(item.type)}
         subtitle={`${item.totalDays} ${item.totalDays === 1 ? 'dia' : 'dias'}`}
         icon={UserX}
-        iconBgColor="bg-gradient-to-br from-rose-500 to-rose-600"
+        iconBgColor="bg-linear-to-br from-rose-500 to-rose-600"
         badges={[
           {
             label: getTypeLabel(item.type),
@@ -355,7 +355,7 @@ export default function AbsencesPage() {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 text-xs text-red-600 hover:bg-red-50"
+              className="flex-1 text-xs text-destructive hover:bg-destructive/10"
               onClick={() => handleReject(item.id)}
             >
               <XCircle className="h-3.5 w-3.5 mr-1" />
@@ -390,7 +390,7 @@ export default function AbsencesPage() {
         title={getTypeLabel(item.type)}
         subtitle={getStatusLabel(item.status)}
         icon={UserX}
-        iconBgColor="bg-gradient-to-br from-rose-500 to-rose-600"
+        iconBgColor="bg-linear-to-br from-rose-500 to-rose-600"
         badges={[
           {
             label: getTypeLabel(item.type),
@@ -520,7 +520,7 @@ export default function AbsencesPage() {
 
         <PageBody>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <EmployeeSelector
                 value={filterEmployeeId}
                 onChange={id => setFilterEmployeeId(id)}
@@ -534,7 +534,7 @@ export default function AbsencesPage() {
                 setFilterType(v === 'ALL' ? '' : (v as AbsenceType))
               }
             >
-              <SelectTrigger className="w-52">
+              <SelectTrigger className="w-full sm:w-52">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -553,7 +553,7 @@ export default function AbsencesPage() {
                 setFilterStatus(v === 'ALL' ? '' : (v as AbsenceStatus))
               }
             >
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

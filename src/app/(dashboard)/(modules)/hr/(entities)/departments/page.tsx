@@ -147,9 +147,9 @@ function DepartmentsPageContent() {
       );
     },
     duplicateConfig: {
-      getNewName: item => `${item.name} (copia)`,
+      getNewName: item => `${item.name} (cópia)`,
       getData: item => ({
-        name: `${item.name} (copia)`,
+        name: `${item.name} (cópia)`,
         code: `${item.code}_COPY`,
         description: item.description,
         parentId: item.parentId,
@@ -244,7 +244,7 @@ function DepartmentsPageContent() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={companyName || item.description || `Codigo: ${item.code}`}
+          subtitle={companyName || item.description || `Código: ${item.code}`}
           icon={Building2}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
@@ -297,7 +297,7 @@ function DepartmentsPageContent() {
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={companyName || item.description || `Codigo: ${item.code}`}
+          subtitle={companyName || item.description || `Código: ${item.code}`}
           icon={Building2}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
           badges={[
@@ -419,7 +419,7 @@ function DepartmentsPageContent() {
 
           <Header
             title="Departamentos"
-            description="Gerencie os departamentos da organizacao"
+            description="Gerencie os departamentos da organização"
           />
         </PageHeader>
 
@@ -484,7 +484,7 @@ function DepartmentsPageContent() {
               defaultSortField="name"
               defaultSortDirection="asc"
               customSortFn={customSortByCode}
-              customSortLabel="Codigo"
+              customSortLabel="Código"
             />
           )}
 

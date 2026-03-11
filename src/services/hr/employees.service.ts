@@ -194,10 +194,10 @@ export const employeesService = {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
       perPage: String(params?.perPage ?? 50),
-      includeDeleted: String(params?.includeDeleted ?? false),
       populate: 'department,position,company',
     });
 
+    if (params?.includeDeleted) query.append('includeDeleted', 'true');
     if (params?.search) query.append('search', params.search);
     if (params?.status) query.append('status', params.status);
     if (params?.departmentId) query.append('departmentId', params.departmentId);

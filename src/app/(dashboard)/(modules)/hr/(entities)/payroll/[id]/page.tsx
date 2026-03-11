@@ -1,5 +1,6 @@
 'use client';
 
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -24,6 +25,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   formatCurrency,
   formatDate,
@@ -42,6 +44,7 @@ export default function PayrollDetailPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const payrollId = params.id as string;
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -151,7 +154,7 @@ export default function PayrollDetailPage() {
         id: 'cancel',
         title: 'Cancelar',
         icon: Ban,
-        onClick: () => cancelMutation.mutate(payrollId),
+        onClick: () => setIsCancelDialogOpen(true),
         variant: 'outline',
         disabled: isMutating,
       });
@@ -239,7 +242,7 @@ export default function PayrollDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-sky-500 to-sky-600">
               <CalendarDays className="h-7 w-7 text-white" />
             </div>
@@ -294,13 +297,13 @@ export default function PayrollDetailPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Deduções</p>
-              <p className="text-2xl font-semibold text-red-600 dark:text-red-400">
+              <p className="text-2xl font-semibold text-destructive">
                 {formatCurrency(payroll.totalDeductions)}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Líquido</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <p className="text-2xl font-bold text-primary">
                 {formatCurrency(payroll.totalNet)}
               </p>
             </div>
@@ -361,6 +364,17 @@ export default function PayrollDetailPage() {
           </div>
         </Card>
       </PageBody>
+
+      <ConfirmDialog
+        open={isCancelDialogOpen}
+        onOpenChange={setIsCancelDialogOpen}
+        title="Cancelar folha de pagamento"
+        description="Tem certeza que deseja cancelar esta folha de pagamento? Esta ação não pode ser desfeita."
+        confirmLabel="Cancelar folha"
+        cancelLabel="Voltar"
+        variant="warning"
+        onConfirm={() => cancelMutation.mutate(payrollId)}
+      />
     </PageLayout>
   );
 }

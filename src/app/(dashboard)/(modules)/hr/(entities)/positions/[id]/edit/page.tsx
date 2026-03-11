@@ -255,7 +255,7 @@ export default function PositionEditPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-indigo-500 to-purple-600">
               <Briefcase className="h-7 w-7 text-white" />
             </div>
@@ -318,7 +318,15 @@ export default function PositionEditPage() {
                     <Card
                       key={department.id}
                       className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleSelectDepartment(department)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectDepartment(department);
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">

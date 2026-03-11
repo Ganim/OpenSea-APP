@@ -107,15 +107,24 @@ export function StakeholderModal({
             </div>
             {title}
           </DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-2"
+            aria-label="Fechar"
+          >
             <X className="w-4 h-4" />
           </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="col-span-2">
-            <Label className="mb-1.5">Nome *</Label>
+            <Label htmlFor="stakeholder-name" className="mb-1.5">
+              Nome *
+            </Label>
             <Input
+              id="stakeholder-name"
               value={form.name || ''}
               onChange={e => handleChange('name', e.target.value)}
               placeholder="Nome completo"
@@ -124,8 +133,11 @@ export function StakeholderModal({
           </div>
 
           <div>
-            <Label className="mb-1.5">Documento (CPF/CNPJ)</Label>
+            <Label htmlFor="stakeholder-document" className="mb-1.5">
+              Documento (CPF/CNPJ)
+            </Label>
             <Input
+              id="stakeholder-document"
               value={form.personDocumentMasked || ''}
               onChange={e =>
                 handleChange('personDocumentMasked', e.target.value)
@@ -135,12 +147,14 @@ export function StakeholderModal({
           </div>
 
           <div>
-            <Label className="mb-1.5">Cargo *</Label>
+            <Label htmlFor="stakeholder-role" className="mb-1.5">
+              Cargo *
+            </Label>
             <Select
               value={String(form.role || '')}
               onValueChange={value => handleChange('role', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="stakeholder-role">
                 <SelectValue placeholder="Selecione o cargo" />
               </SelectTrigger>
               <SelectContent>
@@ -154,8 +168,11 @@ export function StakeholderModal({
           </div>
 
           <div>
-            <Label className="mb-1.5">Data de Entrada</Label>
+            <Label htmlFor="stakeholder-entry-date" className="mb-1.5">
+              Data de Entrada
+            </Label>
             <Input
+              id="stakeholder-entry-date"
               value={form.entryDate || ''}
               onChange={e => handleChange('entryDate', e.target.value)}
               type="date"
@@ -163,8 +180,11 @@ export function StakeholderModal({
           </div>
 
           <div>
-            <Label className="mb-1.5">Data de Saída</Label>
+            <Label htmlFor="stakeholder-exit-date" className="mb-1.5">
+              Data de Saída
+            </Label>
             <Input
+              id="stakeholder-exit-date"
               value={form.exitDate || ''}
               onChange={e => handleChange('exitDate', e.target.value)}
               type="date"
@@ -172,12 +192,14 @@ export function StakeholderModal({
           </div>
 
           <div className="col-span-2">
-            <Label className="mb-1.5">Status</Label>
+            <Label htmlFor="stakeholder-status" className="mb-1.5">
+              Status
+            </Label>
             <Select
               value={String(form.status || 'ACTIVE')}
               onValueChange={value => handleChange('status', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="stakeholder-status">
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
@@ -189,7 +211,10 @@ export function StakeholderModal({
 
           <div className="flex items-center justify-between dark:bg-slate-800 col-span-2 rounded-lg border bg-muted/30 px-4 py-3.5 mt-2">
             <div className="flex-1">
-              <Label className="text-sm font-medium cursor-pointer">
+              <Label
+                htmlFor="stakeholder-legal-rep"
+                className="text-sm font-medium cursor-pointer"
+              >
                 Representante Legal
               </Label>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -197,6 +222,7 @@ export function StakeholderModal({
               </p>
             </div>
             <Switch
+              id="stakeholder-legal-rep"
               checked={!!form.isLegalRepresentative}
               onCheckedChange={value =>
                 handleChange('isLegalRepresentative', value)

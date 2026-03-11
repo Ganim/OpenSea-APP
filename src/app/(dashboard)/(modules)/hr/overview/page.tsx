@@ -31,25 +31,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { useHRAnalytics } from '../_shared/hooks/use-hr-analytics';
-
-// ============================================================================
-// COLORS
-// ============================================================================
-
-const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#06b6d4', // cyan
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#ec4899', // pink
-  '#6366f1', // indigo
-  '#14b8a6', // teal
-  '#f97316', // orange
-];
-
-const PIE_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
+import { CHART_COLORS, CHART_COLOR_SCALE, PIE_COLOR_SCALE } from '@/lib/chart-colors';
 
 // ============================================================================
 // STAT CARD
@@ -203,7 +185,7 @@ export default function HROverviewPage() {
             value={data?.totalEmployees ?? 0}
             icon={Users}
             iconBg="bg-blue-100 dark:bg-blue-500/20"
-            iconColor="text-blue-600 dark:text-blue-400"
+            iconColor="text-primary"
             isLoading={isLoading}
           />
           <StatCard
@@ -257,7 +239,7 @@ export default function HROverviewPage() {
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="count" name="Funcionários" radius={[0, 4, 4, 0]}>
                     {data.employeesByDepartment.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      <Cell key={i} fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -284,7 +266,7 @@ export default function HROverviewPage() {
                     labelLine={false}
                   >
                     {data.employeesByContractType.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      <Cell key={i} fill={PIE_COLOR_SCALE[i % PIE_COLOR_SCALE.length]} />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
@@ -307,8 +289,8 @@ export default function HROverviewPage() {
                   <YAxis tickFormatter={formatCurrency} className="text-xs" tick={{ fontSize: 11 }} />
                   <Tooltip content={<CustomTooltip isCurrency />} />
                   <Legend />
-                  <Bar dataKey="bruto" name="Bruto" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="liquido" name="Líquido" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="bruto" name="Bruto" fill={CHART_COLORS.blue} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="liquido" name="Líquido" fill={CHART_COLORS.emerald} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -329,7 +311,7 @@ export default function HROverviewPage() {
                     type="monotone"
                     dataKey="horas"
                     name="Horas"
-                    stroke="#f59e0b"
+                    stroke={CHART_COLORS.amber}
                     strokeWidth={2}
                     dot={{ r: 4 }}
                     activeDot={{ r: 6 }}
@@ -338,7 +320,7 @@ export default function HROverviewPage() {
                     type="monotone"
                     dataKey="count"
                     name="Registros"
-                    stroke="#8b5cf6"
+                    stroke={CHART_COLORS.violet}
                     strokeWidth={2}
                     dot={{ r: 4 }}
                     activeDot={{ r: 6 }}
@@ -368,9 +350,9 @@ export default function HROverviewPage() {
                   />
                   <YAxis allowDecimals={false} className="text-xs" tick={{ fontSize: 11 }} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" name="Ocorrências" fill="#ef4444" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="count" name="Ocorrências" fill={CHART_COLORS.red} radius={[4, 4, 0, 0]}>
                     {data.absencesByType.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      <Cell key={i} fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -389,8 +371,8 @@ export default function HROverviewPage() {
                   <YAxis tickFormatter={formatCurrency} className="text-xs" tick={{ fontSize: 11 }} />
                   <Tooltip content={<CustomTooltip isCurrency />} />
                   <Legend />
-                  <Bar dataKey="bonificacoes" name="Bonificações" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="deducoes" name="Deduções" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="bonificacoes" name="Bonificações" fill={CHART_COLORS.emerald} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="deducoes" name="Deduções" fill={CHART_COLORS.red} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

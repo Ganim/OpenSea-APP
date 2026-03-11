@@ -1,5 +1,6 @@
 'use client';
 
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -46,6 +47,7 @@ export default function AbsenceDetailPage() {
   const absenceId = params.id as string;
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -170,7 +172,7 @@ export default function AbsenceDetailPage() {
                     id: 'cancel',
                     title: cancelAbsence.isPending ? 'Cancelando...' : 'Cancelar',
                     icon: Ban,
-                    onClick: () => cancelAbsence.mutate(absenceId),
+                    onClick: () => setIsCancelDialogOpen(true),
                     variant: 'outline',
                     disabled: cancelAbsence.isPending,
                   },
@@ -181,7 +183,7 @@ export default function AbsenceDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-rose-500 to-rose-600">
               <UserX className="h-7 w-7 text-white" />
             </div>
@@ -360,6 +362,17 @@ export default function AbsenceDetailPage() {
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
         absenceId={absenceId}
+      />
+
+      <ConfirmDialog
+        open={isCancelDialogOpen}
+        onOpenChange={setIsCancelDialogOpen}
+        title="Cancelar afastamento"
+        description="Tem certeza que deseja cancelar este afastamento? Esta ação não pode ser desfeita."
+        confirmLabel="Cancelar afastamento"
+        cancelLabel="Voltar"
+        variant="warning"
+        onConfirm={() => cancelAbsence.mutate(absenceId)}
       />
     </PageLayout>
   );

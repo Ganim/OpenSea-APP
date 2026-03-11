@@ -171,9 +171,9 @@ function PositionsPageContent() {
       );
     },
     duplicateConfig: {
-      getNewName: item => `${item.name} (copia)`,
+      getNewName: item => `${item.name} (cópia)`,
       getData: item => ({
-        name: `${item.name} (copia)`,
+        name: `${item.name} (cópia)`,
         code: `${item.code}_COPY`,
         description: item.description,
         departmentId: item.departmentId,
@@ -330,7 +330,7 @@ function PositionsPageContent() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={item.description || `Codigo: ${item.code}`}
+          subtitle={item.description || `Código: ${item.code}`}
           icon={Briefcase}
           iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
@@ -359,7 +359,7 @@ function PositionsPageContent() {
             type: 'single',
             button: {
               icon: Users,
-              label: `${employeeCount} funcionario${employeeCount !== 1 ? 's' : ''}`,
+              label: `${employeeCount} funcionário${employeeCount !== 1 ? 's' : ''}`,
               href: `/hr/employees?position=${item.id}`,
               color: 'emerald',
             },
@@ -407,7 +407,7 @@ function PositionsPageContent() {
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={item.description || `Codigo: ${item.code}`}
+          subtitle={item.description || `Código: ${item.code}`}
           icon={Briefcase}
           iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
           badges={[
@@ -436,7 +436,7 @@ function PositionsPageContent() {
             type: 'single',
             button: {
               icon: Users,
-              label: `${employeeCount} funcionario${employeeCount !== 1 ? 's' : ''}`,
+              label: `${employeeCount} funcionário${employeeCount !== 1 ? 's' : ''}`,
               href: `/hr/employees?position=${item.id}`,
               color: 'emerald',
             },
@@ -539,7 +539,7 @@ function PositionsPageContent() {
 
           <Header
             title="Cargos"
-            description="Gerencie os cargos da organizacao"
+            description="Gerencie os cargos da organização"
           />
         </PageHeader>
 
@@ -623,7 +623,7 @@ function PositionsPageContent() {
               }
               showSorting={true}
               customSortFn={customSortByCode}
-              customSortLabel="Codigo"
+              customSortLabel="Código"
             />
           )}
 

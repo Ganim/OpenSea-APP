@@ -125,10 +125,10 @@ export default function CompaniesPage() {
       return [legal, trade, cnpj].some(value => value.includes(q));
     },
     duplicateConfig: {
-      getNewName: item => `${item.legalName} (Copia)`,
+      getNewName: item => `${item.legalName} (Cópia)`,
       getData: item => ({
-        legalName: `${item.legalName} (Copia)`,
-        tradeName: item.tradeName ? `${item.tradeName} (Copia)` : null,
+        legalName: `${item.legalName} (Cópia)`,
+        tradeName: item.tradeName ? `${item.tradeName} (Cópia)` : null,
         cnpj: item.cnpj,
         status: item.status,
       }),

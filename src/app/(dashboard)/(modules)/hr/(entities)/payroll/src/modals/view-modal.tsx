@@ -144,13 +144,13 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Deduções</p>
-                <p className="text-base mt-1 font-semibold text-red-600">
+                <p className="text-base mt-1 font-semibold text-destructive">
                   {formatCurrency(payroll.totalDeductions)}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Líquido</p>
-                <p className="text-base mt-1 font-bold text-blue-600">
+                <p className="text-base mt-1 font-bold text-primary">
                   {formatCurrency(payroll.totalNet)}
                 </p>
               </div>

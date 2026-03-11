@@ -11,6 +11,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { FileManager } from '@/components/storage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,8 @@ import type {
   Department,
   Employee,
 } from '@/types/hr';
-import { useQuery } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowRight,
   Briefcase,
@@ -43,12 +45,14 @@ import {
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   companiesApi,
   companyAddressesApi,
   companyCnaesApi,
   companyFiscalSettingsApi,
   companyStakeholdersApi,
+  deleteCompany,
 } from '../src';
 import { CnaesTab } from '../src/components/cnaes-tab';
 import { FiscalTab } from '../src/components/fiscal-tab';
@@ -57,9 +61,11 @@ import { GeneralTab } from '../src/components/general-tab';
 export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const companyId = params.id as string;
 
   const [activeTab, setActiveTab] = useState('general');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: company, isLoading } = useQuery<Company>({
     queryKey: ['companies', companyId],
@@ -220,11 +226,27 @@ export default function CompanyDetailPage() {
     );
   }
 
-  const handleDelete = (id: string) => {
-    router.push(`/hr/companies/${id}`);
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(true);
   };
-  const handleEdit = (id: string) => {
-    router.push(`/hr/companies/${id}/edit`);
+
+  const confirmDelete = async () => {
+    try {
+      await deleteCompany(companyId);
+      await queryClient.invalidateQueries({ queryKey: ['companies'] });
+      toast.success('Empresa excluída com sucesso!');
+      router.push('/hr/companies');
+    } catch (error) {
+      logger.error(
+        'Erro ao excluir empresa',
+        error instanceof Error ? error : undefined
+      );
+      toast.error('Erro ao excluir empresa');
+    }
+  };
+
+  const handleEdit = () => {
+    router.push(`/hr/companies/${companyId}/edit`);
   };
 
   return (
@@ -241,21 +263,21 @@ export default function CompanyDetailPage() {
               id: 'delete',
               title: 'Excluir',
               icon: Trash,
-              onClick: () => handleDelete(company.id),
+              onClick: handleDelete,
               variant: 'outline',
             },
             {
               id: 'edit',
               title: 'Editar',
               icon: Edit,
-              onClick: () => handleEdit(company.id),
+              onClick: handleEdit,
             },
           ]}
         />
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-emerald-500 to-teal-600">
               <Building2 className="h-7 w-7 text-white" />
             </div>
@@ -294,7 +316,7 @@ export default function CompanyDetailPage() {
 
       <PageBody>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-4 p-2 h-12">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 mb-4 p-2 h-12 overflow-x-auto">
             <TabsTrigger value="general" className="gap-2">
               <Building2 className="h-4 w-4 hidden sm:inline" />
               <span>Geral</span>
@@ -450,6 +472,17 @@ export default function CompanyDetailPage() {
           </TabsContent>
         </Tabs>
       </PageBody>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir empresa"
+        description={`Tem certeza que deseja excluir a empresa "${company.legalName}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </PageLayout>
   );
 }

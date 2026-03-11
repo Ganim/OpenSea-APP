@@ -11,13 +11,15 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 import { employeesService } from '@/services/hr/employees.service';
 import type { Employee, Position } from '@/types/hr';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowRight,
   Briefcase,
@@ -33,12 +35,21 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { formatLevel, getSalaryRange, positionsApi } from '../src';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import {
+  deletePosition,
+  formatLevel,
+  getSalaryRange,
+  positionsApi,
+} from '../src';
 
 export default function PositionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const positionId = params.id as string;
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -74,7 +85,22 @@ export default function PositionDetailPage() {
   };
 
   const handleDelete = () => {
-    router.push(`/hr/positions/${positionId}`);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deletePosition(positionId);
+      await queryClient.invalidateQueries({ queryKey: ['positions'] });
+      toast.success('Cargo excluído com sucesso!');
+      router.push('/hr/positions');
+    } catch (error) {
+      logger.error(
+        'Erro ao excluir cargo',
+        error instanceof Error ? error : undefined
+      );
+      toast.error('Erro ao excluir cargo');
+    }
   };
 
   // ============================================================================
@@ -157,7 +183,7 @@ export default function PositionDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-indigo-500 to-purple-600">
               <Briefcase className="h-7 w-7 text-white" />
             </div>
@@ -329,6 +355,17 @@ export default function PositionDetailPage() {
           )}
         </Card>
       </PageBody>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir cargo"
+        description={`Tem certeza que deseja excluir o cargo "${position.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </PageLayout>
   );
 }

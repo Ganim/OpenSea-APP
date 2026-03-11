@@ -12,6 +12,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ export default function DepartmentDetailPage() {
   const departmentId = params.id as string;
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -108,16 +110,12 @@ export default function DepartmentDetailPage() {
     router.push(`/hr/departments/${departmentId}/edit`);
   };
 
-  const handleDelete = async () => {
-    if (!department) return;
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(true);
+  };
 
-    if (
-      !confirm(
-        `Tem certeza que deseja excluir o departamento "${department.name}"?`
-      )
-    ) {
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!department) return;
 
     setIsDeleting(true);
     try {
@@ -220,7 +218,7 @@ export default function DepartmentDetailPage() {
 
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
-          <div className="flex items-start gap-5">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-blue-500 to-cyan-600">
               <Building2 className="h-7 w-7 text-white" />
             </div>
@@ -442,6 +440,17 @@ export default function DepartmentDetailPage() {
           )}
         </Card>
       </PageBody>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir departamento"
+        description={`Tem certeza que deseja excluir o departamento "${department.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </PageLayout>
   );
 }

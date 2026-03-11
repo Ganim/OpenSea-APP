@@ -119,7 +119,7 @@ export function ViewModal({ isOpen, onClose, deduction }: ViewModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Valor</p>
-                <p className="text-base mt-1 font-semibold text-red-600">
+                <p className="text-base mt-1 font-semibold text-destructive">
                   {formatCurrency(deduction.amount)}
                 </p>
               </div>

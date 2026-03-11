@@ -331,7 +331,7 @@ export default function VacationsPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 text-xs text-red-600 hover:bg-red-50"
+                className="flex-1 text-xs text-destructive hover:bg-destructive/10"
                 onClick={() => handleCancelSchedule(item.id)}
                 disabled={cancelSchedule.isPending}
               >
@@ -477,7 +477,7 @@ export default function VacationsPage() {
 
         <PageBody>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <EmployeeSelector
                 value={filterEmployeeId}
                 onChange={id => setFilterEmployeeId(id)}
@@ -491,7 +491,7 @@ export default function VacationsPage() {
                 setFilterStatus(v === 'ALL' ? '' : (v as VacationStatus))
               }
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

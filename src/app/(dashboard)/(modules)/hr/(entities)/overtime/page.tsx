@@ -427,7 +427,7 @@ export default function OvertimePage() {
           />
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <EmployeeSelector
                 value={filterEmployeeId}
                 onChange={id => setFilterEmployeeId(id)}
@@ -439,7 +439,7 @@ export default function OvertimePage() {
               value={filterApproved}
               onValueChange={v => setFilterApproved(v === 'ALL' ? '' : v)}
             >
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

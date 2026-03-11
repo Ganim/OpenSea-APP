@@ -211,9 +211,9 @@ function EmployeesPageContent() {
       return [fullName, registration, cpf].some(value => value.includes(q));
     },
     duplicateConfig: {
-      getNewName: item => `${item.fullName} (copia)`,
+      getNewName: item => `${item.fullName} (cópia)`,
       getData: item => ({
-        fullName: `${item.fullName} (copia)`,
+        fullName: `${item.fullName} (cópia)`,
         registrationNumber: `${item.registrationNumber}_COPY`,
         cpf: item.cpf,
         hireDate: new Date().toISOString(),
@@ -561,7 +561,7 @@ function EmployeesPageContent() {
       },
       {
         id: 'create-employee',
-        title: 'Novo Funcionario',
+        title: 'Novo Funcionário',
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
@@ -597,14 +597,14 @@ function EmployeesPageContent() {
           <PageActionBar
             breadcrumbItems={[
               { label: 'RH', href: '/hr' },
-              { label: 'Funcionarios', href: '/hr/employees' },
+              { label: 'Funcionários', href: '/hr/employees' },
             ]}
             buttons={visibleActionButtons}
           />
 
           <Header
-            title="Funcionarios"
-            description="Gerencie os funcionarios da organizacao"
+            title="Funcionários"
+            description="Gerencie os funcionários da organização"
           />
         </PageHeader>
 
@@ -624,8 +624,8 @@ function EmployeesPageContent() {
           ) : page.error ? (
             <GridError
               type="server"
-              title="Erro ao carregar funcionarios"
-              message="Ocorreu um erro ao tentar carregar os funcionarios. Por favor, tente novamente."
+              title="Erro ao carregar funcionários"
+              message="Ocorreu um erro ao tentar carregar os funcionários. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
                 onClick: () => crud.refetch(),
@@ -706,7 +706,7 @@ function EmployeesPageContent() {
               }
               showSorting={true}
               customSortFn={customSortByRegistration}
-              customSortLabel="Matricula"
+              customSortLabel="Matrícula"
             />
           )}
 

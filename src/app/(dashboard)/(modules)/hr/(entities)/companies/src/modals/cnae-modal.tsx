@@ -80,15 +80,22 @@ export function CnaeModal({
             </div>
             {title}
           </DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-2"
+            aria-label="Fechar"
+          >
             <X className="w-4 h-4" />
           </Button>
         </DialogHeader>
 
         <div className="grid gap-4 py-2">
           <div>
-            <Label>Código CNAE *</Label>
+            <Label htmlFor="cnae-code">Código CNAE *</Label>
             <Input
+              id="cnae-code"
               value={form.code || ''}
               onChange={e => handleChange('code', e.target.value)}
               placeholder="0000-0/00"
@@ -100,8 +107,9 @@ export function CnaeModal({
           </div>
 
           <div>
-            <Label>Descrição *</Label>
+            <Label htmlFor="cnae-description">Descrição *</Label>
             <Textarea
+              id="cnae-description"
               value={form.description || ''}
               onChange={e => handleChange('description', e.target.value)}
               placeholder="Descrição da atividade econômica"
@@ -112,12 +120,15 @@ export function CnaeModal({
 
           <div className="flex items-center justify-between rounded-md border px-4 py-3">
             <div>
-              <Label className="text-sm font-medium">CNAE Principal?</Label>
+              <Label htmlFor="cnae-primary" className="text-sm font-medium">
+                CNAE Principal?
+              </Label>
               <p className="text-xs text-muted-foreground">
                 Marcar como atividade econômica principal da empresa.
               </p>
             </div>
             <Switch
+              id="cnae-primary"
               checked={!!form.isPrimary}
               onCheckedChange={value => handleChange('isPrimary', value)}
             />

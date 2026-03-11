@@ -77,9 +77,9 @@ export const companiesService = {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
       perPage: String(params?.perPage ?? 20),
-      includeDeleted: String(params?.includeDeleted ?? false),
     });
 
+    if (params?.includeDeleted) query.append('includeDeleted', 'true');
     if (params?.search) query.append('search', params.search);
     if (params?.status) query.append('status', params.status);
 
@@ -146,8 +146,8 @@ export const companiesService = {
     if (params?.type) query.append('type', params.type);
     if (params?.isPrimary !== undefined)
       query.append('isPrimary', String(params.isPrimary));
-    if (params?.includeDeleted !== undefined)
-      query.append('includeDeleted', String(params.includeDeleted));
+    if (params?.includeDeleted)
+      query.append('includeDeleted', 'true');
 
     const suffix = query.toString() ? `?${query.toString()}` : '';
 
@@ -210,9 +210,9 @@ export const companiesService = {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
       perPage: String(params?.perPage ?? 20),
-      includeDeleted: String(params?.includeDeleted ?? false),
     });
 
+    if (params?.includeDeleted) query.append('includeDeleted', 'true');
     if (params?.code) query.append('code', params.code);
     if (params?.isPrimary !== undefined)
       query.append('isPrimary', String(params.isPrimary));

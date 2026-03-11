@@ -157,7 +157,13 @@ export function AddressModal({
             </div>
             {title}
           </DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-2"
+            aria-label="Fechar"
+          >
             <X className="w-4 h-4" />
           </Button>
         </DialogHeader>
@@ -165,12 +171,12 @@ export function AddressModal({
         <div className="space-y-6 py-4">
           {/* Tipo de Endereço */}
           <div className="space-y-2">
-            <Label>Tipo de Endereço *</Label>
+            <Label htmlFor="addr-type">Tipo de Endereço *</Label>
             <Select
               value={String(form.type || '')}
               onValueChange={value => handleChange('type', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="addr-type">
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -185,9 +191,10 @@ export function AddressModal({
 
           {/* CEP com busca */}
           <div className="space-y-2">
-            <Label>CEP *</Label>
+            <Label htmlFor="addr-zip">CEP *</Label>
             <div className="relative">
               <Input
+                id="addr-zip"
                 value={form.zip || ''}
                 onChange={e => handleCepChange(e.target.value)}
                 placeholder="00000-000"
@@ -209,6 +216,7 @@ export function AddressModal({
                     size="sm"
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
                     onClick={() => handleCepSearch(form.zip || '')}
+                    aria-label="Buscar CEP"
                   >
                     <Search className="h-4 w-4" />
                   </Button>
@@ -222,8 +230,9 @@ export function AddressModal({
           {/* Logradouro e Número */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2 space-y-2">
-              <Label>Logradouro *</Label>
+              <Label htmlFor="addr-street">Logradouro *</Label>
               <Input
+                id="addr-street"
                 value={form.street || ''}
                 onChange={e => handleChange('street', e.target.value)}
                 placeholder="Rua, Avenida, Travessa..."
@@ -231,8 +240,9 @@ export function AddressModal({
               />
             </div>
             <div className="space-y-2">
-              <Label>Número *</Label>
+              <Label htmlFor="addr-number">Número *</Label>
               <Input
+                id="addr-number"
                 ref={numberInputRef}
                 value={form.number || ''}
                 onChange={e => handleChange('number', e.target.value)}
@@ -245,16 +255,18 @@ export function AddressModal({
           {/* Complemento e Bairro */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Complemento</Label>
+              <Label htmlFor="addr-complement">Complemento</Label>
               <Input
+                id="addr-complement"
                 value={form.complement || ''}
                 onChange={e => handleChange('complement', e.target.value)}
                 placeholder="Sala, Conjunto, Andar..."
               />
             </div>
             <div className="space-y-2">
-              <Label>Bairro *</Label>
+              <Label htmlFor="addr-district">Bairro *</Label>
               <Input
+                id="addr-district"
                 value={form.district || ''}
                 onChange={e => handleChange('district', e.target.value)}
                 placeholder="Centro"
@@ -266,8 +278,9 @@ export function AddressModal({
           {/* Cidade e Estado */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2 space-y-2">
-              <Label>Cidade *</Label>
+              <Label htmlFor="addr-city">Cidade *</Label>
               <Input
+                id="addr-city"
                 value={form.city || ''}
                 onChange={e => handleChange('city', e.target.value)}
                 placeholder="São Paulo"
@@ -275,8 +288,9 @@ export function AddressModal({
               />
             </div>
             <div className="space-y-2">
-              <Label>Estado *</Label>
+              <Label htmlFor="addr-state">Estado *</Label>
               <Input
+                id="addr-state"
                 value={form.state || ''}
                 onChange={e =>
                   handleChange('state', e.target.value.toUpperCase())
@@ -290,8 +304,9 @@ export function AddressModal({
 
           {/* País */}
           <div className="space-y-2">
-            <Label>País</Label>
+            <Label htmlFor="addr-country">País</Label>
             <Input
+              id="addr-country"
               value={form.countryCode || ''}
               onChange={e =>
                 handleChange(
@@ -307,10 +322,21 @@ export function AddressModal({
           {/* Endereço Primário */}
           <div
             className="flex items-center justify-between rounded-lg border dark:bg-slate-800 p-4 bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
+            role="button"
+            tabIndex={0}
             onClick={() => handleChange('isPrimary', !form.isPrimary)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleChange('isPrimary', !form.isPrimary);
+              }
+            }}
           >
             <div className="space-y-0.5">
-              <Label className="text-sm font-medium cursor-pointer">
+              <Label
+                htmlFor="addr-primary"
+                className="text-sm font-medium cursor-pointer"
+              >
                 Endereço primário
               </Label>
               <p className="text-xs text-muted-foreground">
@@ -318,6 +344,7 @@ export function AddressModal({
               </p>
             </div>
             <Switch
+              id="addr-primary"
               checked={!!form.isPrimary}
               onCheckedChange={value => handleChange('isPrimary', value)}
               onClick={e => e.stopPropagation()}

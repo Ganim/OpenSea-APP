@@ -60,8 +60,8 @@ export const departmentsService = {
     if (params?.companyId) query.append('companyId', params.companyId);
     if (params?.isActive !== undefined)
       query.append('isActive', String(params.isActive));
-    if (params?.includeDeleted !== undefined)
-      query.append('includeDeleted', String(params.includeDeleted));
+    if (params?.includeDeleted)
+      query.append('includeDeleted', 'true');
 
     return apiClient.get<DepartmentsResponse>(
       `/v1/hr/departments?${query.toString()}`

@@ -292,13 +292,13 @@ export default function PayrollPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Deduções</span>
-              <span className="font-medium text-red-600">
+              <span className="font-medium text-destructive">
                 {formatCurrency(item.totalDeductions)}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Líquido</span>
-              <span className="font-bold text-blue-600">
+              <span className="font-bold text-primary">
                 {formatCurrency(item.totalNet)}
               </span>
             </div>
@@ -320,7 +320,7 @@ export default function PayrollPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 gap-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                className="flex-1 gap-1 text-primary border-primary/30 hover:bg-primary/10"
                 onClick={() => handleCalculate(item.id)}
                 disabled={calculateMutation.isPending}
               >
@@ -397,7 +397,7 @@ export default function PayrollPage() {
             <span className="text-green-600">
               Bruto: {formatCurrency(item.totalGross)}
             </span>
-            <span className="text-red-600">
+            <span className="text-destructive">
               Ded: {formatCurrency(item.totalDeductions)}
             </span>
           </div>
@@ -497,7 +497,7 @@ export default function PayrollPage() {
         <PageBody>
           <div className="flex flex-wrap items-center gap-3">
             <Select value={filterMonth} onValueChange={setFilterMonth}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="Mês" />
               </SelectTrigger>
               <SelectContent>
@@ -520,7 +520,7 @@ export default function PayrollPage() {
             />
 
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

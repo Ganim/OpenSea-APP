@@ -183,7 +183,7 @@ export function ViewModal({ isOpen, onClose, vacation }: ViewModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Usados</p>
-                <p className="text-lg font-semibold mt-1 text-blue-600">
+                <p className="text-lg font-semibold mt-1 text-primary">
                   {vacation.usedDays}
                 </p>
               </div>
