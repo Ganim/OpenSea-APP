@@ -190,7 +190,7 @@ export default function FinanceReportsPage() {
               <Button
                 variant="link"
                 className="px-0"
-                onClick={() => router.push('/finance/analytics')}
+                onClick={() => router.push('/finance/reports/analytics')}
               >
                 Painel Financeiro
               </Button>{' '}

@@ -157,7 +157,7 @@ export function FinanceNotificationBell() {
 
         {/* Footer */}
         <div className="p-2 border-t">
-          <Link href="/finance/overdue">
+          <Link href="/finance/overview/overdue">
             <Button variant="ghost" size="sm" className="w-full text-xs">
               Ver todas
             </Button>
