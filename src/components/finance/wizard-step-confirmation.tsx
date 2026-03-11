@@ -77,7 +77,7 @@ export function WizardStepConfirmation({
         </h4>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <div>
-            <span className="text-muted-foreground">Descricao:</span>
+            <span className="text-muted-foreground">Descrição:</span>
             <p className="font-medium">{wizardData.description || '--'}</p>
           </div>
           <div>
@@ -89,7 +89,7 @@ export function WizardStepConfirmation({
             <p className="font-medium">{wizardData.categoryName || '--'}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">Conta Bancaria:</span>
+            <span className="text-muted-foreground">Conta Bancária:</span>
             <p className="font-medium">{wizardData.bankAccountName || '--'}</p>
           </div>
           <div>
@@ -99,7 +99,7 @@ export function WizardStepConfirmation({
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Data de Emissao:</span>
+            <span className="text-muted-foreground">Data de Emissão:</span>
             <p className="font-medium">{formatDate(wizardData.issueDate)}</p>
           </div>
           <div>
@@ -109,7 +109,7 @@ export function WizardStepConfirmation({
           {wizardData.competenceDate && (
             <div>
               <span className="text-muted-foreground">
-                Data de Competencia:
+                Data de Competência:
               </span>
               <p className="font-medium">
                 {formatDate(wizardData.competenceDate)}
@@ -152,7 +152,7 @@ export function WizardStepConfirmation({
               {wizardData.boletoBarcode && (
                 <div>
                   <span className="text-muted-foreground">
-                    Codigo de Barras:
+                    Código de Barras:
                   </span>
                   <p className="font-mono text-xs">
                     {wizardData.boletoBarcode}
@@ -162,7 +162,7 @@ export function WizardStepConfirmation({
               {wizardData.boletoDigitLine && (
                 <div>
                   <span className="text-muted-foreground">
-                    Linha Digitavel:
+                    Linha Digitável:
                   </span>
                   <p className="font-mono text-xs">
                     {wizardData.boletoDigitLine}
@@ -174,7 +174,7 @@ export function WizardStepConfirmation({
 
         {wizardData.notes && (
           <div className="text-sm">
-            <span className="text-muted-foreground">Observacoes:</span>
+            <span className="text-muted-foreground">Observações:</span>
             <p className="font-medium">{wizardData.notes}</p>
           </div>
         )}

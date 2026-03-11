@@ -84,7 +84,7 @@ const INITIAL_DATA: WizardData = {
   notes: '',
 };
 
-const STEP_LABELS = ['Tipo', 'Dados', 'Frequencia', 'Juros/Multa', 'Confirmacao'];
+const STEP_LABELS = ['Tipo', 'Dados', 'Frequência', 'Juros/Multa', 'Confirmação'];
 
 const FREQUENCY_OPTIONS: { value: RecurrenceUnit; label: string }[] = [
   { value: 'WEEKLY', label: 'Semanal' },
@@ -173,12 +173,12 @@ export function RecurringWizard({
 
     try {
       await createMutation.mutateAsync(payload);
-      toast.success('Recorrencia criada com sucesso!');
+      toast.success('Recorrência criada com sucesso!');
       handleOpenChange(false);
       onCreated?.();
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Erro ao criar recorrencia.';
+        err instanceof Error ? err.message : 'Erro ao criar recorrência.';
       toast.error(message);
     }
   }, [data, createMutation, handleOpenChange, onCreated]);
@@ -225,7 +225,7 @@ export function RecurringWizard({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nova Recorrencia</DialogTitle>
+          <DialogTitle>Nova Recorrência</DialogTitle>
         </DialogHeader>
 
         {/* Step Indicator */}
@@ -282,7 +282,7 @@ export function RecurringWizard({
         {currentStep === 1 && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Selecione o tipo de recorrencia:
+              Selecione o tipo de recorrência:
             </p>
             <div className="grid grid-cols-2 gap-4">
               {(['PAYABLE', 'RECEIVABLE'] as FinanceEntryType[]).map((type) => (
@@ -317,12 +317,12 @@ export function RecurringWizard({
         {currentStep === 2 && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="rec-description">Descricao</Label>
+              <Label htmlFor="rec-description">Descrição</Label>
               <Input
                 id="rec-description"
                 value={data.description}
                 onChange={(e) => update({ description: e.target.value })}
-                placeholder="Ex: Aluguel do escritorio"
+                placeholder="Ex: Aluguel do escritório"
               />
             </div>
 
@@ -346,7 +346,7 @@ export function RecurringWizard({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="rec-bank">Conta Bancaria</Label>
+              <Label htmlFor="rec-bank">Conta Bancária</Label>
               <Select
                 value={data.bankAccountId}
                 onValueChange={(v) =>
@@ -415,27 +415,27 @@ export function RecurringWizard({
                 }
               />
               <Label htmlFor="rec-variable" className="text-sm">
-                Valor variavel -- o valor pode mudar a cada periodo
+                Valor variável -- o valor pode mudar a cada período
               </Label>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="rec-notes">Observacoes</Label>
+              <Label htmlFor="rec-notes">Observações</Label>
               <Input
                 id="rec-notes"
                 value={data.notes}
                 onChange={(e) => update({ notes: e.target.value })}
-                placeholder="Observacoes (opcional)"
+                placeholder="Observações (opcional)"
               />
             </div>
           </div>
         )}
 
-        {/* Step 3: Frequencia */}
+        {/* Step 3: Frequência */}
         {currentStep === 3 && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="rec-freq">Frequencia</Label>
+              <Label htmlFor="rec-freq">Frequência</Label>
               <Select
                 value={data.frequencyUnit}
                 onValueChange={(v) =>
@@ -467,12 +467,12 @@ export function RecurringWizard({
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Ex: 1 = a cada periodo, 2 = a cada 2 periodos
+                Ex: 1 = a cada período, 2 = a cada 2 períodos
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="rec-start">Data de Inicio</Label>
+              <Label htmlFor="rec-start">Data de Início</Label>
               <Input
                 id="rec-start"
                 type="date"
@@ -482,7 +482,7 @@ export function RecurringWizard({
             </div>
 
             <div className="space-y-2">
-              <Label>Condicao de Termino</Label>
+              <Label>Condição de Término</Label>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <input
@@ -508,7 +508,7 @@ export function RecurringWizard({
                     className="accent-primary"
                   />
                   <Label htmlFor="end-occ" className="text-sm font-normal">
-                    Apos
+                    Após
                   </Label>
                   <Input
                     type="number"
@@ -523,7 +523,7 @@ export function RecurringWizard({
                     }
                   />
                   <span className="text-sm text-muted-foreground">
-                    ocorrencias
+                    ocorrências
                   </span>
                 </div>
 
@@ -537,7 +537,7 @@ export function RecurringWizard({
                     className="accent-primary"
                   />
                   <Label htmlFor="end-date" className="text-sm font-normal">
-                    Ate
+                    Até
                   </Label>
                   <Input
                     type="date"
@@ -565,7 +565,7 @@ export function RecurringWizard({
                 }
               />
               <Label htmlFor="rec-skip-rates" className="text-sm">
-                Nao aplicar juros e multa
+                Não aplicar juros e multa
               </Label>
             </div>
 
@@ -587,7 +587,7 @@ export function RecurringWizard({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="rec-penalty">Taxa de Multa (% unica)</Label>
+                  <Label htmlFor="rec-penalty">Taxa de Multa (% única)</Label>
                   <Input
                     id="rec-penalty"
                     type="number"
@@ -605,10 +605,10 @@ export function RecurringWizard({
           </div>
         )}
 
-        {/* Step 5: Confirmacao */}
+        {/* Step 5: Confirmação */}
         {currentStep === 5 && (
           <div className="space-y-4">
-            <h3 className="font-medium">Resumo da Recorrencia</h3>
+            <h3 className="font-medium">Resumo da Recorrência</h3>
             <Card className="p-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tipo</span>
@@ -617,18 +617,18 @@ export function RecurringWizard({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Descricao</span>
+                <span className="text-muted-foreground">Descrição</span>
                 <span className="font-medium">{data.description}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Valor</span>
                 <span className="font-medium">
                   {formatCurrency(data.expectedAmount)}
-                  {data.isVariable && ' (variavel)'}
+                  {data.isVariable && ' (variável)'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Frequencia</span>
+                <span className="text-muted-foreground">Frequência</span>
                 <span className="font-medium">
                   {data.frequencyInterval > 1
                     ? `A cada ${data.frequencyInterval}x `
@@ -637,7 +637,7 @@ export function RecurringWizard({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Inicio</span>
+                <span className="text-muted-foreground">Início</span>
                 <span className="font-medium">
                   {new Date(data.startDate + 'T12:00:00').toLocaleDateString(
                     'pt-BR'
@@ -645,12 +645,12 @@ export function RecurringWizard({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Termino</span>
+                <span className="text-muted-foreground">Término</span>
                 <span className="font-medium">
                   {data.endCondition === 'indefinite'
                     ? 'Indefinida'
                     : data.endCondition === 'occurrences'
-                      ? `Apos ${data.totalOccurrences} ocorrencias`
+                      ? `Após ${data.totalOccurrences} ocorrências`
                       : data.endDate
                         ? new Date(
                             data.endDate + 'T12:00:00'
@@ -664,7 +664,7 @@ export function RecurringWizard({
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Juros</span>
                       <span className="font-medium">
-                        {data.interestRate}% ao mes
+                        {data.interestRate}% ao mês
                       </span>
                     </div>
                   )}
@@ -693,7 +693,7 @@ export function RecurringWizard({
 
           {currentStep < 5 ? (
             <Button onClick={goNext} disabled={!canGoNext()}>
-              Proximo
+              Próximo
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
@@ -704,7 +704,7 @@ export function RecurringWizard({
               {createMutation.isPending && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}
-              Criar Recorrencia
+              Criar Recorrência
             </Button>
           )}
         </div>

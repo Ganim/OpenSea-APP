@@ -90,7 +90,7 @@ export function WizardStepAttachment({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Anexe um documento ao lancamento (opcional).
+        Anexe um documento ao lançamento (opcional).
       </p>
 
       {/* Attachment Type */}
@@ -177,7 +177,7 @@ export function WizardStepAttachment({
           Voltar
         </Button>
         <Button onClick={() => goToStep(5)}>
-          Proximo
+          Próximo
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

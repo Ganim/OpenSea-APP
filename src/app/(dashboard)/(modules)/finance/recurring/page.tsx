@@ -105,9 +105,9 @@ export default function RecurringPage() {
     async (id: string) => {
       try {
         await pauseMutation.mutateAsync(id);
-        toast.success('Recorrencia pausada.');
+        toast.success('Recorrência pausada.');
       } catch {
-        toast.error('Erro ao pausar recorrencia.');
+        toast.error('Erro ao pausar recorrência.');
       }
     },
     [pauseMutation]
@@ -117,9 +117,9 @@ export default function RecurringPage() {
     async (id: string) => {
       try {
         await resumeMutation.mutateAsync(id);
-        toast.success('Recorrencia retomada.');
+        toast.success('Recorrência retomada.');
       } catch {
-        toast.error('Erro ao retomar recorrencia.');
+        toast.error('Erro ao retomar recorrência.');
       }
     },
     [resumeMutation]
@@ -134,16 +134,16 @@ export default function RecurringPage() {
     if (!cancelTargetId) return;
     try {
       await cancelMutation.mutateAsync(cancelTargetId);
-      toast.success('Recorrencia cancelada.');
+      toast.success('Recorrência cancelada.');
       setCancelTargetId(null);
     } catch {
-      toast.error('Erro ao cancelar recorrencia.');
+      toast.error('Erro ao cancelar recorrência.');
     }
   }, [cancelTargetId, cancelMutation]);
 
   const handleEdit = useCallback((_config: RecurringConfig) => {
     // Future: open edit modal
-    toast.info('Edicao de recorrencia sera implementada em breve.');
+    toast.info('Edição de recorrência será implementada em breve.');
   }, []);
 
   const isPending =
@@ -155,7 +155,7 @@ export default function RecurringPage() {
     () => [
       {
         id: 'create-recurring',
-        title: 'Nova Recorrencia',
+        title: 'Nova Recorrência',
         icon: Plus,
         variant: 'default' as const,
         onClick: () => setWizardOpen(true),
@@ -170,13 +170,13 @@ export default function RecurringPage() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Financeiro', href: '/finance' },
-            { label: 'Recorrencias', href: '/finance/recurring' },
+            { label: 'Recorrências', href: '/finance/recurring' },
           ]}
           buttons={actionButtons}
         />
         <Header
-          title="Recorrencias"
-          description="Gerencie lancamentos recorrentes automaticos"
+          title="Recorrências"
+          description="Gerencie lançamentos recorrentes automáticos"
         />
       </PageHeader>
 
@@ -184,7 +184,7 @@ export default function RecurringPage() {
         {/* Search */}
         <SearchBar
           value={searchQuery}
-          placeholder="Buscar por descricao..."
+          placeholder="Buscar por descrição..."
           onSearch={handleSearch}
           onClear={() => handleSearch('')}
           showClear={true}
@@ -296,7 +296,7 @@ export default function RecurringPage() {
           ) : error ? (
             <div className="p-8 text-center">
               <p className="text-muted-foreground mb-4">
-                Erro ao carregar recorrencias
+                Erro ao carregar recorrências
               </p>
               <Button variant="outline" onClick={() => refetch()}>
                 Tentar novamente
@@ -330,7 +330,7 @@ export default function RecurringPage() {
           }}
           onSuccess={handleCancelConfirmed}
           title="Confirmar Cancelamento"
-          description="Digite seu PIN de Acao para confirmar o cancelamento desta recorrencia."
+          description="Digite seu PIN de Ação para confirmar o cancelamento desta recorrência."
         />
       </PageBody>
     </PageLayout>

@@ -573,7 +573,7 @@ export default function ConsortiumDetailPage({
               </h2>
             </div>
             <div className="overflow-x-auto">
-              <Table>
+              <Table aria-label="Tabela de parcelas do consórcio">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[80px]">Parcela</TableHead>

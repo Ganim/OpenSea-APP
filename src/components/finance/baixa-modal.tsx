@@ -6,6 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -28,10 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useBankAccounts } from '@/hooks/finance/use-bank-accounts';
 import { useRegisterPayment } from '@/hooks/finance/use-finance-entries';
 import { cn } from '@/lib/utils';
-import type {
-  FinanceEntry,
-  PaymentMethod,
-} from '@/types/finance';
+import type { FinanceEntry, PaymentMethod } from '@/types/finance';
 import { PAYMENT_METHOD_LABELS } from '@/types/finance';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -129,7 +127,9 @@ export function BaixaModal({
   const calculatedInterest = useMemo(() => {
     if (!isOverdue || !categoryInterestRate) return 0;
     const dailyRate = categoryInterestRate / 30;
-    return Math.round(entry.expectedAmount * dailyRate * overdueDays * 100) / 100;
+    return (
+      Math.round(entry.expectedAmount * dailyRate * overdueDays * 100) / 100
+    );
   }, [isOverdue, categoryInterestRate, entry.expectedAmount, overdueDays]);
 
   const calculatedPenalty = useMemo(() => {
@@ -168,7 +168,7 @@ export function BaixaModal({
   const handleSubmit = useCallback(async () => {
     const parsedAmount = parseCurrencyInput(amount);
     if (parsedAmount <= 0) {
-      toast.error('Informe um valor de pagamento valido.');
+      toast.error('Informe um valor de pagamento válido.');
       return;
     }
 
@@ -212,9 +212,11 @@ export function BaixaModal({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Registrar Pagamento</DialogTitle>
-          <div className="text-sm text-muted-foreground mt-1">
-            <span className="font-mono">{entry.code}</span> - {entry.description}
-          </div>
+          <DialogDescription>
+            Informe os dados do pagamento para o lançamento{' '}
+            <span className="font-mono">{entry.code}</span> -{' '}
+            {entry.description}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -224,7 +226,7 @@ export function BaixaModal({
             <Input
               id="baixa-amount"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
               placeholder="0,00"
             />
             <p className="text-xs text-muted-foreground">
@@ -254,7 +256,7 @@ export function BaixaModal({
                 <Calendar
                   mode="single"
                   selected={paymentDate}
-                  onSelect={(date) => {
+                  onSelect={date => {
                     if (date) setPaymentDate(date);
                   }}
                   locale={ptBR}
@@ -263,15 +265,15 @@ export function BaixaModal({
             </Popover>
           </div>
 
-          {/* Conta Bancaria */}
+          {/* Conta Bancária */}
           <div className="space-y-1.5">
-            <Label htmlFor="baixa-bank-account">Conta Bancaria</Label>
+            <Label htmlFor="baixa-bank-account">Conta Bancária</Label>
             <Select value={bankAccountId} onValueChange={setBankAccountId}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecionar conta" />
               </SelectTrigger>
               <SelectContent>
-                {bankAccounts.map((account) => (
+                {bankAccounts.map(account => (
                   <SelectItem key={account.id} value={account.id}>
                     {account.name}
                   </SelectItem>
@@ -280,18 +282,18 @@ export function BaixaModal({
             </Select>
           </div>
 
-          {/* Metodo de Pagamento */}
+          {/* Método de Pagamento */}
           <div className="space-y-1.5">
-            <Label htmlFor="baixa-method">Metodo de Pagamento</Label>
+            <Label htmlFor="baixa-method">Método de Pagamento</Label>
             <Select
               value={method}
-              onValueChange={(v) => setMethod(v as PaymentMethod)}
+              onValueChange={v => setMethod(v as PaymentMethod)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecionar metodo" />
+                <SelectValue placeholder="Selecionar método" />
               </SelectTrigger>
               <SelectContent>
-                {PAYMENT_METHODS.map((m) => (
+                {PAYMENT_METHODS.map(m => (
                   <SelectItem key={m.value} value={m.value}>
                     {m.label}
                   </SelectItem>
@@ -300,14 +302,14 @@ export function BaixaModal({
             </Select>
           </div>
 
-          {/* Referencia */}
+          {/* Referência */}
           <div className="space-y-1.5">
-            <Label htmlFor="baixa-reference">Referencia</Label>
+            <Label htmlFor="baixa-reference">Referência</Label>
             <Input
               id="baixa-reference"
               value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="ID da transacao, n. do boleto, etc."
+              onChange={e => setReference(e.target.value)}
+              placeholder="ID da transação, n. do boleto, etc."
             />
           </div>
 
@@ -317,7 +319,8 @@ export function BaixaModal({
               <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="text-sm font-medium">
-                  Pagamento em atraso ({overdueDays} {overdueDays === 1 ? 'dia' : 'dias'})
+                  Pagamento em atraso ({overdueDays}{' '}
+                  {overdueDays === 1 ? 'dia' : 'dias'})
                 </span>
               </div>
 
@@ -329,14 +332,15 @@ export function BaixaModal({
                 <Input
                   id="baixa-interest"
                   value={interestOverride}
-                  onChange={(e) => setInterestOverride(e.target.value)}
+                  onChange={e => setInterestOverride(e.target.value)}
                   placeholder="0,00"
                   className="h-8"
                 />
                 {categoryInterestRate ? (
                   <p className="text-xs text-muted-foreground">
-                    Calculado automaticamente: {formatCurrency(calculatedInterest)}{' '}
-                    (taxa mensal: {(categoryInterestRate * 100).toFixed(1)}%)
+                    Calculado automaticamente:{' '}
+                    {formatCurrency(calculatedInterest)} (taxa mensal:{' '}
+                    {(categoryInterestRate * 100).toFixed(1)}%)
                   </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">
@@ -353,14 +357,15 @@ export function BaixaModal({
                 <Input
                   id="baixa-penalty"
                   value={penaltyOverride}
-                  onChange={(e) => setPenaltyOverride(e.target.value)}
+                  onChange={e => setPenaltyOverride(e.target.value)}
                   placeholder="0,00"
                   className="h-8"
                 />
                 {categoryPenaltyRate ? (
                   <p className="text-xs text-muted-foreground">
-                    Calculado automaticamente: {formatCurrency(calculatedPenalty)}{' '}
-                    (taxa: {(categoryPenaltyRate * 100).toFixed(1)}%)
+                    Calculado automaticamente:{' '}
+                    {formatCurrency(calculatedPenalty)} (taxa:{' '}
+                    {(categoryPenaltyRate * 100).toFixed(1)}%)
                   </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">
@@ -399,14 +404,14 @@ export function BaixaModal({
             </div>
           )}
 
-          {/* Observacoes */}
+          {/* Observações */}
           <div className="space-y-1.5">
-            <Label htmlFor="baixa-notes">Observacoes</Label>
+            <Label htmlFor="baixa-notes">Observações</Label>
             <Textarea
               id="baixa-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Observacoes sobre o pagamento..."
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Observações sobre o pagamento..."
               rows={2}
             />
           </div>
@@ -416,10 +421,7 @@ export function BaixaModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={registerPayment.isPending}
-          >
+          <Button onClick={handleSubmit} disabled={registerPayment.isPending}>
             {registerPayment.isPending && (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             )}

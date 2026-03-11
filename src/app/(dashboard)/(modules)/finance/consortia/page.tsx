@@ -134,7 +134,7 @@ function TableSkeleton() {
   return (
     <Card className="overflow-hidden">
       <div className="p-0">
-        <Table>
+        <Table aria-label="Tabela de comparação de custos">
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
@@ -400,13 +400,9 @@ export default function ConsortiaPage() {
       perPage: PER_PAGE,
       search: searchQuery || undefined,
       status:
-        statusFilter !== 'ALL'
-          ? (statusFilter as ConsortiumStatus)
-          : undefined,
+        statusFilter !== 'ALL' ? (statusFilter as ConsortiumStatus) : undefined,
       isContemplated:
-        contemplatedFilter === 'ALL'
-          ? undefined
-          : contemplatedFilter === 'YES',
+        contemplatedFilter === 'ALL' ? undefined : contemplatedFilter === 'YES',
     }),
     [page, searchQuery, statusFilter, contemplatedFilter]
   );
@@ -471,9 +467,7 @@ export default function ConsortiaPage() {
     if (!deleteTarget) return;
     try {
       await deleteConsortium.mutateAsync(deleteTarget.id);
-      toast.success(
-        `Consórcio "${deleteTarget.name}" excluído com sucesso.`
-      );
+      toast.success(`Consórcio "${deleteTarget.name}" excluído com sucesso.`);
       setDeleteTarget(null);
       refetch();
     } catch (err) {
@@ -603,7 +597,9 @@ export default function ConsortiaPage() {
             message="Ocorreu um erro ao tentar carregar os consórcios. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => { refetch(); },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : !canList ? (
@@ -617,16 +613,14 @@ export default function ConsortiaPage() {
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <Table>
+              <Table aria-label="Tabela de consórcios">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[160px]">Nome</TableHead>
                     <TableHead className="min-w-[140px]">
                       Administradora
                     </TableHead>
-                    <TableHead className="min-w-[100px]">
-                      Grupo/Cota
-                    </TableHead>
+                    <TableHead className="min-w-[100px]">Grupo/Cota</TableHead>
                     <TableHead className="text-right min-w-[130px]">
                       Crédito
                     </TableHead>
@@ -720,18 +714,12 @@ export default function ConsortiaPage() {
                         {/* Contemplado */}
                         <TableCell className="text-center">
                           {consortium.isContemplated ? (
-                            <Badge
-                              variant="success"
-                              className="gap-1 text-xs"
-                            >
+                            <Badge variant="success" className="gap-1 text-xs">
                               <CheckCircle className="h-3 w-3" />
                               Sim
                             </Badge>
                           ) : (
-                            <Badge
-                              variant="outline"
-                              className="text-xs"
-                            >
+                            <Badge variant="outline" className="text-xs">
                               Não
                             </Badge>
                           )}

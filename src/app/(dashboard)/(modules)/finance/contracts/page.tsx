@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Contracts Listing Page
- * Pagina de listagem de contratos com filtros, paginacao e acoes RBAC.
+ * Página de listagem de contratos com filtros, paginação e ações RBAC.
  */
 
 'use client';
@@ -46,7 +46,10 @@ import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useContracts, useDeleteContract } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { Contract, ContractStatus } from '@/types/finance';
-import { CONTRACT_STATUS_LABELS, PAYMENT_FREQUENCY_LABELS } from '@/types/finance';
+import {
+  CONTRACT_STATUS_LABELS,
+  PAYMENT_FREQUENCY_LABELS,
+} from '@/types/finance';
 import {
   AlertTriangle,
   Calendar,
@@ -126,10 +129,10 @@ function TableSkeleton() {
   return (
     <Card className="overflow-hidden">
       <div className="p-0">
-        <Table>
+        <Table aria-label="Tabela de contratos">
           <TableHeader>
             <TableRow>
-              <TableHead>Titulo</TableHead>
+              <TableHead>Título</TableHead>
               <TableHead>Empresa</TableHead>
               <TableHead className="text-right">Valor Total</TableHead>
               <TableHead className="text-center">Frequencia</TableHead>
@@ -141,13 +144,27 @@ function TableSkeleton() {
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-28 ml-auto" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-20 mx-auto" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-36 mx-auto" /></TableCell>
-                <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                <TableCell><Skeleton className="h-6 w-6 mx-auto" /></TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-40" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28 ml-auto" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20 mx-auto" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-36 mx-auto" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-6 mx-auto" />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -223,7 +240,7 @@ function ContractRowActions({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Abrir menu</span>
@@ -232,7 +249,7 @@ function ContractRowActions({
       <DropdownMenuContent align="end">
         {canView && (
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onView(contract.id);
             }}
@@ -243,7 +260,7 @@ function ContractRowActions({
         )}
         {canEdit && !contract.isCancelled && (
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onEdit(contract.id);
             }}
@@ -257,7 +274,7 @@ function ContractRowActions({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onDelete(contract);
               }}
@@ -312,7 +329,7 @@ function TablePagination({
           <span className="hidden sm:inline">Anterior</span>
         </Button>
         <span className="text-sm text-muted-foreground px-2">
-          Pagina {page} de {totalPages}
+          Página {page} de {totalPages}
         </span>
         <Button
           variant="outline"
@@ -321,7 +338,7 @@ function TablePagination({
           onClick={() => onPageChange(page + 1)}
           className="gap-1"
         >
-          <span className="hidden sm:inline">Proxima</span>
+          <span className="hidden sm:inline">Próxima</span>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
@@ -360,9 +377,7 @@ export default function ContractsPage() {
       perPage: PER_PAGE,
       search: searchQuery || undefined,
       status:
-        statusFilter !== 'ALL'
-          ? (statusFilter as ContractStatus)
-          : undefined,
+        statusFilter !== 'ALL' ? (statusFilter as ContractStatus) : undefined,
     }),
     [page, searchQuery, statusFilter]
   );
@@ -422,9 +437,7 @@ export default function ContractsPage() {
     if (!deleteTarget) return;
     try {
       await deleteContract.mutateAsync(deleteTarget.id);
-      toast.success(
-        `Contrato "${deleteTarget.title}" excluido com sucesso.`
-      );
+      toast.success(`Contrato "${deleteTarget.title}" excluído com sucesso.`);
       setDeleteTarget(null);
       refetch();
     } catch (err) {
@@ -452,7 +465,7 @@ export default function ContractsPage() {
   const visibleActionButtons = useMemo<HeaderButton[]>(
     () =>
       actionButtons
-        .filter((button) =>
+        .filter(button =>
           button.permission ? hasPermission(button.permission) : true
         )
         .map(({ permission, ...button }) => button),
@@ -485,7 +498,7 @@ export default function ContractsPage() {
       <PageBody>
         <SearchBar
           value={searchQuery}
-          placeholder="Buscar por titulo, empresa ou codigo..."
+          placeholder="Buscar por título, empresa ou código..."
           onSearch={handleSearch}
           onClear={() => handleSearch('')}
           showClear={true}
@@ -499,7 +512,7 @@ export default function ContractsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Todos os status</SelectItem>
-              {STATUS_OPTIONS.map((option) => (
+              {STATUS_OPTIONS.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -539,18 +552,18 @@ export default function ContractsPage() {
           <GridError
             type="forbidden"
             title="Acesso restrito"
-            message="Voce nao possui permissao para visualizar contratos."
+            message="Você não possui permissão para visualizar contratos."
           />
         ) : contracts.length === 0 ? (
           <EmptyState canCreate={canCreate} onCreate={handleCreate} />
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <Table>
+              <Table aria-label="Tabela de contratos">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[60px]">Codigo</TableHead>
-                    <TableHead className="min-w-[180px]">Titulo</TableHead>
+                    <TableHead className="min-w-[60px]">Código</TableHead>
+                    <TableHead className="min-w-[180px]">Título</TableHead>
                     <TableHead className="min-w-[150px]">Empresa</TableHead>
                     <TableHead className="text-right min-w-[130px]">
                       Valor Total
@@ -569,7 +582,7 @@ export default function ContractsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {contracts.map((contract) => {
+                  {contracts.map(contract => {
                     const isExpired = contract.isExpired;
                     const isNearExpiry =
                       contract.daysUntilExpiration > 0 &&
@@ -612,8 +625,9 @@ export default function ContractsPage() {
                         </TableCell>
 
                         <TableCell className="text-center text-sm">
-                          {PAYMENT_FREQUENCY_LABELS[contract.paymentFrequency] ??
-                            contract.paymentFrequency}
+                          {PAYMENT_FREQUENCY_LABELS[
+                            contract.paymentFrequency
+                          ] ?? contract.paymentFrequency}
                         </TableCell>
 
                         <TableCell className="text-center">
@@ -631,7 +645,7 @@ export default function ContractsPage() {
                         </TableCell>
 
                         <TableCell
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={e => e.stopPropagation()}
                           className="text-center"
                         >
                           <ContractRowActions
@@ -672,11 +686,11 @@ export default function ContractsPage() {
             setDeleteTarget(null);
           }}
           onSuccess={handleDeleteConfirmed}
-          title="Confirmar Exclusao"
+          title="Confirmar Exclusão"
           description={
             deleteTarget
-              ? `Digite seu PIN de Acao para excluir o contrato "${deleteTarget.title}". Esta acao nao pode ser desfeita.`
-              : 'Digite seu PIN de Acao para autorizar esta operacao.'
+              ? `Digite seu PIN de Ação para excluir o contrato "${deleteTarget.title}". Esta ação não pode ser desfeita.`
+              : 'Digite seu PIN de Ação para autorizar esta operação.'
           }
         />
       </PageBody>

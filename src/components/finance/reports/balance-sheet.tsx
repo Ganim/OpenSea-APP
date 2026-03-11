@@ -29,7 +29,7 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Balanco Patrimonial</CardTitle>
+          <CardTitle>Balanço Patrimonial</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -46,11 +46,11 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Balanco Patrimonial</CardTitle>
+          <CardTitle>Balanço Patrimonial</CardTitle>
         </CardHeader>
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground">
-            Nenhum dado disponivel
+            Nenhum dado disponível
           </p>
         </CardContent>
       </Card>
@@ -76,7 +76,7 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
       items: [
         { label: 'Contas a Pagar', value: data.totalPayable },
         {
-          label: 'Obrigacoes Vencidas',
+          label: 'Obrigações Vencidas',
           value: data.overduePayable,
           highlight: true,
         },
@@ -85,24 +85,24 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
       totalLabel: 'Total do Passivo',
     },
     {
-      title: 'PATRIMONIO LIQUIDO',
+      title: 'PATRIMÔNIO LÍQUIDO',
       items: [],
       total: patrimonio,
-      totalLabel: 'Patrimonio Liquido',
+      totalLabel: 'Patrimônio Líquido',
     },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Balanco Patrimonial</CardTitle>
+        <CardTitle>Balanço Patrimonial</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[60%]">Descricao</TableHead>
+                <TableHead className="w-[60%]">Descrição</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
               </TableRow>
             </TableHeader>

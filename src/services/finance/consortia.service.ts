@@ -28,7 +28,7 @@ export const consortiaService = {
   async list(params?: ConsortiaQuery): Promise<ConsortiaResponse> {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
-      perPage: String(params?.perPage ?? 20),
+      limit: String(params?.perPage ?? 20),
     });
 
     if (params?.search) query.append('search', params.search);

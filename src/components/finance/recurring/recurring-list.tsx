@@ -63,10 +63,10 @@ export function RecurringList({
     return (
       <div className="p-12 text-center">
         <p className="text-muted-foreground mb-2">
-          Nenhuma recorrencia encontrada
+          Nenhuma recorrência encontrada
         </p>
         <p className="text-sm text-muted-foreground">
-          Crie uma nova recorrencia para automatizar seus lancamentos.
+          Crie uma nova recorrência para automatizar seus lançamentos.
         </p>
       </div>
     );
@@ -77,11 +77,11 @@ export function RecurringList({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead>Descricao</TableHead>
+            <TableHead>Descrição</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead className="text-right">Valor</TableHead>
-            <TableHead>Frequencia</TableHead>
-            <TableHead>Proximo Vencimento</TableHead>
+            <TableHead>Frequência</TableHead>
+            <TableHead>Próximo Vencimento</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="w-[60px]" />
           </TableRow>
@@ -94,7 +94,7 @@ export function RecurringList({
                   <span className="font-medium">{config.description}</span>
                   {config.isVariable && (
                     <span className="text-xs text-muted-foreground">
-                      Valor variavel
+                      Valor variável
                     </span>
                   )}
                 </div>
@@ -128,7 +128,7 @@ export function RecurringList({
                       disabled={isPending}
                     >
                       <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Acoes</span>
+                      <span className="sr-only">Ações</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

@@ -63,6 +63,7 @@ import {
   CornerDownRight,
   Edit,
   Eye,
+  FolderTree,
   Lock,
   MoreHorizontal,
   Plus,
@@ -387,16 +388,30 @@ export default function FinanceCategoriesPage() {
             }}
           />
         ) : hierarchyRows.length === 0 ? (
-          <Card className="bg-white/5 p-12 text-center">
-            <p className="text-muted-foreground">
-              {searchQuery || typeFilter !== 'all'
-                ? 'Nenhuma categoria encontrada com os filtros aplicados.'
-                : 'Nenhuma categoria cadastrada.'}
-            </p>
+          <Card className="bg-white/50 dark:bg-white/5 border-gray-200/50 dark:border-white/10">
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="p-4 rounded-full bg-muted/50 mb-4">
+                <FolderTree className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Nenhuma categoria financeira encontrada
+              </h3>
+              <p className="text-muted-foreground text-sm text-center max-w-sm mb-6">
+                {searchQuery || typeFilter !== 'all'
+                  ? 'Nenhuma categoria encontrada com os filtros aplicados. Tente ajustar os filtros.'
+                  : 'Nenhuma categoria cadastrada. Crie categorias de receita e despesa para organizar seus lançamentos.'}
+              </p>
+              {canCreate && !searchQuery && typeFilter === 'all' && (
+                <Button onClick={handleOpenCreateExpense}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Categoria
+                </Button>
+              )}
+            </div>
           </Card>
         ) : (
           <div className="border rounded-lg overflow-hidden">
-            <Table>
+            <Table aria-label="Tabela de categorias financeiras">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50%]">
@@ -463,9 +478,7 @@ export default function FinanceCategoriesPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            category.isActive ? 'default' : 'secondary'
-                          }
+                          variant={category.isActive ? 'default' : 'secondary'}
                         >
                           {category.isActive ? 'Ativa' : 'Inativa'}
                         </Badge>

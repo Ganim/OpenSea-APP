@@ -460,6 +460,7 @@ export const API_ENDPOINTS = {
   // Finance - Dashboard & Reports
   FINANCE_DASHBOARD: {
     OVERVIEW: '/v1/finance/dashboard',
+    LANDING_OVERVIEW: '/v1/finance/overview',
     FORECAST: '/v1/finance/forecast',
     CASHFLOW: '/v1/finance/cashflow',
     CHECK_OVERDUE: '/v1/finance/check-overdue',

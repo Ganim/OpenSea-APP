@@ -182,7 +182,7 @@ export default function ContractDetailPage({
   const handleDelete = useCallback(async () => {
     try {
       await deleteContract.mutateAsync(id);
-      toast.success('Contrato excluido com sucesso.');
+      toast.success('Contrato excluído com sucesso.');
       router.push('/finance/contracts');
     } catch (err) {
       const message =
@@ -195,14 +195,14 @@ export default function ContractDetailPage({
     try {
       const result = await generateEntries.mutateAsync(id);
       toast.success(
-        `${result.entriesCreated} lancamento(s) gerado(s) com sucesso.`
+        `${result.entriesCreated} lançamento(s) gerado(s) com sucesso.`
       );
       refetch();
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
-          : 'Erro ao gerar lancamentos';
+          : 'Erro ao gerar lançamentos';
       toast.error(message);
     }
   }, [id, generateEntries, refetch]);
@@ -229,7 +229,7 @@ export default function ContractDetailPage({
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <FileText className="h-12 w-12 text-muted-foreground" />
         <p className="text-destructive text-lg font-medium">
-          Contrato nao encontrado.
+          Contrato não encontrado.
         </p>
         <Link href="/finance/contracts">
           <Button variant="outline">
@@ -285,7 +285,7 @@ export default function ContractDetailPage({
               <Play className="h-4 w-4 mr-2" />
               {generateEntries.isPending
                 ? 'Gerando...'
-                : 'Gerar Lancamentos'}
+                : 'Gerar Lançamentos'}
             </Button>
           )}
           {canEdit && !contract.isCancelled && (
@@ -316,7 +316,7 @@ export default function ContractDetailPage({
             <AlertTriangle className="h-5 w-5 text-amber-600" />
             <div>
               <p className="font-medium text-amber-800 dark:text-amber-300">
-                Contrato proximo do vencimento
+                Contrato próximo do vencimento
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-400">
                 Este contrato vence em {contract.daysUntilExpiration} dia(s) (
@@ -378,14 +378,14 @@ export default function ContractDetailPage({
                 }
               />
               <InfoRow
-                label="Lancamentos Gerados"
+                label="Lançamentos Gerados"
                 value={generatedEntriesCount}
               />
             </div>
             {nextPaymentDate && (
               <div className="mt-4 pt-4 border-t">
                 <InfoRow
-                  label="Proximo Pagamento"
+                  label="Próximo Pagamento"
                   value={
                     <span className="text-orange-600 dark:text-orange-400 font-medium">
                       {formatDate(nextPaymentDate)}
@@ -404,11 +404,11 @@ export default function ContractDetailPage({
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <InfoRow
-                label="Inicio"
+                label="Início"
                 value={formatDate(contract.startDate)}
               />
               <InfoRow
-                label="Termino"
+                label="Término"
                 value={formatDate(contract.endDate)}
               />
               <InfoRow
@@ -427,7 +427,7 @@ export default function ContractDetailPage({
             {contract.autoRenew && (
               <div className="mt-4 pt-4 border-t">
                 <InfoRow
-                  label="Renovacao Automatica"
+                  label="Renovação Automática"
                   value={`Sim - a cada ${contract.renewalPeriodMonths ?? 12} meses`}
                 />
               </div>
@@ -439,7 +439,7 @@ export default function ContractDetailPage({
             contract.costCenterId ||
             contract.bankAccountId) && (
             <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Classificacao</h2>
+              <h2 className="text-lg font-semibold mb-4">Classificação</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {contract.categoryId && (
                   <InfoRow
@@ -455,7 +455,7 @@ export default function ContractDetailPage({
                 )}
                 {contract.bankAccountId && (
                   <InfoRow
-                    label="Conta Bancaria"
+                    label="Conta Bancária"
                     value={contract.bankAccountId}
                   />
                 )}
@@ -466,7 +466,7 @@ export default function ContractDetailPage({
           {/* Notes */}
           {contract.notes && (
             <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-2">Observacoes</h2>
+              <h2 className="text-lg font-semibold mb-2">Observações</h2>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {contract.notes}
               </p>
@@ -498,7 +498,7 @@ export default function ContractDetailPage({
             <Card className="p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Historico do Fornecedor
+                Histórico do Fornecedor
               </h2>
               <div className="space-y-3">
                 <InfoRow
@@ -619,8 +619,8 @@ export default function ContractDetailPage({
         isOpen={pinModalOpen}
         onClose={() => setPinModalOpen(false)}
         onSuccess={handleDelete}
-        title="Confirmar Exclusao"
-        description={`Digite seu PIN de Acao para excluir o contrato "${contract.title}". Os lancamentos pendentes serao cancelados.`}
+        title="Confirmar Exclusão"
+        description={`Digite seu PIN de Ação para excluir o contrato "${contract.title}". Os lançamentos pendentes serão cancelados.`}
       />
     </div>
   );

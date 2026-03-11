@@ -153,7 +153,7 @@ export function OcrConfirmationStep({
           />
         </div>
 
-        {/* Codigo de Barras (readonly) */}
+        {/* Código de Barras (readonly) */}
         {ocrResult.extractedData.codigoBarras && (
           <div className="space-y-1 sm:col-span-2">
             <Label className="text-xs">Código de Barras</Label>

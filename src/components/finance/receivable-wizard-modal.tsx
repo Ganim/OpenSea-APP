@@ -110,7 +110,7 @@ const INITIAL_WIZARD_DATA: ReceivableWizardData = {
   tags: [],
 };
 
-const STEP_LABELS = ['Tipo', 'Dados', 'Parcelas', 'Anexo', 'Confirmacao'];
+const STEP_LABELS = ['Tipo', 'Dados', 'Parcelas', 'Anexo', 'Confirmação'];
 
 const ACCEPTED_TYPES = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
 
@@ -270,7 +270,7 @@ export function ReceivableWizardModal({
           );
         } catch {
           toast.warning(
-            'Conta criada, mas o anexo nao foi enviado. Voce pode envia-lo pela pagina de detalhes.'
+            'Conta criada, mas o anexo não foi enviado. Você pode enviá-lo pela página de detalhes.'
           );
         }
       }
@@ -442,7 +442,7 @@ export function ReceivableWizardModal({
         {currentStep === 4 && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Anexe um documento ao lancamento (opcional).
+              Anexe um documento ao lançamento (opcional).
             </p>
 
             {/* Attachment Type */}
@@ -529,7 +529,7 @@ export function ReceivableWizardModal({
                 Voltar
               </Button>
               <Button onClick={() => goToStep(5)}>
-                Proximo
+                Próximo
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -568,7 +568,7 @@ function ReceivableInstallmentsStep({
     <div className="space-y-4">
       {/* Toggle: Avulso vs Parcelado */}
       <div className="space-y-2">
-        <Label>Tipo de Lancamento</Label>
+        <Label>Tipo de Lançamento</Label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -581,7 +581,7 @@ function ReceivableInstallmentsStep({
           >
             <span className="text-sm">Avulso</span>
             <p className="text-xs text-muted-foreground mt-1">
-              Lancamento unico
+              Lançamento único
             </p>
           </button>
           <button
@@ -605,7 +605,7 @@ function ReceivableInstallmentsStep({
       {!isInstallment && (
         <div className="p-4 bg-muted/50 rounded-lg text-sm space-y-1">
           <p>
-            <span className="text-muted-foreground">Descricao:</span>{' '}
+            <span className="text-muted-foreground">Descrição:</span>{' '}
             {wizardData.description || '--'}
           </p>
           <p>
@@ -686,7 +686,7 @@ function ReceivableInstallmentsStep({
 
           {/* Preview */}
           <div className="space-y-2">
-            <Label>Previa das Parcelas</Label>
+            <Label>Prévia das Parcelas</Label>
             <InstallmentPreview
               dueDate={wizardData.dueDate}
               amount={wizardData.expectedAmount}
@@ -705,7 +705,7 @@ function ReceivableInstallmentsStep({
           Voltar
         </Button>
         <Button onClick={() => goToStep(4)}>
-          Proximo
+          Próximo
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
@@ -753,7 +753,7 @@ function ReceivableConfirmationStep({
         </h4>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <div>
-            <span className="text-muted-foreground">Descricao:</span>
+            <span className="text-muted-foreground">Descrição:</span>
             <p className="font-medium">{wizardData.description || '--'}</p>
           </div>
           <div>
@@ -765,7 +765,7 @@ function ReceivableConfirmationStep({
             <p className="font-medium">{wizardData.categoryName || '--'}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">Conta Bancaria:</span>
+            <span className="text-muted-foreground">Conta Bancária:</span>
             <p className="font-medium">{wizardData.bankAccountName || '--'}</p>
           </div>
           <div>
@@ -775,7 +775,7 @@ function ReceivableConfirmationStep({
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Data de Emissao:</span>
+            <span className="text-muted-foreground">Data de Emissão:</span>
             <p className="font-medium">{formatDate(wizardData.issueDate)}</p>
           </div>
           <div>
@@ -785,7 +785,7 @@ function ReceivableConfirmationStep({
           {wizardData.competenceDate && (
             <div>
               <span className="text-muted-foreground">
-                Data de Competencia:
+                Data de Competência:
               </span>
               <p className="font-medium">
                 {formatDate(wizardData.competenceDate)}
@@ -823,7 +823,7 @@ function ReceivableConfirmationStep({
 
         {wizardData.notes && (
           <div className="text-sm">
-            <span className="text-muted-foreground">Observacoes:</span>
+            <span className="text-muted-foreground">Observações:</span>
             <p className="font-medium">{wizardData.notes}</p>
           </div>
         )}

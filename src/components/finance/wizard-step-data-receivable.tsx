@@ -80,7 +80,7 @@ export function WizardStepDataReceivable({
   // Validation
   const validate = useCallback((): boolean => {
     if (!wizardData.description.trim()) {
-      toast.error('Preencha a descricao.');
+      toast.error('Preencha a descrição.');
       return false;
     }
     if (!wizardData.categoryId) {
@@ -160,14 +160,14 @@ export function WizardStepDataReceivable({
 
   return (
     <div className="space-y-4">
-      {/* Descricao */}
+      {/* Descrição */}
       <div className="space-y-2">
-        <Label htmlFor="wizard-rcv-description">Descricao *</Label>
+        <Label htmlFor="wizard-rcv-description">Descrição *</Label>
         <Input
           id="wizard-rcv-description"
           value={wizardData.description}
           onChange={(e) => updateWizardData({ description: e.target.value })}
-          placeholder="Descricao do lancamento"
+          placeholder="Descrição do lançamento"
           required
         />
       </div>
@@ -262,9 +262,9 @@ export function WizardStepDataReceivable({
         }
       />
 
-      {/* Conta Bancaria */}
+      {/* Conta Bancária */}
       <div className="space-y-2">
-        <Label>Conta Bancaria</Label>
+        <Label>Conta Bancária</Label>
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.bankAccountId}
@@ -292,7 +292,7 @@ export function WizardStepDataReceivable({
             variant="outline"
             size="icon"
             onClick={() => setShowBankAccountCreate(true)}
-            title="Criar nova conta bancaria"
+            title="Criar nova conta bancária"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -319,7 +319,7 @@ export function WizardStepDataReceivable({
 
       {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
-        {renderDatePicker('Data de Emissao', wizardData.issueDate, (date) =>
+        {renderDatePicker('Data de Emissão', wizardData.issueDate, (date) =>
           updateWizardData({ issueDate: date })
         )}
         {renderDatePicker(
@@ -331,19 +331,19 @@ export function WizardStepDataReceivable({
       </div>
 
       {renderDatePicker(
-        'Data de Competencia',
+        'Data de Competência',
         wizardData.competenceDate,
         (date) => updateWizardData({ competenceDate: date })
       )}
 
-      {/* Observacoes */}
+      {/* Observações */}
       <div className="space-y-2">
-        <Label htmlFor="wizard-rcv-notes">Observacoes</Label>
+        <Label htmlFor="wizard-rcv-notes">Observações</Label>
         <Textarea
           id="wizard-rcv-notes"
           value={wizardData.notes}
           onChange={(e) => updateWizardData({ notes: e.target.value })}
-          placeholder="Observacoes adicionais (opcional)"
+          placeholder="Observações adicionais (opcional)"
           rows={3}
         />
       </div>
@@ -355,7 +355,7 @@ export function WizardStepDataReceivable({
           Voltar
         </Button>
         <Button onClick={handleNext}>
-          Proximo
+          Próximo
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
@@ -398,7 +398,7 @@ export function WizardStepDataReceivable({
       <InlineCreateModal
         open={showBankAccountCreate}
         onOpenChange={setShowBankAccountCreate}
-        title="Nova Conta Bancaria"
+        title="Nova Conta Bancária"
       >
         <InlineBankAccountForm
           onCreated={(bankAccount) => {

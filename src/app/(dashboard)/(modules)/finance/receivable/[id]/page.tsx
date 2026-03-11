@@ -152,7 +152,7 @@ export default function ReceivableDetailPage({
   const handleDeleteConfirmed = useCallback(async () => {
     try {
       await deleteMutation.mutateAsync(id);
-      toast.success('Conta a receber excluida com sucesso.');
+      toast.success('Conta a receber excluída com sucesso.');
       router.push('/finance/receivable');
     } catch (err) {
       const message =
@@ -215,7 +215,7 @@ export default function ReceivableDetailPage({
   if (!entry) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Lancamento nao encontrado.</p>
+        <p className="text-destructive">Lançamento não encontrado.</p>
       </div>
     );
   }
@@ -333,15 +333,15 @@ export default function ReceivableDetailPage({
               <InfoRow label="Centro de Custo" value="Rateio (ver abaixo)" />
             )}
             {entry.bankAccountName && (
-              <InfoRow label="Conta Bancaria" value={entry.bankAccountName} />
+              <InfoRow label="Conta Bancária" value={entry.bankAccountName} />
             )}
             {entry.recurrenceType && (
               <InfoRow
-                label="Recorrencia"
+                label="Recorrência"
                 value={RECURRENCE_TYPE_LABELS[entry.recurrenceType]}
               />
             )}
-            {entry.notes && <InfoRow label="Observacoes" value={entry.notes} />}
+            {entry.notes && <InfoRow label="Observações" value={entry.notes} />}
           </CardContent>
         </Card>
 
@@ -458,13 +458,13 @@ export default function ReceivableDetailPage({
               {entry.parentEntryId && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    Lancamento Pai
+                    Lançamento Pai
                   </span>
                   <Link
                     href={`/finance/receivable/${entry.parentEntryId}`}
                     className="text-sm text-primary hover:underline"
                   >
-                    Ver lancamento original
+                    Ver lançamento original
                   </Link>
                 </div>
               )}
@@ -480,7 +480,7 @@ export default function ReceivableDetailPage({
             <CardTitle className="text-base">Rateio de Centro de Custo</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table aria-label="Tabela de rateio de centro de custo">
               <TableHeader>
                 <TableRow>
                   <TableHead>Centro de Custo</TableHead>
@@ -513,7 +513,7 @@ export default function ReceivableDetailPage({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            Historico de Recebimentos
+            Histórico de Recebimentos
             {entry.payments && entry.payments.length > 0 && (
               <Badge variant="secondary">{entry.payments.length}</Badge>
             )}
@@ -521,15 +521,15 @@ export default function ReceivableDetailPage({
         </CardHeader>
         <CardContent>
           {entry.payments && entry.payments.length > 0 ? (
-            <Table>
+            <Table aria-label="Tabela de histórico de recebimentos">
               <TableHeader>
                 <TableRow>
                   <TableHead>Data</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
-                  <TableHead>Metodo</TableHead>
+                  <TableHead>Método</TableHead>
                   <TableHead>Conta</TableHead>
-                  <TableHead>Referencia</TableHead>
-                  <TableHead>Observacoes</TableHead>
+                  <TableHead>Referência</TableHead>
+                  <TableHead>Observações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -660,7 +660,7 @@ export default function ReceivableDetailPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table aria-label="Tabela de parcelas do recebimento">
               <TableHeader>
                 <TableRow>
                   <TableHead>Parcela</TableHead>
@@ -735,8 +735,8 @@ export default function ReceivableDetailPage({
         isOpen={pinModalOpen}
         onClose={() => setPinModalOpen(false)}
         onSuccess={handleDeleteConfirmed}
-        title="Confirmar Exclusao"
-        description="Digite seu PIN de Acao para confirmar a exclusao desta conta a receber."
+        title="Confirmar Exclusão"
+        description="Digite seu PIN de Ação para confirmar a exclusão desta conta a receber."
       />
     </div>
   );

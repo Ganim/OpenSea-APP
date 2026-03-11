@@ -120,7 +120,7 @@ export default function NewContractPage() {
             <h2 className="text-lg font-semibold mb-4">Dados do Contrato</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <Label htmlFor="title">Titulo *</Label>
+                <Label htmlFor="title">Título *</Label>
                 <Input
                   id="title"
                   required
@@ -133,7 +133,7 @@ export default function NewContractPage() {
               </div>
 
               <div className="md:col-span-2">
-                <Label htmlFor="description">Descricao</Label>
+                <Label htmlFor="description">Descrição</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -141,7 +141,7 @@ export default function NewContractPage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows={2}
-                  placeholder="Descricao detalhada do contrato"
+                  placeholder="Descrição detalhada do contrato"
                 />
               </div>
             </div>
@@ -263,9 +263,9 @@ export default function NewContractPage() {
             </div>
           </div>
 
-          {/* Section: Classificacao */}
+          {/* Section: Classificação */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Classificacao</h2>
+            <h2 className="text-lg font-semibold mb-4">Classificação</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="categoryId">Categoria</Label>
@@ -310,7 +310,7 @@ export default function NewContractPage() {
               </div>
 
               <div>
-                <Label htmlFor="bankAccountId">Conta Bancaria</Label>
+                <Label htmlFor="bankAccountId">Conta Bancária</Label>
                 <Select
                   value={formData.bankAccountId}
                   onValueChange={(value) =>
@@ -337,7 +337,7 @@ export default function NewContractPage() {
             <h2 className="text-lg font-semibold mb-4">Vigencia</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <Label htmlFor="startDate">Data de Inicio *</Label>
+                <Label htmlFor="startDate">Data de Início *</Label>
                 <Input
                   id="startDate"
                   type="date"
@@ -350,7 +350,7 @@ export default function NewContractPage() {
               </div>
 
               <div>
-                <Label htmlFor="endDate">Data de Termino *</Label>
+                <Label htmlFor="endDate">Data de Término *</Label>
                 <Input
                   id="endDate"
                   type="date"
@@ -382,7 +382,7 @@ export default function NewContractPage() {
               </div>
 
               <div className="flex flex-col gap-3">
-                <Label>Renovacao Automatica</Label>
+                <Label>Renovação Automática</Label>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="autoRenew"
@@ -411,10 +411,10 @@ export default function NewContractPage() {
                           renewalPeriodMonths: parseInt(e.target.value) || 12,
                         })
                       }
-                      placeholder="Meses de renovacao"
+                      placeholder="Meses de renovação"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Periodo em meses
+                      Período em meses
                     </p>
                   </div>
                 )}
@@ -424,7 +424,7 @@ export default function NewContractPage() {
 
           {/* Notes */}
           <div>
-            <Label htmlFor="notes">Observacoes</Label>
+            <Label htmlFor="notes">Observações</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -432,7 +432,7 @@ export default function NewContractPage() {
                 setFormData({ ...formData, notes: e.target.value })
               }
               rows={3}
-              placeholder="Observacoes adicionais sobre o contrato"
+              placeholder="Observações adicionais sobre o contrato"
             />
           </div>
 

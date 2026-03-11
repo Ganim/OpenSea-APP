@@ -28,6 +28,29 @@ export interface OverduePayableSummary {
   oldestDueDate: string;
 }
 
+export interface FinanceOverviewEntryTypeCounts {
+  total: number;
+  pending: number;
+  overdue: number;
+}
+
+export interface FinanceOverviewEntityCounts {
+  total: number;
+  active: number;
+}
+
+export interface FinanceOverview {
+  payable: FinanceOverviewEntryTypeCounts;
+  receivable: FinanceOverviewEntryTypeCounts;
+  loans: FinanceOverviewEntityCounts;
+  consortia: FinanceOverviewEntityCounts;
+  contracts: FinanceOverviewEntityCounts;
+  recurring: FinanceOverviewEntityCounts;
+  bankAccounts: number;
+  categories: number;
+  costCenters: number;
+}
+
 export interface CashflowData {
   period: string;
   inflow: number;

@@ -41,7 +41,7 @@ export interface FinanceEntry {
   notes?: string | null;
   categoryId: string;
   categoryName?: string;
-  costCenterId: string;
+  costCenterId: string | null;
   costCenterName?: string;
   costCenterAllocations?: CostCenterAllocation[];
   bankAccountId?: string | null;
@@ -179,9 +179,9 @@ export interface ParseBoletoRequest {
 
 export interface ParseBoletoResult {
   bankCode: string;
-  bankName?: string;
-  dueDate?: string;
-  amount?: number;
+  bankName: string;
+  dueDate: string;
+  amount: number;
   boletoBarcode: string;
   boletoDigitLine: string;
 }

@@ -49,10 +49,10 @@ export function InlineBankAccountForm({
         });
         const bankAccount = (result as { bankAccount: BankAccount }).bankAccount;
         onCreated({ id: bankAccount.id, name: bankAccount.name });
-        toast.success('Conta bancaria criada com sucesso!');
+        toast.success('Conta bancária criada com sucesso!');
       } catch (err) {
         const msg =
-          err instanceof Error ? err.message : 'Erro ao criar conta bancaria.';
+          err instanceof Error ? err.message : 'Erro ao criar conta bancária.';
         toast.error(msg);
       }
     },
@@ -74,7 +74,7 @@ export function InlineBankAccountForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="ba-bankcode">Codigo do Banco</Label>
+          <Label htmlFor="ba-bankcode">Código do Banco</Label>
           <Input
             id="ba-bankcode"
             value={bankCode}
@@ -84,7 +84,7 @@ export function InlineBankAccountForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="ba-agency">Agencia</Label>
+          <Label htmlFor="ba-agency">Agência</Label>
           <Input
             id="ba-agency"
             value={agency}
@@ -96,7 +96,7 @@ export function InlineBankAccountForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="ba-account">Numero da Conta</Label>
+          <Label htmlFor="ba-account">Número da Conta</Label>
           <Input
             id="ba-account"
             value={accountNumber}

@@ -142,7 +142,7 @@ export default function FinanceCompaniesPage() {
           </div>
         ) : (
           <div className="border rounded-lg">
-            <Table>
+            <Table aria-label="Tabela de empresas">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[35%]">Razão Social</TableHead>

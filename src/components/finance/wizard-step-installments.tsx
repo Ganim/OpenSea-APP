@@ -41,7 +41,7 @@ export function WizardStepInstallments({
     <div className="space-y-4">
       {/* Toggle: Avulso vs Parcelado */}
       <div className="space-y-2">
-        <Label>Tipo de Lancamento</Label>
+        <Label>Tipo de Lançamento</Label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -54,7 +54,7 @@ export function WizardStepInstallments({
           >
             <span className="text-sm">Avulso</span>
             <p className="text-xs text-muted-foreground mt-1">
-              Lancamento unico
+              Lançamento único
             </p>
           </button>
           <button
@@ -78,7 +78,7 @@ export function WizardStepInstallments({
       {!isInstallment && (
         <div className="p-4 bg-muted/50 rounded-lg text-sm space-y-1">
           <p>
-            <span className="text-muted-foreground">Descricao:</span>{' '}
+            <span className="text-muted-foreground">Descrição:</span>{' '}
             {wizardData.description || '--'}
           </p>
           <p>
@@ -162,7 +162,7 @@ export function WizardStepInstallments({
 
           {/* Preview */}
           <div className="space-y-2">
-            <Label>Previa das Parcelas</Label>
+            <Label>Prévia das Parcelas</Label>
             <InstallmentPreview
               dueDate={wizardData.dueDate}
               amount={wizardData.expectedAmount}
@@ -181,7 +181,7 @@ export function WizardStepInstallments({
           Voltar
         </Button>
         <Button onClick={() => goToStep(4)}>
-          Proximo
+          Próximo
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>

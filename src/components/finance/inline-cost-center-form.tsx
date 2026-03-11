@@ -59,7 +59,7 @@ export function InlineCostCenterForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="cc-code">Codigo *</Label>
+        <Label htmlFor="cc-code">Código *</Label>
         <Input
           id="cc-code"
           value={code}

@@ -2,6 +2,7 @@ import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
   FinanceDashboard,
+  FinanceOverview,
   CashflowResponse,
   ForecastQuery,
   ForecastResponse,
@@ -11,6 +12,12 @@ export const financeDashboardService = {
   async getDashboard(): Promise<FinanceDashboard> {
     return apiClient.get<FinanceDashboard>(
       API_ENDPOINTS.FINANCE_DASHBOARD.OVERVIEW
+    );
+  },
+
+  async getOverview(): Promise<FinanceOverview> {
+    return apiClient.get<FinanceOverview>(
+      API_ENDPOINTS.FINANCE_DASHBOARD.LANDING_OVERVIEW
     );
   },
 

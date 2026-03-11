@@ -21,7 +21,7 @@ export const costCentersService = {
   async list(params?: CostCentersQuery): Promise<CostCentersResponse> {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
-      perPage: String(params?.perPage ?? 20),
+      limit: String(params?.perPage ?? 20),
     });
 
     if (params?.search) query.append('search', params.search);

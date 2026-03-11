@@ -404,7 +404,7 @@ export function WizardStepData({
             variant="outline"
             size="icon"
             onClick={() => setShowBankAccountCreate(true)}
-            title="Criar nova conta bancaria"
+            title="Criar nova conta bancária"
           >
             <Plus className="h-4 w-4" />
           </Button>

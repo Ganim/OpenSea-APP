@@ -39,15 +39,15 @@ const reportCards = [
   {
     id: 'dre' as const,
     title: 'DRE',
-    description: 'Demonstracao do Resultado do Exercicio com hierarquia e comparativo',
+    description: 'Demonstração do Resultado do Exercício com hierarquia e comparativo',
     icon: FileBarChart,
     color: 'text-blue-600',
     bg: 'bg-blue-100 dark:bg-blue-900/30',
   },
   {
     id: 'balance' as const,
-    title: 'Balanco Patrimonial',
-    description: 'Ativo, passivo e patrimonio liquido',
+    title: 'Balanço Patrimonial',
+    description: 'Ativo, passivo e patrimônio líquido',
     icon: Wallet,
     color: 'text-green-600',
     bg: 'bg-green-100 dark:bg-green-900/30',
@@ -62,8 +62,8 @@ const reportCards = [
   },
   {
     id: 'entries' as const,
-    title: 'Lancamentos',
-    description: 'Listagem completa de lancamentos do periodo',
+    title: 'Lançamentos',
+    description: 'Listagem completa de lançamentos do período',
     icon: FileText,
     color: 'text-amber-600',
     bg: 'bg-amber-100 dark:bg-amber-900/30',
@@ -99,9 +99,9 @@ export default function FinanceReportsPage() {
             <FileBarChart className="h-6 w-6 text-violet-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Relatorios Financeiros</h1>
+            <h1 className="text-3xl font-bold">Relatórios Financeiros</h1>
             <p className="text-muted-foreground">
-              Visualize e exporte relatorios financeiros detalhados
+              Visualize e exporte relatórios financeiros detalhados
             </p>
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function FinanceReportsPage() {
               >
                 Painel Financeiro
               </Button>{' '}
-              para visualizar o fluxo de caixa em graficos interativos, ou exporte o relatorio acima.
+              para visualizar o fluxo de caixa em gráficos interativos, ou exporte o relatório acima.
             </p>
           </CardContent>
         </Card>
@@ -203,7 +203,7 @@ export default function FinanceReportsPage() {
       {activeReport === 'entries' && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Lancamentos</CardTitle>
+            <CardTitle>Lançamentos</CardTitle>
             <ExportMenu
               reportType="ENTRIES"
               startDate={dateRange.startDate}
@@ -228,7 +228,7 @@ export default function FinanceReportsPage() {
               >
                 Contas a Receber
               </Button>{' '}
-              para visualizar lancamentos detalhados, ou exporte o relatorio acima.
+              para visualizar lançamentos detalhados, ou exporte o relatório acima.
             </p>
           </CardContent>
         </Card>

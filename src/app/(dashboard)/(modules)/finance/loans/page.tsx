@@ -136,16 +136,16 @@ function TableSkeleton() {
   return (
     <Card className="overflow-hidden">
       <div className="p-0">
-        <Table>
+        <Table aria-label="Tabela de simulação de amortização">
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>Contrato</TableHead>
-              <TableHead className="text-right">Valor Principal</TableHead>
+              <TableHead className="hidden md:table-cell">Contrato</TableHead>
+              <TableHead className="text-right hidden md:table-cell">Valor Principal</TableHead>
               <TableHead className="text-right">Saldo Devedor</TableHead>
-              <TableHead className="text-center">Taxa</TableHead>
-              <TableHead className="text-center">Parcelas</TableHead>
-              <TableHead>Progresso</TableHead>
+              <TableHead className="text-center hidden lg:table-cell">Taxa</TableHead>
+              <TableHead className="text-center hidden md:table-cell">Parcelas</TableHead>
+              <TableHead className="hidden lg:table-cell">Progresso</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-10" />
             </TableRow>
@@ -156,22 +156,22 @@ function TableSkeleton() {
                 <TableCell>
                   <Skeleton className="h-4 w-36" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Skeleton className="h-4 w-24" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Skeleton className="h-4 w-28 ml-auto" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-28 ml-auto" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <Skeleton className="h-4 w-16 mx-auto" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Skeleton className="h-4 w-16 mx-auto" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <Skeleton className="h-2 w-full rounded-full" />
                 </TableCell>
                 <TableCell>
@@ -255,7 +255,7 @@ function LoanRowActions({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Abrir menu</span>
@@ -265,7 +265,7 @@ function LoanRowActions({
         {/* Base actions */}
         {canView && (
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onView(loan.id);
             }}
@@ -276,7 +276,7 @@ function LoanRowActions({
         )}
         {canEdit && (
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onEdit(loan.id);
             }}
@@ -292,7 +292,7 @@ function LoanRowActions({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onDelete(loan);
               }}
@@ -398,10 +398,7 @@ export default function LoansPage() {
       page,
       perPage: PER_PAGE,
       search: searchQuery || undefined,
-      status:
-        statusFilter !== 'ALL'
-          ? (statusFilter as LoanStatus)
-          : undefined,
+      status: statusFilter !== 'ALL' ? (statusFilter as LoanStatus) : undefined,
     }),
     [page, searchQuery, statusFilter]
   );
@@ -463,9 +460,7 @@ export default function LoansPage() {
     if (!deleteTarget) return;
     try {
       await deleteLoan.mutateAsync(deleteTarget.id);
-      toast.success(
-        `Empréstimo "${deleteTarget.name}" excluído com sucesso.`
-      );
+      toast.success(`Empréstimo "${deleteTarget.name}" excluído com sucesso.`);
       setDeleteTarget(null);
       refetch();
     } catch (err) {
@@ -495,7 +490,7 @@ export default function LoansPage() {
   const visibleActionButtons = useMemo<HeaderButton[]>(
     () =>
       actionButtons
-        .filter((button) =>
+        .filter(button =>
           button.permission ? hasPermission(button.permission) : true
         )
         .map(({ permission, ...button }) => button),
@@ -552,7 +547,7 @@ export default function LoansPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Todos os status</SelectItem>
-              {STATUS_OPTIONS.map((option) => (
+              {STATUS_OPTIONS.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -583,7 +578,9 @@ export default function LoansPage() {
             message="Ocorreu um erro ao tentar carregar os empréstimos. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => { refetch(); },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : !canList ? (
@@ -597,30 +594,30 @@ export default function LoansPage() {
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <Table>
+              <Table aria-label="Tabela de empréstimos">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[180px]">Nome</TableHead>
-                    <TableHead className="min-w-[120px]">Contrato</TableHead>
-                    <TableHead className="text-right min-w-[140px]">
+                    <TableHead className="min-w-[120px] hidden md:table-cell">Contrato</TableHead>
+                    <TableHead className="text-right min-w-[140px] hidden md:table-cell">
                       Valor Principal
                     </TableHead>
                     <TableHead className="text-right min-w-[140px]">
                       Saldo Devedor
                     </TableHead>
-                    <TableHead className="text-center min-w-[90px]">
+                    <TableHead className="text-center min-w-[90px] hidden lg:table-cell">
                       Taxa
                     </TableHead>
-                    <TableHead className="text-center min-w-[100px]">
+                    <TableHead className="text-center min-w-[100px] hidden md:table-cell">
                       Parcelas
                     </TableHead>
-                    <TableHead className="min-w-[140px]">Progresso</TableHead>
+                    <TableHead className="min-w-[140px] hidden lg:table-cell">Progresso</TableHead>
                     <TableHead className="min-w-[120px]">Status</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loans.map((loan) => {
+                  {loans.map(loan => {
                     const progressPercentage =
                       loan.totalInstallments > 0
                         ? Math.round(
@@ -648,14 +645,14 @@ export default function LoansPage() {
                         </TableCell>
 
                         {/* Contrato */}
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <span className="font-mono text-xs text-muted-foreground">
                             {loan.contractNumber || '\u2014'}
                           </span>
                         </TableCell>
 
                         {/* Valor Principal */}
-                        <TableCell className="text-right font-mono text-sm">
+                        <TableCell className="text-right font-mono text-sm hidden md:table-cell">
                           {formatCurrency(loan.principalAmount)}
                         </TableCell>
 
@@ -673,12 +670,12 @@ export default function LoansPage() {
                         </TableCell>
 
                         {/* Taxa de Juros */}
-                        <TableCell className="text-center font-mono text-sm">
+                        <TableCell className="text-center font-mono text-sm hidden lg:table-cell">
                           {formatPercent(loan.interestRate)}
                         </TableCell>
 
                         {/* Parcelas (pagas/total) */}
-                        <TableCell className="text-center">
+                        <TableCell className="text-center hidden md:table-cell">
                           <span className="font-mono text-sm">
                             {loan.paidInstallments}
                             <span className="text-muted-foreground">
@@ -688,7 +685,7 @@ export default function LoansPage() {
                         </TableCell>
 
                         {/* Progresso */}
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           <div className="flex items-center gap-2">
                             <Progress
                               value={progressPercentage}
@@ -711,7 +708,7 @@ export default function LoansPage() {
 
                         {/* Actions */}
                         <TableCell
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={e => e.stopPropagation()}
                           className="text-center"
                         >
                           <LoanRowActions
