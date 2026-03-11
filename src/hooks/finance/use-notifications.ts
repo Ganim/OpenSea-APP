@@ -68,7 +68,7 @@ function loadPreferences(): NotificationPreferences {
   return DEFAULT_PREFS;
 }
 
-export function useNotificationPreferences() {
+export function useFinanceNotificationPreferences() {
   const [prefs, setPrefs] = useState<NotificationPreferences>(DEFAULT_PREFS);
 
   useEffect(() => {

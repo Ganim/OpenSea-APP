@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useOverdueSummary, useNotificationPreferences } from '@/hooks/finance';
+import { useOverdueSummary, useFinanceNotificationPreferences } from '@/hooks/finance';
 import { IoNotificationsOutline, IoSettingsOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -21,7 +21,7 @@ function formatCurrency(value: number): string {
 
 export function FinanceNotificationBell() {
   const { data } = useOverdueSummary();
-  const { prefs } = useNotificationPreferences();
+  const { prefs } = useFinanceNotificationPreferences();
   const [prefsOpen, setPrefsOpen] = useState(false);
 
   const dashboard = data?.dashboard;

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useNotificationPreferences } from '@/hooks/finance';
+import { useFinanceNotificationPreferences } from '@/hooks/finance';
 
 interface NotificationPreferencesProps {
   open: boolean;
@@ -26,7 +26,7 @@ export function NotificationPreferences({
   open,
   onOpenChange,
 }: NotificationPreferencesProps) {
-  const { prefs, updatePreferences } = useNotificationPreferences();
+  const { prefs, updatePreferences } = useFinanceNotificationPreferences();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

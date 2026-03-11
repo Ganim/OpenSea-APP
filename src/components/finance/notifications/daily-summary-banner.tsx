@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useDailySummary, useNotificationPreferences } from '@/hooks/finance';
+import { useDailySummary, useFinanceNotificationPreferences } from '@/hooks/finance';
 import { X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -18,7 +18,7 @@ function getTodayKey(): string {
 
 export function DailySummaryBanner() {
   const { data, isLoading } = useDailySummary();
-  const { prefs } = useNotificationPreferences();
+  const { prefs } = useFinanceNotificationPreferences();
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {

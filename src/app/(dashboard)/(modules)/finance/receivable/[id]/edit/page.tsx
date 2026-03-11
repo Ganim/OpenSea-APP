@@ -118,7 +118,7 @@ export default function EditReceivablePage({
       setFormData({
         description: entry.description,
         categoryId: entry.categoryId,
-        costCenterId: entry.costCenterId,
+        costCenterId: entry.costCenterId ?? '',
         bankAccountId: entry.bankAccountId || '',
         expectedAmount: entry.expectedAmount,
         discount: entry.discount || 0,

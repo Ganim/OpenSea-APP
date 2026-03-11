@@ -213,7 +213,7 @@ export function RecurringWizard({
   const filteredCategories = categories.filter((c) => {
     if (!data.type) return true;
     if (data.type === 'PAYABLE') return c.type === 'EXPENSE' || c.type === 'BOTH';
-    return c.type === 'INCOME' || c.type === 'BOTH';
+    return c.type === 'REVENUE' || c.type === 'BOTH';
   });
 
   const formatCurrency = (value: number) =>
