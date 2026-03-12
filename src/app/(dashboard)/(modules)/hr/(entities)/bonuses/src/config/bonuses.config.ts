@@ -125,7 +125,8 @@ export const bonusesConfig = defineEntityConfig<Bonus>()({
             label: 'Motivo',
             type: 'textarea',
             required: true,
-            placeholder: 'Descreva o motivo da bonificação (mínimo 10 caracteres)',
+            placeholder:
+              'Descreva o motivo da bonificação (mínimo 10 caracteres)',
             colSpan: 2,
             description: '',
           },

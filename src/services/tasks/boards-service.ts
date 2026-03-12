@@ -44,24 +44,24 @@ export const boardsService = {
 
   async get(boardId: string): Promise<BoardResponse> {
     return apiClient.get<BoardResponse>(
-      API_ENDPOINTS.TASKS.BOARDS.GET(boardId),
+      API_ENDPOINTS.TASKS.BOARDS.GET(boardId)
     );
   },
 
   async create(data: CreateBoardRequest): Promise<BoardResponse> {
     return apiClient.post<BoardResponse>(
       API_ENDPOINTS.TASKS.BOARDS.CREATE,
-      data,
+      data
     );
   },
 
   async update(
     boardId: string,
-    data: UpdateBoardRequest,
+    data: UpdateBoardRequest
   ): Promise<BoardResponse> {
     return apiClient.patch<BoardResponse>(
       API_ENDPOINTS.TASKS.BOARDS.UPDATE(boardId),
-      data,
+      data
     );
   },
 
@@ -72,7 +72,7 @@ export const boardsService = {
   async archive(boardId: string, archive: boolean): Promise<BoardResponse> {
     return apiClient.patch<BoardResponse>(
       API_ENDPOINTS.TASKS.BOARDS.ARCHIVE(boardId),
-      { archive },
+      { archive }
     );
   },
 };

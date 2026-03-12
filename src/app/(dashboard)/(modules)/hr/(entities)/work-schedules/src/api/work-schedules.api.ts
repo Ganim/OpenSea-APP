@@ -40,4 +40,8 @@ export const workSchedulesApi = {
   },
 };
 
-export type { WorkScheduleResponse, WorkSchedulesResponse, ListWorkSchedulesParams };
+export type {
+  WorkScheduleResponse,
+  WorkSchedulesResponse,
+  ListWorkSchedulesParams,
+};

@@ -87,16 +87,18 @@ function linhaDigitavelToBarcode(digits: string): string {
   // field 5: [33..36] = due date factor
   // field 6: [37..46] = amount
 
-  const bank = digits.substring(0, 3);        // AAA
-  const currency = digits.substring(3, 4);     // B
+  const bank = digits.substring(0, 3); // AAA
+  const currency = digits.substring(3, 4); // B
   const checkDigit = digits.substring(32, 33); // K
-  const dueFactor = digits.substring(33, 37);  // UUUU
-  const amount = digits.substring(37, 47);     // VVVVVVVVVV
-  const free1 = digits.substring(4, 9);        // CCCCC
-  const free2 = digits.substring(10, 20);      // DDDDDDDDDD
-  const free3 = digits.substring(21, 31);      // EEEEEEEEEE
+  const dueFactor = digits.substring(33, 37); // UUUU
+  const amount = digits.substring(37, 47); // VVVVVVVVVV
+  const free1 = digits.substring(4, 9); // CCCCC
+  const free2 = digits.substring(10, 20); // DDDDDDDDDD
+  const free3 = digits.substring(21, 31); // EEEEEEEEEE
 
-  return bank + currency + checkDigit + dueFactor + amount + free1 + free2 + free3;
+  return (
+    bank + currency + checkDigit + dueFactor + amount + free1 + free2 + free3
+  );
 }
 
 /**

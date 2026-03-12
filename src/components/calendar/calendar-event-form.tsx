@@ -126,11 +126,16 @@ export function CalendarEventForm({
     <div className="px-5 pb-5 space-y-4">
       {/* Title */}
       <div className="space-y-1.5">
-        <label htmlFor={`${idPrefix}-title`} className="text-xs font-medium text-muted-foreground">Título *</label>
+        <label
+          htmlFor={`${idPrefix}-title`}
+          className="text-xs font-medium text-muted-foreground"
+        >
+          Título *
+        </label>
         <Input
           id={`${idPrefix}-title`}
           value={state.title}
-          onChange={(e) => actions.setTitle(e.target.value)}
+          onChange={e => actions.setTitle(e.target.value)}
           placeholder="Nome do evento"
           maxLength={256}
           className="h-10"
@@ -147,9 +152,11 @@ export function CalendarEventForm({
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
             state.showDescription
               ? 'text-white'
-              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10',
+              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
           )}
-          style={state.showDescription ? { backgroundColor: accentColor } : undefined}
+          style={
+            state.showDescription ? { backgroundColor: accentColor } : undefined
+          }
         >
           <AlignLeft className="w-3 h-3" />
           Descrição
@@ -161,9 +168,11 @@ export function CalendarEventForm({
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
             state.showLocation
               ? 'text-white'
-              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10',
+              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
           )}
-          style={state.showLocation ? { backgroundColor: accentColor } : undefined}
+          style={
+            state.showLocation ? { backgroundColor: accentColor } : undefined
+          }
         >
           <MapPin className="w-3 h-3" />
           Local
@@ -175,9 +184,11 @@ export function CalendarEventForm({
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
             state.showTimezone
               ? 'text-white'
-              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10',
+              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
           )}
-          style={state.showTimezone ? { backgroundColor: accentColor } : undefined}
+          style={
+            state.showTimezone ? { backgroundColor: accentColor } : undefined
+          }
         >
           <Globe className="w-3 h-3" />
           Fuso horário
@@ -192,9 +203,11 @@ export function CalendarEventForm({
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
             state.showRecurrence
               ? 'text-white'
-              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10',
+              : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
           )}
-          style={state.showRecurrence ? { backgroundColor: accentColor } : undefined}
+          style={
+            state.showRecurrence ? { backgroundColor: accentColor } : undefined
+          }
         >
           <Repeat className="w-3 h-3" />
           Repetir
@@ -207,7 +220,7 @@ export function CalendarEventForm({
           {state.showDescription && (
             <Textarea
               value={state.description}
-              onChange={(e) => actions.setDescription(e.target.value)}
+              onChange={e => actions.setDescription(e.target.value)}
               placeholder="Descrição do evento"
               rows={2}
               className="resize-none text-sm"
@@ -216,7 +229,7 @@ export function CalendarEventForm({
           {state.showLocation && (
             <Input
               value={state.location}
-              onChange={(e) => actions.setLocation(e.target.value)}
+              onChange={e => actions.setLocation(e.target.value)}
               placeholder="Local do evento"
               maxLength={512}
               className="h-9 text-sm"
@@ -232,18 +245,23 @@ export function CalendarEventForm({
                   className="w-full justify-between font-normal h-9 text-sm"
                 >
                   <span className="truncate">
-                    {state.timezone ? `${state.timezone} (${getTimezoneOffset(state.timezone)})` : 'Selecionar fuso horário'}
+                    {state.timezone
+                      ? `${state.timezone} (${getTimezoneOffset(state.timezone)})`
+                      : 'Selecionar fuso horário'}
                   </span>
                   <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent
+                className="w-[--radix-popover-trigger-width] p-0"
+                align="start"
+              >
                 <Command>
                   <CommandInput placeholder="Buscar fuso horário..." />
                   <CommandList>
                     <CommandEmpty>Nenhum fuso horário encontrado.</CommandEmpty>
                     <CommandGroup className="max-h-[200px] overflow-y-auto">
-                      {timezoneOptions.map((tz) => {
+                      {timezoneOptions.map(tz => {
                         const offset = getTimezoneOffset(tz);
                         return (
                           <CommandItem
@@ -254,9 +272,18 @@ export function CalendarEventForm({
                               popovers.setTzOpen(false);
                             }}
                           >
-                            <Check className={cn('mr-2 h-4 w-4', state.timezone === tz ? 'opacity-100' : 'opacity-0')} />
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                state.timezone === tz
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
                             <span className="flex-1 truncate">{tz}</span>
-                            <span className="text-xs text-muted-foreground ml-2 shrink-0">{offset}</span>
+                            <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                              {offset}
+                            </span>
                           </CommandItem>
                         );
                       })}
@@ -281,29 +308,42 @@ export function CalendarEventForm({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Dia inteiro</span>
-            <Switch checked={state.isAllDay} onCheckedChange={actions.setIsAllDay} />
+            <Switch
+              checked={state.isAllDay}
+              onCheckedChange={actions.setIsAllDay}
+            />
           </div>
         </div>
 
         {state.isAllDay ? (
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label htmlFor={`${idPrefix}-allday-start`} className="text-[0.7rem] text-muted-foreground">Início</label>
+              <label
+                htmlFor={`${idPrefix}-allday-start`}
+                className="text-[0.7rem] text-muted-foreground"
+              >
+                Início
+              </label>
               <Input
                 id={`${idPrefix}-allday-start`}
                 type="date"
                 value={state.startDate.slice(0, 10)}
-                onChange={(e) => actions.setStartDate(e.target.value)}
+                onChange={e => actions.setStartDate(e.target.value)}
                 className="calendar-date-input h-9 text-sm"
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor={`${idPrefix}-allday-end`} className="text-[0.7rem] text-muted-foreground">Fim</label>
+              <label
+                htmlFor={`${idPrefix}-allday-end`}
+                className="text-[0.7rem] text-muted-foreground"
+              >
+                Fim
+              </label>
               <Input
                 id={`${idPrefix}-allday-end`}
                 type="date"
                 value={state.endDate.slice(0, 10)}
-                onChange={(e) => actions.setEndDate(e.target.value)}
+                onChange={e => actions.setEndDate(e.target.value)}
                 className="calendar-date-input h-9 text-sm"
               />
             </div>
@@ -312,12 +352,17 @@ export function CalendarEventForm({
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label htmlFor={`${idPrefix}-start-date`} className="text-[0.7rem] text-muted-foreground">Data início</label>
+                <label
+                  htmlFor={`${idPrefix}-start-date`}
+                  className="text-[0.7rem] text-muted-foreground"
+                >
+                  Data início
+                </label>
                 <Input
                   id={`${idPrefix}-start-date`}
                   type="date"
                   value={state.startDate.slice(0, 10)}
-                  onChange={(e) => {
+                  onChange={e => {
                     const time = state.startDate.slice(11) || '00:00';
                     actions.setStartDate(`${e.target.value}T${time}`);
                   }}
@@ -325,12 +370,17 @@ export function CalendarEventForm({
                 />
               </div>
               <div className="space-y-1">
-                <label htmlFor={`${idPrefix}-start-time`} className="text-[0.7rem] text-muted-foreground">Horário início</label>
+                <label
+                  htmlFor={`${idPrefix}-start-time`}
+                  className="text-[0.7rem] text-muted-foreground"
+                >
+                  Horário início
+                </label>
                 <Input
                   id={`${idPrefix}-start-time`}
                   type="time"
                   value={state.startDate.slice(11, 16)}
-                  onChange={(e) => {
+                  onChange={e => {
                     const date = state.startDate.slice(0, 10);
                     actions.setStartDate(`${date}T${e.target.value}`);
                   }}
@@ -340,12 +390,17 @@ export function CalendarEventForm({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label htmlFor={`${idPrefix}-end-date`} className="text-[0.7rem] text-muted-foreground">Data fim</label>
+                <label
+                  htmlFor={`${idPrefix}-end-date`}
+                  className="text-[0.7rem] text-muted-foreground"
+                >
+                  Data fim
+                </label>
                 <Input
                   id={`${idPrefix}-end-date`}
                   type="date"
                   value={state.endDate.slice(0, 10)}
-                  onChange={(e) => {
+                  onChange={e => {
                     const time = state.endDate.slice(11) || '00:00';
                     actions.setEndDate(`${e.target.value}T${time}`);
                   }}
@@ -353,12 +408,17 @@ export function CalendarEventForm({
                 />
               </div>
               <div className="space-y-1">
-                <label htmlFor={`${idPrefix}-end-time`} className="text-[0.7rem] text-muted-foreground">Horário fim</label>
+                <label
+                  htmlFor={`${idPrefix}-end-time`}
+                  className="text-[0.7rem] text-muted-foreground"
+                >
+                  Horário fim
+                </label>
                 <Input
                   id={`${idPrefix}-end-time`}
                   type="time"
                   value={state.endDate.slice(11, 16)}
-                  onChange={(e) => {
+                  onChange={e => {
                     const date = state.endDate.slice(0, 10);
                     actions.setEndDate(`${date}T${e.target.value}`);
                   }}
@@ -382,7 +442,10 @@ export function CalendarEventForm({
             accentColor={accentColor}
             titleSlot={
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Repeat className="w-3.5 h-3.5" style={{ color: accentColor }} />
+                <Repeat
+                  className="w-3.5 h-3.5"
+                  style={{ color: accentColor }}
+                />
                 Recorrência
               </div>
             }
@@ -401,7 +464,9 @@ export function CalendarEventForm({
                   <button
                     type="button"
                     className="flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 hover:bg-accent/50 transition-colors text-xs"
-                    style={{ color: EVENT_TYPE_COLORS[state.type] ?? accentColor }}
+                    style={{
+                      color: EVENT_TYPE_COLORS[state.type] ?? accentColor,
+                    }}
                   >
                     {EVENT_TYPE_ICONS[state.type]}
                     <span className="hidden sm:inline truncate max-w-[60px]">
@@ -414,7 +479,11 @@ export function CalendarEventForm({
                 <p className="text-xs">Tipo: {EventTypeLabels[state.type]}</p>
               </TooltipContent>
             </Tooltip>
-            <PopoverContent className="w-[200px] p-1" align="start" sideOffset={4}>
+            <PopoverContent
+              className="w-[200px] p-1"
+              align="start"
+              sideOffset={4}
+            >
               {EVENT_TYPES.map(([value, label]) => (
                 <button
                   key={value}
@@ -427,10 +496,12 @@ export function CalendarEventForm({
                     'flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-sm transition-colors',
                     state.type === value
                       ? 'bg-accent font-medium'
-                      : 'hover:bg-accent/50',
+                      : 'hover:bg-accent/50'
                   )}
                 >
-                  <span style={{ color: EVENT_TYPE_COLORS[value] ?? '#64748b' }}>
+                  <span
+                    style={{ color: EVENT_TYPE_COLORS[value] ?? '#64748b' }}
+                  >
                     {EVENT_TYPE_ICONS[value]}
                   </span>
                   {label}
@@ -447,10 +518,14 @@ export function CalendarEventForm({
             <TooltipTrigger asChild>
               <button
                 type="button"
-                onClick={() => actions.setVisibility(state.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC')}
+                onClick={() =>
+                  actions.setVisibility(
+                    state.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC'
+                  )
+                }
                 className={cn(
                   'flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 hover:bg-accent/50 transition-colors text-xs',
-                  state.visibility === 'PRIVATE' && 'text-amber-500',
+                  state.visibility === 'PRIVATE' && 'text-amber-500'
                 )}
               >
                 {state.visibility === 'PUBLIC' ? (
@@ -464,12 +539,17 @@ export function CalendarEventForm({
               </button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              <p className="text-xs">{state.visibility === 'PUBLIC' ? 'Público' : 'Privado'}</p>
+              <p className="text-xs">
+                {state.visibility === 'PUBLIC' ? 'Público' : 'Privado'}
+              </p>
             </TooltipContent>
           </Tooltip>
 
           {/* Color */}
-          <Popover open={popovers.colorOpen} onOpenChange={popovers.setColorOpen}>
+          <Popover
+            open={popovers.colorOpen}
+            onOpenChange={popovers.setColorOpen}
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <PopoverTrigger asChild>
@@ -492,7 +572,11 @@ export function CalendarEventForm({
                 <p className="text-xs">Cor</p>
               </TooltipContent>
             </Tooltip>
-            <PopoverContent className="w-auto p-3" align="center" sideOffset={4}>
+            <PopoverContent
+              className="w-auto p-3"
+              align="center"
+              sideOffset={4}
+            >
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -511,23 +595,30 @@ export function CalendarEventForm({
                 >
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: EVENT_TYPE_COLORS[state.type] ?? '#64748b', opacity: 0.5 }}
+                    style={{
+                      backgroundColor:
+                        EVENT_TYPE_COLORS[state.type] ?? '#64748b',
+                      opacity: 0.5,
+                    }}
                   />
                 </button>
-                {COLOR_PRESETS.map((preset) => (
+                {COLOR_PRESETS.map(preset => (
                   <button
                     key={preset.value}
                     type="button"
                     onClick={() => {
-                      actions.setColor(state.color === preset.value ? '' : preset.value);
+                      actions.setColor(
+                        state.color === preset.value ? '' : preset.value
+                      );
                       popovers.setColorOpen(false);
                     }}
                     className="w-7 h-7 rounded-full transition-all hover:scale-110"
                     style={{
                       backgroundColor: preset.value,
-                      boxShadow: state.color === preset.value
-                        ? `0 0 0 2px var(--color-background), 0 0 0 4px ${preset.value}`
-                        : 'none',
+                      boxShadow:
+                        state.color === preset.value
+                          ? `0 0 0 2px var(--color-background), 0 0 0 4px ${preset.value}`
+                          : 'none',
                     }}
                     title={preset.label}
                     aria-label={`Selecionar cor ${preset.label}`}
@@ -535,7 +626,9 @@ export function CalendarEventForm({
                 ))}
               </div>
               <p className="text-[0.65rem] text-center text-muted-foreground mt-2">
-                {state.color ? 'Clique novamente para remover' : 'Automática por tipo'}
+                {state.color
+                  ? 'Clique novamente para remover'
+                  : 'Automática por tipo'}
               </p>
             </PopoverContent>
           </Popover>

@@ -59,8 +59,15 @@ import {
   type PayrollFilters,
 } from './src';
 
-const CreateModal = dynamic(() => import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
+const CreateModal = dynamic(
+  () =>
+    import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -141,28 +148,33 @@ export default function PayrollPage() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => payrolls.map(i => i.id),
-    [payrolls]
-  );
-
+  const initialIds = useMemo(() => payrolls.map(i => i.id), [payrolls]);
 
   // ============================================================================
   // HANDLERS
   // ============================================================================
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? payrolls.filter(p => ids.includes(p.id))
-      : payrolls;
-    exportToCSV(items, [
-      { header: 'Mês/Ano', accessor: p => formatMonthYear(p.referenceMonth, p.referenceYear) },
-      { header: 'Status', accessor: p => getStatusLabel(p.status) },
-      { header: 'Bruto', accessor: p => p.totalGross },
-      { header: 'Deduções', accessor: p => p.totalDeductions },
-      { header: 'Líquido', accessor: p => p.totalNet },
-    ], 'folha-pagamento');
-  }, [payrolls]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0 ? payrolls.filter(p => ids.includes(p.id)) : payrolls;
+      exportToCSV(
+        items,
+        [
+          {
+            header: 'Mês/Ano',
+            accessor: p => formatMonthYear(p.referenceMonth, p.referenceYear),
+          },
+          { header: 'Status', accessor: p => getStatusLabel(p.status) },
+          { header: 'Bruto', accessor: p => p.totalGross },
+          { header: 'Deduções', accessor: p => p.totalDeductions },
+          { header: 'Líquido', accessor: p => p.totalNet },
+        ],
+        'folha-pagamento'
+      );
+    },
+    [payrolls]
+  );
 
   const handleCreate = useCallback(
     async (data: Parameters<typeof createMutation.mutateAsync>[0]) => {
@@ -420,29 +432,26 @@ export default function PayrollPage() {
     setIsCreateOpen(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-payroll',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-payroll',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-payroll',
+        title: 'Nova Folha',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-payroll',
-          title: 'Nova Folha',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI

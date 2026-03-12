@@ -211,10 +211,14 @@ export default function TeamsPage() {
       showSuccessToast('Equipe renomeada com sucesso');
       page.crud.refetch();
     } catch (error) {
-      logger.error('Erro ao renomear equipe', error instanceof Error ? error : undefined);
+      logger.error(
+        'Erro ao renomear equipe',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao renomear equipe',
-        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
       });
     } finally {
       setIsRenameSubmitting(false);
@@ -230,17 +234,24 @@ export default function TeamsPage() {
     }
   };
 
-  const handleColorSubmit = async (id: string, data: { color: string | null }) => {
+  const handleColorSubmit = async (
+    id: string,
+    data: { color: string | null }
+  ) => {
     setIsColorSubmitting(true);
     try {
       await updateTeam(id, data);
       showSuccessToast('Cor atualizada com sucesso');
       page.crud.refetch();
     } catch (error) {
-      logger.error('Erro ao mudar cor', error instanceof Error ? error : undefined);
+      logger.error(
+        'Erro ao mudar cor',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao mudar cor',
-        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
       });
     } finally {
       setIsColorSubmitting(false);

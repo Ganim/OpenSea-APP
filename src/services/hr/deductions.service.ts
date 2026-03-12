@@ -41,14 +41,18 @@ export const deductionsService = {
   async list(params?: ListDeductionsParams): Promise<DeductionsResponse> {
     const query = new URLSearchParams();
     if (params?.employeeId) query.append('employeeId', params.employeeId);
-    if (params?.isApplied !== undefined) query.append('isApplied', String(params.isApplied));
-    if (params?.isRecurring !== undefined) query.append('isRecurring', String(params.isRecurring));
+    if (params?.isApplied !== undefined)
+      query.append('isApplied', String(params.isApplied));
+    if (params?.isRecurring !== undefined)
+      query.append('isRecurring', String(params.isRecurring));
     if (params?.startDate) query.append('startDate', params.startDate);
     if (params?.endDate) query.append('endDate', params.endDate);
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<DeductionsResponse>(`/v1/hr/deductions${qs ? `?${qs}` : ''}`);
+    return apiClient.get<DeductionsResponse>(
+      `/v1/hr/deductions${qs ? `?${qs}` : ''}`
+    );
   },
 
   async delete(deductionId: string): Promise<void> {

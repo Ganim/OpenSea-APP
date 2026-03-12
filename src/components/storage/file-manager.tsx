@@ -37,7 +37,11 @@ import { FileManagerList } from './file-manager-list';
 import { FileManagerToolbar } from './file-manager-toolbar';
 import { FileManagerSelectionToolbar } from './file-manager-selection-toolbar';
 import { FileManagerDialogs } from './file-manager-dialogs';
-import type { MoveState, RenameState, DeleteState } from './file-manager-dialogs';
+import type {
+  MoveState,
+  RenameState,
+  DeleteState,
+} from './file-manager-dialogs';
 import { TrashView } from './trash-view';
 import type { FolderPermissions } from './folder-context-menu';
 import { formatFileSize } from './utils';
@@ -79,7 +83,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     },
     ref
   ) {
-    const manager = useFileManager({ rootFolderId, entityType, entityId, viewAll });
+    const manager = useFileManager({
+      rootFolderId,
+      entityType,
+      entityId,
+      viewAll,
+    });
     const { hasPermission } = usePermissions();
 
     // Compute permission objects for context menus
@@ -146,7 +155,9 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const [securityKeyDialogOpen, setSecurityKeyDialogOpen] = useState(false);
     const [previewFile, setPreviewFile] = useState<StorageFile | null>(null);
     const [showPreview, setShowPreview] = useState(false);
-    const [previewPassword, setPreviewPassword] = useState<string | undefined>(undefined);
+    const [previewPassword, setPreviewPassword] = useState<string | undefined>(
+      undefined
+    );
     const [versionFile, setVersionFile] = useState<StorageFile | null>(null);
     const [showVersions, setShowVersions] = useState(false);
     const [moveState, setMoveState] = useState<MoveState | null>(null);
@@ -164,7 +175,9 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const setShowTrash = onShowTrashChange ?? setShowTrashInternal;
     const [shareFile, setShareFile] = useState<StorageFile | null>(null);
     const [showShareDialog, setShowShareDialog] = useState(false);
-    const [propertiesFile, setPropertiesFile] = useState<StorageFile | null>(null);
+    const [propertiesFile, setPropertiesFile] = useState<StorageFile | null>(
+      null
+    );
     const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
     const [protectState, setProtectState] = useState<{
       itemId: string;
@@ -290,7 +303,11 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
             if (item.type === 'folder') {
               const folder = allFolders.find(f => f.id === item.id);
               if (folder && !folder.isSystem) {
-                setDeleteState({ type: 'folder', id: folder.id, name: folder.name });
+                setDeleteState({
+                  type: 'folder',
+                  id: folder.id,
+                  name: folder.name,
+                });
               }
             } else {
               const file = allFiles.find(f => f.id === item.id);
@@ -299,8 +316,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
               }
             }
           } else {
-            const bulkFileIds = selected.filter(i => i.type === 'file').map(i => i.id);
-            const bulkFolderIds = selected.filter(i => i.type === 'folder').map(i => i.id);
+            const bulkFileIds = selected
+              .filter(i => i.type === 'file')
+              .map(i => i.id);
+            const bulkFolderIds = selected
+              .filter(i => i.type === 'folder')
+              .map(i => i.id);
             setDeleteState({
               type: 'bulk',
               id: 'bulk',
@@ -339,54 +360,65 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     );
 
     // Navigate to folder — checks protection before entering
-    const handleNavigateToFolder = useCallback((folderId: string) => {
-      const folder = (manager.contents?.folders ?? []).find(f => f.id === folderId);
-      if (folder?.isProtected && !unlockedFoldersRef.current.has(folderId)) {
-        setUnlockState({
-          itemId: folderId,
-          itemType: 'folder',
-          itemName: folder.name,
-          onUnlocked: (password) => {
-            unlockedFoldersRef.current.set(folderId, password);
-            manager.navigateToFolder(folderId);
-          },
-        });
-        return;
-      }
-      manager.navigateToFolder(folderId);
-    }, [manager]);
+    const handleNavigateToFolder = useCallback(
+      (folderId: string) => {
+        const folder = (manager.contents?.folders ?? []).find(
+          f => f.id === folderId
+        );
+        if (folder?.isProtected && !unlockedFoldersRef.current.has(folderId)) {
+          setUnlockState({
+            itemId: folderId,
+            itemType: 'folder',
+            itemName: folder.name,
+            onUnlocked: password => {
+              unlockedFoldersRef.current.set(folderId, password);
+              manager.navigateToFolder(folderId);
+            },
+          });
+          return;
+        }
+        manager.navigateToFolder(folderId);
+      },
+      [manager]
+    );
 
     // Resolve password for a file (file-level or folder-level)
-    const resolveFilePassword = useCallback((file: StorageFile): string | undefined => {
-      if (file.isProtected) return undefined; // Will be handled by unlock dialog
-      // Check if parent folder is protected and we have its password
-      if (manager.currentFolderId) {
-        return unlockedFoldersRef.current.get(manager.currentFolderId);
-      }
-      return undefined;
-    }, [manager.currentFolderId]);
+    const resolveFilePassword = useCallback(
+      (file: StorageFile): string | undefined => {
+        if (file.isProtected) return undefined; // Will be handled by unlock dialog
+        // Check if parent folder is protected and we have its password
+        if (manager.currentFolderId) {
+          return unlockedFoldersRef.current.get(manager.currentFolderId);
+        }
+        return undefined;
+      },
+      [manager.currentFolderId]
+    );
 
     // File preview — checks protection before opening
-    const handlePreviewFile = useCallback((file: StorageFile) => {
-      if (file.isProtected) {
-        setUnlockState({
-          itemId: file.id,
-          itemType: 'file',
-          itemName: file.name,
-          onUnlocked: (password) => {
-            setPreviewPassword(password);
-            setPreviewFile(file);
-            setShowPreview(true);
-          },
-        });
-        return;
-      }
-      // Use folder-level password if available (for files inside protected folders)
-      const folderPwd = resolveFilePassword(file);
-      setPreviewPassword(folderPwd);
-      setPreviewFile(file);
-      setShowPreview(true);
-    }, [resolveFilePassword]);
+    const handlePreviewFile = useCallback(
+      (file: StorageFile) => {
+        if (file.isProtected) {
+          setUnlockState({
+            itemId: file.id,
+            itemType: 'file',
+            itemName: file.name,
+            onUnlocked: password => {
+              setPreviewPassword(password);
+              setPreviewFile(file);
+              setShowPreview(true);
+            },
+          });
+          return;
+        }
+        // Use folder-level password if available (for files inside protected folders)
+        const folderPwd = resolveFilePassword(file);
+        setPreviewPassword(folderPwd);
+        setPreviewFile(file);
+        setShowPreview(true);
+      },
+      [resolveFilePassword]
+    );
 
     // File download — checks protection before downloading
     const handleDownloadFile = useCallback(
@@ -396,9 +428,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
             itemId: file.id,
             itemType: 'file',
             itemName: file.name,
-            onUnlocked: (password) => {
+            onUnlocked: password => {
               try {
-                const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password });
+                const downloadUrl = storageFilesService.getServeUrl(file.id, {
+                  download: true,
+                  password,
+                });
                 window.open(downloadUrl, '_blank');
               } catch {
                 toast.error('Erro ao baixar o arquivo');
@@ -410,7 +445,10 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         try {
           // Use folder-level password if available
           const folderPwd = resolveFilePassword(file);
-          const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password: folderPwd });
+          const downloadUrl = storageFilesService.getServeUrl(file.id, {
+            download: true,
+            password: folderPwd,
+          });
           window.open(downloadUrl, '_blank');
         } catch {
           toast.error('Erro ao baixar o arquivo');
@@ -423,14 +461,14 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const handleDownloadFolder = useCallback(
       async (folder: StorageFolder) => {
         toast.promise(
-          downloadFolderMutation.mutateAsync(folder.id).then((result) => {
+          downloadFolderMutation.mutateAsync(folder.id).then(result => {
             window.open(result.url, '_blank');
           }),
           {
             loading: 'Preparando download da pasta...',
             success: 'Download iniciado',
             error: 'Erro ao baixar a pasta',
-          },
+          }
         );
       },
       [downloadFolderMutation]
@@ -503,10 +541,16 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
             fileIds: deleteState.bulkFileIds,
             folderIds: deleteState.bulkFolderIds,
           });
-          const total = (deleteState.bulkFileIds?.length ?? 0) + (deleteState.bulkFolderIds?.length ?? 0);
+          const total =
+            (deleteState.bulkFileIds?.length ?? 0) +
+            (deleteState.bulkFolderIds?.length ?? 0);
           toast.success(`${total} itens excluídos com sucesso`);
-          queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-          queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
+          queryClient.invalidateQueries({
+            queryKey: ['storage-folder-contents'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['storage-root-contents'],
+          });
           queryClient.invalidateQueries({ queryKey: ['storage-stats'] });
         } else if (deleteState.type === 'folder') {
           await deleteFolderMutation.mutateAsync(deleteState.id);
@@ -527,7 +571,13 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       } finally {
         setDeleteState(null);
       }
-    }, [deleteState, deleteFolderMutation, deleteFileMutation, manager, queryClient]);
+    }, [
+      deleteState,
+      deleteFolderMutation,
+      deleteFileMutation,
+      manager,
+      queryClient,
+    ]);
 
     // File share
     const handleShareFile = useCallback((file: StorageFile) => {
@@ -566,37 +616,63 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     }, []);
 
     // Hide/Unhide
-    const handleHideFile = useCallback(async (file: StorageFile) => {
-      try {
-        if (file.isHidden) {
-          await storageSecurityService.unhideItem({ itemId: file.id, itemType: 'file' });
-          toast.success('Arquivo revelado com sucesso');
-        } else {
-          await storageSecurityService.hideItem({ itemId: file.id, itemType: 'file' });
-          toast.success('Arquivo ocultado com sucesso');
+    const handleHideFile = useCallback(
+      async (file: StorageFile) => {
+        try {
+          if (file.isHidden) {
+            await storageSecurityService.unhideItem({
+              itemId: file.id,
+              itemType: 'file',
+            });
+            toast.success('Arquivo revelado com sucesso');
+          } else {
+            await storageSecurityService.hideItem({
+              itemId: file.id,
+              itemType: 'file',
+            });
+            toast.success('Arquivo ocultado com sucesso');
+          }
+          queryClient.invalidateQueries({
+            queryKey: ['storage-folder-contents'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['storage-root-contents'],
+          });
+        } catch {
+          toast.error('Erro ao alterar visibilidade do arquivo');
         }
-        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-        queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
-      } catch {
-        toast.error('Erro ao alterar visibilidade do arquivo');
-      }
-    }, [queryClient]);
+      },
+      [queryClient]
+    );
 
-    const handleHideFolder = useCallback(async (folder: StorageFolder) => {
-      try {
-        if (folder.isHidden) {
-          await storageSecurityService.unhideItem({ itemId: folder.id, itemType: 'folder' });
-          toast.success('Pasta revelada com sucesso');
-        } else {
-          await storageSecurityService.hideItem({ itemId: folder.id, itemType: 'folder' });
-          toast.success('Pasta ocultada com sucesso');
+    const handleHideFolder = useCallback(
+      async (folder: StorageFolder) => {
+        try {
+          if (folder.isHidden) {
+            await storageSecurityService.unhideItem({
+              itemId: folder.id,
+              itemType: 'folder',
+            });
+            toast.success('Pasta revelada com sucesso');
+          } else {
+            await storageSecurityService.hideItem({
+              itemId: folder.id,
+              itemType: 'folder',
+            });
+            toast.success('Pasta ocultada com sucesso');
+          }
+          queryClient.invalidateQueries({
+            queryKey: ['storage-folder-contents'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['storage-root-contents'],
+          });
+        } catch {
+          toast.error('Erro ao alterar visibilidade da pasta');
         }
-        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-        queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
-      } catch {
-        toast.error('Erro ao alterar visibilidade da pasta');
-      }
-    }, [queryClient]);
+      },
+      [queryClient]
+    );
 
     // Security key dialog success handler
     const handleSecurityKeySuccess = useCallback(() => {
@@ -632,10 +708,16 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         const errorCount = results.filter(r => r.status === 'rejected').length;
 
         // Cancel any in-flight queries so stale data doesn't overwrite fresh data
-        await queryClient.cancelQueries({ queryKey: ['storage-folder-contents'] });
-        await queryClient.cancelQueries({ queryKey: ['storage-root-contents'] });
+        await queryClient.cancelQueries({
+          queryKey: ['storage-folder-contents'],
+        });
+        await queryClient.cancelQueries({
+          queryKey: ['storage-root-contents'],
+        });
         // Invalidate to trigger fresh refetch (same pattern as mutation hooks)
-        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
+        queryClient.invalidateQueries({
+          queryKey: ['storage-folder-contents'],
+        });
         queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
         queryClient.invalidateQueries({ queryKey: ['storage-breadcrumb'] });
         queryClient.invalidateQueries({ queryKey: ['storage-search'] });
@@ -698,20 +780,26 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         .map(i => i.id);
 
       toast.promise(
-        storageFilesService.compressFiles({
-          fileIds,
-          folderIds,
-          targetFolderId: manager.currentFolderId,
-        }).then(() => {
-          manager.clearSelection();
-          queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-          queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
-        }),
+        storageFilesService
+          .compressFiles({
+            fileIds,
+            folderIds,
+            targetFolderId: manager.currentFolderId,
+          })
+          .then(() => {
+            manager.clearSelection();
+            queryClient.invalidateQueries({
+              queryKey: ['storage-folder-contents'],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ['storage-root-contents'],
+            });
+          }),
         {
           loading: 'Compactando arquivos...',
           success: 'Arquivos compactados com sucesso',
           error: 'Erro ao compactar arquivos',
-        },
+        }
       );
     }, [manager, queryClient]);
 
@@ -721,23 +809,29 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       if (!selected || selected.type !== 'file') return;
 
       toast.promise(
-        storageFilesService.decompressFile(selected.id, {
-          targetFolderId: manager.currentFolderId,
-        }).then((result) => {
-          manager.clearSelection();
-          queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-          queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
-          return result;
-        }),
+        storageFilesService
+          .decompressFile(selected.id, {
+            targetFolderId: manager.currentFolderId,
+          })
+          .then(result => {
+            manager.clearSelection();
+            queryClient.invalidateQueries({
+              queryKey: ['storage-folder-contents'],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ['storage-root-contents'],
+            });
+            return result;
+          }),
         {
           loading: 'Descompactando arquivo...',
-          success: (result) => {
+          success: result => {
             return result.folderCount > 0
               ? `${result.files.length} arquivo(s) e ${result.folderCount} pasta(s) extraídos`
               : `${result.files.length} arquivo(s) extraído(s)`;
           },
           error: 'Erro ao descompactar arquivo',
-        },
+        }
       );
     }, [manager, queryClient]);
 
@@ -745,12 +839,13 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     const files = manager.contents?.files ?? [];
 
     const folders = useMemo(
-      () => allFolders.filter(f => {
-        if (f.isFilter) return folderTypeFilter.filter;
-        if (f.isSystem) return folderTypeFilter.system;
-        return folderTypeFilter.personal;
-      }),
-      [allFolders, folderTypeFilter],
+      () =>
+        allFolders.filter(f => {
+          if (f.isFilter) return folderTypeFilter.filter;
+          if (f.isSystem) return folderTypeFilter.system;
+          return folderTypeFilter.personal;
+        }),
+      [allFolders, folderTypeFilter]
     );
 
     const toolbarElement = (
@@ -873,8 +968,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-                      queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
+                      queryClient.invalidateQueries({
+                        queryKey: ['storage-folder-contents'],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ['storage-root-contents'],
+                      });
                     }}
                   >
                     Tentar novamente
@@ -898,15 +997,31 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
-                  onProtectFolder={hasPermission('storage.security.manage') ? handleProtectFolder : undefined}
-                  onHideFolder={hasPermission('storage.security.manage') ? handleHideFolder : undefined}
+                  onProtectFolder={
+                    hasPermission('storage.security.manage')
+                      ? handleProtectFolder
+                      : undefined
+                  }
+                  onHideFolder={
+                    hasPermission('storage.security.manage')
+                      ? handleHideFolder
+                      : undefined
+                  }
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
-                  onProtectFile={hasPermission('storage.security.manage') ? handleProtectFile : undefined}
-                  onHideFile={hasPermission('storage.security.manage') ? handleHideFile : undefined}
+                  onProtectFile={
+                    hasPermission('storage.security.manage')
+                      ? handleProtectFile
+                      : undefined
+                  }
+                  onHideFile={
+                    hasPermission('storage.security.manage')
+                      ? handleHideFile
+                      : undefined
+                  }
                   onProperties={handleFileProperties}
                   onDeleteFile={handleDeleteFile}
                   folderPermissions={folderPermissions}
@@ -932,15 +1047,31 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onManageFolderAccess={handleManageFolderAccess}
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
-                  onProtectFolder={hasPermission('storage.security.manage') ? handleProtectFolder : undefined}
-                  onHideFolder={hasPermission('storage.security.manage') ? handleHideFolder : undefined}
+                  onProtectFolder={
+                    hasPermission('storage.security.manage')
+                      ? handleProtectFolder
+                      : undefined
+                  }
+                  onHideFolder={
+                    hasPermission('storage.security.manage')
+                      ? handleHideFolder
+                      : undefined
+                  }
                   onDownloadFile={handleDownloadFile}
                   onRenameFile={handleRenameFile}
                   onMoveFile={handleMoveFile}
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
-                  onProtectFile={hasPermission('storage.security.manage') ? handleProtectFile : undefined}
-                  onHideFile={hasPermission('storage.security.manage') ? handleHideFile : undefined}
+                  onProtectFile={
+                    hasPermission('storage.security.manage')
+                      ? handleProtectFile
+                      : undefined
+                  }
+                  onHideFile={
+                    hasPermission('storage.security.manage')
+                      ? handleHideFile
+                      : undefined
+                  }
                   onProperties={handleFileProperties}
                   onDeleteFile={handleDeleteFile}
                   folderPermissions={folderPermissions}
@@ -955,14 +1086,17 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                 <span>
                   {folders.length + files.length}{' '}
                   {folders.length + files.length === 1 ? 'item' : 'itens'}
-                  {(manager.searchQuery.trim() || !folderTypeFilter.filter || !folderTypeFilter.system || !folderTypeFilter.personal) && (
-                    <span className="ml-1 text-yellow-600 dark:text-yellow-400">(filtrado)</span>
+                  {(manager.searchQuery.trim() ||
+                    !folderTypeFilter.filter ||
+                    !folderTypeFilter.system ||
+                    !folderTypeFilter.personal) && (
+                    <span className="ml-1 text-yellow-600 dark:text-yellow-400">
+                      (filtrado)
+                    </span>
                   )}
                 </span>
                 <span>
-                  {formatFileSize(
-                    files.reduce((sum, f) => sum + f.size, 0)
-                  )}
+                  {formatFileSize(files.reduce((sum, f) => sum + f.size, 0))}
                 </span>
               </div>
             )}
@@ -981,7 +1115,9 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
             onClear={manager.clearSelection}
             onSelectAll={manager.selectAll}
             onMove={ids => {
-              const selectedForMove = manager.selectedItems.filter(i => ids.includes(i.id));
+              const selectedForMove = manager.selectedItems.filter(i =>
+                ids.includes(i.id)
+              );
               if (selectedForMove.length === 0) return;
 
               if (selectedForMove.length === 1) {
@@ -994,8 +1130,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   itemName: folder?.name ?? file?.name ?? '',
                 });
               } else {
-                const bulkFileIds = selectedForMove.filter(i => i.type === 'file').map(i => i.id);
-                const bulkFolderIds = selectedForMove.filter(i => i.type === 'folder').map(i => i.id);
+                const bulkFileIds = selectedForMove
+                  .filter(i => i.type === 'file')
+                  .map(i => i.id);
+                const bulkFolderIds = selectedForMove
+                  .filter(i => i.type === 'folder')
+                  .map(i => i.id);
                 setMoveState({
                   itemId: 'bulk',
                   itemType: 'bulk',
@@ -1020,10 +1160,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
               }
             }}
             onDownload={async ids => {
-              const selectedForDownload = manager.selectedItems.filter(
-                i => ids.includes(i.id)
+              const selectedForDownload = manager.selectedItems.filter(i =>
+                ids.includes(i.id)
               );
-              const downloadFiles = selectedForDownload.filter(i => i.type === 'file');
+              const downloadFiles = selectedForDownload.filter(
+                i => i.type === 'file'
+              );
 
               if (downloadFiles.length <= 1) {
                 // Single file download
@@ -1035,20 +1177,31 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   toast.info('Preparando download...');
                   const result = await storageFilesService.compressFiles({
                     fileIds: downloadFiles.map(i => i.id),
-                    folderIds: selectedForDownload.filter(i => i.type === 'folder').map(i => i.id),
+                    folderIds: selectedForDownload
+                      .filter(i => i.type === 'folder')
+                      .map(i => i.id),
                     targetFolderId: manager.currentFolderId,
                   });
-                  const downloadUrl = storageFilesService.getServeUrl(result.file.id, { download: true });
+                  const downloadUrl = storageFilesService.getServeUrl(
+                    result.file.id,
+                    { download: true }
+                  );
                   window.open(downloadUrl, '_blank');
-                  queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
-                  queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
+                  queryClient.invalidateQueries({
+                    queryKey: ['storage-folder-contents'],
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: ['storage-root-contents'],
+                  });
                 } catch {
                   toast.error('Erro ao preparar download');
                 }
               }
             }}
             onDelete={ids => {
-              const selectedForDelete = manager.selectedItems.filter(i => ids.includes(i.id));
+              const selectedForDelete = manager.selectedItems.filter(i =>
+                ids.includes(i.id)
+              );
               if (selectedForDelete.length === 0) return;
 
               if (selectedForDelete.length === 1) {
@@ -1061,8 +1214,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   if (file) handleDeleteFile(file);
                 }
               } else {
-                const bulkFileIds = selectedForDelete.filter(i => i.type === 'file').map(i => i.id);
-                const bulkFolderIds = selectedForDelete.filter(i => i.type === 'folder').map(i => i.id);
+                const bulkFileIds = selectedForDelete
+                  .filter(i => i.type === 'file')
+                  .map(i => i.id);
+                const bulkFolderIds = selectedForDelete
+                  .filter(i => i.type === 'folder')
+                  .map(i => i.id);
                 setDeleteState({
                   type: 'bulk',
                   id: 'bulk',
@@ -1140,4 +1297,3 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     );
   }
 );
-

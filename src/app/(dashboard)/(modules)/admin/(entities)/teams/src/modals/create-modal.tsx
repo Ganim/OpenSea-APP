@@ -42,7 +42,11 @@ const initialFormData: NewTeamData = {
   color: '',
 };
 
-export function CreateModal({ open, onOpenChange, onSuccess }: CreateModalProps) {
+export function CreateModal({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreateModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<NewTeamData>({ ...initialFormData });
 
@@ -127,9 +131,7 @@ export function CreateModal({ open, onOpenChange, onSuccess }: CreateModalProps)
                     style={{
                       backgroundColor: color,
                       borderColor:
-                        formData.color === color
-                          ? 'white'
-                          : 'transparent',
+                        formData.color === color ? 'white' : 'transparent',
                       boxShadow:
                         formData.color === color
                           ? `0 0 0 2px ${color}`

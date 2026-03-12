@@ -16,7 +16,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { companyFiscalSettingsApi } from '../api';
 
-const FiscalSettingsModal = dynamic(() => import('../modals/fiscal-settings-modal').then(m => ({ default: m.FiscalSettingsModal })), { ssr: false });
+const FiscalSettingsModal = dynamic(
+  () =>
+    import('../modals/fiscal-settings-modal').then(m => ({
+      default: m.FiscalSettingsModal,
+    })),
+  { ssr: false }
+);
 
 interface FiscalEditTabProps {
   companyId: string;

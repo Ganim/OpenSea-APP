@@ -33,7 +33,7 @@ export function CalendarSelector({
 
   function handleToggle(calendarId: string) {
     if (selectedIds.includes(calendarId)) {
-      onSelectionChange(selectedIds.filter((id) => id !== calendarId));
+      onSelectionChange(selectedIds.filter(id => id !== calendarId));
     } else {
       onSelectionChange([...selectedIds, calendarId]);
     }
@@ -43,17 +43,20 @@ export function CalendarSelector({
     if (selectedCount === totalCount) {
       onSelectionChange([]);
     } else {
-      onSelectionChange(calendars.map((c) => c.id));
+      onSelectionChange(calendars.map(c => c.id));
     }
   }
 
   // Build groups: Pessoal, then each team by name, then Sistema
-  const personal = calendars.filter((c) => c.type === 'PERSONAL');
-  const team = calendars.filter((c) => c.type === 'TEAM');
-  const system = calendars.filter((c) => c.type === 'SYSTEM');
+  const personal = calendars.filter(c => c.type === 'PERSONAL');
+  const team = calendars.filter(c => c.type === 'TEAM');
+  const system = calendars.filter(c => c.type === 'SYSTEM');
 
   // Group team calendars by ownerId (team)
-  const teamGroups = new Map<string, { name: string; color: string | null; calendars: Calendar[] }>();
+  const teamGroups = new Map<
+    string,
+    { name: string; color: string | null; calendars: Calendar[] }
+  >();
   for (const cal of team) {
     const teamId = cal.ownerId ?? 'unknown';
     if (!teamGroups.has(teamId)) {
@@ -103,11 +106,13 @@ export function CalendarSelector({
             onClick={handleSelectAll}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            {selectedCount === totalCount ? 'Desmarcar todos' : 'Selecionar todos'}
+            {selectedCount === totalCount
+              ? 'Desmarcar todos'
+              : 'Selecionar todos'}
           </button>
         </div>
         <div className="mt-1 space-y-2">
-          {groups.map((group) => {
+          {groups.map(group => {
             const Icon = group.icon;
             return (
               <div key={group.label}>
@@ -123,13 +128,13 @@ export function CalendarSelector({
                   </span>
                 </div>
                 <div className="mt-0.5 space-y-0.5">
-                  {group.calendars.map((calendar) => {
+                  {group.calendars.map(calendar => {
                     const isSelected = selectedIds.includes(calendar.id);
                     // Team calendars use ownerColor (team color), others use their own
                     const dotColor =
                       calendar.type === 'TEAM'
-                        ? calendar.ownerColor ?? calendar.color ?? '#64748b'
-                        : calendar.color ?? '#64748b';
+                        ? (calendar.ownerColor ?? calendar.color ?? '#64748b')
+                        : (calendar.color ?? '#64748b');
                     return (
                       <label
                         key={calendar.id}
@@ -144,7 +149,9 @@ export function CalendarSelector({
                           style={{ backgroundColor: dotColor }}
                         />
                         <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        <span className="text-sm truncate">{calendar.name}</span>
+                        <span className="text-sm truncate">
+                          {calendar.name}
+                        </span>
                       </label>
                     );
                   })}

@@ -9,7 +9,14 @@ import {
   bonusesService,
   deductionsService,
 } from '@/services/hr';
-import type { Employee, Overtime, Absence, Payroll, Bonus, Deduction } from '@/types/hr';
+import type {
+  Employee,
+  Overtime,
+  Absence,
+  Payroll,
+  Bonus,
+  Deduction,
+} from '@/types/hr';
 
 // ============================================================================
 // TYPES
@@ -28,7 +35,11 @@ export interface HRAnalyticsData {
   absencesByType: { name: string; count: number }[];
   payrollTrend: { month: string; bruto: number; liquido: number }[];
   overtimeTrend: { month: string; horas: number; count: number }[];
-  bonusesVsDeductions: { month: string; bonificacoes: number; deducoes: number }[];
+  bonusesVsDeductions: {
+    month: string;
+    bonificacoes: number;
+    deducoes: number;
+  }[];
 }
 
 // ============================================================================
@@ -58,15 +69,28 @@ const ABSENCE_TYPE_LABELS: Record<string, string> = {
 };
 
 const MONTH_NAMES = [
-  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
 ];
 
 // ============================================================================
 // HELPERS
 // ============================================================================
 
-function groupBy<T>(items: T[], keyFn: (item: T) => string): Record<string, T[]> {
+function groupBy<T>(
+  items: T[],
+  keyFn: (item: T) => string
+): Record<string, T[]> {
   const groups: Record<string, T[]> = {};
   for (const item of items) {
     const key = keyFn(item);
@@ -109,7 +133,7 @@ function aggregate(
   absences: Absence[],
   payrolls: Payroll[],
   bonuses: Bonus[],
-  deductions: Deduction[],
+  deductions: Deduction[]
 ): HRAnalyticsData {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -117,15 +141,22 @@ function aggregate(
   const last6 = getLast6Months();
 
   // -- KPIs --
-  const activeEmployees = employees.filter(e => e.status !== 'TERMINATED' && e.status !== 'INACTIVE');
+  const activeEmployees = employees.filter(
+    e => e.status !== 'TERMINATED' && e.status !== 'INACTIVE'
+  );
   const pendingOvertime = overtime.filter(o => o.approved === null).length;
-  const activeAbsences = absences.filter(a => a.status === 'IN_PROGRESS' || a.status === 'APPROVED').length;
+  const activeAbsences = absences.filter(
+    a => a.status === 'IN_PROGRESS' || a.status === 'APPROVED'
+  ).length;
   const currentPayroll = payrolls.find(
     p => p.referenceMonth === currentMonth && p.referenceYear === currentYear
   );
 
   // -- Employees by Department --
-  const deptGroups = groupBy(activeEmployees, e => e.department?.name ?? 'Sem Departamento');
+  const deptGroups = groupBy(
+    activeEmployees,
+    e => e.department?.name ?? 'Sem Departamento'
+  );
   const employeesByDepartment = Object.entries(deptGroups)
     .map(([name, items]) => ({ name, count: items.length }))
     .sort((a, b) => b.count - a.count)
@@ -134,13 +165,19 @@ function aggregate(
   // -- Employees by Contract Type --
   const contractGroups = groupBy(activeEmployees, e => e.contractType);
   const employeesByContractType = Object.entries(contractGroups)
-    .map(([type, items]) => ({ name: CONTRACT_TYPE_LABELS[type] ?? type, count: items.length }))
+    .map(([type, items]) => ({
+      name: CONTRACT_TYPE_LABELS[type] ?? type,
+      count: items.length,
+    }))
     .sort((a, b) => b.count - a.count);
 
   // -- Absences by Type --
   const absenceGroups = groupBy(absences, a => a.type);
   const absencesByType = Object.entries(absenceGroups)
-    .map(([type, items]) => ({ name: ABSENCE_TYPE_LABELS[type] ?? type, count: items.length }))
+    .map(([type, items]) => ({
+      name: ABSENCE_TYPE_LABELS[type] ?? type,
+      count: items.length,
+    }))
     .sort((a, b) => b.count - a.count);
 
   // -- Payroll Trend (last 6 months) --
@@ -237,14 +274,31 @@ async function fetchAnalyticsData(): Promise<HRAnalyticsData> {
     deductionsService.list({ perPage: 100 }),
   ]);
 
-  const employees = employeesResult.status === 'fulfilled' ? employeesResult.value.employees : [];
-  const overtime = overtimeResult.status === 'fulfilled' ? overtimeResult.value.overtime : [];
-  const absences = absencesResult.status === 'fulfilled' ? absencesResult.value.absences : [];
-  const payrolls = payrollsResult.status === 'fulfilled' ? payrollsResult.value.payrolls : [];
-  const bonuses = bonusesResult.status === 'fulfilled' ? bonusesResult.value.bonuses : [];
-  const deductions = deductionsResult.status === 'fulfilled' ? deductionsResult.value.deductions : [];
+  const employees =
+    employeesResult.status === 'fulfilled'
+      ? employeesResult.value.employees
+      : [];
+  const overtime =
+    overtimeResult.status === 'fulfilled' ? overtimeResult.value.overtime : [];
+  const absences =
+    absencesResult.status === 'fulfilled' ? absencesResult.value.absences : [];
+  const payrolls =
+    payrollsResult.status === 'fulfilled' ? payrollsResult.value.payrolls : [];
+  const bonuses =
+    bonusesResult.status === 'fulfilled' ? bonusesResult.value.bonuses : [];
+  const deductions =
+    deductionsResult.status === 'fulfilled'
+      ? deductionsResult.value.deductions
+      : [];
 
-  return aggregate(employees, overtime, absences, payrolls, bonuses, deductions);
+  return aggregate(
+    employees,
+    overtime,
+    absences,
+    payrolls,
+    bonuses,
+    deductions
+  );
 }
 
 export function useHRAnalytics() {

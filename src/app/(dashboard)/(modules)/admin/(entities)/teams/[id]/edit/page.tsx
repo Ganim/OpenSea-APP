@@ -69,7 +69,10 @@ export default function EditTeamPage() {
     }
   }, [team]);
 
-  function updateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+  function updateField<K extends keyof typeof form>(
+    key: K,
+    value: (typeof form)[K]
+  ) {
     setForm(prev => ({ ...prev, [key]: value }));
     setHasChanges(true);
   }
@@ -163,7 +166,8 @@ export default function EditTeamPage() {
               title: saveMutation.isPending ? 'Salvando...' : 'Salvar',
               icon: saveMutation.isPending ? Loader2 : Save,
               onClick: () => saveMutation.mutate(),
-              disabled: !hasChanges || !form.name.trim() || saveMutation.isPending,
+              disabled:
+                !hasChanges || !form.name.trim() || saveMutation.isPending,
             },
           ]}
         />

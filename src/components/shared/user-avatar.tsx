@@ -98,7 +98,9 @@ export function UserAvatar({
 
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
-      {resolvedAvatarUrl && <AvatarImage src={resolvedAvatarUrl} alt={displayName} />}
+      {resolvedAvatarUrl && (
+        <AvatarImage src={resolvedAvatarUrl} alt={displayName} />
+      )}
       <AvatarFallback
         className={cn(
           bgColor,

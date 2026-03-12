@@ -26,9 +26,7 @@ export function useFinanceSuppliers(params?: {
       let suppliers = data.suppliers ?? [];
       if (params?.search) {
         const term = params.search.toLowerCase();
-        suppliers = suppliers.filter((s) =>
-          s.name.toLowerCase().includes(term)
-        );
+        suppliers = suppliers.filter(s => s.name.toLowerCase().includes(term));
       }
       return { suppliers };
     },

@@ -202,7 +202,8 @@ export default function DeductionDetailPage() {
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {getName(deduction.employeeId)} · {formatCurrency(deduction.amount)}
+                {getName(deduction.employeeId)} ·{' '}
+                {formatCurrency(deduction.amount)}
               </p>
             </div>
             <div className="flex flex-col gap-2 shrink-0 text-sm">
@@ -246,10 +247,7 @@ export default function DeductionDetailPage() {
                 </Badge>
               }
             />
-            <InfoField
-              label="Data"
-              value={formatDate(deduction.date)}
-            />
+            <InfoField label="Data" value={formatDate(deduction.date)} />
           </div>
           <div className="grid md:grid-cols-2 gap-6 mt-6">
             <InfoField
@@ -278,9 +276,7 @@ export default function DeductionDetailPage() {
               <InfoField
                 label="Total de Parcelas"
                 value={
-                  deduction.installments
-                    ? String(deduction.installments)
-                    : '-'
+                  deduction.installments ? String(deduction.installments) : '-'
                 }
               />
               <InfoField
@@ -291,10 +287,7 @@ export default function DeductionDetailPage() {
                     : '-'
                 }
               />
-              <InfoField
-                label="Progresso"
-                value={installmentsText ?? '-'}
-              />
+              <InfoField label="Progresso" value={installmentsText ?? '-'} />
             </div>
             {deduction.installments && deduction.currentInstallment && (
               <div className="mt-6">

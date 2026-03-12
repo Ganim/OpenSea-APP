@@ -49,17 +49,14 @@ export default function TenantsListPage() {
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   // Debounce search input
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchInput(value);
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-      debounceTimer.current = setTimeout(() => {
-        setDebouncedSearch(value);
-        setPage(1); // Reset to first page on search
-      }, 300);
-    },
-    [],
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(1); // Reset to first page on search
+    }, 300);
+  }, []);
 
   // Reset page on status filter change
   useEffect(() => {
@@ -70,7 +67,7 @@ export default function TenantsListPage() {
     page,
     20,
     debouncedSearch || undefined,
-    statusFilter || undefined,
+    statusFilter || undefined
   );
 
   const tenants = data?.tenants ?? [];
@@ -101,7 +98,7 @@ export default function TenantsListPage() {
           <GlassInput
             placeholder="Buscar por nome ou slug..."
             value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={e => handleSearchChange(e.target.value)}
             icon={<Search className="h-4 w-4" />}
           />
         </div>
@@ -109,10 +106,10 @@ export default function TenantsListPage() {
           <Filter className="h-4 w-4 central-text-muted" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="h-10 px-3 rounded-lg central-glass-strong border border-[rgb(var(--central-border)/0.15)] central-text text-sm outline-none focus:ring-2 focus:ring-[rgb(var(--os-blue-500)/0.3)] transition-all appearance-none cursor-pointer bg-transparent"
           >
-            {STATUS_OPTIONS.map((opt) => (
+            {STATUS_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -140,7 +137,7 @@ export default function TenantsListPage() {
       {/* Table */}
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {[1, 2, 3, 4, 5].map(i => (
             <div
               key={i}
               className="h-16 rounded-xl central-glass-subtle animate-pulse"
@@ -159,7 +156,7 @@ export default function TenantsListPage() {
             </GlassTableRow>
           </GlassTableHeader>
           <GlassTableBody>
-            {tenants.map((tenant) => (
+            {tenants.map(tenant => (
               <GlassTableRow key={tenant.id}>
                 <GlassTableCell>
                   <div className="flex items-center gap-3">
@@ -227,7 +224,7 @@ export default function TenantsListPage() {
               variant="secondary"
               size="sm"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => setPage(p => p - 1)}
               className="gap-2"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -237,7 +234,7 @@ export default function TenantsListPage() {
               variant="secondary"
               size="sm"
               disabled={page >= data.meta.totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => setPage(p => p + 1)}
               className="gap-2"
             >
               Próximo

@@ -123,7 +123,8 @@ export default function AdminLandingPage() {
         users: users.status === 'fulfilled' ? users.value.users.length : null,
         groups: groups.status === 'fulfilled' ? groups.value.length : null,
         teams: teams.status === 'fulfilled' ? teams.value.meta.total : null,
-        companies: companies.status === 'fulfilled' ? companies.value.meta.total : null,
+        companies:
+          companies.status === 'fulfilled' ? companies.value.meta.total : null,
       });
       setCountsLoading(false);
     }

@@ -66,7 +66,7 @@ export function UnlockDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={(v) => {
+      onOpenChange={v => {
         if (!v) setPassword('');
         onOpenChange(v);
       }}
@@ -91,7 +91,7 @@ export function UnlockDialog({
               type="password"
               placeholder="Informe a senha"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               autoFocus
             />
           </div>

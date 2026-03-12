@@ -21,13 +21,7 @@ import { useDeleteFinanceCategory, useFinanceCategory } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import {
-  Calendar,
-  Clock,
-  Edit,
-  FolderTree,
-  Trash,
-} from 'lucide-react';
+import { Calendar, Clock, Edit, FolderTree, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -158,9 +152,7 @@ export default function FinanceCategoryDetailPage({
                 <Badge variant={category.isActive ? 'success' : 'secondary'}>
                   {category.isActive ? 'Ativa' : 'Inativa'}
                 </Badge>
-                {category.isSystem && (
-                  <Badge variant="outline">Sistema</Badge>
-                )}
+                {category.isSystem && <Badge variant="outline">Sistema</Badge>}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
                 {FINANCE_CATEGORY_TYPE_LABELS[category.type]}
@@ -210,10 +202,7 @@ export default function FinanceCategoryDetailPage({
               value={category.displayOrder}
             />
             {category.parentName && (
-              <InfoField
-                label="Categoria Pai"
-                value={category.parentName}
-              />
+              <InfoField label="Categoria Pai" value={category.parentName} />
             )}
             {category.childrenCount !== undefined &&
               category.childrenCount > 0 && (

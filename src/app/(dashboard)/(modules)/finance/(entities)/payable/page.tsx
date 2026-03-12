@@ -765,11 +765,17 @@ export default function PayablePage() {
               <Table aria-label="Tabela de contas a pagar">
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="w-[120px] hidden md:table-cell">Código</TableHead>
+                    <TableHead className="w-[120px] hidden md:table-cell">
+                      Código
+                    </TableHead>
                     <TableHead>Descrição</TableHead>
-                    <TableHead className="hidden md:table-cell">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Fornecedor
+                    </TableHead>
                     <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="hidden md:table-cell">Vencimento</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Vencimento
+                    </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[60px]" />
                   </TableRow>

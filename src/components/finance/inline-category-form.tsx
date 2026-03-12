@@ -10,7 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCreateFinanceCategory, useFinanceCategories } from '@/hooks/finance';
+import {
+  useCreateFinanceCategory,
+  useFinanceCategories,
+} from '@/hooks/finance';
 import type { FinanceCategory, FinanceCategoryType } from '@/types/finance';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import { Loader2 } from 'lucide-react';
@@ -64,7 +67,7 @@ export function InlineCategoryForm({
         <Input
           id="category-name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           placeholder="Nome da categoria"
           required
         />
@@ -72,16 +75,21 @@ export function InlineCategoryForm({
 
       <div className="space-y-2">
         <Label htmlFor="category-type">Tipo</Label>
-        <Select value={type} onValueChange={(v) => setType(v as FinanceCategoryType)}>
+        <Select
+          value={type}
+          onValueChange={v => setType(v as FinanceCategoryType)}
+        >
           <SelectTrigger id="category-type">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
+            {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(
+              ([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              )
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -94,7 +102,7 @@ export function InlineCategoryForm({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">Nenhuma (raiz)</SelectItem>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <SelectItem key={cat.id} value={cat.id}>
                 {cat.name}
               </SelectItem>
@@ -107,7 +115,10 @@ export function InlineCategoryForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={createMutation.isPending || !name.trim()}>
+        <Button
+          type="submit"
+          disabled={createMutation.isPending || !name.trim()}
+        >
           {createMutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

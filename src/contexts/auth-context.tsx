@@ -200,9 +200,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Se o backend auto-selecionou o tenant, salvar o tenant id e disparar evento
         if (response.tenant) {
           localStorage.setItem('selected_tenant_id', response.tenant.id);
-          logger.info('✅ Tenant auto-selecionado pelo backend', { tenantId: response.tenant.id });
+          logger.info('✅ Tenant auto-selecionado pelo backend', {
+            tenantId: response.tenant.id,
+          });
           // Dispatch event so TenantContext picks up the change
-          window.dispatchEvent(new CustomEvent('tenant-refreshed', { detail: response.tenant }));
+          window.dispatchEvent(
+            new CustomEvent('tenant-refreshed', { detail: response.tenant })
+          );
         }
 
         setHasToken(true);

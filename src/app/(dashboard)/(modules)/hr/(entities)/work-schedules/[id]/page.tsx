@@ -65,9 +65,7 @@ export default function WorkScheduleDetailPage() {
     if (!schedule) return;
 
     if (
-      !confirm(
-        `Tem certeza que deseja excluir a escala "${schedule.name}"?`
-      )
+      !confirm(`Tem certeza que deseja excluir a escala "${schedule.name}"?`)
     ) {
       return;
     }

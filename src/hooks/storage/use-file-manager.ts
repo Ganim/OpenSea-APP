@@ -56,20 +56,23 @@ export function useFileManager(options?: FileManagerOptions) {
   } = useFolderContents(currentFolderId, contentsQuery);
 
   // Global search (when at root with search query 2+ chars)
-  const isGlobalSearch = currentFolderId === null && debouncedSearch.length >= 2;
-  const { data: searchResults, isLoading: isLoadingSearch } =
-    useSearchStorage(isGlobalSearch ? debouncedSearch : '');
+  const isGlobalSearch =
+    currentFolderId === null && debouncedSearch.length >= 2;
+  const { data: searchResults, isLoading: isLoadingSearch } = useSearchStorage(
+    isGlobalSearch ? debouncedSearch : ''
+  );
 
   // Ordena os dados no client-side
   const contents = useMemo(() => {
     // Use global search results when in search mode
-    const source = isGlobalSearch && searchResults
-      ? {
-          folders: searchResults.folders,
-          files: searchResults.files,
-          total: searchResults.totalFiles + searchResults.totalFolders,
-        }
-      : rawContents;
+    const source =
+      isGlobalSearch && searchResults
+        ? {
+            folders: searchResults.folders,
+            files: searchResults.files,
+            total: searchResults.totalFiles + searchResults.totalFolders,
+          }
+        : rawContents;
 
     if (!source) return source;
 

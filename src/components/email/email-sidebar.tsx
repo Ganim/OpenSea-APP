@@ -156,273 +156,278 @@ export function EmailSidebar({
 
   return (
     <TooltipProvider delayDuration={300}>
-    <div
-      className="flex h-full w-full flex-col"
-      data-testid="email-sidebar"
-    >
-      {/* Central Inbox + Add Account */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="flex items-center gap-2">
-          <Button
-            variant={isCentralInbox ? 'default' : 'secondary'}
-            className={cn(
-              'flex-1 justify-start gap-3 rounded-xl h-10 text-sm font-medium',
-              isCentralInbox
-                ? 'bg-gradient-to-r from-slate-700 to-emerald-600 hover:from-slate-600 hover:to-emerald-500 text-white border-0 shadow-md'
-                : ''
-            )}
-            onClick={onCentralInbox}
-            data-testid="email-central-inbox"
-          >
-            <Layers className="size-5 shrink-0" />
-            <span className="flex-1 text-left">Caixa Central</span>
-            {totalUnread > 0 && (
-              <span
-                className={cn(
-                  'inline-flex items-center justify-center rounded-full px-2 h-5.5 min-w-5.5 text-[11px] font-semibold leading-none',
-                  isCentralInbox
-                    ? 'bg-white/20 text-white'
-                    : 'bg-primary text-primary-foreground'
-                )}
-                title={`${totalUnread} mensagen${totalUnread === 1 ? '' : 's'} não lida${totalUnread === 1 ? '' : 's'}`}
-              >
-                {totalUnread > 99 ? '99+' : totalUnread}
-              </span>
-            )}
-          </Button>
+      <div className="flex h-full w-full flex-col" data-testid="email-sidebar">
+        {/* Central Inbox + Add Account */}
+        <div className="px-3 pt-3 pb-2">
+          <div className="flex items-center gap-2">
+            <Button
+              variant={isCentralInbox ? 'default' : 'secondary'}
+              className={cn(
+                'flex-1 justify-start gap-3 rounded-xl h-10 text-sm font-medium',
+                isCentralInbox
+                  ? 'bg-gradient-to-r from-slate-700 to-emerald-600 hover:from-slate-600 hover:to-emerald-500 text-white border-0 shadow-md'
+                  : ''
+              )}
+              onClick={onCentralInbox}
+              data-testid="email-central-inbox"
+            >
+              <Layers className="size-5 shrink-0" />
+              <span className="flex-1 text-left">Caixa Central</span>
+              {totalUnread > 0 && (
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center rounded-full px-2 h-5.5 min-w-5.5 text-[11px] font-semibold leading-none',
+                    isCentralInbox
+                      ? 'bg-white/20 text-white'
+                      : 'bg-primary text-primary-foreground'
+                  )}
+                  title={`${totalUnread} mensagen${totalUnread === 1 ? '' : 's'} não lida${totalUnread === 1 ? '' : 's'}`}
+                >
+                  {totalUnread > 99 ? '99+' : totalUnread}
+                </span>
+              )}
+            </Button>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-10 shrink-0 rounded-xl"
-                onClick={onOpenNewAccount}
-                aria-label="Adicionar conta"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Adicionar conta</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-10 shrink-0 rounded-xl"
+                  onClick={onOpenNewAccount}
+                  aria-label="Adicionar conta"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Adicionar conta</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      </div>
 
-      {/* Accounts grouped by Personal / Teams */}
-      <ScrollArea className="flex-1">
-        <div className="px-3 pb-2">
-          {/* Loading skeleton */}
-          {isLoadingAccounts && accounts.length === 0 && (
-            <div className="space-y-3 px-1 pt-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 py-2">
-                  <Skeleton className="size-8 rounded-full shrink-0" />
-                  <div className="flex-1 space-y-1.5">
-                    <Skeleton className="h-3.5 w-28" />
-                    <Skeleton className="h-3 w-36" />
+        {/* Accounts grouped by Personal / Teams */}
+        <ScrollArea className="flex-1">
+          <div className="px-3 pb-2">
+            {/* Loading skeleton */}
+            {isLoadingAccounts && accounts.length === 0 && (
+              <div className="space-y-3 px-1 pt-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2">
+                    <Skeleton className="size-8 rounded-full shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3.5 w-28" />
+                      <Skeleton className="h-3 w-36" />
+                    </div>
                   </div>
+                ))}
+              </div>
+            )}
+
+            {/* No accounts empty state */}
+            {!isLoadingAccounts && accounts.length === 0 && (
+              <div className="flex flex-col items-center justify-center gap-4 px-4 py-10 text-center">
+                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <Mail className="size-7 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* No accounts empty state */}
-          {!isLoadingAccounts && accounts.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-4 px-4 py-10 text-center">
-              <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
-                <Mail className="size-7 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Nenhuma conta de e-mail</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure uma conta para começar
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-2 rounded-xl"
+                  onClick={onOpenNewAccount}
+                >
+                  <Plus className="size-3.5" />
+                  Adicionar conta
+                </Button>
               </div>
-              <div>
-                <p className="text-sm font-medium">Nenhuma conta de e-mail</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Configure uma conta para começar
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-2 rounded-xl"
-                onClick={onOpenNewAccount}
-              >
-                <Plus className="size-3.5" />
-                Adicionar conta
-              </Button>
-            </div>
-          )}
+            )}
 
-          {/* Account groups */}
-          {accountGroups.map(group => (
-            <div key={group.teamId ?? 'personal'} className="mt-2">
-              {/* Group label */}
-              <div className="px-1 pt-2 pb-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {group.label}
-                </p>
-              </div>
+            {/* Account groups */}
+            {accountGroups.map(group => (
+              <div key={group.teamId ?? 'personal'} className="mt-2">
+                {/* Group label */}
+                <div className="px-1 pt-2 pb-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {group.label}
+                  </p>
+                </div>
 
-              {/* Accounts in this group */}
-              <div className="space-y-0.5">
-                {group.accounts.map(account => {
-                  const isExpanded = expandedAccountId === account.id;
-                  const isSelected =
-                    selectedAccountId === account.id && !isCentralInbox;
-                  const accountUnread =
-                    accountUnreadCounts[account.id] ?? (isSelected ? totalUnread : 0);
-                  const avatarColor = getAvatarColor(account.address);
+                {/* Accounts in this group */}
+                <div className="space-y-0.5">
+                  {group.accounts.map(account => {
+                    const isExpanded = expandedAccountId === account.id;
+                    const isSelected =
+                      selectedAccountId === account.id && !isCentralInbox;
+                    const accountUnread =
+                      accountUnreadCounts[account.id] ??
+                      (isSelected ? totalUnread : 0);
+                    const avatarColor = getAvatarColor(account.address);
 
-                  return (
-                    <div key={account.id}>
-                      {/* Account header */}
-                      <div className="group/account relative">
-                        <button
-                          className={cn(
-                            'flex w-full min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm transition-all duration-200',
-                            isSelected && !isCentralInbox
-                              ? 'bg-accent text-accent-foreground'
-                              : 'hover:bg-muted/60 text-foreground'
-                          )}
-                          onClick={() => handleAccountClick(account.id)}
-                        >
-                          {/* Avatar */}
-                          <div
-                            className="flex size-8 shrink-0 items-center justify-center rounded-full text-white"
-                            style={{ backgroundColor: avatarColor }}
-                          >
-                            <span className="text-xs font-semibold leading-none">
-                              {getInitials(account.displayName, account.address)}
-                            </span>
-                          </div>
-
-                          {/* Name + Email */}
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium leading-tight">
-                              {account.displayName || account.address}
-                            </p>
-                            {account.displayName && (
-                              <p className="truncate text-[11px] text-muted-foreground leading-tight mt-0.5">
-                                {account.address}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Unread badge — hidden on group hover (replaced by settings icon) */}
-                          {accountUnread > 0 && (
-                            <span
-                              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground h-5 min-w-5 px-1.5 text-[11px] font-semibold leading-none group-hover/account:opacity-0 transition-opacity duration-200"
-                              title={`${accountUnread} mensagen${accountUnread === 1 ? '' : 's'} não lida${accountUnread === 1 ? '' : 's'}`}
-                            >
-                              {accountUnread > 99 ? '99+' : accountUnread}
-                            </span>
-                          )}
-
-                          {/* Chevron */}
-                          <ChevronDown
+                    return (
+                      <div key={account.id}>
+                        {/* Account header */}
+                        <div className="group/account relative">
+                          <button
                             className={cn(
-                              'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
-                              !isExpanded && '-rotate-90'
+                              'flex w-full min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm transition-all duration-200',
+                              isSelected && !isCentralInbox
+                                ? 'bg-accent text-accent-foreground'
+                                : 'hover:bg-muted/60 text-foreground'
                             )}
-                          />
-                        </button>
+                            onClick={() => handleAccountClick(account.id)}
+                          >
+                            {/* Avatar */}
+                            <div
+                              className="flex size-8 shrink-0 items-center justify-center rounded-full text-white"
+                              style={{ backgroundColor: avatarColor }}
+                            >
+                              <span className="text-xs font-semibold leading-none">
+                                {getInitials(
+                                  account.displayName,
+                                  account.address
+                                )}
+                              </span>
+                            </div>
 
-                        {/* Settings button on hover — replaces unread badge position */}
-                        {onEditAccount && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 shrink-0 absolute right-8 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/account:opacity-100 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 rounded-lg"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  onEditAccount(account);
-                                }}
-                                aria-label="Configurar conta"
+                            {/* Name + Email */}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium leading-tight">
+                                {account.displayName || account.address}
+                              </p>
+                              {account.displayName && (
+                                <p className="truncate text-[11px] text-muted-foreground leading-tight mt-0.5">
+                                  {account.address}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Unread badge — hidden on group hover (replaced by settings icon) */}
+                            {accountUnread > 0 && (
+                              <span
+                                className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground h-5 min-w-5 px-1.5 text-[11px] font-semibold leading-none group-hover/account:opacity-0 transition-opacity duration-200"
+                                title={`${accountUnread} mensagen${accountUnread === 1 ? '' : 's'} não lida${accountUnread === 1 ? '' : 's'}`}
                               >
-                                <Settings className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Configurar conta</TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
+                                {accountUnread > 99 ? '99+' : accountUnread}
+                              </span>
+                            )}
 
-                      {/* Collapsible folders */}
-                      <div
-                        className={cn(
-                          'overflow-hidden transition-all duration-200',
-                          isExpanded
-                            ? 'max-h-[500px] opacity-100'
-                            : 'max-h-0 opacity-0'
-                        )}
-                      >
-                        <div className="ml-6 mt-1 mb-2 space-y-0.5 pl-4">
-                          {sortedFolders.length === 0 ? (
-                            <p className="px-3 py-2 text-[11px] text-muted-foreground">
-                              Sincronizando pastas...
-                            </p>
-                          ) : (
-                            sortedFolders.map(folder => {
-                              const Icon = FOLDER_ICON[folder.type] ?? Folder;
-                              const isFolderSelected =
-                                selectedFolderId === folder.id && !isCentralInbox;
-                              const folderUnread = unreadCounts[folder.id] ?? 0;
+                            {/* Chevron */}
+                            <ChevronDown
+                              className={cn(
+                                'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+                                !isExpanded && '-rotate-90'
+                              )}
+                            />
+                          </button>
 
-                              return (
-                                <button
-                                  key={folder.id}
-                                  className={cn(
-                                    'flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-left text-xs transition-all duration-150',
-                                    isFolderSelected
-                                      ? 'bg-primary/10 text-primary font-medium'
-                                      : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
-                                  )}
+                          {/* Settings button on hover — replaces unread badge position */}
+                          {onEditAccount && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 shrink-0 absolute right-8 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/account:opacity-100 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 rounded-lg"
                                   onClick={e => {
                                     e.stopPropagation();
-                                    onFolderChange(folder.id);
+                                    onEditAccount(account);
                                   }}
+                                  aria-label="Configurar conta"
                                 >
-                                  <Icon className="size-4 shrink-0" />
-                                  <span
-                                    className="truncate flex-1"
-                                    title={getFolderDisplayName(folder)}
-                                  >
-                                    {getFolderDisplayName(folder)}
-                                  </span>
-                                  {folderUnread > 0 && (
-                                    <span
-                                      className={cn(
-                                        'ml-auto inline-flex items-center justify-center rounded-full h-5 min-w-5 px-1.5 text-[10px] font-semibold leading-none',
-                                        folder.type === 'INBOX'
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted text-muted-foreground'
-                                      )}
-                                    >
-                                      {folderUnread > 99 ? '99+' : folderUnread}
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })
+                                  <Settings className="h-3.5 w-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Configurar conta</TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
 
-      {/* Sync footer */}
-      <SyncFooter
-        lastSyncAt={selectedAccount?.lastSyncAt ?? null}
-        isSyncing={isSyncing}
-        disabled={!selectedAccountId}
-        onSync={onSyncAccount}
-      />
-    </div>
+                        {/* Collapsible folders */}
+                        <div
+                          className={cn(
+                            'overflow-hidden transition-all duration-200',
+                            isExpanded
+                              ? 'max-h-[500px] opacity-100'
+                              : 'max-h-0 opacity-0'
+                          )}
+                        >
+                          <div className="ml-6 mt-1 mb-2 space-y-0.5 pl-4">
+                            {sortedFolders.length === 0 ? (
+                              <p className="px-3 py-2 text-[11px] text-muted-foreground">
+                                Sincronizando pastas...
+                              </p>
+                            ) : (
+                              sortedFolders.map(folder => {
+                                const Icon = FOLDER_ICON[folder.type] ?? Folder;
+                                const isFolderSelected =
+                                  selectedFolderId === folder.id &&
+                                  !isCentralInbox;
+                                const folderUnread =
+                                  unreadCounts[folder.id] ?? 0;
+
+                                return (
+                                  <button
+                                    key={folder.id}
+                                    className={cn(
+                                      'flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-left text-xs transition-all duration-150',
+                                      isFolderSelected
+                                        ? 'bg-primary/10 text-primary font-medium'
+                                        : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+                                    )}
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      onFolderChange(folder.id);
+                                    }}
+                                  >
+                                    <Icon className="size-4 shrink-0" />
+                                    <span
+                                      className="truncate flex-1"
+                                      title={getFolderDisplayName(folder)}
+                                    >
+                                      {getFolderDisplayName(folder)}
+                                    </span>
+                                    {folderUnread > 0 && (
+                                      <span
+                                        className={cn(
+                                          'ml-auto inline-flex items-center justify-center rounded-full h-5 min-w-5 px-1.5 text-[10px] font-semibold leading-none',
+                                          folder.type === 'INBOX'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-muted text-muted-foreground'
+                                        )}
+                                      >
+                                        {folderUnread > 99
+                                          ? '99+'
+                                          : folderUnread}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+
+        {/* Sync footer */}
+        <SyncFooter
+          lastSyncAt={selectedAccount?.lastSyncAt ?? null}
+          isSyncing={isSyncing}
+          disabled={!selectedAccountId}
+          onSync={onSyncAccount}
+        />
+      </div>
     </TooltipProvider>
   );
 }
@@ -473,8 +478,7 @@ function SyncFooter({
             </div>
           ) : timeText ? (
             <p className="text-[10px] text-muted-foreground leading-tight">
-              Sincronizado há{' '}
-              <span className="font-medium">{timeText}</span>
+              Sincronizado há <span className="font-medium">{timeText}</span>
             </p>
           ) : (
             <p className="text-[10px] text-muted-foreground">

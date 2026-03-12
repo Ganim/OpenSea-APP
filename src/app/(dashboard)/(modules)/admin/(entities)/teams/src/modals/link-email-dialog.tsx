@@ -92,7 +92,13 @@ interface LinkEmailDialogProps {
 }
 
 type PermissionKey = keyof Omit<LinkTeamEmailData, 'accountId'>;
-type TestStatus = 'idle' | 'creating' | 'testing' | 'syncing' | 'success' | 'error';
+type TestStatus =
+  | 'idle'
+  | 'creating'
+  | 'testing'
+  | 'syncing'
+  | 'success'
+  | 'error';
 
 const DEFAULT_PERMISSIONS: Omit<LinkTeamEmailData, 'accountId'> = {
   ownerCanRead: true,
@@ -304,9 +310,7 @@ export function LinkEmailDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wz-secret">
-              Senha / Senha de aplicativo *
-            </Label>
+            <Label htmlFor="wz-secret">Senha / Senha de aplicativo *</Label>
             <Input
               id="wz-secret"
               type="password"
@@ -492,7 +496,8 @@ export function LinkEmailDialog({
             <div className="text-center space-y-2">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
               <p className="text-sm font-medium">
-                {testStatus === 'creating' && 'Criando conta e vinculando à equipe...'}
+                {testStatus === 'creating' &&
+                  'Criando conta e vinculando à equipe...'}
                 {testStatus === 'testing' && 'Testando conexão IMAP/SMTP...'}
                 {testStatus === 'syncing' && 'Sincronizando pastas...'}
               </p>

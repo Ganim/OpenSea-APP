@@ -32,10 +32,7 @@ export default function DashboardError({
           )}
         </div>
         <div className="flex gap-3 justify-center">
-          <Button
-            variant="outline"
-            onClick={() => window.location.assign('/')}
-          >
+          <Button variant="outline" onClick={() => window.location.assign('/')}>
             Página inicial
           </Button>
           <Button onClick={reset}>Tentar novamente</Button>

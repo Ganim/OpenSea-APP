@@ -692,13 +692,7 @@ const suplemento: TemplatePreset = {
     tipo: {
       name: 'Tipo',
       type: 'select',
-      options: [
-        'Vitamina',
-        'Proteína',
-        'Creatina',
-        'Aminoácido',
-        'Pré-Treino',
-      ],
+      options: ['Vitamina', 'Proteína', 'Creatina', 'Aminoácido', 'Pré-Treino'],
     },
     pesoLiquido: { name: 'Peso Líquido', type: 'number', unit: 'g' },
   },
@@ -940,13 +934,7 @@ const limpeza: TemplatePreset = {
     tipo: {
       name: 'Tipo',
       type: 'select',
-      options: [
-        'Detergente',
-        'Desinfetante',
-        'Amaciante',
-        'Sabão',
-        'Multiuso',
-      ],
+      options: ['Detergente', 'Desinfetante', 'Amaciante', 'Sabão', 'Multiuso'],
     },
     volume: { name: 'Volume', type: 'number', unit: 'mL' },
     fragrancia: { name: 'Fragrância', type: 'text' },
@@ -1041,5 +1029,5 @@ export const PRESETS_BY_CATEGORY = TEMPLATE_PRESETS.reduce(
     acc[preset.category].push(preset);
     return acc;
   },
-  {} as Record<PresetCategory, TemplatePreset[]>,
+  {} as Record<PresetCategory, TemplatePreset[]>
 );

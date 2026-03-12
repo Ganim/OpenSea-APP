@@ -19,9 +19,13 @@ interface CalendarPickerProps {
   onChange: (calendarId: string) => void;
 }
 
-export function CalendarPicker({ calendars, value, onChange }: CalendarPickerProps) {
+export function CalendarPicker({
+  calendars,
+  value,
+  onChange,
+}: CalendarPickerProps) {
   // Only show calendars where user can create events
-  const creatableCalendars = calendars.filter((c) => c.access.canCreate);
+  const creatableCalendars = calendars.filter(c => c.access.canCreate);
 
   // If only one calendar available, don't render picker
   if (creatableCalendars.length <= 1) {
@@ -29,12 +33,15 @@ export function CalendarPicker({ calendars, value, onChange }: CalendarPickerPro
   }
 
   // Group by type, with TEAM sub-grouped by team
-  const personal = creatableCalendars.filter((c) => c.type === 'PERSONAL');
-  const team = creatableCalendars.filter((c) => c.type === 'TEAM');
-  const system = creatableCalendars.filter((c) => c.type === 'SYSTEM');
+  const personal = creatableCalendars.filter(c => c.type === 'PERSONAL');
+  const team = creatableCalendars.filter(c => c.type === 'TEAM');
+  const system = creatableCalendars.filter(c => c.type === 'SYSTEM');
 
   // Group team calendars by ownerId
-  const teamGroups = new Map<string, { name: string; color: string | null; calendars: Calendar[] }>();
+  const teamGroups = new Map<
+    string,
+    { name: string; color: string | null; calendars: Calendar[] }
+  >();
   for (const cal of team) {
     const teamId = cal.ownerId ?? 'unknown';
     if (!teamGroups.has(teamId)) {
@@ -65,7 +72,7 @@ export function CalendarPicker({ calendars, value, onChange }: CalendarPickerPro
           {personal.length > 0 && (
             <SelectGroup>
               <SelectLabel>Pessoal</SelectLabel>
-              {personal.map((cal) => (
+              {personal.map(cal => (
                 <SelectItem key={cal.id} value={cal.id}>
                   <div className="flex items-center gap-2">
                     <span
@@ -90,7 +97,7 @@ export function CalendarPicker({ calendars, value, onChange }: CalendarPickerPro
                 )}
                 {group.name}
               </SelectLabel>
-              {group.calendars.map((cal) => (
+              {group.calendars.map(cal => (
                 <SelectItem key={cal.id} value={cal.id}>
                   <div className="flex items-center gap-2">
                     <span
@@ -107,7 +114,7 @@ export function CalendarPicker({ calendars, value, onChange }: CalendarPickerPro
           {system.length > 0 && (
             <SelectGroup>
               <SelectLabel>Sistema</SelectLabel>
-              {system.map((cal) => (
+              {system.map(cal => (
                 <SelectItem key={cal.id} value={cal.id}>
                   <div className="flex items-center gap-2">
                     <span

@@ -99,7 +99,7 @@ function extractLabelStudioTemplate(
  */
 async function generateAndUploadThumbnail(
   templateId: string,
-  studioTemplate: LabelStudioTemplate,
+  studioTemplate: LabelStudioTemplate
 ) {
   const { toPng } = await import('html-to-image');
   const { StudioLabelRenderer } = await import(
@@ -120,7 +120,7 @@ async function generateAndUploadThumbnail(
     React.createElement(StudioLabelRenderer, {
       template: studioTemplate,
       scale: 2, // 2x for higher quality thumbnail
-    }),
+    })
   );
 
   // Wait for rendering and images to load
@@ -147,7 +147,11 @@ async function generateAndUploadThumbnail(
   const blob = await res.blob();
 
   // Upload to backend
-  await labelTemplatesService.updateThumbnail(templateId, blob, 'thumbnail.png');
+  await labelTemplatesService.updateThumbnail(
+    templateId,
+    blob,
+    'thumbnail.png'
+  );
 }
 
 export default function EditLabelStudioPage() {
@@ -204,12 +208,11 @@ export default function EditLabelStudioPage() {
         });
 
         // Generate and upload thumbnail in background (don't block navigation)
-        generateAndUploadThumbnail(templateId, data.studioTemplate).catch(
-          err =>
-            logger.error(
-              'Failed to generate thumbnail',
-              err instanceof Error ? err : undefined,
-            ),
+        generateAndUploadThumbnail(templateId, data.studioTemplate).catch(err =>
+          logger.error(
+            'Failed to generate thumbnail',
+            err instanceof Error ? err : undefined
+          )
         );
 
         router.push('/print/studio');

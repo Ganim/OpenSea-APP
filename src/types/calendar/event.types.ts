@@ -16,7 +16,11 @@ export type EventVisibility = 'PUBLIC' | 'PRIVATE';
 
 export type ParticipantRole = 'OWNER' | 'ASSIGNEE' | 'GUEST';
 
-export type ParticipantStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'TENTATIVE';
+export type ParticipantStatus =
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'DECLINED'
+  | 'TENTATIVE';
 
 export interface EventParticipant {
   id: string;
@@ -147,11 +151,14 @@ export type SystemSourceType =
   | 'FINANCE_ENTRY'
   | 'STOCK_PO';
 
-export const SYSTEM_SOURCE_ROUTES: Record<SystemSourceType, (id: string) => string> = {
-  HR_ABSENCE: (id) => `/hr/absences/${id}`,
-  HR_BIRTHDAY: (id) => `/hr/employees/${id}`,
-  FINANCE_ENTRY: (id) => `/finance/entries/${id}`,
-  STOCK_PO: (id) => `/stock/purchase-orders/${id}`,
+export const SYSTEM_SOURCE_ROUTES: Record<
+  SystemSourceType,
+  (id: string) => string
+> = {
+  HR_ABSENCE: id => `/hr/absences/${id}`,
+  HR_BIRTHDAY: id => `/hr/employees/${id}`,
+  FINANCE_ENTRY: id => `/finance/entries/${id}`,
+  STOCK_PO: id => `/stock/purchase-orders/${id}`,
 };
 
 export const SYSTEM_SOURCE_LABELS: Record<SystemSourceType, string> = {

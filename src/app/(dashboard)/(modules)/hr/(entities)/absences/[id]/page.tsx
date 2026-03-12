@@ -68,7 +68,14 @@ export default function AbsenceDetailPage() {
   const approveAbsence = useApproveAbsence();
   const cancelAbsence = useCancelAbsence();
 
-  const { getName } = useEmployeeMap(absence ? [absence.employeeId, ...(absence.approvedBy ? [absence.approvedBy] : [])] : []);
+  const { getName } = useEmployeeMap(
+    absence
+      ? [
+          absence.employeeId,
+          ...(absence.approvedBy ? [absence.approvedBy] : []),
+        ]
+      : []
+  );
 
   // ============================================================================
   // LOADING STATE
@@ -155,7 +162,9 @@ export default function AbsenceDetailPage() {
               ? [
                   {
                     id: 'approve',
-                    title: approveAbsence.isPending ? 'Aprovando...' : 'Aprovar',
+                    title: approveAbsence.isPending
+                      ? 'Aprovando...'
+                      : 'Aprovar',
                     icon: Check,
                     onClick: () => approveAbsence.mutate(absenceId),
                     className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
@@ -170,7 +179,9 @@ export default function AbsenceDetailPage() {
                   },
                   {
                     id: 'cancel',
-                    title: cancelAbsence.isPending ? 'Cancelando...' : 'Cancelar',
+                    title: cancelAbsence.isPending
+                      ? 'Cancelando...'
+                      : 'Cancelar',
                     icon: Ban,
                     onClick: () => setIsCancelDialogOpen(true),
                     variant: 'outline',
@@ -200,8 +211,8 @@ export default function AbsenceDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {getName(absence.employeeId)} ·{' '}
-                {formatDate(absence.startDate)} — {formatDate(absence.endDate)}
+                {getName(absence.employeeId)} · {formatDate(absence.startDate)}{' '}
+                — {formatDate(absence.endDate)}
                 {' · '}
                 {absence.totalDays} {absence.totalDays === 1 ? 'dia' : 'dias'}
               </p>
@@ -354,7 +365,6 @@ export default function AbsenceDetailPage() {
             )}
           </Card>
         )}
-
       </PageBody>
 
       {/* Reject Modal */}

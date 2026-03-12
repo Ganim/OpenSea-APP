@@ -26,10 +26,7 @@ import type {
   RecurrenceUnit,
   CreateRecurringConfigRequest,
 } from '@/types/finance';
-import {
-  FINANCE_ENTRY_TYPE_LABELS,
-  FREQUENCY_LABELS,
-} from '@/types/finance';
+import { FINANCE_ENTRY_TYPE_LABELS, FREQUENCY_LABELS } from '@/types/finance';
 import { Check, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -84,7 +81,13 @@ const INITIAL_DATA: WizardData = {
   notes: '',
 };
 
-const STEP_LABELS = ['Tipo', 'Dados', 'Frequência', 'Juros/Multa', 'Confirmação'];
+const STEP_LABELS = [
+  'Tipo',
+  'Dados',
+  'Frequência',
+  'Juros/Multa',
+  'Confirmação',
+];
 
 const FREQUENCY_OPTIONS: { value: RecurrenceUnit; label: string }[] = [
   { value: 'WEEKLY', label: 'Semanal' },
@@ -125,12 +128,15 @@ export function RecurringWizard({
   const bankAccounts = bankAccountsData?.bankAccounts ?? [];
 
   const update = useCallback((updates: Partial<WizardData>) => {
-    setData((prev) => ({ ...prev, ...updates }));
+    setData(prev => ({ ...prev, ...updates }));
   }, []);
 
   const handleReset = useCallback(() => {
     setCurrentStep(1);
-    setData({ ...INITIAL_DATA, startDate: new Date().toISOString().split('T')[0] });
+    setData({
+      ...INITIAL_DATA,
+      startDate: new Date().toISOString().split('T')[0],
+    });
   }, []);
 
   const handleOpenChange = useCallback(
@@ -188,7 +194,9 @@ export function RecurringWizard({
       case 1:
         return !!data.type;
       case 2:
-        return !!data.description && !!data.categoryId && data.expectedAmount > 0;
+        return (
+          !!data.description && !!data.categoryId && data.expectedAmount > 0
+        );
       case 3:
         return !!data.frequencyUnit && !!data.startDate;
       case 4:
@@ -199,27 +207,29 @@ export function RecurringWizard({
   }, [currentStep, data]);
 
   const goNext = useCallback(() => {
-    if (currentStep < 5) setCurrentStep((s) => (s + 1) as WizardStep);
+    if (currentStep < 5) setCurrentStep(s => (s + 1) as WizardStep);
   }, [currentStep]);
 
   const goPrev = useCallback(() => {
-    if (currentStep > 1) setCurrentStep((s) => (s - 1) as WizardStep);
+    if (currentStep > 1) setCurrentStep(s => (s - 1) as WizardStep);
   }, [currentStep]);
 
   // --------------------------------------------------------------------------
   // Render helpers
   // --------------------------------------------------------------------------
 
-  const filteredCategories = categories.filter((c) => {
+  const filteredCategories = categories.filter(c => {
     if (!data.type) return true;
-    if (data.type === 'PAYABLE') return c.type === 'EXPENSE' || c.type === 'BOTH';
+    if (data.type === 'PAYABLE')
+      return c.type === 'EXPENSE' || c.type === 'BOTH';
     return c.type === 'REVENUE' || c.type === 'BOTH';
   });
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-      value
-    );
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -285,7 +295,7 @@ export function RecurringWizard({
               Selecione o tipo de recorrência:
             </p>
             <div className="grid grid-cols-2 gap-4">
-              {(['PAYABLE', 'RECEIVABLE'] as FinanceEntryType[]).map((type) => (
+              {(['PAYABLE', 'RECEIVABLE'] as FinanceEntryType[]).map(type => (
                 <Card
                   key={type}
                   className={`p-4 cursor-pointer transition-all ${
@@ -321,7 +331,7 @@ export function RecurringWizard({
               <Input
                 id="rec-description"
                 value={data.description}
-                onChange={(e) => update({ description: e.target.value })}
+                onChange={e => update({ description: e.target.value })}
                 placeholder="Ex: Aluguel do escritório"
               />
             </div>
@@ -330,13 +340,13 @@ export function RecurringWizard({
               <Label htmlFor="rec-category">Categoria</Label>
               <Select
                 value={data.categoryId}
-                onValueChange={(v) => update({ categoryId: v })}
+                onValueChange={v => update({ categoryId: v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.map((cat) => (
+                  {filteredCategories.map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
                     </SelectItem>
@@ -349,7 +359,7 @@ export function RecurringWizard({
               <Label htmlFor="rec-bank">Conta Bancária</Label>
               <Select
                 value={data.bankAccountId}
-                onValueChange={(v) =>
+                onValueChange={v =>
                   update({ bankAccountId: v === '__none__' ? '' : v })
                 }
               >
@@ -358,7 +368,7 @@ export function RecurringWizard({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Nenhuma</SelectItem>
-                  {bankAccounts.map((acc) => (
+                  {bankAccounts.map(acc => (
                     <SelectItem key={acc.id} value={acc.id}>
                       {acc.name}
                     </SelectItem>
@@ -373,7 +383,7 @@ export function RecurringWizard({
                 <Input
                   id="rec-supplier"
                   value={data.supplierName}
-                  onChange={(e) => update({ supplierName: e.target.value })}
+                  onChange={e => update({ supplierName: e.target.value })}
                   placeholder="Nome do fornecedor (opcional)"
                 />
               </div>
@@ -385,7 +395,7 @@ export function RecurringWizard({
                 <Input
                   id="rec-customer"
                   value={data.customerName}
-                  onChange={(e) => update({ customerName: e.target.value })}
+                  onChange={e => update({ customerName: e.target.value })}
                   placeholder="Nome do cliente (opcional)"
                 />
               </div>
@@ -399,7 +409,7 @@ export function RecurringWizard({
                 min={0}
                 step={0.01}
                 value={data.expectedAmount || ''}
-                onChange={(e) =>
+                onChange={e =>
                   update({ expectedAmount: parseFloat(e.target.value) || 0 })
                 }
                 placeholder="0,00"
@@ -410,7 +420,7 @@ export function RecurringWizard({
               <Checkbox
                 id="rec-variable"
                 checked={data.isVariable}
-                onCheckedChange={(checked) =>
+                onCheckedChange={checked =>
                   update({ isVariable: checked === true })
                 }
               />
@@ -424,7 +434,7 @@ export function RecurringWizard({
               <Input
                 id="rec-notes"
                 value={data.notes}
-                onChange={(e) => update({ notes: e.target.value })}
+                onChange={e => update({ notes: e.target.value })}
                 placeholder="Observações (opcional)"
               />
             </div>
@@ -438,7 +448,7 @@ export function RecurringWizard({
               <Label htmlFor="rec-freq">Frequência</Label>
               <Select
                 value={data.frequencyUnit}
-                onValueChange={(v) =>
+                onValueChange={v =>
                   update({ frequencyUnit: v as RecurrenceUnit })
                 }
               >
@@ -446,7 +456,7 @@ export function RecurringWizard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {FREQUENCY_OPTIONS.map((opt) => (
+                  {FREQUENCY_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -462,7 +472,7 @@ export function RecurringWizard({
                 type="number"
                 min={1}
                 value={data.frequencyInterval}
-                onChange={(e) =>
+                onChange={e =>
                   update({ frequencyInterval: parseInt(e.target.value) || 1 })
                 }
               />
@@ -477,7 +487,7 @@ export function RecurringWizard({
                 id="rec-start"
                 type="date"
                 value={data.startDate}
-                onChange={(e) => update({ startDate: e.target.value })}
+                onChange={e => update({ startDate: e.target.value })}
               />
             </div>
 
@@ -515,7 +525,7 @@ export function RecurringWizard({
                     min={1}
                     className="w-20"
                     value={data.totalOccurrences}
-                    onChange={(e) =>
+                    onChange={e =>
                       update({
                         totalOccurrences: parseInt(e.target.value) || 1,
                         endCondition: 'occurrences',
@@ -543,8 +553,11 @@ export function RecurringWizard({
                     type="date"
                     className="w-44"
                     value={data.endDate}
-                    onChange={(e) =>
-                      update({ endDate: e.target.value, endCondition: 'endDate' })
+                    onChange={e =>
+                      update({
+                        endDate: e.target.value,
+                        endCondition: 'endDate',
+                      })
                     }
                   />
                 </div>
@@ -560,7 +573,7 @@ export function RecurringWizard({
               <Checkbox
                 id="rec-skip-rates"
                 checked={data.skipRates}
-                onCheckedChange={(checked) =>
+                onCheckedChange={checked =>
                   update({ skipRates: checked === true })
                 }
               />
@@ -579,7 +592,7 @@ export function RecurringWizard({
                     min={0}
                     step={0.01}
                     value={data.interestRate || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       update({ interestRate: parseFloat(e.target.value) || 0 })
                     }
                     placeholder="0,00"
@@ -594,7 +607,7 @@ export function RecurringWizard({
                     min={0}
                     step={0.01}
                     value={data.penaltyRate || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       update({ penaltyRate: parseFloat(e.target.value) || 0 })
                     }
                     placeholder="0,00"
@@ -658,24 +671,25 @@ export function RecurringWizard({
                         : '\u2014'}
                 </span>
               </div>
-              {!data.skipRates && (data.interestRate > 0 || data.penaltyRate > 0) && (
-                <>
-                  {data.interestRate > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Juros</span>
-                      <span className="font-medium">
-                        {data.interestRate}% ao mês
-                      </span>
-                    </div>
-                  )}
-                  {data.penaltyRate > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Multa</span>
-                      <span className="font-medium">{data.penaltyRate}%</span>
-                    </div>
-                  )}
-                </>
-              )}
+              {!data.skipRates &&
+                (data.interestRate > 0 || data.penaltyRate > 0) && (
+                  <>
+                    {data.interestRate > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Juros</span>
+                        <span className="font-medium">
+                          {data.interestRate}% ao mês
+                        </span>
+                      </div>
+                    )}
+                    {data.penaltyRate > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Multa</span>
+                        <span className="font-medium">{data.penaltyRate}%</span>
+                      </div>
+                    )}
+                  </>
+                )}
             </Card>
           </div>
         )}
@@ -697,10 +711,7 @@ export function RecurringWizard({
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button
-              onClick={handleConfirm}
-              disabled={createMutation.isPending}
-            >
+            <Button onClick={handleConfirm} disabled={createMutation.isPending}>
               {createMutation.isPending && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}

@@ -83,8 +83,8 @@ export const AuditEventCard: React.FC<AuditEventCardProps> = ({
                     key={i}
                     className={cn(
                       'inline-flex items-center rounded-md px-1.5 py-px text-[12px] font-semibold',
-                      seg.chipStyle ? '' : (seg.chipBg || style.bg),
-                      seg.chipStyle ? '' : (seg.chipText || style.text)
+                      seg.chipStyle ? '' : seg.chipBg || style.bg,
+                      seg.chipStyle ? '' : seg.chipText || style.text
                     )}
                     style={seg.chipStyle}
                   >

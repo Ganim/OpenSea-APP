@@ -22,42 +22,54 @@ interface SecurityKeyDialogProps {
   onSuccess: () => void;
 }
 
-export function SecurityKeyDialog({ open, onOpenChange, onSuccess }: SecurityKeyDialogProps) {
+export function SecurityKeyDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: SecurityKeyDialogProps) {
   const [key, setKey] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!key.trim()) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!key.trim()) return;
 
-    setIsVerifying(true);
-    setError('');
-
-    try {
-      const { valid } = await storageSecurityService.verifySecurityKey(key.trim());
-      if (valid) {
-        toast.success('Itens ocultos revelados');
-        onSuccess();
-        onOpenChange(false);
-        setKey('');
-      } else {
-        setError('Chave de segurança inválida');
-      }
-    } catch {
-      setError('Erro ao verificar chave de segurança');
-    } finally {
-      setIsVerifying(false);
-    }
-  }, [key, onSuccess, onOpenChange]);
-
-  const handleOpenChange = useCallback((open: boolean) => {
-    if (!open) {
-      setKey('');
+      setIsVerifying(true);
       setError('');
-    }
-    onOpenChange(open);
-  }, [onOpenChange]);
+
+      try {
+        const { valid } = await storageSecurityService.verifySecurityKey(
+          key.trim()
+        );
+        if (valid) {
+          toast.success('Itens ocultos revelados');
+          onSuccess();
+          onOpenChange(false);
+          setKey('');
+        } else {
+          setError('Chave de segurança inválida');
+        }
+      } catch {
+        setError('Erro ao verificar chave de segurança');
+      } finally {
+        setIsVerifying(false);
+      }
+    },
+    [key, onSuccess, onOpenChange]
+  );
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        setKey('');
+        setError('');
+      }
+      onOpenChange(open);
+    },
+    [onOpenChange]
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -81,17 +93,23 @@ export function SecurityKeyDialog({ open, onOpenChange, onSuccess }: SecurityKey
                 autoComplete="off"
                 placeholder="Digite a chave de segurança..."
                 value={key}
-                onChange={e => { setKey(e.target.value); setError(''); }}
+                onChange={e => {
+                  setKey(e.target.value);
+                  setError('');
+                }}
                 disabled={isVerifying}
                 autoFocus
               />
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isVerifying}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={isVerifying}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={!key.trim() || isVerifying}>

@@ -16,7 +16,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { companyStakeholdersApi } from '../api';
 
-const StakeholderModal = dynamic(() => import('../modals/stakeholder-modal').then(m => ({ default: m.StakeholderModal })), { ssr: false });
+const StakeholderModal = dynamic(
+  () =>
+    import('../modals/stakeholder-modal').then(m => ({
+      default: m.StakeholderModal,
+    })),
+  { ssr: false }
+);
 
 interface StakeholdersEditTabProps {
   companyId: string;

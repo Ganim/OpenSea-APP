@@ -84,11 +84,7 @@ export function ColumnWipLimitPopover({
             autoFocus
           />
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="flex-1 h-7"
-              onClick={handleSaveWip}
-            >
+            <Button size="sm" className="flex-1 h-7" onClick={handleSaveWip}>
               Salvar
             </Button>
             {wipLimit && (

@@ -31,8 +31,18 @@ import {
   ParticipantRoleLabels,
   ParticipantStatusLabels,
 } from '@/types/common/enums';
-import type { CalendarEvent, Calendar as CalendarType, ParticipantStatus, SystemSourceType } from '@/types/calendar';
-import { EVENT_TYPE_COLORS, REMINDER_PRESETS, SYSTEM_SOURCE_ROUTES, SYSTEM_SOURCE_LABELS } from '@/types/calendar';
+import type {
+  CalendarEvent,
+  Calendar as CalendarType,
+  ParticipantStatus,
+  SystemSourceType,
+} from '@/types/calendar';
+import {
+  EVENT_TYPE_COLORS,
+  REMINDER_PRESETS,
+  SYSTEM_SOURCE_ROUTES,
+  SYSTEM_SOURCE_LABELS,
+} from '@/types/calendar';
 import {
   MapPin,
   Users,
@@ -74,7 +84,7 @@ interface EventDetailSheetProps {
 function getInitials(name: string): string {
   return name
     .split(' ')
-    .map((n) => n[0])
+    .map(n => n[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
@@ -112,7 +122,9 @@ export function EventDetailSheet({
 }: EventDetailSheetProps) {
   const [showPinModal, setShowPinModal] = useState(false);
   const [showRemovePinModal, setShowRemovePinModal] = useState(false);
-  const [participantToRemove, setParticipantToRemove] = useState<string | null>(null);
+  const [participantToRemove, setParticipantToRemove] = useState<string | null>(
+    null
+  );
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showAllParticipants, setShowAllParticipants] = useState(false);
   const deleteEvent = useDeleteCalendarEvent();
@@ -125,7 +137,7 @@ export function EventDetailSheet({
 
   const isSystem = !!event.systemSourceType;
   const eventCalendar = event.calendarId
-    ? calendars.find((c) => c.id === event.calendarId)
+    ? calendars.find(c => c.id === event.calendarId)
     : null;
   const startDate = new Date(event.startDate);
   const endDate = new Date(event.endDate);
@@ -135,16 +147,16 @@ export function EventDetailSheet({
   const reminders = event.reminders ?? [];
 
   const myParticipation = currentUserId
-    ? participants.find((p) => p.userId === currentUserId)
+    ? participants.find(p => p.userId === currentUserId)
     : null;
-  const isOwner = myParticipation?.role === 'OWNER' || event.createdBy === currentUserId;
+  const isOwner =
+    myParticipation?.role === 'OWNER' || event.createdBy === currentUserId;
 
   const myReminders = currentUserId
-    ? reminders.filter((r) => r.userId === currentUserId)
+    ? reminders.filter(r => r.userId === currentUserId)
     : [];
 
-  const isSameDay =
-    startDate.toDateString() === endDate.toDateString();
+  const isSameDay = startDate.toDateString() === endDate.toDateString();
 
   const formatDate = (date: Date) => {
     if (event.isAllDay) {
@@ -178,7 +190,8 @@ export function EventDetailSheet({
       toast.success('Evento excluído com sucesso');
       onOpenChange(false);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao excluir evento';
+      const msg =
+        error instanceof Error ? error.message : 'Erro ao excluir evento';
       toast.error(msg);
     }
   }
@@ -190,10 +203,15 @@ export function EventDetailSheet({
         userId: currentUserId,
         data: { status },
       });
-      const labels = { ACCEPTED: 'aceito', DECLINED: 'recusado', TENTATIVE: 'respondido com talvez' };
+      const labels = {
+        ACCEPTED: 'aceito',
+        DECLINED: 'recusado',
+        TENTATIVE: 'respondido com talvez',
+      };
       toast.success(`Convite ${labels[status]}`);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao responder convite';
+      const msg =
+        error instanceof Error ? error.message : 'Erro ao responder convite';
       toast.error(msg);
     }
   }
@@ -208,7 +226,8 @@ export function EventDetailSheet({
       toast.success('Participante removido');
       setParticipantToRemove(null);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao remover participante';
+      const msg =
+        error instanceof Error ? error.message : 'Erro ao remover participante';
       toast.error(msg);
     }
   }
@@ -227,17 +246,19 @@ export function EventDetailSheet({
       toast.success(
         minutesBefore === 0
           ? 'Lembrete removido'
-          : `Lembrete configurado para ${value} minutos antes`,
+          : `Lembrete configurado para ${value} minutos antes`
       );
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Erro ao configurar lembrete';
+      const msg =
+        error instanceof Error ? error.message : 'Erro ao configurar lembrete';
       toast.error(msg);
     }
   }
 
   function handleViewSource() {
     if (!event?.systemSourceType || !event.systemSourceId) return;
-    const routeFn = SYSTEM_SOURCE_ROUTES[event.systemSourceType as SystemSourceType];
+    const routeFn =
+      SYSTEM_SOURCE_ROUTES[event.systemSourceType as SystemSourceType];
     if (routeFn) {
       router.push(routeFn(event.systemSourceId));
     }
@@ -259,7 +280,9 @@ export function EventDetailSheet({
           {/* Colored header banner */}
           <div
             className="relative px-6 pt-8 pb-5"
-            style={{ background: `linear-gradient(160deg, ${eventColor}30, ${eventColor}08 70%)` }}
+            style={{
+              background: `linear-gradient(160deg, ${eventColor}30, ${eventColor}08 70%)`,
+            }}
           >
             <div
               className="absolute top-0 left-0 w-full h-2"
@@ -275,13 +298,19 @@ export function EventDetailSheet({
                   {EventVisibilityLabels[event.visibility] ?? event.visibility}
                 </Badge>
                 {event.isRecurring && (
-                  <Badge variant="secondary" className="text-[0.65rem] gap-1 h-6">
+                  <Badge
+                    variant="secondary"
+                    className="text-[0.65rem] gap-1 h-6"
+                  >
                     <Repeat className="w-3 h-3" />
                     Recorrente
                   </Badge>
                 )}
                 {isSystem && (
-                  <Badge variant="outline" className="text-[0.65rem] h-6 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-500/40">
+                  <Badge
+                    variant="outline"
+                    className="text-[0.65rem] h-6 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-500/40"
+                  >
                     Sistema
                   </Badge>
                 )}
@@ -329,16 +358,23 @@ export function EventDetailSheet({
                 className="p-2 rounded-lg shrink-0"
                 style={{ backgroundColor: `${eventColor}15` }}
               >
-                <CalendarDays className="w-4 h-4" style={{ color: eventColor }} />
+                <CalendarDays
+                  className="w-4 h-4"
+                  style={{ color: eventColor }}
+                />
               </div>
               <div className="text-sm space-y-0.5">
                 {event.isAllDay ? (
                   <>
                     <div className="font-medium">{formatDate(startDate)}</div>
                     {!isSameDay && (
-                      <div className="text-muted-foreground">até {formatDate(endDate)}</div>
+                      <div className="text-muted-foreground">
+                        até {formatDate(endDate)}
+                      </div>
                     )}
-                    <div className="text-xs text-muted-foreground">Dia inteiro</div>
+                    <div className="text-xs text-muted-foreground">
+                      Dia inteiro
+                    </div>
                   </>
                 ) : isSameDay ? (
                   <>
@@ -357,7 +393,9 @@ export function EventDetailSheet({
                 ) : (
                   <>
                     <div className="font-medium">{formatDate(startDate)}</div>
-                    <div className="text-muted-foreground">até {formatDate(endDate)}</div>
+                    <div className="text-muted-foreground">
+                      até {formatDate(endDate)}
+                    </div>
                   </>
                 )}
               </div>
@@ -387,13 +425,25 @@ export function EventDetailSheet({
                         timeZone: event.timezone!,
                         timeZoneName: 'shortOffset',
                       });
-                      const offsetPart = fmt.formatToParts(new Date()).find((p) => p.type === 'timeZoneName');
+                      const offsetPart = fmt
+                        .formatToParts(new Date())
+                        .find(p => p.type === 'timeZoneName');
                       if (offsetPart) {
                         const raw = offsetPart.value.replace('GMT', '');
-                        const offset = !raw ? 'UTC' : raw.includes(':') ? raw : `${raw}:00`;
-                        return <span className="ml-1.5 text-xs opacity-60">({offset})</span>;
+                        const offset = !raw
+                          ? 'UTC'
+                          : raw.includes(':')
+                            ? raw
+                            : `${raw}:00`;
+                        return (
+                          <span className="ml-1.5 text-xs opacity-60">
+                            ({offset})
+                          </span>
+                        );
                       }
-                    } catch { /* ignore */ }
+                    } catch {
+                      /* ignore */
+                    }
                     return null;
                   })()}
                 </div>
@@ -429,7 +479,11 @@ export function EventDetailSheet({
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant={myParticipation.status === 'ACCEPTED' ? 'default' : 'outline'}
+                      variant={
+                        myParticipation.status === 'ACCEPTED'
+                          ? 'default'
+                          : 'outline'
+                      }
                       className="h-9 text-xs flex-1"
                       onClick={() => handleRsvp('ACCEPTED')}
                       disabled={respondToEvent.isPending}
@@ -439,7 +493,11 @@ export function EventDetailSheet({
                     </Button>
                     <Button
                       size="sm"
-                      variant={myParticipation.status === 'DECLINED' ? 'destructive' : 'outline'}
+                      variant={
+                        myParticipation.status === 'DECLINED'
+                          ? 'destructive'
+                          : 'outline'
+                      }
                       className="h-9 text-xs flex-1"
                       onClick={() => handleRsvp('DECLINED')}
                       disabled={respondToEvent.isPending}
@@ -449,7 +507,11 @@ export function EventDetailSheet({
                     </Button>
                     <Button
                       size="sm"
-                      variant={myParticipation.status === 'TENTATIVE' ? 'secondary' : 'outline'}
+                      variant={
+                        myParticipation.status === 'TENTATIVE'
+                          ? 'secondary'
+                          : 'outline'
+                      }
                       className="h-9 text-xs flex-1"
                       onClick={() => handleRsvp('TENTATIVE')}
                       disabled={respondToEvent.isPending}
@@ -462,7 +524,9 @@ export function EventDetailSheet({
                     <div className="text-xs text-muted-foreground mt-2">
                       Status atual:{' '}
                       <span className="font-medium">
-                        {ParticipantStatusLabels[myParticipation.status as ParticipantStatus] ?? myParticipation.status}
+                        {ParticipantStatusLabels[
+                          myParticipation.status as ParticipantStatus
+                        ] ?? myParticipation.status}
                       </span>
                     </div>
                   )}
@@ -487,14 +551,21 @@ export function EventDetailSheet({
                   >
                     <SelectTrigger
                       className="w-full h-9 text-sm transition-colors"
-                      style={currentReminderValue !== '0' ? { borderColor: eventColor } : undefined}
+                      style={
+                        currentReminderValue !== '0'
+                          ? { borderColor: eventColor }
+                          : undefined
+                      }
                     >
                       <SelectValue placeholder="Selecionar lembrete" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">Sem lembrete</SelectItem>
-                      {REMINDER_PRESETS.map((preset) => (
-                        <SelectItem key={preset.value} value={String(preset.value)}>
+                      {REMINDER_PRESETS.map(preset => (
+                        <SelectItem
+                          key={preset.value}
+                          value={String(preset.value)}
+                        >
                           {preset.label}
                         </SelectItem>
                       ))}
@@ -533,9 +604,12 @@ export function EventDetailSheet({
                   {!showAllParticipants && participants.length > 0 && (
                     <div className="flex items-center mb-2">
                       <div className="flex -space-x-2">
-                        {participants.slice(0, 8).map((p) => {
-                          const displayName = p.userName ?? p.userEmail ?? p.userId;
-                          const statusRing = STATUS_RING_COLORS[p.status] ?? STATUS_RING_COLORS.PENDING;
+                        {participants.slice(0, 8).map(p => {
+                          const displayName =
+                            p.userName ?? p.userEmail ?? p.userId;
+                          const statusRing =
+                            STATUS_RING_COLORS[p.status] ??
+                            STATUS_RING_COLORS.PENDING;
                           const avatarSrc = resolveAvatarUrl(p.userAvatarUrl);
                           return avatarSrc ? (
                             <img
@@ -578,9 +652,12 @@ export function EventDetailSheet({
                   {/* Expanded participant list */}
                   {showAllParticipants && (
                     <div className="space-y-1.5">
-                      {participants.map((p) => {
-                        const displayName = p.userName ?? p.userEmail ?? p.userId;
-                        const statusRing = STATUS_RING_COLORS[p.status] ?? STATUS_RING_COLORS.PENDING;
+                      {participants.map(p => {
+                        const displayName =
+                          p.userName ?? p.userEmail ?? p.userId;
+                        const statusRing =
+                          STATUS_RING_COLORS[p.status] ??
+                          STATUS_RING_COLORS.PENDING;
                         const avatarSrc = resolveAvatarUrl(p.userAvatarUrl);
                         return (
                           <div
@@ -602,24 +679,29 @@ export function EventDetailSheet({
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm truncate font-medium">{displayName}</div>
+                              <div className="text-sm truncate font-medium">
+                                {displayName}
+                              </div>
                               <div className="text-[0.65rem] text-muted-foreground">
-                                {ParticipantRoleLabels[p.role] ?? p.role} · {ParticipantStatusLabels[p.status] ?? p.status}
+                                {ParticipantRoleLabels[p.role] ?? p.role} ·{' '}
+                                {ParticipantStatusLabels[p.status] ?? p.status}
                               </div>
                             </div>
-                            {canManageParticipants && isOwner && p.role !== 'OWNER' && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
-                                onClick={() => {
-                                  setParticipantToRemove(p.userId);
-                                  setShowRemovePinModal(true);
-                                }}
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
-                            )}
+                            {canManageParticipants &&
+                              isOwner &&
+                              p.role !== 'OWNER' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                                  onClick={() => {
+                                    setParticipantToRemove(p.userId);
+                                    setShowRemovePinModal(true);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              )}
                           </div>
                         );
                       })}
@@ -646,7 +728,9 @@ export function EventDetailSheet({
                     <Link2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-0.5">Origem do sistema</div>
+                    <div className="text-xs text-muted-foreground mb-0.5">
+                      Origem do sistema
+                    </div>
                     <Button
                       variant="link"
                       size="sm"
@@ -654,8 +738,9 @@ export function EventDetailSheet({
                       onClick={handleViewSource}
                     >
                       <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                      {SYSTEM_SOURCE_LABELS[event.systemSourceType as SystemSourceType] ??
-                        event.systemSourceType}
+                      {SYSTEM_SOURCE_LABELS[
+                        event.systemSourceType as SystemSourceType
+                      ] ?? event.systemSourceType}
                     </Button>
                   </div>
                 </div>
@@ -665,10 +750,12 @@ export function EventDetailSheet({
             {/* Creator footer */}
             {event.creatorName && (
               <div className="text-xs text-muted-foreground pt-3 border-t border-border/50">
-                Criado por <span className="font-medium text-foreground/70">{event.creatorName}</span>
+                Criado por{' '}
+                <span className="font-medium text-foreground/70">
+                  {event.creatorName}
+                </span>
               </div>
             )}
-
           </div>
 
           {/* Delete button at bottom, full-width */}

@@ -89,23 +89,34 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 function getStatusVariant(
-  status: ConsortiumStatus,
+  status: ConsortiumStatus
 ): 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'outline' {
   switch (status) {
-    case 'ACTIVE': return 'success';
-    case 'CONTEMPLATED': return 'default';
-    case 'WITHDRAWN': return 'warning';
-    case 'COMPLETED': return 'secondary';
-    case 'CANCELLED': return 'destructive';
-    default: return 'secondary';
+    case 'ACTIVE':
+      return 'success';
+    case 'CONTEMPLATED':
+      return 'default';
+    case 'WITHDRAWN':
+      return 'warning';
+    case 'COMPLETED':
+      return 'secondary';
+    case 'CANCELLED':
+      return 'destructive';
+    default:
+      return 'secondary';
   }
 }
 
-function getPaymentStatusVariant(status: string): 'success' | 'destructive' | 'secondary' {
+function getPaymentStatusVariant(
+  status: string
+): 'success' | 'destructive' | 'secondary' {
   switch (status) {
-    case 'PAID': return 'success';
-    case 'OVERDUE': return 'destructive';
-    default: return 'secondary';
+    case 'PAID':
+      return 'success';
+    case 'OVERDUE':
+      return 'destructive';
+    default:
+      return 'secondary';
   }
 }
 
@@ -115,7 +126,9 @@ function getPaymentRowClassName(payment: ConsortiumPayment): string {
 
   const now = new Date();
   const dueDate = new Date(payment.dueDate);
-  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil(
+    (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
   if (diffDays >= 0 && diffDays <= 7 && payment.status === 'PENDING') {
     return 'bg-amber-50 dark:bg-amber-950/20';
   }
@@ -130,7 +143,9 @@ function getPaymentRowClassName(payment: ConsortiumPayment): string {
 function DetailSkeleton() {
   return (
     <PageLayout>
-      <PageHeader><div className="h-10" /></PageHeader>
+      <PageHeader>
+        <div className="h-10" />
+      </PageHeader>
       <PageBody>
         <Card className="p-6">
           <div className="flex gap-6 items-center">
@@ -149,7 +164,9 @@ function DetailSkeleton() {
             </Card>
           ))}
         </div>
-        <Card className="p-6"><Skeleton className="h-48 w-full" /></Card>
+        <Card className="p-6">
+          <Skeleton className="h-48 w-full" />
+        </Card>
       </PageBody>
     </PageLayout>
   );
@@ -194,7 +211,7 @@ function PaymentModal({
   if (!payment) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Registrar Pagamento</DialogTitle>
@@ -212,7 +229,7 @@ function PaymentModal({
               step="0.01"
               placeholder={payment.expectedAmount.toFixed(2)}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
             />
           </div>
           <div>
@@ -221,12 +238,14 @@ function PaymentModal({
               id="pay-date"
               type="date"
               value={paidAt}
-              onChange={(e) => setPaidAt(e.target.value)}
+              onChange={e => setPaidAt(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
           <Button onClick={handlePay} disabled={payMutation.isPending}>
             {payMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
           </Button>
@@ -250,9 +269,11 @@ function ContemplationModal({
   onClose: () => void;
 }) {
   const markMutation = useMarkContemplated();
-  const [contemplationType, setContemplationType] = useState<'BID' | 'DRAW'>('DRAW');
+  const [contemplationType, setContemplationType] = useState<'BID' | 'DRAW'>(
+    'DRAW'
+  );
   const [contemplatedAt, setContemplatedAt] = useState(
-    new Date().toISOString().split('T')[0],
+    new Date().toISOString().split('T')[0]
   );
 
   const handleMark = async () => {
@@ -272,7 +293,7 @@ function ContemplationModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Marcar como Contemplado</DialogTitle>
@@ -285,7 +306,7 @@ function ContemplationModal({
             <Label htmlFor="contemp-type">Tipo de Contemplação</Label>
             <Select
               value={contemplationType}
-              onValueChange={(v) => setContemplationType(v as 'BID' | 'DRAW')}
+              onValueChange={v => setContemplationType(v as 'BID' | 'DRAW')}
             >
               <SelectTrigger id="contemp-type">
                 <SelectValue />
@@ -302,14 +323,18 @@ function ContemplationModal({
               id="contemp-date"
               type="date"
               value={contemplatedAt}
-              onChange={(e) => setContemplatedAt(e.target.value)}
+              onChange={e => setContemplatedAt(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
           <Button onClick={handleMark} disabled={markMutation.isPending}>
-            {markMutation.isPending ? 'Processando...' : 'Confirmar Contemplação'}
+            {markMutation.isPending
+              ? 'Processando...'
+              : 'Confirmar Contemplação'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -323,10 +348,12 @@ function ContemplationModal({
 
 function DueSoonAlert({ payments }: { payments: ConsortiumPayment[] }) {
   const now = new Date();
-  const dueSoon = payments.filter((p) => {
+  const dueSoon = payments.filter(p => {
     if (p.status !== 'PENDING') return false;
     const dueDate = new Date(p.dueDate);
-    const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
     return diffDays >= 0 && diffDays <= 7;
   });
 
@@ -342,10 +369,13 @@ function DueSoonAlert({ payments }: { payments: ConsortiumPayment[] }) {
           </h3>
         </div>
         <div className="space-y-1">
-          {dueSoon.map((p) => (
-            <p key={p.id} className="text-sm text-amber-700 dark:text-amber-300">
-              Parcela {p.installmentNumber} - {formatCurrency(p.expectedAmount)} -
-              vence em {formatDate(p.dueDate)}
+          {dueSoon.map(p => (
+            <p
+              key={p.id}
+              className="text-sm text-amber-700 dark:text-amber-300"
+            >
+              Parcela {p.installmentNumber} - {formatCurrency(p.expectedAmount)}{' '}
+              - vence em {formatDate(p.dueDate)}
             </p>
           ))}
         </div>
@@ -372,7 +402,9 @@ export default function ConsortiumDetailPage({
   const canDelete = hasPermission('finance.consortia.delete');
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [paymentTarget, setPaymentTarget] = useState<ConsortiumPayment | null>(null);
+  const [paymentTarget, setPaymentTarget] = useState<ConsortiumPayment | null>(
+    null
+  );
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [contemplationModalOpen, setContemplationModalOpen] = useState(false);
 
@@ -380,7 +412,9 @@ export default function ConsortiumDetailPage({
 
   const progressPercentage = consortium
     ? consortium.totalInstallments > 0
-      ? Math.round((consortium.paidInstallments / consortium.totalInstallments) * 100)
+      ? Math.round(
+          (consortium.paidInstallments / consortium.totalInstallments) * 100
+        )
       : 0
     : 0;
 
@@ -415,7 +449,9 @@ export default function ConsortiumDetailPage({
         </PageHeader>
         <PageBody>
           <Card className="p-12 text-center">
-            <p className="text-destructive text-lg">Consórcio não encontrado.</p>
+            <p className="text-destructive text-lg">
+              Consórcio não encontrado.
+            </p>
             <Link href="/finance/consortia">
               <Button variant="outline" className="mt-4">
                 Voltar para consórcios
@@ -485,7 +521,8 @@ export default function ConsortiumDetailPage({
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 Administradora: {consortium.administrator}
-                {consortium.groupNumber && ` | Grupo: ${consortium.groupNumber}`}
+                {consortium.groupNumber &&
+                  ` | Grupo: ${consortium.groupNumber}`}
                 {consortium.quotaNumber && ` | Cota: ${consortium.quotaNumber}`}
               </p>
             </div>
@@ -495,7 +532,8 @@ export default function ConsortiumDetailPage({
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-1">
               <span className="text-muted-foreground">
-                {consortium.paidInstallments} de {consortium.totalInstallments} parcelas pagas
+                {consortium.paidInstallments} de {consortium.totalInstallments}{' '}
+                parcelas pagas
               </span>
               <span className="font-medium">{progressPercentage}%</span>
             </div>
@@ -523,7 +561,9 @@ export default function ConsortiumDetailPage({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Data</p>
-                <p className="font-medium">{formatDate(consortium.contemplatedAt)}</p>
+                <p className="font-medium">
+                  {formatDate(consortium.contemplatedAt)}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tipo</p>
@@ -532,7 +572,9 @@ export default function ConsortiumDetailPage({
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Valor do Crédito</p>
+                <p className="text-sm text-muted-foreground">
+                  Valor do Crédito
+                </p>
                 <p className="font-medium font-mono">
                   {formatCurrency(consortium.creditValue)}
                 </p>
@@ -585,7 +627,7 @@ export default function ConsortiumDetailPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {consortium.payments.map((payment) => (
+                  {consortium.payments.map(payment => (
                     <TableRow
                       key={payment.id}
                       className={getPaymentRowClassName(payment)}
@@ -603,15 +645,22 @@ export default function ConsortiumDetailPage({
                         {payment.paidAt ? formatDate(payment.paidAt) : '-'}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant={getPaymentStatusVariant(payment.status)}>
-                          {FINANCE_ENTRY_STATUS_LABELS[payment.status] ?? payment.status}
+                        <Badge
+                          variant={getPaymentStatusVariant(payment.status)}
+                        >
+                          {FINANCE_ENTRY_STATUS_LABELS[payment.status] ??
+                            payment.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {payment.status !== 'PAID' && (
                           <Button
                             size="sm"
-                            variant={payment.status === 'OVERDUE' ? 'destructive' : 'outline'}
+                            variant={
+                              payment.status === 'OVERDUE'
+                                ? 'destructive'
+                                : 'outline'
+                            }
                             onClick={() => handlePayPayment(payment)}
                           >
                             Registrar Pagamento
@@ -633,7 +682,9 @@ export default function ConsortiumDetailPage({
             {consortium.contractNumber && (
               <div>
                 <p className="text-sm text-muted-foreground">Contrato</p>
-                <p className="font-medium font-mono">{consortium.contractNumber}</p>
+                <p className="font-medium font-mono">
+                  {consortium.contractNumber}
+                </p>
               </div>
             )}
             <div>
@@ -642,7 +693,9 @@ export default function ConsortiumDetailPage({
             </div>
             {consortium.paymentDay && (
               <div>
-                <p className="text-sm text-muted-foreground">Dia de Vencimento</p>
+                <p className="text-sm text-muted-foreground">
+                  Dia de Vencimento
+                </p>
                 <p className="font-medium">Dia {consortium.paymentDay}</p>
               </div>
             )}

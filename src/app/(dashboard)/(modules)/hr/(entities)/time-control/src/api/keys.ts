@@ -13,7 +13,13 @@ export const timeEntryKeys = {
   list: (filters?: TimeEntryFilters) =>
     [...timeEntryKeys.lists(), filters ?? {}] as const,
   workedHours: (employeeId: string, startDate: string, endDate: string) =>
-    [...timeEntryKeys.all, 'worked-hours', employeeId, startDate, endDate] as const,
+    [
+      ...timeEntryKeys.all,
+      'worked-hours',
+      employeeId,
+      startDate,
+      endDate,
+    ] as const,
 };
 
 export type TimeEntryQueryKey =

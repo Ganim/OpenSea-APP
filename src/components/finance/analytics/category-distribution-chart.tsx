@@ -97,7 +97,7 @@ export function CategoryDistributionChart({
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  formatter={(value) => formatCurrency(value as number)}
+                  formatter={value => formatCurrency(value as number)}
                   nameKey="name"
                 />
               }

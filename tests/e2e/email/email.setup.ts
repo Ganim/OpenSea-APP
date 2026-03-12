@@ -262,6 +262,7 @@ export const test = base.extend<EmailFixtures>({
   userToken: ['', { option: true }],
   userTenantId: ['', { option: true }],
   emailPage: async ({ page }, use) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(new EmailPage(page));
   },
 });

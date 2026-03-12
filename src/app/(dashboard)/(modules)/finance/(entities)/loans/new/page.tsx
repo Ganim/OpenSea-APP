@@ -61,7 +61,7 @@ export default function NewLoanPage() {
   });
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +92,9 @@ export default function NewLoanPage() {
       toast.success('Empréstimo criado com sucesso.');
       router.push('/finance/loans');
     } catch {
-      toast.error('Erro ao criar empréstimo. Verifique os dados e tente novamente.');
+      toast.error(
+        'Erro ao criar empréstimo. Verifique os dados e tente novamente.'
+      );
     }
   };
 
@@ -126,7 +128,9 @@ export default function NewLoanPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Dados Básicos */}
             <div>
-              <h3 className="text-base font-semibold mb-4">Dados do Empréstimo</h3>
+              <h3 className="text-base font-semibold mb-4">
+                Dados do Empréstimo
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label htmlFor="name">Descrição *</Label>
@@ -135,7 +139,7 @@ export default function NewLoanPage() {
                     required
                     placeholder="Ex: Financiamento Imobiliário Banco do Brasil"
                     value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    onChange={e => handleChange('name', e.target.value)}
                   />
                 </div>
 
@@ -143,17 +147,19 @@ export default function NewLoanPage() {
                   <Label htmlFor="type">Tipo *</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(v) => handleChange('type', v)}
+                    onValueChange={v => handleChange('type', v)}
                   >
                     <SelectTrigger id="type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(LOAN_TYPE_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
+                      {Object.entries(LOAN_TYPE_LABELS).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -164,7 +170,9 @@ export default function NewLoanPage() {
                     id="contractNumber"
                     placeholder="Opcional"
                     value={formData.contractNumber}
-                    onChange={(e) => handleChange('contractNumber', e.target.value)}
+                    onChange={e =>
+                      handleChange('contractNumber', e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -172,10 +180,14 @@ export default function NewLoanPage() {
 
             {/* Dados Financeiros */}
             <div>
-              <h3 className="text-base font-semibold mb-4">Dados Financeiros</h3>
+              <h3 className="text-base font-semibold mb-4">
+                Dados Financeiros
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="principalAmount">Valor Principal (R$) *</Label>
+                  <Label htmlFor="principalAmount">
+                    Valor Principal (R$) *
+                  </Label>
                   <Input
                     id="principalAmount"
                     type="number"
@@ -183,7 +195,9 @@ export default function NewLoanPage() {
                     required
                     placeholder="0,00"
                     value={formData.principalAmount}
-                    onChange={(e) => handleChange('principalAmount', e.target.value)}
+                    onChange={e =>
+                      handleChange('principalAmount', e.target.value)
+                    }
                   />
                 </div>
 
@@ -196,7 +210,7 @@ export default function NewLoanPage() {
                     required
                     placeholder="Ex: 12.00"
                     value={formData.interestRate}
-                    onChange={(e) => handleChange('interestRate', e.target.value)}
+                    onChange={e => handleChange('interestRate', e.target.value)}
                   />
                 </div>
 
@@ -204,7 +218,7 @@ export default function NewLoanPage() {
                   <Label htmlFor="interestType">Sistema de Amortização *</Label>
                   <Select
                     value={formData.interestType}
-                    onValueChange={(v) => handleChange('interestType', v)}
+                    onValueChange={v => handleChange('interestType', v)}
                   >
                     <SelectTrigger id="interestType">
                       <SelectValue />
@@ -230,7 +244,9 @@ export default function NewLoanPage() {
                     min="1"
                     placeholder="Ex: 60"
                     value={formData.totalInstallments}
-                    onChange={(e) => handleChange('totalInstallments', e.target.value)}
+                    onChange={e =>
+                      handleChange('totalInstallments', e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -247,7 +263,7 @@ export default function NewLoanPage() {
                     type="date"
                     required
                     value={formData.startDate}
-                    onChange={(e) => handleChange('startDate', e.target.value)}
+                    onChange={e => handleChange('startDate', e.target.value)}
                   />
                 </div>
 
@@ -260,7 +276,9 @@ export default function NewLoanPage() {
                     max="31"
                     placeholder="Ex: 10"
                     value={formData.installmentDay}
-                    onChange={(e) => handleChange('installmentDay', e.target.value)}
+                    onChange={e =>
+                      handleChange('installmentDay', e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -274,14 +292,14 @@ export default function NewLoanPage() {
                   <Label htmlFor="bankAccountId">Conta Bancária *</Label>
                   <Select
                     value={formData.bankAccountId}
-                    onValueChange={(v) => handleChange('bankAccountId', v)}
+                    onValueChange={v => handleChange('bankAccountId', v)}
                     required
                   >
                     <SelectTrigger id="bankAccountId">
                       <SelectValue placeholder="Selecione uma conta" />
                     </SelectTrigger>
                     <SelectContent>
-                      {bankAccounts.map((ba) => (
+                      {bankAccounts.map(ba => (
                         <SelectItem key={ba.id} value={ba.id}>
                           {ba.name}
                         </SelectItem>
@@ -294,14 +312,14 @@ export default function NewLoanPage() {
                   <Label htmlFor="costCenterId">Centro de Custo *</Label>
                   <Select
                     value={formData.costCenterId}
-                    onValueChange={(v) => handleChange('costCenterId', v)}
+                    onValueChange={v => handleChange('costCenterId', v)}
                     required
                   >
                     <SelectTrigger id="costCenterId">
                       <SelectValue placeholder="Selecione um centro de custo" />
                     </SelectTrigger>
                     <SelectContent>
-                      {costCenters.map((cc) => (
+                      {costCenters.map(cc => (
                         <SelectItem key={cc.id} value={cc.id}>
                           {cc.name}
                         </SelectItem>
@@ -318,7 +336,7 @@ export default function NewLoanPage() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => handleChange('notes', e.target.value)}
+                onChange={e => handleChange('notes', e.target.value)}
                 rows={3}
                 placeholder="Informações adicionais sobre o empréstimo..."
               />

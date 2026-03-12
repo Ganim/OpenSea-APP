@@ -42,8 +42,13 @@ export function useCreateRecurringConfig() {
 export function useUpdateRecurringConfig() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateRecurringConfigRequest }) =>
-      financeRecurringService.update(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateRecurringConfigRequest;
+    }) => financeRecurringService.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.RECURRING_CONFIGS });
       queryClient.invalidateQueries({

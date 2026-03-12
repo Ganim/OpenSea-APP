@@ -7,12 +7,7 @@ interface VideoPlayerProps {
   name: string;
 }
 
-const VIDEO_MIMES = [
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'video/quicktime',
-];
+const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
 
 export function isVideoPreviewable(mimeType: string): boolean {
   return VIDEO_MIMES.includes(mimeType);

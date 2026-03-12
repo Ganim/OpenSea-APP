@@ -55,7 +55,9 @@ export default function RecurringPage() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<FinanceEntryType | 'ALL'>('ALL');
-  const [statusFilter, setStatusFilter] = useState<RecurringStatus | 'ALL'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<RecurringStatus | 'ALL'>(
+    'ALL'
+  );
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -233,7 +235,7 @@ export default function RecurringPage() {
                 </label>
                 <Select
                   value={typeFilter}
-                  onValueChange={(v) => {
+                  onValueChange={v => {
                     setTypeFilter(v as FinanceEntryType | 'ALL');
                     setPage(1);
                   }}
@@ -243,7 +245,7 @@ export default function RecurringPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">Todos</SelectItem>
-                    {TYPE_OPTIONS.map((opt) => (
+                    {TYPE_OPTIONS.map(opt => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
@@ -261,7 +263,7 @@ export default function RecurringPage() {
                 </label>
                 <Select
                   value={statusFilter}
-                  onValueChange={(v) => {
+                  onValueChange={v => {
                     setStatusFilter(v as RecurringStatus | 'ALL');
                     setPage(1);
                   }}
@@ -271,7 +273,7 @@ export default function RecurringPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">Todos</SelectItem>
-                    {STATUS_OPTIONS.map((opt) => (
+                    {STATUS_OPTIONS.map(opt => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>

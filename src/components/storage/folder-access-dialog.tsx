@@ -522,9 +522,7 @@ function ShareWithTeamsSection({
 
   return (
     <div className="space-y-4">
-      <h4 className="text-sm font-medium">
-        Compartilhar com times
-      </h4>
+      <h4 className="text-sm font-medium">Compartilhar com times</h4>
 
       {/* Search */}
       <div className="relative px-1">

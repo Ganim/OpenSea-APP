@@ -51,7 +51,13 @@ export function ProfileTab({ user }: ProfileTabProps) {
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
 
   const uploadAvatarMutation = useMutation({
-    mutationFn: async ({ file, crop }: { file: File; crop: { x: number; y: number; width: number; height: number } }) => {
+    mutationFn: async ({
+      file,
+      crop,
+    }: {
+      file: File;
+      crop: { x: number; y: number; width: number; height: number };
+    }) => {
       return meService.uploadAvatar(file, crop);
     },
     onSuccess: () => {
@@ -65,9 +71,15 @@ export function ProfileTab({ user }: ProfileTabProps) {
     },
   });
 
-  const handleAvatarUpload = useCallback(async (file: File, crop: { x: number; y: number; width: number; height: number }) => {
-    await uploadAvatarMutation.mutateAsync({ file, crop });
-  }, [uploadAvatarMutation]);
+  const handleAvatarUpload = useCallback(
+    async (
+      file: File,
+      crop: { x: number; y: number; width: number; height: number }
+    ) => {
+      await uploadAvatarMutation.mutateAsync({ file, crop });
+    },
+    [uploadAvatarMutation]
+  );
 
   const handleAvatarRemove = useCallback(async () => {
     await meService.deleteAvatar();

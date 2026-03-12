@@ -766,11 +766,17 @@ export default function ReceivablePage() {
               <Table aria-label="Tabela de contas a receber">
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="w-[120px] hidden md:table-cell">Código</TableHead>
+                    <TableHead className="w-[120px] hidden md:table-cell">
+                      Código
+                    </TableHead>
                     <TableHead>Descrição</TableHead>
-                    <TableHead className="hidden md:table-cell">Cliente</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Cliente
+                    </TableHead>
                     <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="hidden md:table-cell">Vencimento</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Vencimento
+                    </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[60px]" />
                   </TableRow>

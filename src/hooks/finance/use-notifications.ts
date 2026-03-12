@@ -77,7 +77,7 @@ export function useFinanceNotificationPreferences() {
 
   const updatePreferences = useCallback(
     (updates: Partial<NotificationPreferences>) => {
-      setPrefs((prev) => {
+      setPrefs(prev => {
         const next = { ...prev, ...updates };
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(next));

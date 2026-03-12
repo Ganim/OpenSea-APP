@@ -77,11 +77,11 @@ export function DeviationAlert({
           </h3>
         </div>
         <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
-          Foram identificadas diferenças entre os juros cobrados e os juros calculados
-          pela tabela de amortização contratual:
+          Foram identificadas diferenças entre os juros cobrados e os juros
+          calculados pela tabela de amortização contratual:
         </p>
         <div className="space-y-3">
-          {deviations.map((d) => (
+          {deviations.map(d => (
             <div
               key={d.installmentNumber}
               className="flex items-start gap-3 p-3 rounded-lg bg-amber-100/50 dark:bg-amber-900/20"
@@ -101,7 +101,8 @@ export function DeviationAlert({
           ))}
         </div>
         <p className="text-xs text-amber-600 dark:text-amber-400 mt-4">
-          Recomendamos verificar junto ao banco se houve alteração nas condições contratuais.
+          Recomendamos verificar junto ao banco se houve alteração nas condições
+          contratuais.
         </p>
       </div>
     </Card>
@@ -132,9 +133,10 @@ export function RenegotiationSuggestion({
           </h3>
         </div>
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          A taxa atual do mercado ({marketRate.toFixed(2)}% a.m.) é menor que sua taxa
-          contratada ({loanRate.toFixed(2)}% a.m.). Considere renegociar as condições
-          do empréstimo com a instituição financeira para reduzir o custo total.
+          A taxa atual do mercado ({marketRate.toFixed(2)}% a.m.) é menor que
+          sua taxa contratada ({loanRate.toFixed(2)}% a.m.). Considere
+          renegociar as condições do empréstimo com a instituição financeira
+          para reduzir o custo total.
         </p>
       </div>
     </Card>

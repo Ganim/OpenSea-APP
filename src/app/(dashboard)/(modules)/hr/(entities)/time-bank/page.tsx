@@ -23,7 +23,15 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { exportToCSV } from '@/lib/csv-export';
 import type { TimeBank } from '@/types/hr';
-import { Download, ExternalLink, Eye, Hourglass, Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import {
+  Download,
+  ExternalLink,
+  Eye,
+  Hourglass,
+  Minus,
+  Plus,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Suspense, useCallback, useMemo, useState } from 'react';
@@ -38,10 +46,25 @@ import {
   useAdjustTimeBank,
 } from './src';
 
-const CreditModal = dynamic(() => import('./src/modals/credit-modal').then(m => ({ default: m.CreditModal })), { ssr: false });
-const DebitModal = dynamic(() => import('./src/modals/debit-modal').then(m => ({ default: m.DebitModal })), { ssr: false });
-const AdjustModal = dynamic(() => import('./src/modals/adjust-modal').then(m => ({ default: m.AdjustModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
+const CreditModal = dynamic(
+  () =>
+    import('./src/modals/credit-modal').then(m => ({ default: m.CreditModal })),
+  { ssr: false }
+);
+const DebitModal = dynamic(
+  () =>
+    import('./src/modals/debit-modal').then(m => ({ default: m.DebitModal })),
+  { ssr: false }
+);
+const AdjustModal = dynamic(
+  () =>
+    import('./src/modals/adjust-modal').then(m => ({ default: m.AdjustModal })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
 export default function TimeBankPage() {
@@ -83,7 +106,10 @@ function TimeBankPageContent() {
 
   const timeBanks = data?.timeBanks ?? [];
 
-  const employeeIds = useMemo(() => timeBanks.map(tb => tb.employeeId), [timeBanks]);
+  const employeeIds = useMemo(
+    () => timeBanks.map(tb => tb.employeeId),
+    [timeBanks]
+  );
   const { getName } = useEmployeeMap(employeeIds);
 
   // ============================================================================
@@ -100,11 +126,7 @@ function TimeBankPageContent() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => timeBanks.map(i => i.id),
-    [timeBanks]
-  );
-
+  const initialIds = useMemo(() => timeBanks.map(i => i.id), [timeBanks]);
 
   // ============================================================================
   // HANDLERS
@@ -144,17 +166,28 @@ function TimeBankPageContent() {
     [timeBanks]
   );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? timeBanks.filter(tb => ids.includes(tb.id))
-      : timeBanks;
-    exportToCSV(items, [
-      { header: 'Funcionário', accessor: tb => getName(tb.employeeId) },
-      { header: 'Ano', accessor: tb => tb.year },
-      { header: 'Saldo (horas)', accessor: tb => tb.balance },
-      { header: 'Atualizado em', accessor: tb => new Date(tb.updatedAt).toLocaleDateString('pt-BR') },
-    ], 'banco-de-horas');
-  }, [timeBanks, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0
+          ? timeBanks.filter(tb => ids.includes(tb.id))
+          : timeBanks;
+      exportToCSV(
+        items,
+        [
+          { header: 'Funcionário', accessor: tb => getName(tb.employeeId) },
+          { header: 'Ano', accessor: tb => tb.year },
+          { header: 'Saldo (horas)', accessor: tb => tb.balance },
+          {
+            header: 'Atualizado em',
+            accessor: tb => new Date(tb.updatedAt).toLocaleDateString('pt-BR'),
+          },
+        ],
+        'banco-de-horas'
+      );
+    },
+    [timeBanks, getName]
+  );
 
   // ============================================================================
   // CONTEXT MENU
@@ -198,9 +231,7 @@ function TimeBankPageContent() {
         subtitle={formatBalance(item.balance)}
         icon={Hourglass}
         iconBgColor="bg-linear-to-br from-teal-500 to-teal-600"
-        badges={[
-          { label: formatYear(item.year), variant: 'outline' },
-        ]}
+        badges={[{ label: formatYear(item.year), variant: 'outline' }]}
         metadata={
           <div className="flex flex-col gap-1">
             <p
@@ -237,12 +268,12 @@ function TimeBankPageContent() {
         subtitle={formatBalance(item.balance)}
         icon={Hourglass}
         iconBgColor="bg-linear-to-br from-teal-500 to-teal-600"
-        badges={[
-          { label: formatYear(item.year), variant: 'outline' },
-        ]}
+        badges={[{ label: formatYear(item.year), variant: 'outline' }]}
         metadata={
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className={`font-bold font-mono ${getBalanceColor(item.balance)}`}>
+            <span
+              className={`font-bold font-mono ${getBalanceColor(item.balance)}`}
+            >
               {formatBalance(item.balance)}
             </span>
             <span>

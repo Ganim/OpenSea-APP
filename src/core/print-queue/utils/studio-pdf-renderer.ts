@@ -684,7 +684,11 @@ export async function renderStudioTemplateToPdf(
   previewData: Record<string, unknown>,
   offsetX: number,
   offsetY: number,
-  JsBarcode: (canvas: HTMLCanvasElement, data: string, options: Record<string, unknown>) => void,
+  JsBarcode: (
+    canvas: HTMLCanvasElement,
+    data: string,
+    options: Record<string, unknown>
+  ) => void,
   QRCode: typeof import('qrcode')
 ) {
   // Desenhar fundo do canvas se não for branco

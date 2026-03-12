@@ -20,10 +20,7 @@ import {
 } from '@/components/ui/select';
 import { companiesService } from '@/services/admin/companies.service';
 import type { CreateBankAccountData, PixKeyType } from '@/types/finance';
-import {
-  BANK_ACCOUNT_TYPE_LABELS,
-  PIX_KEY_TYPE_LABELS,
-} from '@/types/finance';
+import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
 import { useQuery } from '@tanstack/react-query';
 import { Landmark, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -106,7 +103,7 @@ export function CreateBankAccountModal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(open) => {
+      onOpenChange={open => {
         if (!open) handleClose();
       }}
     >
@@ -130,7 +127,7 @@ export function CreateBankAccountModal({
                 id="create-name"
                 placeholder="Ex: Conta Principal"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={e => setForm({ ...form, name: e.target.value })}
                 required
               />
             </div>
@@ -140,7 +137,7 @@ export function CreateBankAccountModal({
                 id="create-color"
                 type="color"
                 value={form.color}
-                onChange={(e) => setForm({ ...form, color: e.target.value })}
+                onChange={e => setForm({ ...form, color: e.target.value })}
                 className="h-9 p-1 cursor-pointer"
               />
             </div>
@@ -152,7 +149,7 @@ export function CreateBankAccountModal({
               <Label>Banco *</Label>
               <BankSelect
                 value={form.bankCode}
-                onSelect={(bank) =>
+                onSelect={bank =>
                   setForm({
                     ...form,
                     bankCode: bank.bankCode,
@@ -167,13 +164,13 @@ export function CreateBankAccountModal({
                 <Input
                   placeholder="0001"
                   value={form.agency}
-                  onChange={(e) => setForm({ ...form, agency: e.target.value })}
+                  onChange={e => setForm({ ...form, agency: e.target.value })}
                   required
                 />
                 <Input
                   placeholder="Díg"
                   value={form.agencyDigit}
-                  onChange={(e) =>
+                  onChange={e =>
                     setForm({ ...form, agencyDigit: e.target.value })
                   }
                   maxLength={2}
@@ -188,7 +185,7 @@ export function CreateBankAccountModal({
               <Label htmlFor="create-accountType">Tipo de Conta *</Label>
               <Select
                 value={form.accountType}
-                onValueChange={(value) =>
+                onValueChange={value =>
                   setForm({
                     ...form,
                     accountType: value as typeof form.accountType,
@@ -215,7 +212,7 @@ export function CreateBankAccountModal({
                 <Input
                   placeholder="12345"
                   value={form.accountNumber}
-                  onChange={(e) =>
+                  onChange={e =>
                     setForm({ ...form, accountNumber: e.target.value })
                   }
                   required
@@ -223,7 +220,7 @@ export function CreateBankAccountModal({
                 <Input
                   placeholder="Díg"
                   value={form.accountDigit}
-                  onChange={(e) =>
+                  onChange={e =>
                     setForm({ ...form, accountDigit: e.target.value })
                   }
                   maxLength={2}
@@ -238,21 +235,17 @@ export function CreateBankAccountModal({
               <Label htmlFor="create-pixKeyType">Tipo de Chave PIX</Label>
               <Select
                 value={form.pixKeyType}
-                onValueChange={(value) =>
-                  setForm({ ...form, pixKeyType: value })
-                }
+                onValueChange={value => setForm({ ...form, pixKeyType: value })}
               >
                 <SelectTrigger id="create-pixKeyType">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(PIX_KEY_TYPE_LABELS).map(
-                    ([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    )
-                  )}
+                  {Object.entries(PIX_KEY_TYPE_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -262,7 +255,7 @@ export function CreateBankAccountModal({
                 id="create-pixKey"
                 placeholder="Ex: email@exemplo.com"
                 value={form.pixKey}
-                onChange={(e) => setForm({ ...form, pixKey: e.target.value })}
+                onChange={e => setForm({ ...form, pixKey: e.target.value })}
               />
             </div>
           </div>
@@ -272,9 +265,7 @@ export function CreateBankAccountModal({
             <Label htmlFor="create-companyId">Empresa</Label>
             <Select
               value={form.companyId}
-              onValueChange={(value) =>
-                setForm({ ...form, companyId: value })
-              }
+              onValueChange={value => setForm({ ...form, companyId: value })}
             >
               <SelectTrigger id="create-companyId">
                 <SelectValue
@@ -286,7 +277,7 @@ export function CreateBankAccountModal({
                 />
               </SelectTrigger>
               <SelectContent>
-                {companies.map((company) => (
+                {companies.map(company => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.tradeName || company.legalName}
                   </SelectItem>

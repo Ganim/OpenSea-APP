@@ -10,12 +10,17 @@ const ENTRY_TYPE_LABELS: Record<string, string> = {
 };
 
 const ENTRY_TYPE_COLORS: Record<string, string> = {
-  CLOCK_IN: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  CLOCK_IN:
+    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
   CLOCK_OUT: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  BREAK_START: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  BREAK_END: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  OVERTIME_START: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  OVERTIME_END: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  BREAK_START:
+    'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  BREAK_END:
+    'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  OVERTIME_START:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  OVERTIME_END:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
 };
 
 export function getEntryTypeLabel(type: string): string {
@@ -23,7 +28,10 @@ export function getEntryTypeLabel(type: string): string {
 }
 
 export function getEntryTypeColor(type: string): string {
-  return ENTRY_TYPE_COLORS[type] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+  return (
+    ENTRY_TYPE_COLORS[type] ??
+    'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  );
 }
 
 export function isEntryType(type: string): boolean {

@@ -524,7 +524,11 @@ async function renderLabelToPdf(
   data: LabelData,
   position: { x: number; y: number; width: number; height: number },
   _template: LabelTemplateDefinition,
-  JsBarcode: (canvas: HTMLCanvasElement, data: string, options: Record<string, unknown>) => void,
+  JsBarcode: (
+    canvas: HTMLCanvasElement,
+    data: string,
+    options: Record<string, unknown>
+  ) => void,
   QRCode: typeof import('qrcode')
 ) {
   const { x, y, width, height } = position;

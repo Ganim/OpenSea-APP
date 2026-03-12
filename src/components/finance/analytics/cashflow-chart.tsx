@@ -92,7 +92,7 @@ export function CashflowChart({
 
   if (projectedData) {
     for (const point of projectedData) {
-      const existing = combinedData.find((d) => d.date === point.date);
+      const existing = combinedData.find(d => d.date === point.date);
       if (existing) {
         existing.projected = point.cumulativeNet;
       } else {
@@ -151,7 +151,7 @@ export function CashflowChart({
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  formatter={(value) => formatCurrency(value as number)}
+                  formatter={value => formatCurrency(value as number)}
                 />
               }
             />
@@ -194,7 +194,10 @@ function GroupBySelector({
   onChange: (v: 'day' | 'week' | 'month') => void;
 }) {
   return (
-    <Select value={value} onValueChange={(v) => onChange(v as 'day' | 'week' | 'month')}>
+    <Select
+      value={value}
+      onValueChange={v => onChange(v as 'day' | 'week' | 'month')}
+    >
       <SelectTrigger className="w-[120px]">
         <SelectValue />
       </SelectTrigger>

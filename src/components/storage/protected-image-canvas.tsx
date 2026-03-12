@@ -76,15 +76,18 @@ export function ProtectedImageCanvas({
   // Block keyboard shortcuts for save/print/devtools — scoped to parent container
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const container = containerRef.current?.closest('[role="dialog"]') ?? containerRef.current;
+    const container =
+      containerRef.current?.closest('[role="dialog"]') ?? containerRef.current;
     if (!container) return;
 
     const handler = (e: Event) => {
       const ke = e as KeyboardEvent;
       if (
         (ke.ctrlKey || ke.metaKey) &&
-        (ke.key === 's' || ke.key === 'p' || ke.key === 'u' ||
-         (ke.shiftKey && ke.key === 'I'))
+        (ke.key === 's' ||
+          ke.key === 'p' ||
+          ke.key === 'u' ||
+          (ke.shiftKey && ke.key === 'I'))
       ) {
         ke.preventDefault();
       }
@@ -94,7 +97,8 @@ export function ProtectedImageCanvas({
     };
 
     container.addEventListener('keydown', handler, { capture: true });
-    return () => container.removeEventListener('keydown', handler, { capture: true });
+    return () =>
+      container.removeEventListener('keydown', handler, { capture: true });
   }, []);
 
   return (

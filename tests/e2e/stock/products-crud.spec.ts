@@ -67,13 +67,16 @@ test.describe('Stock - Products CRUD', () => {
     await nameInput.fill(productName);
 
     // Select template — look for a select/combobox
-    const templateSelect = page.locator(
-      '[role="dialog"] [role="combobox"]'
-    ).first();
+    const templateSelect = page
+      .locator('[role="dialog"] [role="combobox"]')
+      .first();
     if (await templateSelect.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await templateSelect.click();
       await page.waitForTimeout(300);
-      const option = page.locator('[role="option"]').filter({ hasText: defaultTemplateName }).first();
+      const option = page
+        .locator('[role="option"]')
+        .filter({ hasText: defaultTemplateName })
+        .first();
       if (await option.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await option.click();
       }
@@ -91,49 +94,55 @@ test.describe('Stock - Products CRUD', () => {
     await expect(page.getByText(productName)).toBeVisible({ timeout: 10_000 });
   });
 
-  test.fixme('5.2 - Validar erro ao criar produto sem nome', async ({ page }) => {
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'products');
+  test.fixme(
+    '5.2 - Validar erro ao criar produto sem nome',
+    async ({ page }) => {
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'products');
 
-    await page.getByRole('button', { name: 'Novo Produto' }).click();
-    await expect(page.locator('[role="dialog"]')).toBeVisible({
-      timeout: 5_000,
-    });
+      await page.getByRole('button', { name: 'Novo Produto' }).click();
+      await expect(page.locator('[role="dialog"]')).toBeVisible({
+        timeout: 5_000,
+      });
 
-    // Submit without filling name
-    const submitBtn = page
-      .locator('[role="dialog"] button')
-      .filter({ hasText: /Criar|Salvar/i })
-      .first();
-    await submitBtn.click();
+      // Submit without filling name
+      const submitBtn = page
+        .locator('[role="dialog"] button')
+        .filter({ hasText: /Criar|Salvar/i })
+        .first();
+      await submitBtn.click();
 
-    // Modal should remain open (validation prevents submission)
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible({ timeout: 3_000 });
-  });
+      // Modal should remain open (validation prevents submission)
+      const modal = page.locator('[role="dialog"]');
+      await expect(modal).toBeVisible({ timeout: 3_000 });
+    }
+  );
 
   // ─── READ / LIST ────────────────────────────────────────────────────
 
-  test.fixme('5.3 - Listar produtos e verificar hidratação', async ({ page }) => {
-    const product = await createProductViaApi(userToken, {
-      name: `e2e-product-list-${Date.now()}`,
-      templateId: defaultTemplateId,
-    });
+  test.fixme(
+    '5.3 - Listar produtos e verificar hidratação',
+    async ({ page }) => {
+      const product = await createProductViaApi(userToken, {
+        name: `e2e-product-list-${Date.now()}`,
+        templateId: defaultTemplateId,
+      });
 
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'products');
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'products');
 
-    await expect(
-      page.getByRole('heading', { name: 'Produtos' })
-    ).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Produtos' })).toBeVisible(
+        { timeout: 10_000 }
+      );
 
-    await expect(page.getByText(product.name)).toBeVisible({
-      timeout: 10_000,
-    });
+      await expect(page.getByText(product.name)).toBeVisible({
+        timeout: 10_000,
+      });
 
-    // Cleanup
-    await deleteProductViaApi(userToken, product.id);
-  });
+      // Cleanup
+      await deleteProductViaApi(userToken, product.id);
+    }
+  );
 
   test.fixme('5.4 - Buscar produto por nome', async ({ page }) => {
     const product = await createProductViaApi(userToken, {
@@ -217,9 +226,9 @@ test.describe('Stock - Products CRUD', () => {
     const isEditPage = page.url().includes('/edit');
     if (isEditPage) {
       // Edit page — verify form loaded
-      await expect(
-        page.locator('input').first()
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('input').first()).toBeVisible({
+        timeout: 10_000,
+      });
     } else {
       // Edit modal
       await expect(page.locator('[role="dialog"]')).toBeVisible({
@@ -254,12 +263,8 @@ test.describe('Stock - Products CRUD', () => {
     const otpInput = page.locator('[data-input-otp="true"]').first();
 
     await Promise.race([
-      deleteBtn
-        .waitFor({ state: 'visible', timeout: 5_000 })
-        .catch(() => {}),
-      otpInput
-        .waitFor({ state: 'visible', timeout: 5_000 })
-        .catch(() => {}),
+      deleteBtn.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {}),
+      otpInput.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {}),
     ]);
 
     if (await otpInput.isVisible().catch(() => false)) {
@@ -301,9 +306,9 @@ test.describe('Stock - Products CRUD', () => {
       !page.url().endsWith('/products');
 
     if (isDetailPage) {
-      await expect(
-        page.locator(`text=${product.name}`).first()
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator(`text=${product.name}`).first()).toBeVisible({
+        timeout: 10_000,
+      });
     } else {
       const hasDialog = await page
         .locator('[role="dialog"]')

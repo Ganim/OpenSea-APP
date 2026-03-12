@@ -6,12 +6,7 @@ import { FileTypeIcon } from '@/components/storage/file-type-icon';
 import { formatFileSize } from '@/components/storage/utils';
 import { storageSharingService } from '@/services/storage';
 import type { SharedFileInfo, FileTypeCategory } from '@/types/storage';
-import {
-  Download,
-  Loader2,
-  Lock,
-  AlertTriangle,
-} from 'lucide-react';
+import { Download, Loader2, Lock, AlertTriangle } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -57,7 +52,10 @@ export default function SharedFilePage() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Falha ao baixar o arquivo';
-      if (message.toLowerCase().includes('password') || message.toLowerCase().includes('senha')) {
+      if (
+        message.toLowerCase().includes('password') ||
+        message.toLowerCase().includes('senha')
+      ) {
         setNeedsPassword(true);
         setError('Senha incorreta');
       } else {
@@ -84,9 +82,7 @@ export default function SharedFilePage() {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Link indisponível
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {error}
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
         </div>
       </div>
     );
@@ -151,9 +147,7 @@ export default function SharedFilePage() {
                 if (e.key === 'Enter') handleDownload();
               }}
             />
-            {error && (
-              <p className="text-xs text-red-500 mt-1">{error}</p>
-            )}
+            {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
           </div>
         )}
 

@@ -47,19 +47,31 @@ export const payrollService = {
   },
 
   async calculate(payrollId: string): Promise<PayrollWithItemsResponse> {
-    return apiClient.post<PayrollWithItemsResponse>(`/v1/hr/payrolls/${payrollId}/calculate`, {});
+    return apiClient.post<PayrollWithItemsResponse>(
+      `/v1/hr/payrolls/${payrollId}/calculate`,
+      {}
+    );
   },
 
   async approve(payrollId: string): Promise<PayrollResponse> {
-    return apiClient.post<PayrollResponse>(`/v1/hr/payrolls/${payrollId}/approve`, {});
+    return apiClient.post<PayrollResponse>(
+      `/v1/hr/payrolls/${payrollId}/approve`,
+      {}
+    );
   },
 
   async pay(payrollId: string): Promise<PayrollResponse> {
-    return apiClient.post<PayrollResponse>(`/v1/hr/payrolls/${payrollId}/pay`, {});
+    return apiClient.post<PayrollResponse>(
+      `/v1/hr/payrolls/${payrollId}/pay`,
+      {}
+    );
   },
 
   async cancel(payrollId: string): Promise<PayrollResponse> {
-    return apiClient.post<PayrollResponse>(`/v1/hr/payrolls/${payrollId}/cancel`, {});
+    return apiClient.post<PayrollResponse>(
+      `/v1/hr/payrolls/${payrollId}/cancel`,
+      {}
+    );
   },
 
   async get(payrollId: string): Promise<PayrollResponse> {
@@ -68,12 +80,16 @@ export const payrollService = {
 
   async list(params?: ListPayrollsParams): Promise<PayrollsResponse> {
     const query = new URLSearchParams();
-    if (params?.referenceMonth) query.append('referenceMonth', String(params.referenceMonth));
-    if (params?.referenceYear) query.append('referenceYear', String(params.referenceYear));
+    if (params?.referenceMonth)
+      query.append('referenceMonth', String(params.referenceMonth));
+    if (params?.referenceYear)
+      query.append('referenceYear', String(params.referenceYear));
     if (params?.status) query.append('status', params.status);
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<PayrollsResponse>(`/v1/hr/payrolls${qs ? `?${qs}` : ''}`);
+    return apiClient.get<PayrollsResponse>(
+      `/v1/hr/payrolls${qs ? `?${qs}` : ''}`
+    );
   },
 };

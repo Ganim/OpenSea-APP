@@ -87,7 +87,7 @@ function DRERow({
             {hasChildren ? (
               <button
                 className="p-0.5 hover:bg-muted rounded"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleExpand(node.categoryId);
                 }}
@@ -117,7 +117,7 @@ function DRERow({
 
       {hasChildren &&
         isExpanded &&
-        node.children.map((child) => (
+        node.children.map(child => (
           <DRERow
             key={child.categoryId}
             node={child}
@@ -143,7 +143,7 @@ export function DREInteractiveTable({
   const [expanded, setExpanded] = useState<RowState>({});
 
   const toggleExpand = useCallback((id: string) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
   if (isLoading) {

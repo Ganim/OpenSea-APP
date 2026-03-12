@@ -60,9 +60,22 @@ import {
   getTypeColor,
 } from './src';
 
-const RequestSickLeaveModal = dynamic(() => import('./src/modals/request-sick-leave-modal').then(m => ({ default: m.RequestSickLeaveModal })), { ssr: false });
-const RejectModal = dynamic(() => import('./src/modals/reject-modal').then(m => ({ default: m.RejectModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
+const RequestSickLeaveModal = dynamic(
+  () =>
+    import('./src/modals/request-sick-leave-modal').then(m => ({
+      default: m.RequestSickLeaveModal,
+    })),
+  { ssr: false }
+);
+const RejectModal = dynamic(
+  () =>
+    import('./src/modals/reject-modal').then(m => ({ default: m.RejectModal })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -125,7 +138,13 @@ export default function AbsencesPage() {
     if (filterStartDate) params.startDate = filterStartDate;
     if (filterEndDate) params.endDate = filterEndDate;
     return params;
-  }, [filterEmployeeId, filterType, filterStatus, filterStartDate, filterEndDate]);
+  }, [
+    filterEmployeeId,
+    filterType,
+    filterStatus,
+    filterStartDate,
+    filterEndDate,
+  ]);
 
   // ============================================================================
   // DATA
@@ -137,7 +156,10 @@ export default function AbsencesPage() {
 
   const absences = data?.absences ?? [];
 
-  const employeeIds = useMemo(() => absences.map(a => a.employeeId), [absences]);
+  const employeeIds = useMemo(
+    () => absences.map(a => a.employeeId),
+    [absences]
+  );
   const { getName } = useEmployeeMap(employeeIds);
 
   // ============================================================================
@@ -154,49 +176,64 @@ export default function AbsencesPage() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => absences.map(i => i.id),
-    [absences]
-  );
-
+  const initialIds = useMemo(() => absences.map(i => i.id), [absences]);
 
   // ============================================================================
   // HANDLERS
   // ============================================================================
 
-  const handleBulkApprove = useCallback(async (ids: string[]) => {
-    const pendingIds = ids.filter(id => {
-      const item = absences.find(a => a.id === id);
-      return item && item.status === 'PENDING';
-    });
-    if (pendingIds.length === 0) {
-      toast.info('Nenhuma ausência pendente selecionada');
-      return;
-    }
-    try {
-      for (const id of pendingIds) {
-        approveAbsence.mutate(id);
+  const handleBulkApprove = useCallback(
+    async (ids: string[]) => {
+      const pendingIds = ids.filter(id => {
+        const item = absences.find(a => a.id === id);
+        return item && item.status === 'PENDING';
+      });
+      if (pendingIds.length === 0) {
+        toast.info('Nenhuma ausência pendente selecionada');
+        return;
       }
-      toast.success(`${pendingIds.length} ausência(s) aprovada(s)`);
-    } catch {
-      // Toast handled by mutation
-    }
-  }, [absences, approveAbsence]);
+      try {
+        for (const id of pendingIds) {
+          approveAbsence.mutate(id);
+        }
+        toast.success(`${pendingIds.length} ausência(s) aprovada(s)`);
+      } catch {
+        // Toast handled by mutation
+      }
+    },
+    [absences, approveAbsence]
+  );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? absences.filter(a => ids.includes(a.id))
-      : absences;
-    exportToCSV(items, [
-      { header: 'Funcionário', accessor: a => getName(a.employeeId) },
-      { header: 'Tipo', accessor: a => getTypeLabel(a.type) },
-      { header: 'Status', accessor: a => getStatusLabel(a.status) },
-      { header: 'Data Início', accessor: a => a.startDate ? new Date(a.startDate).toLocaleDateString('pt-BR') : '' },
-      { header: 'Data Fim', accessor: a => a.endDate ? new Date(a.endDate).toLocaleDateString('pt-BR') : '' },
-      { header: 'Dias', accessor: a => a.totalDays },
-      { header: 'CID', accessor: a => a.cid || '' },
-    ], 'ausencias');
-  }, [absences, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0 ? absences.filter(a => ids.includes(a.id)) : absences;
+      exportToCSV(
+        items,
+        [
+          { header: 'Funcionário', accessor: a => getName(a.employeeId) },
+          { header: 'Tipo', accessor: a => getTypeLabel(a.type) },
+          { header: 'Status', accessor: a => getStatusLabel(a.status) },
+          {
+            header: 'Data Início',
+            accessor: a =>
+              a.startDate
+                ? new Date(a.startDate).toLocaleDateString('pt-BR')
+                : '',
+          },
+          {
+            header: 'Data Fim',
+            accessor: a =>
+              a.endDate ? new Date(a.endDate).toLocaleDateString('pt-BR') : '',
+          },
+          { header: 'Dias', accessor: a => a.totalDays },
+          { header: 'CID', accessor: a => a.cid || '' },
+        ],
+        'ausencias'
+      );
+    },
+    [absences, getName]
+  );
 
   const handleViewItem = useCallback(
     (ids: string[]) => {
@@ -313,8 +350,7 @@ export default function AbsencesPage() {
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3" />
               <span>
-                {formatDate(item.startDate)} &mdash;{' '}
-                {formatDate(item.endDate)}
+                {formatDate(item.startDate)} &mdash; {formatDate(item.endDate)}
               </span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -437,29 +473,26 @@ export default function AbsencesPage() {
     setShowCreateModal(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-absences',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-absences',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-absence',
+        title: 'Registrar Atestado',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-absence',
-          title: 'Registrar Atestado',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI
@@ -644,13 +677,17 @@ export default function AbsencesPage() {
           <HRSelectionToolbar
             totalItems={absences.length}
             actions={[
-              ...(canApprove ? [{
-                id: 'bulk-approve',
-                label: 'Aprovar',
-                icon: Check,
-                onClick: handleBulkApprove,
-                variant: 'default' as const,
-              }] : []),
+              ...(canApprove
+                ? [
+                    {
+                      id: 'bulk-approve',
+                      label: 'Aprovar',
+                      icon: Check,
+                      onClick: handleBulkApprove,
+                      variant: 'default' as const,
+                    },
+                  ]
+                : []),
             ]}
             defaultActions={{
               export: true,

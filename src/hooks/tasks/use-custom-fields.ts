@@ -23,9 +23,12 @@ export function useCustomFields(boardId: string) {
 export function useCreateCustomField(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateCustomFieldRequest) => customFieldsService.create(boardId, data),
+    mutationFn: (data: CreateCustomFieldRequest) =>
+      customFieldsService.create(boardId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId) });
+      qc.invalidateQueries({
+        queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -34,10 +37,17 @@ export function useCreateCustomField(boardId: string) {
 export function useUpdateCustomField(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ fieldId, data }: { fieldId: string; data: UpdateCustomFieldRequest }) =>
-      customFieldsService.update(boardId, fieldId, data),
+    mutationFn: ({
+      fieldId,
+      data,
+    }: {
+      fieldId: string;
+      data: UpdateCustomFieldRequest;
+    }) => customFieldsService.update(boardId, fieldId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId) });
+      qc.invalidateQueries({
+        queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -46,9 +56,12 @@ export function useUpdateCustomField(boardId: string) {
 export function useDeleteCustomField(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (fieldId: string) => customFieldsService.delete(boardId, fieldId),
+    mutationFn: (fieldId: string) =>
+      customFieldsService.delete(boardId, fieldId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId) });
+      qc.invalidateQueries({
+        queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -57,12 +70,21 @@ export function useDeleteCustomField(boardId: string) {
 export function useSetCustomFieldValues(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ cardId, values }: { cardId: string; values: SetCustomFieldValueRequest['values'] }) =>
-      customFieldsService.setValues(boardId, cardId, { values }),
+    mutationFn: ({
+      cardId,
+      values,
+    }: {
+      cardId: string;
+      values: SetCustomFieldValueRequest['values'];
+    }) => customFieldsService.setValues(boardId, cardId, { values }),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
-      qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARD(boardId, variables.cardId) });
-      qc.invalidateQueries({ queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId) });
+      qc.invalidateQueries({
+        queryKey: CARD_QUERY_KEYS.CARD(boardId, variables.cardId),
+      });
+      qc.invalidateQueries({
+        queryKey: CUSTOM_FIELD_QUERY_KEYS.CUSTOM_FIELDS(boardId),
+      });
     },
   });
 }

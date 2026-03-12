@@ -134,7 +134,9 @@ export function CalculateHoursModal({
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/40">
-                  <p className="text-xs text-muted-foreground">Horas Líquidas</p>
+                  <p className="text-xs text-muted-foreground">
+                    Horas Líquidas
+                  </p>
                   <p className="text-lg font-bold text-blue-700 dark:text-blue-400">
                     {formatHours(result.totalNetHours)}
                   </p>

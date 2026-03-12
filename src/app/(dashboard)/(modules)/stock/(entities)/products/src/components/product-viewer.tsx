@@ -329,7 +329,11 @@ export function ProductViewer({
 
   // Mapear care options selecionadas
   // TODO: migrate to ProductCareInstruction API
-  const selectedCareOptions = useMemo((): Array<{ code: string; assetPath: string; label: string }> => {
+  const selectedCareOptions = useMemo((): Array<{
+    code: string;
+    assetPath: string;
+    label: string;
+  }> => {
     if (!careOptionsData) return [];
     return [];
   }, [careOptionsData]);
@@ -743,11 +747,9 @@ export function ProductViewer({
                 })
                 .map(([key, config]) => {
                   const value = product.attributes?.[key];
-                  const cfg = config;
-                  const baseLabel = cfg?.label || key;
-                  // Adiciona unidade de medida ao label quando existir
-                  const label = cfg?.unitOfMeasure
-                    ? `${baseLabel} (${cfg.unitOfMeasure})`
+                  const baseLabel = config.label || key;
+                  const label = config.unitOfMeasure
+                    ? `${baseLabel} (${config.unitOfMeasure})`
                     : baseLabel;
 
                   const renderValue = () => {

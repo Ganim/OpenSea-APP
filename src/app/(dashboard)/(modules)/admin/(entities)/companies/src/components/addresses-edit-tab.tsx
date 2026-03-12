@@ -18,7 +18,11 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { companyAddressesApi } from '../api';
 
-const AddressModal = dynamic(() => import('../modals/address-modal').then(m => ({ default: m.AddressModal })), { ssr: false });
+const AddressModal = dynamic(
+  () =>
+    import('../modals/address-modal').then(m => ({ default: m.AddressModal })),
+  { ssr: false }
+);
 
 interface AddressesEditTabProps {
   companyId: string;

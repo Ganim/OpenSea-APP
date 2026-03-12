@@ -14,10 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { StorageFile } from '@/types/storage';
-import {
-  useListVersions,
-  useRestoreVersion,
-} from '@/hooks/storage';
+import { useListVersions, useRestoreVersion } from '@/hooks/storage';
 import { usePermissions } from '@/hooks/use-permissions';
 import { storageFilesService } from '@/services/storage/files.service';
 import { formatFileSize } from './utils';
@@ -46,7 +43,10 @@ export function FileVersionPanel({
     (version: number) => {
       if (!file) return;
       try {
-        const downloadUrl = storageFilesService.getServeUrl(file.id, { version, download: true });
+        const downloadUrl = storageFilesService.getServeUrl(file.id, {
+          version,
+          download: true,
+        });
         window.open(downloadUrl, '_blank');
       } catch {
         toast.error('Erro ao baixar esta versão');

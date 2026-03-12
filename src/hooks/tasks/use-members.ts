@@ -13,7 +13,8 @@ export const MEMBER_QUERY_KEYS = {
 export function useInviteMember(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: AddBoardMemberRequest) => membersService.invite(boardId, data),
+    mutationFn: (data: AddBoardMemberRequest) =>
+      membersService.invite(boardId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
@@ -23,8 +24,13 @@ export function useInviteMember(boardId: string) {
 export function useUpdateMemberRole(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ memberId, data }: { memberId: string; data: UpdateBoardMemberRequest }) =>
-      membersService.updateRole(boardId, memberId, data),
+    mutationFn: ({
+      memberId,
+      data,
+    }: {
+      memberId: string;
+      data: UpdateBoardMemberRequest;
+    }) => membersService.updateRole(boardId, memberId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },

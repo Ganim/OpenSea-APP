@@ -47,7 +47,7 @@ export function NotificationPreferences({
             <Switch
               id="notif-overdue"
               checked={prefs.notifOverdue}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updatePreferences({ notifOverdue: checked })
               }
             />
@@ -56,7 +56,9 @@ export function NotificationPreferences({
           {/* Due soon toggle */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="notif-due-soon">Notificar vencimento proximo</Label>
+              <Label htmlFor="notif-due-soon">
+                Notificar vencimento proximo
+              </Label>
               <p className="text-xs text-muted-foreground">
                 Alertar sobre contas proximas do vencimento
               </p>
@@ -64,7 +66,7 @@ export function NotificationPreferences({
             <Switch
               id="notif-due-soon"
               checked={prefs.notifDueSoon}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updatePreferences({ notifDueSoon: checked })
               }
             />
@@ -80,7 +82,7 @@ export function NotificationPreferences({
             </div>
             <Select
               value={String(prefs.notifDueDaysBefore)}
-              onValueChange={(v) =>
+              onValueChange={v =>
                 updatePreferences({ notifDueDaysBefore: Number(v) })
               }
             >
@@ -88,7 +90,7 @@ export function NotificationPreferences({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[1, 3, 5, 7].map((d) => (
+                {[1, 3, 5, 7].map(d => (
                   <SelectItem key={d} value={String(d)}>
                     {d}
                   </SelectItem>
@@ -108,7 +110,7 @@ export function NotificationPreferences({
             <Switch
               id="notif-daily"
               checked={prefs.notifDailySummary}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 updatePreferences({ notifDailySummary: checked })
               }
             />

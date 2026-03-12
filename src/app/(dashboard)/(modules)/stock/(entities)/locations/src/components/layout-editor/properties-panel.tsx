@@ -89,7 +89,9 @@ export function PropertiesPanel({
             <Label className="text-xs text-muted-foreground">Posição</Label>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-aisle-x" className="text-xs">X</Label>
+                <Label htmlFor="zone-prop-aisle-x" className="text-xs">
+                  X
+                </Label>
                 <Input
                   id="zone-prop-aisle-x"
                   type="number"
@@ -103,7 +105,9 @@ export function PropertiesPanel({
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-aisle-y" className="text-xs">Y</Label>
+                <Label htmlFor="zone-prop-aisle-y" className="text-xs">
+                  Y
+                </Label>
                 <Input
                   id="zone-prop-aisle-y"
                   type="number"
@@ -205,7 +209,9 @@ export function PropertiesPanel({
         <CardContent className="space-y-4">
           {/* Label personalizado */}
           <div className="space-y-1">
-            <Label htmlFor="zone-prop-label" className="text-xs">Texto</Label>
+            <Label htmlFor="zone-prop-label" className="text-xs">
+              Texto
+            </Label>
             <Input
               id="zone-prop-label"
               value={selectedAnnotation.label || ''}
@@ -224,7 +230,9 @@ export function PropertiesPanel({
             <Label className="text-xs text-muted-foreground">Posição</Label>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-ann-x" className="text-xs">X</Label>
+                <Label htmlFor="zone-prop-ann-x" className="text-xs">
+                  X
+                </Label>
                 <Input
                   id="zone-prop-ann-x"
                   type="number"
@@ -238,7 +246,9 @@ export function PropertiesPanel({
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-ann-y" className="text-xs">Y</Label>
+                <Label htmlFor="zone-prop-ann-y" className="text-xs">
+                  Y
+                </Label>
                 <Input
                   id="zone-prop-ann-y"
                   type="number"
@@ -259,7 +269,9 @@ export function PropertiesPanel({
             <Label className="text-xs text-muted-foreground">Tamanho</Label>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-width" className="text-xs">Largura</Label>
+                <Label htmlFor="zone-prop-width" className="text-xs">
+                  Largura
+                </Label>
                 <Input
                   id="zone-prop-width"
                   type="number"
@@ -273,7 +285,9 @@ export function PropertiesPanel({
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="zone-prop-height" className="text-xs">Altura</Label>
+                <Label htmlFor="zone-prop-height" className="text-xs">
+                  Altura
+                </Label>
                 <Input
                   id="zone-prop-height"
                   type="number"
@@ -291,7 +305,9 @@ export function PropertiesPanel({
 
           {/* Cor */}
           <div className="space-y-1">
-            <Label htmlFor="zone-prop-color" className="text-xs">Cor</Label>
+            <Label htmlFor="zone-prop-color" className="text-xs">
+              Cor
+            </Label>
             <div className="flex gap-2">
               <Input
                 id="zone-prop-color"

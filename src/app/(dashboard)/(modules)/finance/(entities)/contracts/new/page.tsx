@@ -125,7 +125,7 @@ export default function NewContractPage() {
                   id="title"
                   required
                   value={formData.title}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Ex: Contrato de fornecimento de materia-prima"
@@ -137,7 +137,7 @@ export default function NewContractPage() {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows={2}
@@ -157,7 +157,7 @@ export default function NewContractPage() {
                   id="companyName"
                   required
                   value={formData.companyName}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, companyName: e.target.value })
                   }
                   placeholder="Razao social ou nome fantasia"
@@ -169,7 +169,7 @@ export default function NewContractPage() {
                 <Input
                   id="contactName"
                   value={formData.contactName}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, contactName: e.target.value })
                   }
                   placeholder="Responsavel pelo contrato"
@@ -182,7 +182,7 @@ export default function NewContractPage() {
                   id="contactEmail"
                   type="email"
                   value={formData.contactEmail}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, contactEmail: e.target.value })
                   }
                   placeholder="email@empresa.com"
@@ -193,9 +193,7 @@ export default function NewContractPage() {
 
           {/* Section: Valores e Frequencia */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">
-              Valores e Pagamento
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Valores e Pagamento</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="totalValue">Valor Total (R$) *</Label>
@@ -206,7 +204,7 @@ export default function NewContractPage() {
                   required
                   min="0.01"
                   value={formData.totalValue || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({
                       ...formData,
                       totalValue: parseFloat(e.target.value) || 0,
@@ -224,7 +222,7 @@ export default function NewContractPage() {
                   required
                   min="0.01"
                   value={formData.paymentAmount || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({
                       ...formData,
                       paymentAmount: parseFloat(e.target.value) || 0,
@@ -271,7 +269,7 @@ export default function NewContractPage() {
                 <Label htmlFor="categoryId">Categoria</Label>
                 <Select
                   value={formData.categoryId}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setFormData({ ...formData, categoryId: value })
                   }
                 >
@@ -279,7 +277,7 @@ export default function NewContractPage() {
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
+                    {categories.map(cat => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.name}
                       </SelectItem>
@@ -292,7 +290,7 @@ export default function NewContractPage() {
                 <Label htmlFor="costCenterId">Centro de Custo</Label>
                 <Select
                   value={formData.costCenterId}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setFormData({ ...formData, costCenterId: value })
                   }
                 >
@@ -300,7 +298,7 @@ export default function NewContractPage() {
                     <SelectValue placeholder="Selecione um centro de custo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {costCenters.map((cc) => (
+                    {costCenters.map(cc => (
                       <SelectItem key={cc.id} value={cc.id}>
                         {cc.name}
                       </SelectItem>
@@ -313,7 +311,7 @@ export default function NewContractPage() {
                 <Label htmlFor="bankAccountId">Conta Bancária</Label>
                 <Select
                   value={formData.bankAccountId}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setFormData({ ...formData, bankAccountId: value })
                   }
                 >
@@ -321,7 +319,7 @@ export default function NewContractPage() {
                     <SelectValue placeholder="Selecione uma conta" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map((ba) => (
+                    {bankAccounts.map(ba => (
                       <SelectItem key={ba.id} value={ba.id}>
                         {ba.name}
                       </SelectItem>
@@ -343,7 +341,7 @@ export default function NewContractPage() {
                   type="date"
                   required
                   value={formData.startDate}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, startDate: e.target.value })
                   }
                 />
@@ -356,7 +354,7 @@ export default function NewContractPage() {
                   type="date"
                   required
                   value={formData.endDate}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, endDate: e.target.value })
                   }
                 />
@@ -372,7 +370,7 @@ export default function NewContractPage() {
                   min="1"
                   max="365"
                   value={formData.alertDaysBefore}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({
                       ...formData,
                       alertDaysBefore: parseInt(e.target.value) || 30,
@@ -387,7 +385,7 @@ export default function NewContractPage() {
                   <Checkbox
                     id="autoRenew"
                     checked={formData.autoRenew}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setFormData({
                         ...formData,
                         autoRenew: checked === true,
@@ -405,7 +403,7 @@ export default function NewContractPage() {
                       min="1"
                       max="120"
                       value={formData.renewalPeriodMonths}
-                      onChange={(e) =>
+                      onChange={e =>
                         setFormData({
                           ...formData,
                           renewalPeriodMonths: parseInt(e.target.value) || 12,
@@ -428,7 +426,7 @@ export default function NewContractPage() {
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) =>
+              onChange={e =>
                 setFormData({ ...formData, notes: e.target.value })
               }
               rows={3}

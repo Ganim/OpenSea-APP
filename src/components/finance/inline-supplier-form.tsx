@@ -83,7 +83,7 @@ export function InlineSupplierForm({
           <Input
             id="supplier-name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             placeholder="Nome do fornecedor"
             required
           />
@@ -98,7 +98,7 @@ export function InlineSupplierForm({
         <Input
           id="supplier-cnpj"
           value={cnpj}
-          onChange={(e) => handleCnpjChange(e.target.value)}
+          onChange={e => handleCnpjChange(e.target.value)}
           placeholder="00000000000000"
           maxLength={14}
         />
@@ -108,7 +108,10 @@ export function InlineSupplierForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={createMutation.isPending || !name.trim()}>
+        <Button
+          type="submit"
+          disabled={createMutation.isPending || !name.trim()}
+        >
           {createMutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

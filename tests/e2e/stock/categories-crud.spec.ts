@@ -105,9 +105,9 @@ test.describe('Stock - Categories CRUD', () => {
     await navigateToStockPage(page, 'product-categories');
 
     // Verify page loaded
-    await expect(
-      page.getByRole('heading', { name: 'Categorias' })
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Categorias' })).toBeVisible(
+      { timeout: 10_000 }
+    );
 
     // Verify category appears
     await expect(page.getByText(cat.name)).toBeVisible({ timeout: 10_000 });
@@ -150,9 +150,7 @@ test.describe('Stock - Categories CRUD', () => {
     await page.locator('#name').fill(childName);
 
     // Try to select parent category if dropdown exists
-    const parentSelect = page.locator(
-      '#parentId, [name="parentId"], select'
-    );
+    const parentSelect = page.locator('#parentId, [name="parentId"], select');
     if (await parentSelect.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await parentSelect.selectOption({ label: parent.name });
     }
@@ -178,9 +176,9 @@ test.describe('Stock - Categories CRUD', () => {
     await openContextMenu(page, cat.name);
     await clickContextAction(page, 'Editar');
 
-    await expect(
-      page.locator('[role="dialog"]')
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('[role="dialog"]')).toBeVisible({
+      timeout: 5_000,
+    });
 
     const nameInput = page.locator('[role="dialog"] #name');
     await nameInput.clear();

@@ -18,13 +18,13 @@ import {
 } from '@/components/ui/table';
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import {
-  useDeleteFinanceEntry,
-  useFinanceEntry,
-} from '@/hooks/finance';
+import { useDeleteFinanceEntry, useFinanceEntry } from '@/hooks/finance';
 import { useFinanceCategories } from '@/hooks/finance/use-finance-categories';
 import { financeEntriesService } from '@/services/finance';
-import type { FinanceAttachmentType, FinanceEntryStatus } from '@/types/finance';
+import type {
+  FinanceAttachmentType,
+  FinanceEntryStatus,
+} from '@/types/finance';
 import {
   FINANCE_ENTRY_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -142,7 +142,7 @@ export default function ReceivableDetailPage({
 
   const categoryRates = useMemo(() => {
     if (!entry) return { interestRate: undefined, penaltyRate: undefined };
-    const cat = categories.find((c) => c.id === entry.categoryId);
+    const cat = categories.find(c => c.id === entry.categoryId);
     return {
       interestRate: cat?.interestRate ?? undefined,
       penaltyRate: cat?.penaltyRate ?? undefined,
@@ -389,7 +389,11 @@ export default function ReceivableDetailPage({
             <InfoRow
               label="Saldo Restante"
               value={formatCurrency(entry.remainingBalance)}
-              className={entry.remainingBalance > 0 ? 'text-orange-600 font-semibold' : 'text-green-600 font-semibold'}
+              className={
+                entry.remainingBalance > 0
+                  ? 'text-orange-600 font-semibold'
+                  : 'text-green-600 font-semibold'
+              }
             />
             {entry.totalDue - entry.remainingBalance > 0 && (
               <InfoRow
@@ -415,7 +419,9 @@ export default function ReceivableDetailPage({
               label="Vencimento"
               value={formatDate(entry.dueDate)}
               className={
-                entry.isOverdue && entry.status !== 'RECEIVED' && entry.status !== 'PAID'
+                entry.isOverdue &&
+                entry.status !== 'RECEIVED' &&
+                entry.status !== 'PAID'
                   ? 'text-destructive font-medium'
                   : ''
               }
@@ -427,7 +433,10 @@ export default function ReceivableDetailPage({
               />
             )}
             {entry.paymentDate && (
-              <InfoRow label="Recebimento" value={formatDate(entry.paymentDate)} />
+              <InfoRow
+                label="Recebimento"
+                value={formatDate(entry.paymentDate)}
+              />
             )}
           </CardContent>
         </Card>
@@ -477,7 +486,9 @@ export default function ReceivableDetailPage({
       {hasAllocations && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Rateio de Centro de Custo</CardTitle>
+            <CardTitle className="text-base">
+              Rateio de Centro de Custo
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table aria-label="Tabela de rateio de centro de custo">
@@ -533,7 +544,7 @@ export default function ReceivableDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {entry.payments.map((payment) => (
+                {entry.payments.map(payment => (
                   <TableRow key={payment.id}>
                     <TableCell className="text-sm">
                       {formatDate(payment.paidAt)}
@@ -605,7 +616,7 @@ export default function ReceivableDetailPage({
         <CardContent>
           {entry.attachments && entry.attachments.length > 0 ? (
             <div className="space-y-2">
-              {entry.attachments.map((attachment) => (
+              {entry.attachments.map(attachment => (
                 <div
                   key={attachment.id}
                   className="flex items-center justify-between p-3 rounded-lg border"
@@ -671,7 +682,7 @@ export default function ReceivableDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {entry.childEntries.map((child) => (
+                {entry.childEntries.map(child => (
                   <TableRow key={child.id}>
                     <TableCell className="text-sm">
                       {child.currentInstallment != null &&

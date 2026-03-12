@@ -140,10 +140,14 @@ export function FileManagerGrid({
 
   // Drag-and-drop
   const {
-    draggedItemIds, dragOverFolderId,
-    handleItemDragStart, handleItemDragEnd,
-    handleFolderDragEnter, handleFolderDragOver,
-    handleFolderDragLeave, handleFolderDrop,
+    draggedItemIds,
+    dragOverFolderId,
+    handleItemDragStart,
+    handleItemDragEnd,
+    handleFolderDragEnter,
+    handleFolderDragOver,
+    handleFolderDragLeave,
+    handleFolderDrop,
   } = useStorageDragDrop({ selectedItems, folders, onDragMoveToFolder });
 
   // Dynamic column count based on container width.

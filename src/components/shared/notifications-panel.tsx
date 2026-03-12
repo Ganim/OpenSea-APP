@@ -171,7 +171,7 @@ export function NotificationsPanel() {
   });
 
   const notifications = data?.notifications ?? [];
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   // Mutations
   const markAsRead = useMarkNotificationAsRead();
@@ -242,7 +242,10 @@ export function NotificationsPanel() {
 
             <div className="flex items-center gap-1.5">
               {unreadCount > 0 && (
-                <Badge variant="default" className="bg-rose-500 text-white text-xs">
+                <Badge
+                  variant="default"
+                  className="bg-rose-500 text-white text-xs"
+                >
                   {unreadCount} nova{unreadCount !== 1 && 's'}
                 </Badge>
               )}
@@ -327,7 +330,7 @@ export function NotificationsPanel() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        notifications.forEach((n) => deleteNotif.mutate(n.id));
+                        notifications.forEach(n => deleteNotif.mutate(n.id));
                       }}
                       className="h-7 w-7 p-0"
                     >
@@ -384,7 +387,7 @@ export function NotificationsPanel() {
                             ? 'bg-blue-50 dark:bg-blue-500/10'
                             : 'hover:bg-gray-100 dark:hover:bg-white/5'
                         }`}
-                        onSelect={(e) => {
+                        onSelect={e => {
                           e.preventDefault();
                           handleNotificationClick(notification);
                         }}
@@ -430,7 +433,7 @@ export function NotificationsPanel() {
                             </span>
                             <div
                               className="flex gap-0.5"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={e => e.stopPropagation()}
                             >
                               {isUnread && (
                                 <Tooltip>
@@ -438,7 +441,7 @@ export function NotificationsPanel() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.stopPropagation();
                                         markAsRead.mutate(notification.id);
                                       }}
@@ -447,7 +450,9 @@ export function NotificationsPanel() {
                                       <Check className="w-3 h-3 text-gray-400 dark:text-white/40" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Marcar como lida</TooltipContent>
+                                  <TooltipContent>
+                                    Marcar como lida
+                                  </TooltipContent>
                                 </Tooltip>
                               )}
                               <Tooltip>
@@ -455,7 +460,7 @@ export function NotificationsPanel() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={(e) => {
+                                    onClick={e => {
                                       e.stopPropagation();
                                       deleteNotif.mutate(notification.id);
                                     }}
@@ -464,7 +469,9 @@ export function NotificationsPanel() {
                                     <Archive className="w-3 h-3 text-gray-400 dark:text-white/40" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>Arquivar notificação</TooltipContent>
+                                <TooltipContent>
+                                  Arquivar notificação
+                                </TooltipContent>
                               </Tooltip>
                             </div>
                           </div>

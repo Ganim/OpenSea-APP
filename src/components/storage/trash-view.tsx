@@ -1,6 +1,12 @@
 'use client';
 
-import { Trash2, RotateCcw, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Trash2,
+  RotateCcw,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -65,7 +71,7 @@ export function TrashView({ className }: TrashViewProps) {
       <div
         className={cn(
           'flex flex-col items-center justify-center py-16 text-center',
-          className,
+          className
         )}
       >
         <Trash2 className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
@@ -101,16 +107,12 @@ export function TrashView({ className }: TrashViewProps) {
       {/* Items list */}
       <div className="flex-1 overflow-auto p-2 space-y-1">
         {/* Deleted folders */}
-        {data?.folders.map((folder) => (
+        {data?.folders.map(folder => (
           <div
             key={folder.id}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50/50 dark:bg-white/5 opacity-60 hover:opacity-100 transition-opacity"
           >
-            <FolderIcon
-              folder={folder}
-              size="sm"
-              className="shrink-0"
-            />
+            <FolderIcon folder={folder} size="sm" className="shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate line-through text-gray-600 dark:text-gray-400">
                 {folder.name}
@@ -137,7 +139,7 @@ export function TrashView({ className }: TrashViewProps) {
         ))}
 
         {/* Deleted files */}
-        {data?.files.map((file) => (
+        {data?.files.map(file => (
           <div
             key={file.id}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50/50 dark:bg-white/5 opacity-60 hover:opacity-100 transition-opacity"
@@ -184,7 +186,7 @@ export function TrashView({ className }: TrashViewProps) {
               variant="outline"
               size="icon-sm"
               disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -192,7 +194,7 @@ export function TrashView({ className }: TrashViewProps) {
               variant="outline"
               size="icon-sm"
               disabled={page >= Math.ceil(totalItems / TRASH_PAGE_LIMIT)}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => setPage(p => p + 1)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

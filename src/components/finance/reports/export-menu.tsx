@@ -20,14 +20,22 @@ interface ExportMenuProps {
   endDate: string;
 }
 
-const FORMAT_OPTIONS: { format: ExportFormat; label: string; icon: React.ElementType }[] = [
+const FORMAT_OPTIONS: {
+  format: ExportFormat;
+  label: string;
+  icon: React.ElementType;
+}[] = [
   { format: 'CSV', label: 'CSV', icon: FileSpreadsheet },
   { format: 'PDF', label: 'PDF', icon: FileText },
   { format: 'XLSX', label: 'Excel (XLSX)', icon: FileSpreadsheet },
   { format: 'DOCX', label: 'Word (DOCX)', icon: FileText },
 ];
 
-export function ExportMenu({ reportType, startDate, endDate }: ExportMenuProps) {
+export function ExportMenu({
+  reportType,
+  startDate,
+  endDate,
+}: ExportMenuProps) {
   const { mutate: exportReport, isPending } = useExportReport();
 
   return (
@@ -43,11 +51,16 @@ export function ExportMenu({ reportType, startDate, endDate }: ExportMenuProps) 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {FORMAT_OPTIONS.map((opt) => (
+        {FORMAT_OPTIONS.map(opt => (
           <DropdownMenuItem
             key={opt.format}
             onClick={() =>
-              exportReport({ reportType, format: opt.format, startDate, endDate })
+              exportReport({
+                reportType,
+                format: opt.format,
+                startDate,
+                endDate,
+              })
             }
           >
             <opt.icon className="h-4 w-4 mr-2" />

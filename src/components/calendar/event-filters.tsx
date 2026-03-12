@@ -34,13 +34,13 @@ export function EventFilters({
 }: EventFiltersProps) {
   return (
     <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-      {onEventSelect && (
-        <EventSearchCombobox onEventSelect={onEventSelect} />
-      )}
+      {onEventSelect && <EventSearchCombobox onEventSelect={onEventSelect} />}
 
       <Select
         value={selectedType ?? 'ALL'}
-        onValueChange={(val) => onTypeChange(val === 'ALL' ? undefined : (val as EventType))}
+        onValueChange={val =>
+          onTypeChange(val === 'ALL' ? undefined : (val as EventType))
+        }
       >
         <SelectTrigger className="w-[170px] h-9 text-sm bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <SelectValue placeholder="Tipo de evento" />
@@ -64,7 +64,10 @@ export function EventFilters({
           checked={includeSystemEvents}
           onCheckedChange={onSystemEventsChange}
         />
-        <Label htmlFor="system-events" className="text-sm whitespace-nowrap text-muted-foreground cursor-pointer">
+        <Label
+          htmlFor="system-events"
+          className="text-sm whitespace-nowrap text-muted-foreground cursor-pointer"
+        >
           Eventos do sistema
         </Label>
       </div>

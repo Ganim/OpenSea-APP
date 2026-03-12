@@ -202,7 +202,12 @@ export function BoardAutomationsDialog({
             <div className="space-y-3">
               {/* Nome */}
               <div className="space-y-1.5">
-                <label htmlFor="automation-name" className="text-sm font-medium">Nome</label>
+                <label
+                  htmlFor="automation-name"
+                  className="text-sm font-medium"
+                >
+                  Nome
+                </label>
                 <Input
                   id="automation-name"
                   placeholder="Ex: Mover para concluído"
@@ -213,7 +218,12 @@ export function BoardAutomationsDialog({
 
               {/* Gatilho */}
               <div className="space-y-1.5">
-                <label htmlFor="automation-trigger" className="text-sm font-medium">Gatilho</label>
+                <label
+                  htmlFor="automation-trigger"
+                  className="text-sm font-medium"
+                >
+                  Gatilho
+                </label>
                 <Select
                   value={trigger}
                   onValueChange={v => setTrigger(v as AutomationTrigger)}
@@ -238,7 +248,12 @@ export function BoardAutomationsDialog({
 
               {/* Acao */}
               <div className="space-y-1.5">
-                <label htmlFor="automation-action" className="text-sm font-medium">Ação</label>
+                <label
+                  htmlFor="automation-action"
+                  className="text-sm font-medium"
+                >
+                  Ação
+                </label>
                 <Select
                   value={action}
                   onValueChange={v => setAction(v as AutomationAction)}

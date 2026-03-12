@@ -16,7 +16,13 @@ import {
 } from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Deduction } from '@/types/hr';
-import { Calendar, ExternalLink, MinusCircle, RefreshCcwDot, X } from 'lucide-react';
+import {
+  Calendar,
+  ExternalLink,
+  MinusCircle,
+  RefreshCcwDot,
+  X,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   formatCurrency,

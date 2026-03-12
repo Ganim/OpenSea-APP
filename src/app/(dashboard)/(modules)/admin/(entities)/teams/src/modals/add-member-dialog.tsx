@@ -74,31 +74,37 @@ export function AddMemberDialog({
         setAllUsers(
           (response.users ?? []).map(u => ({
             id: u.id,
-            name: [u.profile?.name, u.profile?.surname].filter(Boolean).join(' ') || u.username,
+            name:
+              [u.profile?.name, u.profile?.surname].filter(Boolean).join(' ') ||
+              u.username,
             username: u.username,
             email: u.email,
             avatarUrl: u.profile?.avatarUrl ?? null,
-          })),
+          }))
         );
       })
       .catch(error => {
-        logger.error('Erro ao carregar usuários', error instanceof Error ? error : undefined);
+        logger.error(
+          'Erro ao carregar usuários',
+          error instanceof Error ? error : undefined
+        );
         setAllUsers([]);
       })
       .finally(() => setIsLoadingUsers(false));
   }, [open]);
 
   // Client-side filter by username
-  const searchResults = search.trim().length >= 2
-    ? allUsers.filter(u => {
-        const q = search.toLowerCase();
-        return (
-          u.username.toLowerCase().includes(q) ||
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q)
-        );
-      })
-    : [];
+  const searchResults =
+    search.trim().length >= 2
+      ? allUsers.filter(u => {
+          const q = search.toLowerCase();
+          return (
+            u.username.toLowerCase().includes(q) ||
+            u.name.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q)
+          );
+        })
+      : [];
 
   const addMemberMutation = useMutation({
     mutationFn: () =>
@@ -113,11 +119,15 @@ export function AddMemberDialog({
       showSuccessToast('Membro adicionado com sucesso');
       handleClose();
     },
-    onError: (error) => {
-      logger.error('Erro ao adicionar membro', error instanceof Error ? error : undefined);
+    onError: error => {
+      logger.error(
+        'Erro ao adicionar membro',
+        error instanceof Error ? error : undefined
+      );
       showErrorToast({
         title: 'Erro ao adicionar membro',
-        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
       });
     },
   });
@@ -187,19 +197,25 @@ export function AddMemberDialog({
                         size="sm"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm truncate">{user.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+                        <p className="font-medium text-sm truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          @{user.username}
+                        </p>
                       </div>
                     </button>
                   ))}
                 </div>
               )}
 
-              {!isLoadingUsers && search.trim().length >= 2 && searchResults.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-3">
-                  Nenhum usuário encontrado.
-                </p>
-              )}
+              {!isLoadingUsers &&
+                search.trim().length >= 2 &&
+                searchResults.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-3">
+                    Nenhum usuário encontrado.
+                  </p>
+                )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -212,7 +228,9 @@ export function AddMemberDialog({
                 />
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{selectedUser.name}</p>
-                  <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
+                  <p className="text-sm text-muted-foreground">
+                    @{selectedUser.username}
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -226,7 +244,10 @@ export function AddMemberDialog({
 
               <div className="space-y-2">
                 <Label>Papel</Label>
-                <Select value={role} onValueChange={v => setRole(v as 'ADMIN' | 'MEMBER')}>
+                <Select
+                  value={role}
+                  onValueChange={v => setRole(v as 'ADMIN' | 'MEMBER')}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

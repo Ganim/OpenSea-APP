@@ -39,8 +39,7 @@ export function useListBonuses(
         perPage: params?.perPage ?? 100,
       });
 
-      const bonuses =
-        (response as { bonuses?: Bonus[] }).bonuses ?? [];
+      const bonuses = (response as { bonuses?: Bonus[] }).bonuses ?? [];
       const page = params?.page ?? 1;
       const perPage = params?.perPage ?? 100;
 

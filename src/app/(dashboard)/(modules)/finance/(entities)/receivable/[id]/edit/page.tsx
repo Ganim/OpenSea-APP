@@ -252,12 +252,15 @@ export default function EditReceivablePage({
                   value={formData.description}
                   onChange={e => {
                     setFormData({ ...formData, description: e.target.value });
-                    if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
+                    if (errors.description)
+                      setErrors(prev => ({ ...prev, description: '' }));
                   }}
                   className={errors.description ? 'border-destructive' : ''}
                 />
                 {errors.description && (
-                  <p className="text-sm text-destructive mt-1">{errors.description}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.description}
+                  </p>
                 )}
               </div>
 
@@ -267,11 +270,15 @@ export default function EditReceivablePage({
                   value={formData.categoryId}
                   onValueChange={value => {
                     setFormData({ ...formData, categoryId: value });
-                    if (errors.categoryId) setErrors(prev => ({ ...prev, categoryId: '' }));
+                    if (errors.categoryId)
+                      setErrors(prev => ({ ...prev, categoryId: '' }));
                   }}
                   required
                 >
-                  <SelectTrigger id="categoryId" className={errors.categoryId ? 'border-destructive' : ''}>
+                  <SelectTrigger
+                    id="categoryId"
+                    className={errors.categoryId ? 'border-destructive' : ''}
+                  >
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -283,7 +290,9 @@ export default function EditReceivablePage({
                   </SelectContent>
                 </Select>
                 {errors.categoryId && (
-                  <p className="text-sm text-destructive mt-1">{errors.categoryId}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.categoryId}
+                  </p>
                 )}
               </div>
 
@@ -293,11 +302,15 @@ export default function EditReceivablePage({
                   value={formData.costCenterId}
                   onValueChange={value => {
                     setFormData({ ...formData, costCenterId: value });
-                    if (errors.costCenterId) setErrors(prev => ({ ...prev, costCenterId: '' }));
+                    if (errors.costCenterId)
+                      setErrors(prev => ({ ...prev, costCenterId: '' }));
                   }}
                   required
                 >
-                  <SelectTrigger id="costCenterId" className={errors.costCenterId ? 'border-destructive' : ''}>
+                  <SelectTrigger
+                    id="costCenterId"
+                    className={errors.costCenterId ? 'border-destructive' : ''}
+                  >
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -309,7 +322,9 @@ export default function EditReceivablePage({
                   </SelectContent>
                 </Select>
                 {errors.costCenterId && (
-                  <p className="text-sm text-destructive mt-1">{errors.costCenterId}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.costCenterId}
+                  </p>
                 )}
               </div>
 
@@ -359,12 +374,15 @@ export default function EditReceivablePage({
                       ...formData,
                       expectedAmount: parseFloat(e.target.value) || 0,
                     });
-                    if (errors.expectedAmount) setErrors(prev => ({ ...prev, expectedAmount: '' }));
+                    if (errors.expectedAmount)
+                      setErrors(prev => ({ ...prev, expectedAmount: '' }));
                   }}
                   className={errors.expectedAmount ? 'border-destructive' : ''}
                 />
                 {errors.expectedAmount && (
-                  <p className="text-sm text-destructive mt-1">{errors.expectedAmount}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.expectedAmount}
+                  </p>
                 )}
               </div>
 
@@ -377,12 +395,15 @@ export default function EditReceivablePage({
                   value={formData.dueDate}
                   onChange={e => {
                     setFormData({ ...formData, dueDate: e.target.value });
-                    if (errors.dueDate) setErrors(prev => ({ ...prev, dueDate: '' }));
+                    if (errors.dueDate)
+                      setErrors(prev => ({ ...prev, dueDate: '' }));
                   }}
                   className={errors.dueDate ? 'border-destructive' : ''}
                 />
                 {errors.dueDate && (
-                  <p className="text-sm text-destructive mt-1">{errors.dueDate}</p>
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.dueDate}
+                  </p>
                 )}
               </div>
 

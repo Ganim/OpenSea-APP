@@ -26,9 +26,7 @@ export function useFinanceCustomers(params?: {
       let customers = data.customers ?? [];
       if (params?.search) {
         const term = params.search.toLowerCase();
-        customers = customers.filter((c) =>
-          c.name.toLowerCase().includes(term)
-        );
+        customers = customers.filter(c => c.name.toLowerCase().includes(term));
       }
       return { customers };
     },

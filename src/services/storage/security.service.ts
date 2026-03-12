@@ -33,23 +33,27 @@ export const storageSecurityService = {
   async protectItem(data: ProtectItemRequest): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_ENDPOINTS.STORAGE.SECURITY.PROTECT,
-      data,
+      data
     );
   },
 
   // POST /v1/storage/security/unprotect - Remove proteção por senha
-  async unprotectItem(data: UnprotectItemRequest): Promise<{ message: string }> {
+  async unprotectItem(
+    data: UnprotectItemRequest
+  ): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_ENDPOINTS.STORAGE.SECURITY.UNPROTECT,
-      data,
+      data
     );
   },
 
   // POST /v1/storage/security/verify - Verifica senha de item protegido
-  async verifyProtection(data: VerifyProtectionRequest): Promise<VerifyProtectionResponse> {
+  async verifyProtection(
+    data: VerifyProtectionRequest
+  ): Promise<VerifyProtectionResponse> {
     return apiClient.post<VerifyProtectionResponse>(
       API_ENDPOINTS.STORAGE.SECURITY.VERIFY,
-      data,
+      data
     );
   },
 
@@ -57,7 +61,7 @@ export const storageSecurityService = {
   async hideItem(data: HideItemRequest): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_ENDPOINTS.STORAGE.SECURITY.HIDE,
-      data,
+      data
     );
   },
 
@@ -65,7 +69,7 @@ export const storageSecurityService = {
   async unhideItem(data: HideItemRequest): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_ENDPOINTS.STORAGE.SECURITY.UNHIDE,
-      data,
+      data
     );
   },
 
@@ -73,7 +77,7 @@ export const storageSecurityService = {
   async verifySecurityKey(key: string): Promise<{ valid: boolean }> {
     return apiClient.post<{ valid: boolean }>(
       API_ENDPOINTS.STORAGE.SECURITY.VERIFY_KEY,
-      { key },
+      { key }
     );
   },
 };

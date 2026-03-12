@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect, useCallback, Suspense, lazy } from 'react';
+import {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+  Suspense,
+  lazy,
+} from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useBoard } from '@/hooks/tasks/use-boards';
@@ -15,7 +23,9 @@ import { KanbanView } from '@/components/tasks/views/kanban-view';
 import { ListView } from '@/components/tasks/views/list-view';
 import { TableView } from '@/components/tasks/views/table-view';
 const CalendarView = lazy(() =>
-  import('@/components/tasks/views/calendar-view').then(m => ({ default: m.CalendarView }))
+  import('@/components/tasks/views/calendar-view').then(m => ({
+    default: m.CalendarView,
+  }))
 );
 import { CardDetailModal } from '@/components/tasks/cards/card-detail-modal';
 import { BoardSettingsDialog } from '@/components/tasks/boards/board-settings-dialog';
@@ -62,7 +72,7 @@ function BoardPageContent() {
   const isViewer = useMemo(() => {
     if (!board || !user) return false;
     if (board.ownerId === user.id) return false;
-    const membership = board.members?.find((m) => m.userId === user.id);
+    const membership = board.members?.find(m => m.userId === user.id);
     return membership?.role === 'VIEWER';
   }, [board, user]);
 
@@ -72,17 +82,17 @@ function BoardPageContent() {
 
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((c) => c.title.toLowerCase().includes(q));
+      result = result.filter(c => c.title.toLowerCase().includes(q));
     }
     if (filters.priority) {
-      result = result.filter((c) => c.priority === filters.priority);
+      result = result.filter(c => c.priority === filters.priority);
     }
     if (filters.assigneeId) {
-      result = result.filter((c) => c.assigneeId === filters.assigneeId);
+      result = result.filter(c => c.assigneeId === filters.assigneeId);
     }
     if (filters.labelId) {
-      result = result.filter((c) =>
-        c.labels?.some((l) => l.id === filters.labelId),
+      result = result.filter(c =>
+        c.labels?.some(l => l.id === filters.labelId)
       );
     }
 
@@ -217,10 +227,7 @@ function BoardPageContent() {
           {/* Title row */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div
-                className="p-2.5 rounded-xl"
-                style={gradient.style}
-              >
+              <div className="p-2.5 rounded-xl" style={gradient.style}>
                 <KanbanSquare className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -246,7 +253,7 @@ function BoardPageContent() {
                   <Input
                     placeholder="Buscar tarefas..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={e => setSearch(e.target.value)}
                     className="pl-9 h-9 bg-white dark:bg-white/10 border-gray-200 dark:border-white/10"
                   />
                 </div>
@@ -270,7 +277,9 @@ function BoardPageContent() {
       {/* View content */}
       <div
         ref={viewRef}
-        style={viewHeight ? { height: viewHeight, overflow: 'hidden' } : undefined}
+        style={
+          viewHeight ? { height: viewHeight, overflow: 'hidden' } : undefined
+        }
       >
         {currentView === 'kanban' && (
           <KanbanView
@@ -316,7 +325,7 @@ function BoardPageContent() {
       {selectedCardId && (
         <CardDetailModal
           open={!!selectedCardId}
-          onOpenChange={(open) => {
+          onOpenChange={open => {
             if (!open) setSelectedCardId(null);
           }}
           boardId={boardId}

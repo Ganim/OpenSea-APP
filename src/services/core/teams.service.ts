@@ -118,17 +118,22 @@ export const teamsService = {
   },
 
   // GET /v1/teams/my
-  async listMyTeams(params?: { page?: number; limit?: number }): Promise<TeamsListResponse> {
+  async listMyTeams(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<TeamsListResponse> {
     const queryParams: Record<string, string> = {};
     if (params?.page) queryParams.page = String(params.page);
     if (params?.limit) queryParams.limit = String(params.limit);
-    return apiClient.get<TeamsListResponse>(API_ENDPOINTS.TEAMS.MY, { params: queryParams });
+    return apiClient.get<TeamsListResponse>(API_ENDPOINTS.TEAMS.MY, {
+      params: queryParams,
+    });
   },
 
   // GET /v1/teams/:teamId/members
   async listTeamMembers(
     teamId: string,
-    params?: ListTeamMembersParams,
+    params?: ListTeamMembersParams
   ): Promise<TeamMembersListResponse> {
     const queryParams: Record<string, string> = {};
     if (params?.page) queryParams.page = String(params.page);
@@ -137,53 +142,55 @@ export const teamsService = {
     if (params?.search) queryParams.search = params.search;
     return apiClient.get<TeamMembersListResponse>(
       API_ENDPOINTS.TEAMS.MEMBERS.LIST(teamId),
-      { params: queryParams },
+      { params: queryParams }
     );
   },
 
   // POST /v1/teams/:teamId/members
   async addTeamMember(
     teamId: string,
-    data: { userId: string; role?: 'ADMIN' | 'MEMBER' },
+    data: { userId: string; role?: 'ADMIN' | 'MEMBER' }
   ): Promise<TeamMemberResponse> {
     return apiClient.post<TeamMemberResponse>(
       API_ENDPOINTS.TEAMS.MEMBERS.ADD(teamId),
-      data,
+      data
     );
   },
 
   // POST /v1/teams/:teamId/members/bulk
   async bulkAddMembers(
     teamId: string,
-    data: AddTeamMembersData,
+    data: AddTeamMembersData
   ): Promise<BulkAddMembersResponse> {
     return apiClient.post<BulkAddMembersResponse>(
       API_ENDPOINTS.TEAMS.MEMBERS.BULK_ADD(teamId),
-      data,
+      data
     );
   },
 
   // DELETE /v1/teams/:teamId/members/:memberId
   async removeTeamMember(teamId: string, memberId: string): Promise<void> {
-    await apiClient.delete(API_ENDPOINTS.TEAMS.MEMBERS.REMOVE(teamId, memberId));
+    await apiClient.delete(
+      API_ENDPOINTS.TEAMS.MEMBERS.REMOVE(teamId, memberId)
+    );
   },
 
   // PATCH /v1/teams/:teamId/members/:memberId/role
   async changeTeamMemberRole(
     teamId: string,
     memberId: string,
-    data: ChangeTeamMemberRoleData,
+    data: ChangeTeamMemberRoleData
   ): Promise<TeamMemberResponse> {
     return apiClient.patch<TeamMemberResponse>(
       API_ENDPOINTS.TEAMS.MEMBERS.CHANGE_ROLE(teamId, memberId),
-      data,
+      data
     );
   },
 
   // POST /v1/teams/:teamId/transfer-ownership
   async transferOwnership(
     teamId: string,
-    data: TransferOwnershipData,
+    data: TransferOwnershipData
   ): Promise<void> {
     await apiClient.post(API_ENDPOINTS.TEAMS.TRANSFER_OWNERSHIP(teamId), data);
   },
@@ -191,18 +198,18 @@ export const teamsService = {
   // GET /v1/teams/:teamId/emails
   async listTeamEmails(teamId: string): Promise<TeamEmailsListResponse> {
     return apiClient.get<TeamEmailsListResponse>(
-      API_ENDPOINTS.TEAMS.EMAILS.LIST(teamId),
+      API_ENDPOINTS.TEAMS.EMAILS.LIST(teamId)
     );
   },
 
   // POST /v1/teams/:teamId/emails
   async linkEmailToTeam(
     teamId: string,
-    data: LinkTeamEmailData,
+    data: LinkTeamEmailData
   ): Promise<TeamEmailResponse> {
     return apiClient.post<TeamEmailResponse>(
       API_ENDPOINTS.TEAMS.EMAILS.LINK(teamId),
-      data,
+      data
     );
   },
 
@@ -210,21 +217,18 @@ export const teamsService = {
   async updateTeamEmailPermissions(
     teamId: string,
     accountId: string,
-    data: UpdateTeamEmailPermissionsData,
+    data: UpdateTeamEmailPermissionsData
   ): Promise<TeamEmailResponse> {
     return apiClient.patch<TeamEmailResponse>(
       API_ENDPOINTS.TEAMS.EMAILS.UPDATE_PERMISSIONS(teamId, accountId),
-      data,
+      data
     );
   },
 
   // DELETE /v1/teams/:teamId/emails/:accountId
-  async unlinkEmailFromTeam(
-    teamId: string,
-    accountId: string,
-  ): Promise<void> {
+  async unlinkEmailFromTeam(teamId: string, accountId: string): Promise<void> {
     await apiClient.delete(
-      API_ENDPOINTS.TEAMS.EMAILS.UNLINK(teamId, accountId),
+      API_ENDPOINTS.TEAMS.EMAILS.UNLINK(teamId, accountId)
     );
   },
 };

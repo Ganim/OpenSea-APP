@@ -42,9 +42,9 @@ export interface Product {
     name: string;
     unitOfMeasure: string;
     sequentialCode?: number;
-    productAttributes: Record<string, unknown>;
-    variantAttributes: Record<string, unknown>;
-    itemAttributes: Record<string, unknown>;
+    productAttributes: TemplateAttributes;
+    variantAttributes: TemplateAttributes;
+    itemAttributes: TemplateAttributes;
     isActive: boolean;
     createdAt: string;
     updatedAt?: string;

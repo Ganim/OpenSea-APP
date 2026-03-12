@@ -17,26 +17,26 @@ export interface CalendarResponse {
 export const calendarsService = {
   async listMyCalendars(): Promise<CalendarsResponse> {
     return apiClient.get<CalendarsResponse>(
-      API_ENDPOINTS.CALENDAR.CALENDARS.LIST,
+      API_ENDPOINTS.CALENDAR.CALENDARS.LIST
     );
   },
 
   async createTeamCalendar(
-    data: CreateTeamCalendarData,
+    data: CreateTeamCalendarData
   ): Promise<CalendarResponse> {
     return apiClient.post<CalendarResponse>(
       API_ENDPOINTS.CALENDAR.CALENDARS.CREATE_TEAM,
-      data,
+      data
     );
   },
 
   async updateCalendar(
     id: string,
-    data: UpdateCalendarData,
+    data: UpdateCalendarData
   ): Promise<CalendarResponse> {
     return apiClient.patch<CalendarResponse>(
       API_ENDPOINTS.CALENDAR.CALENDARS.UPDATE(id),
-      data,
+      data
     );
   },
 
@@ -46,11 +46,11 @@ export const calendarsService = {
 
   async updateTeamCalendarPermissions(
     id: string,
-    data: TeamCalendarPermissions,
+    data: TeamCalendarPermissions
   ): Promise<void> {
     await apiClient.patch<void>(
       API_ENDPOINTS.CALENDAR.CALENDARS.UPDATE_PERMISSIONS(id),
-      data,
+      data
     );
   },
 };

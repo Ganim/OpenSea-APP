@@ -32,7 +32,16 @@ import {
 } from '@/components/ui/select';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Bonus } from '@/types/hr';
-import { Calendar, Download, ExternalLink, Eye, Plus, PlusCircle, Trash2, User } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  ExternalLink,
+  Eye,
+  Plus,
+  PlusCircle,
+  Trash2,
+  User,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
@@ -49,9 +58,22 @@ import {
   type BonusFilters,
 } from './src';
 
-const CreateModal = dynamic(() => import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
-const DeleteConfirmModal = dynamic(() => import('./src/modals/delete-confirm-modal').then(m => ({ default: m.DeleteConfirmModal })), { ssr: false });
+const CreateModal = dynamic(
+  () =>
+    import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
+const DeleteConfirmModal = dynamic(
+  () =>
+    import('./src/modals/delete-confirm-modal').then(m => ({
+      default: m.DeleteConfirmModal,
+    })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -127,7 +149,6 @@ export default function BonusesPage() {
     [filteredItems]
   );
 
-
   // ============================================================================
   // HANDLERS
   // ============================================================================
@@ -175,30 +196,43 @@ export default function BonusesPage() {
     }
   }, [deleteTarget, deleteMutation]);
 
-  const handleBulkDelete = useCallback(async (ids: string[]) => {
-    try {
-      for (const id of ids) {
-        await deleteMutation.mutateAsync(id);
+  const handleBulkDelete = useCallback(
+    async (ids: string[]) => {
+      try {
+        for (const id of ids) {
+          await deleteMutation.mutateAsync(id);
+        }
+        toast.success(`${ids.length} bonificação(ões) excluída(s)`);
+      } catch {
+        // Toast handled by mutation
       }
-      toast.success(`${ids.length} bonificação(ões) excluída(s)`);
-    } catch {
-      // Toast handled by mutation
-    }
-  }, [deleteMutation]);
+    },
+    [deleteMutation]
+  );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? bonuses.filter(b => ids.includes(b.id))
-      : bonuses;
-    exportToCSV(items, [
-      { header: 'Nome', accessor: b => b.name },
-      { header: 'Funcionário', accessor: b => getName(b.employeeId) },
-      { header: 'Valor', accessor: b => b.amount },
-      { header: 'Data', accessor: b => b.date ? new Date(b.date).toLocaleDateString('pt-BR') : '' },
-      { header: 'Motivo', accessor: b => b.reason },
-      { header: 'Paga', accessor: b => b.isPaid ? 'Sim' : 'Não' },
-    ], 'bonificacoes');
-  }, [bonuses, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0 ? bonuses.filter(b => ids.includes(b.id)) : bonuses;
+      exportToCSV(
+        items,
+        [
+          { header: 'Nome', accessor: b => b.name },
+          { header: 'Funcionário', accessor: b => getName(b.employeeId) },
+          { header: 'Valor', accessor: b => b.amount },
+          {
+            header: 'Data',
+            accessor: b =>
+              b.date ? new Date(b.date).toLocaleDateString('pt-BR') : '',
+          },
+          { header: 'Motivo', accessor: b => b.reason },
+          { header: 'Paga', accessor: b => (b.isPaid ? 'Sim' : 'Não') },
+        ],
+        'bonificacoes'
+      );
+    },
+    [bonuses, getName]
+  );
 
   // ============================================================================
   // CONTEXT MENU ACTIONS
@@ -343,29 +377,26 @@ export default function BonusesPage() {
     setIsCreateOpen(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-bonuses',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-bonuses',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-bonus',
+        title: 'Nova Bonificação',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-bonus',
-          title: 'Nova Bonificação',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI

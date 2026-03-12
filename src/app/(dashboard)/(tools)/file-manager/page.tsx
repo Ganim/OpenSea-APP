@@ -8,7 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { usePermissions } from '@/hooks/use-permissions';
-import { Eye, EyeOff, FolderOpen, FolderPlus, Trash2, Upload } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  FolderOpen,
+  FolderPlus,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 
 export default function FileManagerPage() {
@@ -82,7 +89,8 @@ export default function FileManagerPage() {
                     Gerenciador de Arquivos
                   </h1>
                   <p className="text-sm text-gray-600 dark:text-white/60">
-                    Organize, envie e compartilhe documentos e arquivos da empresa
+                    Organize, envie e compartilhe documentos e arquivos da
+                    empresa
                   </p>
                 </div>
               </div>

@@ -31,7 +31,12 @@ const FREQUENCIES: { value: Frequency; label: string; suffix: string }[] = [
   { value: 'YEARLY', label: 'Ano', suffix: 'ano(s)' },
 ];
 
-export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', titleSlot }: RecurrencePickerProps) {
+export function RecurrencePicker({
+  value,
+  onChange,
+  accentColor = '#3b82f6',
+  titleSlot,
+}: RecurrencePickerProps) {
   const [frequency, setFrequency] = useState<Frequency>('WEEKLY');
   const [interval, setInterval] = useState(1);
   const [weekdays, setWeekdays] = useState<string[]>([]);
@@ -41,9 +46,7 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
   useEffect(() => {
     if (!value) return;
     const match = value.replace('RRULE:', '');
-    const parts = Object.fromEntries(
-      match.split(';').map((p) => p.split('=')),
-    );
+    const parts = Object.fromEntries(match.split(';').map(p => p.split('=')));
     if (parts.FREQ) setFrequency(parts.FREQ as Frequency);
     if (parts.INTERVAL) setInterval(Number(parts.INTERVAL));
     if (parts.BYDAY) setWeekdays(parts.BYDAY.split(','));
@@ -58,7 +61,7 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
       if (c) parts.push(`COUNT=${c}`);
       onChange(`RRULE:${parts.join(';')}`);
     },
-    [onChange],
+    [onChange]
   );
 
   // Emit initial value on mount
@@ -90,7 +93,7 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
     emitRRule(frequency, interval, weekdays, val);
   };
 
-  const currentFreq = FREQUENCIES.find((f) => f.value === frequency)!;
+  const currentFreq = FREQUENCIES.find(f => f.value === frequency)!;
 
   return (
     <div className="space-y-3">
@@ -98,7 +101,7 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
       <div className="flex items-center gap-2">
         {titleSlot && <div className="flex-1 min-w-0">{titleSlot}</div>}
         <div className={cn('flex gap-1', !titleSlot && 'w-full')}>
-          {FREQUENCIES.map((f) => (
+          {FREQUENCIES.map(f => (
             <button
               key={f.value}
               type="button"
@@ -107,9 +110,13 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
                 'px-2.5 py-1 rounded-full text-[11px] font-medium transition-all',
                 frequency === f.value
                   ? 'text-white shadow-sm'
-                  : 'bg-muted/60 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10',
+                  : 'bg-muted/60 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
               )}
-              style={frequency === f.value ? { backgroundColor: accentColor } : undefined}
+              style={
+                frequency === f.value
+                  ? { backgroundColor: accentColor }
+                  : undefined
+              }
             >
               {f.label}
             </button>
@@ -125,10 +132,12 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
           min={1}
           max={99}
           value={interval}
-          onChange={(e) => handleIntervalChange(Number(e.target.value))}
+          onChange={e => handleIntervalChange(Number(e.target.value))}
           className="w-16 h-8 text-center text-sm px-1 [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <span className="text-xs text-muted-foreground">{currentFreq.suffix}</span>
+        <span className="text-xs text-muted-foreground">
+          {currentFreq.suffix}
+        </span>
 
         {/* Count */}
         <span className="text-xs text-muted-foreground ml-auto">por</span>
@@ -138,7 +147,7 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
           max={365}
           value={count ?? ''}
           placeholder="∞"
-          onChange={(e) => {
+          onChange={e => {
             const val = e.target.value ? Number(e.target.value) : undefined;
             handleCountChange(val);
           }}
@@ -158,18 +167,21 @@ export function RecurrencePicker({ value, onChange, accentColor = '#3b82f6', tit
               onValueChange={handleWeekdaysChange}
               className="w-full gap-1"
             >
-              {WEEKDAYS.map((day) => (
+              {WEEKDAYS.map(day => (
                 <ToggleGroupItem
                   key={day.value}
                   value={day.value}
                   size="sm"
                   className={cn(
                     'flex-1 h-8 rounded-md p-0 text-xs font-medium transition-all',
-                    weekdays.includes(day.value) && 'text-white',
+                    weekdays.includes(day.value) && 'text-white'
                   )}
                   style={
                     weekdays.includes(day.value)
-                      ? { backgroundColor: accentColor, borderColor: accentColor }
+                      ? {
+                          backgroundColor: accentColor,
+                          borderColor: accentColor,
+                        }
                       : undefined
                   }
                   title={day.full}

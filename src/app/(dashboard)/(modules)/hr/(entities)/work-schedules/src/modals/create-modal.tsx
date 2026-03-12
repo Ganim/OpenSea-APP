@@ -32,7 +32,11 @@ interface DaySchedule {
   enabled: boolean;
 }
 
-const DEFAULT_WEEKDAY: DaySchedule = { start: '08:00', end: '17:00', enabled: true };
+const DEFAULT_WEEKDAY: DaySchedule = {
+  start: '08:00',
+  end: '17:00',
+  enabled: true,
+};
 const DEFAULT_WEEKEND: DaySchedule = { start: '', end: '', enabled: false };
 
 function getDefaultDays(): Record<DayKey, DaySchedule> {
@@ -69,7 +73,11 @@ export function CreateModal({
     }
   }, [isOpen]);
 
-  function updateDay(day: DayKey, field: keyof DaySchedule, value: string | boolean) {
+  function updateDay(
+    day: DayKey,
+    field: keyof DaySchedule,
+    value: string | boolean
+  ) {
     setDays(prev => ({
       ...prev,
       [day]: { ...prev[day], [field]: value },
@@ -209,10 +217,7 @@ export function CreateModal({
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSubmit || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={!canSubmit || isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Criar Escala
           </Button>

@@ -25,7 +25,7 @@ export const commentsService = {
   async list(
     boardId: string,
     cardId: string,
-    params?: CommentsQuery,
+    params?: CommentsQuery
   ): Promise<CommentsResponse> {
     const query = new URLSearchParams();
 
@@ -43,11 +43,11 @@ export const commentsService = {
   async create(
     boardId: string,
     cardId: string,
-    data: CreateCommentRequest,
+    data: CreateCommentRequest
   ): Promise<CommentResponse> {
     return apiClient.post<CommentResponse>(
       API_ENDPOINTS.TASKS.COMMENTS.CREATE(boardId, cardId),
-      data,
+      data
     );
   },
 
@@ -55,21 +55,21 @@ export const commentsService = {
     boardId: string,
     cardId: string,
     commentId: string,
-    data: UpdateCommentRequest,
+    data: UpdateCommentRequest
   ): Promise<CommentResponse> {
     return apiClient.patch<CommentResponse>(
       API_ENDPOINTS.TASKS.COMMENTS.UPDATE(boardId, cardId, commentId),
-      data,
+      data
     );
   },
 
   async delete(
     boardId: string,
     cardId: string,
-    commentId: string,
+    commentId: string
   ): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.COMMENTS.DELETE(boardId, cardId, commentId),
+      API_ENDPOINTS.TASKS.COMMENTS.DELETE(boardId, cardId, commentId)
     );
   },
 
@@ -77,11 +77,11 @@ export const commentsService = {
     boardId: string,
     cardId: string,
     commentId: string,
-    emoji: string,
+    emoji: string
   ): Promise<void> {
     await apiClient.post<void>(
       API_ENDPOINTS.TASKS.COMMENTS.ADD_REACTION(boardId, cardId, commentId),
-      { emoji },
+      { emoji }
     );
   },
 
@@ -89,10 +89,15 @@ export const commentsService = {
     boardId: string,
     cardId: string,
     commentId: string,
-    emoji: string,
+    emoji: string
   ): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.COMMENTS.REMOVE_REACTION(boardId, cardId, commentId, emoji),
+      API_ENDPOINTS.TASKS.COMMENTS.REMOVE_REACTION(
+        boardId,
+        cardId,
+        commentId,
+        emoji
+      )
     );
   },
 };

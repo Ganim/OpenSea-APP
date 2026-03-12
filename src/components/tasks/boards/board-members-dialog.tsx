@@ -133,7 +133,11 @@ export function BoardMembersDialog({
                     className="flex items-center gap-3 rounded-md border px-3 py-2"
                   >
                     {/* Avatar */}
-                    <MemberAvatar name={member.userName ?? member.userEmail} avatarUrl={member.userAvatarUrl} size="md" />
+                    <MemberAvatar
+                      name={member.userName ?? member.userEmail}
+                      avatarUrl={member.userAvatarUrl}
+                      size="md"
+                    />
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
@@ -234,7 +238,9 @@ export function BoardMembersDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="member-role" className="text-sm font-medium">Função</label>
+                <label htmlFor="member-role" className="text-sm font-medium">
+                  Função
+                </label>
                 <Select
                   value={inviteRole}
                   onValueChange={v => setInviteRole(v as BoardMemberRole)}

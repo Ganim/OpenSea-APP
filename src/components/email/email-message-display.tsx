@@ -324,7 +324,7 @@ export function EmailMessageDisplay({
   const shouldFetchThread =
     detail?.messageId && (detail?.threadId || detail?.isAnswered);
   const threadQuery = useThreadMessages(
-    shouldFetchThread ? selectedMessage?.id ?? null : null
+    shouldFetchThread ? (selectedMessage?.id ?? null) : null
   );
   const threadMessages = threadQuery.data?.messages ?? [];
   const hasThread = threadMessages.length > 1;
@@ -812,9 +812,7 @@ export function EmailMessageDisplay({
                     className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     <MessageSquare className="size-3.5" />
-                    <span>
-                      {threadMessages.length} mensagens na conversa
-                    </span>
+                    <span>{threadMessages.length} mensagens na conversa</span>
                     {threadExpanded ? (
                       <ChevronUp className="size-3" />
                     ) : (
@@ -829,7 +827,7 @@ export function EmailMessageDisplay({
                 {hasThread && threadExpanded ? (
                   /* ═══ Thread conversation view ═══ */
                   <div className="max-w-3xl space-y-6">
-                    {threadMessages.map((threadMsg) => {
+                    {threadMessages.map(threadMsg => {
                       const isCurrent = threadMsg.id === selectedMessage.id;
                       const msgHtml = threadMsg.bodyHtmlSanitized
                         ? stripGlobalEmailStyles(threadMsg.bodyHtmlSanitized)

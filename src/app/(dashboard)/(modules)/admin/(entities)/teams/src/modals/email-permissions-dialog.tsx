@@ -43,7 +43,7 @@ const ACTIONS = [
 ] as const;
 
 function extractPermissions(
-  te: TeamEmailAccount,
+  te: TeamEmailAccount
 ): UpdateTeamEmailPermissionsData {
   return {
     ownerCanRead: te.ownerCanRead,
@@ -79,7 +79,7 @@ export function EmailPermissionsDialog({
       teamsService.updateTeamEmailPermissions(
         teamId,
         teamEmail!.accountId,
-        data,
+        data
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'emails'] });
@@ -139,7 +139,10 @@ export function EmailPermissionsDialog({
                         const key =
                           `${role.key}Can${action.key}` as PermissionKey;
                         return (
-                          <td key={action.key} className="text-center py-2.5 px-3">
+                          <td
+                            key={action.key}
+                            className="text-center py-2.5 px-3"
+                          >
                             <Switch
                               checked={permissions[key] ?? false}
                               onCheckedChange={() => togglePermission(key)}

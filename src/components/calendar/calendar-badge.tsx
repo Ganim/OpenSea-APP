@@ -23,7 +23,12 @@ interface CalendarBadgeProps {
   className?: string;
 }
 
-export function CalendarBadge({ name, type, color, className }: CalendarBadgeProps) {
+export function CalendarBadge({
+  name,
+  type,
+  color,
+  className,
+}: CalendarBadgeProps) {
   const bgColor = color ?? '#64748b';
   const icon = CALENDAR_TYPE_ICONS[type];
   const typeLabel = CALENDAR_TYPE_LABELS[type];

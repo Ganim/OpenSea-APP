@@ -140,7 +140,12 @@ export default function NewPlanPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="plan-tier" className="text-sm font-medium central-text">Tier</label>
+              <label
+                htmlFor="plan-tier"
+                className="text-sm font-medium central-text"
+              >
+                Tier
+              </label>
               <GlassSelect
                 value={form.tier}
                 onValueChange={v =>
@@ -198,7 +203,12 @@ export default function NewPlanPage() {
                 checked={form.isActive}
                 onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))}
               />
-              <label htmlFor="plan-active" className="text-sm font-medium central-text">Ativo</label>
+              <label
+                htmlFor="plan-active"
+                className="text-sm font-medium central-text"
+              >
+                Ativo
+              </label>
             </div>
           </div>
         </GlassCard>

@@ -10,10 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  UNIT_OF_MEASURE_LABELS,
-  type UnitOfMeasure,
-} from '@/types/stock';
+import { UNIT_OF_MEASURE_LABELS, type UnitOfMeasure } from '@/types/stock';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -22,7 +19,10 @@ interface QuickCreateFormProps {
   onSubmit: (data: { name: string; unitOfMeasure: UnitOfMeasure }) => void;
 }
 
-const UOM_ENTRIES = Object.entries(UNIT_OF_MEASURE_LABELS) as [UnitOfMeasure, string][];
+const UOM_ENTRIES = Object.entries(UNIT_OF_MEASURE_LABELS) as [
+  UnitOfMeasure,
+  string,
+][];
 
 export function QuickCreateForm({ onBack, onSubmit }: QuickCreateFormProps) {
   const [name, setName] = useState('');
@@ -43,7 +43,12 @@ export function QuickCreateForm({ onBack, onSubmit }: QuickCreateFormProps) {
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          className="shrink-0"
+        >
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <h3 className="text-lg font-semibold">Novo Template Manual</h3>

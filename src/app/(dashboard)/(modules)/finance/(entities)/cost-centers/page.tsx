@@ -174,16 +174,20 @@ export default function CostCentersPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleCreate = useCallback(async (data: Parameters<typeof createMutation.mutateAsync>[0]) => {
-    try {
-      await createMutation.mutateAsync(data);
-      toast.success('Centro de custo criado com sucesso!');
-      setIsCreateOpen(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao criar centro de custo';
-      toast.error(message);
-    }
-  }, [createMutation]);
+  const handleCreate = useCallback(
+    async (data: Parameters<typeof createMutation.mutateAsync>[0]) => {
+      try {
+        await createMutation.mutateAsync(data);
+        toast.success('Centro de custo criado com sucesso!');
+        setIsCreateOpen(false);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Erro ao criar centro de custo';
+        toast.error(message);
+      }
+    },
+    [createMutation]
+  );
 
   const handleView = useCallback(
     (ids: string[]) => {
@@ -217,7 +221,8 @@ export default function CostCentersPage() {
       toast.success('Centro de custo excluído com sucesso!');
       setDeleteTarget(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao excluir centro de custo';
+      const message =
+        err instanceof Error ? err.message : 'Erro ao excluir centro de custo';
       toast.error(message);
     }
   }, [deleteTarget, deleteMutation]);
@@ -265,7 +270,9 @@ export default function CostCentersPage() {
         setLinkTarget(null);
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : 'Erro ao atualizar centro de custo';
+          err instanceof Error
+            ? err.message
+            : 'Erro ao atualizar centro de custo';
         toast.error(message);
       }
     },
@@ -287,7 +294,7 @@ export default function CostCentersPage() {
         icon: Building2,
         onClick: handleLinkCompany,
         separator: 'before',
-        hidden: (ids) => {
+        hidden: ids => {
           const cc = costCenters.find(c => c.id === ids[0]);
           return !!cc?.companyId;
         },
@@ -299,7 +306,7 @@ export default function CostCentersPage() {
         icon: Link2Off,
         onClick: handleUnlinkCompany,
         separator: 'before',
-        hidden: (ids) => {
+        hidden: ids => {
           const cc = costCenters.find(c => c.id === ids[0]);
           return !cc?.companyId;
         },
@@ -370,7 +377,8 @@ export default function CostCentersPage() {
               {item.createdAt && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString('pt-BR')}
+                  Criado em{' '}
+                  {new Date(item.createdAt).toLocaleDateString('pt-BR')}
                 </span>
               )}
             </div>
@@ -524,7 +532,9 @@ export default function CostCentersPage() {
               message="Ocorreu um erro ao tentar carregar os centros de custo. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => { refetch() },
+                onClick: () => {
+                  refetch();
+                },
               }}
             />
           ) : (
@@ -576,7 +586,9 @@ export default function CostCentersPage() {
             }}
             onSuccess={handleDeleteConfirm}
             title={'Confirmar Exclus\u00E3o'}
-            description={'Digite seu PIN de a\u00E7\u00E3o para excluir este centro de custo. Esta a\u00E7\u00E3o n\u00E3o pode ser desfeita.'}
+            description={
+              'Digite seu PIN de a\u00E7\u00E3o para excluir este centro de custo. Esta a\u00E7\u00E3o n\u00E3o pode ser desfeita.'
+            }
           />
         </PageBody>
       </PageLayout>

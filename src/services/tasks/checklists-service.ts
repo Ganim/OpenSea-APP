@@ -20,11 +20,11 @@ export const checklistsService = {
   async create(
     boardId: string,
     cardId: string,
-    data: CreateChecklistRequest,
+    data: CreateChecklistRequest
   ): Promise<ChecklistResponse> {
     return apiClient.post<ChecklistResponse>(
       API_ENDPOINTS.TASKS.CHECKLISTS.CREATE(boardId, cardId),
-      data,
+      data
     );
   },
 
@@ -32,21 +32,21 @@ export const checklistsService = {
     boardId: string,
     cardId: string,
     checklistId: string,
-    data: UpdateChecklistRequest,
+    data: UpdateChecklistRequest
   ): Promise<ChecklistResponse> {
     return apiClient.patch<ChecklistResponse>(
       API_ENDPOINTS.TASKS.CHECKLISTS.UPDATE(boardId, cardId, checklistId),
-      data,
+      data
     );
   },
 
   async delete(
     boardId: string,
     cardId: string,
-    checklistId: string,
+    checklistId: string
   ): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.CHECKLISTS.DELETE(boardId, cardId, checklistId),
+      API_ENDPOINTS.TASKS.CHECKLISTS.DELETE(boardId, cardId, checklistId)
     );
   },
 
@@ -54,11 +54,11 @@ export const checklistsService = {
     boardId: string,
     cardId: string,
     checklistId: string,
-    data: CreateChecklistItemRequest,
+    data: CreateChecklistItemRequest
   ): Promise<ChecklistItemResponse> {
     return apiClient.post<ChecklistItemResponse>(
       API_ENDPOINTS.TASKS.CHECKLISTS.ADD_ITEM(boardId, cardId, checklistId),
-      data,
+      data
     );
   },
 
@@ -66,10 +66,15 @@ export const checklistsService = {
     boardId: string,
     cardId: string,
     checklistId: string,
-    itemId: string,
+    itemId: string
   ): Promise<ChecklistItemResponse> {
     return apiClient.patch<ChecklistItemResponse>(
-      API_ENDPOINTS.TASKS.CHECKLISTS.TOGGLE_ITEM(boardId, cardId, checklistId, itemId),
+      API_ENDPOINTS.TASKS.CHECKLISTS.TOGGLE_ITEM(
+        boardId,
+        cardId,
+        checklistId,
+        itemId
+      )
     );
   },
 
@@ -77,10 +82,15 @@ export const checklistsService = {
     boardId: string,
     cardId: string,
     checklistId: string,
-    itemId: string,
+    itemId: string
   ): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.CHECKLISTS.DELETE_ITEM(boardId, cardId, checklistId, itemId),
+      API_ENDPOINTS.TASKS.CHECKLISTS.DELETE_ITEM(
+        boardId,
+        cardId,
+        checklistId,
+        itemId
+      )
     );
   },
 };

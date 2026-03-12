@@ -20,16 +20,29 @@ export { subtasksService } from './subtasks-service';
 export type { SubtasksResponse, SubtaskResponse } from './subtasks-service';
 
 export { checklistsService } from './checklists-service';
-export type { ChecklistResponse, ChecklistItemResponse } from './checklists-service';
+export type {
+  ChecklistResponse,
+  ChecklistItemResponse,
+} from './checklists-service';
 
 export { attachmentsService } from './attachments-service';
-export type { AttachmentsResponse, AttachmentResponse } from './attachments-service';
+export type {
+  AttachmentsResponse,
+  AttachmentResponse,
+} from './attachments-service';
 
 export { activityService } from './activity-service';
 export type { ActivitiesResponse } from './activity-service';
 
 export { automationsService } from './automations-service';
-export type { AutomationsResponse, AutomationResponse } from './automations-service';
+export type {
+  AutomationsResponse,
+  AutomationResponse,
+} from './automations-service';
 
 export { customFieldsService } from './custom-fields-service';
-export type { CustomFieldsResponse, CustomFieldResponse, CustomFieldValuesResponse } from './custom-fields-service';
+export type {
+  CustomFieldsResponse,
+  CustomFieldResponse,
+  CustomFieldValuesResponse,
+} from './custom-fields-service';

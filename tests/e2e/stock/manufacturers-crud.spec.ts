@@ -74,9 +74,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await waitForToast(page, 'sucesso');
 
     // Verify manufacturer appears in grid (name is uppercased in UI)
-    await expect(
-      page.getByText(mfrName.toUpperCase())
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(mfrName.toUpperCase())).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('3.2 - Criar fabricante via API e verificar listagem', async ({
@@ -97,9 +97,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     ).toBeVisible({ timeout: 10_000 });
 
     // Verify manufacturer appears (uppercased in UI)
-    await expect(
-      page.getByText(mfr.name.toUpperCase())
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(mfr.name.toUpperCase())).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Cleanup
     await deleteManufacturerViaApi(userToken, mfr.id);
@@ -120,9 +120,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await searchInput.fill(mfr.name);
     await page.waitForTimeout(500);
 
-    await expect(
-      page.getByText(mfr.name.toUpperCase())
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(mfr.name.toUpperCase())).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Cleanup
     await deleteManufacturerViaApi(userToken, mfr.id);
@@ -186,13 +186,13 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await clickContextAction(page, 'Renomear');
 
     // Rename modal — title: "Renomear Fabricante", field: "Nome do Fabricante"
-    await expect(
-      page.getByText('Renomear Fabricante')
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Renomear Fabricante')).toBeVisible({
+      timeout: 5_000,
+    });
 
-    const nameInput = page.locator(
-      '[role="dialog"] input[type="text"]'
-    ).first();
+    const nameInput = page
+      .locator('[role="dialog"] input[type="text"]')
+      .first();
     await nameInput.clear();
     await nameInput.fill(newName);
 
@@ -201,9 +201,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await saveBtn.click();
     await waitForToast(page, 'sucesso');
 
-    await expect(
-      page.getByText(newName.toUpperCase())
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(newName.toUpperCase())).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Cleanup
     await deleteManufacturerViaApi(userToken, mfr.id);
@@ -257,9 +257,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await confirmDelete(page);
     await waitForToast(page, 'sucesso');
 
-    await expect(
-      page.getByText(mfr.name.toUpperCase())
-    ).not.toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(mfr.name.toUpperCase())).not.toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   // ─── DETAIL PAGE ───────────────────────────────────────────────────
@@ -277,9 +277,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify detail page loaded — name appears in heading area
-    await expect(
-      page.locator(`text=${mfr.name}`).first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(`text=${mfr.name}`).first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Check tabs exist (Geral, Histórico de Pedidos, Documentos)
     await expect(page.getByText('Geral')).toBeVisible({ timeout: 5_000 });
@@ -301,9 +301,9 @@ test.describe('Stock - Manufacturers CRUD', () => {
     await page.waitForLoadState('networkidle');
 
     // Wait for "Identificação" section heading — confirms form loaded
-    await expect(
-      page.getByText('Identificação')
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Identificação')).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Verify name field has current value
     const nameInput = page.locator('input').first();

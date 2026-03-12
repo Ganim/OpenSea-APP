@@ -474,13 +474,13 @@ export function VariantForm({
                     <SelectValue placeholder="Selecione o padrão..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.entries(PATTERN_LABELS) as [Pattern, string][]).map(
-                      ([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
-                        </SelectItem>
-                      )
-                    )}
+                    {(
+                      Object.entries(PATTERN_LABELS) as [Pattern, string][]
+                    ).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {pattern && (

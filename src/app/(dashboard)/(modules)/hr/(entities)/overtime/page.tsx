@@ -33,7 +33,16 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { Overtime } from '@/types/hr';
-import { Check, Clock, Coffee, Download, ExternalLink, Eye, Plus, User } from 'lucide-react';
+import {
+  Check,
+  Clock,
+  Coffee,
+  Download,
+  ExternalLink,
+  Eye,
+  Plus,
+  User,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
@@ -49,9 +58,22 @@ import {
   getApprovalColor,
 } from './src';
 
-const CreateModal = dynamic(() => import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })), { ssr: false });
-const ApproveModal = dynamic(() => import('./src/modals/approve-modal').then(m => ({ default: m.ApproveModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
+const CreateModal = dynamic(
+  () =>
+    import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
+  { ssr: false }
+);
+const ApproveModal = dynamic(
+  () =>
+    import('./src/modals/approve-modal').then(m => ({
+      default: m.ApproveModal,
+    })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -100,7 +122,10 @@ export default function OvertimePage() {
 
   const overtimeList = data?.overtime ?? [];
 
-  const employeeIds = useMemo(() => overtimeList.map(o => o.employeeId), [overtimeList]);
+  const employeeIds = useMemo(
+    () => overtimeList.map(o => o.employeeId),
+    [overtimeList]
+  );
   const { getName } = useEmployeeMap(employeeIds);
 
   // ============================================================================
@@ -132,7 +157,6 @@ export default function OvertimePage() {
     [filteredItems]
   );
 
-
   // ============================================================================
   // HANDLERS
   // ============================================================================
@@ -163,37 +187,59 @@ export default function OvertimePage() {
     [overtimeList]
   );
 
-  const handleBulkApprove = useCallback(async (ids: string[]) => {
-    const pendingIds = ids.filter(id => {
-      const item = overtimeList.find(o => o.id === id);
-      return item && item.approved === null;
-    });
-    if (pendingIds.length === 0) {
-      toast.info('Nenhuma hora extra pendente selecionada');
-      return;
-    }
-    try {
-      for (const id of pendingIds) {
-        await approveMutation.mutateAsync({ id, data: { addToTimeBank: false } });
+  const handleBulkApprove = useCallback(
+    async (ids: string[]) => {
+      const pendingIds = ids.filter(id => {
+        const item = overtimeList.find(o => o.id === id);
+        return item && item.approved === null;
+      });
+      if (pendingIds.length === 0) {
+        toast.info('Nenhuma hora extra pendente selecionada');
+        return;
       }
-      toast.success(`${pendingIds.length} hora(s) extra(s) aprovada(s)`);
-    } catch {
-      // Toast handled by mutation
-    }
-  }, [overtimeList, approveMutation]);
+      try {
+        for (const id of pendingIds) {
+          await approveMutation.mutateAsync({
+            id,
+            data: { addToTimeBank: false },
+          });
+        }
+        toast.success(`${pendingIds.length} hora(s) extra(s) aprovada(s)`);
+      } catch {
+        // Toast handled by mutation
+      }
+    },
+    [overtimeList, approveMutation]
+  );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? overtimeList.filter(o => ids.includes(o.id))
-      : overtimeList;
-    exportToCSV(items, [
-      { header: 'Funcionário', accessor: o => getName(o.employeeId) },
-      { header: 'Data', accessor: o => o.date ? new Date(o.date).toLocaleDateString('pt-BR') : '' },
-      { header: 'Horas', accessor: o => o.hours },
-      { header: 'Motivo', accessor: o => o.reason },
-      { header: 'Aprovada', accessor: o => o.approved === null ? 'Pendente' : o.approved ? 'Sim' : 'Não' },
-    ], 'horas-extras');
-  }, [overtimeList, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0
+          ? overtimeList.filter(o => ids.includes(o.id))
+          : overtimeList;
+      exportToCSV(
+        items,
+        [
+          { header: 'Funcionário', accessor: o => getName(o.employeeId) },
+          {
+            header: 'Data',
+            accessor: o =>
+              o.date ? new Date(o.date).toLocaleDateString('pt-BR') : '',
+          },
+          { header: 'Horas', accessor: o => o.hours },
+          { header: 'Motivo', accessor: o => o.reason },
+          {
+            header: 'Aprovada',
+            accessor: o =>
+              o.approved === null ? 'Pendente' : o.approved ? 'Sim' : 'Não',
+          },
+        ],
+        'horas-extras'
+      );
+    },
+    [overtimeList, getName]
+  );
 
   // ============================================================================
   // CONTEXT MENU
@@ -340,29 +386,26 @@ export default function OvertimePage() {
     setIsCreateOpen(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-overtime',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-overtime',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-overtime',
+        title: 'Registrar Hora Extra',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-overtime',
-          title: 'Registrar Hora Extra',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI
@@ -532,13 +575,17 @@ export default function OvertimePage() {
           <HRSelectionToolbar
             totalItems={filteredItems.length}
             actions={[
-              ...(canApprove ? [{
-                id: 'bulk-approve',
-                label: 'Aprovar',
-                icon: Check,
-                onClick: handleBulkApprove,
-                variant: 'default' as const,
-              }] : []),
+              ...(canApprove
+                ? [
+                    {
+                      id: 'bulk-approve',
+                      label: 'Aprovar',
+                      icon: Check,
+                      onClick: handleBulkApprove,
+                      variant: 'default' as const,
+                    },
+                  ]
+                : []),
             ]}
             defaultActions={{
               export: true,

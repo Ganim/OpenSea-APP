@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -16,13 +12,12 @@ import {
 import { CalendarEventForm } from './calendar-event-form';
 import { useUpdateCalendarEvent, useMyCalendars } from '@/hooks/calendar';
 import { EVENT_TYPE_COLORS } from '@/types/calendar';
-import type { CalendarEvent, EventType, EventVisibility } from '@/types/calendar';
-import {
-  Pencil,
-  Save,
-  Loader2,
-  CalendarDays,
-} from 'lucide-react';
+import type {
+  CalendarEvent,
+  EventType,
+  EventVisibility,
+} from '@/types/calendar';
+import { Pencil, Save, Loader2, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 
@@ -40,7 +35,7 @@ export function EventEditDialog({
   const updateEvent = useUpdateCalendarEvent();
   const { data: calendarsData } = useMyCalendars();
   const eventCalendar = calendarsData?.calendars?.find(
-    (c) => c.id === event?.calendarId,
+    c => c.id === event?.calendarId
   );
 
   const [title, setTitle] = useState('');
@@ -63,7 +58,8 @@ export function EventEditDialog({
   const [typeOpen, setTypeOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
 
-  const accentColor = color || event?.color || EVENT_TYPE_COLORS[type] || '#3b82f6';
+  const accentColor =
+    color || event?.color || EVENT_TYPE_COLORS[type] || '#3b82f6';
 
   useEffect(() => {
     if (event && open) {
@@ -77,7 +73,9 @@ export function EventEditDialog({
       setVisibility(event.visibility);
       setColor(event.color ?? '');
       setRrule(event.rrule);
-      setTimezone(event.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
+      setTimezone(
+        event.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
       setShowDescription(!!event.description);
       setShowLocation(!!event.location);
       setShowTimezone(!!event.timezone);
@@ -178,7 +176,9 @@ export function EventEditDialog({
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <span
                     className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: eventCalendar.color ?? accentColor }}
+                    style={{
+                      backgroundColor: eventCalendar.color ?? accentColor,
+                    }}
                   />
                   {eventCalendar.name}
                 </p>
@@ -191,16 +191,47 @@ export function EventEditDialog({
           idPrefix="edit"
           accentColor={accentColor}
           state={{
-            title, description, location, startDate, endDate, isAllDay,
-            type, visibility, color, rrule, timezone,
-            showDescription, showLocation, showTimezone, showRecurrence,
+            title,
+            description,
+            location,
+            startDate,
+            endDate,
+            isAllDay,
+            type,
+            visibility,
+            color,
+            rrule,
+            timezone,
+            showDescription,
+            showLocation,
+            showTimezone,
+            showRecurrence,
           }}
           actions={{
-            setTitle, setDescription, setLocation, setStartDate, setEndDate, setIsAllDay,
-            setType, setVisibility, setColor, setRrule, setTimezone,
-            setShowDescription, setShowLocation, setShowTimezone, setShowRecurrence,
+            setTitle,
+            setDescription,
+            setLocation,
+            setStartDate,
+            setEndDate,
+            setIsAllDay,
+            setType,
+            setVisibility,
+            setColor,
+            setRrule,
+            setTimezone,
+            setShowDescription,
+            setShowLocation,
+            setShowTimezone,
+            setShowRecurrence,
           }}
-          popovers={{ tzOpen, setTzOpen, typeOpen, setTypeOpen, colorOpen, setColorOpen }}
+          popovers={{
+            tzOpen,
+            setTzOpen,
+            typeOpen,
+            setTypeOpen,
+            colorOpen,
+            setColorOpen,
+          }}
           calendarSlot={calendarSlot}
         />
 

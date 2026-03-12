@@ -128,7 +128,7 @@ async function updateThumbnail(
   formData.append('file', file, filename || 'thumbnail.png');
   return apiClient.post<{ thumbnailUrl: string }>(
     `${BASE_URL}/${id}/generate-thumbnail`,
-    formData,
+    formData
   );
 }
 
@@ -144,7 +144,7 @@ async function uploadImage(
   formData.append('file', file);
   return apiClient.post<{ imageUrl: string }>(
     `${BASE_URL}/${id}/upload-image`,
-    formData,
+    formData
   );
 }
 

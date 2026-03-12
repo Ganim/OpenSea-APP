@@ -39,7 +39,7 @@ export const storageFilesService = {
 
     const response = await apiClient.post<{ token: string; expiresIn: number }>(
       API_ENDPOINTS.STORAGE.FILES.SERVE_TOKEN,
-      {},
+      {}
     );
 
     _serveTokenCache = {
@@ -55,13 +55,22 @@ export const storageFilesService = {
    * Used for <iframe>, <video>, <img> src attributes which cannot send Authorization headers.
    * Falls back to session token if serve token is not yet cached (sync method).
    */
-  getServeUrl(id: string, options?: { version?: number; download?: boolean; password?: string; format?: 'pdf' }): string {
+  getServeUrl(
+    id: string,
+    options?: {
+      version?: number;
+      download?: boolean;
+      password?: string;
+      format?: 'pdf';
+    }
+  ): string {
     // Use cached serve token if available, otherwise fall back to session token
-    const token = _serveTokenCache && _serveTokenCache.expiresAt > Date.now() + 60_000
-      ? _serveTokenCache.token
-      : typeof window !== 'undefined'
-        ? localStorage.getItem(authConfig.tokenKey)
-        : null;
+    const token =
+      _serveTokenCache && _serveTokenCache.expiresAt > Date.now() + 60_000
+        ? _serveTokenCache.token
+        : typeof window !== 'undefined'
+          ? localStorage.getItem(authConfig.tokenKey)
+          : null;
     const base = `${apiConfig.baseURL}${API_ENDPOINTS.STORAGE.FILES.SERVE(id)}`;
     const params = new URLSearchParams();
     if (token) params.set('token', token);
@@ -75,7 +84,15 @@ export const storageFilesService = {
   /**
    * Returns a serve URL using a fresh short-lived token (async version).
    */
-  async getServeUrlWithToken(id: string, options?: { version?: number; download?: boolean; password?: string; format?: 'pdf' }): Promise<string> {
+  async getServeUrlWithToken(
+    id: string,
+    options?: {
+      version?: number;
+      download?: boolean;
+      password?: string;
+      format?: 'pdf';
+    }
+  ): Promise<string> {
     const token = await this.getServeToken();
     const base = `${apiConfig.baseURL}${API_ENDPOINTS.STORAGE.FILES.SERVE(id)}`;
     const params = new URLSearchParams();
@@ -120,7 +137,8 @@ export const storageFilesService = {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
-      if (options?.entityType) formData.append('entityType', options.entityType);
+      if (options?.entityType)
+        formData.append('entityType', options.entityType);
       if (options?.entityId) formData.append('entityId', options.entityId);
 
       const endpoint = folderId
@@ -128,16 +146,17 @@ export const storageFilesService = {
         : API_ENDPOINTS.STORAGE.FILES.UPLOAD_ROOT;
 
       const url = new URL(endpoint, apiConfig.baseURL).toString();
-      const token = typeof window !== 'undefined'
-        ? localStorage.getItem(authConfig.tokenKey)
-        : null;
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem(authConfig.tokenKey)
+          : null;
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', url);
       if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
       xhr.withCredentials = true;
 
-      xhr.upload.onprogress = (e) => {
+      xhr.upload.onprogress = e => {
         if (e.lengthComputable) {
           onProgress(Math.round((e.loaded / e.total) * 100));
         }
@@ -264,7 +283,9 @@ export const storageFilesService = {
   },
 
   // GET /v1/storage/search - Busca global de arquivos e pastas
-  async searchStorage(query: SearchStorageQuery): Promise<SearchStorageResponse> {
+  async searchStorage(
+    query: SearchStorageQuery
+  ): Promise<SearchStorageResponse> {
     const params: Record<string, string> = { query: query.query };
     if (query.fileType) params.fileType = query.fileType;
     if (query.page) params.page = String(query.page);
@@ -281,18 +302,23 @@ export const storageFilesService = {
   },
 
   // POST /v1/storage/files/compress - Compactar arquivos/pastas em ZIP
-  async compressFiles(data: CompressFilesRequest): Promise<CompressFilesResponse> {
+  async compressFiles(
+    data: CompressFilesRequest
+  ): Promise<CompressFilesResponse> {
     return apiClient.post<CompressFilesResponse>(
       API_ENDPOINTS.STORAGE.FILES.COMPRESS,
-      data,
+      data
     );
   },
 
   // POST /v1/storage/files/:id/decompress - Descompactar arquivo ZIP
-  async decompressFile(id: string, data?: DecompressFileRequest): Promise<DecompressFileResponse> {
+  async decompressFile(
+    id: string,
+    data?: DecompressFileRequest
+  ): Promise<DecompressFileResponse> {
     return apiClient.post<DecompressFileResponse>(
       API_ENDPOINTS.STORAGE.FILES.DECOMPRESS(id),
-      data ?? {},
+      data ?? {}
     );
   },
 
@@ -300,43 +326,43 @@ export const storageFilesService = {
 
   // POST /v1/storage/files/multipart/initiate
   async initiateMultipartUpload(
-    data: MultipartInitiateRequest,
+    data: MultipartInitiateRequest
   ): Promise<MultipartInitiateResponse> {
     return apiClient.post<MultipartInitiateResponse>(
       API_ENDPOINTS.STORAGE.FILES.MULTIPART.INITIATE,
-      data,
+      data
     );
   },
 
   // POST /v1/storage/files/multipart/complete
   async completeMultipartUpload(
-    data: MultipartCompleteRequest,
+    data: MultipartCompleteRequest
   ): Promise<MultipartCompleteResponse> {
     return apiClient.post<MultipartCompleteResponse>(
       API_ENDPOINTS.STORAGE.FILES.MULTIPART.COMPLETE,
-      data,
+      data
     );
   },
 
   // POST /v1/storage/files/multipart/abort
   async abortMultipartUpload(key: string, uploadId: string): Promise<void> {
-    return apiClient.post<void>(
-      API_ENDPOINTS.STORAGE.FILES.MULTIPART.ABORT,
-      { key, uploadId },
-    );
+    return apiClient.post<void>(API_ENDPOINTS.STORAGE.FILES.MULTIPART.ABORT, {
+      key,
+      uploadId,
+    });
   },
 
   // Upload a single part to a presigned URL, returns ETag
   async uploadPart(
     url: string,
     blob: Blob,
-    onProgress?: (loaded: number) => void,
+    onProgress?: (loaded: number) => void
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', url);
 
-      xhr.upload.onprogress = (e) => {
+      xhr.upload.onprogress = e => {
         if (e.lengthComputable && onProgress) {
           onProgress(e.loaded);
         }
@@ -355,7 +381,8 @@ export const storageFilesService = {
         }
       };
 
-      xhr.onerror = () => reject(new Error('Erro de rede durante upload da parte'));
+      xhr.onerror = () =>
+        reject(new Error('Erro de rede durante upload da parte'));
       xhr.timeout = 5 * 60 * 1000;
       xhr.ontimeout = () => reject(new Error('Upload da parte expirou'));
 
@@ -371,7 +398,7 @@ export const storageFilesService = {
     folderId: string | null,
     file: File,
     onProgress: (percent: number) => void,
-    options?: { entityType?: string; entityId?: string },
+    options?: { entityType?: string; entityId?: string }
   ): Promise<FileResponse> {
     if (file.size < this.MULTIPART_THRESHOLD) {
       return this.uploadFileWithProgress(folderId, file, onProgress, options);
@@ -400,7 +427,7 @@ export const storageFilesService = {
         const end = Math.min(start + this.PART_SIZE, file.size);
         const blob = file.slice(start, end);
 
-        const etag = await this.uploadPart(url, blob, (loaded) => {
+        const etag = await this.uploadPart(url, blob, loaded => {
           const currentTotal = totalUploaded + loaded;
           onProgress(Math.round((currentTotal / file.size) * 95)); // Reserve 5% for completion
         });
@@ -436,7 +463,10 @@ export const storageFilesService = {
   // --- Bulk Operations ---
 
   // POST /v1/storage/bulk/delete - Excluir múltiplos itens
-  async bulkDelete(data: { fileIds?: string[]; folderIds?: string[] }): Promise<{
+  async bulkDelete(data: {
+    fileIds?: string[];
+    folderIds?: string[];
+  }): Promise<{
     deletedFiles: number;
     deletedFolders: number;
     errors: string[];

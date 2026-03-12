@@ -33,7 +33,10 @@ import { InlineBankAccountForm } from './inline-bank-account-form';
 import { InlineCategoryForm } from './inline-category-form';
 import { InlineCreateModal } from './inline-create-modal';
 import { InlineCustomerForm } from './inline-customer-form';
-import type { ReceivableWizardData, WizardStep } from './receivable-wizard-modal';
+import type {
+  ReceivableWizardData,
+  WizardStep,
+} from './receivable-wizard-modal';
 
 // ============================================================================
 // PROPS
@@ -141,7 +144,7 @@ export function WizardStepDataReceivable({
             <Calendar
               mode="single"
               selected={dateValue}
-              onSelect={(date) => {
+              onSelect={date => {
                 if (date) {
                   onChange(format(date, 'yyyy-MM-dd'));
                 }
@@ -166,7 +169,7 @@ export function WizardStepDataReceivable({
         <Input
           id="wizard-rcv-description"
           value={wizardData.description}
-          onChange={(e) => updateWizardData({ description: e.target.value })}
+          onChange={e => updateWizardData({ description: e.target.value })}
           placeholder="Descrição do lançamento"
           required
         />
@@ -178,8 +181,8 @@ export function WizardStepDataReceivable({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.customerId}
-            onValueChange={(val) => {
-              const selected = customers.find((c) => c.id === val);
+            onValueChange={val => {
+              const selected = customers.find(c => c.id === val);
               updateWizardData({
                 customerId: val,
                 customerName: selected?.name ?? '',
@@ -190,7 +193,7 @@ export function WizardStepDataReceivable({
               <SelectValue placeholder="Selecione um cliente" />
             </SelectTrigger>
             <SelectContent>
-              {customers.map((c) => (
+              {customers.map(c => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name}
                 </SelectItem>
@@ -215,8 +218,8 @@ export function WizardStepDataReceivable({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.categoryId}
-            onValueChange={(val) => {
-              const selected = categories.find((c) => c.id === val);
+            onValueChange={val => {
+              const selected = categories.find(c => c.id === val);
               updateWizardData({
                 categoryId: val,
                 categoryName: selected?.name ?? '',
@@ -227,7 +230,7 @@ export function WizardStepDataReceivable({
               <SelectValue placeholder="Selecione uma categoria" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </SelectItem>
@@ -249,12 +252,12 @@ export function WizardStepDataReceivable({
       {/* Centro de Custo (single/rateio) */}
       <CostCenterAllocationComponent
         value={wizardData.costCenterAllocations}
-        onChange={(allocations) =>
+        onChange={allocations =>
           updateWizardData({ costCenterAllocations: allocations })
         }
         totalAmount={wizardData.expectedAmount}
         useRateio={wizardData.useRateio}
-        onToggleRateio={(useRateio) => updateWizardData({ useRateio })}
+        onToggleRateio={useRateio => updateWizardData({ useRateio })}
         costCenterId={wizardData.costCenterId}
         costCenterName={wizardData.costCenterName}
         onCostCenterChange={(id, name) =>
@@ -268,8 +271,8 @@ export function WizardStepDataReceivable({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.bankAccountId}
-            onValueChange={(val) => {
-              const selected = bankAccounts.find((ba) => ba.id === val);
+            onValueChange={val => {
+              const selected = bankAccounts.find(ba => ba.id === val);
               updateWizardData({
                 bankAccountId: val,
                 bankAccountName: selected?.name ?? '',
@@ -280,7 +283,7 @@ export function WizardStepDataReceivable({
               <SelectValue placeholder="Selecione uma conta (opcional)" />
             </SelectTrigger>
             <SelectContent>
-              {bankAccounts.map((ba) => (
+              {bankAccounts.map(ba => (
                 <SelectItem key={ba.id} value={ba.id}>
                   {ba.name}
                 </SelectItem>
@@ -308,7 +311,7 @@ export function WizardStepDataReceivable({
           step="0.01"
           min="0"
           value={wizardData.expectedAmount || ''}
-          onChange={(e) =>
+          onChange={e =>
             updateWizardData({
               expectedAmount: parseFloat(e.target.value) || 0,
             })
@@ -319,13 +322,13 @@ export function WizardStepDataReceivable({
 
       {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
-        {renderDatePicker('Data de Emissão', wizardData.issueDate, (date) =>
+        {renderDatePicker('Data de Emissão', wizardData.issueDate, date =>
           updateWizardData({ issueDate: date })
         )}
         {renderDatePicker(
           'Data de Vencimento',
           wizardData.dueDate,
-          (date) => updateWizardData({ dueDate: date }),
+          date => updateWizardData({ dueDate: date }),
           true
         )}
       </div>
@@ -333,7 +336,7 @@ export function WizardStepDataReceivable({
       {renderDatePicker(
         'Data de Competência',
         wizardData.competenceDate,
-        (date) => updateWizardData({ competenceDate: date })
+        date => updateWizardData({ competenceDate: date })
       )}
 
       {/* Observações */}
@@ -342,7 +345,7 @@ export function WizardStepDataReceivable({
         <Textarea
           id="wizard-rcv-notes"
           value={wizardData.notes}
-          onChange={(e) => updateWizardData({ notes: e.target.value })}
+          onChange={e => updateWizardData({ notes: e.target.value })}
           placeholder="Observações adicionais (opcional)"
           rows={3}
         />
@@ -367,7 +370,7 @@ export function WizardStepDataReceivable({
         title="Novo Cliente"
       >
         <InlineCustomerForm
-          onCreated={(customer) => {
+          onCreated={customer => {
             setShowCustomerCreate(false);
             updateWizardData({
               customerId: customer.id,
@@ -384,7 +387,7 @@ export function WizardStepDataReceivable({
         title="Nova Categoria"
       >
         <InlineCategoryForm
-          onCreated={(category) => {
+          onCreated={category => {
             setShowCategoryCreate(false);
             updateWizardData({
               categoryId: category.id,
@@ -401,7 +404,7 @@ export function WizardStepDataReceivable({
         title="Nova Conta Bancária"
       >
         <InlineBankAccountForm
-          onCreated={(bankAccount) => {
+          onCreated={bankAccount => {
             setShowBankAccountCreate(false);
             updateWizardData({
               bankAccountId: bankAccount.id,

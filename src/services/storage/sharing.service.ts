@@ -12,21 +12,21 @@ export const storageSharingService = {
   // POST /v1/storage/files/:fileId/share - Create share link
   async createShareLink(
     fileId: string,
-    data: CreateShareLinkRequest,
+    data: CreateShareLinkRequest
   ): Promise<StorageShareLink> {
     return apiClient.request<StorageShareLink>(
       API_ENDPOINTS.STORAGE.SHARING.CREATE(fileId),
       {
         method: 'POST',
         body: JSON.stringify(data),
-      },
+      }
     );
   },
 
   // GET /v1/storage/files/:fileId/shares - List share links
   async listShareLinks(fileId: string): Promise<StorageShareLink[]> {
     return apiClient.request<StorageShareLink[]>(
-      API_ENDPOINTS.STORAGE.SHARING.LIST(fileId),
+      API_ENDPOINTS.STORAGE.SHARING.LIST(fileId)
     );
   },
 
@@ -36,28 +36,28 @@ export const storageSharingService = {
       API_ENDPOINTS.STORAGE.SHARING.REVOKE(linkId),
       {
         method: 'DELETE',
-      },
+      }
     );
   },
 
   // GET /v1/public/shared/:token - Access shared file (public, no auth)
   async accessSharedFile(token: string): Promise<SharedFileInfo> {
     return apiClient.request<SharedFileInfo>(
-      API_ENDPOINTS.STORAGE.PUBLIC.ACCESS(token),
+      API_ENDPOINTS.STORAGE.PUBLIC.ACCESS(token)
     );
   },
 
   // POST /v1/public/shared/:token/download - Download shared file (public, no auth)
   async downloadSharedFile(
     token: string,
-    data?: SharedFileDownloadRequest,
+    data?: SharedFileDownloadRequest
   ): Promise<SharedFileDownloadResponse> {
     return apiClient.request<SharedFileDownloadResponse>(
       API_ENDPOINTS.STORAGE.PUBLIC.DOWNLOAD(token),
       {
         method: 'POST',
         body: JSON.stringify(data ?? {}),
-      },
+      }
     );
   },
 };

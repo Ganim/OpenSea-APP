@@ -2,13 +2,11 @@
 
 import type { ReceivableSubType } from '@/types/finance';
 import { RECEIVABLE_SUBTYPE_LABELS } from '@/types/finance';
-import {
-  Briefcase,
-  Home,
-  MoreHorizontal,
-  ShoppingCart,
-} from 'lucide-react';
-import type { ReceivableWizardData, WizardStep } from './receivable-wizard-modal';
+import { Briefcase, Home, MoreHorizontal, ShoppingCart } from 'lucide-react';
+import type {
+  ReceivableWizardData,
+  WizardStep,
+} from './receivable-wizard-modal';
 
 // ============================================================================
 // CONSTANTS

@@ -75,10 +75,7 @@ function TimeControlPageContent() {
   const clockOut = useClockOut();
 
   const entries = data?.timeEntries ?? [];
-  const groupedEntries = useMemo(
-    () => groupEntriesByDate(entries),
-    [entries]
-  );
+  const groupedEntries = useMemo(() => groupEntriesByDate(entries), [entries]);
   const sortedDates = useMemo(
     () => Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a)),
     [groupedEntries]
@@ -201,7 +198,9 @@ function TimeControlPageContent() {
             message="Ocorreu um erro ao carregar os registros de ponto. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => { refetch(); },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : entries.length === 0 ? (

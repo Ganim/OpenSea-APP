@@ -8,18 +8,35 @@ import { DRAG_MIME } from './constants';
 interface UseStorageDragDropOptions {
   selectedItems?: DragMoveItem[];
   folders: StorageFolder[];
-  onDragMoveToFolder?: (targetFolderId: string | null, items: DragMoveItem[]) => void;
+  onDragMoveToFolder?: (
+    targetFolderId: string | null,
+    items: DragMoveItem[]
+  ) => void;
 }
 
-export function useStorageDragDrop({ selectedItems, folders, onDragMoveToFolder }: UseStorageDragDropOptions) {
+export function useStorageDragDrop({
+  selectedItems,
+  folders,
+  onDragMoveToFolder,
+}: UseStorageDragDropOptions) {
   const [draggedItemIds, setDraggedItemIds] = useState<Set<string>>(new Set());
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
 
   const handleItemDragStart = useCallback(
-    (id: string, type: 'folder' | 'file', isSystem: boolean, e: React.DragEvent) => {
-      if (isSystem) { e.preventDefault(); return; }
+    (
+      id: string,
+      type: 'folder' | 'file',
+      isSystem: boolean,
+      e: React.DragEvent
+    ) => {
+      if (isSystem) {
+        e.preventDefault();
+        return;
+      }
       let items: DragMoveItem[];
-      const isInSelection = selectedItems?.some(si => si.id === id && si.type === type);
+      const isInSelection = selectedItems?.some(
+        si => si.id === id && si.type === type
+      );
       if (isInSelection && selectedItems && selectedItems.length > 1) {
         items = selectedItems.filter(si => {
           if (si.type === 'folder') {
@@ -84,11 +101,15 @@ export function useStorageDragDrop({ selectedItems, folders, onDragMoveToFolder 
       if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
       if (draggedItemIds.has(folderId) || isSystem) return;
       try {
-        const items: DragMoveItem[] = JSON.parse(e.dataTransfer.getData(DRAG_MIME));
+        const items: DragMoveItem[] = JSON.parse(
+          e.dataTransfer.getData(DRAG_MIME)
+        );
         if (items.length > 0 && onDragMoveToFolder) {
           onDragMoveToFolder(folderId, items);
         }
-      } catch { /* Invalid data */ }
+      } catch {
+        /* Invalid data */
+      }
       setDraggedItemIds(new Set());
     },
     [draggedItemIds, onDragMoveToFolder]

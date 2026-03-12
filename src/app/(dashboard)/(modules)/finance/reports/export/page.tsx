@@ -25,7 +25,9 @@ export default function ExportPage() {
   const [startDate, setStartDate] = useState(defaultRange.start);
   const [endDate, setEndDate] = useState(defaultRange.end);
   const [format, setFormat] = useState<'CSV' | 'PDF' | 'XLSX' | 'DOCX'>('CSV');
-  const [reportType, setReportType] = useState<'ENTRIES' | 'DRE' | 'BALANCE' | 'CASHFLOW'>('ENTRIES');
+  const [reportType, setReportType] = useState<
+    'ENTRIES' | 'DRE' | 'BALANCE' | 'CASHFLOW'
+  >('ENTRIES');
   const [message, setMessage] = useState<{
     type: 'success' | 'error';
     text: string;
@@ -129,13 +131,18 @@ export default function ExportPage() {
           <div className="space-y-3">
             <Label>Tipo de Relatório</Label>
             <div className="flex flex-wrap gap-4">
-              {([
-                ['ENTRIES', 'Lançamentos'],
-                ['DRE', 'DRE'],
-                ['BALANCE', 'Balanço'],
-                ['CASHFLOW', 'Fluxo de Caixa'],
-              ] as const).map(([value, label]) => (
-                <label key={value} className="flex items-center gap-2 cursor-pointer">
+              {(
+                [
+                  ['ENTRIES', 'Lançamentos'],
+                  ['DRE', 'DRE'],
+                  ['BALANCE', 'Balanço'],
+                  ['CASHFLOW', 'Fluxo de Caixa'],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="reportType"
@@ -153,13 +160,18 @@ export default function ExportPage() {
           <div className="space-y-3">
             <Label>Formato de Exportação</Label>
             <div className="flex flex-wrap gap-4">
-              {([
-                ['CSV', 'CSV'],
-                ['PDF', 'PDF'],
-                ['XLSX', 'Excel (XLSX)'],
-                ['DOCX', 'Word (DOCX)'],
-              ] as const).map(([value, label]) => (
-                <label key={value} className="flex items-center gap-2 cursor-pointer">
+              {(
+                [
+                  ['CSV', 'CSV'],
+                  ['PDF', 'PDF'],
+                  ['XLSX', 'Excel (XLSX)'],
+                  ['DOCX', 'Word (DOCX)'],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="format"

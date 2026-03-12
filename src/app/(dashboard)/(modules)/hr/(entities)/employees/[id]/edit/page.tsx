@@ -251,7 +251,10 @@ export default function EmployeeEditPage() {
   const validateAll = () => {
     const newErrors: Record<string, string> = {};
     newErrors.fullName = validateField('fullName', fullName);
-    newErrors.registrationNumber = validateField('registrationNumber', registrationNumber);
+    newErrors.registrationNumber = validateField(
+      'registrationNumber',
+      registrationNumber
+    );
     newErrors.cpf = validateField('cpf', cpf);
 
     // Remove empty errors
@@ -639,10 +642,15 @@ export default function EmployeeEditPage() {
                       value={fullName}
                       onChange={e => {
                         setFullName(e.target.value);
-                        if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
+                        if (errors.fullName)
+                          setErrors(prev => ({ ...prev, fullName: '' }));
                       }}
                       onBlur={() => handleBlur('fullName', fullName)}
-                      className={errors.fullName ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                      className={
+                        errors.fullName
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : ''
+                      }
                       required
                     />
                     {errors.fullName && (
@@ -658,14 +666,26 @@ export default function EmployeeEditPage() {
                       value={registrationNumber}
                       onChange={e => {
                         setRegistrationNumber(e.target.value);
-                        if (errors.registrationNumber) setErrors(prev => ({ ...prev, registrationNumber: '' }));
+                        if (errors.registrationNumber)
+                          setErrors(prev => ({
+                            ...prev,
+                            registrationNumber: '',
+                          }));
                       }}
-                      onBlur={() => handleBlur('registrationNumber', registrationNumber)}
-                      className={errors.registrationNumber ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                      onBlur={() =>
+                        handleBlur('registrationNumber', registrationNumber)
+                      }
+                      className={
+                        errors.registrationNumber
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : ''
+                      }
                       required
                     />
                     {errors.registrationNumber && (
-                      <p className="text-xs text-red-500">{errors.registrationNumber}</p>
+                      <p className="text-xs text-red-500">
+                        {errors.registrationNumber}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -679,10 +699,15 @@ export default function EmployeeEditPage() {
                       value={cpf}
                       onChange={e => {
                         setCpf(e.target.value);
-                        if (errors.cpf) setErrors(prev => ({ ...prev, cpf: '' }));
+                        if (errors.cpf)
+                          setErrors(prev => ({ ...prev, cpf: '' }));
                       }}
                       onBlur={() => handleBlur('cpf', cpf)}
-                      className={errors.cpf ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                      className={
+                        errors.cpf
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : ''
+                      }
                       required
                     />
                     {errors.cpf && (

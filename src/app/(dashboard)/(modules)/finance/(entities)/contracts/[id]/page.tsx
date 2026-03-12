@@ -144,7 +144,7 @@ export default function ContractDetailPage({
     if (!contract) return;
     storageFilesService
       .listFiles({ entityType: 'CONTRACT', entityId: contract.id, limit: 50 })
-      .then((res) => setAttachments(res.files ?? []))
+      .then(res => setAttachments(res.files ?? []))
       .catch(() => {});
   }, [contract]);
 
@@ -157,7 +157,7 @@ export default function ContractDetailPage({
           entityType: 'CONTRACT',
           entityId: contract.id,
         });
-        setAttachments((prev) => [...prev, result.file]);
+        setAttachments(prev => [...prev, result.file]);
         toast.success('Documento enviado com sucesso!');
       } catch (err) {
         const message =
@@ -200,9 +200,7 @@ export default function ContractDetailPage({
       refetch();
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : 'Erro ao gerar lançamentos';
+        err instanceof Error ? err.message : 'Erro ao gerar lançamentos';
       toast.error(message);
     }
   }, [id, generateEntries, refetch]);
@@ -283,9 +281,7 @@ export default function ContractDetailPage({
               disabled={generateEntries.isPending}
             >
               <Play className="h-4 w-4 mr-2" />
-              {generateEntries.isPending
-                ? 'Gerando...'
-                : 'Gerar Lançamentos'}
+              {generateEntries.isPending ? 'Gerando...' : 'Gerar Lançamentos'}
             </Button>
           )}
           {canEdit && !contract.isCancelled && (
@@ -403,14 +399,8 @@ export default function ContractDetailPage({
               Vigencia
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InfoRow
-                label="Início"
-                value={formatDate(contract.startDate)}
-              />
-              <InfoRow
-                label="Término"
-                value={formatDate(contract.endDate)}
-              />
+              <InfoRow label="Início" value={formatDate(contract.startDate)} />
+              <InfoRow label="Término" value={formatDate(contract.endDate)} />
               <InfoRow
                 label="Dias ate o Vencimento"
                 value={
@@ -442,10 +432,7 @@ export default function ContractDetailPage({
               <h2 className="text-lg font-semibold mb-4">Classificação</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {contract.categoryId && (
-                  <InfoRow
-                    label="Categoria"
-                    value={contract.categoryId}
-                  />
+                  <InfoRow label="Categoria" value={contract.categoryId} />
                 )}
                 {contract.costCenterId && (
                   <InfoRow
@@ -555,7 +542,7 @@ export default function ContractDetailPage({
             </div>
             {attachments.length > 0 ? (
               <div className="space-y-2">
-                {attachments.map((file) => (
+                {attachments.map(file => (
                   <div
                     key={file.id}
                     className="flex items-center justify-between p-3 rounded-lg border"
@@ -602,7 +589,10 @@ export default function ContractDetailPage({
             </h2>
             <div className="space-y-2 text-xs">
               <InfoRow label="ID" value={contract.id} />
-              <InfoRow label="Criado em" value={formatDate(contract.createdAt)} />
+              <InfoRow
+                label="Criado em"
+                value={formatDate(contract.createdAt)}
+              />
               {contract.updatedAt && (
                 <InfoRow
                   label="Atualizado em"

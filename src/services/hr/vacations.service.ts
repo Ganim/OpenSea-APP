@@ -62,35 +62,68 @@ export interface VacationBalanceResponse {
 }
 
 export const vacationsService = {
-  async create(data: CreateVacationPeriodRequest): Promise<VacationPeriodResponse> {
-    return apiClient.post<VacationPeriodResponse>('/v1/hr/vacation-periods', data);
+  async create(
+    data: CreateVacationPeriodRequest
+  ): Promise<VacationPeriodResponse> {
+    return apiClient.post<VacationPeriodResponse>(
+      '/v1/hr/vacation-periods',
+      data
+    );
   },
 
-  async schedule(id: string, data: ScheduleVacationRequest): Promise<VacationPeriodResponse> {
-    return apiClient.patch<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}/schedule`, data);
+  async schedule(
+    id: string,
+    data: ScheduleVacationRequest
+  ): Promise<VacationPeriodResponse> {
+    return apiClient.patch<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}/schedule`,
+      data
+    );
   },
 
   async start(id: string): Promise<VacationPeriodResponse> {
-    return apiClient.patch<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}/start`, {});
+    return apiClient.patch<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}/start`,
+      {}
+    );
   },
 
-  async complete(id: string, data: CompleteVacationRequest): Promise<VacationPeriodResponse> {
-    return apiClient.patch<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}/complete`, data);
+  async complete(
+    id: string,
+    data: CompleteVacationRequest
+  ): Promise<VacationPeriodResponse> {
+    return apiClient.patch<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}/complete`,
+      data
+    );
   },
 
-  async sellDays(id: string, data: SellVacationDaysRequest): Promise<VacationPeriodResponse> {
-    return apiClient.patch<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}/sell`, data);
+  async sellDays(
+    id: string,
+    data: SellVacationDaysRequest
+  ): Promise<VacationPeriodResponse> {
+    return apiClient.patch<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}/sell`,
+      data
+    );
   },
 
   async cancelSchedule(id: string): Promise<VacationPeriodResponse> {
-    return apiClient.patch<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}/cancel-schedule`, {});
+    return apiClient.patch<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}/cancel-schedule`,
+      {}
+    );
   },
 
   async get(id: string): Promise<VacationPeriodResponse> {
-    return apiClient.get<VacationPeriodResponse>(`/v1/hr/vacation-periods/${id}`);
+    return apiClient.get<VacationPeriodResponse>(
+      `/v1/hr/vacation-periods/${id}`
+    );
   },
 
-  async list(params?: ListVacationPeriodsParams): Promise<VacationPeriodsResponse> {
+  async list(
+    params?: ListVacationPeriodsParams
+  ): Promise<VacationPeriodsResponse> {
     const query = new URLSearchParams();
     if (params?.employeeId) query.append('employeeId', params.employeeId);
     if (params?.status) query.append('status', params.status);
@@ -98,10 +131,16 @@ export const vacationsService = {
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<VacationPeriodsResponse>(`/v1/hr/vacation-periods${qs ? `?${qs}` : ''}`);
+    return apiClient.get<VacationPeriodsResponse>(
+      `/v1/hr/vacation-periods${qs ? `?${qs}` : ''}`
+    );
   },
 
-  async getVacationBalance(employeeId: string): Promise<VacationBalanceResponse> {
-    return apiClient.get<VacationBalanceResponse>(`/v1/hr/employees/${employeeId}/vacation-balance`);
+  async getVacationBalance(
+    employeeId: string
+  ): Promise<VacationBalanceResponse> {
+    return apiClient.get<VacationBalanceResponse>(
+      `/v1/hr/employees/${employeeId}/vacation-balance`
+    );
   },
 };

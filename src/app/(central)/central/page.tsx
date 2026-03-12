@@ -85,8 +85,18 @@ function formatMrr(value: number): string {
 function formatMonth(month: string): string {
   const [year, m] = month.split('-');
   const monthNames = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
   ];
   return `${monthNames[parseInt(m, 10) - 1]} ${year?.slice(2)}`;
 }
@@ -128,14 +138,16 @@ export default function CentralDashboardPage() {
     : [];
 
   const growthData = stats
-    ? stats.monthlyGrowth.map((item) => ({
+    ? stats.monthlyGrowth.map(item => ({
         month: formatMonth(item.month),
         count: item.count,
       }))
     : [];
 
   const chartTextColor = isDark ? '#94a3b8' : '#64748b';
-  const chartGridColor = isDark ? 'rgba(148,163,184,0.1)' : 'rgba(100,116,139,0.15)';
+  const chartGridColor = isDark
+    ? 'rgba(148,163,184,0.1)'
+    : 'rgba(100,116,139,0.15)';
 
   return (
     <div className="space-y-6 pb-8">
@@ -264,7 +276,7 @@ export default function CentralDashboardPage() {
                   formatter={(value: number) => [value, 'Empresas']}
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {tierData.map((entry) => (
+                  {tierData.map(entry => (
                     <Cell
                       key={entry.tier}
                       fill={TIER_COLORS[entry.tier] ?? '#3b82f6'}
@@ -305,7 +317,7 @@ export default function CentralDashboardPage() {
                     paddingAngle={4}
                     dataKey="value"
                   >
-                    {statusData.map((entry) => (
+                    {statusData.map(entry => (
                       <Cell
                         key={entry.status}
                         fill={STATUS_COLORS[entry.status] ?? '#94a3b8'}
@@ -324,7 +336,7 @@ export default function CentralDashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-3">
-                {statusData.map((entry) => (
+                {statusData.map(entry => (
                   <div key={entry.status} className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full"

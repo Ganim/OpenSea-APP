@@ -149,8 +149,7 @@ export function BoardSettingsColumns({
                   className="h-7 text-sm"
                   autoFocus
                   onKeyDown={e => {
-                    if (e.key === 'Enter')
-                      handleUpdateColumnName(column.id);
+                    if (e.key === 'Enter') handleUpdateColumnName(column.id);
                     if (e.key === 'Escape') setEditingColumnId(null);
                   }}
                 />

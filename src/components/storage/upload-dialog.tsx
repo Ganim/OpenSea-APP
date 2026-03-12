@@ -1,7 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Upload, X, FileIcon, CheckCircle2, AlertCircle, AlertTriangle, RotateCcw } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileIcon,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  RotateCcw,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -55,11 +63,9 @@ export function UploadDialog({
 
   const hasQuota = stats && stats.maxStorageMb > 0;
   const totalPendingSize = files
-    .filter((f) => f.status === 'pending')
+    .filter(f => f.status === 'pending')
     .reduce((sum, f) => sum + f.file.size, 0);
-  const projectedUsage = stats
-    ? stats.totalSize + totalPendingSize
-    : 0;
+  const projectedUsage = stats ? stats.totalSize + totalPendingSize : 0;
   const quotaExceeded =
     hasQuota && projectedUsage > stats.maxStorageMb * 1024 * 1024;
   const quotaNearLimit =
@@ -149,7 +155,7 @@ export function UploadDialog({
     const MAX_CONCURRENT = 3;
     const pendingIndices = files
       .map((f, i) => (f.status === 'pending' ? i : -1))
-      .filter((i) => i !== -1);
+      .filter(i => i !== -1);
 
     const uploadFile = async (i: number) => {
       setFiles(prev =>
@@ -162,14 +168,14 @@ export function UploadDialog({
         await storageFilesService.smartUpload(
           folderId,
           files[i].file,
-          (percent) => {
+          percent => {
             setFiles(prev =>
               prev.map((f, idx) =>
                 idx === i ? { ...f, progress: percent } : f
               )
             );
           },
-          entityType ? { entityType, entityId } : undefined,
+          entityType ? { entityType, entityId } : undefined
         );
 
         setFiles(prev =>
@@ -204,7 +210,7 @@ export function UploadDialog({
           const idx = queue.shift()!;
           await uploadFile(idx);
         }
-      },
+      }
     );
     await Promise.all(workers);
 
@@ -264,8 +270,9 @@ export function UploadDialog({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              O upload excederia o limite de armazenamento ({formatFileSize(stats!.maxStorageMb * 1024 * 1024)}).
-              Remova arquivos ou solicite aumento do limite.
+              O upload excederia o limite de armazenamento (
+              {formatFileSize(stats!.maxStorageMb * 1024 * 1024)}). Remova
+              arquivos ou solicite aumento do limite.
             </AlertDescription>
           </Alert>
         )}
@@ -273,7 +280,8 @@ export function UploadDialog({
           <Alert className="border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Armazenamento próximo do limite ({stats!.usedStoragePercent.toFixed(1)}% utilizado).
+              Armazenamento próximo do limite (
+              {stats!.usedStoragePercent.toFixed(1)}% utilizado).
             </AlertDescription>
           </Alert>
         )}
@@ -380,7 +388,14 @@ export function UploadDialog({
                         e.stopPropagation();
                         setFiles(prev =>
                           prev.map((f, idx) =>
-                            idx === index ? { ...f, status: 'pending' as const, error: undefined, progress: 0 } : f
+                            idx === index
+                              ? {
+                                  ...f,
+                                  status: 'pending' as const,
+                                  error: undefined,
+                                  progress: 0,
+                                }
+                              : f
                           )
                         );
                       }}

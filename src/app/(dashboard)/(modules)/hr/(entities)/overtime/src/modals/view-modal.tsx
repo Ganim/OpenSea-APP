@@ -34,7 +34,12 @@ interface ViewModalProps {
 export function ViewModal({ isOpen, onClose, overtime }: ViewModalProps) {
   const router = useRouter();
   const { getName } = useEmployeeMap(
-    overtime ? [overtime.employeeId, ...(overtime.approvedBy ? [overtime.approvedBy] : [])] : []
+    overtime
+      ? [
+          overtime.employeeId,
+          ...(overtime.approvedBy ? [overtime.approvedBy] : []),
+        ]
+      : []
   );
 
   if (!overtime) return null;
@@ -118,9 +123,7 @@ export function ViewModal({ isOpen, onClose, overtime }: ViewModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Funcionário</p>
-                <p className="text-base mt-1">
-                  {getName(overtime.employeeId)}
-                </p>
+                <p className="text-base mt-1">{getName(overtime.employeeId)}</p>
               </div>
               <div className="col-span-2">
                 <p className="text-sm text-muted-foreground">Motivo</p>

@@ -64,8 +64,7 @@ export const positionsService = {
     if (params?.companyId) query.append('companyId', params.companyId);
     if (params?.isActive !== undefined)
       query.append('isActive', String(params.isActive));
-    if (params?.includeDeleted)
-      query.append('includeDeleted', 'true');
+    if (params?.includeDeleted) query.append('includeDeleted', 'true');
 
     return apiClient.get<PositionsResponse>(
       `/v1/hr/positions?${query.toString()}`

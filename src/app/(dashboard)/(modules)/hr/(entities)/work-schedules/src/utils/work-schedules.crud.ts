@@ -44,7 +44,8 @@ export async function updateWorkSchedule(
   const cleanData: UpdateWorkScheduleRequest = {};
 
   if (data.name !== undefined) cleanData.name = data.name;
-  if (data.description !== undefined) cleanData.description = data.description ?? undefined;
+  if (data.description !== undefined)
+    cleanData.description = data.description ?? undefined;
   if (data.mondayStart !== undefined) cleanData.mondayStart = data.mondayStart;
   if (data.mondayEnd !== undefined) cleanData.mondayEnd = data.mondayEnd;
   if (data.tuesdayStart !== undefined)

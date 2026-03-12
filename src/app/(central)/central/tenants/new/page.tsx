@@ -290,7 +290,10 @@ export default function NewTenantPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="tenant-status" className="text-sm font-medium central-text">
+                <label
+                  htmlFor="tenant-status"
+                  className="text-sm font-medium central-text"
+                >
                   Status
                 </label>
                 <GlassSelect

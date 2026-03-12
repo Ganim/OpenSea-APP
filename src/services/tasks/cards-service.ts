@@ -51,78 +51,78 @@ export const cardsService = {
 
   async get(boardId: string, cardId: string): Promise<CardResponse> {
     return apiClient.get<CardResponse>(
-      API_ENDPOINTS.TASKS.CARDS.GET(boardId, cardId),
+      API_ENDPOINTS.TASKS.CARDS.GET(boardId, cardId)
     );
   },
 
   async create(
     boardId: string,
-    data: CreateCardRequest,
+    data: CreateCardRequest
   ): Promise<CardResponse> {
     return apiClient.post<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.CREATE(boardId),
-      data,
+      data
     );
   },
 
   async update(
     boardId: string,
     cardId: string,
-    data: UpdateCardRequest,
+    data: UpdateCardRequest
   ): Promise<CardResponse> {
     return apiClient.patch<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.UPDATE(boardId, cardId),
-      data,
+      data
     );
   },
 
   async delete(boardId: string, cardId: string): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.CARDS.DELETE(boardId, cardId),
+      API_ENDPOINTS.TASKS.CARDS.DELETE(boardId, cardId)
     );
   },
 
   async move(
     boardId: string,
     cardId: string,
-    data: MoveCardRequest,
+    data: MoveCardRequest
   ): Promise<CardResponse> {
     return apiClient.patch<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.MOVE(boardId, cardId),
-      data,
+      data
     );
   },
 
   async assign(
     boardId: string,
     cardId: string,
-    data: { assigneeId: string | null },
+    data: { assigneeId: string | null }
   ): Promise<CardResponse> {
     return apiClient.patch<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.ASSIGN(boardId, cardId),
-      data,
+      data
     );
   },
 
   async archive(
     boardId: string,
     cardId: string,
-    archive: boolean,
+    archive: boolean
   ): Promise<CardResponse> {
     return apiClient.patch<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.ARCHIVE(boardId, cardId),
-      { archive },
+      { archive }
     );
   },
 
   async manageLabels(
     boardId: string,
     cardId: string,
-    data: { labelIds: string[] },
+    data: { labelIds: string[] }
   ): Promise<CardResponse> {
     return apiClient.put<CardResponse>(
       API_ENDPOINTS.TASKS.CARDS.LABELS(boardId, cardId),
-      data,
+      data
     );
   },
 };

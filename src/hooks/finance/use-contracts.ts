@@ -81,10 +81,7 @@ export function useSupplierHistory(params: {
   companyName?: string;
 }) {
   return useQuery({
-    queryKey: QUERY_KEYS.SUPPLIER_HISTORY(
-      params.companyId,
-      params.companyName
-    ),
+    queryKey: QUERY_KEYS.SUPPLIER_HISTORY(params.companyId, params.companyName),
     queryFn: () => contractsService.getSupplierHistory(params),
     enabled: !!(params.companyId || params.companyName),
   });

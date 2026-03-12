@@ -59,10 +59,29 @@ import {
   formatDaysInfo,
 } from './src';
 
-const CreateModal = dynamic(() => import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })), { ssr: false });
-const ScheduleModal = dynamic(() => import('./src/modals/schedule-modal').then(m => ({ default: m.ScheduleModal })), { ssr: false });
-const SellDaysModal = dynamic(() => import('./src/modals/sell-days-modal').then(m => ({ default: m.SellDaysModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
+const CreateModal = dynamic(
+  () =>
+    import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
+  { ssr: false }
+);
+const ScheduleModal = dynamic(
+  () =>
+    import('./src/modals/schedule-modal').then(m => ({
+      default: m.ScheduleModal,
+    })),
+  { ssr: false }
+);
+const SellDaysModal = dynamic(
+  () =>
+    import('./src/modals/sell-days-modal').then(m => ({
+      default: m.SellDaysModal,
+    })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -121,7 +140,10 @@ export default function VacationsPage() {
 
   const vacations = data?.vacationPeriods ?? [];
 
-  const employeeIds = useMemo(() => vacations.map(v => v.employeeId), [vacations]);
+  const employeeIds = useMemo(
+    () => vacations.map(v => v.employeeId),
+    [vacations]
+  );
   const { getName } = useEmployeeMap(employeeIds);
 
   // ============================================================================
@@ -143,11 +165,7 @@ export default function VacationsPage() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => vacations.map(i => i.id),
-    [vacations]
-  );
-
+  const initialIds = useMemo(() => vacations.map(i => i.id), [vacations]);
 
   // ============================================================================
   // HANDLERS
@@ -183,21 +201,39 @@ export default function VacationsPage() {
     [cancelSchedule]
   );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? vacations.filter(v => ids.includes(v.id))
-      : vacations;
-    exportToCSV(items, [
-      { header: 'Funcionário', accessor: v => getName(v.employeeId) },
-      { header: 'Status', accessor: v => getStatusLabel(v.status) },
-      { header: 'Início Aquisitivo', accessor: v => v.acquisitionStart ? new Date(v.acquisitionStart).toLocaleDateString('pt-BR') : '' },
-      { header: 'Fim Aquisitivo', accessor: v => v.acquisitionEnd ? new Date(v.acquisitionEnd).toLocaleDateString('pt-BR') : '' },
-      { header: 'Dias Totais', accessor: v => v.totalDays },
-      { header: 'Dias Usados', accessor: v => v.usedDays },
-      { header: 'Dias Vendidos', accessor: v => v.soldDays },
-      { header: 'Dias Restantes', accessor: v => v.remainingDays },
-    ], 'ferias');
-  }, [vacations, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0 ? vacations.filter(v => ids.includes(v.id)) : vacations;
+      exportToCSV(
+        items,
+        [
+          { header: 'Funcionário', accessor: v => getName(v.employeeId) },
+          { header: 'Status', accessor: v => getStatusLabel(v.status) },
+          {
+            header: 'Início Aquisitivo',
+            accessor: v =>
+              v.acquisitionStart
+                ? new Date(v.acquisitionStart).toLocaleDateString('pt-BR')
+                : '',
+          },
+          {
+            header: 'Fim Aquisitivo',
+            accessor: v =>
+              v.acquisitionEnd
+                ? new Date(v.acquisitionEnd).toLocaleDateString('pt-BR')
+                : '',
+          },
+          { header: 'Dias Totais', accessor: v => v.totalDays },
+          { header: 'Dias Usados', accessor: v => v.usedDays },
+          { header: 'Dias Vendidos', accessor: v => v.soldDays },
+          { header: 'Dias Restantes', accessor: v => v.remainingDays },
+        ],
+        'ferias'
+      );
+    },
+    [vacations, getName]
+  );
 
   // ============================================================================
   // CONTEXT MENU
@@ -232,9 +268,7 @@ export default function VacationsPage() {
   const renderGridCard = (item: VacationPeriod, isSelected: boolean) => {
     const usedPercent =
       item.totalDays > 0
-        ? Math.round(
-            ((item.usedDays + item.soldDays) / item.totalDays) * 100
-          )
+        ? Math.round(((item.usedDays + item.soldDays) / item.totalDays) * 100)
         : 0;
 
     return (
@@ -401,29 +435,26 @@ export default function VacationsPage() {
     setShowCreateModal(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-vacations',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-vacations',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-vacation',
+        title: 'Novo Período',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-vacation',
-          title: 'Novo Período',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI

@@ -60,7 +60,7 @@ export default function NewConsortiumPage() {
   });
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +91,9 @@ export default function NewConsortiumPage() {
       toast.success('Consórcio criado com sucesso.');
       router.push('/finance/consortia');
     } catch {
-      toast.error('Erro ao criar consórcio. Verifique os dados e tente novamente.');
+      toast.error(
+        'Erro ao criar consórcio. Verifique os dados e tente novamente.'
+      );
     }
   };
 
@@ -125,7 +127,9 @@ export default function NewConsortiumPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Dados do Consórcio */}
             <div>
-              <h3 className="text-base font-semibold mb-4">Dados do Consórcio</h3>
+              <h3 className="text-base font-semibold mb-4">
+                Dados do Consórcio
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label htmlFor="name">Nome/Descrição *</Label>
@@ -134,7 +138,7 @@ export default function NewConsortiumPage() {
                     required
                     placeholder="Ex: Consórcio Imóvel Residencial"
                     value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    onChange={e => handleChange('name', e.target.value)}
                   />
                 </div>
 
@@ -145,7 +149,9 @@ export default function NewConsortiumPage() {
                     required
                     placeholder="Ex: Porto Seguro, Embracon, Rodobens..."
                     value={formData.administrator}
-                    onChange={(e) => handleChange('administrator', e.target.value)}
+                    onChange={e =>
+                      handleChange('administrator', e.target.value)
+                    }
                   />
                 </div>
 
@@ -156,7 +162,9 @@ export default function NewConsortiumPage() {
                       id="groupNumber"
                       placeholder="Ex: 0123"
                       value={formData.groupNumber}
-                      onChange={(e) => handleChange('groupNumber', e.target.value)}
+                      onChange={e =>
+                        handleChange('groupNumber', e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -165,7 +173,9 @@ export default function NewConsortiumPage() {
                       id="quotaNumber"
                       placeholder="Ex: 045"
                       value={formData.quotaNumber}
-                      onChange={(e) => handleChange('quotaNumber', e.target.value)}
+                      onChange={e =>
+                        handleChange('quotaNumber', e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -174,7 +184,9 @@ export default function NewConsortiumPage() {
 
             {/* Dados Financeiros */}
             <div>
-              <h3 className="text-base font-semibold mb-4">Dados Financeiros</h3>
+              <h3 className="text-base font-semibold mb-4">
+                Dados Financeiros
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="creditValue">Valor do Crédito (R$) *</Label>
@@ -185,7 +197,7 @@ export default function NewConsortiumPage() {
                     required
                     placeholder="0,00"
                     value={formData.creditValue}
-                    onChange={(e) => handleChange('creditValue', e.target.value)}
+                    onChange={e => handleChange('creditValue', e.target.value)}
                   />
                 </div>
 
@@ -198,7 +210,9 @@ export default function NewConsortiumPage() {
                     required
                     placeholder="0,00"
                     value={formData.monthlyPayment}
-                    onChange={(e) => handleChange('monthlyPayment', e.target.value)}
+                    onChange={e =>
+                      handleChange('monthlyPayment', e.target.value)
+                    }
                   />
                 </div>
 
@@ -211,7 +225,9 @@ export default function NewConsortiumPage() {
                     min="1"
                     placeholder="Ex: 120"
                     value={formData.totalInstallments}
-                    onChange={(e) => handleChange('totalInstallments', e.target.value)}
+                    onChange={e =>
+                      handleChange('totalInstallments', e.target.value)
+                    }
                   />
                 </div>
 
@@ -224,7 +240,7 @@ export default function NewConsortiumPage() {
                     max="31"
                     placeholder="Ex: 15"
                     value={formData.paymentDay}
-                    onChange={(e) => handleChange('paymentDay', e.target.value)}
+                    onChange={e => handleChange('paymentDay', e.target.value)}
                   />
                 </div>
               </div>
@@ -241,7 +257,7 @@ export default function NewConsortiumPage() {
                     type="date"
                     required
                     value={formData.startDate}
-                    onChange={(e) => handleChange('startDate', e.target.value)}
+                    onChange={e => handleChange('startDate', e.target.value)}
                   />
                 </div>
               </div>
@@ -255,14 +271,14 @@ export default function NewConsortiumPage() {
                   <Label htmlFor="bankAccountId">Conta Bancária *</Label>
                   <Select
                     value={formData.bankAccountId}
-                    onValueChange={(v) => handleChange('bankAccountId', v)}
+                    onValueChange={v => handleChange('bankAccountId', v)}
                     required
                   >
                     <SelectTrigger id="bankAccountId">
                       <SelectValue placeholder="Selecione uma conta" />
                     </SelectTrigger>
                     <SelectContent>
-                      {bankAccounts.map((ba) => (
+                      {bankAccounts.map(ba => (
                         <SelectItem key={ba.id} value={ba.id}>
                           {ba.name}
                         </SelectItem>
@@ -275,14 +291,14 @@ export default function NewConsortiumPage() {
                   <Label htmlFor="costCenterId">Centro de Custo *</Label>
                   <Select
                     value={formData.costCenterId}
-                    onValueChange={(v) => handleChange('costCenterId', v)}
+                    onValueChange={v => handleChange('costCenterId', v)}
                     required
                   >
                     <SelectTrigger id="costCenterId">
                       <SelectValue placeholder="Selecione um centro de custo" />
                     </SelectTrigger>
                     <SelectContent>
-                      {costCenters.map((cc) => (
+                      {costCenters.map(cc => (
                         <SelectItem key={cc.id} value={cc.id}>
                           {cc.name}
                         </SelectItem>
@@ -299,7 +315,7 @@ export default function NewConsortiumPage() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => handleChange('notes', e.target.value)}
+                onChange={e => handleChange('notes', e.target.value)}
                 rows={3}
                 placeholder="Informações adicionais sobre o consórcio..."
               />

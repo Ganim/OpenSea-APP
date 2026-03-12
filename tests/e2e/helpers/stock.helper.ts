@@ -33,9 +33,7 @@ async function fetchWithRetry(
       const body = await res.text();
       if (body.includes('Rate limit') || res.status === 429) {
         const match = body.match(/retry in (\d+)/);
-        const waitSec = match
-          ? parseInt(match[1], 10) + 2
-          : (attempt + 1) * 5;
+        const waitSec = match ? parseInt(match[1], 10) + 2 : (attempt + 1) * 5;
         await sleep(waitSec * 1_000);
         continue;
       }
@@ -76,9 +74,7 @@ export async function createTagViaApi(
   });
 
   if (!res.ok) {
-    throw new Error(
-      `Create tag failed (${res.status}): ${await res.text()}`
-    );
+    throw new Error(`Create tag failed (${res.status}): ${await res.text()}`);
   }
 
   const data = await res.json();
@@ -96,9 +92,7 @@ export async function deleteTagViaApi(
   });
 
   if (!res.ok && res.status !== 404) {
-    throw new Error(
-      `Delete tag failed (${res.status}): ${await res.text()}`
-    );
+    throw new Error(`Delete tag failed (${res.status}): ${await res.text()}`);
   }
 }
 
@@ -273,14 +267,20 @@ export async function deleteTemplateViaApi(
 
 export async function navigateToStockPage(
   page: Page,
-  entity: 'tags' | 'product-categories' | 'manufacturers' | 'templates' | 'products' | 'locations'
+  entity:
+    | 'tags'
+    | 'product-categories'
+    | 'manufacturers'
+    | 'templates'
+    | 'products'
+    | 'locations'
 ): Promise<void> {
   await page.goto(`/stock/${entity}`);
   await page.waitForLoadState('networkidle');
   // Wait for page heading to confirm page is loaded (not "Carregando...")
-  await expect(
-    page.getByRole('heading', { level: 1 })
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible({
+    timeout: 15_000,
+  });
 }
 
 // ═════════════════════════════════════════════════════════════════════════

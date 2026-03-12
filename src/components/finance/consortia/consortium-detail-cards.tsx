@@ -28,7 +28,9 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function ConsortiumDetailCards({ consortium }: ConsortiumDetailCardsProps) {
+export function ConsortiumDetailCards({
+  consortium,
+}: ConsortiumDetailCardsProps) {
   const totalPaid = consortium.paidInstallments * consortium.monthlyPayment;
   const totalCost = consortium.totalInstallments * consortium.monthlyPayment;
   const remaining = totalCost - totalPaid;
@@ -40,7 +42,9 @@ export function ConsortiumDetailCards({ consortium }: ConsortiumDetailCardsProps
           <Building2 className="h-4 w-4 text-muted-foreground" />
           <span className="text-xs text-muted-foreground">Administradora</span>
         </div>
-        <p className="text-sm font-semibold truncate">{consortium.administrator}</p>
+        <p className="text-sm font-semibold truncate">
+          {consortium.administrator}
+        </p>
       </Card>
 
       <Card className="p-4">
@@ -89,9 +93,13 @@ export function ConsortiumDetailCards({ consortium }: ConsortiumDetailCardsProps
           <span className="text-xs text-muted-foreground">Contemplação</span>
         </div>
         {consortium.isContemplated ? (
-          <Badge variant="success" className="mt-1">Contemplado</Badge>
+          <Badge variant="success" className="mt-1">
+            Contemplado
+          </Badge>
         ) : (
-          <Badge variant="outline" className="mt-1">Aguardando</Badge>
+          <Badge variant="outline" className="mt-1">
+            Aguardando
+          </Badge>
         )}
       </Card>
     </div>

@@ -98,7 +98,9 @@ export function MoveItemDialog({
           folderIds: bulkFolderIds,
           targetFolderId: targetId,
         });
-        queryClient.invalidateQueries({ queryKey: ['storage-folder-contents'] });
+        queryClient.invalidateQueries({
+          queryKey: ['storage-folder-contents'],
+        });
         queryClient.invalidateQueries({ queryKey: ['storage-root-contents'] });
         setIsBulkMoving(false);
       } else if (itemType === 'folder') {
@@ -113,11 +115,17 @@ export function MoveItemDialog({
         });
       }
 
-      toast.success(itemType === 'bulk' ? 'Itens movidos com sucesso' : 'Item movido com sucesso');
+      toast.success(
+        itemType === 'bulk'
+          ? 'Itens movidos com sucesso'
+          : 'Item movido com sucesso'
+      );
       handleClose();
     } catch {
       setIsBulkMoving(false);
-      toast.error(itemType === 'bulk' ? 'Erro ao mover os itens' : 'Erro ao mover o item');
+      toast.error(
+        itemType === 'bulk' ? 'Erro ao mover os itens' : 'Erro ao mover o item'
+      );
     }
   };
 

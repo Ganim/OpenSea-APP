@@ -175,7 +175,9 @@ test.describe('Stock - Tags CRUD', () => {
     });
 
     // Wait for the new name to appear in the grid (refetch may take a moment)
-    await expect(page.getByText(newName).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(newName).first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Cleanup
     await deleteTagViaApi(userToken, tag.id);

@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   CoreProvider,
   EntityCard,
@@ -29,6 +30,7 @@ import { formatCNPJ } from '@/helpers/formatters';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Company } from '@/types/hr';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ArrowDownAZ,
   Building2,
@@ -47,7 +49,6 @@ import {
   companiesConfig,
   createCompany,
   deleteCompany,
-  duplicateCompany,
   updateCompany,
 } from './src';
 
@@ -71,20 +72,6 @@ const ViewModal = dynamic(
   () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
   { ssr: false }
 );
-const DeleteConfirmModal = dynamic(
-  () =>
-    import('./src/modals/delete-confirm-modal').then(m => ({
-      default: m.DeleteConfirmModal,
-    })),
-  { ssr: false }
-);
-const DuplicateConfirmModal = dynamic(
-  () =>
-    import('./src/modals/duplicate-confirm-modal').then(m => ({
-      default: m.DuplicateConfirmModal,
-    })),
-  { ssr: false }
-);
 import { createCompanyFromBrasilAPI } from './src/utils/create-from-brasilapi';
 
 type ActionButtonWithPermission = HeaderButton & {
@@ -93,6 +80,7 @@ type ActionButtonWithPermission = HeaderButton & {
 
 export default function CompaniesPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const [isCnpjModalOpen, setIsCnpjModalOpen] = useState(false);
 
@@ -129,7 +117,6 @@ export default function CompaniesPage() {
     createFn: createCompany,
     updateFn: updateCompany,
     deleteFn: deleteCompany,
-    duplicateFn: duplicateCompany,
     onDeleteSuccess: () => {
       // Deleted successfully
     },
@@ -152,15 +139,6 @@ export default function CompaniesPage() {
       const cnpj = item.cnpj?.toLowerCase() || '';
       return [legal, trade, cnpj].some(value => value.includes(q));
     },
-    duplicateConfig: {
-      getNewName: item => `${item.legalName} (Cópia)`,
-      getData: item => ({
-        legalName: `${item.legalName} (Cópia)`,
-        tradeName: item.tradeName ? `${item.tradeName} (Cópia)` : null,
-        cnpj: item.cnpj,
-        status: item.status,
-      }),
-    },
   });
 
   // ============================================================================
@@ -171,8 +149,6 @@ export default function CompaniesPage() {
     page.handlers.handleItemsView(ids);
   const handleContextEdit = (ids: string[]) =>
     page.handlers.handleItemsEdit(ids);
-  const handleContextDuplicate = (ids: string[]) =>
-    page.handlers.handleItemsDuplicate(ids);
   const handleContextDelete = (ids: string[]) => {
     page.modals.setItemsToDelete(ids);
     page.modals.open('delete');
@@ -228,7 +204,6 @@ export default function CompaniesPage() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
         <EntityCard
@@ -293,7 +268,6 @@ export default function CompaniesPage() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
         onDelete={handleContextDelete}
       >
         <EntityCard
@@ -486,13 +460,11 @@ export default function CompaniesPage() {
               defaultActions={{
                 view: true,
                 edit: true,
-                duplicate: true,
                 delete: true,
               }}
               handlers={{
                 onView: page.handlers.handleItemsView,
                 onEdit: page.handlers.handleItemsEdit,
-                onDuplicate: page.handlers.handleItemsDuplicate,
                 onDelete: page.handlers.handleItemsDelete,
               }}
             />
@@ -526,22 +498,17 @@ export default function CompaniesPage() {
             }}
           />
 
-          {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          {/* Delete Confirmation with PIN */}
+          <VerifyActionPinModal
             isOpen={page.modals.isOpen('delete')}
             onClose={() => page.modals.close('delete')}
-            itemCount={page.modals.itemsToDelete.length}
-            onConfirm={page.handlers.handleDeleteConfirm}
-            isLoading={crud.isDeleting}
-          />
-
-          {/* Duplicate Confirmation */}
-          <DuplicateConfirmModal
-            isOpen={page.modals.isOpen('duplicate')}
-            onClose={() => page.modals.close('duplicate')}
-            itemCount={page.modals.itemsToDuplicate.length}
-            onConfirm={page.handlers.handleDuplicateConfirm}
-            isLoading={crud.isDuplicating}
+            onSuccess={page.handlers.handleDeleteConfirm}
+            title="Confirmar Exclusão"
+            description={
+              page.modals.itemsToDelete.length === 1
+                ? 'Digite seu PIN de ação para excluir esta empresa. Esta ação não pode ser desfeita.'
+                : `Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} empresas. Esta ação não pode ser desfeita.`
+            }
           />
 
           {/* CNPJ Lookup Modal */}
@@ -555,10 +522,20 @@ export default function CompaniesPage() {
                   `Empresa "${company.legalName}" criada com sucesso!`
                 );
 
-                // Fechar modal e atualizar listagem
+                // Fechar modal
                 setIsCnpjModalOpen(false);
-                await crud.refetch();
-                page.setSearchQuery(''); // Limpar busca para ver a nova empresa
+                page.setSearchQuery('');
+
+                // Inserir empresa no cache imediatamente para feedback visual instantâneo
+                queryClient.setQueryData<Company[]>(['companies'], old =>
+                  old ? [company, ...old] : [company]
+                );
+
+                // Forçar refetch para garantir consistência com o backend
+                await queryClient.invalidateQueries({
+                  queryKey: ['companies'],
+                  refetchType: 'all',
+                });
               } catch (error) {
                 const message =
                   error instanceof Error

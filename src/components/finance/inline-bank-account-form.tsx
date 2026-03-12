@@ -47,7 +47,8 @@ export function InlineBankAccountForm({
           accountNumber: accountNumber || '00000000',
           accountType,
         });
-        const bankAccount = (result as { bankAccount: BankAccount }).bankAccount;
+        const bankAccount = (result as { bankAccount: BankAccount })
+          .bankAccount;
         onCreated({ id: bankAccount.id, name: bankAccount.name });
         toast.success('Conta bancária criada com sucesso!');
       } catch (err) {
@@ -56,7 +57,15 @@ export function InlineBankAccountForm({
         toast.error(msg);
       }
     },
-    [name, bankCode, agency, accountNumber, accountType, createMutation, onCreated]
+    [
+      name,
+      bankCode,
+      agency,
+      accountNumber,
+      accountType,
+      createMutation,
+      onCreated,
+    ]
   );
 
   return (
@@ -66,7 +75,7 @@ export function InlineBankAccountForm({
         <Input
           id="ba-name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           placeholder="Nome da conta"
           required
         />
@@ -78,7 +87,7 @@ export function InlineBankAccountForm({
           <Input
             id="ba-bankcode"
             value={bankCode}
-            onChange={(e) => setBankCode(e.target.value)}
+            onChange={e => setBankCode(e.target.value)}
             placeholder="001"
           />
         </div>
@@ -88,7 +97,7 @@ export function InlineBankAccountForm({
           <Input
             id="ba-agency"
             value={agency}
-            onChange={(e) => setAgency(e.target.value)}
+            onChange={e => setAgency(e.target.value)}
             placeholder="0001"
           />
         </div>
@@ -100,23 +109,28 @@ export function InlineBankAccountForm({
           <Input
             id="ba-account"
             value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
+            onChange={e => setAccountNumber(e.target.value)}
             placeholder="00000000"
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="ba-type">Tipo</Label>
-          <Select value={accountType} onValueChange={(v) => setAccountType(v as BankAccountType)}>
+          <Select
+            value={accountType}
+            onValueChange={v => setAccountType(v as BankAccountType)}
+          >
             <SelectTrigger id="ba-type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
+              {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                )
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -126,7 +140,10 @@ export function InlineBankAccountForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={createMutation.isPending || !name.trim()}>
+        <Button
+          type="submit"
+          disabled={createMutation.isPending || !name.trim()}
+        >
           {createMutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

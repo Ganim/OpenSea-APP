@@ -98,7 +98,7 @@ export function WizardStepAttachment({
         <Label>Tipo de Anexo</Label>
         <Select
           value={wizardData.attachmentType}
-          onValueChange={(val) =>
+          onValueChange={val =>
             updateWizardData({
               attachmentType: val as FinanceAttachmentType,
             })
@@ -132,9 +132,7 @@ export function WizardStepAttachment({
         >
           <Upload className="h-10 w-10 text-muted-foreground" />
           <div className="text-center">
-            <p className="text-sm font-medium">
-              Arraste ou clique para enviar
-            </p>
+            <p className="text-sm font-medium">Arraste ou clique para enviar</p>
             <p className="text-xs text-muted-foreground mt-1">
               PDF, JPG, PNG, DOC, DOCX
             </p>

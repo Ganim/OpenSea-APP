@@ -14,7 +14,10 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { companyCnaesApi } from '../api';
 
-const CnaeModal = dynamic(() => import('../modals/cnae-modal').then(m => ({ default: m.CnaeModal })), { ssr: false });
+const CnaeModal = dynamic(
+  () => import('../modals/cnae-modal').then(m => ({ default: m.CnaeModal })),
+  { ssr: false }
+);
 
 interface CnaesEditTabProps {
   companyId: string;

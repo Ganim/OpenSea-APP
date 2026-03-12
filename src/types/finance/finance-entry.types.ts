@@ -1,4 +1,9 @@
-export type PayableSubType = 'BOLETO' | 'NOTA_FISCAL' | 'TRANSFERENCIA' | 'CARTAO' | 'OUTROS';
+export type PayableSubType =
+  | 'BOLETO'
+  | 'NOTA_FISCAL'
+  | 'TRANSFERENCIA'
+  | 'CARTAO'
+  | 'OUTROS';
 
 export type FinanceEntryType = 'PAYABLE' | 'RECEIVABLE';
 export type FinanceEntryRecurrence = 'SINGLE' | 'RECURRING' | 'INSTALLMENT';

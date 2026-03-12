@@ -50,11 +50,7 @@ export function CreateModal({
   const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
 
   const canSubmit =
-    employeeId.trim() &&
-    name.trim() &&
-    isAmountValid &&
-    isReasonValid &&
-    date;
+    employeeId.trim() && name.trim() && isAmountValid && isReasonValid && date;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

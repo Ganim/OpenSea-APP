@@ -107,9 +107,12 @@ export function WizardStepInstallments({
                 min={2}
                 max={120}
                 value={wizardData.totalInstallments}
-                onChange={(e) =>
+                onChange={e =>
                   updateWizardData({
-                    totalInstallments: Math.max(2, parseInt(e.target.value) || 2),
+                    totalInstallments: Math.max(
+                      2,
+                      parseInt(e.target.value) || 2
+                    ),
                   })
                 }
               />
@@ -123,7 +126,7 @@ export function WizardStepInstallments({
                 min={1}
                 max={12}
                 value={wizardData.recurrenceInterval}
-                onChange={(e) =>
+                onChange={e =>
                   updateWizardData({
                     recurrenceInterval: Math.max(
                       1,
@@ -138,7 +141,7 @@ export function WizardStepInstallments({
               <Label>Unidade</Label>
               <Select
                 value={wizardData.recurrenceUnit}
-                onValueChange={(val) =>
+                onValueChange={val =>
                   updateWizardData({
                     recurrenceUnit: val as RecurrenceUnit,
                   })

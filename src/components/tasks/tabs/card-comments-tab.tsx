@@ -5,10 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageSquare, Send } from 'lucide-react';
-import {
-  useComments,
-  useCreateComment,
-} from '@/hooks/tasks/use-comments';
+import { useComments, useCreateComment } from '@/hooks/tasks/use-comments';
 import { useAuth } from '@/contexts/auth-context';
 import { CommentItem } from './comment-item';
 

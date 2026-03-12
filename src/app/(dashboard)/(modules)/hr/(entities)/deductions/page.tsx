@@ -32,7 +32,16 @@ import {
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { exportToCSV } from '@/lib/csv-export';
 import type { Deduction } from '@/types/hr';
-import { Calendar, Download, ExternalLink, Eye, MinusCircle, Plus, Trash2, User } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  ExternalLink,
+  Eye,
+  MinusCircle,
+  Plus,
+  Trash2,
+  User,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -50,9 +59,22 @@ import {
   type DeductionFilters,
 } from './src';
 
-const CreateModal = dynamic(() => import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })), { ssr: false });
-const ViewModal = dynamic(() => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })), { ssr: false });
-const DeleteConfirmModal = dynamic(() => import('./src/modals/delete-confirm-modal').then(m => ({ default: m.DeleteConfirmModal })), { ssr: false });
+const CreateModal = dynamic(
+  () =>
+    import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
+  { ssr: false }
+);
+const ViewModal = dynamic(
+  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
+  { ssr: false }
+);
+const DeleteConfirmModal = dynamic(
+  () =>
+    import('./src/modals/delete-confirm-modal').then(m => ({
+      default: m.DeleteConfirmModal,
+    })),
+  { ssr: false }
+);
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
@@ -106,7 +128,10 @@ export default function DeductionsPage() {
 
   const deductions = data?.deductions ?? [];
 
-  const employeeIds = useMemo(() => deductions.map(d => d.employeeId), [deductions]);
+  const employeeIds = useMemo(
+    () => deductions.map(d => d.employeeId),
+    [deductions]
+  );
   const { getName } = useEmployeeMap(employeeIds);
 
   // ============================================================================
@@ -137,7 +162,6 @@ export default function DeductionsPage() {
     () => filteredItems.map(i => i.id),
     [filteredItems]
   );
-
 
   // ============================================================================
   // HANDLERS
@@ -186,31 +210,49 @@ export default function DeductionsPage() {
     }
   }, [deleteTarget, deleteMutation]);
 
-  const handleBulkDelete = useCallback(async (ids: string[]) => {
-    try {
-      for (const id of ids) {
-        await deleteMutation.mutateAsync(id);
+  const handleBulkDelete = useCallback(
+    async (ids: string[]) => {
+      try {
+        for (const id of ids) {
+          await deleteMutation.mutateAsync(id);
+        }
+        toast.success(`${ids.length} dedução(ões) excluída(s)`);
+      } catch {
+        // Toast handled by mutation
       }
-      toast.success(`${ids.length} dedução(ões) excluída(s)`);
-    } catch {
-      // Toast handled by mutation
-    }
-  }, [deleteMutation]);
+    },
+    [deleteMutation]
+  );
 
-  const handleExport = useCallback((ids: string[]) => {
-    const items = ids.length > 0
-      ? deductions.filter(d => ids.includes(d.id))
-      : deductions;
-    exportToCSV(items, [
-      { header: 'Nome', accessor: d => d.name },
-      { header: 'Funcionário', accessor: d => getName(d.employeeId) },
-      { header: 'Valor', accessor: d => d.amount },
-      { header: 'Data', accessor: d => d.date ? new Date(d.date).toLocaleDateString('pt-BR') : '' },
-      { header: 'Motivo', accessor: d => d.reason },
-      { header: 'Recorrente', accessor: d => d.isRecurring ? 'Sim' : 'Não' },
-      { header: 'Aplicada', accessor: d => d.isApplied ? 'Sim' : 'Não' },
-    ], 'deducoes');
-  }, [deductions, getName]);
+  const handleExport = useCallback(
+    (ids: string[]) => {
+      const items =
+        ids.length > 0
+          ? deductions.filter(d => ids.includes(d.id))
+          : deductions;
+      exportToCSV(
+        items,
+        [
+          { header: 'Nome', accessor: d => d.name },
+          { header: 'Funcionário', accessor: d => getName(d.employeeId) },
+          { header: 'Valor', accessor: d => d.amount },
+          {
+            header: 'Data',
+            accessor: d =>
+              d.date ? new Date(d.date).toLocaleDateString('pt-BR') : '',
+          },
+          { header: 'Motivo', accessor: d => d.reason },
+          {
+            header: 'Recorrente',
+            accessor: d => (d.isRecurring ? 'Sim' : 'Não'),
+          },
+          { header: 'Aplicada', accessor: d => (d.isApplied ? 'Sim' : 'Não') },
+        ],
+        'deducoes'
+      );
+    },
+    [deductions, getName]
+  );
 
   // ============================================================================
   // CONTEXT MENU ACTIONS
@@ -371,29 +413,26 @@ export default function DeductionsPage() {
     setIsCreateOpen(true);
   }, []);
 
-  const actionButtons: HeaderButton[] = useMemo(
-    () => {
-      const buttons: HeaderButton[] = [];
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    buttons.push({
+      id: 'export-deductions',
+      title: 'Exportar',
+      icon: Download,
+      onClick: () => handleExport([]),
+      variant: 'outline',
+    });
+    if (canCreate) {
       buttons.push({
-        id: 'export-deductions',
-        title: 'Exportar',
-        icon: Download,
-        onClick: () => handleExport([]),
-        variant: 'outline',
+        id: 'create-deduction',
+        title: 'Nova Dedução',
+        icon: Plus,
+        onClick: handleOpenCreate,
+        variant: 'default',
       });
-      if (canCreate) {
-        buttons.push({
-          id: 'create-deduction',
-          title: 'Nova Dedução',
-          icon: Plus,
-          onClick: handleOpenCreate,
-          variant: 'default',
-        });
-      }
-      return buttons;
-    },
-    [canCreate, handleOpenCreate, handleExport]
-  );
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate, handleExport]);
 
   // ============================================================================
   // FILTERS UI

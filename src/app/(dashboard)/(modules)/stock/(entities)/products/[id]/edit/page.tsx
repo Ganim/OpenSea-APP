@@ -201,7 +201,11 @@ export default function EditProductPage() {
 
   // Seleções de cuidado atuais do produto para exibir ícones no cabeçalho
   // TODO: migrate to ProductCareInstruction API
-  const selectedCareOptions = useMemo((): Array<{ code: string; assetPath: string; label: string }> => {
+  const selectedCareOptions = useMemo((): Array<{
+    code: string;
+    assetPath: string;
+    label: string;
+  }> => {
     if (!careOptions) return [];
     return [];
   }, [careOptions]);
@@ -657,10 +661,7 @@ export default function EditProductPage() {
         <TabsContent value="conservation">
           <Card className="w-full p-6">
             <div className="space-y-6">
-              <CareSelector
-                productId={productId}
-                initialSelectedIds={[]}
-              />
+              <CareSelector productId={productId} initialSelectedIds={[]} />
             </div>
           </Card>
         </TabsContent>

@@ -24,9 +24,7 @@ export interface CreateWorkScheduleOptions {
   showErrorToast?: boolean;
 }
 
-export function useCreateWorkSchedule(
-  options: CreateWorkScheduleOptions = {}
-) {
+export function useCreateWorkSchedule(options: CreateWorkScheduleOptions = {}) {
   const queryClient = useQueryClient();
   const {
     onSuccess,
@@ -43,9 +41,7 @@ export function useCreateWorkSchedule(
     onSuccess: workSchedule => {
       queryClient.invalidateQueries({ queryKey: workScheduleKeys.lists() });
       if (showSuccessToast) {
-        toast.success(
-          `Escala "${workSchedule.name}" criada com sucesso!`
-        );
+        toast.success(`Escala "${workSchedule.name}" criada com sucesso!`);
       }
       onSuccess?.(workSchedule);
     },
@@ -72,9 +68,7 @@ export interface UpdateWorkScheduleOptions {
   showErrorToast?: boolean;
 }
 
-export function useUpdateWorkSchedule(
-  options: UpdateWorkScheduleOptions = {}
-) {
+export function useUpdateWorkSchedule(options: UpdateWorkScheduleOptions = {}) {
   const queryClient = useQueryClient();
   const {
     onSuccess,
@@ -119,9 +113,7 @@ export interface DeleteWorkScheduleOptions {
   showErrorToast?: boolean;
 }
 
-export function useDeleteWorkSchedule(
-  options: DeleteWorkScheduleOptions = {}
-) {
+export function useDeleteWorkSchedule(options: DeleteWorkScheduleOptions = {}) {
   const queryClient = useQueryClient();
   const {
     onSuccess,

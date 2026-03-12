@@ -325,7 +325,11 @@ export default function ManufacturerDetailPage() {
 
         {/* Aba Documentos */}
         <TabsContent value="documents" className="space-y-6 flex flex-col">
-          <FileManager entityType="manufacturer" entityId={manufacturerId} className="h-[600px]" />
+          <FileManager
+            entityType="manufacturer"
+            entityId={manufacturerId}
+            className="h-[600px]"
+          />
         </TabsContent>
       </Tabs>
 
@@ -335,8 +339,8 @@ export default function ManufacturerDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o fabricante &quot;{manufacturer.name}&quot;?
-              Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir o fabricante &quot;
+              {manufacturer.name}&quot;? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

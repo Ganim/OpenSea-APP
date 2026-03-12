@@ -18,7 +18,10 @@ interface RecurringStatusBadgeProps {
   className?: string;
 }
 
-export function RecurringStatusBadge({ status, className }: RecurringStatusBadgeProps) {
+export function RecurringStatusBadge({
+  status,
+  className,
+}: RecurringStatusBadgeProps) {
   return (
     <Badge variant={STATUS_VARIANT[status]} className={className}>
       {RECURRING_STATUS_LABELS[status]}

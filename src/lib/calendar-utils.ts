@@ -17,7 +17,7 @@ export function getTimezoneOffset(tz: string): string {
       timeZoneName: 'shortOffset',
     });
     const parts = formatter.formatToParts(now);
-    const offsetPart = parts.find((p) => p.type === 'timeZoneName');
+    const offsetPart = parts.find(p => p.type === 'timeZoneName');
     if (!offsetPart) return '';
     // Convert "GMT+3" or "GMT-5:30" to "+3:00" or "-5:30"
     const raw = offsetPart.value.replace('GMT', '');

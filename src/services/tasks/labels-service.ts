@@ -17,34 +17,34 @@ export interface LabelResponse {
 export const labelsService = {
   async list(boardId: string): Promise<LabelsResponse> {
     return apiClient.get<LabelsResponse>(
-      API_ENDPOINTS.TASKS.LABELS.LIST(boardId),
+      API_ENDPOINTS.TASKS.LABELS.LIST(boardId)
     );
   },
 
   async create(
     boardId: string,
-    data: CreateLabelRequest,
+    data: CreateLabelRequest
   ): Promise<LabelResponse> {
     return apiClient.post<LabelResponse>(
       API_ENDPOINTS.TASKS.LABELS.CREATE(boardId),
-      data,
+      data
     );
   },
 
   async update(
     boardId: string,
     labelId: string,
-    data: UpdateLabelRequest,
+    data: UpdateLabelRequest
   ): Promise<LabelResponse> {
     return apiClient.patch<LabelResponse>(
       API_ENDPOINTS.TASKS.LABELS.UPDATE(boardId, labelId),
-      data,
+      data
     );
   },
 
   async delete(boardId: string, labelId: string): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.LABELS.DELETE(boardId, labelId),
+      API_ENDPOINTS.TASKS.LABELS.DELETE(boardId, labelId)
     );
   },
 };

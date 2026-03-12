@@ -52,7 +52,7 @@ export function InlineCostCenterForm({
         <Input
           id="cc-name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           placeholder="Nome do centro de custo"
           required
         />
@@ -63,7 +63,7 @@ export function InlineCostCenterForm({
         <Input
           id="cc-code"
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={e => setCode(e.target.value)}
           placeholder="Ex: CC-001"
           required
         />

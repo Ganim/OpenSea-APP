@@ -1,8 +1,5 @@
 import { labelsService } from '@/services/tasks';
-import type {
-  CreateLabelRequest,
-  UpdateLabelRequest,
-} from '@/types/tasks';
+import type { CreateLabelRequest, UpdateLabelRequest } from '@/types/tasks';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BOARD_QUERY_KEYS } from './use-boards';
 
@@ -21,7 +18,8 @@ export function useLabels(boardId: string) {
 export function useCreateLabel(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateLabelRequest) => labelsService.create(boardId, data),
+    mutationFn: (data: CreateLabelRequest) =>
+      labelsService.create(boardId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: LABEL_QUERY_KEYS.LABELS(boardId) });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
@@ -32,8 +30,13 @@ export function useCreateLabel(boardId: string) {
 export function useUpdateLabel(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ labelId, data }: { labelId: string; data: UpdateLabelRequest }) =>
-      labelsService.update(boardId, labelId, data),
+    mutationFn: ({
+      labelId,
+      data,
+    }: {
+      labelId: string;
+      data: UpdateLabelRequest;
+    }) => labelsService.update(boardId, labelId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: LABEL_QUERY_KEYS.LABELS(boardId) });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });

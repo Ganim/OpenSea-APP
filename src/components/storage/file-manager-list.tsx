@@ -126,10 +126,14 @@ export function FileManagerList({
 
   // Drag-and-drop
   const {
-    draggedItemIds, dragOverFolderId,
-    handleItemDragStart, handleItemDragEnd,
-    handleFolderDragEnter, handleFolderDragOver,
-    handleFolderDragLeave, handleFolderDrop,
+    draggedItemIds,
+    dragOverFolderId,
+    handleItemDragStart,
+    handleItemDragEnd,
+    handleFolderDragEnter,
+    handleFolderDragOver,
+    handleFolderDragLeave,
+    handleFolderDrop,
   } = useStorageDragDrop({ selectedItems, folders, onDragMoveToFolder });
 
   // Merge folders and files into a single flat list
@@ -166,7 +170,13 @@ export function FileManagerList({
           <div
             role="columnheader"
             tabIndex={0}
-            aria-sort={sortBy === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+            aria-sort={
+              sortBy === 'name'
+                ? sortOrder === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             className="flex-1 min-w-0 px-2 cursor-pointer select-none"
             onClick={() => onSortChange('name')}
             onKeyDown={e => e.key === 'Enter' && onSortChange('name')}
@@ -178,11 +188,19 @@ export function FileManagerList({
               sortOrder={sortOrder}
             />
           </div>
-          <div role="columnheader" className="w-32 px-2">Tipo</div>
+          <div role="columnheader" className="w-32 px-2">
+            Tipo
+          </div>
           <div
             role="columnheader"
             tabIndex={0}
-            aria-sort={sortBy === 'size' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+            aria-sort={
+              sortBy === 'size'
+                ? sortOrder === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             className="w-28 px-2 cursor-pointer select-none"
             onClick={() => onSortChange('size')}
             onKeyDown={e => e.key === 'Enter' && onSortChange('size')}
@@ -197,7 +215,13 @@ export function FileManagerList({
           <div
             role="columnheader"
             tabIndex={0}
-            aria-sort={sortBy === 'updatedAt' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+            aria-sort={
+              sortBy === 'updatedAt'
+                ? sortOrder === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             className="w-40 px-2 cursor-pointer select-none"
             onClick={() => onSortChange('updatedAt')}
             onKeyDown={e => e.key === 'Enter' && onSortChange('updatedAt')}

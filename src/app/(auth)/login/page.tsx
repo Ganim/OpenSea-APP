@@ -254,7 +254,6 @@ export default function LoginPage() {
               </form>
             </CardContent>
           </Card>
-
         </div>
       </div>
     </AuthBackground>

@@ -42,20 +42,33 @@ export interface ListAbsencesParams {
 }
 
 export const absencesService = {
-  async requestVacation(data: RequestVacationAbsenceRequest): Promise<AbsenceResponse> {
+  async requestVacation(
+    data: RequestVacationAbsenceRequest
+  ): Promise<AbsenceResponse> {
     return apiClient.post<AbsenceResponse>('/v1/hr/absences/vacation', data);
   },
 
-  async requestSickLeave(data: RequestSickLeaveRequest): Promise<AbsenceResponse> {
+  async requestSickLeave(
+    data: RequestSickLeaveRequest
+  ): Promise<AbsenceResponse> {
     return apiClient.post<AbsenceResponse>('/v1/hr/absences/sick-leave', data);
   },
 
   async approve(id: string): Promise<AbsenceResponse> {
-    return apiClient.patch<AbsenceResponse>(`/v1/hr/absences/${id}/approve`, {});
+    return apiClient.patch<AbsenceResponse>(
+      `/v1/hr/absences/${id}/approve`,
+      {}
+    );
   },
 
-  async reject(id: string, data: RejectAbsenceRequest): Promise<AbsenceResponse> {
-    return apiClient.patch<AbsenceResponse>(`/v1/hr/absences/${id}/reject`, data);
+  async reject(
+    id: string,
+    data: RejectAbsenceRequest
+  ): Promise<AbsenceResponse> {
+    return apiClient.patch<AbsenceResponse>(
+      `/v1/hr/absences/${id}/reject`,
+      data
+    );
   },
 
   async cancel(id: string): Promise<AbsenceResponse> {
@@ -76,6 +89,8 @@ export const absencesService = {
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<AbsencesResponse>(`/v1/hr/absences${qs ? `?${qs}` : ''}`);
+    return apiClient.get<AbsencesResponse>(
+      `/v1/hr/absences${qs ? `?${qs}` : ''}`
+    );
   },
 };

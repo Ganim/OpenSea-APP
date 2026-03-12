@@ -49,9 +49,7 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
           <CardTitle>Balanço Patrimonial</CardTitle>
         </CardHeader>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">
-            Nenhum dado disponível
-          </p>
+          <p className="text-muted-foreground">Nenhum dado disponível</p>
         </CardContent>
       </Card>
     );
@@ -107,7 +105,7 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sections.map((section) => (
+              {sections.map(section => (
                 <>
                   <TableRow
                     key={section.title}
@@ -115,7 +113,7 @@ export function BalanceSheet({ data, isLoading }: BalanceSheetProps) {
                   >
                     <TableCell colSpan={2}>{section.title}</TableCell>
                   </TableRow>
-                  {section.items.map((item) => (
+                  {section.items.map(item => (
                     <TableRow key={item.label}>
                       <TableCell className="pl-8">{item.label}</TableCell>
                       <TableCell

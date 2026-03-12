@@ -44,7 +44,7 @@ const LabelStudioEditor = dynamic(
  */
 async function generateAndUploadThumbnail(
   templateId: string,
-  studioTemplate: LabelStudioTemplate,
+  studioTemplate: LabelStudioTemplate
 ) {
   const { toPng } = await import('html-to-image');
   const { StudioLabelRenderer } = await import(
@@ -63,7 +63,7 @@ async function generateAndUploadThumbnail(
     React.createElement(StudioLabelRenderer, {
       template: studioTemplate,
       scale: 2,
-    }),
+    })
   );
 
   await new Promise(resolve => setTimeout(resolve, 500));
@@ -81,7 +81,11 @@ async function generateAndUploadThumbnail(
 
   const res = await fetch(dataUrl);
   const blob = await res.blob();
-  await labelTemplatesService.updateThumbnail(templateId, blob, 'thumbnail.png');
+  await labelTemplatesService.updateThumbnail(
+    templateId,
+    blob,
+    'thumbnail.png'
+  );
 }
 
 export default function NewLabelStudioPage() {
@@ -121,12 +125,12 @@ export default function NewLabelStudioPage() {
         if (result?.template?.id) {
           generateAndUploadThumbnail(
             result.template.id,
-            data.studioTemplate,
+            data.studioTemplate
           ).catch(err =>
             logger.error(
               'Failed to generate thumbnail',
-              err instanceof Error ? err : undefined,
-            ),
+              err instanceof Error ? err : undefined
+            )
           );
         }
 

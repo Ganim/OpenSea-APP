@@ -108,9 +108,7 @@ export function ViewModal({ isOpen, onClose, workSchedule }: ViewModalProps) {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Intervalo (min)
-                </p>
+                <p className="text-sm text-muted-foreground">Intervalo (min)</p>
                 <p className="text-base mt-1">
                   {workSchedule.breakDuration} minutos
                 </p>
@@ -154,9 +152,7 @@ export function ViewModal({ isOpen, onClose, workSchedule }: ViewModalProps) {
                         : 'bg-primary/5'
                     }`}
                   >
-                    <span className="font-medium w-24">
-                      {getDayLabel(day)}
-                    </span>
+                    <span className="font-medium w-24">{getDayLabel(day)}</span>
                     <span className={isOff ? 'italic' : ''}>
                       {formatDayRange(start, end)}
                     </span>

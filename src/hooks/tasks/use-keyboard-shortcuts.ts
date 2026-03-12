@@ -124,7 +124,7 @@ export function useKeyboardShortcuts(actions: KeyboardShortcutActions) {
           break;
       }
     },
-    [actions],
+    [actions]
   );
 
   useEffect(() => {

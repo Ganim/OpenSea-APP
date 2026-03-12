@@ -2,7 +2,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -37,11 +43,11 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
     setNumPages(0);
 
     fetch(url)
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.arrayBuffer();
       })
-      .then((buffer) => {
+      .then(buffer => {
         if (!cancelled) {
           setPdfData({ data: new Uint8Array(buffer) });
         }
@@ -54,13 +60,18 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
         }
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
-  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setLoading(false);
-  }, []);
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }: { numPages: number }) => {
+      setNumPages(numPages);
+      setLoading(false);
+    },
+    []
+  );
 
   const onDocumentLoadError = useCallback(() => {
     setError('Erro ao renderizar PDF');
@@ -68,19 +79,19 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
   }, []);
 
   const goToPrevPage = useCallback(() => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
+    setPageNumber(prev => Math.max(prev - 1, 1));
   }, []);
 
   const goToNextPage = useCallback(() => {
-    setPageNumber((prev) => Math.min(prev + 1, numPages));
+    setPageNumber(prev => Math.min(prev + 1, numPages));
   }, [numPages]);
 
   const zoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev + 0.25, 3.0));
+    setScale(prev => Math.min(prev + 0.25, 3.0));
   }, []);
 
   const zoomOut = useCallback(() => {
-    setScale((prev) => Math.max(prev - 0.25, 0.5));
+    setScale(prev => Math.max(prev - 0.25, 0.5));
   }, []);
 
   return (
@@ -88,23 +99,43 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
       {/* Toolbar */}
       {numPages > 0 && (
         <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b bg-white dark:bg-slate-900 shrink-0">
-          <Button size="icon-sm" variant="ghost" onClick={goToPrevPage} disabled={pageNumber <= 1}>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={goToPrevPage}
+            disabled={pageNumber <= 1}
+          >
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <span className="text-xs text-muted-foreground tabular-nums min-w-[80px] text-center">
             {pageNumber} / {numPages}
           </span>
-          <Button size="icon-sm" variant="ghost" onClick={goToNextPage} disabled={pageNumber >= numPages}>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={goToNextPage}
+            disabled={pageNumber >= numPages}
+          >
             <ChevronRight className="w-4 h-4" />
           </Button>
           <div className="w-px h-4 bg-border mx-1" />
-          <Button size="icon-sm" variant="ghost" onClick={zoomOut} disabled={scale <= 0.5}>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={zoomOut}
+            disabled={scale <= 0.5}
+          >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <span className="text-xs text-muted-foreground tabular-nums min-w-[40px] text-center">
             {Math.round(scale * 100)}%
           </span>
-          <Button size="icon-sm" variant="ghost" onClick={zoomIn} disabled={scale >= 3.0}>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={zoomIn}
+            disabled={scale >= 3.0}
+          >
             <ZoomIn className="w-4 h-4" />
           </Button>
         </div>

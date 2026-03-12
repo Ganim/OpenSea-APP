@@ -163,12 +163,23 @@ export function useMoveCard(boardId: string) {
                   .filter(c => c.columnId === dstColumnId && c.id !== cardId)
                   .sort((a, b) => a.position - b.position);
 
-          const updatedCard = { ...movedCard, columnId: dstColumnId, position: dstPosition };
+          const updatedCard = {
+            ...movedCard,
+            columnId: dstColumnId,
+            position: dstPosition,
+          };
           dstCards.splice(dstPosition, 0, updatedCard);
 
-          const positionMap = new Map<string, { columnId: string; position: number }>();
-          srcCards.forEach((c, i) => positionMap.set(c.id, { columnId: srcColumnId, position: i }));
-          dstCards.forEach((c, i) => positionMap.set(c.id, { columnId: dstColumnId, position: i }));
+          const positionMap = new Map<
+            string,
+            { columnId: string; position: number }
+          >();
+          srcCards.forEach((c, i) =>
+            positionMap.set(c.id, { columnId: srcColumnId, position: i })
+          );
+          dstCards.forEach((c, i) =>
+            positionMap.set(c.id, { columnId: dstColumnId, position: i })
+          );
 
           return {
             ...old,

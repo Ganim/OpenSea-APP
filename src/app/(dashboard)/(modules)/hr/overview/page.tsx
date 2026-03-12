@@ -24,14 +24,13 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import {
-  Users,
-  Clock,
-  UserX,
-  DollarSign,
-} from 'lucide-react';
+import { Users, Clock, UserX, DollarSign } from 'lucide-react';
 import { useHRAnalytics } from '../_shared/hooks/use-hr-analytics';
-import { CHART_COLORS, CHART_COLOR_SCALE, PIE_COLOR_SCALE } from '@/lib/chart-colors';
+import {
+  CHART_COLORS,
+  CHART_COLOR_SCALE,
+  PIE_COLOR_SCALE,
+} from '@/lib/chart-colors';
 
 // ============================================================================
 // STAT CARD
@@ -47,7 +46,15 @@ interface StatCardProps {
   isLoading?: boolean;
 }
 
-function StatCard({ title, value, icon: Icon, iconBg, iconColor, subtitle, isLoading }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  subtitle,
+  isLoading,
+}: StatCardProps) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -90,11 +97,7 @@ function ChartCard({ title, children, isLoading, className }: ChartCardProps) {
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-[280px] w-full" />
-        ) : (
-          children
-        )}
+        {isLoading ? <Skeleton className="h-[280px] w-full" /> : children}
       </CardContent>
     </Card>
   );
@@ -141,14 +144,20 @@ interface CustomTooltipProps {
   isCurrency?: boolean;
 }
 
-function CustomTooltip({ active, payload, label, isCurrency }: CustomTooltipProps) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  isCurrency,
+}: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border bg-background p-3 shadow-md">
       <p className="text-sm font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm" style={{ color: entry.color }}>
-          {entry.name}: {isCurrency ? formatTooltipCurrency(entry.value) : entry.value}
+          {entry.name}:{' '}
+          {isCurrency ? formatTooltipCurrency(entry.value) : entry.value}
         </p>
       ))}
     </div>
@@ -226,9 +235,20 @@ export default function HROverviewPage() {
           >
             {data && data.employeesByDepartment.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={data.employeesByDepartment} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis type="number" allowDecimals={false} className="text-xs" />
+                <BarChart
+                  data={data.employeesByDepartment}
+                  layout="vertical"
+                  margin={{ left: 20 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    className="text-xs"
+                  />
                   <YAxis
                     type="category"
                     dataKey="name"
@@ -237,9 +257,16 @@ export default function HROverviewPage() {
                     className="text-xs"
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" name="Funcionários" radius={[0, 4, 4, 0]}>
+                  <Bar
+                    dataKey="count"
+                    name="Funcionários"
+                    radius={[0, 4, 4, 0]}
+                  >
                     {data.employeesByDepartment.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]} />
+                      <Cell
+                        key={i}
+                        fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -262,11 +289,16 @@ export default function HROverviewPage() {
                     outerRadius={90}
                     innerRadius={50}
                     paddingAngle={2}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                     labelLine={false}
                   >
                     {data.employeesByContractType.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLOR_SCALE[i % PIE_COLOR_SCALE.length]} />
+                      <Cell
+                        key={i}
+                        fill={PIE_COLOR_SCALE[i % PIE_COLOR_SCALE.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
@@ -284,13 +316,34 @@ export default function HROverviewPage() {
             {data && data.payrollTrend.some(p => p.bruto > 0) ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data.payrollTrend}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 11 }} />
-                  <YAxis tickFormatter={formatCurrency} className="text-xs" tick={{ fontSize: 11 }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis
+                    tickFormatter={formatCurrency}
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
                   <Tooltip content={<CustomTooltip isCurrency />} />
                   <Legend />
-                  <Bar dataKey="bruto" name="Bruto" fill={CHART_COLORS.blue} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="liquido" name="Líquido" fill={CHART_COLORS.emerald} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="bruto"
+                    name="Bruto"
+                    fill={CHART_COLORS.blue}
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="liquido"
+                    name="Líquido"
+                    fill={CHART_COLORS.emerald}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -302,8 +355,15 @@ export default function HROverviewPage() {
             {data && data.overtimeTrend.some(o => o.horas > 0) ? (
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={data.overtimeTrend}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 11 }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
                   <YAxis className="text-xs" tick={{ fontSize: 11 }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
@@ -339,7 +399,10 @@ export default function HROverviewPage() {
             {data && data.absencesByType.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data.absencesByType}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
                   <XAxis
                     dataKey="name"
                     className="text-xs"
@@ -348,11 +411,23 @@ export default function HROverviewPage() {
                     textAnchor="end"
                     height={50}
                   />
-                  <YAxis allowDecimals={false} className="text-xs" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    allowDecimals={false}
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" name="Ocorrências" fill={CHART_COLORS.red} radius={[4, 4, 0, 0]}>
+                  <Bar
+                    dataKey="count"
+                    name="Ocorrências"
+                    fill={CHART_COLORS.red}
+                    radius={[4, 4, 0, 0]}
+                  >
                     {data.absencesByType.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]} />
+                      <Cell
+                        key={i}
+                        fill={CHART_COLOR_SCALE[i % CHART_COLOR_SCALE.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -362,17 +437,44 @@ export default function HROverviewPage() {
             )}
           </ChartCard>
 
-          <ChartCard title="Bonificações vs Deduções (6 meses)" isLoading={isLoading}>
-            {data && data.bonusesVsDeductions.some(b => b.bonificacoes > 0 || b.deducoes > 0) ? (
+          <ChartCard
+            title="Bonificações vs Deduções (6 meses)"
+            isLoading={isLoading}
+          >
+            {data &&
+            data.bonusesVsDeductions.some(
+              b => b.bonificacoes > 0 || b.deducoes > 0
+            ) ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data.bonusesVsDeductions}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 11 }} />
-                  <YAxis tickFormatter={formatCurrency} className="text-xs" tick={{ fontSize: 11 }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis
+                    tickFormatter={formatCurrency}
+                    className="text-xs"
+                    tick={{ fontSize: 11 }}
+                  />
                   <Tooltip content={<CustomTooltip isCurrency />} />
                   <Legend />
-                  <Bar dataKey="bonificacoes" name="Bonificações" fill={CHART_COLORS.emerald} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="deducoes" name="Deduções" fill={CHART_COLORS.red} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="bonificacoes"
+                    name="Bonificações"
+                    fill={CHART_COLORS.emerald}
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="deducoes"
+                    name="Deduções"
+                    fill={CHART_COLORS.red}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

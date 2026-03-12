@@ -199,12 +199,16 @@ export const BinCell = memo(function BinCell({
       tabIndex={!isFiltered && !bin.isBlocked ? 0 : undefined}
       aria-label={`Nicho ${bin.address}`}
       onClick={!isFiltered && !bin.isBlocked ? onClick : undefined}
-      onKeyDown={!isFiltered && !bin.isBlocked ? (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      } : undefined}
+      onKeyDown={
+        !isFiltered && !bin.isBlocked
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       className={cn(
         'relative flex items-center justify-center transition-colors',
         // Tamanhos fixos (sem scale no hover para evitar barras de rolagem)

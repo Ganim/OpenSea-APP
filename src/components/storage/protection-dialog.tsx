@@ -56,7 +56,7 @@ export function ProtectionDialog({
     try {
       await storageSecurityService.protectItem({ itemId, itemType, password });
       toast.success(
-        `${itemType === 'file' ? 'Arquivo' : 'Pasta'} protegido(a) com senha`,
+        `${itemType === 'file' ? 'Arquivo' : 'Pasta'} protegido(a) com senha`
       );
       queryClient.invalidateQueries({ queryKey: ['storage'] });
       onOpenChange(false);
@@ -79,9 +79,13 @@ export function ProtectionDialog({
 
     setLoading(true);
     try {
-      await storageSecurityService.unprotectItem({ itemId, itemType, password });
+      await storageSecurityService.unprotectItem({
+        itemId,
+        itemType,
+        password,
+      });
       toast.success(
-        `Proteção por senha removida do ${itemType === 'file' ? 'arquivo' : 'pasta'}`,
+        `Proteção por senha removida do ${itemType === 'file' ? 'arquivo' : 'pasta'}`
       );
       queryClient.invalidateQueries({ queryKey: ['storage'] });
       onOpenChange(false);
@@ -96,7 +100,7 @@ export function ProtectionDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={(v) => {
+      onOpenChange={v => {
         if (!v) {
           setPassword('');
           setConfirmPassword('');
@@ -134,7 +138,7 @@ export function ProtectionDialog({
               type="password"
               placeholder={isProtected ? 'Senha atual' : 'Defina uma senha'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               autoFocus
             />
           </div>
@@ -147,7 +151,7 @@ export function ProtectionDialog({
                 type="password"
                 placeholder="Confirme a senha"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
               />
             </div>
           )}

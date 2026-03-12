@@ -46,11 +46,24 @@ import { useAuth } from '@/contexts/auth-context';
 import { InfoField } from '@/components/shared/info-field';
 import { toast } from 'sonner';
 import { teamsService } from '@/services/core/teams.service';
-import type { Team, TeamEmailAccount, TeamMember, TeamMemberRole } from '@/types/core';
+import type {
+  Team,
+  TeamEmailAccount,
+  TeamMember,
+  TeamMemberRole,
+} from '@/types/core';
 import { TEAM_MEMBER_ROLE_LABELS } from '@/types/core';
 import type { Calendar as CalendarModel } from '@/types/calendar';
-import { CalendarBadge, TeamCalendarPermissionsDialog } from '@/components/calendar';
-import { useMyCalendars, useCreateTeamCalendar, useDeleteCalendar, useUpdateCalendar } from '@/hooks/calendar';
+import {
+  CalendarBadge,
+  TeamCalendarPermissionsDialog,
+} from '@/components/calendar';
+import {
+  useMyCalendars,
+  useCreateTeamCalendar,
+  useDeleteCalendar,
+  useUpdateCalendar,
+} from '@/hooks/calendar';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
@@ -77,7 +90,11 @@ import {
 import { PiUsersThreeDuotone } from 'react-icons/pi';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { AddMemberDialog, EmailPermissionsDialog, LinkEmailDialog } from '../src';
+import {
+  AddMemberDialog,
+  EmailPermissionsDialog,
+  LinkEmailDialog,
+} from '../src';
 
 export default function TeamDetailPage() {
   const params = useParams();
@@ -100,21 +117,29 @@ export default function TeamDetailPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [changeRoleOpen, setChangeRoleOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [newRole, setNewRole] = useState<'OWNER' | 'ADMIN' | 'MEMBER'>('MEMBER');
+  const [newRole, setNewRole] = useState<'OWNER' | 'ADMIN' | 'MEMBER'>(
+    'MEMBER'
+  );
   const [pinConfirmOpen, setPinConfirmOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'changeRole' | 'removeMember' | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    'changeRole' | 'removeMember' | null
+  >(null);
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
   const [slugCopied, setSlugCopied] = useState(false);
   const [linkEmailOpen, setLinkEmailOpen] = useState(false);
   const [editEmailPermsOpen, setEditEmailPermsOpen] = useState(false);
-  const [selectedTeamEmail, setSelectedTeamEmail] = useState<TeamEmailAccount | null>(null);
+  const [selectedTeamEmail, setSelectedTeamEmail] =
+    useState<TeamEmailAccount | null>(null);
   const [calendarPermsOpen, setCalendarPermsOpen] = useState(false);
-  const [selectedCalendar, setSelectedCalendar] = useState<CalendarModel | null>(null);
-  const [renameCalendar, setRenameCalendar] = useState<CalendarModel | null>(null);
+  const [selectedCalendar, setSelectedCalendar] =
+    useState<CalendarModel | null>(null);
+  const [renameCalendar, setRenameCalendar] = useState<CalendarModel | null>(
+    null
+  );
   const [renameValue, setRenameValue] = useState('');
   // renameColor removed — team calendars inherit the team's color
-  const [deleteCalendarConfirm, setDeleteCalendarConfirm] = useState<CalendarModel | null>(null);
-
+  const [deleteCalendarConfirm, setDeleteCalendarConfirm] =
+    useState<CalendarModel | null>(null);
 
   // Queries
   const { data: teamData, isLoading: isLoadingTeam } = useQuery({
@@ -138,18 +163,24 @@ export default function TeamDetailPage() {
 
   const teamEmails = teamEmailsData?.emailAccounts ?? [];
 
-  const { data: calendarsData, isLoading: isLoadingCalendars } = useMyCalendars();
+  const { data: calendarsData, isLoading: isLoadingCalendars } =
+    useMyCalendars();
   const teamCalendars = (calendarsData?.calendars ?? []).filter(
-    (c) => c.type === 'TEAM' && c.ownerId === teamId,
+    c => c.type === 'TEAM' && c.ownerId === teamId
   );
   const createTeamCalendar = useCreateTeamCalendar();
   const deleteCalendar = useDeleteCalendar();
   const updateCalendar = useUpdateCalendar();
 
   const currentMember = members.find(m => m.userId === currentUser?.id);
-  const currentUserTeamRole = currentMember?.role as 'OWNER' | 'ADMIN' | 'MEMBER' | undefined;
+  const currentUserTeamRole = currentMember?.role as
+    | 'OWNER'
+    | 'ADMIN'
+    | 'MEMBER'
+    | undefined;
   const isCurrentUserOwner = currentUserTeamRole === 'OWNER';
-  const canManageTeamCalendars = currentUserTeamRole === 'OWNER' || currentUserTeamRole === 'ADMIN';
+  const canManageTeamCalendars =
+    currentUserTeamRole === 'OWNER' || currentUserTeamRole === 'ADMIN';
 
   // Mutations
   const deleteMutation = useMutation({
@@ -163,7 +194,8 @@ export default function TeamDetailPage() {
   });
 
   const removeMemberMutation = useMutation({
-    mutationFn: (memberId: string) => teamsService.removeTeamMember(teamId, memberId),
+    mutationFn: (memberId: string) =>
+      teamsService.removeTeamMember(teamId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'members'] });
       queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
@@ -173,8 +205,13 @@ export default function TeamDetailPage() {
   });
 
   const changeRoleMutation = useMutation({
-    mutationFn: ({ memberId, role }: { memberId: string; role: 'ADMIN' | 'MEMBER' }) =>
-      teamsService.changeTeamMemberRole(teamId, memberId, { role }),
+    mutationFn: ({
+      memberId,
+      role,
+    }: {
+      memberId: string;
+      role: 'ADMIN' | 'MEMBER';
+    }) => teamsService.changeTeamMemberRole(teamId, memberId, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'members'] });
       toast.success('Papel alterado com sucesso');
@@ -259,14 +296,20 @@ export default function TeamDetailPage() {
     switch (role) {
       case 'OWNER':
         return (
-          <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 text-white">
+          <Badge
+            variant="default"
+            className="bg-amber-500 hover:bg-amber-600 text-white"
+          >
             <Crown className="w-3 h-3 mr-1" />
             {TEAM_MEMBER_ROLE_LABELS.OWNER}
           </Badge>
         );
       case 'ADMIN':
         return (
-          <Badge variant="default" className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Badge
+            variant="default"
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
             <ShieldCheck className="w-3 h-3 mr-1" />
             {TEAM_MEMBER_ROLE_LABELS.ADMIN}
           </Badge>
@@ -388,7 +431,9 @@ export default function TeamDetailPage() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {team.name}
+                </h1>
                 <Badge variant={team.isActive ? 'default' : 'secondary'}>
                   {team.isActive ? 'Ativa' : 'Inativa'}
                 </Badge>
@@ -505,7 +550,9 @@ export default function TeamDetailPage() {
             ) : members.length === 0 ? (
               <div className="py-8 text-center">
                 <Users className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">Nenhum membro encontrado.</p>
+                <p className="text-muted-foreground">
+                  Nenhum membro encontrado.
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -532,26 +579,30 @@ export default function TeamDetailPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {getRoleBadge(member.role)}
-                      {canManageMembers && member.role !== 'OWNER' && (isCurrentUserOwner || member.role === 'MEMBER') && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleChangeRole(member)}
-                            title="Alterar papel"
-                          >
-                            <Shield className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRequestRemoveMember(member.id)}
-                            title="Remover membro"
-                          >
-                            <UserMinus className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </>
-                      )}
+                      {canManageMembers &&
+                        member.role !== 'OWNER' &&
+                        (isCurrentUserOwner || member.role === 'MEMBER') && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleChangeRole(member)}
+                              title="Alterar papel"
+                            >
+                              <Shield className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleRequestRemoveMember(member.id)
+                              }
+                              title="Remover membro"
+                            >
+                              <UserMinus className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </>
+                        )}
                     </div>
                   </div>
                 ))}
@@ -640,7 +691,9 @@ export default function TeamDetailPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => unlinkEmailMutation.mutate(te.accountId)}
+                                  onClick={() =>
+                                    unlinkEmailMutation.mutate(te.accountId)
+                                  }
                                   disabled={unlinkEmailMutation.isPending}
                                 >
                                   <Link2Off className="w-4 h-4 text-destructive" />
@@ -675,9 +728,15 @@ export default function TeamDetailPage() {
                     createTeamCalendar.mutate(
                       { teamId, name: `Calendário de ${team.name}` },
                       {
-                        onSuccess: () => toast.success('Calendário criado com sucesso'),
-                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Erro ao criar calendário'),
-                      },
+                        onSuccess: () =>
+                          toast.success('Calendário criado com sucesso'),
+                        onError: err =>
+                          toast.error(
+                            err instanceof Error
+                              ? err.message
+                              : 'Erro ao criar calendário'
+                          ),
+                      }
                     );
                   }}
                   disabled={createTeamCalendar.isPending}
@@ -708,7 +767,11 @@ export default function TeamDetailPage() {
                     key={cal.id}
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 transition-colors"
                   >
-                    <CalendarBadge name={cal.name} type={cal.type} color={team.color} />
+                    <CalendarBadge
+                      name={cal.name}
+                      type={cal.type}
+                      color={team.color}
+                    />
                     <div className="flex items-center gap-1">
                       {(cal.access?.canManage ?? canManageTeamCalendars) && (
                         <TooltipProvider>
@@ -779,7 +842,8 @@ export default function TeamDetailPage() {
           <DialogHeader>
             <DialogTitle>Alterar Papel do Membro</DialogTitle>
             <DialogDescription>
-              Altere o papel de {selectedMember?.userName ?? 'membro'} na equipe.
+              Altere o papel de {selectedMember?.userName ?? 'membro'} na
+              equipe.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -787,7 +851,9 @@ export default function TeamDetailPage() {
               <Label>Novo papel</Label>
               <Select
                 value={newRole}
-                onValueChange={v => setNewRole(v as 'OWNER' | 'ADMIN' | 'MEMBER')}
+                onValueChange={v =>
+                  setNewRole(v as 'OWNER' | 'ADMIN' | 'MEMBER')
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -796,7 +862,9 @@ export default function TeamDetailPage() {
                   <SelectItem value="MEMBER">Membro</SelectItem>
                   <SelectItem value="ADMIN">Administrador</SelectItem>
                   {isCurrentUserOwner && (
-                    <SelectItem value="OWNER">Proprietário (Transferir Propriedade)</SelectItem>
+                    <SelectItem value="OWNER">
+                      Proprietário (Transferir Propriedade)
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -809,9 +877,13 @@ export default function TeamDetailPage() {
                     Atenção: Transferência de propriedade
                   </p>
                   <p className="text-muted-foreground mt-1">
-                    Ao transferir a propriedade, você será rebaixado para Administrador e{' '}
-                    <span className="font-medium">{selectedMember?.userName ?? 'este membro'}</span>{' '}
-                    se tornará o novo proprietário da equipe. Esta ação requer confirmação por PIN.
+                    Ao transferir a propriedade, você será rebaixado para
+                    Administrador e{' '}
+                    <span className="font-medium">
+                      {selectedMember?.userName ?? 'este membro'}
+                    </span>{' '}
+                    se tornará o novo proprietário da equipe. Esta ação requer
+                    confirmação por PIN.
                   </p>
                 </div>
               </div>
@@ -891,12 +963,19 @@ export default function TeamDetailPage() {
       {(() => {
         const editAccent = team.color || '#3b82f6';
         return (
-          <Dialog open={!!renameCalendar} onOpenChange={(open) => { if (!open) setRenameCalendar(null); }}>
+          <Dialog
+            open={!!renameCalendar}
+            onOpenChange={open => {
+              if (!open) setRenameCalendar(null);
+            }}
+          >
             <DialogContent className="sm:max-w-[440px] p-0">
               {/* Accent bar */}
               <div
                 className="h-1.5 w-full rounded-t-lg transition-colors"
-                style={{ background: `linear-gradient(to right, ${editAccent}, ${editAccent}80)` }}
+                style={{
+                  background: `linear-gradient(to right, ${editAccent}, ${editAccent}80)`,
+                }}
               />
 
               <div className="px-6 pt-4 pb-2">
@@ -906,24 +985,31 @@ export default function TeamDetailPage() {
                       className="p-2 rounded-lg transition-colors"
                       style={{ background: `${editAccent}18` }}
                     >
-                      <Pencil className="w-4 h-4" style={{ color: editAccent }} />
+                      <Pencil
+                        className="w-4 h-4"
+                        style={{ color: editAccent }}
+                      />
                     </div>
                     Renomear Calendário
                   </DialogTitle>
                   <DialogDescription>
-                    Altere o nome do calendário da equipe. A cor é herdada da equipe.
+                    Altere o nome do calendário da equipe. A cor é herdada da
+                    equipe.
                   </DialogDescription>
                 </DialogHeader>
               </div>
 
               <div className="px-6 pb-2">
-                <Label htmlFor="calendar-name" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="calendar-name"
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
                   Nome
                 </Label>
                 <Input
                   id="calendar-name"
                   value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
+                  onChange={e => setRenameValue(e.target.value)}
                   placeholder="Nome do calendário"
                   className="mt-1.5"
                   style={{ borderColor: `${editAccent}50` }}
@@ -931,7 +1017,10 @@ export default function TeamDetailPage() {
               </div>
 
               <DialogFooter className="px-6 pb-5 pt-3">
-                <Button variant="outline" onClick={() => setRenameCalendar(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setRenameCalendar(null)}
+                >
                   Cancelar
                 </Button>
                 <Button
@@ -950,8 +1039,13 @@ export default function TeamDetailPage() {
                           toast.success('Calendário renomeado com sucesso');
                           setRenameCalendar(null);
                         },
-                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Erro ao renomear calendário'),
-                      },
+                        onError: err =>
+                          toast.error(
+                            err instanceof Error
+                              ? err.message
+                              : 'Erro ao renomear calendário'
+                          ),
+                      }
                     );
                   }}
                 >
@@ -964,22 +1058,32 @@ export default function TeamDetailPage() {
       })()}
 
       {/* DELETE CALENDAR CONFIRM DIALOG */}
-      <Dialog open={!!deleteCalendarConfirm} onOpenChange={(open) => { if (!open) setDeleteCalendarConfirm(null); }}>
+      <Dialog
+        open={!!deleteCalendarConfirm}
+        onOpenChange={open => {
+          if (!open) setDeleteCalendarConfirm(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Excluir Calendário</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir o calendário &quot;{deleteCalendarConfirm?.name}&quot;?
+              Tem certeza que deseja excluir o calendário &quot;
+              {deleteCalendarConfirm?.name}&quot;?
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
-              Todos os eventos associados a este calendário serão removidos. Esta ação não pode ser desfeita.
+              Todos os eventos associados a este calendário serão removidos.
+              Esta ação não pode ser desfeita.
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteCalendarConfirm(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteCalendarConfirm(null)}
+            >
               Cancelar
             </Button>
             <Button
@@ -992,7 +1096,12 @@ export default function TeamDetailPage() {
                     toast.success('Calendário excluído com sucesso');
                     setDeleteCalendarConfirm(null);
                   },
-                  onError: (err) => toast.error(err instanceof Error ? err.message : 'Erro ao excluir calendário'),
+                  onError: err =>
+                    toast.error(
+                      err instanceof Error
+                        ? err.message
+                        : 'Erro ao excluir calendário'
+                    ),
                 });
               }}
             >

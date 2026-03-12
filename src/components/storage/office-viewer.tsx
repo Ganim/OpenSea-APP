@@ -82,17 +82,17 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
     setFileBuffer(null);
 
     fetch(url)
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error('Erro ao carregar arquivo');
         return res.arrayBuffer();
       })
-      .then((buffer) => {
+      .then(buffer => {
         if (!cancelled) setFileBuffer(buffer);
       })
-      .catch((err) => {
+      .catch(err => {
         if (!cancelled) {
           setError(
-            err instanceof Error ? err.message : 'Erro ao carregar arquivo',
+            err instanceof Error ? err.message : 'Erro ao carregar arquivo'
           );
           setLoading(false);
         }
@@ -128,7 +128,7 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
         if (!cancelled && breakPages) {
           // Style wrapper as page canvas
           const wrapper = container.querySelector(
-            '.docx-wrapper',
+            '.docx-wrapper'
           ) as HTMLElement;
           if (wrapper) {
             wrapper.style.background = 'transparent';
@@ -139,18 +139,18 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
             '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)';
           const cardBorder = '1px solid rgba(0,0,0,0.06)';
           const sections = container.querySelectorAll(
-            'section.docx',
+            'section.docx'
           ) as NodeListOf<HTMLElement>;
           let totalPages = 0;
 
-          sections.forEach((section) => {
+          sections.forEach(section => {
             const ph =
               parseFloat(window.getComputedStyle(section).minHeight) ||
               A4_PAGE_HEIGHT;
             pageHeightRef.current = ph;
             const sectionPages = Math.max(
               1,
-              Math.ceil(section.scrollHeight / ph),
+              Math.ceil(section.scrollHeight / ph)
             );
             totalPages += sectionPages;
 
@@ -185,9 +185,7 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
                 card.style.border = cardBorder;
 
                 const clone =
-                  i === 0
-                    ? section
-                    : (section.cloneNode(true) as HTMLElement);
+                  i === 0 ? section : (section.cloneNode(true) as HTMLElement);
                 if (i > 0) clone.style.marginTop = `${-i * ph}px`;
 
                 card.appendChild(clone);
@@ -208,7 +206,7 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
         } else if (!cancelled) {
           // Continuous scroll — reset page canvas styling
           const wrapper = container.querySelector(
-            '.docx-wrapper',
+            '.docx-wrapper'
           ) as HTMLElement;
           if (wrapper) {
             wrapper.style.background = '';
@@ -220,9 +218,7 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
       } catch (err) {
         if (!cancelled) {
           setError(
-            err instanceof Error
-              ? err.message
-              : 'Erro ao renderizar documento',
+            err instanceof Error ? err.message : 'Erro ao renderizar documento'
           );
         }
       } finally {
@@ -267,17 +263,17 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
           if (!sheetName) throw new Error('Planilha vazia');
 
           const html = XLSX.utils.sheet_to_html(
-            workbook.Sheets[sheetName] as Parameters<typeof XLSX.utils.sheet_to_html>[0],
-            { editable: false },
+            workbook.Sheets[sheetName] as Parameters<
+              typeof XLSX.utils.sheet_to_html
+            >[0],
+            { editable: false }
           );
           container.innerHTML = `<div class="xlsx-preview">${html}</div>`;
         }
       } catch (err) {
         if (!cancelled) {
           setError(
-            err instanceof Error
-              ? err.message
-              : 'Erro ao renderizar planilha',
+            err instanceof Error ? err.message : 'Erro ao renderizar planilha'
           );
         }
       } finally {
@@ -302,14 +298,11 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
       // +10 tolerance to handle sub-pixel rounding at page boundaries
       const adjusted = Math.max(
         0,
-        scrollEl.scrollTop - WRAPPER_PADDING * scale + 10,
+        scrollEl.scrollTop - WRAPPER_PADDING * scale + 10
       );
       const page = Math.min(
         numPages,
-        Math.max(
-          1,
-          Math.floor(adjusted / ((ph + PAGE_GAP) * scale)) + 1,
-        ),
+        Math.max(1, Math.floor(adjusted / ((ph + PAGE_GAP) * scale)) + 1)
       );
       setCurrentPage(page);
     };
@@ -323,27 +316,25 @@ export function OfficeViewer({ url, fileName, mimeType }: OfficeViewerProps) {
       if (!scrollRef.current || page < 1 || page > numPages) return;
       const ph = pageHeightRef.current;
       scrollRef.current.scrollTo({
-        top:
-          WRAPPER_PADDING * scale +
-          (page - 1) * (ph + PAGE_GAP) * scale,
+        top: WRAPPER_PADDING * scale + (page - 1) * (ph + PAGE_GAP) * scale,
         behavior: 'smooth',
       });
       setCurrentPage(page);
     },
-    [numPages, scale],
+    [numPages, scale]
   );
 
   const zoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev + 0.25, 3.0));
+    setScale(prev => Math.min(prev + 0.25, 3.0));
   }, []);
 
   const zoomOut = useCallback(() => {
-    setScale((prev) => Math.max(prev - 0.25, 0.5));
+    setScale(prev => Math.max(prev - 0.25, 0.5));
   }, []);
 
   const toggleBreakPages = useCallback(() => {
     setLoading(true);
-    setBreakPages((prev) => !prev);
+    setBreakPages(prev => !prev);
   }, []);
 
   const switchSheet = useCallback((idx: number) => {

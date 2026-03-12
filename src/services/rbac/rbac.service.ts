@@ -253,7 +253,11 @@ export async function addPermissionsToGroupBulk(
     added: number;
     skipped: number;
     errors: unknown[];
-  }>(API_ENDPOINTS.RBAC.GROUPS.PERMISSIONS_BULK(groupId), { permissions });
+  }>(
+    API_ENDPOINTS.RBAC.GROUPS.PERMISSIONS_BULK(groupId),
+    { permissions },
+    { signal: AbortSignal.timeout(60000) }
+  );
   return response;
 }
 

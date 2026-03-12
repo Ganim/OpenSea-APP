@@ -70,7 +70,14 @@ export default function OvertimeDetailPage() {
       },
     });
 
-  const { getName } = useEmployeeMap(overtime ? [overtime.employeeId, ...(overtime.approvedBy ? [overtime.approvedBy] : [])] : []);
+  const { getName } = useEmployeeMap(
+    overtime
+      ? [
+          overtime.employeeId,
+          ...(overtime.approvedBy ? [overtime.approvedBy] : []),
+        ]
+      : []
+  );
 
   // ============================================================================
   // LOADING STATE
@@ -173,7 +180,8 @@ export default function OvertimeDetailPage() {
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {getName(overtime.employeeId)} · {formatHours(overtime.hours)} registrada(s)
+                {getName(overtime.employeeId)} · {formatHours(overtime.hours)}{' '}
+                registrada(s)
               </p>
             </div>
             <div className="flex flex-col gap-2 shrink-0 text-sm">
@@ -261,14 +269,18 @@ export default function OvertimeDetailPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <InfoField
                 label="Aprovado por"
-                value={overtime.approvedBy ? getName(overtime.approvedBy) : null}
+                value={
+                  overtime.approvedBy ? getName(overtime.approvedBy) : null
+                }
                 icon={<User className="h-4 w-4" />}
                 showCopyButton
                 copyTooltip="Copiar nome do funcionário"
               />
               <InfoField
                 label="Data da aprovação"
-                value={overtime.approvedAt ? formatDate(overtime.approvedAt) : null}
+                value={
+                  overtime.approvedAt ? formatDate(overtime.approvedAt) : null
+                }
                 icon={<Calendar className="h-4 w-4" />}
               />
             </div>

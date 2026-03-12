@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -81,8 +77,8 @@ export function EventCreateDialog({
   const [calOpen, setCalOpen] = useState(false);
 
   const accentColor = color || EVENT_TYPE_COLORS[type] || '#3b82f6';
-  const creatableCalendars = calendars.filter((c) => c.access.canCreate);
-  const selectedCalendar = creatableCalendars.find((c) => c.id === calendarId);
+  const creatableCalendars = calendars.filter(c => c.access.canCreate);
+  const selectedCalendar = creatableCalendars.find(c => c.id === calendarId);
 
   useEffect(() => {
     if (open) {
@@ -149,80 +145,92 @@ export function EventCreateDialog({
     }
   }
 
-  const calendarSlot = creatableCalendars.length > 1 ? (
-    <Popover open={calOpen} onOpenChange={setCalOpen}>
+  const calendarSlot =
+    creatableCalendars.length > 1 ? (
+      <Popover open={calOpen} onOpenChange={setCalOpen}>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 hover:bg-accent/50 transition-colors text-xs"
+                >
+                  <span
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: selectedCalendar?.color ?? '#64748b',
+                    }}
+                  />
+                  <span className="hidden sm:inline truncate max-w-[60px]">
+                    {selectedCalendar?.name ?? 'Calendário'}
+                  </span>
+                </button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="text-xs">
+                Calendário: {selectedCalendar?.name ?? '—'}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <PopoverContent className="w-[220px] p-1" align="end" sideOffset={4}>
+          {creatableCalendars.map(cal => {
+            const Icon = CALENDAR_TYPE_ICONS[cal.type];
+            return (
+              <button
+                key={cal.id}
+                type="button"
+                onClick={() => {
+                  setCalendarId(cal.id);
+                  setCalOpen(false);
+                }}
+                className={cn(
+                  'flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-sm transition-colors',
+                  calendarId === cal.id
+                    ? 'bg-accent font-medium'
+                    : 'hover:bg-accent/50'
+                )}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{
+                    backgroundColor:
+                      (cal.type === 'TEAM' ? cal.ownerColor : null) ??
+                      cal.color ??
+                      '#64748b',
+                  }}
+                />
+                <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate">{cal.name}</span>
+                {calendarId === cal.id && (
+                  <Check className="w-3.5 h-3.5 ml-auto text-foreground shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </PopoverContent>
+      </Popover>
+    ) : (
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 hover:bg-accent/50 transition-colors text-xs"
-              >
-                <span
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: selectedCalendar?.color ?? '#64748b' }}
-                />
-                <span className="hidden sm:inline truncate max-w-[60px]">
-                  {selectedCalendar?.name ?? 'Calendário'}
-                </span>
-              </button>
-            </PopoverTrigger>
+            <div className="flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 text-xs text-muted-foreground cursor-default">
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline truncate max-w-[60px]">
+                {selectedCalendar?.name ?? 'Pessoal'}
+              </span>
+            </div>
           </TooltipTrigger>
           <TooltipContent side="top">
-            <p className="text-xs">Calendário: {selectedCalendar?.name ?? '—'}</p>
+            <p className="text-xs">
+              Calendário: {selectedCalendar?.name ?? 'Pessoal'}
+            </p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent className="w-[220px] p-1" align="end" sideOffset={4}>
-        {creatableCalendars.map((cal) => {
-          const Icon = CALENDAR_TYPE_ICONS[cal.type];
-          return (
-            <button
-              key={cal.id}
-              type="button"
-              onClick={() => {
-                setCalendarId(cal.id);
-                setCalOpen(false);
-              }}
-              className={cn(
-                'flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-sm transition-colors',
-                calendarId === cal.id
-                  ? 'bg-accent font-medium'
-                  : 'hover:bg-accent/50',
-              )}
-            >
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: (cal.type === 'TEAM' ? cal.ownerColor : null) ?? cal.color ?? '#64748b' }}
-              />
-              <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              <span className="truncate">{cal.name}</span>
-              {calendarId === cal.id && (
-                <Check className="w-3.5 h-3.5 ml-auto text-foreground shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
-  ) : (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center justify-center gap-1.5 h-9 rounded-md border border-border/60 text-xs text-muted-foreground cursor-default">
-            <CalendarDays className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline truncate max-w-[60px]">
-              {selectedCalendar?.name ?? 'Pessoal'}
-            </span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p className="text-xs">Calendário: {selectedCalendar?.name ?? 'Pessoal'}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+    );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -240,11 +248,16 @@ export function EventCreateDialog({
               className="p-2 rounded-lg shrink-0"
               style={{ backgroundColor: `${accentColor}18` }}
             >
-              <CalendarPlus className="w-5 h-5" style={{ color: accentColor }} />
+              <CalendarPlus
+                className="w-5 h-5"
+                style={{ color: accentColor }}
+              />
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-semibold">Novo Evento</h2>
-              <p className="text-xs text-muted-foreground">Preencha os dados do evento</p>
+              <p className="text-xs text-muted-foreground">
+                Preencha os dados do evento
+              </p>
             </div>
           </div>
         </div>
@@ -253,16 +266,47 @@ export function EventCreateDialog({
           idPrefix="create"
           accentColor={accentColor}
           state={{
-            title, description, location, startDate, endDate, isAllDay,
-            type, visibility, color, rrule, timezone,
-            showDescription, showLocation, showTimezone, showRecurrence,
+            title,
+            description,
+            location,
+            startDate,
+            endDate,
+            isAllDay,
+            type,
+            visibility,
+            color,
+            rrule,
+            timezone,
+            showDescription,
+            showLocation,
+            showTimezone,
+            showRecurrence,
           }}
           actions={{
-            setTitle, setDescription, setLocation, setStartDate, setEndDate, setIsAllDay,
-            setType, setVisibility, setColor, setRrule, setTimezone,
-            setShowDescription, setShowLocation, setShowTimezone, setShowRecurrence,
+            setTitle,
+            setDescription,
+            setLocation,
+            setStartDate,
+            setEndDate,
+            setIsAllDay,
+            setType,
+            setVisibility,
+            setColor,
+            setRrule,
+            setTimezone,
+            setShowDescription,
+            setShowLocation,
+            setShowTimezone,
+            setShowRecurrence,
           }}
-          popovers={{ tzOpen, setTzOpen, typeOpen, setTypeOpen, colorOpen, setColorOpen }}
+          popovers={{
+            tzOpen,
+            setTzOpen,
+            typeOpen,
+            setTypeOpen,
+            colorOpen,
+            setColorOpen,
+          }}
           calendarSlot={calendarSlot}
         />
 

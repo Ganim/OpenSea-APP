@@ -19,7 +19,10 @@ import type { OcrExtractResult } from '@/services/finance';
 import { Check } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { OcrConfirmationStep, type OcrConfirmedData } from './ocr-confirmation-step';
+import {
+  OcrConfirmationStep,
+  type OcrConfirmedData,
+} from './ocr-confirmation-step';
 import { OcrUploadButton } from './ocr-upload-button';
 import { WizardStepAttachment } from './wizard-step-attachment';
 import { WizardStepConfirmation } from './wizard-step-confirmation';
@@ -122,7 +125,10 @@ export function PayableWizardModal({
 
   const handleReset = useCallback(() => {
     setCurrentStep(1);
-    setWizardData({ ...INITIAL_WIZARD_DATA, issueDate: new Date().toISOString().split('T')[0] });
+    setWizardData({
+      ...INITIAL_WIZARD_DATA,
+      issueDate: new Date().toISOString().split('T')[0],
+    });
     setOcrResult(null);
   }, []);
 
@@ -138,7 +144,7 @@ export function PayableWizardModal({
     if (data.codigoBarras) updates.boletoBarcode = data.codigoBarras;
     if (data.linhaDigitavel) updates.boletoDigitLine = data.linhaDigitavel;
 
-    setWizardData((prev) => ({ ...prev, ...updates }));
+    setWizardData(prev => ({ ...prev, ...updates }));
     setOcrResult(null);
     setCurrentStep(2); // Auto-advance to Dados step
   }, []);
@@ -158,7 +164,7 @@ export function PayableWizardModal({
   );
 
   const updateWizardData = useCallback((updates: Partial<WizardData>) => {
-    setWizardData((prev) => ({ ...prev, ...updates }));
+    setWizardData(prev => ({ ...prev, ...updates }));
   }, []);
 
   const goToStep = useCallback((step: WizardStep) => {
@@ -181,7 +187,8 @@ export function PayableWizardModal({
       boletoDigitLine: wizardData.boletoDigitLine || undefined,
       notes: wizardData.notes || undefined,
       tags: wizardData.tags.length > 0 ? wizardData.tags : undefined,
-      recurrenceType: wizardData.recurrenceType === 'INSTALLMENT' ? 'INSTALLMENT' : 'SINGLE',
+      recurrenceType:
+        wizardData.recurrenceType === 'INSTALLMENT' ? 'INSTALLMENT' : 'SINGLE',
       totalInstallments:
         wizardData.recurrenceType === 'INSTALLMENT'
           ? wizardData.totalInstallments
@@ -199,7 +206,7 @@ export function PayableWizardModal({
     // Cost center: single or rateio
     if (wizardData.useRateio && wizardData.costCenterAllocations.length > 0) {
       payload.costCenterAllocations = wizardData.costCenterAllocations.map(
-        (a) => ({
+        a => ({
           costCenterId: a.costCenterId,
           percentage: a.percentage,
         })
@@ -255,10 +262,7 @@ export function PayableWizardModal({
             const isCompleted = currentStep > stepNum;
 
             return (
-              <div
-                key={label}
-                className="flex flex-col items-center flex-1"
-              >
+              <div key={label} className="flex flex-col items-center flex-1">
                 <div className="flex items-center w-full">
                   {index > 0 && (
                     <div
@@ -278,18 +282,12 @@ export function PayableWizardModal({
                           : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {isCompleted ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      stepNum
-                    )}
+                    {isCompleted ? <Check className="h-4 w-4" /> : stepNum}
                   </div>
                   {index < STEP_LABELS.length - 1 && (
                     <div
                       className={`flex-1 h-0.5 ${
-                        isCompleted
-                          ? 'bg-primary'
-                          : 'bg-muted-foreground/20'
+                        isCompleted ? 'bg-primary' : 'bg-muted-foreground/20'
                       }`}
                     />
                   )}

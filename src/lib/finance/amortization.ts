@@ -27,19 +27,19 @@ export interface AmortizationRow {
 export function calculateSAC(
   principalAmount: number,
   monthlyRate: number,
-  totalMonths: number,
+  totalMonths: number
 ): AmortizationRow[] {
   const rows: AmortizationRow[] = [];
-  const fixedPrincipal = Math.round((principalAmount / totalMonths) * 100) / 100;
+  const fixedPrincipal =
+    Math.round((principalAmount / totalMonths) * 100) / 100;
   let balance = principalAmount;
 
   for (let i = 1; i <= totalMonths; i++) {
     const interest = Math.round(balance * monthlyRate * 100) / 100;
 
     // Last installment gets the remainder to zero out balance
-    const principal = i === totalMonths
-      ? Math.round(balance * 100) / 100
-      : fixedPrincipal;
+    const principal =
+      i === totalMonths ? Math.round(balance * 100) / 100 : fixedPrincipal;
 
     const payment = Math.round((principal + interest) * 100) / 100;
 
@@ -72,7 +72,7 @@ export function calculateSAC(
 export function calculatePrice(
   principalAmount: number,
   monthlyRate: number,
-  totalMonths: number,
+  totalMonths: number
 ): AmortizationRow[] {
   const rows: AmortizationRow[] = [];
 
@@ -82,11 +82,12 @@ export function calculatePrice(
     fixedPayment = Math.round((principalAmount / totalMonths) * 100) / 100;
   } else {
     // PMT formula: P * r / (1 - (1 + r)^-n)
-    fixedPayment = Math.round(
-      ((principalAmount * monthlyRate) /
-        (1 - Math.pow(1 + monthlyRate, -totalMonths))) *
-        100,
-    ) / 100;
+    fixedPayment =
+      Math.round(
+        ((principalAmount * monthlyRate) /
+          (1 - Math.pow(1 + monthlyRate, -totalMonths))) *
+          100
+      ) / 100;
   }
 
   let balance = principalAmount;
@@ -95,13 +96,15 @@ export function calculatePrice(
     const interest = Math.round(balance * monthlyRate * 100) / 100;
 
     // Last installment: pay off remaining balance
-    const principal = i === totalMonths
-      ? Math.round(balance * 100) / 100
-      : Math.round((fixedPayment - interest) * 100) / 100;
+    const principal =
+      i === totalMonths
+        ? Math.round(balance * 100) / 100
+        : Math.round((fixedPayment - interest) * 100) / 100;
 
-    const payment = i === totalMonths
-      ? Math.round((principal + interest) * 100) / 100
-      : fixedPayment;
+    const payment =
+      i === totalMonths
+        ? Math.round((principal + interest) * 100) / 100
+        : fixedPayment;
 
     balance = Math.round((balance - principal) * 100) / 100;
     if (balance < 0) balance = 0;

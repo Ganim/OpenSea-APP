@@ -49,13 +49,16 @@ export function FilePreviewModal({
   // Proxy serve URL — streams through backend, no direct S3 exposure
   const serveUrl = useMemo(
     () => (file ? storageFilesService.getServeUrl(file.id, { password }) : ''),
-    [file, password],
+    [file, password]
   );
 
   // Office files are converted to PDF server-side (LibreOffice headless)
   const serveUrlPdf = useMemo(
-    () => (file ? storageFilesService.getServeUrl(file.id, { password, format: 'pdf' }) : ''),
-    [file, password],
+    () =>
+      file
+        ? storageFilesService.getServeUrl(file.id, { password, format: 'pdf' })
+        : '',
+    [file, password]
   );
 
   // Reset fallback state when navigating between files
@@ -82,7 +85,10 @@ export function FilePreviewModal({
   const handleDownload = useCallback(() => {
     if (!file) return;
     try {
-      const downloadUrl = storageFilesService.getServeUrl(file.id, { download: true, password });
+      const downloadUrl = storageFilesService.getServeUrl(file.id, {
+        download: true,
+        password,
+      });
       window.open(downloadUrl, '_blank');
     } catch {
       toast.error('Erro ao baixar o arquivo');
@@ -100,7 +106,9 @@ export function FilePreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`max-h-[95vh] flex flex-col [&>button]:hidden ${isDocument ? 'sm:max-w-4xl' : 'sm:max-w-3xl'}`}>
+      <DialogContent
+        className={`max-h-[95vh] flex flex-col [&>button]:hidden ${isDocument ? 'sm:max-w-4xl' : 'sm:max-w-3xl'}`}
+      >
         <DialogHeader className="flex flex-row items-center gap-2 space-y-0">
           <FileTypeIcon fileType={file.fileType} size={20} />
           <DialogTitle className="flex-1 truncate">{file.name}</DialogTitle>
@@ -170,10 +178,19 @@ export function FilePreviewModal({
             </div>
           ) : isPdf && serveUrl ? (
             <PdfViewer url={serveUrl} />
-          ) : (isOffice || isPresentation) && serveUrlPdf && !pdfConversionFailed ? (
-            <PdfViewer url={serveUrlPdf} onError={() => setPdfConversionFailed(true)} />
+          ) : (isOffice || isPresentation) &&
+            serveUrlPdf &&
+            !pdfConversionFailed ? (
+            <PdfViewer
+              url={serveUrlPdf}
+              onError={() => setPdfConversionFailed(true)}
+            />
           ) : isOffice && pdfConversionFailed && serveUrl ? (
-            <OfficeViewer url={serveUrl} fileName={file.name} mimeType={file.mimeType} />
+            <OfficeViewer
+              url={serveUrl}
+              fileName={file.name}
+              mimeType={file.mimeType}
+            />
           ) : isVideo && serveUrl ? (
             <VideoPlayer url={serveUrl} name={file.name} />
           ) : (
@@ -185,7 +202,6 @@ export function FilePreviewModal({
             </div>
           )}
         </div>
-
       </DialogContent>
     </Dialog>
   );

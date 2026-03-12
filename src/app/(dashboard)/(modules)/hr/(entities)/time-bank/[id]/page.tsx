@@ -57,7 +57,7 @@ export default function TimeBankDetailPage() {
       const response = await timeBankApi.list();
       const timeBanks =
         (response as { timeBanks?: TimeBank[] }).timeBanks ?? [];
-      return timeBanks.find((tb) => tb.id === timeBankId);
+      return timeBanks.find(tb => tb.id === timeBankId);
     },
   });
 
@@ -136,7 +136,11 @@ export default function TimeBankDetailPage() {
 
   const balanceColor = getBalanceColor(timeBank.balance);
   const balanceVariant =
-    timeBank.balance > 0 ? 'success' : timeBank.balance < 0 ? 'destructive' : 'secondary';
+    timeBank.balance > 0
+      ? 'success'
+      : timeBank.balance < 0
+        ? 'destructive'
+        : 'secondary';
 
   // ============================================================================
   // RENDER
@@ -233,10 +237,7 @@ export default function TimeBankDetailPage() {
               showCopyButton
               copyTooltip="Copiar nome do funcionário"
             />
-            <InfoField
-              label="Ano"
-              value={formatYear(timeBank.year)}
-            />
+            <InfoField label="Ano" value={formatYear(timeBank.year)} />
             <InfoField
               label="Saldo"
               value={formatBalance(timeBank.balance)}
@@ -258,7 +259,9 @@ export default function TimeBankDetailPage() {
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Histórico de Saldo</p>
+              <p className="text-xs text-muted-foreground">
+                Histórico de Saldo
+              </p>
               <div className="flex gap-2 mt-2">
                 {timeBank.hasPositiveBalance && (
                   <Badge className="gap-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
@@ -272,11 +275,10 @@ export default function TimeBankDetailPage() {
                     Possui saldo negativo
                   </Badge>
                 )}
-                {!timeBank.hasPositiveBalance && !timeBank.hasNegativeBalance && (
-                  <Badge variant="secondary">
-                    Sem movimentações
-                  </Badge>
-                )}
+                {!timeBank.hasPositiveBalance &&
+                  !timeBank.hasNegativeBalance && (
+                    <Badge variant="secondary">Sem movimentações</Badge>
+                  )}
               </div>
             </div>
             <div className="space-y-1">
@@ -312,21 +314,27 @@ export default function TimeBankDetailPage() {
       <CreditModal
         isOpen={creditOpen}
         onClose={() => setCreditOpen(false)}
-        onSubmit={async (data) => { await credit.mutateAsync(data); }}
+        onSubmit={async data => {
+          await credit.mutateAsync(data);
+        }}
         isLoading={credit.isPending}
       />
 
       <DebitModal
         isOpen={debitOpen}
         onClose={() => setDebitOpen(false)}
-        onSubmit={async (data) => { await debit.mutateAsync(data); }}
+        onSubmit={async data => {
+          await debit.mutateAsync(data);
+        }}
         isLoading={debit.isPending}
       />
 
       <AdjustModal
         isOpen={adjustOpen}
         onClose={() => setAdjustOpen(false)}
-        onSubmit={async (data) => { await adjust.mutateAsync(data); }}
+        onSubmit={async data => {
+          await adjust.mutateAsync(data);
+        }}
         isLoading={adjust.isPending}
       />
     </PageLayout>

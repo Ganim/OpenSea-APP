@@ -355,7 +355,6 @@ export default function VacationDetailPage() {
             <p className="text-sm">{vacation.notes}</p>
           </Card>
         )}
-
       </PageBody>
 
       {/* Modals */}

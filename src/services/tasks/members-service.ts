@@ -13,28 +13,28 @@ export interface MemberResponse {
 export const membersService = {
   async invite(
     boardId: string,
-    data: AddBoardMemberRequest,
+    data: AddBoardMemberRequest
   ): Promise<MemberResponse> {
     return apiClient.post<MemberResponse>(
       API_ENDPOINTS.TASKS.BOARDS.MEMBERS.INVITE(boardId),
-      data,
+      data
     );
   },
 
   async updateRole(
     boardId: string,
     memberId: string,
-    data: UpdateBoardMemberRequest,
+    data: UpdateBoardMemberRequest
   ): Promise<MemberResponse> {
     return apiClient.patch<MemberResponse>(
       API_ENDPOINTS.TASKS.BOARDS.MEMBERS.UPDATE(boardId, memberId),
-      data,
+      data
     );
   },
 
   async remove(boardId: string, memberId: string): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.BOARDS.MEMBERS.REMOVE(boardId, memberId),
+      API_ENDPOINTS.TASKS.BOARDS.MEMBERS.REMOVE(boardId, memberId)
     );
   },
 };

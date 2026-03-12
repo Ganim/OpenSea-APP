@@ -56,7 +56,10 @@ export function getDaySchedule(
   };
 }
 
-export function formatDayRange(start: string | null, end: string | null): string {
+export function formatDayRange(
+  start: string | null,
+  end: string | null
+): string {
   if (!start || !end) return 'Folga';
   return `${start} - ${end}`;
 }

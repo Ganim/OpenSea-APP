@@ -10,14 +10,17 @@ interface EmptyTrashDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EmptyTrashDialog({ open, onOpenChange }: EmptyTrashDialogProps) {
+export function EmptyTrashDialog({
+  open,
+  onOpenChange,
+}: EmptyTrashDialogProps) {
   const emptyTrash = useEmptyTrash();
 
   const handleConfirm = async () => {
     try {
       const result = await emptyTrash.mutateAsync();
       toast.success(
-        `Lixeira esvaziada: ${result.deletedFiles} arquivo(s) e ${result.deletedFolders} pasta(s) removidos`,
+        `Lixeira esvaziada: ${result.deletedFiles} arquivo(s) e ${result.deletedFolders} pasta(s) removidos`
       );
       onOpenChange(false);
     } catch {

@@ -65,7 +65,7 @@ export function PhotoUploadDialog({
       };
       reader.readAsDataURL(file);
     },
-    [],
+    []
   );
 
   const handleUpload = useCallback(async () => {
@@ -108,7 +108,7 @@ export function PhotoUploadDialog({
       }
       onOpenChange(isOpen);
     },
-    [onOpenChange, handleReset],
+    [onOpenChange, handleReset]
   );
 
   return (

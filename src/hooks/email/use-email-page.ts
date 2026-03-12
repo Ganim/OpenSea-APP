@@ -125,10 +125,14 @@ export function useEmailPage() {
     }
   );
 
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(mid);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    mid
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [messageFilter, setMessageFilter] = useState<'all' | 'unread' | 'starred'>('all');
+  const [messageFilter, setMessageFilter] = useState<
+    'all' | 'unread' | 'starred'
+  >('all');
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeMode, setComposeMode] = useState<ComposeMode>({ type: 'new' });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -142,7 +146,9 @@ export function useEmailPage() {
 
   const [accountWizardOpen, setAccountWizardOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<EmailAccount | null>(null);
-  const [mobileView, setMobileView] = useState<'sidebar' | 'list' | 'detail'>('list');
+  const [mobileView, setMobileView] = useState<'sidebar' | 'list' | 'detail'>(
+    'list'
+  );
 
   const syncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSelectedMessageRef = useRef<EmailMessageListItem | null>(null);
@@ -164,7 +170,7 @@ export function useEmailPage() {
 
     emailService
       .getMessage(mid)
-      .then((response) => {
+      .then(response => {
         if (cancelled) return;
         const msg = response.message;
 
@@ -198,7 +204,9 @@ export function useEmailPage() {
         setSelectedMessageId(null);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mid]);
 
@@ -343,9 +351,10 @@ export function useEmailPage() {
     ? centralInbox.messages
     : (messagesQuery.data?.pages.flatMap(p => p.data) ?? []);
 
-  const messages = messageFilter === 'starred'
-    ? rawMessages.filter(m => m.isFlagged)
-    : rawMessages;
+  const messages =
+    messageFilter === 'starred'
+      ? rawMessages.filter(m => m.isFlagged)
+      : rawMessages;
 
   const messagesTotal = isCentralInbox
     ? centralInbox.total
@@ -515,13 +524,14 @@ export function useEmailPage() {
 
     emailService
       .getMessage(selectedMessage.id)
-      .then((response) => {
+      .then(response => {
         const msg = response.message;
         const quoted = msg.bodyHtmlSanitized ?? msg.bodyText;
         const rfcId = msg.messageId;
 
         if (action === 'reply') openReply(selectedMessage, rfcId, quoted);
-        else if (action === 'forward') openForward(selectedMessage, rfcId, quoted);
+        else if (action === 'forward')
+          openForward(selectedMessage, rfcId, quoted);
       })
       .catch(() => {
         if (action === 'reply') openReply(selectedMessage);
@@ -554,7 +564,12 @@ export function useEmailPage() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        (e.target as HTMLElement)?.isContentEditable
+      )
+        return;
       if (e.key === 'Delete' && !composeOpen) {
         e.preventDefault();
         handleDeleteSelected();
@@ -620,9 +635,16 @@ export function useEmailPage() {
       isLoadingAccounts: accountsQuery.isLoading,
     }),
     [
-      accounts, folders, selectedAccountId, selectedFolderId,
-      isCentralInbox, isMobile, syncMutation, unreadCounts,
-      accountUnreadCounts, accountsQuery.isLoading,
+      accounts,
+      folders,
+      selectedAccountId,
+      selectedFolderId,
+      isCentralInbox,
+      isMobile,
+      syncMutation,
+      unreadCounts,
+      accountUnreadCounts,
+      accountsQuery.isLoading,
     ]
   );
 
@@ -724,10 +746,24 @@ export function useEmailPage() {
       },
     }),
     [
-      messages, messagesTotal, selectedMessageId, isMobile, messagesLoading,
-      messagesError, selectedAccountId, isCentralInbox, searchQuery,
-      messageFilter, selectedFolder, messagesQuery, selectedIds, folders,
-      bulkMarkReadMutation, bulkMoveMutation, bulkDeleteMutation, flagMutation,
+      messages,
+      messagesTotal,
+      selectedMessageId,
+      isMobile,
+      messagesLoading,
+      messagesError,
+      selectedAccountId,
+      isCentralInbox,
+      searchQuery,
+      messageFilter,
+      selectedFolder,
+      messagesQuery,
+      selectedIds,
+      folders,
+      bulkMarkReadMutation,
+      bulkMoveMutation,
+      bulkDeleteMutation,
+      flagMutation,
     ]
   );
 
@@ -743,8 +779,14 @@ export function useEmailPage() {
       accountId: selectedMessage?.accountId ?? selectedAccountId,
     }),
     [
-      selectedMessage, isCentralInbox, folders, selectedFolderId,
-      openReply, openReplyAll, openForward, selectedAccountId,
+      selectedMessage,
+      isCentralInbox,
+      folders,
+      selectedFolderId,
+      openReply,
+      openReplyAll,
+      openForward,
+      selectedAccountId,
     ]
   );
 

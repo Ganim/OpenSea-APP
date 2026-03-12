@@ -77,51 +77,57 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
     await expect(page.getByText(name)).toBeVisible({ timeout: 10_000 });
   });
 
-  test.fixme('6.2 - Validar erro ao criar armazém sem código', async ({ page }) => {
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'locations');
+  test.fixme(
+    '6.2 - Validar erro ao criar armazém sem código',
+    async ({ page }) => {
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'locations');
 
-    await page.getByRole('button', { name: /Novo Armazém/i }).click();
-    await expect(page.locator('[role="dialog"]')).toBeVisible({
-      timeout: 5_000,
-    });
+      await page.getByRole('button', { name: /Novo Armazém/i }).click();
+      await expect(page.locator('[role="dialog"]')).toBeVisible({
+        timeout: 5_000,
+      });
 
-    // Fill name only, skip code
-    const nameInput = page.getByLabel(/Nome/i).first();
-    await nameInput.fill('Test Warehouse');
+      // Fill name only, skip code
+      const nameInput = page.getByLabel(/Nome/i).first();
+      await nameInput.fill('Test Warehouse');
 
-    const submitBtn = page
-      .locator('[role="dialog"] button')
-      .filter({ hasText: /Criar|Salvar/i })
-      .first();
-    await submitBtn.click();
+      const submitBtn = page
+        .locator('[role="dialog"] button')
+        .filter({ hasText: /Criar|Salvar/i })
+        .first();
+      await submitBtn.click();
 
-    // Modal should remain open (validation prevents submission)
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible({ timeout: 3_000 });
-  });
+      // Modal should remain open (validation prevents submission)
+      const modal = page.locator('[role="dialog"]');
+      await expect(modal).toBeVisible({ timeout: 3_000 });
+    }
+  );
 
   // ─── READ / LIST ────────────────────────────────────────────────────
 
-  test.fixme('6.3 - Listar armazéns e verificar hidratação', async ({ page }) => {
-    const wh = await createWarehouseViaApi(userToken, {
-      code: warehouseCode(),
-      name: `e2e-wh-list-${Date.now()}`,
-      isActive: true,
-    });
+  test.fixme(
+    '6.3 - Listar armazéns e verificar hidratação',
+    async ({ page }) => {
+      const wh = await createWarehouseViaApi(userToken, {
+        code: warehouseCode(),
+        name: `e2e-wh-list-${Date.now()}`,
+        isActive: true,
+      });
 
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'locations');
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'locations');
 
-    await expect(
-      page.getByRole('heading', { level: 1 })
-    ).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible({
+        timeout: 10_000,
+      });
 
-    await expect(page.getByText(wh.name)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText(wh.name)).toBeVisible({ timeout: 10_000 });
 
-    // Cleanup
-    await deleteWarehouseViaApi(userToken, wh.id);
-  });
+      // Cleanup
+      await deleteWarehouseViaApi(userToken, wh.id);
+    }
+  );
 
   test.fixme('6.4 - Buscar armazém por nome', async ({ page }) => {
     const wh = await createWarehouseViaApi(userToken, {
@@ -180,8 +186,15 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
 
     // Warehouse cards use a dropdown button (not context menu)
     // Try the 3-dot menu button near the card
-    const cardContainer = card.locator('xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]').first();
-    const menuBtn = cardContainer.locator('button').filter({ has: page.locator('svg') }).last();
+    const cardContainer = card
+      .locator(
+        'xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]'
+      )
+      .first();
+    const menuBtn = cardContainer
+      .locator('button')
+      .filter({ has: page.locator('svg') })
+      .last();
 
     if (await menuBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await menuBtn.click();
@@ -242,8 +255,15 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
     await expect(card).toBeVisible({ timeout: 10_000 });
 
     // Find dropdown trigger
-    const cardContainer = card.locator('xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]').first();
-    const menuBtn = cardContainer.locator('button').filter({ has: page.locator('svg') }).last();
+    const cardContainer = card
+      .locator(
+        'xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]'
+      )
+      .first();
+    const menuBtn = cardContainer
+      .locator('button')
+      .filter({ has: page.locator('svg') })
+      .last();
 
     if (await menuBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await menuBtn.click();
@@ -292,8 +312,15 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
     const card = page.locator(`text="${wh.name}"`).first();
     await expect(card).toBeVisible({ timeout: 10_000 });
 
-    const cardContainer = card.locator('xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]').first();
-    const menuBtn = cardContainer.locator('button').filter({ has: page.locator('svg') }).last();
+    const cardContainer = card
+      .locator(
+        'xpath=ancestor::div[contains(@class,"card") or contains(@class,"Card") or contains(@class,"rounded")]'
+      )
+      .first();
+    const menuBtn = cardContainer
+      .locator('button')
+      .filter({ has: page.locator('svg') })
+      .last();
 
     if (await menuBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await menuBtn.click();
@@ -344,9 +371,7 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
     await expect(card).toBeVisible({ timeout: 10_000 });
 
     // Try footer "Ver Zonas" button
-    const viewZonesBtn = page
-      .getByRole('link', { name: /Ver Zonas/i })
-      .first();
+    const viewZonesBtn = page.getByRole('link', { name: /Ver Zonas/i }).first();
 
     if (await viewZonesBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await viewZonesBtn.click();
@@ -363,9 +388,9 @@ test.describe('Stock - Locations (Warehouses) CRUD', () => {
     });
 
     // Verify warehouse name appears
-    await expect(
-      page.locator(`text=${wh.name}`).first()
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(`text=${wh.name}`).first()).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Cleanup
     await deleteWarehouseViaApi(userToken, wh.id);

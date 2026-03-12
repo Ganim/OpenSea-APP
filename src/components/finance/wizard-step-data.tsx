@@ -28,7 +28,15 @@ import { cn } from '@/lib/utils';
 import { parseBoleto } from '@/lib/boleto-parser';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowLeft, ArrowRight, CalendarIcon, Lightbulb, Loader2, Plus, Zap } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarIcon,
+  Lightbulb,
+  Loader2,
+  Plus,
+  Zap,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CostCenterAllocationComponent } from './cost-center-allocation';
@@ -146,7 +154,7 @@ export function WizardStepData({
 
   // Supplier pattern learning
   const { data: supplierSuggestion } = useLastSupplierEntry(
-    wizardData.supplierName,
+    wizardData.supplierName
   );
   const lastAppliedSupplier = useRef<string>('');
 
@@ -162,7 +170,7 @@ export function WizardStepData({
 
       if (supplierSuggestion.categoryId) {
         const cat = categories.find(
-          (c) => c.id === supplierSuggestion.categoryId,
+          c => c.id === supplierSuggestion.categoryId
         );
         if (cat) {
           updates.categoryId = cat.id;
@@ -178,7 +186,13 @@ export function WizardStepData({
         updateWizardData(updates);
       }
     }
-  }, [supplierSuggestion, wizardData.supplierName, wizardData.categoryId, categories, updateWizardData]);
+  }, [
+    supplierSuggestion,
+    wizardData.supplierName,
+    wizardData.categoryId,
+    categories,
+    updateWizardData,
+  ]);
 
   // Validation
   const validate = useCallback((): boolean => {
@@ -244,7 +258,7 @@ export function WizardStepData({
             <Calendar
               mode="single"
               selected={dateValue}
-              onSelect={(date) => {
+              onSelect={date => {
                 if (date) {
                   onChange(format(date, 'yyyy-MM-dd'));
                 }
@@ -269,7 +283,7 @@ export function WizardStepData({
         <Input
           id="wizard-description"
           value={wizardData.description}
-          onChange={(e) => updateWizardData({ description: e.target.value })}
+          onChange={e => updateWizardData({ description: e.target.value })}
           placeholder="Descrição do lançamento"
           required
         />
@@ -281,8 +295,8 @@ export function WizardStepData({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.supplierId}
-            onValueChange={(val) => {
-              const selected = suppliers.find((s) => s.id === val);
+            onValueChange={val => {
+              const selected = suppliers.find(s => s.id === val);
               updateWizardData({
                 supplierId: val,
                 supplierName: selected?.name ?? '',
@@ -293,7 +307,7 @@ export function WizardStepData({
               <SelectValue placeholder="Selecione um fornecedor" />
             </SelectTrigger>
             <SelectContent>
-              {suppliers.map((s) => (
+              {suppliers.map(s => (
                 <SelectItem key={s.id} value={s.id}>
                   {s.name}
                 </SelectItem>
@@ -327,8 +341,8 @@ export function WizardStepData({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.categoryId}
-            onValueChange={(val) => {
-              const selected = categories.find((c) => c.id === val);
+            onValueChange={val => {
+              const selected = categories.find(c => c.id === val);
               updateWizardData({
                 categoryId: val,
                 categoryName: selected?.name ?? '',
@@ -339,7 +353,7 @@ export function WizardStepData({
               <SelectValue placeholder="Selecione uma categoria" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </SelectItem>
@@ -361,12 +375,12 @@ export function WizardStepData({
       {/* Centro de Custo (single/rateio) */}
       <CostCenterAllocationComponent
         value={wizardData.costCenterAllocations}
-        onChange={(allocations) =>
+        onChange={allocations =>
           updateWizardData({ costCenterAllocations: allocations })
         }
         totalAmount={wizardData.expectedAmount}
         useRateio={wizardData.useRateio}
-        onToggleRateio={(useRateio) => updateWizardData({ useRateio })}
+        onToggleRateio={useRateio => updateWizardData({ useRateio })}
         costCenterId={wizardData.costCenterId}
         costCenterName={wizardData.costCenterName}
         onCostCenterChange={(id, name) =>
@@ -380,8 +394,8 @@ export function WizardStepData({
         <div className="flex items-center gap-2">
           <Select
             value={wizardData.bankAccountId}
-            onValueChange={(val) => {
-              const selected = bankAccounts.find((ba) => ba.id === val);
+            onValueChange={val => {
+              const selected = bankAccounts.find(ba => ba.id === val);
               updateWizardData({
                 bankAccountId: val,
                 bankAccountName: selected?.name ?? '',
@@ -392,7 +406,7 @@ export function WizardStepData({
               <SelectValue placeholder="Selecione uma conta (opcional)" />
             </SelectTrigger>
             <SelectContent>
-              {bankAccounts.map((ba) => (
+              {bankAccounts.map(ba => (
                 <SelectItem key={ba.id} value={ba.id}>
                   {ba.name}
                 </SelectItem>
@@ -420,7 +434,7 @@ export function WizardStepData({
           step="0.01"
           min="0"
           value={wizardData.expectedAmount || ''}
-          onChange={(e) =>
+          onChange={e =>
             updateWizardData({
               expectedAmount: parseFloat(e.target.value) || 0,
             })
@@ -431,13 +445,13 @@ export function WizardStepData({
 
       {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
-        {renderDatePicker('Data de Emissão', wizardData.issueDate, (date) =>
+        {renderDatePicker('Data de Emissão', wizardData.issueDate, date =>
           updateWizardData({ issueDate: date })
         )}
         {renderDatePicker(
           'Data de Vencimento',
           wizardData.dueDate,
-          (date) => updateWizardData({ dueDate: date }),
+          date => updateWizardData({ dueDate: date }),
           true
         )}
       </div>
@@ -445,7 +459,7 @@ export function WizardStepData({
       {renderDatePicker(
         'Data de Competência',
         wizardData.competenceDate,
-        (date) => updateWizardData({ competenceDate: date })
+        date => updateWizardData({ competenceDate: date })
       )}
 
       {/* Boleto-specific fields */}
@@ -466,7 +480,7 @@ export function WizardStepData({
               <Input
                 id="wizard-digitline"
                 value={wizardData.boletoDigitLine}
-                onChange={(e) => {
+                onChange={e => {
                   updateWizardData({ boletoDigitLine: e.target.value });
                   handleBoletoAutoFill(e.target.value, 'linha_digitavel');
                 }}
@@ -478,7 +492,8 @@ export function WizardStepData({
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Ao colar a linha digitável, o valor e vencimento serão preenchidos automaticamente
+              Ao colar a linha digitável, o valor e vencimento serão preenchidos
+              automaticamente
             </p>
           </div>
           <div className="space-y-2">
@@ -486,7 +501,7 @@ export function WizardStepData({
             <Input
               id="wizard-barcode"
               value={wizardData.boletoBarcode}
-              onChange={(e) => {
+              onChange={e => {
                 updateWizardData({ boletoBarcode: e.target.value });
                 handleBoletoAutoFill(e.target.value, 'codigo_barras');
               }}
@@ -496,7 +511,8 @@ export function WizardStepData({
           </div>
           {parsedBankName && (
             <p className="text-xs text-muted-foreground">
-              Banco identificado: <span className="font-medium">{parsedBankName}</span>
+              Banco identificado:{' '}
+              <span className="font-medium">{parsedBankName}</span>
             </p>
           )}
         </div>
@@ -508,7 +524,7 @@ export function WizardStepData({
         <Textarea
           id="wizard-notes"
           value={wizardData.notes}
-          onChange={(e) => updateWizardData({ notes: e.target.value })}
+          onChange={e => updateWizardData({ notes: e.target.value })}
           placeholder="Observações adicionais (opcional)"
           rows={3}
         />
@@ -533,7 +549,7 @@ export function WizardStepData({
         title="Novo Fornecedor"
       >
         <InlineSupplierForm
-          onCreated={(supplier) => {
+          onCreated={supplier => {
             setShowSupplierCreate(false);
             updateWizardData({
               supplierId: supplier.id,
@@ -550,7 +566,7 @@ export function WizardStepData({
         title="Nova Categoria"
       >
         <InlineCategoryForm
-          onCreated={(category) => {
+          onCreated={category => {
             setShowCategoryCreate(false);
             updateWizardData({
               categoryId: category.id,
@@ -567,7 +583,7 @@ export function WizardStepData({
         title="Nova Conta Bancária"
       >
         <InlineBankAccountForm
-          onCreated={(bankAccount) => {
+          onCreated={bankAccount => {
             setShowBankAccountCreate(false);
             updateWizardData({
               bankAccountId: bankAccount.id,

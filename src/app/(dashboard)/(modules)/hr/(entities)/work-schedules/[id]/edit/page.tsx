@@ -208,8 +208,7 @@ export default function WorkScheduleEditPage() {
               id: 'cancel',
               title: 'Cancelar',
               icon: X,
-              onClick: () =>
-                router.push(`/hr/work-schedules/${scheduleId}`),
+              onClick: () => router.push(`/hr/work-schedules/${scheduleId}`),
               variant: 'outline',
               disabled: isSaving,
             },
@@ -331,20 +330,14 @@ export default function WorkScheduleEditPage() {
                       <Input
                         type="time"
                         value={d.start}
-                        onChange={e =>
-                          updateDay(day, 'start', e.target.value)
-                        }
+                        onChange={e => updateDay(day, 'start', e.target.value)}
                         className="w-32 h-8 text-sm"
                       />
-                      <span className="text-muted-foreground text-sm">
-                        até
-                      </span>
+                      <span className="text-muted-foreground text-sm">até</span>
                       <Input
                         type="time"
                         value={d.end}
-                        onChange={e =>
-                          updateDay(day, 'end', e.target.value)
-                        }
+                        onChange={e => updateDay(day, 'end', e.target.value)}
                         className="w-32 h-8 text-sm"
                       />
                     </div>

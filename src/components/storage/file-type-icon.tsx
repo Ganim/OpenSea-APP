@@ -25,8 +25,16 @@ const FILE_TYPE_CONFIG: Record<
   FileTypeCategory,
   { icon: React.ElementType; color: string; label: string }
 > = {
-  document: { icon: PiFileDocDuotone, color: 'text-blue-500', label: 'Documento' },
-  image: { icon: PiFileImageDuotone, color: 'text-emerald-500', label: 'Imagem' },
+  document: {
+    icon: PiFileDocDuotone,
+    color: 'text-blue-500',
+    label: 'Documento',
+  },
+  image: {
+    icon: PiFileImageDuotone,
+    color: 'text-emerald-500',
+    label: 'Imagem',
+  },
   spreadsheet: {
     icon: PiFileXlsDuotone,
     color: 'text-green-600',

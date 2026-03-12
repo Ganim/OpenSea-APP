@@ -38,8 +38,14 @@ export const overtimeService = {
     return apiClient.post<OvertimeResponse>('/v1/hr/overtime', data);
   },
 
-  async approve(overtimeId: string, data?: ApproveOvertimeRequest): Promise<OvertimeResponse> {
-    return apiClient.post<OvertimeResponse>(`/v1/hr/overtime/${overtimeId}/approve`, data ?? {});
+  async approve(
+    overtimeId: string,
+    data?: ApproveOvertimeRequest
+  ): Promise<OvertimeResponse> {
+    return apiClient.post<OvertimeResponse>(
+      `/v1/hr/overtime/${overtimeId}/approve`,
+      data ?? {}
+    );
   },
 
   async get(overtimeId: string): Promise<OvertimeResponse> {
@@ -51,10 +57,13 @@ export const overtimeService = {
     if (params?.employeeId) query.append('employeeId', params.employeeId);
     if (params?.startDate) query.append('startDate', params.startDate);
     if (params?.endDate) query.append('endDate', params.endDate);
-    if (params?.approved !== undefined) query.append('approved', String(params.approved));
+    if (params?.approved !== undefined)
+      query.append('approved', String(params.approved));
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<OvertimeListResponse>(`/v1/hr/overtime${qs ? `?${qs}` : ''}`);
+    return apiClient.get<OvertimeListResponse>(
+      `/v1/hr/overtime${qs ? `?${qs}` : ''}`
+    );
   },
 };

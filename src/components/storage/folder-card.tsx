@@ -127,15 +127,14 @@ export function FolderCard({
             {folder.name}
           </span>
 
-          {folder.fileCount !== undefined && (
-            folder.fileCount > 0 ? (
+          {folder.fileCount !== undefined &&
+            (folder.fileCount > 0 ? (
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                 {folder.fileCount} {folder.fileCount === 1 ? 'item' : 'itens'}
               </Badge>
             ) : (
               <span className="text-xs text-muted-foreground">Pasta vazia</span>
-            )
-          )}
+            ))}
         </div>
       </div>
     </FolderContextMenu>

@@ -87,7 +87,7 @@ export function RecurringList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {configs.map((config) => (
+          {configs.map(config => (
             <TableRow key={config.id}>
               <TableCell>
                 <div className="flex flex-col">
@@ -101,7 +101,9 @@ export function RecurringList({
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={config.type === 'PAYABLE' ? 'destructive' : 'success'}
+                  variant={
+                    config.type === 'PAYABLE' ? 'destructive' : 'success'
+                  }
                 >
                   {FINANCE_ENTRY_TYPE_LABELS[config.type]}
                 </Badge>

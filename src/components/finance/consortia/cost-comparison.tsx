@@ -36,7 +36,8 @@ export function CostComparison({
   marketMonthlyRate = 0.01,
 }: CostComparisonProps) {
   // 1. Consortium total cost (all payments including admin fees)
-  const consortiumTotalCost = consortium.totalInstallments * consortium.monthlyPayment;
+  const consortiumTotalCost =
+    consortium.totalInstallments * consortium.monthlyPayment;
 
   // 2. Direct purchase (cash/vista)
   const directPurchase = consortium.creditValue;
@@ -45,7 +46,7 @@ export function CostComparison({
   const priceRows = calculatePrice(
     consortium.creditValue,
     marketMonthlyRate,
-    consortium.totalInstallments,
+    consortium.totalInstallments
   );
   const financingTotalCost = priceRows.reduce((sum, r) => sum + r.payment, 0);
 
@@ -117,7 +118,9 @@ export function CostComparison({
               ) : (
                 <>
                   <Equal className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Igual ao valor à vista</span>
+                  <span className="text-muted-foreground">
+                    Igual ao valor à vista
+                  </span>
                 </>
               )}
             </div>

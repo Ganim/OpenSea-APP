@@ -14,38 +14,35 @@ export interface ColumnResponse {
 export const columnsService = {
   async create(
     boardId: string,
-    data: CreateColumnRequest,
+    data: CreateColumnRequest
   ): Promise<ColumnResponse> {
     return apiClient.post<ColumnResponse>(
       API_ENDPOINTS.TASKS.COLUMNS.CREATE(boardId),
-      data,
+      data
     );
   },
 
   async update(
     boardId: string,
     columnId: string,
-    data: UpdateColumnRequest,
+    data: UpdateColumnRequest
   ): Promise<ColumnResponse> {
     return apiClient.patch<ColumnResponse>(
       API_ENDPOINTS.TASKS.COLUMNS.UPDATE(boardId, columnId),
-      data,
+      data
     );
   },
 
   async delete(boardId: string, columnId: string): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.COLUMNS.DELETE(boardId, columnId),
+      API_ENDPOINTS.TASKS.COLUMNS.DELETE(boardId, columnId)
     );
   },
 
-  async reorder(
-    boardId: string,
-    data: ReorderColumnsRequest,
-  ): Promise<void> {
+  async reorder(boardId: string, data: ReorderColumnsRequest): Promise<void> {
     await apiClient.patch<void>(
       API_ENDPOINTS.TASKS.COLUMNS.REORDER(boardId),
-      data,
+      data
     );
   },
 };

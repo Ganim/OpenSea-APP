@@ -346,9 +346,7 @@ function ListCardRow({
         </span>
       )}
 
-      {card.assigneeName && (
-        <MemberAvatar name={card.assigneeName} size="sm" />
-      )}
+      {card.assigneeName && <MemberAvatar name={card.assigneeName} size="sm" />}
     </div>
   );
 }

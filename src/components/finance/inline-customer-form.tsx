@@ -86,7 +86,7 @@ export function InlineCustomerForm({
           <Input
             id="customer-name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             placeholder="Nome do cliente"
             required
           />
@@ -101,7 +101,7 @@ export function InlineCustomerForm({
         <Input
           id="customer-document"
           value={document}
-          onChange={(e) => handleDocumentChange(e.target.value)}
+          onChange={e => handleDocumentChange(e.target.value)}
           placeholder="CPF (11 digitos) ou CNPJ (14 digitos)"
           maxLength={14}
         />
@@ -118,7 +118,10 @@ export function InlineCustomerForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={createMutation.isPending || !name.trim()}>
+        <Button
+          type="submit"
+          disabled={createMutation.isPending || !name.trim()}
+        >
           {createMutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

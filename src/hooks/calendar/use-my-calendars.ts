@@ -61,13 +61,8 @@ export function useUpdateTeamCalendarPermissions() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: TeamCalendarPermissions;
-    }) => calendarsService.updateTeamCalendarPermissions(id, data),
+    mutationFn: ({ id, data }: { id: string; data: TeamCalendarPermissions }) =>
+      calendarsService.updateTeamCalendarPermissions(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_CALENDARS });
     },

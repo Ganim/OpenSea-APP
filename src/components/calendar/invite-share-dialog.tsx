@@ -2,11 +2,7 @@
 
 import { useState } from 'react';
 import { storageFilesService } from '@/services/storage/files.service';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -17,7 +13,14 @@ import { teamsService } from '@/services/core/teams.service';
 import type { CalendarEvent, ParticipantRole } from '@/types/calendar';
 import { EVENT_TYPE_COLORS } from '@/types/calendar';
 import { useQuery } from '@tanstack/react-query';
-import { Search, UserPlus, Users, Loader2, Check, ChevronDown } from 'lucide-react';
+import {
+  Search,
+  UserPlus,
+  Users,
+  Loader2,
+  Check,
+  ChevronDown,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 
@@ -30,7 +33,7 @@ interface InviteShareDialogProps {
 function getInitials(name: string): string {
   return name
     .split(' ')
-    .map((n) => n[0])
+    .map(n => n[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
@@ -72,9 +75,11 @@ export function InviteShareDialog({
   const shareWithTeam = useShareEventWithTeam();
 
   const eventColor = event.color ?? EVENT_TYPE_COLORS[event.type] ?? '#64748b';
-  const existingParticipantIds = new Set((event.participants ?? []).map((p) => p.userId));
+  const existingParticipantIds = new Set(
+    (event.participants ?? []).map(p => p.userId)
+  );
 
-  const filteredUsers = (usersData?.users ?? []).filter((u) => {
+  const filteredUsers = (usersData?.users ?? []).filter(u => {
     if (existingParticipantIds.has(u.id)) return false;
     if (!userSearch) return true;
     const name = u.profile?.name
@@ -89,7 +94,7 @@ export function InviteShareDialog({
   });
 
   const teams = teamsData?.data ?? [];
-  const filteredTeams = teams.filter((t) => {
+  const filteredTeams = teams.filter(t => {
     if (!teamSearch) return true;
     return t.name.toLowerCase().includes(teamSearch.toLowerCase());
   });
@@ -137,7 +142,9 @@ export function InviteShareDialog({
         eventId: event.id,
         teamId: selectedTeamId,
       });
-      toast.success(`Evento compartilhado com ${result.shared} membro(s) da equipe`);
+      toast.success(
+        `Evento compartilhado com ${result.shared} membro(s) da equipe`
+      );
       setSelectedTeamId(null);
       setTeamSearch('');
       onOpenChange(false);
@@ -172,7 +179,9 @@ export function InviteShareDialog({
               <UserPlus className="w-5 h-5" style={{ color: eventColor }} />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Convidar participantes</h2>
+              <h2 className="text-base font-semibold">
+                Convidar participantes
+              </h2>
               <p className="text-xs text-muted-foreground truncate max-w-[300px]">
                 {event.title}
               </p>
@@ -189,7 +198,9 @@ export function InviteShareDialog({
                 ? 'text-white'
                 : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
             }`}
-            style={tab === 'users' ? { backgroundColor: eventColor } : undefined}
+            style={
+              tab === 'users' ? { backgroundColor: eventColor } : undefined
+            }
           >
             <UserPlus className="w-3.5 h-3.5" />
             Usuários
@@ -206,7 +217,9 @@ export function InviteShareDialog({
                 ? 'text-white'
                 : 'bg-muted/50 dark:bg-white/5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10'
             }`}
-            style={tab === 'teams' ? { backgroundColor: eventColor } : undefined}
+            style={
+              tab === 'teams' ? { backgroundColor: eventColor } : undefined
+            }
           >
             <Users className="w-3.5 h-3.5" />
             Equipes
@@ -223,9 +236,13 @@ export function InviteShareDialog({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder={tab === 'users' ? 'Buscar por nome ou e-mail...' : 'Buscar equipe...'}
+              placeholder={
+                tab === 'users'
+                  ? 'Buscar por nome ou e-mail...'
+                  : 'Buscar equipe...'
+              }
               value={tab === 'users' ? userSearch : teamSearch}
-              onChange={(e) =>
+              onChange={e =>
                 tab === 'users'
                   ? setUserSearch(e.target.value)
                   : setTeamSearch(e.target.value)
@@ -249,10 +266,10 @@ export function InviteShareDialog({
               </div>
             ) : (
               <div className="p-2 space-y-0.5">
-                {filteredUsers.map((u) => {
+                {filteredUsers.map(u => {
                   const name = u.profile?.name
                     ? `${u.profile.name} ${u.profile.surname ?? ''}`.trim()
-                    : u.username ?? u.email;
+                    : (u.username ?? u.email);
                   const isSelected = selectedUsers.has(u.id);
                   const entry = selectedUsers.get(u.id);
 
@@ -265,11 +282,20 @@ export function InviteShareDialog({
                           ? ''
                           : 'border-transparent hover:bg-accent/50'
                       }`}
-                      style={isSelected ? { backgroundColor: `${eventColor}10`, borderColor: `${eventColor}35` } : undefined}
+                      style={
+                        isSelected
+                          ? {
+                              backgroundColor: `${eventColor}10`,
+                              borderColor: `${eventColor}35`,
+                            }
+                          : undefined
+                      }
                     >
                       {/* Avatar */}
                       {(() => {
-                        const avatarSrc = resolveAvatarUrl(u.profile?.avatarUrl);
+                        const avatarSrc = resolveAvatarUrl(
+                          u.profile?.avatarUrl
+                        );
                         return avatarSrc ? (
                           <img
                             src={avatarSrc}
@@ -279,9 +305,16 @@ export function InviteShareDialog({
                         ) : (
                           <div
                             className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
-                            style={isSelected
-                              ? { backgroundColor: `${eventColor}cc`, color: 'white' }
-                              : { backgroundColor: `${eventColor}18`, color: eventColor }
+                            style={
+                              isSelected
+                                ? {
+                                    backgroundColor: `${eventColor}cc`,
+                                    color: 'white',
+                                  }
+                                : {
+                                    backgroundColor: `${eventColor}18`,
+                                    color: eventColor,
+                                  }
                             }
                           >
                             {getInitials(name)}
@@ -291,8 +324,12 @@ export function InviteShareDialog({
 
                       {/* Name + email */}
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                        <div className="text-sm font-medium truncate">
+                          {name}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {u.email}
+                        </div>
                       </div>
 
                       {/* Role badge or check indicator */}
@@ -300,7 +337,7 @@ export function InviteShareDialog({
                         <Badge
                           variant="secondary"
                           className="text-[0.65rem] h-6 gap-1 cursor-pointer hover:bg-accent shrink-0"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             cycleRole(u.id);
                           }}
@@ -316,66 +353,80 @@ export function InviteShareDialog({
                 })}
               </div>
             )
+          ) : teamsLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredTeams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <Users className="w-8 h-8 mb-2 opacity-40" />
+              <span className="text-sm">Nenhuma equipe encontrada</span>
+            </div>
           ) : (
-            teamsLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : filteredTeams.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                <Users className="w-8 h-8 mb-2 opacity-40" />
-                <span className="text-sm">Nenhuma equipe encontrada</span>
-              </div>
-            ) : (
-              <div className="p-2 space-y-0.5">
-                {filteredTeams.map((team) => {
-                  const isSelected = selectedTeamId === team.id;
-                  return (
+            <div className="p-2 space-y-0.5">
+              {filteredTeams.map(team => {
+                const isSelected = selectedTeamId === team.id;
+                return (
+                  <div
+                    key={team.id}
+                    onClick={() =>
+                      setSelectedTeamId(isSelected ? null : team.id)
+                    }
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all border ${
+                      isSelected ? '' : 'border-transparent hover:bg-accent/50'
+                    }`}
+                    style={
+                      isSelected
+                        ? {
+                            backgroundColor: `${eventColor}10`,
+                            borderColor: `${eventColor}35`,
+                          }
+                        : undefined
+                    }
+                  >
                     <div
-                      key={team.id}
-                      onClick={() => setSelectedTeamId(isSelected ? null : team.id)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all border ${
-                        isSelected
-                          ? ''
-                          : 'border-transparent hover:bg-accent/50'
-                      }`}
-                      style={isSelected ? { backgroundColor: `${eventColor}10`, borderColor: `${eventColor}35` } : undefined}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{
+                        backgroundColor: team.color
+                          ? `${team.color}20`
+                          : `${eventColor}15`,
+                      }}
                     >
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: team.color ? `${team.color}20` : `${eventColor}15` }}
-                      >
-                        <Users className="w-4 h-4" style={{ color: team.color ?? eventColor }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          {team.color && (
-                            <div
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: team.color }}
-                            />
-                          )}
-                          <span className="text-sm font-medium truncate">{team.name}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {team.membersCount} membro(s)
-                        </div>
-                      </div>
-                      {isSelected ? (
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: eventColor }}
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full border-2 border-border/60 shrink-0" />
-                      )}
+                      <Users
+                        className="w-4 h-4"
+                        style={{ color: team.color ?? eventColor }}
+                      />
                     </div>
-                  );
-                })}
-              </div>
-            )
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        {team.color && (
+                          <div
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: team.color }}
+                          />
+                        )}
+                        <span className="text-sm font-medium truncate">
+                          {team.name}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {team.membersCount} membro(s)
+                      </div>
+                    </div>
+                    {isSelected ? (
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: eventColor }}
+                      >
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-border/60 shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </ScrollArea>
 

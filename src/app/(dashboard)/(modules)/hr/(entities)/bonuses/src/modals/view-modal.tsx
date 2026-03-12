@@ -16,7 +16,13 @@ import {
 } from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Bonus } from '@/types/hr';
-import { Calendar, ExternalLink, PlusCircle, RefreshCcwDot, X } from 'lucide-react';
+import {
+  Calendar,
+  ExternalLink,
+  PlusCircle,
+  RefreshCcwDot,
+  X,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   formatCurrency,
@@ -95,9 +101,7 @@ export function ViewModal({ isOpen, onClose, bonus }: ViewModalProps) {
         <div className="space-y-6">
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={getPaidColor(bonus)}>
-              {getPaidLabel(bonus)}
-            </Badge>
+            <Badge variant={getPaidColor(bonus)}>{getPaidLabel(bonus)}</Badge>
           </div>
 
           {/* Dados principais */}
@@ -120,9 +124,7 @@ export function ViewModal({ isOpen, onClose, bonus }: ViewModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Funcionário</p>
-                <p className="text-base mt-1">
-                  {getName(bonus.employeeId)}
-                </p>
+                <p className="text-base mt-1">{getName(bonus.employeeId)}</p>
               </div>
               <div className="col-span-2">
                 <p className="text-sm text-muted-foreground">Motivo</p>
@@ -144,16 +146,15 @@ export function ViewModal({ isOpen, onClose, bonus }: ViewModalProps) {
                   </span>
                 </div>
               )}
-              {bonus.updatedAt &&
-                bonus.updatedAt !== bonus.createdAt && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <RefreshCcwDot className="h-4 w-4 text-yellow-500" />
-                    <span className="text-gray-500">Atualizado em:</span>
-                    <span className="font-medium">
-                      {formatDate(bonus.updatedAt)}
-                    </span>
-                  </div>
-                )}
+              {bonus.updatedAt && bonus.updatedAt !== bonus.createdAt && (
+                <div className="flex items-center gap-2 text-sm">
+                  <RefreshCcwDot className="h-4 w-4 text-yellow-500" />
+                  <span className="text-gray-500">Atualizado em:</span>
+                  <span className="font-medium">
+                    {formatDate(bonus.updatedAt)}
+                  </span>
+                </div>
+              )}
             </div>
           </Card>
         </div>

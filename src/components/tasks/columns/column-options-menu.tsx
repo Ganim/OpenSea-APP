@@ -227,9 +227,7 @@ export function ColumnOptionsMenu({
 
           {/* Delete column */}
           {!column.isDefault && (
-            <DropdownMenuItem
-              onClick={() => setShowDeleteDialog(true)}
-            >
+            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
               <Trash2 className="h-4 w-4 mr-2 text-rose-500" />
               Excluir coluna
             </DropdownMenuItem>

@@ -46,9 +46,15 @@ export function InlineCreateModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center" onKeyDown={handleKeyDown}>
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center"
+      onKeyDown={handleKeyDown}
+    >
       {/* Overlay */}
-      <div className="absolute inset-0" style={{ backgroundColor: 'var(--modal-overlay)' }} />
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: 'var(--modal-overlay)' }}
+      />
 
       {/* Panel */}
       <div

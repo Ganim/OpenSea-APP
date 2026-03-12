@@ -12,7 +12,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCreateShareLink, useShareLinks, useRevokeShareLink } from '@/hooks/storage';
+import {
+  useCreateShareLink,
+  useShareLinks,
+  useRevokeShareLink,
+} from '@/hooks/storage';
 import type { StorageFile, StorageShareLink } from '@/types/storage';
 import {
   Copy,
@@ -124,7 +128,10 @@ export function ShareLinkDialog({
                 checked={usePassword}
                 onCheckedChange={c => setUsePassword(!!c)}
               />
-              <Label htmlFor="use-password" className="text-sm flex items-center gap-1.5">
+              <Label
+                htmlFor="use-password"
+                className="text-sm flex items-center gap-1.5"
+              >
                 <Lock className="w-3.5 h-3.5" />
                 Proteger com senha
               </Label>
@@ -145,7 +152,10 @@ export function ShareLinkDialog({
                 checked={useExpiry}
                 onCheckedChange={c => setUseExpiry(!!c)}
               />
-              <Label htmlFor="use-expiry" className="text-sm flex items-center gap-1.5">
+              <Label
+                htmlFor="use-expiry"
+                className="text-sm flex items-center gap-1.5"
+              >
                 <Calendar className="w-3.5 h-3.5" />
                 Data de expiração
               </Label>
@@ -165,7 +175,10 @@ export function ShareLinkDialog({
                 checked={useMaxDownloads}
                 onCheckedChange={c => setUseMaxDownloads(!!c)}
               />
-              <Label htmlFor="use-max-downloads" className="text-sm flex items-center gap-1.5">
+              <Label
+                htmlFor="use-max-downloads"
+                className="text-sm flex items-center gap-1.5"
+              >
                 <Hash className="w-3.5 h-3.5" />
                 Limite de downloads
               </Label>
@@ -286,9 +299,7 @@ function ShareLinkItem({
       <Button
         size="icon-sm"
         variant="ghost"
-        onClick={() =>
-          window.open(`/shared/${link.token}`, '_blank')
-        }
+        onClick={() => window.open(`/shared/${link.token}`, '_blank')}
         title="Abrir em nova aba"
       >
         <ExternalLink className="w-3.5 h-3.5" />

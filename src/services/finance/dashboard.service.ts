@@ -72,9 +72,7 @@ export const financeDashboardService = {
         : 'http://127.0.0.1:3333';
 
     const token =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('auth_token')
-        : null;
+      typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
     const response = await fetch(
       `${baseUrl}${API_ENDPOINTS.FINANCE_DASHBOARD.EXPORT_ACCOUNTING}`,
@@ -85,7 +83,7 @@ export const financeDashboardService = {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(params),
-      },
+      }
     );
 
     if (!response.ok) {

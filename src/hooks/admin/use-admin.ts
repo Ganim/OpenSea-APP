@@ -27,7 +27,7 @@ export function useAdminTenants(
   page = 1,
   limit = 20,
   search?: string,
-  status?: string,
+  status?: string
 ) {
   return useQuery({
     queryKey: [...adminKeys.tenants(), page, limit, search, status],

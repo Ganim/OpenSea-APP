@@ -205,7 +205,7 @@ export const DashboardStatsSchema = z.object({
     z.object({
       month: z.string(),
       count: z.number(),
-    }),
+    })
   ),
   recentActivity: z.array(RecentActivitySchema),
   totalUsers: z.number().int().nonnegative(),

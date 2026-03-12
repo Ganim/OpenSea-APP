@@ -18,7 +18,9 @@ export interface RecurringConfigResponse {
 }
 
 export const financeRecurringService = {
-  async list(params?: RecurringConfigsQuery): Promise<RecurringConfigsResponse> {
+  async list(
+    params?: RecurringConfigsQuery
+  ): Promise<RecurringConfigsResponse> {
     const query = new URLSearchParams({
       page: String(params?.page ?? 1),
       limit: String(params?.limit ?? 20),
@@ -39,7 +41,9 @@ export const financeRecurringService = {
     );
   },
 
-  async create(data: CreateRecurringConfigRequest): Promise<RecurringConfigResponse> {
+  async create(
+    data: CreateRecurringConfigRequest
+  ): Promise<RecurringConfigResponse> {
     return apiClient.post<RecurringConfigResponse>(
       API_ENDPOINTS.FINANCE_RECURRING.CREATE,
       data

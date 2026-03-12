@@ -1,49 +1,53 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-    CentralInboxQuery,
-    CreateEmailAccountRequest,
-    EmailAccountResponse,
-    EmailAccountsResponse,
-    EmailContactSuggestResponse,
-    EmailFoldersResponse,
-    EmailMessageResponse,
-    EmailMessagesQuery,
-    EmailMessagesResponse,
-    SaveEmailDraftRequest,
-    SaveEmailDraftResponse,
-    SendEmailMessageRequest,
-    SendEmailMessageResponse,
-    ShareEmailAccountRequest,
-    EmailThreadResponse,
-    UpdateEmailAccountRequest,
+  CentralInboxQuery,
+  CreateEmailAccountRequest,
+  EmailAccountResponse,
+  EmailAccountsResponse,
+  EmailContactSuggestResponse,
+  EmailFoldersResponse,
+  EmailMessageResponse,
+  EmailMessagesQuery,
+  EmailMessagesResponse,
+  SaveEmailDraftRequest,
+  SaveEmailDraftResponse,
+  SendEmailMessageRequest,
+  SendEmailMessageResponse,
+  ShareEmailAccountRequest,
+  EmailThreadResponse,
+  UpdateEmailAccountRequest,
 } from '@/types/email';
 
 export const emailService = {
   async listAccounts(): Promise<EmailAccountsResponse> {
-    return apiClient.get<EmailAccountsResponse>(API_ENDPOINTS.EMAIL.ACCOUNTS.LIST);
+    return apiClient.get<EmailAccountsResponse>(
+      API_ENDPOINTS.EMAIL.ACCOUNTS.LIST
+    );
   },
 
   async getAccount(id: string): Promise<EmailAccountResponse> {
-    return apiClient.get<EmailAccountResponse>(API_ENDPOINTS.EMAIL.ACCOUNTS.GET(id));
+    return apiClient.get<EmailAccountResponse>(
+      API_ENDPOINTS.EMAIL.ACCOUNTS.GET(id)
+    );
   },
 
   async createAccount(
-    data: CreateEmailAccountRequest,
+    data: CreateEmailAccountRequest
   ): Promise<EmailAccountResponse> {
     return apiClient.post<EmailAccountResponse>(
       API_ENDPOINTS.EMAIL.ACCOUNTS.CREATE,
-      data,
+      data
     );
   },
 
   async updateAccount(
     id: string,
-    data: UpdateEmailAccountRequest,
+    data: UpdateEmailAccountRequest
   ): Promise<EmailAccountResponse> {
     return apiClient.patch<EmailAccountResponse>(
       API_ENDPOINTS.EMAIL.ACCOUNTS.UPDATE(id),
-      data,
+      data
     );
   },
 
@@ -52,56 +56,72 @@ export const emailService = {
   },
 
   async testConnection(id: string): Promise<void> {
-    await apiClient.post<void>(
-      API_ENDPOINTS.EMAIL.ACCOUNTS.TEST(id),
-      {},
-    );
+    await apiClient.post<void>(API_ENDPOINTS.EMAIL.ACCOUNTS.TEST(id), {});
   },
 
   async triggerSync(id: string): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_ENDPOINTS.EMAIL.ACCOUNTS.SYNC(id),
-      {},
+      {}
     );
   },
 
   async listFolders(accountId: string): Promise<EmailFoldersResponse> {
-    return apiClient.get<EmailFoldersResponse>(API_ENDPOINTS.EMAIL.FOLDERS.LIST, {
-      params: { accountId },
-    });
+    return apiClient.get<EmailFoldersResponse>(
+      API_ENDPOINTS.EMAIL.FOLDERS.LIST,
+      {
+        params: { accountId },
+      }
+    );
   },
 
-  async listMessages(query: EmailMessagesQuery): Promise<EmailMessagesResponse> {
-    return apiClient.get<EmailMessagesResponse>(API_ENDPOINTS.EMAIL.MESSAGES.LIST, {
-      params: {
-        accountId: query.accountId,
-        ...(query.folderId ? { folderId: query.folderId } : {}),
-        ...(query.unread !== undefined ? { unread: String(query.unread) } : {}),
-        ...(query.search ? { search: query.search } : {}),
-        page: String(query.page ?? 1),
-        limit: String(query.limit ?? 20),
-      },
-    });
+  async listMessages(
+    query: EmailMessagesQuery
+  ): Promise<EmailMessagesResponse> {
+    return apiClient.get<EmailMessagesResponse>(
+      API_ENDPOINTS.EMAIL.MESSAGES.LIST,
+      {
+        params: {
+          accountId: query.accountId,
+          ...(query.folderId ? { folderId: query.folderId } : {}),
+          ...(query.unread !== undefined
+            ? { unread: String(query.unread) }
+            : {}),
+          ...(query.search ? { search: query.search } : {}),
+          page: String(query.page ?? 1),
+          limit: String(query.limit ?? 20),
+        },
+      }
+    );
   },
 
-  async listCentralInbox(query: CentralInboxQuery): Promise<EmailMessagesResponse> {
-    return apiClient.get<EmailMessagesResponse>(API_ENDPOINTS.EMAIL.MESSAGES.CENTRAL_INBOX, {
-      params: {
-        accountIds: query.accountIds.join(','),
-        ...(query.unread !== undefined ? { unread: String(query.unread) } : {}),
-        ...(query.search ? { search: query.search } : {}),
-        page: String(query.page ?? 1),
-        limit: String(query.limit ?? 50),
-      },
-    });
+  async listCentralInbox(
+    query: CentralInboxQuery
+  ): Promise<EmailMessagesResponse> {
+    return apiClient.get<EmailMessagesResponse>(
+      API_ENDPOINTS.EMAIL.MESSAGES.CENTRAL_INBOX,
+      {
+        params: {
+          accountIds: query.accountIds.join(','),
+          ...(query.unread !== undefined
+            ? { unread: String(query.unread) }
+            : {}),
+          ...(query.search ? { search: query.search } : {}),
+          page: String(query.page ?? 1),
+          limit: String(query.limit ?? 50),
+        },
+      }
+    );
   },
 
   async getMessage(id: string): Promise<EmailMessageResponse> {
-    return apiClient.get<EmailMessageResponse>(API_ENDPOINTS.EMAIL.MESSAGES.GET(id));
+    return apiClient.get<EmailMessageResponse>(
+      API_ENDPOINTS.EMAIL.MESSAGES.GET(id)
+    );
   },
 
   async sendMessage(
-    data: SendEmailMessageRequest,
+    data: SendEmailMessageRequest
   ): Promise<SendEmailMessageResponse> {
     // Use FormData when attachments are present, JSON otherwise
     if (data.attachments?.length) {
@@ -114,10 +134,16 @@ export const emailService = {
       form.append('bodyHtml', data.bodyHtml);
       if (data.inReplyTo) form.append('inReplyTo', data.inReplyTo);
       data.references?.forEach(ref => form.append('references', ref));
-      data.attachments.forEach(file => form.append('attachments', file, file.name));
+      data.attachments.forEach(file =>
+        form.append('attachments', file, file.name)
+      );
       return apiClient.request<SendEmailMessageResponse>(
         API_ENDPOINTS.EMAIL.MESSAGES.SEND,
-        { method: 'POST', body: form as unknown as BodyInit, timeout: 120_000 } as RequestInit & { timeout: number },
+        {
+          method: 'POST',
+          body: form as unknown as BodyInit,
+          timeout: 120_000,
+        } as RequestInit & { timeout: number }
       );
     }
 
@@ -126,14 +152,16 @@ export const emailService = {
     return apiClient.post<SendEmailMessageResponse>(
       API_ENDPOINTS.EMAIL.MESSAGES.SEND,
       jsonBody,
-      { timeout: 120_000 } as RequestInit & { timeout: number },
+      { timeout: 120_000 } as RequestInit & { timeout: number }
     );
   },
 
-  async saveDraft(data: SaveEmailDraftRequest): Promise<SaveEmailDraftResponse> {
+  async saveDraft(
+    data: SaveEmailDraftRequest
+  ): Promise<SaveEmailDraftResponse> {
     return apiClient.post<SaveEmailDraftResponse>(
       API_ENDPOINTS.EMAIL.MESSAGES.DRAFT,
-      data,
+      data
     );
   },
 
@@ -155,23 +183,20 @@ export const emailService = {
 
   async shareAccount(
     id: string,
-    data: ShareEmailAccountRequest,
+    data: ShareEmailAccountRequest
   ): Promise<void> {
-    return apiClient.post<void>(
-      API_ENDPOINTS.EMAIL.ACCOUNTS.SHARE(id),
-      data,
-    );
+    return apiClient.post<void>(API_ENDPOINTS.EMAIL.ACCOUNTS.SHARE(id), data);
   },
 
   async unshareAccount(id: string, userId: string): Promise<void> {
     return apiClient.delete<void>(
-      API_ENDPOINTS.EMAIL.ACCOUNTS.UNSHARE(id, userId),
+      API_ENDPOINTS.EMAIL.ACCOUNTS.UNSHARE(id, userId)
     );
   },
 
   async getThreadMessages(id: string): Promise<EmailThreadResponse> {
     return apiClient.get<EmailThreadResponse>(
-      API_ENDPOINTS.EMAIL.MESSAGES.THREAD(id),
+      API_ENDPOINTS.EMAIL.MESSAGES.THREAD(id)
     );
   },
 
@@ -183,20 +208,20 @@ export const emailService = {
 
   async suggestContacts(
     query: string,
-    limit = 10,
+    limit = 10
   ): Promise<EmailContactSuggestResponse> {
     return apiClient.get<EmailContactSuggestResponse>(
       API_ENDPOINTS.EMAIL.MESSAGES.SUGGEST_CONTACTS,
-      { params: { q: query, limit: String(limit) } },
+      { params: { q: query, limit: String(limit) } }
     );
   },
 
   async downloadAttachment(
     messageId: string,
-    attachmentId: string,
+    attachmentId: string
   ): Promise<{ blob: Blob; filename: string; contentType: string }> {
     return apiClient.getBlob(
-      API_ENDPOINTS.EMAIL.MESSAGES.ATTACHMENT_DOWNLOAD(messageId, attachmentId),
+      API_ENDPOINTS.EMAIL.MESSAGES.ATTACHMENT_DOWNLOAD(messageId, attachmentId)
     );
   },
 };

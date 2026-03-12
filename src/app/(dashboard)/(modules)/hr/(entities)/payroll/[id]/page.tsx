@@ -88,11 +88,15 @@ export default function PayrollDetailPage() {
     payMutation.isPending ||
     cancelMutation.isPending;
 
-  const { getName } = useEmployeeMap(payroll ? [
-    ...(payroll.processedBy ? [payroll.processedBy] : []),
-    ...(payroll.approvedBy ? [payroll.approvedBy] : []),
-    ...(payroll.paidBy ? [payroll.paidBy] : []),
-  ] : []);
+  const { getName } = useEmployeeMap(
+    payroll
+      ? [
+          ...(payroll.processedBy ? [payroll.processedBy] : []),
+          ...(payroll.approvedBy ? [payroll.approvedBy] : []),
+          ...(payroll.paidBy ? [payroll.paidBy] : []),
+        ]
+      : []
+  );
 
   // ============================================================================
   // WORKFLOW BUTTONS
@@ -319,7 +323,10 @@ export default function PayrollDetailPage() {
             </h3>
             <div className="grid md:grid-cols-2 gap-6">
               {payroll.processedBy && (
-                <InfoField label="Processado por" value={getName(payroll.processedBy)} />
+                <InfoField
+                  label="Processado por"
+                  value={getName(payroll.processedBy)}
+                />
               )}
               {payroll.processedAt && (
                 <InfoField
@@ -328,7 +335,10 @@ export default function PayrollDetailPage() {
                 />
               )}
               {payroll.approvedBy && (
-                <InfoField label="Aprovado por" value={getName(payroll.approvedBy)} />
+                <InfoField
+                  label="Aprovado por"
+                  value={getName(payroll.approvedBy)}
+                />
               )}
               {payroll.approvedAt && (
                 <InfoField

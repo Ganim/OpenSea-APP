@@ -267,7 +267,7 @@ export default function FinanceCategoriesPage() {
     [sortField]
   );
 
-  const SortIcon = ({ field }: { field: SortField }) => {
+  const renderSortIcon = (field: SortField) => {
     if (sortField !== field)
       return <ArrowUp className="h-3 w-3 text-muted-foreground/30" />;
     return sortDir === 'asc' ? (
@@ -420,7 +420,7 @@ export default function FinanceCategoriesPage() {
                       className="flex items-center gap-1 cursor-pointer hover:text-foreground"
                       onClick={() => toggleSort('name')}
                     >
-                      Nome <SortIcon field="name" />
+                      Nome {renderSortIcon('name')}
                     </button>
                   </TableHead>
                   <TableHead className="w-[120px]">
@@ -429,7 +429,7 @@ export default function FinanceCategoriesPage() {
                       className="flex items-center gap-1 cursor-pointer hover:text-foreground"
                       onClick={() => toggleSort('type')}
                     >
-                      Tipo <SortIcon field="type" />
+                      Tipo {renderSortIcon('type')}
                     </button>
                   </TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>

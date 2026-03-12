@@ -223,9 +223,7 @@ export function EmailMessageList({
 
   const toggleAllGroups = useCallback(() => {
     setCollapsedGroups(prev =>
-      prev.size >= allGroupKeys.length
-        ? new Set()
-        : new Set(allGroupKeys)
+      prev.size >= allGroupKeys.length ? new Set() : new Set(allGroupKeys)
     );
   }, [allGroupKeys]);
 
@@ -338,7 +336,9 @@ export function EmailMessageList({
         let nextIdx: number;
         if (e.key === 'ArrowDown') {
           nextIdx =
-            currentIdx < filteredMessages.length - 1 ? currentIdx + 1 : currentIdx;
+            currentIdx < filteredMessages.length - 1
+              ? currentIdx + 1
+              : currentIdx;
         } else {
           nextIdx = currentIdx > 0 ? currentIdx - 1 : 0;
         }
@@ -347,7 +347,8 @@ export function EmailMessageList({
           onSelectMessage(nextMessage.id);
           // Scroll the virtual list to make the selected item visible
           const flatIdx = flatItems.findIndex(
-            item => item.type === 'message' && item.message.id === nextMessage.id
+            item =>
+              item.type === 'message' && item.message.id === nextMessage.id
           );
           if (flatIdx !== -1) {
             virtualizer.scrollToIndex(flatIdx, { align: 'auto' });
@@ -418,701 +419,726 @@ export function EmailMessageList({
 
   return (
     <TooltipProvider delayDuration={300}>
-    <div className="flex h-full flex-col" data-testid="email-message-list">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <h2 className="text-base font-semibold tracking-tight">
-          {folderName ?? 'Mensagens'}
-        </h2>
-        <Badge
-          variant="secondary"
-          className="text-[11px] font-medium h-5.5 px-2 rounded-full"
-        >
-          {total ?? messages.length}
-        </Badge>
-      </div>
+      <div className="flex h-full flex-col" data-testid="email-message-list">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h2 className="text-base font-semibold tracking-tight">
+            {folderName ?? 'Mensagens'}
+          </h2>
+          <Badge
+            variant="secondary"
+            className="text-[11px] font-medium h-5.5 px-2 rounded-full"
+          >
+            {total ?? messages.length}
+          </Badge>
+        </div>
 
-      {/* Search + Filter */}
-      <div className="px-4 pb-3 space-y-3">
-        <div className="relative flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Pesquisar e-mails..."
-              value={searchQuery}
-              onChange={e => onSearchChange(e.target.value)}
-              className="pl-9 h-9 text-sm rounded-xl"
-            />
-          </div>
-          <Popover>
+        {/* Search + Filter */}
+        <div className="px-4 pb-3 space-y-3">
+          <div className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Pesquisar e-mails..."
+                value={searchQuery}
+                onChange={e => onSearchChange(e.target.value)}
+                className="pl-9 h-9 text-sm rounded-xl"
+              />
+            </div>
+            <Popover>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={hasActiveFilters ? 'default' : 'ghost'}
+                      size="icon"
+                      className={cn(
+                        'size-9 shrink-0 rounded-xl',
+                        hasActiveFilters && 'shadow-sm'
+                      )}
+                      aria-label="Filtros avançados"
+                    >
+                      <Filter className="size-4" />
+                    </Button>
+                  </PopoverTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Filtros avançados</TooltipContent>
+              </Tooltip>
+              <PopoverContent className="w-72 p-4 space-y-4" align="end">
+                <div>
+                  <p className="text-sm font-semibold">Filtros</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Remetente
+                  </label>
+                  <Input
+                    placeholder="email@exemplo.com"
+                    value={fromFilter}
+                    onChange={e => setFromFilter(e.target.value)}
+                    className="h-8 text-xs rounded-lg"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Período
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      value={dateFrom}
+                      onChange={e => setDateFrom(e.target.value)}
+                      className="h-8 text-xs flex-1 rounded-lg"
+                    />
+                    <span className="text-xs text-muted-foreground">a</span>
+                    <Input
+                      type="date"
+                      value={dateTo}
+                      onChange={e => setDateTo(e.target.value)}
+                      className="h-8 text-xs flex-1 rounded-lg"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Tem anexo
+                  </label>
+                  <Switch
+                    checked={hasAttachmentsFilter}
+                    onCheckedChange={setHasAttachmentsFilter}
+                  />
+                </div>
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-8 text-xs gap-2 text-muted-foreground rounded-lg"
+                    onClick={() => {
+                      setFromFilter('');
+                      setHasAttachmentsFilter(false);
+                      setDateFrom('');
+                      setDateTo('');
+                    }}
+                  >
+                    <X className="size-3" />
+                    Limpar filtros
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
             <Tooltip>
               <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={hasActiveFilters ? 'default' : 'ghost'}
-                    size="icon"
-                    className={cn(
-                      'size-9 shrink-0 rounded-xl',
-                      hasActiveFilters && 'shadow-sm'
-                    )}
-                    aria-label="Filtros avançados"
-                  >
-                    <Filter className="size-4" />
-                  </Button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Filtros avançados</TooltipContent>
-            </Tooltip>
-            <PopoverContent className="w-72 p-4 space-y-4" align="end">
-              <div>
-                <p className="text-sm font-semibold">Filtros</p>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Remetente
-                </label>
-                <Input
-                  placeholder="email@exemplo.com"
-                  value={fromFilter}
-                  onChange={e => setFromFilter(e.target.value)}
-                  className="h-8 text-xs rounded-lg"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Período
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="date"
-                    value={dateFrom}
-                    onChange={e => setDateFrom(e.target.value)}
-                    className="h-8 text-xs flex-1 rounded-lg"
-                  />
-                  <span className="text-xs text-muted-foreground">a</span>
-                  <Input
-                    type="date"
-                    value={dateTo}
-                    onChange={e => setDateTo(e.target.value)}
-                    className="h-8 text-xs flex-1 rounded-lg"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Tem anexo
-                </label>
-                <Switch
-                  checked={hasAttachmentsFilter}
-                  onCheckedChange={setHasAttachmentsFilter}
-                />
-              </div>
-              {hasActiveFilters && (
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="w-full h-8 text-xs gap-2 text-muted-foreground rounded-lg"
-                  onClick={() => {
-                    setFromFilter('');
-                    setHasAttachmentsFilter(false);
-                    setDateFrom('');
-                    setDateTo('');
-                  }}
+                  size="icon"
+                  className="size-9 shrink-0 rounded-xl"
+                  onClick={toggleAllGroups}
+                  aria-label={
+                    allCollapsed
+                      ? 'Expandir todos os grupos'
+                      : 'Colapsar todos os grupos'
+                  }
                 >
-                  <X className="size-3" />
-                  Limpar filtros
+                  {allCollapsed ? (
+                    <ChevronsUpDown className="size-4" />
+                  ) : (
+                    <ChevronsDownUp className="size-4" />
+                  )}
                 </Button>
-              )}
-            </PopoverContent>
-          </Popover>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-9 shrink-0 rounded-xl"
-                onClick={toggleAllGroups}
-                aria-label={allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
-              >
-                {allCollapsed ? (
-                  <ChevronsUpDown className="size-4" />
-                ) : (
-                  <ChevronsDownUp className="size-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {allCollapsed ? 'Expandir todos os grupos' : 'Colapsar todos os grupos'}
-            </TooltipContent>
-          </Tooltip>
-        </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {allCollapsed
+                  ? 'Expandir todos os grupos'
+                  : 'Colapsar todos os grupos'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
-        {/* Tabs */}
-        <Tabs
-          value={filter}
-          onValueChange={v => onFilterChange(v as 'all' | 'unread' | 'starred')}
-        >
-          <TabsList className="h-9 w-full rounded-xl">
-            <TabsTrigger value="all" className="flex-1 text-xs rounded-lg">
-              Todos
-              {folderTotalMessages !== undefined && folderTotalMessages > 0
-                ? ` (${folderTotalMessages})`
-                : ''}
-            </TabsTrigger>
-            <TabsTrigger value="unread" className="flex-1 text-xs rounded-lg">
-              Não lidos
-              {folderUnreadMessages !== undefined && folderUnreadMessages > 0
-                ? ` (${folderUnreadMessages})`
-                : ''}
-            </TabsTrigger>
-            <TabsTrigger value="starred" className="flex-1 text-xs rounded-lg">
-              <Star className="size-3 mr-1 fill-current" />
-              Estrela
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* Bulk-actions toolbar */}
-      {selectedIds.size > 0 && (
-        <div
-          className="flex items-center gap-2 px-4 py-2 bg-primary/8 border-y"
-          data-testid="email-bulk-actions-toolbar"
-        >
-          <Checkbox
-            checked={
-              selectedIds.size === filteredMessages.length &&
-              filteredMessages.length > 0
-                ? true
-                : selectedIds.size > 0
-                  ? 'indeterminate'
-                  : false
+          {/* Tabs */}
+          <Tabs
+            value={filter}
+            onValueChange={v =>
+              onFilterChange(v as 'all' | 'unread' | 'starred')
             }
-            onCheckedChange={checked => {
-              if (checked) onSelectAll?.();
-              else onClearSelection?.();
-            }}
-            className="size-4"
-          />
-          <span
-            className="text-xs font-semibold text-primary"
-            data-testid="email-bulk-selection-count"
           >
-            {selectedIds.size} selecionado{selectedIds.size > 1 ? 's' : ''}
-          </span>
-          <Separator orientation="vertical" className="h-4" />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg"
-                onClick={() => onBulkMarkRead?.(Array.from(selectedIds), true)}
-                aria-label="Marcar como lida"
+            <TabsList className="h-9 w-full rounded-xl">
+              <TabsTrigger value="all" className="flex-1 text-xs rounded-lg">
+                Todos
+                {folderTotalMessages !== undefined && folderTotalMessages > 0
+                  ? ` (${folderTotalMessages})`
+                  : ''}
+              </TabsTrigger>
+              <TabsTrigger value="unread" className="flex-1 text-xs rounded-lg">
+                Não lidos
+                {folderUnreadMessages !== undefined && folderUnreadMessages > 0
+                  ? ` (${folderUnreadMessages})`
+                  : ''}
+              </TabsTrigger>
+              <TabsTrigger
+                value="starred"
+                className="flex-1 text-xs rounded-lg"
               >
-                <MailOpen className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Marcar como lida</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg"
-                onClick={() => onBulkMarkRead?.(Array.from(selectedIds), false)}
-                aria-label="Marcar como não lida"
-              >
-                <Mail className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Marcar como não lida</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg"
-                onClick={() => onBulkArchive?.(Array.from(selectedIds))}
-                aria-label="Arquivar"
-              >
-                <Archive className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Arquivar</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg text-destructive hover:text-destructive"
-                onClick={() => onBulkDelete?.(Array.from(selectedIds))}
-                aria-label="Excluir"
-              >
-                <Trash2 className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Excluir</TooltipContent>
-          </Tooltip>
-          <div className="flex-1" />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 rounded-lg"
-                onClick={() => onClearSelection?.()}
-                aria-label="Limpar seleção"
-              >
-                <X className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Limpar seleção</TooltipContent>
-          </Tooltip>
+                <Star className="size-3 mr-1 fill-current" />
+                Estrela
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-      )}
 
-      {/* Loading skeleton */}
-      {isLoading && (
-        <div className="space-y-0 overflow-hidden px-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex items-start gap-3 px-3 py-3.5">
-              <Skeleton className="size-9 rounded-full shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-3.5 w-32" />
-                  <Skeleton className="h-3 w-14" />
-                </div>
-                <Skeleton className="h-3.5 w-3/4" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Error */}
-      {isError && (
-        <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-          <div className="size-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
-            <AlertCircle className="size-7 text-destructive/60" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-destructive">
-              Erro ao carregar mensagens
-            </p>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Verifique sua conectividade ou sincronize a conta.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* No account */}
-      {noAccount && !isLoading && (
-        <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-          <div className="size-16 rounded-2xl bg-muted flex items-center justify-center">
-            <Inbox className="size-8 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="text-sm font-medium">Nenhuma conta de e-mail</p>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Configure uma conta para começar
-            </p>
-          </div>
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="gap-2 rounded-xl"
+        {/* Bulk-actions toolbar */}
+        {selectedIds.size > 0 && (
+          <div
+            className="flex items-center gap-2 px-4 py-2 bg-primary/8 border-y"
+            data-testid="email-bulk-actions-toolbar"
           >
-            <NextLink href="/email/settings">
-              <Settings className="size-4" />
-              Adicionar conta
-            </NextLink>
-          </Button>
-        </div>
-      )}
-
-      {/* Empty */}
-      {!isLoading &&
-        !isError &&
-        !noAccount &&
-        filteredMessages.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-            {searchQuery ? (
-              <>
-                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <Search className="size-7 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Nenhum resultado</p>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Tente uma busca diferente
-                  </p>
-                </div>
-              </>
-            ) : filter === 'unread' ? (
-              <>
-                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <MailOpen className="size-7 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    Nenhuma mensagem não lida
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Você está em dia!
-                  </p>
-                </div>
-              </>
-            ) : filter === 'starred' ? (
-              <>
-                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <Star className="size-7 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    Nenhuma mensagem com estrela
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Marque mensagens importantes com estrela
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <Inbox className="size-7 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Nenhuma mensagem</p>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Esta pasta está vazia
-                  </p>
-                </div>
-              </>
-            )}
+            <Checkbox
+              checked={
+                selectedIds.size === filteredMessages.length &&
+                filteredMessages.length > 0
+                  ? true
+                  : selectedIds.size > 0
+                    ? 'indeterminate'
+                    : false
+              }
+              onCheckedChange={checked => {
+                if (checked) onSelectAll?.();
+                else onClearSelection?.();
+              }}
+              className="size-4"
+            />
+            <span
+              className="text-xs font-semibold text-primary"
+              data-testid="email-bulk-selection-count"
+            >
+              {selectedIds.size} selecionado{selectedIds.size > 1 ? 's' : ''}
+            </span>
+            <Separator orientation="vertical" className="h-4" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-lg"
+                  onClick={() =>
+                    onBulkMarkRead?.(Array.from(selectedIds), true)
+                  }
+                  aria-label="Marcar como lida"
+                >
+                  <MailOpen className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Marcar como lida</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-lg"
+                  onClick={() =>
+                    onBulkMarkRead?.(Array.from(selectedIds), false)
+                  }
+                  aria-label="Marcar como não lida"
+                >
+                  <Mail className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Marcar como não lida</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-lg"
+                  onClick={() => onBulkArchive?.(Array.from(selectedIds))}
+                  aria-label="Arquivar"
+                >
+                  <Archive className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Arquivar</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-lg text-destructive hover:text-destructive"
+                  onClick={() => onBulkDelete?.(Array.from(selectedIds))}
+                  aria-label="Excluir"
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Excluir</TooltipContent>
+            </Tooltip>
+            <div className="flex-1" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 rounded-lg"
+                  onClick={() => onClearSelection?.()}
+                  aria-label="Limpar seleção"
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Limpar seleção</TooltipContent>
+            </Tooltip>
           </div>
         )}
 
-      {/* Virtualized list with date groups */}
-      {!isLoading && !isError && !noAccount && filteredMessages.length > 0 && (
-        <div
-          ref={parentRef}
-          className="flex-1 overflow-y-auto"
-          role="listbox"
-          aria-label={folderName ?? 'Mensagens'}
-          tabIndex={0}
-        >
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            {virtualizer.getVirtualItems().map(virtualRow => {
-              const isLoader = virtualRow.index >= flatItems.length;
-
-              if (isLoader) {
-                return (
-                  <div
-                    key="load-more-sentinel"
-                    data-index={virtualRow.index}
-                    ref={virtualizer.measureElement}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                    className="flex items-center justify-center py-4"
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Role para carregar mais
-                      </span>
-                    )}
+        {/* Loading skeleton */}
+        {isLoading && (
+          <div className="space-y-0 overflow-hidden px-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 px-3 py-3.5">
+                <Skeleton className="size-9 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3.5 w-32" />
+                    <Skeleton className="h-3 w-14" />
                   </div>
-                );
-              }
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-              const item = flatItems[virtualRow.index];
+        {/* Error */}
+        {isError && (
+          <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+            <div className="size-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="size-7 text-destructive/60" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-destructive">
+                Erro ao carregar mensagens
+              </p>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Verifique sua conectividade ou sincronize a conta.
+              </p>
+            </div>
+          </div>
+        )}
 
-              // ── Group header row ────────────────────────────────────────
-              if (item.type === 'group-header') {
-                const isCollapsed = collapsedGroups.has(item.groupKey);
+        {/* No account */}
+        {noAccount && !isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+            <div className="size-16 rounded-2xl bg-muted flex items-center justify-center">
+              <Inbox className="size-8 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Nenhuma conta de e-mail</p>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Configure uma conta para começar
+              </p>
+            </div>
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="gap-2 rounded-xl"
+            >
+              <NextLink href="/email/settings">
+                <Settings className="size-4" />
+                Adicionar conta
+              </NextLink>
+            </Button>
+          </div>
+        )}
 
-                return (
-                  <div
-                    key={`group-${item.groupKey}`}
-                    data-index={virtualRow.index}
-                    ref={virtualizer.measureElement}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    <div className="group/header px-2">
+        {/* Empty */}
+        {!isLoading &&
+          !isError &&
+          !noAccount &&
+          filteredMessages.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+              {searchQuery ? (
+                <>
+                  <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
+                    <Search className="size-7 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Nenhum resultado</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Tente uma busca diferente
+                    </p>
+                  </div>
+                </>
+              ) : filter === 'unread' ? (
+                <>
+                  <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
+                    <MailOpen className="size-7 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      Nenhuma mensagem não lida
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Você está em dia!
+                    </p>
+                  </div>
+                </>
+              ) : filter === 'starred' ? (
+                <>
+                  <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
+                    <Star className="size-7 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      Nenhuma mensagem com estrela
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Marque mensagens importantes com estrela
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
+                    <Inbox className="size-7 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Nenhuma mensagem</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Esta pasta está vazia
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+        {/* Virtualized list with date groups */}
+        {!isLoading &&
+          !isError &&
+          !noAccount &&
+          filteredMessages.length > 0 && (
+            <div
+              ref={parentRef}
+              className="flex-1 overflow-y-auto"
+              role="listbox"
+              aria-label={folderName ?? 'Mensagens'}
+              tabIndex={0}
+            >
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualizer.getVirtualItems().map(virtualRow => {
+                  const isLoader = virtualRow.index >= flatItems.length;
+
+                  if (isLoader) {
+                    return (
                       <div
-                        className="flex items-center gap-1.5 px-3 h-9 cursor-pointer select-none hover:bg-muted/40 rounded-lg transition-colors duration-150"
-                        onClick={() => toggleGroup(item.groupKey)}
+                        key="load-more-sentinel"
+                        data-index={virtualRow.index}
+                        ref={virtualizer.measureElement}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                        className="flex items-center justify-center py-4"
                       >
-                        <ChevronRight
-                          className={cn(
-                            'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
-                            !isCollapsed && 'rotate-90'
-                          )}
-                        />
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex-1">
-                          {item.label}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground/60 tabular-nums mr-0.5">
-                          {item.messageCount}
-                        </span>
-
-                        {/* Hover actions dropdown */}
-                        <DropdownMenu>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-6 shrink-0 rounded-md opacity-0 group-hover/header:opacity-100 focus:opacity-100 transition-opacity duration-150"
-                                  onClick={e => e.stopPropagation()}
-                                  aria-label="Ações do grupo"
-                                >
-                                  <MoreHorizontal className="size-3.5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>Ações do grupo</TooltipContent>
-                          </Tooltip>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                onBulkMarkRead?.(item.messageIds, true);
-                              }}
-                              className="text-xs gap-2"
-                            >
-                              <MailOpen className="size-3.5" />
-                              Marcar como Lido
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                onBulkMarkRead?.(item.messageIds, false);
-                              }}
-                              className="text-xs gap-2"
-                            >
-                              <Mail className="size-3.5" />
-                              Marcar como Não Lido
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                onBulkDelete?.(item.messageIds);
-                              }}
-                              className="text-xs gap-2 text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="size-3.5" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {isFetchingNextPage ? (
+                          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            Role para carregar mais
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  </div>
-                );
-              }
+                    );
+                  }
 
-              // ── Message row ─────────────────────────────────────────────
-              const message = item.message;
-              const isSelected = selectedMessageId === message.id;
-              const isChecked = selectedIds.has(message.id);
-              const senderDisplay =
-                message.fromName || message.fromAddress || '(sem remetente)';
-              const avatarColor = getAvatarColor(message.fromAddress);
-              const initials = getInitials(
-                message.fromName,
-                message.fromAddress
-              );
+                  const item = flatItems[virtualRow.index];
 
-              return (
-                <div
-                  key={virtualRow.key}
-                  data-index={virtualRow.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <div className="px-2">
-                    <div
-                      role="option"
-                      aria-selected={isSelected}
-                      aria-label={`${!message.isRead ? 'Não lido: ' : ''}${message.fromName || message.fromAddress}: ${message.subject || '(sem assunto)'}`}
-                      className={cn(
-                        'group flex w-full items-start gap-3 px-3 py-3 text-left cursor-pointer transition-all duration-150 rounded-xl',
-                        isSelected && 'bg-accent shadow-sm',
-                        isChecked && !isSelected && 'bg-primary/5',
-                        !isSelected && !isChecked && 'hover:bg-muted/50'
-                      )}
-                      onClick={e => handleMessageClick(message.id, e)}
-                    >
-                      {/* Avatar / Checkbox area */}
+                  // ── Group header row ────────────────────────────────────────
+                  if (item.type === 'group-header') {
+                    const isCollapsed = collapsedGroups.has(item.groupKey);
+
+                    return (
                       <div
-                        className="relative shrink-0 mt-0.5"
-                        onClick={e => {
-                          e.stopPropagation();
-                          onToggleSelect?.(message.id);
+                        key={`group-${item.groupKey}`}
+                        data-index={virtualRow.index}
+                        ref={virtualizer.measureElement}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualRow.start}px)`,
                         }}
                       >
-                        {/* Avatar */}
-                        <div
-                          className={cn(
-                            'flex size-9 items-center justify-center rounded-full text-white transition-opacity duration-150',
-                            (isChecked || selectedIds.size > 0) &&
-                              'opacity-0 group-hover:opacity-0'
-                          )}
-                          style={{ backgroundColor: avatarColor }}
-                        >
-                          <span className="text-xs font-semibold leading-none">
-                            {initials}
-                          </span>
-                        </div>
-
-                        {/* Unread dot */}
-                        {!message.isRead &&
-                          !isChecked &&
-                          selectedIds.size === 0 && (
-                            <div className="absolute -top-0.5 -left-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background" />
-                          )}
-
-                        {/* Checkbox overlay */}
-                        <div
-                          className={cn(
-                            'absolute inset-0 flex items-center justify-center rounded-full transition-opacity duration-150',
-                            isChecked || selectedIds.size > 0
-                              ? 'opacity-100'
-                              : 'opacity-0 group-hover:opacity-100'
-                          )}
-                        >
-                          <div className="size-9 rounded-full bg-muted/80 backdrop-blur-sm flex items-center justify-center">
-                            <Checkbox
-                              checked={isChecked}
-                              className="size-4"
-                              onCheckedChange={() =>
-                                onToggleSelect?.(message.id)
-                              }
-                              onClick={e => e.stopPropagation()}
+                        <div className="group/header px-2">
+                          <div
+                            className="flex items-center gap-1.5 px-3 h-9 cursor-pointer select-none hover:bg-muted/40 rounded-lg transition-colors duration-150"
+                            onClick={() => toggleGroup(item.groupKey)}
+                          >
+                            <ChevronRight
+                              className={cn(
+                                'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+                                !isCollapsed && 'rotate-90'
+                              )}
                             />
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex-1">
+                              {item.label}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/60 tabular-nums mr-0.5">
+                              {item.messageCount}
+                            </span>
+
+                            {/* Hover actions dropdown */}
+                            <DropdownMenu>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-6 shrink-0 rounded-md opacity-0 group-hover/header:opacity-100 focus:opacity-100 transition-opacity duration-150"
+                                      onClick={e => e.stopPropagation()}
+                                      aria-label="Ações do grupo"
+                                    >
+                                      <MoreHorizontal className="size-3.5" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>Ações do grupo</TooltipContent>
+                              </Tooltip>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    onBulkMarkRead?.(item.messageIds, true);
+                                  }}
+                                  className="text-xs gap-2"
+                                >
+                                  <MailOpen className="size-3.5" />
+                                  Marcar como Lido
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    onBulkMarkRead?.(item.messageIds, false);
+                                  }}
+                                  className="text-xs gap-2"
+                                >
+                                  <Mail className="size-3.5" />
+                                  Marcar como Não Lido
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    onBulkDelete?.(item.messageIds);
+                                  }}
+                                  className="text-xs gap-2 text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       </div>
+                    );
+                  }
 
-                      {/* Content — sender+date, subject */}
-                      <div className="min-w-0 flex-1">
-                        {/* Row 1: Sender + Date */}
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={cn(
-                              'flex min-w-0 flex-1 items-center gap-1 text-sm',
-                              !message.isRead
-                                ? 'font-semibold text-foreground'
-                                : 'text-muted-foreground font-semibold'
-                            )}
-                            title={senderDisplay}
-                          >
-                            <span className="truncate">{senderDisplay}</span>
-                            {!message.isRead && (
-                              <PiSparkleDuotone className="size-3.5 shrink-0 text-sky-500" />
-                            )}
-                          </span>
-                          <span
-                            className="shrink-0 text-[11px] text-muted-foreground tabular-nums"
-                            title={formatEmailDateFull(message.receivedAt)}
-                          >
-                            {formatEmailDate(message.receivedAt)}
-                          </span>
-                        </div>
+                  // ── Message row ─────────────────────────────────────────────
+                  const message = item.message;
+                  const isSelected = selectedMessageId === message.id;
+                  const isChecked = selectedIds.has(message.id);
+                  const senderDisplay =
+                    message.fromName ||
+                    message.fromAddress ||
+                    '(sem remetente)';
+                  const avatarColor = getAvatarColor(message.fromAddress);
+                  const initials = getInitials(
+                    message.fromName,
+                    message.fromAddress
+                  );
 
-                        {/* Row 2: Subject (with star + attachment icons) */}
-                        <div className="flex items-center justify-between gap-1 mt-0.5">
-                          <p
-                            className={cn(
-                              'truncate text-[13px] leading-snug',
-                              !message.isRead
-                                ? 'font-medium text-foreground'
-                                : 'text-muted-foreground'
-                            )}
-                            title={message.subject || '(sem assunto)'}
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                    >
+                      <div className="px-2">
+                        <div
+                          role="option"
+                          aria-selected={isSelected}
+                          aria-label={`${!message.isRead ? 'Não lido: ' : ''}${message.fromName || message.fromAddress}: ${message.subject || '(sem assunto)'}`}
+                          className={cn(
+                            'group flex w-full items-start gap-3 px-3 py-3 text-left cursor-pointer transition-all duration-150 rounded-xl',
+                            isSelected && 'bg-accent shadow-sm',
+                            isChecked && !isSelected && 'bg-primary/5',
+                            !isSelected && !isChecked && 'hover:bg-muted/50'
+                          )}
+                          onClick={e => handleMessageClick(message.id, e)}
+                        >
+                          {/* Avatar / Checkbox area */}
+                          <div
+                            className="relative shrink-0 mt-0.5"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onToggleSelect?.(message.id);
+                            }}
                           >
-                            {message.subject || (
-                              <em className="text-muted-foreground">
-                                (sem assunto)
-                              </em>
-                            )}
-                          </p>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              type="button"
+                            {/* Avatar */}
+                            <div
                               className={cn(
-                                'shrink-0 transition-opacity duration-150',
-                                message.isFlagged
+                                'flex size-9 items-center justify-center rounded-full text-white transition-opacity duration-150',
+                                (isChecked || selectedIds.size > 0) &&
+                                  'opacity-0 group-hover:opacity-0'
+                              )}
+                              style={{ backgroundColor: avatarColor }}
+                            >
+                              <span className="text-xs font-semibold leading-none">
+                                {initials}
+                              </span>
+                            </div>
+
+                            {/* Unread dot */}
+                            {!message.isRead &&
+                              !isChecked &&
+                              selectedIds.size === 0 && (
+                                <div className="absolute -top-0.5 -left-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background" />
+                              )}
+
+                            {/* Checkbox overlay */}
+                            <div
+                              className={cn(
+                                'absolute inset-0 flex items-center justify-center rounded-full transition-opacity duration-150',
+                                isChecked || selectedIds.size > 0
                                   ? 'opacity-100'
                                   : 'opacity-0 group-hover:opacity-100'
                               )}
-                              onClick={e => {
-                                e.stopPropagation();
-                                onToggleFlag?.(message.id, !message.isFlagged);
-                              }}
-                              aria-label={
-                                message.isFlagged
-                                  ? 'Remover estrela'
-                                  : 'Marcar com estrela'
-                              }
                             >
-                              <Star
+                              <div className="size-9 rounded-full bg-muted/80 backdrop-blur-sm flex items-center justify-center">
+                                <Checkbox
+                                  checked={isChecked}
+                                  className="size-4"
+                                  onCheckedChange={() =>
+                                    onToggleSelect?.(message.id)
+                                  }
+                                  onClick={e => e.stopPropagation()}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Content — sender+date, subject */}
+                          <div className="min-w-0 flex-1">
+                            {/* Row 1: Sender + Date */}
+                            <div className="flex items-center gap-1.5">
+                              <span
                                 className={cn(
-                                  'size-3.5',
-                                  message.isFlagged
-                                    ? 'text-amber-500 fill-amber-500'
-                                    : 'text-muted-foreground hover:text-amber-400'
+                                  'flex min-w-0 flex-1 items-center gap-1 text-sm',
+                                  !message.isRead
+                                    ? 'font-semibold text-foreground'
+                                    : 'text-muted-foreground font-semibold'
                                 )}
-                              />
-                            </button>
-                            {message.isAnswered && (
-                              <Reply className="size-3 shrink-0 text-muted-foreground" />
-                            )}
-                            {message.hasAttachments && (
-                              <Paperclip className="size-3 shrink-0 text-muted-foreground" />
-                            )}
+                                title={senderDisplay}
+                              >
+                                <span className="truncate">
+                                  {senderDisplay}
+                                </span>
+                                {!message.isRead && (
+                                  <PiSparkleDuotone className="size-3.5 shrink-0 text-sky-500" />
+                                )}
+                              </span>
+                              <span
+                                className="shrink-0 text-[11px] text-muted-foreground tabular-nums"
+                                title={formatEmailDateFull(message.receivedAt)}
+                              >
+                                {formatEmailDate(message.receivedAt)}
+                              </span>
+                            </div>
+
+                            {/* Row 2: Subject (with star + attachment icons) */}
+                            <div className="flex items-center justify-between gap-1 mt-0.5">
+                              <p
+                                className={cn(
+                                  'truncate text-[13px] leading-snug',
+                                  !message.isRead
+                                    ? 'font-medium text-foreground'
+                                    : 'text-muted-foreground'
+                                )}
+                                title={message.subject || '(sem assunto)'}
+                              >
+                                {message.subject || (
+                                  <em className="text-muted-foreground">
+                                    (sem assunto)
+                                  </em>
+                                )}
+                              </p>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    'shrink-0 transition-opacity duration-150',
+                                    message.isFlagged
+                                      ? 'opacity-100'
+                                      : 'opacity-0 group-hover:opacity-100'
+                                  )}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    onToggleFlag?.(
+                                      message.id,
+                                      !message.isFlagged
+                                    );
+                                  }}
+                                  aria-label={
+                                    message.isFlagged
+                                      ? 'Remover estrela'
+                                      : 'Marcar com estrela'
+                                  }
+                                >
+                                  <Star
+                                    className={cn(
+                                      'size-3.5',
+                                      message.isFlagged
+                                        ? 'text-amber-500 fill-amber-500'
+                                        : 'text-muted-foreground hover:text-amber-400'
+                                    )}
+                                  />
+                                </button>
+                                {message.isAnswered && (
+                                  <Reply className="size-3 shrink-0 text-muted-foreground" />
+                                )}
+                                {message.hasAttachments && (
+                                  <Paperclip className="size-3 shrink-0 text-muted-foreground" />
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+      </div>
     </TooltipProvider>
   );
 }

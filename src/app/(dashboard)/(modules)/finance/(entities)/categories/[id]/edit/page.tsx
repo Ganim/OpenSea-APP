@@ -264,11 +264,7 @@ export default function EditFinanceCategoryPage({
 
       <PageBody>
         <Card className="p-4 sm:p-6 w-full bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <form
-            ref={formRef}
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {/* Row 1: Name + Parent */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">

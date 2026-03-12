@@ -290,12 +290,8 @@ export function ItemEntryFormModal({
         unitCost: formData.unitCost > 0 ? formData.unitCost : undefined,
         attributes: formData.attributes,
         batchNumber: formData.batchNumber.trim() || undefined,
-        manufacturingDate: formData.manufacturingDate
-          ? new Date(formData.manufacturingDate)
-          : undefined,
-        expiryDate: formData.expiryDate
-          ? new Date(formData.expiryDate)
-          : undefined,
+        manufacturingDate: formData.manufacturingDate || undefined,
+        expiryDate: formData.expiryDate || undefined,
         notes,
       };
 

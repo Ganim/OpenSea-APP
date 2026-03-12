@@ -21,9 +21,12 @@ export function useAutomations(boardId: string) {
 export function useCreateAutomation(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateAutomationRequest) => automationsService.create(boardId, data),
+    mutationFn: (data: CreateAutomationRequest) =>
+      automationsService.create(boardId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId) });
+      qc.invalidateQueries({
+        queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -32,10 +35,17 @@ export function useCreateAutomation(boardId: string) {
 export function useUpdateAutomation(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ automationId, data }: { automationId: string; data: UpdateAutomationRequest }) =>
-      automationsService.update(boardId, automationId, data),
+    mutationFn: ({
+      automationId,
+      data,
+    }: {
+      automationId: string;
+      data: UpdateAutomationRequest;
+    }) => automationsService.update(boardId, automationId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId) });
+      qc.invalidateQueries({
+        queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -44,9 +54,12 @@ export function useUpdateAutomation(boardId: string) {
 export function useDeleteAutomation(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (automationId: string) => automationsService.delete(boardId, automationId),
+    mutationFn: (automationId: string) =>
+      automationsService.delete(boardId, automationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId) });
+      qc.invalidateQueries({
+        queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });
@@ -55,9 +68,12 @@ export function useDeleteAutomation(boardId: string) {
 export function useToggleAutomation(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (automationId: string) => automationsService.toggle(boardId, automationId),
+    mutationFn: (automationId: string) =>
+      automationsService.toggle(boardId, automationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId) });
+      qc.invalidateQueries({
+        queryKey: AUTOMATION_QUERY_KEYS.AUTOMATIONS(boardId),
+      });
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
   });

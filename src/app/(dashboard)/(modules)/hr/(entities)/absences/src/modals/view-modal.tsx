@@ -22,7 +22,14 @@ import {
 } from '@/components/ui/tooltip';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { Absence } from '@/types/hr';
-import { Calendar, Clock, ExternalLink, FileText, UserX, X } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  ExternalLink,
+  FileText,
+  UserX,
+  X,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   getTypeLabel,

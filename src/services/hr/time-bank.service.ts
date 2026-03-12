@@ -39,9 +39,14 @@ export const timeBankService = {
     return apiClient.post<TimeBankResponse>('/v1/hr/time-bank/adjust', data);
   },
 
-  async getByEmployee(employeeId: string, year?: number): Promise<TimeBankResponse> {
+  async getByEmployee(
+    employeeId: string,
+    year?: number
+  ): Promise<TimeBankResponse> {
     const query = year ? `?year=${year}` : '';
-    return apiClient.get<TimeBankResponse>(`/v1/hr/time-bank/${employeeId}${query}`);
+    return apiClient.get<TimeBankResponse>(
+      `/v1/hr/time-bank/${employeeId}${query}`
+    );
   },
 
   async list(params?: ListTimeBanksParams): Promise<TimeBanksResponse> {
@@ -49,6 +54,8 @@ export const timeBankService = {
     if (params?.employeeId) query.append('employeeId', params.employeeId);
     if (params?.year) query.append('year', String(params.year));
     const qs = query.toString();
-    return apiClient.get<TimeBanksResponse>(`/v1/hr/time-bank${qs ? `?${qs}` : ''}`);
+    return apiClient.get<TimeBanksResponse>(
+      `/v1/hr/time-bank${qs ? `?${qs}` : ''}`
+    );
   },
 };

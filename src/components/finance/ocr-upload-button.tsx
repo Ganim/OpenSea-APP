@@ -53,7 +53,7 @@ export function OcrUploadButton({ onExtracted }: OcrUploadButtonProps) {
         fileInputRef.current.value = '';
       }
     },
-    [ocrMutation, onExtracted],
+    [ocrMutation, onExtracted]
   );
 
   const handlePasteSubmit = useCallback(async () => {
@@ -126,7 +126,7 @@ export function OcrUploadButton({ onExtracted }: OcrUploadButtonProps) {
             </p>
             <Textarea
               value={pasteText}
-              onChange={(e) => setPasteText(e.target.value)}
+              onChange={e => setPasteText(e.target.value)}
               placeholder="Cole o texto do documento aqui..."
               rows={8}
               className="resize-none"

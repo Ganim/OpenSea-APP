@@ -157,7 +157,9 @@ function RenameModal({
 /**
  * Resolve thumbnailUrl relativa para URL completa com token
  */
-function resolveThumbnailUrl(url: string | null | undefined): string | undefined {
+function resolveThumbnailUrl(
+  url: string | null | undefined
+): string | undefined {
   if (!url) return undefined;
   const match = url.match(/\/v1\/storage\/files\/([^/]+)\/serve/);
   if (match) {

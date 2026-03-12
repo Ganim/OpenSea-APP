@@ -1,9 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
-import type {
-  CardActivity,
-  ActivitiesQuery,
-} from '@/types/tasks';
+import type { CardActivity, ActivitiesQuery } from '@/types/tasks';
 
 export interface ActivitiesResponse {
   activities: CardActivity[];
@@ -31,22 +28,22 @@ function buildActivityQuery(params?: ActivitiesQuery): string {
 export const activityService = {
   async boardActivity(
     boardId: string,
-    params?: ActivitiesQuery,
+    params?: ActivitiesQuery
   ): Promise<ActivitiesResponse> {
     const qs = buildActivityQuery(params);
     return apiClient.get<ActivitiesResponse>(
-      `${API_ENDPOINTS.TASKS.ACTIVITY.BOARD(boardId)}${qs}`,
+      `${API_ENDPOINTS.TASKS.ACTIVITY.BOARD(boardId)}${qs}`
     );
   },
 
   async cardActivity(
     boardId: string,
     cardId: string,
-    params?: ActivitiesQuery,
+    params?: ActivitiesQuery
   ): Promise<ActivitiesResponse> {
     const qs = buildActivityQuery(params);
     return apiClient.get<ActivitiesResponse>(
-      `${API_ENDPOINTS.TASKS.ACTIVITY.CARD(boardId, cardId)}${qs}`,
+      `${API_ENDPOINTS.TASKS.ACTIVITY.CARD(boardId, cardId)}${qs}`
     );
   },
 };

@@ -16,7 +16,8 @@ export const COLUMN_QUERY_KEYS = {
 export function useCreateColumn(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateColumnRequest) => columnsService.create(boardId, data),
+    mutationFn: (data: CreateColumnRequest) =>
+      columnsService.create(boardId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
     },
@@ -26,29 +27,31 @@ export function useCreateColumn(boardId: string) {
 export function useUpdateColumn(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ columnId, data }: { columnId: string; data: UpdateColumnRequest }) =>
-      columnsService.update(boardId, columnId, data),
+    mutationFn: ({
+      columnId,
+      data,
+    }: {
+      columnId: string;
+      data: UpdateColumnRequest;
+    }) => columnsService.update(boardId, columnId, data),
     onMutate: async ({ columnId, data }) => {
       await qc.cancelQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
       const previousBoard = qc.getQueryData<BoardResponse>(
         BOARD_QUERY_KEYS.BOARD(boardId)
       );
 
-      qc.setQueryData<BoardResponse>(
-        BOARD_QUERY_KEYS.BOARD(boardId),
-        old => {
-          if (!old?.board?.columns) return old;
-          return {
-            ...old,
-            board: {
-              ...old.board,
-              columns: old.board.columns.map(col =>
-                col.id === columnId ? { ...col, ...data } : col
-              ),
-            },
-          };
-        }
-      );
+      qc.setQueryData<BoardResponse>(BOARD_QUERY_KEYS.BOARD(boardId), old => {
+        if (!old?.board?.columns) return old;
+        return {
+          ...old,
+          board: {
+            ...old.board,
+            columns: old.board.columns.map(col =>
+              col.id === columnId ? { ...col, ...data } : col
+            ),
+          },
+        };
+      });
 
       return { previousBoard };
     },
@@ -64,26 +67,23 @@ export function useDeleteColumn(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (columnId: string) => columnsService.delete(boardId, columnId),
-    onMutate: async (columnId) => {
+    onMutate: async columnId => {
       await qc.cancelQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
       await qc.cancelQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       const previousBoard = qc.getQueryData<BoardResponse>(
         BOARD_QUERY_KEYS.BOARD(boardId)
       );
 
-      qc.setQueryData<BoardResponse>(
-        BOARD_QUERY_KEYS.BOARD(boardId),
-        old => {
-          if (!old?.board?.columns) return old;
-          return {
-            ...old,
-            board: {
-              ...old.board,
-              columns: old.board.columns.filter(col => col.id !== columnId),
-            },
-          };
-        }
-      );
+      qc.setQueryData<BoardResponse>(BOARD_QUERY_KEYS.BOARD(boardId), old => {
+        if (!old?.board?.columns) return old;
+        return {
+          ...old,
+          board: {
+            ...old.board,
+            columns: old.board.columns.filter(col => col.id !== columnId),
+          },
+        };
+      });
 
       return { previousBoard };
     },
@@ -101,30 +101,31 @@ export function useDeleteColumn(boardId: string) {
 export function useReorderColumns(boardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ReorderColumnsRequest) => columnsService.reorder(boardId, data),
+    mutationFn: (data: ReorderColumnsRequest) =>
+      columnsService.reorder(boardId, data),
     onMutate: async ({ columnIds }) => {
       await qc.cancelQueries({ queryKey: BOARD_QUERY_KEYS.BOARD(boardId) });
       const previousBoard = qc.getQueryData<BoardResponse>(
         BOARD_QUERY_KEYS.BOARD(boardId)
       );
 
-      qc.setQueryData<BoardResponse>(
-        BOARD_QUERY_KEYS.BOARD(boardId),
-        old => {
-          if (!old?.board?.columns) return old;
-          const colMap = new Map(old.board.columns.map(c => [c.id, c]));
-          const reordered = columnIds
-            .map((id, i) => {
-              const col = colMap.get(id);
-              return col ? { ...col, position: i } : null;
-            })
-            .filter(Boolean);
-          return {
-            ...old,
-            board: { ...old.board, columns: reordered as typeof old.board.columns },
-          };
-        }
-      );
+      qc.setQueryData<BoardResponse>(BOARD_QUERY_KEYS.BOARD(boardId), old => {
+        if (!old?.board?.columns) return old;
+        const colMap = new Map(old.board.columns.map(c => [c.id, c]));
+        const reordered = columnIds
+          .map((id, i) => {
+            const col = colMap.get(id);
+            return col ? { ...col, position: i } : null;
+          })
+          .filter(Boolean);
+        return {
+          ...old,
+          board: {
+            ...old.board,
+            columns: reordered as typeof old.board.columns,
+          },
+        };
+      });
 
       return { previousBoard };
     },

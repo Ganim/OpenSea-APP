@@ -8,7 +8,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { TemplatePreset } from '@/data/template-presets';
-import type { CreateTemplateRequest, Template, TemplateAttributes, UnitOfMeasure } from '@/types/stock';
+import type {
+  CreateTemplateRequest,
+  Template,
+  TemplateAttributes,
+  UnitOfMeasure,
+} from '@/types/stock';
 import { LayoutTemplateIcon } from 'lucide-react';
 import { useState } from 'react';
 import { PresetGrid } from '../components/preset-grid';
@@ -33,7 +38,16 @@ interface CreateModalProps {
  * para o formato TemplateAttributes esperado pela API.
  */
 function convertPresetAttributes(
-  attrs: Record<string, { name: string; type: string; required?: boolean; options?: string[]; unit?: string }>
+  attrs: Record<
+    string,
+    {
+      name: string;
+      type: string;
+      required?: boolean;
+      options?: string[];
+      unit?: string;
+    }
+  >
 ): TemplateAttributes {
   const result: TemplateAttributes = {};
   for (const [key, attr] of Object.entries(attrs)) {
@@ -46,9 +60,16 @@ function convertPresetAttributes(
     };
     result[key] = {
       label: attr.name,
-      type: (typeMap[attr.type] || attr.type) as 'string' | 'number' | 'boolean' | 'date' | 'select',
+      type: (typeMap[attr.type] || attr.type) as
+        | 'string'
+        | 'number'
+        | 'boolean'
+        | 'date'
+        | 'select',
       required: attr.required || false,
-      ...(attr.options && attr.options.length > 0 ? { options: attr.options } : {}),
+      ...(attr.options && attr.options.length > 0
+        ? { options: attr.options }
+        : {}),
     };
   }
   return result;
@@ -61,7 +82,9 @@ export function CreateModal({
   onSubmit,
 }: CreateModalProps) {
   const [state, setState] = useState<ModalState>('grid');
-  const [selectedPreset, setSelectedPreset] = useState<TemplatePreset | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<TemplatePreset | null>(
+    null
+  );
 
   const handleClose = () => {
     setState('grid');
@@ -87,7 +110,10 @@ export function CreateModal({
     handleClose();
   };
 
-  const handleManualSubmit = async (formData: { name: string; unitOfMeasure: UnitOfMeasure }) => {
+  const handleManualSubmit = async (formData: {
+    name: string;
+    unitOfMeasure: UnitOfMeasure;
+  }) => {
     const data: Partial<Template> & CreateTemplateRequest = {
       name: formData.name,
       unitOfMeasure: formData.unitOfMeasure,

@@ -119,8 +119,7 @@ export function WizardStepConfirmation({
         </div>
 
         {/* Cost Center */}
-        {wizardData.useRateio &&
-        wizardData.costCenterAllocations.length > 0 ? (
+        {wizardData.useRateio && wizardData.costCenterAllocations.length > 0 ? (
           <div className="text-sm">
             <span className="text-muted-foreground">
               Centros de Custo (Rateio):

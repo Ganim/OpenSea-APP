@@ -12,7 +12,12 @@ import type {
   RespondToEventData,
   ManageRemindersData,
 } from '@/types/calendar';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 const QUERY_KEYS = {
   CALENDAR_EVENTS: ['calendar-events'],
@@ -43,11 +48,12 @@ export function useCreateCalendarEvent() {
   return useMutation({
     mutationFn: (data: CreateCalendarEventData) =>
       calendarEventsService.create(data),
-    onMutate: async (data) => {
+    onMutate: async data => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
-      const previousQueries = queryClient.getQueriesData<CalendarEventsResponse>({
-        queryKey: QUERY_KEYS.CALENDAR_EVENTS,
-      });
+      const previousQueries =
+        queryClient.getQueriesData<CalendarEventsResponse>({
+          queryKey: QUERY_KEYS.CALENDAR_EVENTS,
+        });
 
       const tempEvent: CalendarEvent = {
         id: `temp-${Date.now()}`,
@@ -80,13 +86,13 @@ export function useCreateCalendarEvent() {
 
       queryClient.setQueriesData<CalendarEventsResponse>(
         { queryKey: QUERY_KEYS.CALENDAR_EVENTS },
-        (old) => {
+        old => {
           if (!old?.events) return old;
           return {
             ...old,
             events: [...old.events, tempEvent],
           };
-        },
+        }
       );
 
       return { previousQueries };
@@ -111,21 +117,20 @@ export function useUpdateCalendarEvent() {
       calendarEventsService.update(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
-      const previousQueries = queryClient.getQueriesData<CalendarEventsResponse>({
-        queryKey: QUERY_KEYS.CALENDAR_EVENTS,
-      });
+      const previousQueries =
+        queryClient.getQueriesData<CalendarEventsResponse>({
+          queryKey: QUERY_KEYS.CALENDAR_EVENTS,
+        });
 
       queryClient.setQueriesData<CalendarEventsResponse>(
         { queryKey: QUERY_KEYS.CALENDAR_EVENTS },
-        (old) => {
+        old => {
           if (!old?.events) return old;
           return {
             ...old,
-            events: old.events.map((e) =>
-              e.id === id ? { ...e, ...data } : e,
-            ),
+            events: old.events.map(e => (e.id === id ? { ...e, ...data } : e)),
           };
-        },
+        }
       );
 
       return { previousQueries };
@@ -144,21 +149,22 @@ export function useDeleteCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => calendarEventsService.delete(id),
-    onMutate: async (id) => {
+    onMutate: async id => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
-      const previousQueries = queryClient.getQueriesData<CalendarEventsResponse>({
-        queryKey: QUERY_KEYS.CALENDAR_EVENTS,
-      });
+      const previousQueries =
+        queryClient.getQueriesData<CalendarEventsResponse>({
+          queryKey: QUERY_KEYS.CALENDAR_EVENTS,
+        });
 
       queryClient.setQueriesData<CalendarEventsResponse>(
         { queryKey: QUERY_KEYS.CALENDAR_EVENTS },
-        (old) => {
+        old => {
           if (!old?.events) return old;
           return {
             ...old,
-            events: old.events.filter((e) => e.id !== id),
+            events: old.events.filter(e => e.id !== id),
           };
-        },
+        }
       );
 
       return { previousQueries };
@@ -176,19 +182,24 @@ export function useDeleteCalendarEvent() {
 export function useInviteParticipants() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, data }: { eventId: string; data: InviteParticipantsData }) =>
-      calendarEventsService.inviteParticipants(eventId, data),
+    mutationFn: ({
+      eventId,
+      data,
+    }: {
+      eventId: string;
+      data: InviteParticipantsData;
+    }) => calendarEventsService.inviteParticipants(eventId, data),
     onMutate: async ({ eventId, data }) => {
       await queryClient.cancelQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
       });
       const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
-        QUERY_KEYS.CALENDAR_EVENT(eventId),
+        QUERY_KEYS.CALENDAR_EVENT(eventId)
       );
 
       if (previousEvent) {
         const existingParticipants = previousEvent.event.participants ?? [];
-        const newParticipants = data.participants.map((p) => ({
+        const newParticipants = data.participants.map(p => ({
           id: `temp-${Date.now()}-${p.userId}`,
           eventId,
           userId: p.userId,
@@ -210,7 +221,7 @@ export function useInviteParticipants() {
               ...previousEvent.event,
               participants: [...existingParticipants, ...newParticipants],
             },
-          },
+          }
         );
       }
 
@@ -220,7 +231,7 @@ export function useInviteParticipants() {
       if (context?.previousEvent) {
         queryClient.setQueryData(
           QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
-          context.previousEvent,
+          context.previousEvent
         );
       }
     },
@@ -236,14 +247,20 @@ export function useInviteParticipants() {
 export function useRespondToEvent() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, data }: { eventId: string; userId?: string; data: RespondToEventData }) =>
-      calendarEventsService.respondToEvent(eventId, data),
+    mutationFn: ({
+      eventId,
+      data,
+    }: {
+      eventId: string;
+      userId?: string;
+      data: RespondToEventData;
+    }) => calendarEventsService.respondToEvent(eventId, data),
     onMutate: async ({ eventId, userId, data }) => {
       await queryClient.cancelQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
       });
       const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
-        QUERY_KEYS.CALENDAR_EVENT(eventId),
+        QUERY_KEYS.CALENDAR_EVENT(eventId)
       );
 
       if (previousEvent) {
@@ -254,13 +271,17 @@ export function useRespondToEvent() {
             ...previousEvent,
             event: {
               ...previousEvent.event,
-              participants: existingParticipants.map((p) =>
+              participants: existingParticipants.map(p =>
                 userId && p.userId === userId
-                  ? { ...p, status: data.status, respondedAt: new Date().toISOString() }
-                  : p,
+                  ? {
+                      ...p,
+                      status: data.status,
+                      respondedAt: new Date().toISOString(),
+                    }
+                  : p
               ),
             },
-          },
+          }
         );
       }
 
@@ -270,7 +291,7 @@ export function useRespondToEvent() {
       if (context?.previousEvent) {
         queryClient.setQueryData(
           QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
-          context.previousEvent,
+          context.previousEvent
         );
       }
     },
@@ -293,7 +314,7 @@ export function useRemoveParticipant() {
         queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
       });
       const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
-        QUERY_KEYS.CALENDAR_EVENT(eventId),
+        QUERY_KEYS.CALENDAR_EVENT(eventId)
       );
 
       if (previousEvent) {
@@ -305,10 +326,10 @@ export function useRemoveParticipant() {
             event: {
               ...previousEvent.event,
               participants: existingParticipants.filter(
-                (p) => p.userId !== userId,
+                p => p.userId !== userId
               ),
             },
-          },
+          }
         );
       }
 
@@ -318,7 +339,7 @@ export function useRemoveParticipant() {
       if (context?.previousEvent) {
         queryClient.setQueryData(
           QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
-          context.previousEvent,
+          context.previousEvent
         );
       }
     },
@@ -334,8 +355,13 @@ export function useRemoveParticipant() {
 export function useShareEventWithUsers() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, userIds }: { eventId: string; userIds: string[] }) =>
-      calendarEventsService.shareWithUsers(eventId, userIds),
+    mutationFn: ({
+      eventId,
+      userIds,
+    }: {
+      eventId: string;
+      userIds: string[];
+    }) => calendarEventsService.shareWithUsers(eventId, userIds),
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
@@ -362,8 +388,13 @@ export function useShareEventWithTeam() {
 export function useUnshareUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, targetUserId }: { eventId: string; targetUserId: string }) =>
-      calendarEventsService.unshareUser(eventId, targetUserId),
+    mutationFn: ({
+      eventId,
+      targetUserId,
+    }: {
+      eventId: string;
+      targetUserId: string;
+    }) => calendarEventsService.unshareUser(eventId, targetUserId),
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CALENDAR_EVENTS });
       queryClient.invalidateQueries({
@@ -376,14 +407,19 @@ export function useUnshareUser() {
 export function useManageReminders() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, data }: { eventId: string; data: ManageRemindersData }) =>
-      calendarEventsService.manageReminders(eventId, data),
+    mutationFn: ({
+      eventId,
+      data,
+    }: {
+      eventId: string;
+      data: ManageRemindersData;
+    }) => calendarEventsService.manageReminders(eventId, data),
     onMutate: async ({ eventId, data }) => {
       await queryClient.cancelQueries({
         queryKey: QUERY_KEYS.CALENDAR_EVENT(eventId),
       });
       const previousEvent = queryClient.getQueryData<CalendarEventResponse>(
-        QUERY_KEYS.CALENDAR_EVENT(eventId),
+        QUERY_KEYS.CALENDAR_EVENT(eventId)
       );
 
       if (previousEvent) {
@@ -405,7 +441,7 @@ export function useManageReminders() {
               ...previousEvent.event,
               reminders: newReminders,
             },
-          },
+          }
         );
       }
 
@@ -415,7 +451,7 @@ export function useManageReminders() {
       if (context?.previousEvent) {
         queryClient.setQueryData(
           QUERY_KEYS.CALENDAR_EVENT(variables.eventId),
-          context.previousEvent,
+          context.previousEvent
         );
       }
     },

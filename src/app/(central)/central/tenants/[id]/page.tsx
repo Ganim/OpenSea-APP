@@ -1,6 +1,11 @@
 'use client';
 
-import { GlassBadge, GlassButton, GlassCard, GlassInput } from '@/components/central';
+import {
+  GlassBadge,
+  GlassButton,
+  GlassCard,
+  GlassInput,
+} from '@/components/central';
 import {
   Dialog,
   DialogContent,
@@ -671,7 +676,8 @@ export default function TenantDetailPage() {
                       onClick={() =>
                         setSecurityKeyState({
                           userId: u.userId,
-                          userName: u.user?.username ?? u.user?.email ?? u.userId,
+                          userName:
+                            u.user?.username ?? u.user?.email ?? u.userId,
                         })
                       }
                       title="Chave de segurança"
@@ -743,7 +749,7 @@ export default function TenantDetailPage() {
         <TabsContent value="flags" className="space-y-6 w-full">
           {flagsLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4].map(i => (
                 <div
                   key={i}
                   className="h-20 rounded-xl central-glass-subtle animate-pulse"
@@ -757,7 +763,7 @@ export default function TenantDetailPage() {
                 const systemFlags = flagsData?.systemFlags ?? [];
                 const tenantFlags = flagsData?.featureFlags ?? [];
                 const tenantFlagMap = new Map(
-                  tenantFlags.map((f) => [f.flag, f])
+                  tenantFlags.map(f => [f.flag, f])
                 );
 
                 const categories = [
@@ -773,31 +779,27 @@ export default function TenantDetailPage() {
                 ];
 
                 const grouped = categories
-                  .map((cat) => ({
+                  .map(cat => ({
                     ...cat,
-                    flags: systemFlags.filter((f) => f.category === cat.key),
+                    flags: systemFlags.filter(f => f.category === cat.key),
                   }))
-                  .filter((cat) => cat.flags.length > 0);
+                  .filter(cat => cat.flags.length > 0);
 
                 // Custom flags: flags in tenantFlags that aren't in systemFlags
-                const systemFlagNames = new Set(
-                  systemFlags.map((f) => f.flag)
-                );
+                const systemFlagNames = new Set(systemFlags.map(f => f.flag));
                 const customFlags = tenantFlags.filter(
-                  (f) => !systemFlagNames.has(f.flag)
+                  f => !systemFlagNames.has(f.flag)
                 );
 
                 return (
                   <>
-                    {grouped.map((cat) => (
+                    {grouped.map(cat => (
                       <GlassCard key={cat.key} className="p-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <GlassBadge variant="default">
-                            {cat.label}
-                          </GlassBadge>
+                          <GlassBadge variant="default">{cat.label}</GlassBadge>
                         </div>
                         <div className="space-y-3">
-                          {cat.flags.map((sf) => {
+                          {cat.flags.map(sf => {
                             const tenantFlag = tenantFlagMap.get(sf.flag);
                             const isEnabled = tenantFlag?.enabled ?? false;
 
@@ -819,7 +821,7 @@ export default function TenantDetailPage() {
                                 </div>
                                 <Switch
                                   checked={isEnabled}
-                                  onCheckedChange={(checked) =>
+                                  onCheckedChange={checked =>
                                     handleFlagToggle(sf.flag, checked)
                                   }
                                   disabled={manageFlags.isPending}
@@ -841,7 +843,7 @@ export default function TenantDetailPage() {
 
                       {customFlags.length > 0 && (
                         <div className="space-y-3 mb-4">
-                          {customFlags.map((cf) => (
+                          {customFlags.map(cf => (
                             <div
                               key={cf.flag}
                               className="flex items-center justify-between p-4 rounded-xl central-glass-subtle"
@@ -853,7 +855,7 @@ export default function TenantDetailPage() {
                               </div>
                               <Switch
                                 checked={cf.enabled}
-                                onCheckedChange={(checked) =>
+                                onCheckedChange={checked =>
                                   handleFlagToggle(cf.flag, checked)
                                 }
                                 disabled={manageFlags.isPending}
@@ -866,9 +868,11 @@ export default function TenantDetailPage() {
                       <div className="flex gap-2">
                         <GlassInput
                           value={customFlagName}
-                          onChange={(e) =>
+                          onChange={e =>
                             setCustomFlagName(
-                              e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '')
+                              e.target.value
+                                .toUpperCase()
+                                .replace(/[^A-Z0-9_]/g, '')
                             )
                           }
                           placeholder="NOME_DA_FLAG"

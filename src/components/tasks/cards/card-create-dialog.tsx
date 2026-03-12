@@ -155,7 +155,9 @@ export function CardCreateDialog({
 
           {/* Coluna */}
           <div className="space-y-1.5">
-            <label htmlFor="card-column" className="text-sm font-medium">Coluna</label>
+            <label htmlFor="card-column" className="text-sm font-medium">
+              Coluna
+            </label>
             <Select value={columnId} onValueChange={setColumnId}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a coluna" />
@@ -178,7 +180,9 @@ export function CardCreateDialog({
 
           {/* Prioridade */}
           <div className="space-y-1.5">
-            <label htmlFor="card-priority" className="text-sm font-medium">Prioridade</label>
+            <label htmlFor="card-priority" className="text-sm font-medium">
+              Prioridade
+            </label>
             <Select
               value={priority}
               onValueChange={v => setPriority(v as CardPriority)}
@@ -206,7 +210,9 @@ export function CardCreateDialog({
 
           {/* Responsável */}
           <div className="space-y-1.5">
-            <label htmlFor="card-assignee" className="text-sm font-medium">Responsável</label>
+            <label htmlFor="card-assignee" className="text-sm font-medium">
+              Responsável
+            </label>
             <Select value={assigneeId} onValueChange={setAssigneeId}>
               <SelectTrigger>
                 <SelectValue placeholder="Sem responsável" />
@@ -218,7 +224,11 @@ export function CardCreateDialog({
                 {members.map(m => (
                   <SelectItem key={m.userId} value={m.userId}>
                     <span className="flex items-center gap-2">
-                      <MemberAvatar name={m.userName} avatarUrl={m.userAvatarUrl} size="sm" />
+                      <MemberAvatar
+                        name={m.userName}
+                        avatarUrl={m.userAvatarUrl}
+                        size="sm"
+                      />
                       {m.userName ?? m.userEmail}
                     </span>
                   </SelectItem>

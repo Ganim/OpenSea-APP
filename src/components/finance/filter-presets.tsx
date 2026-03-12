@@ -31,7 +31,10 @@ interface FilterPresetsProps {
   /** Apply a preset's filters */
   onApply: (filters: Record<string, string | undefined>) => void;
   /** Built-in quick presets */
-  quickPresets?: { label: string; filters: Record<string, string | undefined> }[];
+  quickPresets?: {
+    label: string;
+    filters: Record<string, string | undefined>;
+  }[];
 }
 
 // ============================================================================
@@ -80,7 +83,7 @@ export function FilterPresets({
   }, [pageKey]);
 
   const hasActiveFilters = useMemo(
-    () => Object.values(currentFilters).some((v) => v && v !== 'ALL'),
+    () => Object.values(currentFilters).some(v => v && v !== 'ALL'),
     [currentFilters]
   );
 
@@ -100,7 +103,7 @@ export function FilterPresets({
 
   const handleRemove = useCallback(
     (id: string) => {
-      const updated = presets.filter((p) => p.id !== id);
+      const updated = presets.filter(p => p.id !== id);
       setPresets(updated);
       savePresets(pageKey, updated);
     },
@@ -111,7 +114,7 @@ export function FilterPresets({
     <>
       <div className="flex items-center gap-2 flex-wrap">
         {/* Quick presets */}
-        {quickPresets?.map((qp) => (
+        {quickPresets?.map(qp => (
           <Button
             key={qp.label}
             variant="outline"
@@ -124,7 +127,7 @@ export function FilterPresets({
         ))}
 
         {/* Saved presets */}
-        {presets.map((preset) => (
+        {presets.map(preset => (
           <Badge
             key={preset.id}
             variant="secondary"
@@ -140,7 +143,7 @@ export function FilterPresets({
             </button>
             <button
               type="button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 handleRemove(preset.id);
               }}
@@ -178,9 +181,9 @@ export function FilterPresets({
               <Input
                 id="preset-name"
                 value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
+                onChange={e => setPresetName(e.target.value)}
                 placeholder="Ex: Vencidos este mes"
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter') handleSave();
                 }}
               />
@@ -193,7 +196,11 @@ export function FilterPresets({
               >
                 Cancelar
               </Button>
-              <Button size="sm" onClick={handleSave} disabled={!presetName.trim()}>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={!presetName.trim()}
+              >
                 Salvar
               </Button>
             </div>

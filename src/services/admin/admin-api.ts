@@ -57,7 +57,7 @@ export const adminApi = {
     page = 1,
     limit = 20,
     search?: string,
-    status?: string,
+    status?: string
   ) => {
     const params = new URLSearchParams();
     params.set('page', String(page));

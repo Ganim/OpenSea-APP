@@ -18,18 +18,18 @@ export interface SubtaskResponse {
 export const subtasksService = {
   async list(boardId: string, cardId: string): Promise<SubtasksResponse> {
     return apiClient.get<SubtasksResponse>(
-      API_ENDPOINTS.TASKS.SUBTASKS.LIST(boardId, cardId),
+      API_ENDPOINTS.TASKS.SUBTASKS.LIST(boardId, cardId)
     );
   },
 
   async create(
     boardId: string,
     cardId: string,
-    data: CreateSubtaskRequest,
+    data: CreateSubtaskRequest
   ): Promise<SubtaskResponse> {
     return apiClient.post<SubtaskResponse>(
       API_ENDPOINTS.TASKS.SUBTASKS.CREATE(boardId, cardId),
-      data,
+      data
     );
   },
 
@@ -37,21 +37,21 @@ export const subtasksService = {
     boardId: string,
     cardId: string,
     subtaskId: string,
-    data: UpdateCardRequest,
+    data: UpdateCardRequest
   ): Promise<SubtaskResponse> {
     return apiClient.patch<SubtaskResponse>(
       API_ENDPOINTS.TASKS.SUBTASKS.UPDATE(boardId, cardId, subtaskId),
-      data,
+      data
     );
   },
 
   async delete(
     boardId: string,
     cardId: string,
-    subtaskId: string,
+    subtaskId: string
   ): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.TASKS.SUBTASKS.DELETE(boardId, cardId, subtaskId),
+      API_ENDPOINTS.TASKS.SUBTASKS.DELETE(boardId, cardId, subtaskId)
     );
   },
 
@@ -59,12 +59,12 @@ export const subtasksService = {
     boardId: string,
     cardId: string,
     subtaskId: string,
-    completed: boolean,
+    completed: boolean
   ): Promise<SubtaskResponse> {
     const data: CompleteSubtaskRequest = { completed };
     return apiClient.patch<SubtaskResponse>(
       API_ENDPOINTS.TASKS.SUBTASKS.COMPLETE(boardId, cardId, subtaskId),
-      data,
+      data
     );
   },
 };

@@ -80,7 +80,7 @@ export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        {PRESETS.map((preset) => (
+        {PRESETS.map(preset => (
           <Button
             key={preset.label}
             variant="outline"
@@ -110,9 +110,7 @@ export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
               id="custom-start"
               type="date"
               value={value.startDate}
-              onChange={(e) =>
-                onChange({ ...value, startDate: e.target.value })
-              }
+              onChange={e => onChange({ ...value, startDate: e.target.value })}
             />
           </div>
           <div className="space-y-1">
@@ -121,7 +119,7 @@ export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
               id="custom-end"
               type="date"
               value={value.endDate}
-              onChange={(e) => onChange({ ...value, endDate: e.target.value })}
+              onChange={e => onChange({ ...value, endDate: e.target.value })}
             />
           </div>
         </div>

@@ -207,9 +207,7 @@ function ChipInput({
   const ref = inputRef ?? localRef;
 
   // Filter out already-added chips from suggestions
-  const filteredSuggestions = suggestions.filter(
-    s => !chips.includes(s.email)
-  );
+  const filteredSuggestions = suggestions.filter(s => !chips.includes(s.email));
 
   function addChip(value: string) {
     const trimmed = value.trim();
@@ -562,7 +560,13 @@ export function EmailComposeDialog({
       return;
     }
 
-    console.log('[Compose] Sending email', { accountId, to: toChips, subject, hasBody: !!bodyHtml, attachments: attachmentFiles.length });
+    console.log('[Compose] Sending email', {
+      accountId,
+      to: toChips,
+      subject,
+      hasBody: !!bodyHtml,
+      attachments: attachmentFiles.length,
+    });
 
     sendMutation.mutate(
       {
@@ -765,7 +769,16 @@ export function EmailComposeDialog({
         }
       });
     onClose();
-  }, [toChips, ccChips, bccChips, subject, editor, accountId, onClose, syncMutation]);
+  }, [
+    toChips,
+    ccChips,
+    bccChips,
+    subject,
+    editor,
+    accountId,
+    onClose,
+    syncMutation,
+  ]);
 
   const discardAndClose = useCallback(() => {
     localStorage.removeItem(DRAFT_STORAGE_KEY);
@@ -790,9 +803,21 @@ export function EmailComposeDialog({
   ];
 
   const COLOR_PRESETS = [
-    '#000000', '#434343', '#666666', '#999999', '#cccccc',
-    '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6',
-    '#8b5cf6', '#ec4899', '#14b8a6', '#0ea5e9', '#6366f1',
+    '#000000',
+    '#434343',
+    '#666666',
+    '#999999',
+    '#cccccc',
+    '#ef4444',
+    '#f97316',
+    '#eab308',
+    '#22c55e',
+    '#3b82f6',
+    '#8b5cf6',
+    '#ec4899',
+    '#14b8a6',
+    '#0ea5e9',
+    '#6366f1',
   ];
 
   function handleSetColor(color: string) {
@@ -1147,14 +1172,19 @@ export function EmailComposeDialog({
             <Separator orientation="vertical" className="h-5 mx-0.5" />
 
             {/* Font size */}
-            <Popover open={fontSizePopoverOpen} onOpenChange={setFontSizePopoverOpen}>
+            <Popover
+              open={fontSizePopoverOpen}
+              onOpenChange={setFontSizePopoverOpen}
+            >
               <PopoverTrigger asChild>
                 <div>
                   <ToolbarButton
                     onClick={() => setFontSizePopoverOpen(true)}
                     tooltip="Tamanho da fonte"
                   >
-                    <span className="text-[10px] font-bold leading-none">A</span>
+                    <span className="text-[10px] font-bold leading-none">
+                      A
+                    </span>
                   </ToolbarButton>
                 </div>
               </PopoverTrigger>
@@ -1196,7 +1226,11 @@ export function EmailComposeDialog({
                   </ToolbarButton>
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-3" side="bottom" align="start">
+              <PopoverContent
+                className="w-auto p-3"
+                side="bottom"
+                align="start"
+              >
                 <p className="text-xs font-medium mb-2">Cor do texto</p>
                 <div className="grid grid-cols-5 gap-1.5">
                   {COLOR_PRESETS.map(color => (
@@ -1218,7 +1252,9 @@ export function EmailComposeDialog({
                     onChange={e => handleSetColor(e.target.value)}
                     title="Cor personalizada"
                   />
-                  <span className="text-xs text-muted-foreground">Personalizada</span>
+                  <span className="text-xs text-muted-foreground">
+                    Personalizada
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -1427,7 +1463,9 @@ export function EmailComposeDialog({
                 <div className="border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-xl p-6 bg-blue-50/80 dark:bg-blue-500/15 backdrop-blur-sm">
                   <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                     <Paperclip className="size-5" />
-                    <span className="text-sm font-medium">Solte os arquivos para anexar</span>
+                    <span className="text-sm font-medium">
+                      Solte os arquivos para anexar
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1486,7 +1524,11 @@ export function EmailComposeDialog({
                       ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20'
                       : 'text-muted-foreground hover:bg-muted'
                   )}
-                  title={includeSignature ? 'Clique para remover assinatura' : 'Clique para incluir assinatura'}
+                  title={
+                    includeSignature
+                      ? 'Clique para remover assinatura'
+                      : 'Clique para incluir assinatura'
+                  }
                 >
                   <PenLine className="size-3" />
                   {includeSignature ? 'Assinatura incluída' : 'Sem assinatura'}
@@ -1529,7 +1571,10 @@ export function EmailComposeDialog({
       </Dialog>
 
       {/* Draft discard confirmation */}
-      <AlertDialog open={discardConfirmOpen} onOpenChange={setDiscardConfirmOpen}>
+      <AlertDialog
+        open={discardConfirmOpen}
+        onOpenChange={setDiscardConfirmOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Descartar rascunho?</AlertDialogTitle>

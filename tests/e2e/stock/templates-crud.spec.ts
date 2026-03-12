@@ -59,26 +59,29 @@ test.describe('Stock - Templates CRUD', () => {
     await expect(page.getByText(tplName)).toBeVisible({ timeout: 10_000 });
   });
 
-  test.fixme('4.2 - Validar erro ao criar template sem nome', async ({ page }) => {
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'templates');
+  test.fixme(
+    '4.2 - Validar erro ao criar template sem nome',
+    async ({ page }) => {
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'templates');
 
-    await page.getByRole('button', { name: 'Novo Template' }).click();
-    await expect(page.getByText('Novo Template').first()).toBeVisible({
-      timeout: 5_000,
-    });
+      await page.getByRole('button', { name: 'Novo Template' }).click();
+      await expect(page.getByText('Novo Template').first()).toBeVisible({
+        timeout: 5_000,
+      });
 
-    // Submit without filling name
-    const submitBtn = page
-      .locator('[role="dialog"] button')
-      .filter({ hasText: /Criar|Salvar/i })
-      .first();
-    await submitBtn.click();
+      // Submit without filling name
+      const submitBtn = page
+        .locator('[role="dialog"] button')
+        .filter({ hasText: /Criar|Salvar/i })
+        .first();
+      await submitBtn.click();
 
-    // Modal should remain open
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible({ timeout: 3_000 });
-  });
+      // Modal should remain open
+      const modal = page.locator('[role="dialog"]');
+      await expect(modal).toBeVisible({ timeout: 3_000 });
+    }
+  );
 
   // ─── READ / LIST ────────────────────────────────────────────────────
 
@@ -91,9 +94,9 @@ test.describe('Stock - Templates CRUD', () => {
     await injectAuthIntoBrowser(page, userToken, userTenantId);
     await navigateToStockPage(page, 'templates');
 
-    await expect(
-      page.getByRole('heading', { name: 'Templates' })
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Templates' })).toBeVisible({
+      timeout: 10_000,
+    });
 
     await expect(page.getByText(tpl.name)).toBeVisible({ timeout: 10_000 });
 
@@ -140,7 +143,9 @@ test.describe('Stock - Templates CRUD', () => {
     });
 
     // EntityForm name field — use the first text input in dialog
-    const nameInput = page.locator('[role="dialog"] input[type="text"]').first();
+    const nameInput = page
+      .locator('[role="dialog"] input[type="text"]')
+      .first();
     await nameInput.clear();
     await nameInput.fill(newName);
 
@@ -155,9 +160,9 @@ test.describe('Stock - Templates CRUD', () => {
     await searchInput.fill(newName);
     await page.waitForTimeout(500);
 
-    await expect(
-      page.locator(`text=${newName}`).first()
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(`text=${newName}`).first()).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Cleanup
     await deleteTemplateViaApi(userToken, tpl.id);
@@ -229,13 +234,18 @@ test.describe('Stock - Templates CRUD', () => {
     // Check if navigated to detail page or view modal
     const isDetailPage = page.url().includes(tpl.id);
     if (isDetailPage) {
-      await expect(
-        page.locator(`text=${tpl.name}`).first()
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator(`text=${tpl.name}`).first()).toBeVisible({
+        timeout: 10_000,
+      });
     } else {
       // Either on list page with view modal, or navigated to templates/{id}
-      const hasDialog = await page.locator('[role="dialog"]').isVisible().catch(() => false);
-      const navigatedToDetail = page.url().includes('/stock/templates/') && !page.url().endsWith('/templates');
+      const hasDialog = await page
+        .locator('[role="dialog"]')
+        .isVisible()
+        .catch(() => false);
+      const navigatedToDetail =
+        page.url().includes('/stock/templates/') &&
+        !page.url().endsWith('/templates');
       expect(hasDialog || navigatedToDetail).toBeTruthy();
     }
 
@@ -263,16 +273,14 @@ test.describe('Stock - Templates CRUD', () => {
       .first();
 
     if (await dupItem.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await dupItem.evaluate((el) => (el as HTMLElement).click());
+      await dupItem.evaluate(el => (el as HTMLElement).click());
 
       // Confirm duplication
       const confirmBtn = page
         .locator('[role="alertdialog"] button, [role="dialog"] button')
         .filter({ hasText: /Confirmar|Duplicar/i })
         .first();
-      if (
-        await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)
-      ) {
+      if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await confirmBtn.click();
         await waitForToast(page, 'sucesso');
       }

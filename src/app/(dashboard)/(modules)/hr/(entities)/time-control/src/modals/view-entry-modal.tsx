@@ -11,11 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { TimeEntry } from '@/types/hr';
 import { Timer } from 'lucide-react';
-import {
-  formatDateTime,
-  getEntryTypeColor,
-  getEntryTypeLabel,
-} from '../utils';
+import { formatDateTime, getEntryTypeColor, getEntryTypeLabel } from '../utils';
 
 interface ViewEntryModalProps {
   isOpen: boolean;
@@ -87,9 +83,7 @@ export function ViewEntryModal({
             <span className="text-sm text-muted-foreground w-24">
               Registrado em:
             </span>
-            <span className="text-sm">
-              {formatDateTime(entry.createdAt)}
-            </span>
+            <span className="text-sm">{formatDateTime(entry.createdAt)}</span>
           </div>
         </div>
 

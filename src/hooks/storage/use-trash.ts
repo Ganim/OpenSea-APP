@@ -8,11 +8,7 @@ const TRASH_KEYS = {
 
 export { TRASH_KEYS as storageTrashKeys };
 
-export function useDeletedItems(
-  page = 1,
-  limit = 20,
-  enabled = true,
-) {
+export function useDeletedItems(page = 1, limit = 20, enabled = true) {
   return useQuery({
     queryKey: TRASH_KEYS.DELETED_ITEMS(page, limit),
     queryFn: () => storageTrashService.listDeletedItems(page, limit),

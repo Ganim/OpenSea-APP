@@ -52,7 +52,12 @@ export interface Notification {
 }
 
 // ── Backend-aligned notification ──
-export type NotificationType = 'INFO' | 'WARNING' | 'ERROR' | 'SUCCESS' | 'REMINDER';
+export type NotificationType =
+  | 'INFO'
+  | 'WARNING'
+  | 'ERROR'
+  | 'SUCCESS'
+  | 'REMINDER';
 export type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
 export type NotificationChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH';
 

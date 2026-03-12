@@ -90,10 +90,20 @@ export interface FileManagerDialogsProps {
   onClearPropertiesFile: () => void;
   folderName: string;
   // Protection
-  protectState: { itemId: string; itemType: 'file' | 'folder'; itemName: string; isProtected: boolean } | null;
+  protectState: {
+    itemId: string;
+    itemType: 'file' | 'folder';
+    itemName: string;
+    isProtected: boolean;
+  } | null;
   onClearProtectState: () => void;
   // Unlock
-  unlockState: { itemId: string; itemType: 'file' | 'folder'; itemName: string; onUnlocked: (password: string) => void } | null;
+  unlockState: {
+    itemId: string;
+    itemType: 'file' | 'folder';
+    itemName: string;
+    onUnlocked: (password: string) => void;
+  } | null;
   onClearUnlockState: () => void;
   // Security Key
   securityKeyDialogOpen: boolean;
@@ -183,7 +193,7 @@ export function FileManagerDialogs({
         file={previewFile}
         files={previewFiles}
         open={showPreview}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           onShowPreviewChange(open);
           if (!open) onClearPreviewPassword();
         }}
@@ -265,7 +275,7 @@ export function FileManagerDialogs({
       {protectState && (
         <ProtectionDialog
           open={!!protectState}
-          onOpenChange={(open) => {
+          onOpenChange={open => {
             if (!open) onClearProtectState();
           }}
           itemId={protectState.itemId}
@@ -279,7 +289,7 @@ export function FileManagerDialogs({
       {unlockState && (
         <UnlockDialog
           open={!!unlockState}
-          onOpenChange={(open) => {
+          onOpenChange={open => {
             if (!open) onClearUnlockState();
           }}
           itemId={unlockState.itemId}

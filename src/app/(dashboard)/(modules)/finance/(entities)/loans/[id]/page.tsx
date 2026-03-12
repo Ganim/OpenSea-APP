@@ -37,10 +37,7 @@ import { useDeleteLoan, useLoan, usePayLoanInstallment } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
 import { calculatePrice, calculateSAC } from '@/lib/finance/amortization';
 import type { LoanInstallment, LoanStatus } from '@/types/finance';
-import {
-  LOAN_STATUS_LABELS,
-  LOAN_TYPE_LABELS,
-} from '@/types/finance';
+import { LOAN_STATUS_LABELS, LOAN_TYPE_LABELS } from '@/types/finance';
 import {
   ArrowLeft,
   Banknote,
@@ -73,15 +70,21 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 function getStatusVariant(
-  status: LoanStatus,
+  status: LoanStatus
 ): 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'outline' {
   switch (status) {
-    case 'ACTIVE': return 'success';
-    case 'PAID_OFF': return 'default';
-    case 'DEFAULTED': return 'destructive';
-    case 'RENEGOTIATED': return 'warning';
-    case 'CANCELLED': return 'secondary';
-    default: return 'secondary';
+    case 'ACTIVE':
+      return 'success';
+    case 'PAID_OFF':
+      return 'default';
+    case 'DEFAULTED':
+      return 'destructive';
+    case 'RENEGOTIATED':
+      return 'warning';
+    case 'CANCELLED':
+      return 'secondary';
+    default:
+      return 'secondary';
   }
 }
 
@@ -151,7 +154,9 @@ function PaymentModal({
           paidAt,
         },
       });
-      toast.success(`Parcela ${installment.installmentNumber} paga com sucesso.`);
+      toast.success(
+        `Parcela ${installment.installmentNumber} paga com sucesso.`
+      );
       onClose();
     } catch {
       toast.error('Erro ao registrar pagamento.');
@@ -161,7 +166,7 @@ function PaymentModal({
   if (!installment) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Registrar Pagamento</DialogTitle>
@@ -179,7 +184,7 @@ function PaymentModal({
               step="0.01"
               placeholder={installment.totalAmount.toFixed(2)}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
             />
           </div>
           <div>
@@ -188,7 +193,7 @@ function PaymentModal({
               id="pay-date"
               type="date"
               value={paidAt}
-              onChange={(e) => setPaidAt(e.target.value)}
+              onChange={e => setPaidAt(e.target.value)}
             />
           </div>
         </div>
@@ -223,7 +228,8 @@ export default function LoanDetailPage({
   const canDelete = hasPermission(FINANCE_PERMISSIONS.LOANS.DELETE);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [paymentInstallment, setPaymentInstallment] = useState<LoanInstallment | null>(null);
+  const [paymentInstallment, setPaymentInstallment] =
+    useState<LoanInstallment | null>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const loan = data?.loan;
@@ -238,10 +244,18 @@ export default function LoanDetailPage({
     // Use Price by default (same as backend calculation)
     // SAC when interestType is 'SAC'
     if (loan.interestType === 'SAC') {
-      return calculateSAC(loan.principalAmount, monthlyRate, loan.totalInstallments);
+      return calculateSAC(
+        loan.principalAmount,
+        monthlyRate,
+        loan.totalInstallments
+      );
     }
 
-    return calculatePrice(loan.principalAmount, monthlyRate, loan.totalInstallments);
+    return calculatePrice(
+      loan.principalAmount,
+      monthlyRate,
+      loan.totalInstallments
+    );
   }, [loan]);
 
   const progressPercentage = loan
@@ -281,7 +295,9 @@ export default function LoanDetailPage({
         </PageHeader>
         <PageBody>
           <Card className="p-12 text-center">
-            <p className="text-destructive text-lg">Empréstimo não encontrado.</p>
+            <p className="text-destructive text-lg">
+              Empréstimo não encontrado.
+            </p>
             <Link href="/finance/loans">
               <Button variant="outline" className="mt-4">
                 Voltar para empréstimos
@@ -355,7 +371,8 @@ export default function LoanDetailPage({
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-1">
               <span className="text-muted-foreground">
-                {loan.paidInstallments} de {loan.totalInstallments} parcelas pagas
+                {loan.paidInstallments} de {loan.totalInstallments} parcelas
+                pagas
               </span>
               <span className="font-medium">{progressPercentage}%</span>
             </div>
@@ -368,7 +385,9 @@ export default function LoanDetailPage({
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Valor Principal</span>
+              <span className="text-sm text-muted-foreground">
+                Valor Principal
+              </span>
             </div>
             <p className="text-xl font-bold font-mono">
               {formatCurrency(loan.principalAmount)}
@@ -378,7 +397,9 @@ export default function LoanDetailPage({
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Banknote className="h-4 w-4 text-orange-500" />
-              <span className="text-sm text-muted-foreground">Saldo Devedor</span>
+              <span className="text-sm text-muted-foreground">
+                Saldo Devedor
+              </span>
             </div>
             <p className="text-xl font-bold font-mono text-orange-600 dark:text-orange-400">
               {formatCurrency(loan.outstandingBalance)}
@@ -388,7 +409,9 @@ export default function LoanDetailPage({
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Percent className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Taxa de Juros</span>
+              <span className="text-sm text-muted-foreground">
+                Taxa de Juros
+              </span>
             </div>
             <p className="text-xl font-bold font-mono">
               {loan.interestRate}% a.a.
@@ -403,9 +426,7 @@ export default function LoanDetailPage({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Início</span>
             </div>
-            <p className="text-xl font-bold">
-              {formatDate(loan.startDate)}
-            </p>
+            <p className="text-xl font-bold">{formatDate(loan.startDate)}</p>
             {loan.installmentDay && (
               <p className="text-xs text-muted-foreground">
                 Dia {loan.installmentDay}
@@ -440,17 +461,18 @@ export default function LoanDetailPage({
             <h2 className="text-lg font-semibold mb-4">Parcelas Pendentes</h2>
             <div className="space-y-2">
               {loan.installments
-                .filter((inst) => inst.status !== 'PAID')
+                .filter(inst => inst.status !== 'PAID')
                 .sort((a, b) => a.installmentNumber - b.installmentNumber)
                 .slice(0, 5)
-                .map((inst) => (
+                .map(inst => (
                   <div
                     key={inst.id}
                     className="flex items-center justify-between p-3 rounded-lg border"
                   >
                     <div>
                       <p className="font-medium">
-                        Parcela {inst.installmentNumber}/{loan.totalInstallments}
+                        Parcela {inst.installmentNumber}/
+                        {loan.totalInstallments}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Vencimento: {formatDate(inst.dueDate)} |{' '}
@@ -459,7 +481,9 @@ export default function LoanDetailPage({
                     </div>
                     <Button
                       size="sm"
-                      variant={inst.status === 'OVERDUE' ? 'destructive' : 'default'}
+                      variant={
+                        inst.status === 'OVERDUE' ? 'destructive' : 'default'
+                      }
                       onClick={() => handlePayInstallment(inst)}
                     >
                       Registrar Pagamento
@@ -485,9 +509,13 @@ export default function LoanDetailPage({
               </div>
             )}
             <div>
-              <p className="text-sm text-muted-foreground">Sistema de Amortização</p>
+              <p className="text-sm text-muted-foreground">
+                Sistema de Amortização
+              </p>
               <p className="font-medium">
-                {loan.interestType === 'SAC' ? 'SAC (Amortização Constante)' : 'Tabela Price (Parcela Fixa)'}
+                {loan.interestType === 'SAC'
+                  ? 'SAC (Amortização Constante)'
+                  : 'Tabela Price (Parcela Fixa)'}
               </p>
             </div>
             {loan.costCenterName && (

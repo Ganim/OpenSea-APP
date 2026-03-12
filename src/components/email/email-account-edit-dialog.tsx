@@ -153,7 +153,7 @@ export function EmailAccountEditDialog({
         placeholder: 'Escreva sua assinatura aqui...',
       }),
     ],
-    [],
+    []
   );
 
   const editorProps = useMemo(
@@ -163,7 +163,7 @@ export function EmailAccountEditDialog({
           'prose prose-sm dark:prose-invert max-w-none min-h-[180px] focus:outline-none py-3 px-4 text-sm leading-relaxed',
       },
     }),
-    [],
+    []
   );
 
   const editor = useEditor({
@@ -237,7 +237,7 @@ export function EmailAccountEditDialog({
             message: 'Conexão bem-sucedida com IMAP e SMTP.',
           });
         },
-        onError: (error) => {
+        onError: error => {
           setTestResult({
             success: false,
             message:
@@ -443,7 +443,8 @@ export function EmailAccountEditDialog({
                     <div>
                       <Label>Assinatura de e-mail</Label>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Adicionada automaticamente ao final dos e-mails enviados.
+                        Adicionada automaticamente ao final dos e-mails
+                        enviados.
                       </p>
                     </div>
                     {editor && editor.getHTML() !== '<p></p>' && (
@@ -467,7 +468,7 @@ export function EmailAccountEditDialog({
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={e => {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           if (file.size > 2 * 1024 * 1024) {
@@ -475,7 +476,11 @@ export function EmailAccountEditDialog({
                           }
                           const reader = new FileReader();
                           reader.onload = () => {
-                            editor.chain().focus().setImage({ src: reader.result as string }).run();
+                            editor
+                              .chain()
+                              .focus()
+                              .setImage({ src: reader.result as string })
+                              .run();
                           };
                           reader.readAsDataURL(file);
                           e.target.value = '';
@@ -543,7 +548,11 @@ export function EmailAccountEditDialog({
                               <span className="text-[10px] font-bold">A</span>
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-36 p-1" side="bottom" align="start">
+                          <PopoverContent
+                            className="w-36 p-1"
+                            side="bottom"
+                            align="start"
+                          >
                             {[
                               { label: 'Pequeno', value: '12px' },
                               { label: 'Normal', value: '14px' },
@@ -556,7 +565,13 @@ export function EmailAccountEditDialog({
                                 type="button"
                                 className="w-full text-left px-2.5 py-1.5 text-sm rounded-md hover:bg-muted transition-colors"
                                 style={{ fontSize: fs.value }}
-                                onClick={() => editor.chain().focus().setFontSize(fs.value).run()}
+                                onClick={() =>
+                                  editor
+                                    .chain()
+                                    .focus()
+                                    .setFontSize(fs.value)
+                                    .run()
+                                }
                               >
                                 {fs.label}
                               </button>
@@ -565,7 +580,9 @@ export function EmailAccountEditDialog({
                             <button
                               type="button"
                               className="w-full text-left px-2.5 py-1.5 text-xs text-muted-foreground rounded-md hover:bg-muted"
-                              onClick={() => editor.chain().focus().unsetFontSize().run()}
+                              onClick={() =>
+                                editor.chain().focus().unsetFontSize().run()
+                              }
                             >
                               Tamanho padrão
                             </button>
@@ -585,20 +602,40 @@ export function EmailAccountEditDialog({
                               <Palette className="size-4" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-3" side="bottom" align="start">
-                            <p className="text-xs font-medium mb-2">Cor do texto</p>
+                          <PopoverContent
+                            className="w-auto p-3"
+                            side="bottom"
+                            align="start"
+                          >
+                            <p className="text-xs font-medium mb-2">
+                              Cor do texto
+                            </p>
                             <div className="grid grid-cols-5 gap-1.5">
                               {[
-                                '#000000', '#434343', '#666666', '#999999', '#cccccc',
-                                '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6',
-                                '#8b5cf6', '#ec4899', '#14b8a6', '#0ea5e9', '#6366f1',
+                                '#000000',
+                                '#434343',
+                                '#666666',
+                                '#999999',
+                                '#cccccc',
+                                '#ef4444',
+                                '#f97316',
+                                '#eab308',
+                                '#22c55e',
+                                '#3b82f6',
+                                '#8b5cf6',
+                                '#ec4899',
+                                '#14b8a6',
+                                '#0ea5e9',
+                                '#6366f1',
                               ].map(color => (
                                 <button
                                   key={color}
                                   type="button"
                                   className="size-6 rounded-md border border-border hover:scale-110 transition-transform"
                                   style={{ backgroundColor: color }}
-                                  onClick={() => editor.chain().focus().setColor(color).run()}
+                                  onClick={() =>
+                                    editor.chain().focus().setColor(color).run()
+                                  }
                                   title={color}
                                 />
                               ))}
@@ -608,10 +645,18 @@ export function EmailAccountEditDialog({
                               <input
                                 type="color"
                                 className="size-6 cursor-pointer border-0 p-0 bg-transparent"
-                                onChange={e => editor.chain().focus().setColor(e.target.value).run()}
+                                onChange={e =>
+                                  editor
+                                    .chain()
+                                    .focus()
+                                    .setColor(e.target.value)
+                                    .run()
+                                }
                                 title="Cor personalizada"
                               />
-                              <span className="text-xs text-muted-foreground">Personalizada</span>
+                              <span className="text-xs text-muted-foreground">
+                                Personalizada
+                              </span>
                             </div>
                           </PopoverContent>
                         </Popover>
@@ -628,11 +673,7 @@ export function EmailAccountEditDialog({
                               'bg-accent'
                           )}
                           onClick={() =>
-                            editor
-                              .chain()
-                              .focus()
-                              .setTextAlign('left')
-                              .run()
+                            editor.chain().focus().setTextAlign('left').run()
                           }
                           title="Alinhar à esquerda"
                         >
@@ -648,11 +689,7 @@ export function EmailAccountEditDialog({
                               'bg-accent'
                           )}
                           onClick={() =>
-                            editor
-                              .chain()
-                              .focus()
-                              .setTextAlign('center')
-                              .run()
+                            editor.chain().focus().setTextAlign('center').run()
                           }
                           title="Centralizar"
                         >
@@ -668,11 +705,7 @@ export function EmailAccountEditDialog({
                               'bg-accent'
                           )}
                           onClick={() =>
-                            editor
-                              .chain()
-                              .focus()
-                              .setTextAlign('right')
-                              .run()
+                            editor.chain().focus().setTextAlign('right').run()
                           }
                           title="Alinhar à direita"
                         >
@@ -718,7 +751,10 @@ export function EmailAccountEditDialog({
                       </div>
 
                       {/* Editor */}
-                      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
+                      <EditorContent
+                        editor={editor}
+                        className="flex-1 overflow-y-auto"
+                      />
                     </div>
                   )}
                 </div>
@@ -828,9 +864,12 @@ export function EmailAccountEditDialog({
                   {/* TLS Certificate Verification */}
                   <div className="flex items-center justify-between pt-2">
                     <div>
-                      <p className="text-sm font-medium">Verificar certificado TLS</p>
+                      <p className="text-sm font-medium">
+                        Verificar certificado TLS
+                      </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Valida o certificado do servidor. Desative para hosts com certificados auto-assinados.
+                        Valida o certificado do servidor. Desative para hosts
+                        com certificados auto-assinados.
                       </p>
                     </div>
                     <Switch
@@ -900,9 +939,7 @@ export function EmailAccountEditDialog({
               Cancelar
             </Button>
             <Button onClick={handleSave} disabled={isPending}>
-              {isPending && (
-                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              )}
+              {isPending && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
               {isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>

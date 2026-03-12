@@ -116,7 +116,13 @@ export default function PermissionGroupEditPage() {
       setStorageMaxFileSizeMb(ss?.maxFileSizeMb?.toString() ?? '');
       setStorageMaxStorageMb(ss?.maxStorageMb?.toString() ?? '');
     }
-  }, [group?.id, group?.name, group?.description, group?.color, group?.storageSettings]);
+  }, [
+    group?.id,
+    group?.name,
+    group?.description,
+    group?.color,
+    group?.storageSettings,
+  ]);
 
   useEffect(() => {
     if (
@@ -200,9 +206,14 @@ export default function PermissionGroupEditPage() {
         storageMaxStorageMb !== '';
       const storageSettings: StorageSettings | null = hasStorageSettings
         ? {
-            allowedFileTypes: storageAllowedTypes.length > 0 ? storageAllowedTypes : undefined,
-            maxFileSizeMb: storageMaxFileSizeMb ? Number(storageMaxFileSizeMb) : undefined,
-            maxStorageMb: storageMaxStorageMb ? Number(storageMaxStorageMb) : undefined,
+            allowedFileTypes:
+              storageAllowedTypes.length > 0 ? storageAllowedTypes : undefined,
+            maxFileSizeMb: storageMaxFileSizeMb
+              ? Number(storageMaxFileSizeMb)
+              : undefined,
+            maxStorageMb: storageMaxStorageMb
+              ? Number(storageMaxStorageMb)
+              : undefined,
           }
         : null;
 
@@ -693,8 +704,8 @@ export default function PermissionGroupEditPage() {
                   Configurações de Armazenamento
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Defina restrições de upload para os usuários deste grupo. Deixe
-                  em branco para não impor restrições.
+                  Defina restrições de upload para os usuários deste grupo.
+                  Deixe em branco para não impor restrições.
                 </p>
               </div>
 
@@ -709,7 +720,10 @@ export default function PermissionGroupEditPage() {
                   {[
                     { value: 'image/*', label: 'Imagens' },
                     { value: 'application/pdf', label: 'PDF' },
-                    { value: 'application/vnd.openxmlformats-officedocument.*', label: 'Office (docx, xlsx, pptx)' },
+                    {
+                      value: 'application/vnd.openxmlformats-officedocument.*',
+                      label: 'Office (docx, xlsx, pptx)',
+                    },
                     { value: 'video/*', label: 'Vídeos' },
                     { value: 'audio/*', label: 'Áudio' },
                     { value: 'application/zip', label: 'Arquivos compactados' },
@@ -721,13 +735,13 @@ export default function PermissionGroupEditPage() {
                         'flex items-center gap-2 p-2 rounded-lg border transition-colors cursor-pointer',
                         storageAllowedTypes.includes(opt.value)
                           ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-600/20'
-                          : 'border-slate-200 dark:border-slate-600 bg-slate-600/20',
+                          : 'border-slate-200 dark:border-slate-600 bg-slate-600/20'
                       )}
                       onClick={() => {
                         setStorageAllowedTypes(prev =>
                           prev.includes(opt.value)
                             ? prev.filter(t => t !== opt.value)
-                            : [...prev, opt.value],
+                            : [...prev, opt.value]
                         );
                       }}
                     >
@@ -737,7 +751,7 @@ export default function PermissionGroupEditPage() {
                           setStorageAllowedTypes(prev =>
                             checked
                               ? [...prev, opt.value]
-                              : prev.filter(t => t !== opt.value),
+                              : prev.filter(t => t !== opt.value)
                           );
                         }}
                       />

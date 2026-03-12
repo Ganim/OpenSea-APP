@@ -84,7 +84,7 @@ export function StorageStatsCard({ className }: StorageStatsCardProps) {
               <span>Utilizado</span>
               <span
                 className={cn(
-                  hasQuota && getQuotaColor(stats.usedStoragePercent),
+                  hasQuota && getQuotaColor(stats.usedStoragePercent)
                 )}
               >
                 {hasQuota
@@ -94,7 +94,9 @@ export function StorageStatsCard({ className }: StorageStatsCardProps) {
             </div>
             <Progress
               value={hasQuota ? stats.usedStoragePercent : 0}
-              className={cn(hasQuota && getProgressColor(stats.usedStoragePercent))}
+              className={cn(
+                hasQuota && getProgressColor(stats.usedStoragePercent)
+              )}
             />
           </div>
 

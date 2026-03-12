@@ -34,13 +34,16 @@ function formatCurrency(value: number): string {
 
 function getRowClassName(installment?: LoanInstallment): string {
   if (!installment) return '';
-  if (installment.status === 'PAID') return 'bg-emerald-50 dark:bg-emerald-950/20';
+  if (installment.status === 'PAID')
+    return 'bg-emerald-50 dark:bg-emerald-950/20';
   if (installment.status === 'OVERDUE') return 'bg-red-50 dark:bg-red-950/20';
 
   // Check if it's the next due installment
   const now = new Date();
   const dueDate = new Date(installment.dueDate);
-  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil(
+    (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
   if (diffDays >= 0 && diffDays <= 30 && installment.status === 'PENDING') {
     return 'bg-amber-50 dark:bg-amber-950/20';
   }
@@ -48,21 +51,32 @@ function getRowClassName(installment?: LoanInstallment): string {
   return '';
 }
 
-function getInstallmentStatusLabel(installment?: LoanInstallment): string | null {
+function getInstallmentStatusLabel(
+  installment?: LoanInstallment
+): string | null {
   if (!installment) return null;
   switch (installment.status) {
-    case 'PAID': return 'Pago';
-    case 'OVERDUE': return 'Vencido';
-    case 'PENDING': return 'Pendente';
-    default: return installment.status;
+    case 'PAID':
+      return 'Pago';
+    case 'OVERDUE':
+      return 'Vencido';
+    case 'PENDING':
+      return 'Pendente';
+    default:
+      return installment.status;
   }
 }
 
-function getInstallmentStatusVariant(status: string): 'success' | 'destructive' | 'secondary' {
+function getInstallmentStatusVariant(
+  status: string
+): 'success' | 'destructive' | 'secondary' {
   switch (status) {
-    case 'PAID': return 'success';
-    case 'OVERDUE': return 'destructive';
-    default: return 'secondary';
+    case 'PAID':
+      return 'success';
+    case 'OVERDUE':
+      return 'destructive';
+    default:
+      return 'secondary';
   }
 }
 
@@ -103,7 +117,7 @@ export function AmortizationTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((row) => {
+            {rows.map(row => {
               const inst = installmentMap.get(row.installment);
               const statusLabel = getInstallmentStatusLabel(inst);
 
@@ -130,7 +144,9 @@ export function AmortizationTable({
                   {installments && (
                     <TableCell className="text-center">
                       {statusLabel && inst && (
-                        <Badge variant={getInstallmentStatusVariant(inst.status)}>
+                        <Badge
+                          variant={getInstallmentStatusVariant(inst.status)}
+                        >
                           {statusLabel}
                         </Badge>
                       )}
@@ -168,7 +184,7 @@ export function AmortizationTable({
             <p className="text-muted-foreground">Custo Efetivo</p>
             <p className="font-semibold font-mono">
               {(
-                ((rows.reduce((sum, r) => sum + r.interest, 0)) /
+                (rows.reduce((sum, r) => sum + r.interest, 0) /
                   (rows[0]?.balance + (rows[0]?.principal ?? 0) || 1)) *
                 100
               ).toFixed(2)}

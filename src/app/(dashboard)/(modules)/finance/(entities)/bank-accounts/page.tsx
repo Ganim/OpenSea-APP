@@ -13,11 +13,7 @@ import { SearchBar } from '@/components/layout/search-bar';
 import { LinkCompanyModal } from '@/components/modals/link-company-modal';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
-import {
-  EntityCard,
-  EntityContextMenu,
-  EntityGrid,
-} from '@/core';
+import { EntityCard, EntityContextMenu, EntityGrid } from '@/core';
 import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import type { EntityConfig } from '@/core/types';
 import {
@@ -32,13 +28,7 @@ import {
   BANK_ACCOUNT_STATUS_LABELS,
   BANK_ACCOUNT_TYPE_LABELS,
 } from '@/types/finance';
-import {
-  Building2,
-  Landmark,
-  Link2,
-  Plus,
-  Unlink,
-} from 'lucide-react';
+import { Building2, Landmark, Link2, Plus, Unlink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -89,12 +79,14 @@ function getStatusBadgeConfig(status: string) {
     case 'ACTIVE':
       return {
         variant: 'default' as const,
-        color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+        color:
+          'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
       };
     case 'INACTIVE':
       return {
         variant: 'secondary' as const,
-        color: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20',
+        color:
+          'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20',
       };
     case 'CLOSED':
       return {
@@ -156,7 +148,7 @@ export default function BankAccountsPage() {
     if (!searchQuery.trim()) return bankAccounts;
 
     const q = searchQuery.toLowerCase();
-    return bankAccounts.filter((account) => {
+    return bankAccounts.filter(account => {
       const name = account.name?.toLowerCase() ?? '';
       const bankName = account.bankName?.toLowerCase() ?? '';
       const agency = account.agency?.toLowerCase() ?? '';
@@ -212,7 +204,7 @@ export default function BankAccountsPage() {
   const handleDeleteRequest = useCallback(
     (ids: string[]) => {
       if (ids.length === 1) {
-        const account = bankAccounts?.find((a) => a.id === ids[0]);
+        const account = bankAccounts?.find(a => a.id === ids[0]);
         if (account) {
           setDeleteTarget(account);
           setPinModalOpen(true);
@@ -236,7 +228,7 @@ export default function BankAccountsPage() {
   const handleLinkCompany = useCallback(
     (ids: string[]) => {
       if (ids.length === 1) {
-        const account = bankAccounts?.find((a) => a.id === ids[0]);
+        const account = bankAccounts?.find(a => a.id === ids[0]);
         if (account) {
           setLinkTarget(account);
           setLinkMode(account.companyId ? 'unlink' : 'link');
@@ -335,8 +327,7 @@ export default function BankAccountsPage() {
                 color: typeBadgeColor,
               },
               {
-                label:
-                  BANK_ACCOUNT_STATUS_LABELS[item.status] ?? item.status,
+                label: BANK_ACCOUNT_STATUS_LABELS[item.status] ?? item.status,
                 variant: statusBadge.variant,
                 color: statusBadge.color,
               },
@@ -450,8 +441,7 @@ export default function BankAccountsPage() {
                 color: typeBadgeColor,
               },
               {
-                label:
-                  BANK_ACCOUNT_STATUS_LABELS[item.status] ?? item.status,
+                label: BANK_ACCOUNT_STATUS_LABELS[item.status] ?? item.status,
                 variant: statusBadge.variant,
                 color: statusBadge.color,
               },
@@ -558,7 +548,9 @@ export default function BankAccountsPage() {
             message="Ocorreu um erro ao tentar carregar as contas bancárias. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => { refetch() },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : (
@@ -569,7 +561,7 @@ export default function BankAccountsPage() {
             renderListItem={renderListCard}
             isLoading={isLoading}
             isSearching={!!searchQuery}
-            onItemDoubleClick={(item) => {
+            onItemDoubleClick={item => {
               if (canView) {
                 router.push(`/finance/bank-accounts/${item.id}`);
               }

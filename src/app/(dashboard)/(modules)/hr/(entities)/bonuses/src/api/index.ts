@@ -3,11 +3,7 @@
  */
 
 // Query Keys
-export {
-  bonusKeys,
-  type BonusFilters,
-  type BonusQueryKey,
-} from './keys';
+export { bonusKeys, type BonusFilters, type BonusQueryKey } from './keys';
 
 // Queries
 export {

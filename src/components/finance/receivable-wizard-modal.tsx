@@ -45,7 +45,10 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { InstallmentPreview } from './installment-preview';
-import { OcrConfirmationStep, type OcrConfirmedData } from './ocr-confirmation-step';
+import {
+  OcrConfirmationStep,
+  type OcrConfirmedData,
+} from './ocr-confirmation-step';
 import { OcrUploadButton } from './ocr-upload-button';
 import { WizardStepDataReceivable } from './wizard-step-data-receivable';
 import { WizardStepTypeReceivable } from './wizard-step-type-receivable';
@@ -174,7 +177,10 @@ export function ReceivableWizardModal({
 
   const handleReset = useCallback(() => {
     setCurrentStep(1);
-    setWizardData({ ...INITIAL_WIZARD_DATA, issueDate: new Date().toISOString().split('T')[0] });
+    setWizardData({
+      ...INITIAL_WIZARD_DATA,
+      issueDate: new Date().toISOString().split('T')[0],
+    });
     setOcrResult(null);
   }, []);
 
@@ -188,7 +194,7 @@ export function ReceivableWizardModal({
     if (data.vencimento) updates.dueDate = data.vencimento;
     if (data.beneficiario) updates.customerName = data.beneficiario;
 
-    setWizardData((prev) => ({ ...prev, ...updates }));
+    setWizardData(prev => ({ ...prev, ...updates }));
     setOcrResult(null);
     setCurrentStep(2); // Auto-advance to Dados step
   }, []);
@@ -207,9 +213,12 @@ export function ReceivableWizardModal({
     [onOpenChange, handleReset]
   );
 
-  const updateWizardData = useCallback((updates: Partial<ReceivableWizardData>) => {
-    setWizardData((prev) => ({ ...prev, ...updates }));
-  }, []);
+  const updateWizardData = useCallback(
+    (updates: Partial<ReceivableWizardData>) => {
+      setWizardData(prev => ({ ...prev, ...updates }));
+    },
+    []
+  );
 
   const goToStep = useCallback((step: WizardStep) => {
     setCurrentStep(step);
@@ -229,7 +238,8 @@ export function ReceivableWizardModal({
       bankAccountId: wizardData.bankAccountId || undefined,
       notes: wizardData.notes || undefined,
       tags: wizardData.tags.length > 0 ? wizardData.tags : undefined,
-      recurrenceType: wizardData.recurrenceType === 'INSTALLMENT' ? 'INSTALLMENT' : 'SINGLE',
+      recurrenceType:
+        wizardData.recurrenceType === 'INSTALLMENT' ? 'INSTALLMENT' : 'SINGLE',
       totalInstallments:
         wizardData.recurrenceType === 'INSTALLMENT'
           ? wizardData.totalInstallments
@@ -247,7 +257,7 @@ export function ReceivableWizardModal({
     // Cost center: single or rateio
     if (wizardData.useRateio && wizardData.costCenterAllocations.length > 0) {
       payload.costCenterAllocations = wizardData.costCenterAllocations.map(
-        (a) => ({
+        a => ({
           costCenterId: a.costCenterId,
           percentage: a.percentage,
         })
@@ -344,10 +354,7 @@ export function ReceivableWizardModal({
             const isCompleted = currentStep > stepNum;
 
             return (
-              <div
-                key={label}
-                className="flex flex-col items-center flex-1"
-              >
+              <div key={label} className="flex flex-col items-center flex-1">
                 <div className="flex items-center w-full">
                   {index > 0 && (
                     <div
@@ -367,18 +374,12 @@ export function ReceivableWizardModal({
                           : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {isCompleted ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      stepNum
-                    )}
+                    {isCompleted ? <Check className="h-4 w-4" /> : stepNum}
                   </div>
                   {index < STEP_LABELS.length - 1 && (
                     <div
                       className={`flex-1 h-0.5 ${
-                        isCompleted
-                          ? 'bg-primary'
-                          : 'bg-muted-foreground/20'
+                        isCompleted ? 'bg-primary' : 'bg-muted-foreground/20'
                       }`}
                     />
                   )}
@@ -450,7 +451,7 @@ export function ReceivableWizardModal({
               <Label>Tipo de Anexo</Label>
               <Select
                 value={wizardData.attachmentType}
-                onValueChange={(val) =>
+                onValueChange={val =>
                   updateWizardData({
                     attachmentType: val as FinanceAttachmentType,
                   })
@@ -460,11 +461,13 @@ export function ReceivableWizardModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(ATTACHMENT_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(ATTACHMENT_TYPE_LABELS).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -631,9 +634,12 @@ function ReceivableInstallmentsStep({
                 min={2}
                 max={120}
                 value={wizardData.totalInstallments}
-                onChange={(e) =>
+                onChange={e =>
                   updateWizardData({
-                    totalInstallments: Math.max(2, parseInt(e.target.value) || 2),
+                    totalInstallments: Math.max(
+                      2,
+                      parseInt(e.target.value) || 2
+                    ),
                   })
                 }
               />
@@ -647,7 +653,7 @@ function ReceivableInstallmentsStep({
                 min={1}
                 max={12}
                 value={wizardData.recurrenceInterval}
-                onChange={(e) =>
+                onChange={e =>
                   updateWizardData({
                     recurrenceInterval: Math.max(
                       1,
@@ -662,7 +668,7 @@ function ReceivableInstallmentsStep({
               <Label>Unidade</Label>
               <Select
                 value={wizardData.recurrenceUnit}
-                onValueChange={(val) =>
+                onValueChange={val =>
                   updateWizardData({
                     recurrenceUnit: val as RecurrenceUnit,
                   })
@@ -795,8 +801,7 @@ function ReceivableConfirmationStep({
         </div>
 
         {/* Cost Center */}
-        {wizardData.useRateio &&
-        wizardData.costCenterAllocations.length > 0 ? (
+        {wizardData.useRateio && wizardData.costCenterAllocations.length > 0 ? (
           <div className="text-sm">
             <span className="text-muted-foreground">
               Centros de Custo (Rateio):

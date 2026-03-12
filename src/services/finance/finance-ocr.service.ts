@@ -35,19 +35,19 @@ export const financeOcrService = {
 
     return apiClient.post<OcrExtractResult>(
       API_ENDPOINTS.FINANCE_ENTRIES.OCR_UPLOAD,
-      formData,
+      formData
     );
   },
 
   async extractFromText(text: string): Promise<OcrExtractResult> {
     return apiClient.post<OcrExtractResult>(
       API_ENDPOINTS.FINANCE_ENTRIES.OCR_TEXT,
-      { text },
+      { text }
     );
   },
 
   async getLastSupplierEntry(
-    supplierName: string,
+    supplierName: string
   ): Promise<SupplierSuggestion | null> {
     const params = new URLSearchParams({ supplierName });
     const response = await apiClient.get<{

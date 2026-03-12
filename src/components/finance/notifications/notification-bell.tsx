@@ -6,7 +6,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useOverdueSummary, useFinanceNotificationPreferences } from '@/hooks/finance';
+import {
+  useOverdueSummary,
+  useFinanceNotificationPreferences,
+} from '@/hooks/finance';
 import { IoNotificationsOutline, IoSettingsOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -43,10 +46,7 @@ export function FinanceNotificationBell() {
 
   if (prefsOpen) {
     return (
-      <NotificationPreferences
-        open={prefsOpen}
-        onOpenChange={setPrefsOpen}
-      />
+      <NotificationPreferences open={prefsOpen} onOpenChange={setPrefsOpen} />
     );
   }
 
@@ -101,7 +101,9 @@ export function FinanceNotificationBell() {
                     >
                       <div>
                         <p className="text-sm font-medium text-destructive">
-                          {overduePayableCount} conta{overduePayableCount > 1 ? 's' : ''} a pagar vencida{overduePayableCount > 1 ? 's' : ''}
+                          {overduePayableCount} conta
+                          {overduePayableCount > 1 ? 's' : ''} a pagar vencida
+                          {overduePayableCount > 1 ? 's' : ''}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Total: {formatCurrency(overduePayable)}
@@ -116,7 +118,9 @@ export function FinanceNotificationBell() {
                     >
                       <div>
                         <p className="text-sm font-medium text-amber-600">
-                          {overdueReceivableCount} conta{overdueReceivableCount > 1 ? 's' : ''} a receber vencida{overdueReceivableCount > 1 ? 's' : ''}
+                          {overdueReceivableCount} conta
+                          {overdueReceivableCount > 1 ? 's' : ''} a receber
+                          vencida{overdueReceivableCount > 1 ? 's' : ''}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Total: {formatCurrency(overdueReceivable)}
@@ -128,29 +132,30 @@ export function FinanceNotificationBell() {
               )}
 
               {/* Due soon section */}
-              {prefs.notifDueSoon && (upcomingPayable > 0 || upcomingReceivable > 0) && (
-                <div className="p-3 space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Vencendo em Breve (7 dias)
-                  </p>
-                  {upcomingPayable > 0 && (
-                    <div className="flex items-center justify-between p-2">
-                      <p className="text-sm">A pagar</p>
-                      <p className="text-sm font-medium">
-                        {formatCurrency(upcomingPayable)}
-                      </p>
-                    </div>
-                  )}
-                  {upcomingReceivable > 0 && (
-                    <div className="flex items-center justify-between p-2">
-                      <p className="text-sm">A receber</p>
-                      <p className="text-sm font-medium text-green-600">
-                        {formatCurrency(upcomingReceivable)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+              {prefs.notifDueSoon &&
+                (upcomingPayable > 0 || upcomingReceivable > 0) && (
+                  <div className="p-3 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Vencendo em Breve (7 dias)
+                    </p>
+                    {upcomingPayable > 0 && (
+                      <div className="flex items-center justify-between p-2">
+                        <p className="text-sm">A pagar</p>
+                        <p className="text-sm font-medium">
+                          {formatCurrency(upcomingPayable)}
+                        </p>
+                      </div>
+                    )}
+                    {upcomingReceivable > 0 && (
+                      <div className="flex items-center justify-between p-2">
+                        <p className="text-sm">A receber</p>
+                        <p className="text-sm font-medium text-green-600">
+                          {formatCurrency(upcomingReceivable)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           )}
         </div>

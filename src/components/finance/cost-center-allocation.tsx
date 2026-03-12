@@ -85,7 +85,7 @@ export function CostCenterAllocationComponent({
   ) => {
     const updated = [...value];
     if (field === 'costCenterId') {
-      const selected = costCenters.find((cc) => cc.id === val);
+      const selected = costCenters.find(cc => cc.id === val);
       updated[index] = {
         ...updated[index],
         costCenterId: val as string,
@@ -120,14 +120,20 @@ export function CostCenterAllocationComponent({
             <span className="text-xs text-muted-foreground">Ratear</span>
             <Switch
               checked={useRateio}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 onToggleRateio(checked);
                 if (checked && value.length === 0) {
                   // Initialize with current cost center or empty row
                   onChange(
                     costCenterId
                       ? [{ costCenterId, percentage: 100, costCenterName }]
-                      : [{ costCenterId: '', percentage: 100, costCenterName: '' }]
+                      : [
+                          {
+                            costCenterId: '',
+                            percentage: 100,
+                            costCenterName: '',
+                          },
+                        ]
                   );
                 }
               }}
@@ -137,8 +143,8 @@ export function CostCenterAllocationComponent({
         <div className="flex items-center gap-2">
           <Select
             value={costCenterId}
-            onValueChange={(val) => {
-              const selected = costCenters.find((cc) => cc.id === val);
+            onValueChange={val => {
+              const selected = costCenters.find(cc => cc.id === val);
               onCostCenterChange(val, selected?.name ?? '');
             }}
           >
@@ -146,7 +152,7 @@ export function CostCenterAllocationComponent({
               <SelectValue placeholder="Selecione um centro de custo" />
             </SelectTrigger>
             <SelectContent>
-              {costCenters.map((cc) => (
+              {costCenters.map(cc => (
                 <SelectItem key={cc.id} value={cc.id}>
                   {cc.name}
                 </SelectItem>
@@ -201,7 +207,7 @@ export function CostCenterAllocationComponent({
             <div key={index} className="flex items-center gap-2">
               <Select
                 value={alloc.costCenterId}
-                onValueChange={(val) =>
+                onValueChange={val =>
                   handleRowChange(index, 'costCenterId', val)
                 }
               >
@@ -209,7 +215,7 @@ export function CostCenterAllocationComponent({
                   <SelectValue placeholder="Centro de custo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {costCenters.map((cc) => (
+                  {costCenters.map(cc => (
                     <SelectItem key={cc.id} value={cc.id}>
                       {cc.name}
                     </SelectItem>
@@ -224,7 +230,7 @@ export function CostCenterAllocationComponent({
                   max={100}
                   step={0.01}
                   value={alloc.percentage || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     handleRowChange(
                       index,
                       'percentage',
@@ -288,10 +294,10 @@ export function CostCenterAllocationComponent({
         title="Novo Centro de Custo"
       >
         <InlineCostCenterForm
-          onCreated={(cc) => {
+          onCreated={cc => {
             setShowCreateCostCenter(false);
             // Add the new cost center to the last empty row
-            const emptyIndex = value.findIndex((a) => !a.costCenterId);
+            const emptyIndex = value.findIndex(a => !a.costCenterId);
             if (emptyIndex >= 0) {
               handleRowChange(emptyIndex, 'costCenterId', cc.id);
             }

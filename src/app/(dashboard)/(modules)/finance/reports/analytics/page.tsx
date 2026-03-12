@@ -57,7 +57,7 @@ export default function FinanceAnalyticsPage() {
     });
 
   // Revenue vs Expense data from forecast (which has payable/receivable)
-  const revenueExpenseData = forecastData?.data?.map((d) => ({
+  const revenueExpenseData = forecastData?.data?.map(d => ({
     date: d.date,
     receivable: d.receivable,
     payable: d.payable,
@@ -114,11 +114,11 @@ export default function FinanceAnalyticsPage() {
       </div>
 
       <CashflowChart
-        realizedData={cashflowData?.data?.map((d) => ({
+        realizedData={cashflowData?.data?.map(d => ({
           date: (d as { date?: string; period?: string }).date ?? d.period,
           cumulativeBalance: d.cumulativeBalance,
         }))}
-        projectedData={forecastData?.data?.map((d) => ({
+        projectedData={forecastData?.data?.map(d => ({
           date: d.date,
           cumulativeNet: d.cumulativeNet,
         }))}

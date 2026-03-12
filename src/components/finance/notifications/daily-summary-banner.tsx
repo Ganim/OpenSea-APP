@@ -1,7 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useDailySummary, useFinanceNotificationPreferences } from '@/hooks/finance';
+import {
+  useDailySummary,
+  useFinanceNotificationPreferences,
+} from '@/hooks/finance';
 import { X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -42,7 +45,8 @@ export function DailySummaryBanner() {
   const { payableToday, receivableToday, overdueCount, overdueTotal } = data;
 
   // Nothing to show
-  if (overdueCount === 0 && payableToday === 0 && receivableToday === 0) return null;
+  if (overdueCount === 0 && payableToday === 0 && receivableToday === 0)
+    return null;
 
   return (
     <div className="relative rounded-lg border bg-card p-4">
@@ -62,10 +66,12 @@ export function DailySummaryBanner() {
             <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
             <span className="text-sm">
               <span className="font-medium text-destructive">
-                {overdueCount} conta{overdueCount > 1 ? 's' : ''} vencida{overdueCount > 1 ? 's' : ''}
+                {overdueCount} conta{overdueCount > 1 ? 's' : ''} vencida
+                {overdueCount > 1 ? 's' : ''}
               </span>
               <span className="text-muted-foreground">
-                {' '}({formatCurrency(overdueTotal)})
+                {' '}
+                ({formatCurrency(overdueTotal)})
               </span>
             </span>
           </div>

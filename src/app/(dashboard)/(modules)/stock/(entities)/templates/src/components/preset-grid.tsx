@@ -1,12 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   PRESET_CATEGORY_LABELS,
   PRESETS_BY_CATEGORY,
@@ -24,7 +19,10 @@ interface PresetGridProps {
 
 const CATEGORIES = Object.keys(PRESET_CATEGORY_LABELS) as PresetCategory[];
 
-export function PresetGrid({ onSelectPreset, onManualCreate }: PresetGridProps) {
+export function PresetGrid({
+  onSelectPreset,
+  onManualCreate,
+}: PresetGridProps) {
   return (
     <div className="flex flex-col gap-4">
       <Tabs defaultValue={CATEGORIES[0]} className="w-full">

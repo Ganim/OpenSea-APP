@@ -73,7 +73,7 @@ async function triggerSilentEmailSync() {
 
   try {
     const res = await apiClient.get<{ data: { id: string }[] }>(
-      API_ENDPOINTS.EMAIL.ACCOUNTS.LIST,
+      API_ENDPOINTS.EMAIL.ACCOUNTS.LIST
     );
     const accounts = res.data ?? [];
     if (accounts.length === 0) return;
@@ -132,21 +132,23 @@ export function useMarkNotificationAsRead() {
 
   return useMutation({
     mutationFn: (id: string) => markNotificationAsRead(id),
-    onMutate: async (id) => {
+    onMutate: async id => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATION_KEYS.all });
 
       // Optimistic update across all list caches
       queryClient.setQueriesData<NotificationListResponse>(
         { queryKey: NOTIFICATION_KEYS.all },
-        (old) => {
+        old => {
           if (!old) return old;
           return {
             ...old,
             notifications: old.notifications.map((n: BackendNotification) =>
-              n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n,
+              n.id === id
+                ? { ...n, isRead: true, readAt: new Date().toISOString() }
+                : n
             ),
           };
-        },
+        }
       );
     },
     onSettled: () => {
@@ -165,7 +167,7 @@ export function useMarkAllNotificationsAsRead() {
 
       queryClient.setQueriesData<NotificationListResponse>(
         { queryKey: NOTIFICATION_KEYS.all },
-        (old) => {
+        old => {
           if (!old) return old;
           return {
             ...old,
@@ -175,7 +177,7 @@ export function useMarkAllNotificationsAsRead() {
               readAt: n.readAt ?? new Date().toISOString(),
             })),
           };
-        },
+        }
       );
     },
     onSettled: () => {
@@ -189,21 +191,21 @@ export function useDeleteNotification() {
 
   return useMutation({
     mutationFn: (id: string) => deleteNotification(id),
-    onMutate: async (id) => {
+    onMutate: async id => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATION_KEYS.all });
 
       queryClient.setQueriesData<NotificationListResponse>(
         { queryKey: NOTIFICATION_KEYS.all },
-        (old) => {
+        old => {
           if (!old) return old;
           return {
             ...old,
             notifications: old.notifications.filter(
-              (n: BackendNotification) => n.id !== id,
+              (n: BackendNotification) => n.id !== id
             ),
             total: Math.max(0, old.total - 1),
           };
-        },
+        }
       );
     },
     onSettled: () => {
@@ -226,19 +228,19 @@ export function useForceNotificationCheck() {
     mutationFn: async () => {
       // 1. Get all email accounts
       const res = await apiClient.get<{ data: { id: string }[] }>(
-        API_ENDPOINTS.EMAIL.ACCOUNTS.LIST,
+        API_ENDPOINTS.EMAIL.ACCOUNTS.LIST
       );
       const accounts = res.data ?? [];
 
       // 2. Trigger sync for each account
       await Promise.allSettled(
-        accounts.map((a) =>
-          apiClient.post(API_ENDPOINTS.EMAIL.ACCOUNTS.SYNC(a.id)),
-        ),
+        accounts.map(a =>
+          apiClient.post(API_ENDPOINTS.EMAIL.ACCOUNTS.SYNC(a.id))
+        )
       );
 
       // 3. Small delay to let inline sync complete
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await new Promise(resolve => setTimeout(resolve, 2_000));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_KEYS.all });

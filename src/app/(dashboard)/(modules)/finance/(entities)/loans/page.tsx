@@ -141,10 +141,16 @@ function TableSkeleton() {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Contrato</TableHead>
-              <TableHead className="text-right hidden md:table-cell">Valor Principal</TableHead>
+              <TableHead className="text-right hidden md:table-cell">
+                Valor Principal
+              </TableHead>
               <TableHead className="text-right">Saldo Devedor</TableHead>
-              <TableHead className="text-center hidden lg:table-cell">Taxa</TableHead>
-              <TableHead className="text-center hidden md:table-cell">Parcelas</TableHead>
+              <TableHead className="text-center hidden lg:table-cell">
+                Taxa
+              </TableHead>
+              <TableHead className="text-center hidden md:table-cell">
+                Parcelas
+              </TableHead>
               <TableHead className="hidden lg:table-cell">Progresso</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-10" />
@@ -598,7 +604,9 @@ export default function LoansPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[180px]">Nome</TableHead>
-                    <TableHead className="min-w-[120px] hidden md:table-cell">Contrato</TableHead>
+                    <TableHead className="min-w-[120px] hidden md:table-cell">
+                      Contrato
+                    </TableHead>
                     <TableHead className="text-right min-w-[140px] hidden md:table-cell">
                       Valor Principal
                     </TableHead>
@@ -611,7 +619,9 @@ export default function LoansPage() {
                     <TableHead className="text-center min-w-[100px] hidden md:table-cell">
                       Parcelas
                     </TableHead>
-                    <TableHead className="min-w-[140px] hidden lg:table-cell">Progresso</TableHead>
+                    <TableHead className="min-w-[140px] hidden lg:table-cell">
+                      Progresso
+                    </TableHead>
                     <TableHead className="min-w-[120px]">Status</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>

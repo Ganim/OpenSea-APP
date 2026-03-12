@@ -11,8 +11,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { FileManager } from '@/components/storage';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -55,6 +54,7 @@ import {
   deleteCompany,
 } from '../src';
 import { CnaesTab } from '../src/components/cnaes-tab';
+import { CompanyDocumentsTab } from '../src/components/company-documents-tab';
 import { FiscalTab } from '../src/components/fiscal-tab';
 import { GeneralTab } from '../src/components/general-tab';
 
@@ -65,7 +65,7 @@ export default function CompanyDetailPage() {
   const companyId = params.id as string;
 
   const [activeTab, setActiveTab] = useState('general');
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeletePinOpen, setIsDeletePinOpen] = useState(false);
 
   const { data: company, isLoading } = useQuery<Company>({
     queryKey: ['companies', companyId],
@@ -227,7 +227,7 @@ export default function CompanyDetailPage() {
   }
 
   const handleDelete = () => {
-    setIsDeleteDialogOpen(true);
+    setIsDeletePinOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -467,28 +467,16 @@ export default function CompanyDetailPage() {
           />
 
           {/* Aba Documentos */}
-          <TabsContent
-            value="documents"
-            className="space-y-6 w-full flex flex-col"
-          >
-            <FileManager
-              entityType="company"
-              entityId={companyId}
-              className="h-[600px]"
-            />
-          </TabsContent>
+          <CompanyDocumentsTab companyId={companyId} />
         </Tabs>
       </PageBody>
 
-      <ConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        title="Excluir empresa"
-        description={`Tem certeza que deseja excluir a empresa "${company.legalName}"? Esta ação não pode ser desfeita.`}
-        confirmLabel="Excluir"
-        cancelLabel="Cancelar"
-        variant="destructive"
-        onConfirm={confirmDelete}
+      <VerifyActionPinModal
+        isOpen={isDeletePinOpen}
+        onClose={() => setIsDeletePinOpen(false)}
+        onSuccess={confirmDelete}
+        title="Excluir Empresa"
+        description={`Digite seu PIN de ação para excluir a empresa "${company.legalName}". Esta ação não pode ser desfeita.`}
       />
     </PageLayout>
   );

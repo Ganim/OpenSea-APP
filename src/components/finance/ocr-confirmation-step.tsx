@@ -54,13 +54,13 @@ export function OcrConfirmationStep({
   onDiscard,
 }: OcrConfirmationStepProps) {
   const [valor, setValor] = useState<string>(
-    ocrResult.extractedData.valor?.toString() ?? '',
+    ocrResult.extractedData.valor?.toString() ?? ''
   );
   const [vencimento, setVencimento] = useState<string>(
-    ocrResult.extractedData.vencimento ?? '',
+    ocrResult.extractedData.vencimento ?? ''
   );
   const [beneficiario, setBeneficiario] = useState<string>(
-    ocrResult.extractedData.beneficiario ?? '',
+    ocrResult.extractedData.beneficiario ?? ''
   );
 
   const confidenceInfo = getConfidenceLabel(ocrResult.confidence);
@@ -118,7 +118,7 @@ export function OcrConfirmationStep({
             id="ocr-valor"
             type="text"
             value={valor}
-            onChange={(e) => setValor(e.target.value)}
+            onChange={e => setValor(e.target.value)}
             placeholder="0,00"
             className="h-9"
           />
@@ -133,7 +133,7 @@ export function OcrConfirmationStep({
             id="ocr-vencimento"
             type="date"
             value={vencimento}
-            onChange={(e) => setVencimento(e.target.value)}
+            onChange={e => setVencimento(e.target.value)}
             className="h-9"
           />
         </div>
@@ -147,7 +147,7 @@ export function OcrConfirmationStep({
             id="ocr-beneficiario"
             type="text"
             value={beneficiario}
-            onChange={(e) => setBeneficiario(e.target.value)}
+            onChange={e => setBeneficiario(e.target.value)}
             placeholder="Nome do beneficiário"
             className="h-9"
           />

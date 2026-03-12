@@ -370,7 +370,7 @@ function ImageSection({
       try {
         const { imageUrl } = await labelTemplatesService.uploadImage(
           templateId,
-          file,
+          file
         );
         onUpdate({ src: imageUrl });
         toast.success('Imagem enviada com sucesso');
@@ -380,7 +380,7 @@ function ImageSection({
         setIsUploading(false);
       }
     },
-    [templateId, onUpdate],
+    [templateId, onUpdate]
   );
 
   const handleFileChange = useCallback(
@@ -391,7 +391,7 @@ function ImageSection({
         e.target.value = '';
       }
     },
-    [handleFileUpload],
+    [handleFileUpload]
   );
 
   return (
@@ -563,10 +563,7 @@ function ElementProperties({
 
       {/* === IMAGE === */}
       {element.type === 'image' && (
-        <ImageSection
-          element={element}
-          onUpdate={onUpdate}
-        />
+        <ImageSection element={element} onUpdate={onUpdate} />
       )}
 
       {/* === ICON === */}

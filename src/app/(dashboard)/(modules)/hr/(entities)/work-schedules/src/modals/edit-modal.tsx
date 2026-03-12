@@ -44,7 +44,9 @@ export function EditModal({
   const [description, setDescription] = useState('');
   const [breakDuration, setBreakDuration] = useState(60);
   const [isActive, setIsActive] = useState(true);
-  const [days, setDays] = useState<Record<DayKey, DaySchedule>>({} as Record<DayKey, DaySchedule>);
+  const [days, setDays] = useState<Record<DayKey, DaySchedule>>(
+    {} as Record<DayKey, DaySchedule>
+  );
   const [lastId, setLastId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -56,7 +58,10 @@ export function EditModal({
       setBreakDuration(workSchedule.breakDuration);
       setIsActive(workSchedule.isActive);
 
-      const newDays: Record<DayKey, DaySchedule> = {} as Record<DayKey, DaySchedule>;
+      const newDays: Record<DayKey, DaySchedule> = {} as Record<
+        DayKey,
+        DaySchedule
+      >;
       for (const day of WEEK_DAYS) {
         const startKey = `${day}Start` as keyof WorkSchedule;
         const endKey = `${day}End` as keyof WorkSchedule;
@@ -77,7 +82,11 @@ export function EditModal({
     if (!isOpen) setLastId(null);
   }, [isOpen]);
 
-  function updateDay(day: DayKey, field: keyof DaySchedule, value: string | boolean) {
+  function updateDay(
+    day: DayKey,
+    field: keyof DaySchedule,
+    value: string | boolean
+  ) {
     setDays(prev => ({
       ...prev,
       [day]: { ...prev[day], [field]: value },

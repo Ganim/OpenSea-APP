@@ -9,13 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { RecurrenceUnit } from '@/types/finance';
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  format,
-  parseISO,
-} from 'date-fns';
+import { addDays, addMonths, addWeeks, format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMemo } from 'react';
 
@@ -121,7 +115,7 @@ export function InstallmentPreview({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {installments.map((inst) => (
+          {installments.map(inst => (
             <TableRow key={inst.index}>
               <TableCell className="font-medium">
                 {inst.index}/{totalInstallments}

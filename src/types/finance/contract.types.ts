@@ -69,9 +69,7 @@ export interface CreateContractData {
   notes?: string;
 }
 
-export type UpdateContractData = Partial<
-  Omit<CreateContractData, 'startDate'>
->;
+export type UpdateContractData = Partial<Omit<CreateContractData, 'startDate'>>;
 
 export interface ContractsQuery {
   page?: number;

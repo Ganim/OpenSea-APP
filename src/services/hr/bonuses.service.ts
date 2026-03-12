@@ -38,13 +38,16 @@ export const bonusesService = {
   async list(params?: ListBonusesParams): Promise<BonusesResponse> {
     const query = new URLSearchParams();
     if (params?.employeeId) query.append('employeeId', params.employeeId);
-    if (params?.isPaid !== undefined) query.append('isPaid', String(params.isPaid));
+    if (params?.isPaid !== undefined)
+      query.append('isPaid', String(params.isPaid));
     if (params?.startDate) query.append('startDate', params.startDate);
     if (params?.endDate) query.append('endDate', params.endDate);
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<BonusesResponse>(`/v1/hr/bonuses${qs ? `?${qs}` : ''}`);
+    return apiClient.get<BonusesResponse>(
+      `/v1/hr/bonuses${qs ? `?${qs}` : ''}`
+    );
   },
 
   async delete(bonusId: string): Promise<void> {

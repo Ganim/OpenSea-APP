@@ -9,7 +9,7 @@ import type {
 export const financeAnalyticsService = {
   async getDashboard(): Promise<FinanceDashboard> {
     return apiClient.get<FinanceDashboard>(
-      API_ENDPOINTS.FINANCE_DASHBOARD.OVERVIEW,
+      API_ENDPOINTS.FINANCE_DASHBOARD.OVERVIEW
     );
   },
 
@@ -28,7 +28,7 @@ export const financeAnalyticsService = {
       query.append('bankAccountId', params.bankAccountId);
 
     return apiClient.get<CashflowResponse>(
-      `${API_ENDPOINTS.FINANCE_DASHBOARD.CASHFLOW}?${query.toString()}`,
+      `${API_ENDPOINTS.FINANCE_DASHBOARD.CASHFLOW}?${query.toString()}`
     );
   },
 
@@ -46,7 +46,7 @@ export const financeAnalyticsService = {
     if (params.type) query.append('type', params.type);
 
     return apiClient.get<ForecastResponse>(
-      `${API_ENDPOINTS.FINANCE_DASHBOARD.FORECAST}?${query.toString()}`,
+      `${API_ENDPOINTS.FINANCE_DASHBOARD.FORECAST}?${query.toString()}`
     );
   },
 };

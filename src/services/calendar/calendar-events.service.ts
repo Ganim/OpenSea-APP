@@ -77,63 +77,66 @@ export const calendarEventsService = {
 
   async inviteParticipants(
     eventId: string,
-    data: InviteParticipantsData,
+    data: InviteParticipantsData
   ): Promise<InviteParticipantsResponse> {
     return apiClient.post<InviteParticipantsResponse>(
       API_ENDPOINTS.CALENDAR.EVENTS.INVITE(eventId),
-      data,
+      data
     );
   },
 
   async respondToEvent(
     eventId: string,
-    data: RespondToEventData,
+    data: RespondToEventData
   ): Promise<RespondToEventResponse> {
     return apiClient.patch<RespondToEventResponse>(
       API_ENDPOINTS.CALENDAR.EVENTS.RESPOND(eventId),
-      data,
+      data
     );
   },
 
   async removeParticipant(eventId: string, userId: string): Promise<void> {
     await apiClient.delete<void>(
-      API_ENDPOINTS.CALENDAR.EVENTS.REMOVE_PARTICIPANT(eventId, userId),
+      API_ENDPOINTS.CALENDAR.EVENTS.REMOVE_PARTICIPANT(eventId, userId)
     );
   },
 
   async manageReminders(
     eventId: string,
-    data: ManageRemindersData,
+    data: ManageRemindersData
   ): Promise<ManageRemindersResponse> {
     return apiClient.put<ManageRemindersResponse>(
       API_ENDPOINTS.CALENDAR.EVENTS.MANAGE_REMINDERS(eventId),
-      data,
+      data
     );
   },
 
   async shareWithUsers(
     eventId: string,
-    userIds: string[],
+    userIds: string[]
   ): Promise<{ shared: number }> {
     return apiClient.post<{ shared: number }>(
       API_ENDPOINTS.CALENDAR.EVENTS.SHARE_USERS(eventId),
-      { userIds },
+      { userIds }
     );
   },
 
   async shareWithTeam(
     eventId: string,
-    teamId: string,
+    teamId: string
   ): Promise<{ shared: number }> {
     return apiClient.post<{ shared: number }>(
       API_ENDPOINTS.CALENDAR.EVENTS.SHARE_TEAM(eventId),
-      { teamId },
+      { teamId }
     );
   },
 
-  async unshareUser(eventId: string, targetUserId: string): Promise<{ removed: boolean }> {
+  async unshareUser(
+    eventId: string,
+    targetUserId: string
+  ): Promise<{ removed: boolean }> {
     return apiClient.delete<{ removed: boolean }>(
-      API_ENDPOINTS.CALENDAR.EVENTS.UNSHARE_USER(eventId, targetUserId),
+      API_ENDPOINTS.CALENDAR.EVENTS.UNSHARE_USER(eventId, targetUserId)
     );
   },
 

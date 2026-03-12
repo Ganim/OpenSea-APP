@@ -50,7 +50,10 @@ class ApiClient {
     };
 
     const controller = new AbortController();
-    const requestTimeout = (restOptions as Record<string, unknown>).timeout as number | undefined ?? this.timeout;
+    const requestTimeout =
+      ((restOptions as Record<string, unknown>).timeout as
+        | number
+        | undefined) ?? this.timeout;
     const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
     try {
@@ -226,7 +229,7 @@ class ApiClient {
    */
   async getBlob(
     endpoint: string,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<{ blob: Blob; filename: string; contentType: string }> {
     const { params, headers = {} } = options ?? {};
 
@@ -258,9 +261,12 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: 'Download failed' }));
         throw new Error(
-          (errorData as Record<string, string>).message || `HTTP ${response.status}`,
+          (errorData as Record<string, string>).message ||
+            `HTTP ${response.status}`
         );
       }
 

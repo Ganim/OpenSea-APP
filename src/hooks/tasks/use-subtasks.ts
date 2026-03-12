@@ -1,13 +1,14 @@
 import { subtasksService } from '@/services/tasks';
-import type {
-  CreateSubtaskRequest,
-  UpdateCardRequest,
-} from '@/types/tasks';
+import type { CreateSubtaskRequest, UpdateCardRequest } from '@/types/tasks';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CARD_QUERY_KEYS } from './use-cards';
 
 export const SUBTASK_QUERY_KEYS = {
-  SUBTASKS: (boardId: string, cardId: string) => ['task-subtasks', boardId, cardId],
+  SUBTASKS: (boardId: string, cardId: string) => [
+    'task-subtasks',
+    boardId,
+    cardId,
+  ],
 } as const;
 
 export function useSubtasks(boardId: string, cardId: string) {
@@ -21,9 +22,12 @@ export function useSubtasks(boardId: string, cardId: string) {
 export function useCreateSubtask(boardId: string, cardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateSubtaskRequest) => subtasksService.create(boardId, cardId, data),
+    mutationFn: (data: CreateSubtaskRequest) =>
+      subtasksService.create(boardId, cardId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId) });
+      qc.invalidateQueries({
+        queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId),
+      });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId) });
     },
@@ -33,10 +37,17 @@ export function useCreateSubtask(boardId: string, cardId: string) {
 export function useUpdateSubtask(boardId: string, cardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ subtaskId, data }: { subtaskId: string; data: UpdateCardRequest }) =>
-      subtasksService.update(boardId, cardId, subtaskId, data),
+    mutationFn: ({
+      subtaskId,
+      data,
+    }: {
+      subtaskId: string;
+      data: UpdateCardRequest;
+    }) => subtasksService.update(boardId, cardId, subtaskId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId) });
+      qc.invalidateQueries({
+        queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId),
+      });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId) });
     },
@@ -46,9 +57,12 @@ export function useUpdateSubtask(boardId: string, cardId: string) {
 export function useDeleteSubtask(boardId: string, cardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (subtaskId: string) => subtasksService.delete(boardId, cardId, subtaskId),
+    mutationFn: (subtaskId: string) =>
+      subtasksService.delete(boardId, cardId, subtaskId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId) });
+      qc.invalidateQueries({
+        queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId),
+      });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId) });
     },
@@ -58,10 +72,17 @@ export function useDeleteSubtask(boardId: string, cardId: string) {
 export function useCompleteSubtask(boardId: string, cardId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ subtaskId, completed }: { subtaskId: string; completed: boolean }) =>
-      subtasksService.complete(boardId, cardId, subtaskId, completed),
+    mutationFn: ({
+      subtaskId,
+      completed,
+    }: {
+      subtaskId: string;
+      completed: boolean;
+    }) => subtasksService.complete(boardId, cardId, subtaskId, completed),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId) });
+      qc.invalidateQueries({
+        queryKey: SUBTASK_QUERY_KEYS.SUBTASKS(boardId, cardId),
+      });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId) });
     },

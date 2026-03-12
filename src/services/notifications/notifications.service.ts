@@ -15,7 +15,7 @@ import type {
 // ============================================
 
 export async function listNotifications(
-  filters?: NotificationFilters,
+  filters?: NotificationFilters
 ): Promise<NotificationListResponse> {
   const params: Record<string, string> = {};
 
@@ -32,7 +32,7 @@ export async function listNotifications(
 
   return apiClient.get<NotificationListResponse>(
     API_ENDPOINTS.NOTIFICATIONS.LIST,
-    { params },
+    { params }
   );
 }
 

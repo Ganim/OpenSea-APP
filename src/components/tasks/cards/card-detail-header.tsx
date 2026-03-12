@@ -1,7 +1,11 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -133,8 +137,7 @@ export function CardDetailHeader({
                   'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400',
                 card.priority === 'LOW' &&
                   'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-                card.priority === 'NONE' &&
-                  'bg-gray-500/10 text-gray-500'
+                card.priority === 'NONE' && 'bg-gray-500/10 text-gray-500'
               )}
             >
               <PriorityBadge priority={card.priority} />
@@ -147,8 +150,7 @@ export function CardDetailHeader({
                 variant="secondary"
                 className={cn(
                   'text-[10px] h-5 gap-1 font-medium',
-                  isOverdue &&
-                    'bg-red-500/15 text-red-600 dark:text-red-400',
+                  isOverdue && 'bg-red-500/15 text-red-600 dark:text-red-400',
                   isDueSoon &&
                     'bg-amber-500/15 text-amber-600 dark:text-amber-400',
                   !isOverdue && !isDueSoon && 'bg-gray-500/10'

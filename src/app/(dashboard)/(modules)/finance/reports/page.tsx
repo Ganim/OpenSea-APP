@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, FileBarChart, FileText, TrendingUp, Wallet } from 'lucide-react';
+import {
+  ArrowLeft,
+  FileBarChart,
+  FileText,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -39,7 +45,8 @@ const reportCards = [
   {
     id: 'dre' as const,
     title: 'DRE',
-    description: 'Demonstração do Resultado do Exercício com hierarquia e comparativo',
+    description:
+      'Demonstração do Resultado do Exercício com hierarquia e comparativo',
     icon: FileBarChart,
     color: 'text-blue-600',
     bg: 'bg-blue-100 dark:bg-blue-900/30',
@@ -110,13 +117,11 @@ export default function FinanceReportsPage() {
       <PeriodSelector value={dateRange} onChange={setDateRange} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {reportCards.map((card) => (
+        {reportCards.map(card => (
           <Card
             key={card.id}
             className={`cursor-pointer transition-all hover:shadow-md ${
-              activeReport === card.id
-                ? 'ring-2 ring-primary'
-                : ''
+              activeReport === card.id ? 'ring-2 ring-primary' : ''
             }`}
             onClick={() =>
               setActiveReport(activeReport === card.id ? null : card.id)
@@ -139,11 +144,9 @@ export default function FinanceReportsPage() {
                   variant="ghost"
                   size="sm"
                   className="text-xs"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
-                    setActiveReport(
-                      activeReport === card.id ? null : card.id,
-                    );
+                    setActiveReport(activeReport === card.id ? null : card.id);
                   }}
                 >
                   {activeReport === card.id ? 'Ocultar' : 'Visualizar'}
@@ -194,7 +197,8 @@ export default function FinanceReportsPage() {
               >
                 Painel Financeiro
               </Button>{' '}
-              para visualizar o fluxo de caixa em gráficos interativos, ou exporte o relatório acima.
+              para visualizar o fluxo de caixa em gráficos interativos, ou
+              exporte o relatório acima.
             </p>
           </CardContent>
         </Card>
@@ -228,7 +232,8 @@ export default function FinanceReportsPage() {
               >
                 Contas a Receber
               </Button>{' '}
-              para visualizar lançamentos detalhados, ou exporte o relatório acima.
+              para visualizar lançamentos detalhados, ou exporte o relatório
+              acima.
             </p>
           </CardContent>
         </Card>

@@ -14,12 +14,16 @@ import {
 describe('Tasks _utils', () => {
   describe('isOverdue', () => {
     it('should return true for a date in the past', () => {
-      const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const pastDate = new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(pastDate)).toBe(true);
     });
 
     it('should return false for a date in the future', () => {
-      const futureDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+      const futureDate = new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(futureDate)).toBe(false);
     });
 
@@ -32,22 +36,30 @@ describe('Tasks _utils', () => {
     });
 
     it('should return false if status is DONE', () => {
-      const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const pastDate = new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(pastDate, 'DONE')).toBe(false);
     });
 
     it('should return false if status is CANCELED', () => {
-      const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const pastDate = new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(pastDate, 'CANCELED')).toBe(false);
     });
 
     it('should return true if status is IN_PROGRESS and date is past', () => {
-      const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const pastDate = new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(pastDate, 'IN_PROGRESS')).toBe(true);
     });
 
     it('should return true if status is TODO and date is past', () => {
-      const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const pastDate = new Date(
+        Date.now() - 2 * 24 * 60 * 60 * 1000
+      ).toISOString();
       expect(isOverdue(pastDate, 'TODO')).toBe(true);
     });
 

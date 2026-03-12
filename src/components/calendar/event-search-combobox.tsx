@@ -39,7 +39,9 @@ function formatEventDate(dateStr: string, isAllDay: boolean): string {
   return `${day} às ${time}`;
 }
 
-export function EventSearchCombobox({ onEventSelect }: EventSearchComboboxProps) {
+export function EventSearchCombobox({
+  onEventSelect,
+}: EventSearchComboboxProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<CalendarEvent[]>([]);
@@ -102,11 +104,7 @@ export function EventSearchCombobox({ onEventSelect }: EventSearchComboboxProps)
           <span className="truncate">Buscar eventos...</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        className="w-[360px] p-0"
-        align="start"
-        sideOffset={4}
-      >
+      <PopoverContent className="w-[360px] p-0" align="start" sideOffset={4}>
         <Command shouldFilter={false}>
           <CommandInput
             value={search}
@@ -135,7 +133,7 @@ export function EventSearchCombobox({ onEventSelect }: EventSearchComboboxProps)
 
             {!isSearching && results.length > 0 && (
               <CommandGroup heading="Resultados">
-                {results.map((event) => {
+                {results.map(event => {
                   const eventColor =
                     event.color ?? EVENT_TYPE_COLORS[event.type] ?? '#64748b';
                   const icon = EVENT_TYPE_ICONS[event.type];
@@ -163,7 +161,9 @@ export function EventSearchCombobox({ onEventSelect }: EventSearchComboboxProps)
                           {event.title}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <span>{formatEventDate(dateStr, event.isAllDay)}</span>
+                          <span>
+                            {formatEventDate(dateStr, event.isAllDay)}
+                          </span>
                           <span className="opacity-40">·</span>
                           <span style={{ color: eventColor }}>{typeLabel}</span>
                         </div>

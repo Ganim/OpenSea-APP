@@ -37,7 +37,7 @@ export const financeReportsService = {
     if (params.categoryId) query.append('categoryId', params.categoryId);
 
     return apiClient.get<InteractiveDREResponse>(
-      `/v1/finance/dashboard/dre?${query.toString()}`,
+      `/v1/finance/dashboard/dre?${query.toString()}`
     );
   },
 
@@ -54,9 +54,7 @@ export const financeReportsService = {
         : 'http://127.0.0.1:3333';
 
     const token =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('auth_token')
-        : null;
+      typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
     const response = await fetch(
       `${baseUrl}${API_ENDPOINTS.FINANCE_DASHBOARD.EXPORT_ACCOUNTING}`,
@@ -73,7 +71,7 @@ export const financeReportsService = {
           endDate: params.endDate,
           type: params.type,
         }),
-      },
+      }
     );
 
     if (!response.ok) {
