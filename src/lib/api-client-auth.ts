@@ -13,6 +13,7 @@ import type { RefreshResponse } from './api-client.types';
 
 export class TokenManager {
   private refreshPromise: Promise<string> | null = null;
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
   private baseURL: string;
 
   // Token cache para evitar acessos repetidos ao localStorage
@@ -20,8 +21,16 @@ export class TokenManager {
   private tokenCacheTimestamp = 0;
   private readonly CACHE_TTL = 1000; // 1 segundo
 
+  get isRefreshing(): boolean {
+    return this.refreshPromise !== null;
+  }
+
   constructor(baseURL = apiConfig.baseURL) {
     this.baseURL = baseURL;
+    // Schedule refresh for existing token (e.g., page reload)
+    if (typeof window !== 'undefined') {
+      this.scheduleProactiveRefresh();
+    }
   }
 
   // =============================================================================
@@ -75,10 +84,56 @@ export class TokenManager {
 
     // Dispara evento customizado para notificar o AuthContext
     window.dispatchEvent(new CustomEvent('auth-token-change'));
+
+    // Schedule proactive refresh before new token expires
+    if (token) {
+      this.scheduleProactiveRefresh();
+    }
   }
 
   clearTokens(): void {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
     this.setTokens(null, null);
+  }
+
+  /**
+   * Decode JWT payload without signature verification to read `exp`.
+   * Schedules a refresh 5 minutes before expiration.
+   */
+  scheduleProactiveRefresh(): void {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+
+    const token = this.getToken();
+    if (!token) return;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp as number;
+      if (!exp) return;
+
+      const now = Math.floor(Date.now() / 1000);
+      // Refresh 5 minutes before expiration (access token is 30min)
+      const refreshIn = (exp - now - 300) * 1000;
+
+      if (refreshIn <= 0) {
+        // Token already near expiration, refresh now
+        this.refreshAccessToken().catch(() => {});
+        return;
+      }
+
+      this.refreshTimer = setTimeout(() => {
+        this.refreshTimer = null;
+        this.refreshAccessToken().catch(() => {});
+      }, refreshIn);
+    } catch {
+      // Invalid token format, skip proactive refresh
+    }
   }
 
   // =============================================================================
@@ -238,25 +293,9 @@ export class TokenManager {
     }
   }
 
-  handleRefreshFailure(isNetworkError = false): void {
-    logger.debug('[API] Limpando tokens...');
+  handleRefreshFailure(_isNetworkError = false): void {
+    logger.debug('[API] Limpando tokens após falha de refresh...');
     this.clearTokens();
-
-    // Redirect para login apenas no browser
-    // Não faz redirect automático em caso de erro de rede para evitar loops
-    if (typeof window !== 'undefined' && !isNetworkError) {
-      // Verifica se já não está na página de login
-      const currentPath = window.location.pathname;
-      const isLoginPage =
-        currentPath === '/login' || currentPath === '/fast-login';
-
-      if (!isLoginPage) {
-        logger.debug('[API] Redirecionando para login...');
-        // Usa setTimeout para garantir que a limpeza de tokens aconteça primeiro
-        setTimeout(() => {
-          window.location.href = '/fast-login?session=expired';
-        }, 100);
-      }
-    }
+    // Auth-context handles redirect via token change detection
   }
 }

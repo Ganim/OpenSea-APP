@@ -145,4 +145,11 @@ export const authService = {
   isAuthenticated(): boolean {
     return !!this.getToken();
   },
+
+  async routineCheck(): Promise<{
+    finance: { markedOverdue: number; dueSoonAlerts: number } | null;
+    calendarReminders: { processed: number; errors: number } | null;
+  }> {
+    return apiClient.post('/v1/auth/routine-check');
+  },
 };

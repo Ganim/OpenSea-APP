@@ -2,7 +2,10 @@
 
 import { authConfig } from '@/config/api';
 import { useLogin, useLogout, useMe, useRegister } from '@/hooks';
+import { useRoutineCheck } from '@/hooks/use-routine-check';
+import { apiClient } from '@/lib/api-client';
 import { saveAccount } from '@/lib/saved-accounts';
+import { authService } from '@/services';
 import { logger } from '@/lib/logger';
 import type { LoginCredentials, RegisterData, User } from '@/types';
 import { useRouter, usePathname } from 'next/navigation';
@@ -92,6 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     error: userError,
   } = useMe(hasToken);
 
+  // Routine check: runs backend side-effects (overdue, reminders) periodically
+  useRoutineCheck(hasToken);
+
   // E2E bypass: when running E2E tests, we may want to short-circuit auth
   // and provide a fake authenticated user to avoid flaky login flows.
   const isE2EBypass =
@@ -122,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     route => pathname === route || pathname?.startsWith('/reset-password')
   );
 
-  // Se houve erro ao buscar usuário (token inválido/expirado), limpa os tokens
+  // Se houve erro ao buscar usuário (token inválido/expirado), coordena com refresh
   useEffect(() => {
     if (!userError || !hasToken) return;
 
@@ -137,24 +143,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       message.includes('invalid token') ||
       message.includes('token inválido');
 
-    if (isAuthError) {
-      logger.debug('🔑 Token inválido ou usuário não encontrado, limpando...');
-      localStorage.removeItem(authConfig.tokenKey);
-      localStorage.removeItem(authConfig.refreshTokenKey);
-      setHasToken(false);
-
-      // Redireciona para login se não estiver em rota pública
-      if (!isPublicRoute) {
-        logger.debug('🔄 Redirecionando para login...');
-        router.push('/fast-login?session=expired');
-      }
-    } else {
+    if (!isAuthError) {
       logger.warn('Erro não-autorização em /me, tokens preservados', {
         status,
         message,
       });
+      return;
     }
-  }, [userError, hasToken, isPublicRoute, router]);
+
+    // Check if api-client is currently refreshing the token
+    const tm = apiClient.getTokenManager();
+    if (tm.isRefreshing) {
+      logger.debug('Token refresh em andamento, aguardando antes de deslogar...');
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (!tm.isRefreshing) {
+          clearInterval(checkInterval);
+          const newToken = localStorage.getItem(authConfig.tokenKey);
+          if (newToken) {
+            logger.debug('Refresh concluído com sucesso, ignorando erro anterior');
+            refetchUser();
+          } else {
+            performLogout();
+          }
+        } else if (attempts >= 50) {
+          clearInterval(checkInterval);
+          performLogout();
+        }
+      }, 200);
+      return;
+    }
+
+    performLogout();
+
+    function performLogout() {
+      logger.debug('Token inválido, limpando...');
+      localStorage.removeItem(authConfig.tokenKey);
+      localStorage.removeItem(authConfig.refreshTokenKey);
+      setHasToken(false);
+      if (!isPublicRoute) {
+        logger.debug('Redirecionando para login...');
+        router.push('/fast-login?session=expired');
+      }
+    }
+  }, [userError, hasToken, isPublicRoute, router, refetchUser]);
 
   // Redireciona para login se não tem token e está em rota protegida
   useEffect(() => {
@@ -232,6 +265,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           logger.debug('💾 Conta salva para Fast Login', { userId: u.id });
         }
+
+        // Trigger routine check after login (fire-and-forget)
+        authService.routineCheck().catch(() => {});
 
         // Check if PIN setup is required
         const fetchedUser = userResult.data?.user;

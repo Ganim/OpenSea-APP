@@ -179,6 +179,10 @@ class ApiClient {
     }
   }
 
+  getTokenManager(): TokenManager {
+    return this.tokenManager;
+  }
+
   async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
