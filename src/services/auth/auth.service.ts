@@ -116,6 +116,7 @@ export const authService = {
   setToken(token: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(authConfig.tokenKey, token);
+      window.dispatchEvent(new CustomEvent('auth-token-change'));
     }
   },
 
