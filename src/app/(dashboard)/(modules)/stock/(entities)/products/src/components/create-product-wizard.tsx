@@ -496,28 +496,29 @@ export function CreateProductWizard({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Queries
-  const { data: templates = [], isLoading: loadingTemplates } = useQuery<
-    Template[]
-  >({
+  const { data: templatesData, isLoading: loadingTemplates } = useQuery({
     queryKey: ['templates'],
-    queryFn: async () => {
-      const response = await templatesService.listTemplates();
-      return Array.isArray(response?.templates) ? response.templates : [];
-    },
+    queryFn: () => templatesService.listTemplates(),
     enabled: open,
   });
+  const templates = Array.isArray(templatesData?.templates)
+    ? templatesData.templates
+    : Array.isArray(templatesData)
+      ? (templatesData as Template[])
+      : [];
 
-  const { data: manufacturers = [], isLoading: loadingManufacturers } =
-    useQuery<Manufacturer[]>({
+  const { data: manufacturersData, isLoading: loadingManufacturers } = useQuery(
+    {
       queryKey: ['manufacturers'],
-      queryFn: async () => {
-        const response = await manufacturersService.listManufacturers();
-        return Array.isArray(response?.manufacturers)
-          ? response.manufacturers
-          : [];
-      },
+      queryFn: () => manufacturersService.listManufacturers(),
       enabled: open,
-    });
+    }
+  );
+  const manufacturers = Array.isArray(manufacturersData?.manufacturers)
+    ? manufacturersData.manufacturers
+    : Array.isArray(manufacturersData)
+      ? (manufacturersData as Manufacturer[])
+      : [];
 
   // Auto-select initial template
   if (initialTemplateId && !selectedTemplate && templates.length > 0) {
