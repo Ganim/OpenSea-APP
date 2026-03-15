@@ -552,11 +552,7 @@ export function CreateProductWizard({
         attributes,
       });
 
-      // Reset for next product
-      setProductName('');
-      setProductDescription('');
-      setAttributes({});
-      setCurrentStep(3); // Stay on step 3 for quick consecutive creation
+      handleClose();
     } catch (error) {
       logger.error(
         'Error creating product',
