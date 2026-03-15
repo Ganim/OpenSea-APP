@@ -16,12 +16,6 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { productsConfig } from '@/config/entities/products.config';
 import {
@@ -53,7 +47,6 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { EditProductForm } from './src/components';
 import { CreateProductWizard } from './src/components/create-product-wizard';
 import {
   AssignCategoryModal,
@@ -379,7 +372,9 @@ function ProductsPageContent() {
   };
 
   const handleContextEdit = (ids: string[]) => {
-    page.handlers.handleItemsEdit(ids);
+    if (ids.length === 1) {
+      router.push(`/stock/products/${ids[0]}/edit`);
+    }
   };
 
   const handleContextDelete = (ids: string[]) => {
@@ -411,6 +406,9 @@ function ProductsPageContent() {
   const handleRenameSubmit = useCallback(
     async (id: string, data: { name: string }) => {
       await crud.update(id, data as UpdateProductRequest);
+      await crud.invalidate();
+      setRenameModalOpen(false);
+      setRenameProduct(null);
     },
     [crud]
   );
@@ -423,6 +421,8 @@ function ProductsPageContent() {
         } as UpdateProductRequest);
       }
       await crud.invalidate();
+      setAssignCategoryOpen(false);
+      setActionProductIds([]);
       toast.success(
         ids.length === 1
           ? 'Categoria atribuída com sucesso!'
@@ -438,6 +438,8 @@ function ProductsPageContent() {
         await crud.update(id, { manufacturerId } as UpdateProductRequest);
       }
       await crud.invalidate();
+      setAssignManufacturerOpen(false);
+      setActionProductIds([]);
       toast.success(
         ids.length === 1
           ? 'Fabricante atribuído com sucesso!'
@@ -870,29 +872,6 @@ function ProductsPageContent() {
               await crud.create(data);
             }}
           />
-
-          {/* Edit Modal */}
-          <Dialog
-            open={page.modals.isOpen('edit')}
-            onOpenChange={open => !open && page.modals.close('edit')}
-          >
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Editar Produto</DialogTitle>
-              </DialogHeader>
-              {page.modals.editingItem && (
-                <EditProductForm
-                  product={page.modals.editingItem}
-                  onSubmit={async data => {
-                    await crud.update(page.modals.editingItem!.id, data);
-                    page.modals.close('edit');
-                  }}
-                  onCancel={() => page.modals.close('edit')}
-                  isSubmitting={crud.isUpdating}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
 
           {/* Delete Confirmation */}
           <VerifyActionPinModal
