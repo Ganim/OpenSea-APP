@@ -319,15 +319,12 @@ export default function EditManufacturerPage() {
                 {manufacturer.name}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <Label htmlFor="status-switch" className="text-sm text-muted-foreground">
-                {isActive ? 'Ativo' : 'Inativo'}
-              </Label>
-              <Switch
-                id="status-switch"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
+            <div className="hidden sm:flex items-center gap-3 shrink-0 rounded-lg bg-white/5 px-4 py-2">
+              <div className="text-right">
+                <p className="text-xs font-semibold">Status</p>
+                <p className="text-[11px] text-muted-foreground">{isActive ? 'Ativo' : 'Inativo'}</p>
+              </div>
+              <Switch checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
         </Card>
