@@ -1,40 +1,248 @@
 /**
  * OpenSea OS - Template Detail Page
- * Página de detalhes de um template específico com edição avançada
+ * Página de visualização de um template com layout padronizado
  */
 
 'use client';
 
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
-import { logger } from '@/lib/logger';
-import { Button } from '@/components/ui/button';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { templatesService } from '@/services/stock';
-import type {
-  Template,
-  TemplateAttributes,
-  UnitOfMeasure,
-} from '@/types/stock';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { productsService, templatesService } from '@/services/stock';
+import type { Template, TemplateAttribute } from '@/types/stock';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Calendar,
+  Clock,
+  Hash,
+  Info,
+  Layers,
+  Pencil,
+  Puzzle,
+  Settings,
+  Shirt,
+  SlidersHorizontal,
+  ShieldCheck,
+} from 'lucide-react';
 import Image from 'next/image';
-import { GrObjectGroup } from 'react-icons/gr';
 import { useParams, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { TemplateViewer } from '../src/components';
+import { useEffect, useMemo, useState } from 'react';
+import { GrObjectGroup } from 'react-icons/gr';
+import {
+  MdPrint,
+  MdPrintDisabled,
+  MdVisibility,
+  MdVisibilityOff,
+} from 'react-icons/md';
+import { getUnitLabel } from '../src/constants/unit-labels';
+import { ATTRIBUTE_TYPE_LABELS } from '../src/types/templates.types';
+
+// ============================================================================
+// SECTION HEADER (read-only, non-collapsible)
+// ============================================================================
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  subtitle,
+  badge,
+}: {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Icon className="h-5 w-5 text-foreground" />
+          <div>
+            <h3 className="text-base font-semibold">{title}</h3>
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          </div>
+        </div>
+        {badge}
+      </div>
+      <div className="border-b border-border" />
+    </div>
+  );
+}
+
+// ============================================================================
+// ATTRIBUTE CARD
+// ============================================================================
+
+function AttributeCard({
+  attrKey,
+  attr,
+}: {
+  attrKey: string;
+  attr: TemplateAttribute;
+}) {
+  const hasAdvanced =
+    attr.unitOfMeasure || attr.mask || attr.placeholder || attr.description;
+  const hasDefaultValue =
+    attr.defaultValue !== undefined && attr.defaultValue !== '';
+
+  return (
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-white/[0.04] border-b border-white/[0.06]">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-medium truncate">
+            {attr.label || attrKey}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {ATTRIBUTE_TYPE_LABELS[attr.type] || attr.type}
+          </span>
+        </div>
+      </div>
+
+      {/* Body: toggle chips */}
+      <div className="px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium border ${
+              attr.required
+                ? 'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300'
+                : 'border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] text-muted-foreground'
+            }`}
+          >
+            <ShieldCheck className="h-3 w-3" />
+            {attr.required ? 'Obrigatório' : 'Opcional'}
+          </span>
+
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium border ${
+              attr.enablePrint
+                ? 'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300'
+                : 'border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] text-muted-foreground'
+            }`}
+          >
+            {attr.enablePrint ? (
+              <MdPrint className="h-3 w-3" />
+            ) : (
+              <MdPrintDisabled className="h-3 w-3" />
+            )}
+            Campo de Etiqueta
+          </span>
+
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium border ${
+              attr.enableView
+                ? 'border-teal-600/25 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/8 text-teal-700 dark:text-teal-300'
+                : 'border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] text-muted-foreground'
+            }`}
+          >
+            {attr.enableView ? (
+              <MdVisibility className="h-3 w-3" />
+            ) : (
+              <MdVisibilityOff className="h-3 w-3" />
+            )}
+            Visível em Relatórios
+          </span>
+        </div>
+
+        {/* Select options */}
+        {attr.type === 'select' &&
+          attr.options &&
+          attr.options.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-white/[0.06]">
+              <p className="text-xs text-muted-foreground mb-2">Opções</p>
+              <div className="flex flex-wrap gap-1.5">
+                {attr.options.map((option, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {option}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Advanced details */}
+        {(hasAdvanced || hasDefaultValue) && (
+          <div className="mt-3 pt-3 border-t border-white/[0.06]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {attr.unitOfMeasure && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Unidade</p>
+                  <p className="text-sm">{attr.unitOfMeasure}</p>
+                </div>
+              )}
+              {attr.mask && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Máscara</p>
+                  <p className="text-sm font-mono">{attr.mask}</p>
+                </div>
+              )}
+              {attr.placeholder && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Placeholder</p>
+                  <p className="text-sm text-muted-foreground italic">
+                    {attr.placeholder}
+                  </p>
+                </div>
+              )}
+              {hasDefaultValue && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Valor Padrão</p>
+                  <p className="text-sm">
+                    {attr.type === 'boolean'
+                      ? attr.defaultValue
+                        ? 'Sim'
+                        : 'Não'
+                      : String(attr.defaultValue)}
+                  </p>
+                </div>
+              )}
+            </div>
+            {attr.description && (
+              <div className="mt-3">
+                <p className="text-xs text-muted-foreground">Descrição</p>
+                <p className="text-sm mt-0.5">{attr.description}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN PAGE
+// ============================================================================
 
 export default function TemplateDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const templateId = params.id as string;
 
   // ============================================================================
   // DATA FETCHING
   // ============================================================================
 
-  const { data: template, isLoading } = useQuery<Template>({
+  const {
+    data: template,
+    isLoading,
+    error,
+  } = useQuery<Template>({
     queryKey: ['templates', templateId],
     queryFn: async () => {
       const response = await templatesService.getTemplate(templateId);
@@ -42,127 +250,456 @@ export default function TemplateDetailPage() {
     },
   });
 
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
+  const [productsCount, setProductsCount] = useState<number | null>(null);
 
-  const handleSave = async (data: {
-    name: string;
-    iconUrl?: string;
-    unitOfMeasure: UnitOfMeasure;
-    productAttributes: Record<string, unknown>;
-    variantAttributes: Record<string, unknown>;
-    itemAttributes: Record<string, unknown>;
-  }) => {
-    try {
-      await templatesService.updateTemplate(templateId, {
-        name: data.name,
-        iconUrl: data.iconUrl,
-        unitOfMeasure: data.unitOfMeasure,
-        productAttributes: data.productAttributes as TemplateAttributes,
-        variantAttributes: data.variantAttributes as TemplateAttributes,
-        itemAttributes: data.itemAttributes as TemplateAttributes,
-      });
-      await queryClient.invalidateQueries({ queryKey: ['templates'] });
-      toast.success('Template atualizado com sucesso!');
-    } catch (error) {
-      logger.error(
-        'Failed to save template',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          templateId: params.id,
-        }
-      );
-      toast.error('Erro ao salvar template');
-      throw error;
-    }
-  };
+  useEffect(() => {
+    if (!template) return;
+    productsService
+      .listProducts(template.id)
+      .then(r => setProductsCount(r.products?.length || 0))
+      .catch(() => setProductsCount(0));
+  }, [template]);
 
   // ============================================================================
-  // LOADING STATE
+  // COMPUTED
+  // ============================================================================
+
+  const productAttributes = useMemo(
+    () =>
+      (template?.productAttributes as Record<string, TemplateAttribute>) ||
+      null,
+    [template]
+  );
+  const variantAttributes = useMemo(
+    () =>
+      (template?.variantAttributes as Record<string, TemplateAttribute>) ||
+      null,
+    [template]
+  );
+  const itemAttributes = useMemo(
+    () =>
+      (template?.itemAttributes as Record<string, TemplateAttribute>) || null,
+    [template]
+  );
+
+  const totalAttributes = useMemo(() => {
+    return (
+      Object.keys(productAttributes || {}).length +
+      Object.keys(variantAttributes || {}).length +
+      Object.keys(itemAttributes || {}).length
+    );
+  }, [productAttributes, variantAttributes, itemAttributes]);
+
+  const specialModules = template?.specialModules || [];
+
+  // ============================================================================
+  // ACTION BAR
+  // ============================================================================
+
+  const actionButtons: HeaderButton[] = [
+    {
+      id: 'edit',
+      title: 'Editar',
+      icon: Pencil,
+      onClick: () => router.push(`/stock/templates/${templateId}/edit`),
+      variant: 'default',
+    },
+  ];
+
+  // ============================================================================
+  // LOADING
   // ============================================================================
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Templates', href: '/stock/templates' },
+              { label: '...' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  if (!template) {
+  // ============================================================================
+  // ERROR
+  // ============================================================================
+
+  if (error || !template) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-12 text-center">
-          <GrObjectGroup className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Template não encontrado
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            O template que você está procurando não existe ou foi removido.
-          </p>
-          <Button onClick={() => router.push('/stock/templates')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Templates
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Templates', href: '/stock/templates' },
+              { label: 'Erro' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Template não encontrado"
+            message="O template que você está procurando não existe ou foi removido."
+            action={{
+              label: 'Voltar para Templates',
+              onClick: () => router.push('/stock/templates'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
+
+  // ============================================================================
+  // DATES
+  // ============================================================================
+
+  const formattedCreatedAt = new Date(template.createdAt).toLocaleDateString(
+    'pt-BR',
+    { day: '2-digit', month: 'long', year: 'numeric' }
+  );
+  const formattedUpdatedAt =
+    template.updatedAt && template.updatedAt !== template.createdAt
+      ? new Date(template.updatedAt).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        })
+      : null;
 
   // ============================================================================
   // RENDER
   // ============================================================================
 
   return (
-    <div className="min-h-screen from-purple-50 via-gray-50 to-pink-50 dark:from-gray-900 dark:via-slate-900 dark:to-slate-800 px-6">
-      {/* Header com breadcrumb + editar */}
-      <div className="max-w-8xl flex items-center justify-between mb-4">
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Templates', href: '/stock/templates' },
-            { label: template.name, href: `/stock/templates/${templateId}` },
+            { label: template.name },
           ]}
+          buttons={actionButtons}
         />
+      </PageHeader>
 
-        <Button
-          size={'sm'}
-          onClick={() => router.push(`/stock/templates/${templateId}/edit`)}
-        >
-          Editar
-        </Button>
-      </div>
+      <PageBody>
+        {/* ── Identity Card ── */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-purple-500 to-pink-600 shadow-lg">
+              {template.iconUrl ? (
+                <Image
+                  src={template.iconUrl}
+                  alt={template.name}
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-contain brightness-0 invert"
+                  unoptimized
+                />
+              ) : (
+                <GrObjectGroup className="h-6 w-6 text-white" />
+              )}
+            </div>
 
-      {/* Content - Visualização apenas */}
-      <div className="max-w-8xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-slate-600 to-slate-800 overflow-hidden">
-            {template.iconUrl ? (
-              <Image
-                src={template.iconUrl}
-                alt={template.name}
-                width={24}
-                height={24}
-                className="h-6 w-6 object-contain brightness-0 invert"
-                unoptimized
-              />
-            ) : (
-              <GrObjectGroup className="h-5 w-5 text-white" />
-            )}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl font-bold truncate">{template.name}</h1>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Calendar className="h-3 w-3 text-sky-400" />
+                  {formattedCreatedAt}
+                </span>
+                {formattedUpdatedAt && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-amber-400" />
+                    {formattedUpdatedAt}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Stats (desktop) */}
+            <div className="hidden md:flex items-center gap-2">
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2.5 py-1.5 text-xs text-muted-foreground">
+                      <Hash className="h-3 w-3" />
+                      {getUnitLabel(template.unitOfMeasure)}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Unidade de medida</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2.5 py-1.5 text-xs text-muted-foreground">
+                      <SlidersHorizontal className="h-3 w-3" />
+                      {totalAttributes} atributo
+                      {totalAttributes !== 1 ? 's' : ''}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Total de atributos</TooltipContent>
+                </Tooltip>
+
+                {productsCount !== null && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2.5 py-1.5 text-xs text-muted-foreground">
+                        <Layers className="h-3 w-3" />
+                        {productsCount} produto
+                        {productsCount !== 1 ? 's' : ''}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Produtos usando este template</TooltipContent>
+                  </Tooltip>
+                )}
+              </TooltipProvider>
+            </div>
           </div>
-          <h1 className="text-xl font-bold">{template.name}</h1>
-        </div>
+        </Card>
 
-        <TemplateViewer
-          template={template}
-          showHeader={false}
-          showEditButton={false}
-          onSave={handleSave}
-          isModal={false}
-        />
-      </div>
-    </div>
+        {/* ── Content Card ── */}
+        <Card className="bg-white/5 py-2 overflow-hidden">
+          <div className="px-6 py-4 space-y-8">
+            {/* ── Seção: Informações Gerais ── */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={Info}
+                title="Informações Gerais"
+                subtitle="Dados básicos do template"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Nome</p>
+                  <p className="text-sm font-medium">{template.name}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    Unidade de Medida
+                  </p>
+                  <p className="text-sm font-medium">
+                    {getUnitLabel(template.unitOfMeasure)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Ícone</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border overflow-hidden">
+                      {template.iconUrl ? (
+                        <Image
+                          src={template.iconUrl}
+                          alt="Ícone"
+                          width={18}
+                          height={18}
+                          className="h-[18px] w-[18px] object-contain dark:brightness-0 dark:invert"
+                          unoptimized
+                        />
+                      ) : (
+                        <GrObjectGroup className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <span className="text-sm text-muted-foreground truncate">
+                      {template.iconUrl || 'Padrão'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {template.code && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Código</p>
+                  <p className="text-sm font-mono font-medium">
+                    {template.code}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ── Seção: Módulos Especiais ── */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={Puzzle}
+                title="Módulos Especiais"
+                subtitle="Funcionalidades adicionais habilitadas"
+              />
+
+              {specialModules.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  Nenhum módulo especial ativado.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {specialModules.includes('CARE_INSTRUCTIONS') && (
+                    <div className="flex items-center justify-between w-full rounded-lg border border-border bg-white dark:bg-slate-800/60 p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-purple-500/20 to-pink-500/20">
+                          <Shirt className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">
+                            Conservação Têxtil
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Instruções de cuidado segundo a norma ISO 3758
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="default"
+                        className="text-xs shrink-0"
+                      >
+                        Ativado
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ── Seção: Atributos ── */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={SlidersHorizontal}
+                title="Atributos"
+                subtitle="Campos personalizados para produtos, variantes e itens"
+                badge={
+                  totalAttributes > 0 ? (
+                    <span className="text-xs text-muted-foreground">
+                      {totalAttributes} total
+                    </span>
+                  ) : undefined
+                }
+              />
+
+              <Tabs defaultValue="product" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
+                  <TabsTrigger value="product" className="gap-2">
+                    <Layers className="w-4 h-4 hidden sm:inline" />
+                    Produtos
+                    {productAttributes &&
+                      Object.keys(productAttributes).length > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-xs">
+                          {Object.keys(productAttributes).length}
+                        </Badge>
+                      )}
+                  </TabsTrigger>
+                  <TabsTrigger value="variant" className="gap-2">
+                    <Layers className="w-4 h-4 hidden sm:inline" />
+                    Variantes
+                    {variantAttributes &&
+                      Object.keys(variantAttributes).length > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-xs">
+                          {Object.keys(variantAttributes).length}
+                        </Badge>
+                      )}
+                  </TabsTrigger>
+                  <TabsTrigger value="item" className="gap-2">
+                    <Settings className="w-4 h-4 hidden sm:inline" />
+                    Itens
+                    {itemAttributes &&
+                      Object.keys(itemAttributes).length > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-xs">
+                          {Object.keys(itemAttributes).length}
+                        </Badge>
+                      )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="product" className="space-y-4 mt-2">
+                  <div className="w-full p-6 rounded-xl bg-white dark:bg-slate-800/60 border border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Layers className="w-5 h-5 text-foreground" />
+                      <h3 className="font-semibold">Atributos de Produtos</h3>
+                    </div>
+                    {!productAttributes ||
+                    Object.keys(productAttributes).length === 0 ? (
+                      <p className="text-center py-8 text-muted-foreground">
+                        Nenhum atributo configurado.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {Object.entries(productAttributes).map(
+                          ([key, attr]) => (
+                            <AttributeCard
+                              key={key}
+                              attrKey={key}
+                              attr={attr}
+                            />
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="variant" className="space-y-4 mt-2">
+                  <div className="w-full p-6 rounded-xl bg-white dark:bg-slate-800/60 border border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Layers className="w-5 h-5 text-foreground" />
+                      <h3 className="font-semibold">Atributos de Variantes</h3>
+                    </div>
+                    {!variantAttributes ||
+                    Object.keys(variantAttributes).length === 0 ? (
+                      <p className="text-center py-8 text-muted-foreground">
+                        Nenhum atributo configurado.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {Object.entries(variantAttributes).map(
+                          ([key, attr]) => (
+                            <AttributeCard
+                              key={key}
+                              attrKey={key}
+                              attr={attr}
+                            />
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="item" className="space-y-4 mt-2">
+                  <div className="w-full p-6 rounded-xl bg-white dark:bg-slate-800/60 border border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Settings className="w-5 h-5 text-foreground" />
+                      <h3 className="font-semibold">Atributos de Itens</h3>
+                    </div>
+                    {!itemAttributes ||
+                    Object.keys(itemAttributes).length === 0 ? (
+                      <p className="text-center py-8 text-muted-foreground">
+                        Nenhum atributo configurado.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {Object.entries(itemAttributes).map(([key, attr]) => (
+                          <AttributeCard
+                            key={key}
+                            attrKey={key}
+                            attr={attr}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        </Card>
+      </PageBody>
+    </PageLayout>
   );
 }
