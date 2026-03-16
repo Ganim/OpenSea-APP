@@ -29,7 +29,6 @@ import {
 } from '@/core';
 import { useReorderCategories } from '@/hooks/stock/use-categories';
 import { usePermissions } from '@/hooks/use-permissions';
-import { cn } from '@/lib/utils';
 import { categoriesService } from '@/services/stock';
 import type { Category } from '@/types/stock';
 import {
@@ -75,11 +74,11 @@ export default function ProductCategoriesPage() {
   const crud = useEntityCrud<Category>({
     entityName: 'Categoria',
     entityNamePlural: 'Categorias',
-    queryKey: ['categories'],
+    queryKey: ['categories', 'root'],
     baseUrl: '/v1/categories',
     listFn: async () => {
       const response = await categoriesService.listCategories();
-      return response.categories;
+      return response.categories.filter(c => !c.parentId);
     },
     getFn: async (id: string) => {
       const response = await categoriesService.getCategory(id);
@@ -110,7 +109,7 @@ export default function ProductCategoriesPage() {
   const page = useEntityPage<Category>({
     entityName: 'Categoria',
     entityNamePlural: 'Categorias',
-    queryKey: ['categories'],
+    queryKey: ['categories', 'root'],
     crud,
     viewRoute: id => `/stock/product-categories/${id}`,
     filterFn: (item, query) => {
@@ -204,41 +203,9 @@ export default function ProductCategoriesPage() {
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const getCategoryBadges = (item: Category) => {
-    const badges: {
-      label: string;
-      variant: 'outline';
-      icon?: typeof Package;
-      color?: string;
-    }[] = [
-      {
-        label: `${item.childrenCount || 0} subcategoria${(item.childrenCount || 0) !== 1 ? 's' : ''}`,
-        variant: 'outline',
-        icon: FolderTree,
-        color:
-          'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
-      },
-      {
-        label: `${item.productCount || 0} produto${(item.productCount || 0) !== 1 ? 's' : ''}`,
-        variant: 'outline',
-        icon: Package,
-        color:
-          'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
-      },
-    ];
-    if (!item.isActive) {
-      badges.push({
-        label: 'Inativa',
-        variant: 'outline',
-        color:
-          'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
-      });
-    }
-    return badges;
-  };
-
   const renderGridCard = (item: Category, isSelected: boolean) => {
-    const productsCount = item.productCount || 0;
+    const subCount = item.childrenCount || 0;
+    const prodCount = item.productCount || 0;
 
     return (
       <EntityContextMenu
@@ -251,18 +218,23 @@ export default function ProductCategoriesPage() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={item.description || 'Sem descricao'}
+          subtitle={`Posição de exibição: ${item.displayOrder || 0}`}
           thumbnail={item.iconUrl || undefined}
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-6 h-6 text-white" />
           }
           iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
-          badges={getCategoryBadges(item)}
           footer={{
-            type: 'single',
-            button: {
+            type: 'split',
+            left: {
+              icon: FolderTree,
+              label: `${subCount} subcategoria${subCount !== 1 ? 's' : ''}`,
+              href: `/stock/product-categories/${item.id}`,
+              color: 'emerald',
+            },
+            right: {
               icon: Package,
-              label: `${productsCount} produto${productsCount !== 1 ? 's' : ''}`,
+              label: `${prodCount} produto${prodCount !== 1 ? 's' : ''}`,
               href: `/stock/products?category=${item.id}`,
               color: 'emerald',
             },
@@ -282,8 +254,8 @@ export default function ProductCategoriesPage() {
   };
 
   const renderListCard = (item: Category, isSelected: boolean) => {
-    const productsCount = item.productCount || 0;
-    const listBadges = getCategoryBadges(item);
+    const subCount = item.childrenCount || 0;
+    const prodCount = item.productCount || 0;
 
     return (
       <EntityContextMenu
@@ -307,25 +279,7 @@ export default function ProductCategoriesPage() {
               )}
             </span>
           }
-          subtitle={item.description || 'Sem descricao'}
-          metadata={
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {listBadges
-                .filter(b => b.icon)
-                .map((badge, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border shrink-0',
-                      badge.color
-                    )}
-                  >
-                    {badge.icon && <badge.icon className="w-3 h-3" />}
-                    {badge.label}
-                  </span>
-                ))}
-            </div>
-          }
+          subtitle={`Posição de exibição: ${item.displayOrder || 0}`}
           thumbnail={item.iconUrl || undefined}
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-5 h-5 text-white" />
@@ -341,15 +295,26 @@ export default function ProductCategoriesPage() {
           updatedAt={item.updatedAt}
           showStatusBadges={true}
         >
-          <Link
-            href={`/stock/products?category=${item.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
-            onClick={e => e.stopPropagation()}
-          >
-            <Package className="h-3.5 w-3.5" />
-            {productsCount} produto{productsCount !== 1 ? 's' : ''}
-            <ChevronRight className="h-3 w-3" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/stock/product-categories/${item.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              <FolderTree className="h-3.5 w-3.5" />
+              {subCount} subcategoria{subCount !== 1 ? 's' : ''}
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+            <Link
+              href={`/stock/products?category=${item.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              <Package className="h-3.5 w-3.5" />
+              {prodCount} produto{prodCount !== 1 ? 's' : ''}
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
         </EntityCard>
       </EntityContextMenu>
     );
@@ -484,7 +449,9 @@ export default function ProductCategoriesPage() {
           {isReorderMode ? (
             <SortableCategoryList
               ref={sortableRef}
-              items={page.filteredItems}
+              items={[...page.filteredItems].sort(
+                (a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)
+              )}
             />
           ) : page.isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -506,8 +473,12 @@ export default function ProductCategoriesPage() {
               renderListItem={renderListCard}
               isLoading={page.isLoading}
               isSearching={!!page.searchQuery}
-              showSorting={true}
+              showSorting={false}
               showItemCount={false}
+              defaultSortField="custom"
+              customSortFn={(a, b) =>
+                (a.displayOrder || 0) - (b.displayOrder || 0)
+              }
               toolbarStart={
                 <p className="text-sm text-muted-foreground whitespace-nowrap">
                   Total de {page.filteredItems.length}{' '}
@@ -516,8 +487,6 @@ export default function ProductCategoriesPage() {
                     : 'categorias'}
                 </p>
               }
-              defaultSortField="name"
-              defaultSortDirection="asc"
             />
           )}
 

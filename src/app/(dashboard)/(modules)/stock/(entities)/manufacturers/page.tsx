@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   CoreProvider,
   EntityCard,
@@ -25,32 +26,35 @@ import {
   useEntityCrud,
   useEntityPage,
 } from '@/core';
-import { useAuth } from '@/contexts/auth-context';
 import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
 import { productsService } from '@/services/stock';
-import type { BrasilAPICompanyData } from '@/types/brasilapi';
 import type { Manufacturer, Product } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
+import { COUNTRIES } from '@/components/ui/country-select';
+import { formatCNPJ } from '@/lib/masks';
 import {
   ArrowDownAZ,
   Calendar,
+  ChevronRight,
   Clock,
+  Copy,
   Factory,
   Globe,
+  Hash,
   Package,
+  Pencil,
   Plus,
-  RefreshCcwDot,
-  Star,
+  Trash2,
   Upload,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CircleFlag } from 'react-circle-flags';
 import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import {
-  CNPJLookupModal,
+  CreateManufacturerWizard,
   createManufacturer,
-  CreateModal,
-  DeleteConfirmModal,
   deleteManufacturer,
   DuplicateConfirmModal,
   duplicateManufacturer,
@@ -58,7 +62,6 @@ import {
   manufacturersConfig,
   RenameModal,
   updateManufacturer,
-  ViewModal,
 } from './src';
 
 type ActionButtonWithPermission = HeaderButton & {
@@ -67,14 +70,15 @@ type ActionButtonWithPermission = HeaderButton & {
 
 export default function ManufacturersPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
   const { hasPermission } = usePermissions();
 
   // ============================================================================
   // STATE
   // ============================================================================
 
-  const [cnpjLookupOpen, setCnpjLookupOpen] = useState(false);
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameManufacturer, setRenameManufacturer] =
+    useState<Manufacturer | null>(null);
 
   // ============================================================================
   // CRUD SETUP
@@ -111,7 +115,6 @@ export default function ManufacturersPage() {
       const response = await productsService.listProducts();
       return response.products;
     },
-    enabled: isAuthenticated,
   });
 
   const productCountMap = useMemo(() => {
@@ -159,62 +162,157 @@ export default function ManufacturersPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleContextView = (ids: string[]) =>
-    page.handlers.handleItemsView(ids);
+  const handleContextView = (ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/stock/manufacturers/${ids[0]}`);
+    }
+  };
 
-  const handleContextRename = (ids: string[]) =>
-    page.handlers.handleItemsEdit(ids);
+  const handleContextEdit = (ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/stock/manufacturers/${ids[0]}/edit`);
+    }
+  };
 
-  const handleContextDuplicate = (ids: string[]) =>
+  const handleContextRename = useCallback(
+    (ids: string[]) => {
+      const manufacturer = crud.items?.find(m => m.id === ids[0]) || null;
+      setRenameManufacturer(manufacturer);
+      setRenameModalOpen(true);
+    },
+    [crud.items]
+  );
+
+  const handleRenameSubmit = useCallback(
+    async (id: string, data: Partial<Manufacturer>) => {
+      await crud.update(id, data);
+      await crud.invalidate();
+      setRenameModalOpen(false);
+      setRenameManufacturer(null);
+    },
+    [crud]
+  );
+
+  const handleContextDuplicate = (ids: string[]) => {
     page.handlers.handleItemsDuplicate(ids);
+  };
 
   const handleContextDelete = (ids: string[]) => {
     page.modals.setItemsToDelete(ids);
     page.modals.open('delete');
   };
 
-  // Handle CNPJ lookup import - cria diretamente
-  const handleCnpjImport = useCallback(
-    async (data: BrasilAPICompanyData) => {
-      try {
-        // Convert BrasilAPI data to Manufacturer format
-        const manufacturerData: Partial<Manufacturer> = {
-          name: data.nome_fantasia || data.razao_social,
-          legalName: data.razao_social || undefined,
-          cnpj: data.cnpj || undefined,
-          email: data.email || undefined,
-          phone: data.ddd_telefone_1 || undefined,
-          website: undefined,
-          addressLine1: `${data.descricao_tipo_de_logradouro} ${data.logradouro}, ${data.numero}`,
-          addressLine2: data.complemento || undefined,
-          city: data.municipio,
-          state: data.uf,
-          postalCode: data.cep,
-          country: 'Brasil',
-          isActive: true,
-        };
-
-        const manufacturer = await createManufacturer(manufacturerData);
-        const displayName = manufacturer.name;
-        toast.success(`Fabricante "${displayName}" criado com sucesso!`);
-
-        // Fechar modal e atualizar listagem
-        setCnpjLookupOpen(false);
-        await crud.refetch();
-        page.handlers.handleSearch('');
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Erro ao criar fabricante';
-        toast.error(message);
-      }
-    },
-    [crud, page]
-  );
-
-  const handleCreateManually = useCallback(() => {
-    setCnpjLookupOpen(false);
+  const handleCreate = useCallback(() => {
     page.modals.open('create');
   }, [page.modals]);
+
+  // ============================================================================
+  // CONTEXT MENU ACTIONS
+  // ============================================================================
+
+  const contextActions = useMemo(
+    () => [
+      {
+        id: 'rename',
+        label: 'Renomear',
+        icon: Pencil,
+        onClick: handleContextRename,
+        hidden: (ids: string[]) => ids.length > 1,
+      },
+      {
+        id: 'duplicate',
+        label: 'Duplicar',
+        icon: Copy,
+        onClick: handleContextDuplicate,
+        separator: 'before' as const,
+      },
+      {
+        id: 'delete',
+        label: 'Excluir',
+        icon: Trash2,
+        onClick: handleContextDelete,
+        variant: 'destructive' as const,
+        separator: 'before' as const,
+      },
+    ],
+    [handleContextRename]
+  );
+
+  // ============================================================================
+  // BADGES
+  // ============================================================================
+
+  /** Resolve country name → ISO code for flag */
+  const getCountryCode = useCallback((name: string): string | null => {
+    if (!name) return null;
+    const lower = name.toLowerCase().trim();
+    const match = COUNTRIES.find(c => c.name.toLowerCase() === lower);
+    return match?.code ?? null;
+  }, []);
+
+  /** Create a flag icon component for a given country code */
+  const makeFlagIcon = useCallback(
+    (cc: string) =>
+      function FlagIcon() {
+        return <CircleFlag countryCode={cc} height={12} width={12} />;
+      },
+    []
+  );
+
+  const getManufacturerBadges = (item: Manufacturer) => {
+    const badges: {
+      label: string;
+      variant: 'outline';
+      icon?: typeof Globe;
+      color: string;
+      flag?: string;
+    }[] = [];
+
+    // Country badge with flag (violet) — first
+    const cc = getCountryCode(item.country);
+    badges.push({
+      label: item.country || '—',
+      variant: 'outline',
+      icon: cc && cc !== 'OTHER' ? (makeFlagIcon(cc.toLowerCase()) as unknown as typeof Globe) : Globe,
+      color:
+        'border-violet-600/25 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300',
+      flag: cc && cc !== 'OTHER' ? cc.toLowerCase() : undefined,
+    });
+
+    // Code badge (slate) — second
+    if (item.code) {
+      badges.push({
+        label: item.code,
+        variant: 'outline',
+        icon: Hash,
+        color:
+          'border-slate-600/25 dark:border-slate-500/20 bg-slate-50 dark:bg-slate-500/8 text-slate-700 dark:text-slate-300',
+      });
+    }
+
+    // Website badge (sky)
+    if (item.website) {
+      badges.push({
+        label: 'Website',
+        variant: 'outline',
+        icon: Globe,
+        color:
+          'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+      });
+    }
+
+    // Inactive badge (amber)
+    if (!item.isActive) {
+      badges.push({
+        label: 'Inativo',
+        variant: 'outline',
+        color:
+          'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
+      });
+    }
+
+    return badges;
+  };
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -263,58 +361,17 @@ export default function ManufacturersPage() {
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
-        onEdit={handleContextRename}
-        labels={{ edit: 'Renomear' }}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        onEdit={handleContextEdit}
+        actions={contextActions}
       >
         <EntityCard
           id={item.id}
           variant="grid"
           title={(item.name || '').toUpperCase()}
-          subtitle={item.country || '—'}
+          subtitle={item.cnpj ? formatCNPJ(item.cnpj) : 'Sem CNPJ'}
           icon={Factory}
           iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
-          badges={[
-            ...(item.rating
-              ? [
-                  {
-                    label: `${item.rating}/5`,
-                    variant: 'outline' as const,
-                    icon: Star,
-                  },
-                ]
-              : []),
-            ...(item.website
-              ? [
-                  {
-                    label: 'Website',
-                    variant: 'secondary' as const,
-                    icon: Globe,
-                  },
-                ]
-              : []),
-            {
-              label: item.isActive ? 'Ativo' : 'Inativo',
-              variant: item.isActive ? 'default' : 'secondary',
-            },
-          ]}
-          metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-          }
+          badges={getManufacturerBadges(item)}
           footer={{
             type: 'single',
             button: {
@@ -337,79 +394,67 @@ export default function ManufacturersPage() {
 
   const renderListCard = (item: Manufacturer, isSelected: boolean) => {
     const productCount = productCountMap.get(item.id) || 0;
+    const listBadges = getManufacturerBadges(item);
 
     return (
       <EntityContextMenu
         itemId={item.id}
         onView={handleContextView}
-        onEdit={handleContextRename}
-        labels={{ edit: 'Renomear' }}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        onEdit={handleContextEdit}
+        actions={contextActions}
       >
         <EntityCard
           id={item.id}
           variant="list"
-          title={(item.name || '').toUpperCase()}
-          subtitle={item.country || '—'}
-          icon={Factory}
-          iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
-          badges={[
-            ...(item.rating
-              ? [
-                  {
-                    label: `${item.rating}/5`,
-                    variant: 'outline' as const,
-                    icon: Star,
-                  },
-                ]
-              : []),
-            ...(item.website
-              ? [
-                  {
-                    label: 'Website',
-                    variant: 'secondary' as const,
-                    icon: Globe,
-                  },
-                ]
-              : []),
-            {
-              label: item.isActive ? 'Ativo' : 'Inativo',
-              variant: item.isActive ? 'default' : 'secondary',
-            },
-          ]}
+          title={
+            <span className="flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-gray-900 dark:text-white truncate">
+                {(item.name || '').toUpperCase()}
+              </span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {item.cnpj ? formatCNPJ(item.cnpj) : 'Sem CNPJ'}
+              </span>
+            </span>
+          }
           metadata={
-            <div className="flex items-center gap-4 text-xs">
-              {item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <Calendar className="h-3 w-3 text-blue-500" />
-                  Criado em {new Date(item.createdAt).toLocaleDateString()}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {listBadges.map((badge, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border shrink-0',
+                    badge.color
+                  )}
+                >
+                  {badge.flag ? (
+                    <CircleFlag countryCode={badge.flag} height={12} width={12} className="shrink-0" />
+                  ) : badge.icon ? (
+                    <badge.icon className="w-3 h-3" />
+                  ) : null}
+                  {badge.label}
                 </span>
-              )}
-              {item.updatedAt && item.updatedAt !== item.createdAt && (
-                <span className="flex items-center gap-1 ">
-                  <RefreshCcwDot className="h-3 w-3 text-yellow-500" />
-                  Atualizado em {new Date(item.updatedAt).toLocaleDateString()}
-                </span>
-              )}
+              ))}
             </div>
           }
-          footer={{
-            type: 'single',
-            button: {
-              icon: Package,
-              label: `${productCount} ${productCount === 1 ? 'produto' : 'produtos'}`,
-              href: `/stock/products?manufacturer=${item.id}`,
-              color: 'emerald',
-            },
-          }}
+          icon={Factory}
+          iconBgColor="bg-linear-to-br from-violet-500 to-purple-600"
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
-        />
+        >
+          <Link
+            href={`/stock/products?manufacturer=${item.id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+            onClick={e => e.stopPropagation()}
+          >
+            <Package className="h-3.5 w-3.5" />
+            {productCount} produto{productCount !== 1 ? 's' : ''}
+            <ChevronRight className="h-3 w-3" />
+          </Link>
+        </EntityCard>
       </EntityContextMenu>
     );
   };
@@ -434,10 +479,6 @@ export default function ManufacturersPage() {
     router.push('/import/stock/manufacturers');
   }, [router]);
 
-  const handleCreate = useCallback(() => {
-    setCnpjLookupOpen(true);
-  }, []);
-
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
       {
@@ -445,7 +486,7 @@ export default function ManufacturersPage() {
         title: 'Importar',
         icon: Upload,
         onClick: handleImport,
-        variant: 'outline',
+        variant: 'ghost',
         permission: manufacturersConfig.permissions?.import,
       },
       {
@@ -534,6 +575,15 @@ export default function ManufacturersPage() {
                 page.handlers.handleItemDoubleClick(item)
               }
               showSorting={true}
+              showItemCount={false}
+              toolbarStart={
+                <p className="text-sm text-muted-foreground whitespace-nowrap">
+                  Total de {page.filteredItems.length}{' '}
+                  {page.filteredItems.length === 1
+                    ? 'fabricante'
+                    : 'fabricantes'}
+                </p>
+              }
               defaultSortField="custom"
               defaultSortDirection="asc"
               customSortOptions={sortOptions}
@@ -555,37 +605,23 @@ export default function ManufacturersPage() {
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{
                 view: true,
+                edit: true,
                 duplicate: true,
                 delete: true,
               }}
               handlers={{
                 onView: page.handlers.handleItemsView,
+                onEdit: page.handlers.handleItemsEdit,
                 onDuplicate: page.handlers.handleItemsDuplicate,
                 onDelete: page.handlers.handleItemsDelete,
               }}
             />
           )}
 
-          {/* CNPJ Lookup Modal */}
-          <CNPJLookupModal
-            isOpen={cnpjLookupOpen}
-            onClose={() => setCnpjLookupOpen(false)}
-            onImport={handleCnpjImport}
-            onCreateManually={handleCreateManually}
-          />
-
-          {/* View Modal */}
-          <ViewModal
-            isOpen={page.modals.isOpen('view')}
-            onClose={() => page.modals.close('view')}
-            manufacturer={page.modals.viewingItem}
-          />
-
-          {/* Create Modal */}
-          <CreateModal
-            isOpen={page.modals.isOpen('create')}
-            onClose={() => page.modals.close('create')}
-            isSubmitting={crud.isCreating}
+          {/* Create Wizard */}
+          <CreateManufacturerWizard
+            open={page.modals.isOpen('create')}
+            onOpenChange={open => !open && page.modals.close('create')}
             onSubmit={async data => {
               await crud.create(data);
             }}
@@ -593,22 +629,23 @@ export default function ManufacturersPage() {
 
           {/* Rename Modal */}
           <RenameModal
-            isOpen={page.modals.isOpen('edit')}
-            onClose={() => page.modals.close('edit')}
-            manufacturer={page.modals.editingItem}
-            isSubmitting={crud.isUpdating}
-            onSubmit={async (id, data) => {
-              await crud.update(id, data);
+            isOpen={renameModalOpen}
+            onClose={() => {
+              setRenameModalOpen(false);
+              setRenameManufacturer(null);
             }}
+            manufacturer={renameManufacturer}
+            isSubmitting={crud.isUpdating}
+            onSubmit={handleRenameSubmit}
           />
 
-          {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          {/* Delete Confirmation (PIN) */}
+          <VerifyActionPinModal
             isOpen={page.modals.isOpen('delete')}
             onClose={() => page.modals.close('delete')}
-            itemCount={page.modals.itemsToDelete.length}
-            onConfirm={page.handlers.handleDeleteConfirm}
-            isLoading={crud.isDeleting}
+            onSuccess={() => page.handlers.handleDeleteConfirm()}
+            title="Confirmar Exclusão"
+            description={`Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} ${page.modals.itemsToDelete.length === 1 ? 'fabricante' : 'fabricantes'}.`}
           />
 
           {/* Duplicate Confirmation */}

@@ -1,4 +1,5 @@
 export * from './cnpj-lookup-modal';
+export * from './create-manufacturer-wizard';
 export * from './create-modal';
 export * from './delete-confirm-modal';
 export * from './duplicate-confirm-modal';

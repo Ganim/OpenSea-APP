@@ -1,6 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { PageBreadcrumb, type BreadcrumbItemData } from './page-breadcrumb';
@@ -87,30 +92,52 @@ export function PageActionBar({
 
         {/* Renderiza HeaderButtons se fornecidos */}
         {buttons
-          ? buttons.map(button => (
-              <Button
-                key={button.id}
-                variant={button.variant || 'default'}
-                size="sm"
-                onClick={button.onClick}
-                title={button.title}
-                disabled={button.disabled}
-                className="min-h-0"
-              >
-                {button.icon && (
-                  <button.icon
-                    className={cn('h-4 w-4', {
-                      'text-primary': button.variant === 'ghost',
-                      'text-white':
-                        !button.variant ||
-                        button.variant === 'default' ||
-                        button.variant === 'destructive',
-                    })}
-                  />
-                )}
-                <span className="hidden lg:inline">{button.title}</span>
-              </Button>
-            ))
+          ? buttons.map(button => {
+              const isIconOnly = !!button.tooltip;
+
+              const btn = (
+                <Button
+                  key={button.id}
+                  variant={button.variant || 'default'}
+                  size="sm"
+                  onClick={button.onClick}
+                  title={isIconOnly ? undefined : button.title}
+                  disabled={button.disabled}
+                  className={cn('min-h-0', button.className)}
+                >
+                  {button.icon && (
+                    <button.icon
+                      className={cn('h-4 w-4', {
+                        'text-primary': button.variant === 'ghost',
+                        'text-white':
+                          !button.className &&
+                          (!button.variant ||
+                            button.variant === 'default' ||
+                            button.variant === 'destructive'),
+                      })}
+                    />
+                  )}
+                  {!isIconOnly && (
+                    <span className={button.icon ? 'hidden lg:inline' : undefined}>
+                      {button.title}
+                    </span>
+                  )}
+                </Button>
+              );
+
+              if (isIconOnly) {
+                return (
+                  <Tooltip key={button.id}>
+                    <TooltipTrigger asChild>{btn}</TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      {button.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+
+              return btn;
+            })
           : null}
       </div>
     </div>

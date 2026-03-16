@@ -32,7 +32,6 @@ import {
   useCategories,
   useCategory,
   useDeleteCategory,
-  useReorderCategories,
   useUpdateCategory,
 } from '@/hooks/stock/use-categories';
 import { logger } from '@/lib/logger';
@@ -40,13 +39,9 @@ import type { Category, UpdateCategoryRequest } from '@/types/stock';
 import { FolderTree, Loader2, Save, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
 import { toast } from 'sonner';
-import {
-  SortableCategoryList,
-  type SortableCategoryListRef,
-} from '../../src/components/sortable-category-list';
 
 export default function EditCategoryPage({
   params,
@@ -75,8 +70,6 @@ export default function EditCategoryPage({
   );
   const updateCategoryMutation = useUpdateCategory();
   const deleteCategoryMutation = useDeleteCategory();
-  const reorderMutation = useReorderCategories();
-  const subcategorySortableRef = useRef<SortableCategoryListRef>(null);
 
   // ============================================================================
   // FORM STATE
@@ -93,11 +86,6 @@ export default function EditCategoryPage({
   // ============================================================================
   // COMPUTED
   // ============================================================================
-
-  const subcategories = useMemo(
-    () => categories.filter((c: Category) => c.parentId === categoryId),
-    [categories, categoryId]
-  );
 
   const availableParents = useMemo(
     () =>
@@ -146,7 +134,7 @@ export default function EditCategoryPage({
       const data: UpdateCategoryRequest = {
         name: name.trim(),
         description: description.trim() || undefined,
-        iconUrl: iconUrl.trim() || null,
+        iconUrl: iconUrl.trim() || undefined,
         parentId: parentId === 'none' ? undefined : parentId || undefined,
         isActive,
       };
@@ -199,7 +187,9 @@ export default function EditCategoryPage({
       title: 'Excluir',
       icon: Trash2,
       onClick: () => setDeleteModalOpen(true),
-      variant: 'destructive',
+      variant: 'default',
+      className:
+        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-[#334155] dark:text-white dark:hover:bg-rose-600',
       disabled: isSaving,
     },
     {
@@ -347,10 +337,12 @@ export default function EditCategoryPage({
               </p>
               <h1 className="text-xl font-bold truncate">{category.name}</h1>
             </div>
-            <div className="hidden sm:flex flex-col items-end text-right gap-0.5">
-              <p className="text-xs text-muted-foreground">
-                Criado em {formattedDate}
-              </p>
+            <div className="hidden sm:flex items-center gap-3 shrink-0 rounded-lg bg-white/5 px-4 py-2">
+              <div className="text-right">
+                <p className="text-xs font-semibold">Status</p>
+                <p className="text-[11px] text-muted-foreground">{isActive ? 'Ativa' : 'Inativa'}</p>
+              </div>
+              <Switch checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
         </Card>
@@ -358,6 +350,19 @@ export default function EditCategoryPage({
         {/* Form Card */}
         <Card className="bg-white/5 py-2 overflow-hidden">
           <div className="px-6 py-4 space-y-8">
+            {/* Section: Informações Gerais */}
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <FolderTree className="h-5 w-5 text-foreground" />
+                  <div>
+                    <h3 className="text-base font-semibold">Informações Gerais</h3>
+                    <p className="text-sm text-muted-foreground">Dados básicos da categoria</p>
+                  </div>
+                </div>
+                <div className="border-b border-border" />
+              </div>
+
             {/* Row 1: Nome, Categoria Pai, Ícone */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="grid gap-2">
@@ -433,51 +438,10 @@ export default function EditCategoryPage({
               />
             </div>
 
-            {/* Row 3: Status toggle */}
-            <div className="flex items-center justify-between w-full rounded-lg border border-border bg-white dark:bg-slate-800/60 p-4">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm font-medium">Categoria Ativa</p>
-                  <p className="text-xs text-muted-foreground">
-                    Categorias inativas não aparecem nas listagens
-                  </p>
-                </div>
-              </div>
-              <Switch checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
         </Card>
 
-        {/* Subcategories Section */}
-        {subcategories.length > 0 && (
-          <Card className="bg-white/5 py-2 overflow-hidden">
-            <div className="px-6 py-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <FolderTree className="h-5 w-5" />
-                  Subcategorias ({subcategories.length})
-                </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (subcategorySortableRef.current) {
-                      reorderMutation.mutate(
-                        subcategorySortableRef.current.getReorderedItems()
-                      );
-                    }
-                  }}
-                >
-                  Salvar Ordem
-                </Button>
-              </div>
-              <SortableCategoryList
-                ref={subcategorySortableRef}
-                items={subcategories}
-              />
-            </div>
-          </Card>
-        )}
       </PageBody>
 
       {/* Delete Confirmation */}

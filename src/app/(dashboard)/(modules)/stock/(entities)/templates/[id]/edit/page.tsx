@@ -137,7 +137,9 @@ export default function TemplateEditPage() {
       title: 'Excluir',
       icon: Trash2,
       onClick: () => setDeleteModalOpen(true),
-      variant: 'destructive',
+      variant: 'default',
+      className:
+        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-[#334155] dark:text-white dark:hover:bg-rose-600',
       disabled: isDeleting,
     },
     {

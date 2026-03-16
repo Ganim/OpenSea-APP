@@ -127,12 +127,14 @@ export function Header({
                   size="default"
                   aria-label={button.title}
                 >
-                  <Icon
-                    className={cn(
-                      button.style?.iconSize || 'w-4 h-4',
-                      button.style?.className
-                    )}
-                  />
+                  {Icon && (
+                    <Icon
+                      className={cn(
+                        button.style?.iconSize || 'w-4 h-4',
+                        button.style?.className
+                      )}
+                    />
+                  )}
                   {/* Esconde o texto em mobile e mantém em telas maiores */}
                   <span className="hidden sm:inline">{button.title}</span>
                 </Button>

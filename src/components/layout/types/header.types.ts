@@ -30,8 +30,8 @@ export interface HeaderButton {
   id?: string;
   /** Título/label do botão */
   title: string;
-  /** Ícone (Lucide, react-icons, ou qualquer React component) */
-  icon: React.ElementType;
+  /** Ícone (Lucide, react-icons, ou qualquer React component). Opcional — se omitido, exibe apenas texto. */
+  icon?: React.ElementType;
   /** Função chamada ao clicar */
   onClick: () => void | Promise<void>;
   /** Variante visual do botão */

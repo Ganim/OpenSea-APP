@@ -1,34 +1,83 @@
 /**
- * Edit Manufacturer Page - Identical to Company Edit Page
- * Uses manual form (proven to work) with companies layout
+ * Edit Manufacturer Page
+ * Follows the standard edit page pattern: PageLayout > PageHeader > PageBody
  */
 
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { GridError } from '@/components/handlers/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import {
+  CountrySelect,
+  COUNTRIES,
+  getCountryName,
+} from '@/components/ui/country-select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { logger } from '@/lib/logger';
 import { formatCEP, formatPhone } from '@/lib/masks';
 import type { Manufacturer, UpdateManufacturerRequest } from '@/types/stock';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Factory, Save } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Factory,
+  Globe,
+  Info,
+  Loader2,
+  MapPinHouse,
+  NotebookText,
+  Phone,
+  Save,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { logger } from '@/lib/logger';
 import { manufacturersApi } from '../../src';
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Icon className="h-5 w-5 text-foreground" />
+          <div>
+            <h3 className="text-base font-semibold">{title}</h3>
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          </div>
+        </div>
+      </div>
+      <div className="border-b border-border" />
+    </div>
+  );
+}
+
+/** Resolve country name → ISO code */
+function getCountryCodeFromName(name: string): string {
+  if (!name) return 'BR';
+  const lower = name.toLowerCase().trim();
+  const match = COUNTRIES.find(c => c.name.toLowerCase() === lower);
+  return match?.code ?? 'BR';
+}
 
 export default function EditManufacturerPage() {
   const params = useParams();
@@ -40,7 +89,8 @@ export default function EditManufacturerPage() {
   const [name, setName] = useState('');
   const [legalName, setLegalName] = useState('');
   const [cnpj, setCnpj] = useState('');
-  const [country, setCountry] = useState('');
+  const [countryCode, setCountryCode] = useState('BR');
+  const [rating, setRating] = useState(0);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
@@ -50,10 +100,18 @@ export default function EditManufacturerPage() {
   const [state, setState] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [isActive, setIsActive] = useState(true);
-  const [rating, setRating] = useState('0');
   const [notes, setNotes] = useState('');
 
-  const { data: manufacturer, isLoading } = useQuery<Manufacturer>({
+  // UI state
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const {
+    data: manufacturer,
+    isLoading,
+    error,
+  } = useQuery<Manufacturer>({
     queryKey: ['manufacturers', manufacturerId],
     queryFn: () => manufacturersApi.get(manufacturerId),
     enabled: !!manufacturerId,
@@ -65,7 +123,7 @@ export default function EditManufacturerPage() {
       setName(manufacturer.name || '');
       setLegalName(manufacturer.legalName || '');
       setCnpj(manufacturer.cnpj || '');
-      setCountry(manufacturer.country || '');
+      setCountryCode(getCountryCodeFromName(manufacturer.country || ''));
       setEmail(manufacturer.email || '');
       setPhone(manufacturer.phone || '');
       setWebsite(manufacturer.website || '');
@@ -75,365 +133,443 @@ export default function EditManufacturerPage() {
       setState(manufacturer.state || '');
       setPostalCode(manufacturer.postalCode || '');
       setIsActive(manufacturer.isActive ?? true);
-      setRating(String(manufacturer.rating || 0));
+      setRating(manufacturer.rating || 0);
       setNotes(manufacturer.notes || '');
     }
   }, [manufacturer]);
 
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdateManufacturerRequest) =>
-      manufacturersApi.update(manufacturerId, data),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['manufacturers'] });
-      toast.success('Fabricante atualizado com sucesso');
-      router.push(`/stock/manufacturers/${manufacturerId}`);
-    },
-    onError: error => {
-      logger.error(
-        'Erro ao atualizar fabricante',
-        error instanceof Error ? error : undefined
-      );
-      toast.error('Não foi possível atualizar o fabricante');
-    },
-  });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !country.trim()) {
+    if (!name.trim() || !countryCode) {
       toast.error('Nome e País são obrigatórios');
       return;
     }
 
-    const data: UpdateManufacturerRequest = {
-      name: name.trim(),
-      legalName: legalName.trim() || undefined,
-      cnpj: cnpj.trim() || undefined,
-      country: country.trim(),
-      email: email.trim() || undefined,
-      phone: phone.trim() || undefined,
-      website: website.trim() || undefined,
-      addressLine1: addressLine1.trim() || undefined,
-      addressLine2: addressLine2.trim() || undefined,
-      city: city.trim() || undefined,
-      state: state.trim() || undefined,
-      postalCode: postalCode.trim() || undefined,
-      isActive,
-      rating: parseFloat(rating) || undefined,
-      notes: notes.trim() || undefined,
-    };
+    try {
+      setIsSaving(true);
+      const data: UpdateManufacturerRequest = {
+        name: name.trim(),
+        legalName: legalName.trim() || undefined,
+        cnpj: cnpj.trim() || undefined,
+        country: getCountryName(countryCode),
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
+        website: website.trim() || undefined,
+        addressLine1: addressLine1.trim() || undefined,
+        addressLine2: addressLine2.trim() || undefined,
+        city: city.trim() || undefined,
+        state: state.trim() || undefined,
+        postalCode: postalCode.trim() || undefined,
+        isActive,
+        rating: rating || undefined,
+        notes: notes.trim() || undefined,
+      };
 
-    await updateMutation.mutateAsync(data);
+      await manufacturersApi.update(manufacturerId, data);
+      await queryClient.invalidateQueries({ queryKey: ['manufacturers'] });
+      toast.success('Fabricante atualizado com sucesso');
+      router.push(`/stock/manufacturers/${manufacturerId}`);
+    } catch (err) {
+      logger.error(
+        'Failed to update manufacturer',
+        err instanceof Error ? err : new Error(String(err))
+      );
+      toast.error('Não foi possível atualizar o fabricante');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  const handleSaveClick = () => {
+    const form = document.getElementById(
+      'manufacturer-form'
+    ) as HTMLFormElement;
+    if (form) {
+      form.dispatchEvent(
+        new Event('submit', { cancelable: true, bubbles: true })
+      );
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await manufacturersApi.delete(manufacturerId);
+      await queryClient.invalidateQueries({ queryKey: ['manufacturers'] });
+      toast.success('Fabricante excluído com sucesso!');
+      router.push('/stock/manufacturers');
+    } catch (err) {
+      logger.error(
+        'Failed to delete manufacturer',
+        err instanceof Error ? err : new Error(String(err)),
+        { manufacturerId }
+      );
+      toast.error('Erro ao excluir fabricante');
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+    }
+  };
+
+  // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Fabricantes', href: '/stock/manufacturers' },
+              { label: '...' },
+              { label: 'Editar' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
     );
   }
 
-  if (!manufacturer) {
+  // Error state
+  if (error || !manufacturer) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-12 text-center">
-          <Factory className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">
-            Fabricante não encontrado
-          </h2>
-          <Button
-            onClick={() => router.push('/stock/manufacturers')}
-            className="mt-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Fabricantes
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Fabricantes', href: '/stock/manufacturers' },
+              { label: 'Erro' },
+            ]}
+          />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Fabricante não encontrado"
+            message="O fabricante que você está procurando não existe ou foi removido."
+            action={{
+              label: 'Voltar para Fabricantes',
+              onClick: () => router.push('/stock/manufacturers'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
     );
   }
+
+  const actionButtons: HeaderButton[] = [
+    {
+      id: 'cancel',
+      title: 'Cancelar',
+      onClick: () => router.push(`/stock/manufacturers/${manufacturerId}`),
+      variant: 'ghost',
+    },
+    {
+      id: 'delete',
+      title: 'Excluir',
+      icon: Trash2,
+      onClick: () => setDeleteModalOpen(true),
+      variant: 'default',
+      className:
+        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-[#334155] dark:text-white dark:hover:bg-rose-600',
+      disabled: isDeleting,
+    },
+    {
+      id: 'save',
+      title: isSaving ? 'Salvando...' : 'Salvar alterações',
+      icon: isSaving ? Loader2 : Save,
+      onClick: handleSaveClick,
+      variant: 'default',
+      disabled: isSaving,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex w-full items-center justify-between">
-        <PageBreadcrumb
-          items={[
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
             { label: 'Estoque', href: '/stock' },
             { label: 'Fabricantes', href: '/stock/manufacturers' },
             {
-              label: manufacturer?.name || '...',
+              label: manufacturer.name,
               href: `/stock/manufacturers/${manufacturerId}`,
             },
-            {
-              label: 'Editar',
-              href: `/stock/manufacturers/${manufacturerId}/edit`,
-            },
+            { label: 'Editar' },
           ]}
+          buttons={actionButtons}
         />
-        <div className="flex gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => {
-              const form = document.getElementById(
-                'manufacturer-form'
-              ) as HTMLFormElement;
-              if (form) {
-                form.dispatchEvent(
-                  new Event('submit', { cancelable: true, bubbles: true })
-                );
-              }
-            }}
-            className="gap-2"
-            disabled={updateMutation.isPending}
-          >
-            <Save className="h-4 w-4" />
-            Salvar
-          </Button>
-        </div>
-      </div>
+      </PageHeader>
 
-      {/* Manufacturer Info Card */}
-      <Card className="p-4 sm:p-6">
-        <div className="flex gap-4 sm:flex-row items-center sm:gap-6">
-          <div className="flex items-center justify-center h-10 w-10 md:h-16 md:w-16 rounded-lg bg-linear-to-br from-violet-500 to-purple-600 shrink-0">
-            <Factory className="md:h-8 md:w-8 text-white" />
-          </div>
-          <div className="flex justify-between flex-1 gap-4 flex-row items-center">
-            <div>
-              <h1 className="text-lg sm:text-3xl font-bold tracking-tight">
+      <PageBody>
+        {/* Identity Card */}
+        <Card className="bg-white/5 p-5">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-purple-600 shadow-lg">
+              <Factory className="h-6 w-6 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-muted-foreground">
+                Editando fabricante
+              </p>
+              <h1 className="truncate text-xl font-bold">
                 {manufacturer.name}
               </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Editar Fabricante
-              </p>
             </div>
-            <div>
-              <Badge variant="secondary" className="mt-1">
-                Editando
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Form */}
-      <Card className="w-full p-4 sm:p-6">
-        <form
-          id="manufacturer-form"
-          onSubmit={handleSubmit}
-          className="space-y-6"
-        >
-          {/* Informações Básicas */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Identificação</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="name">
-                  Nome <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Nome do fabricante"
-                  required
-                  maxLength={255}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="legalName">Razão Social</Label>
-                <Input
-                  id="legalName"
-                  value={legalName}
-                  onChange={e => setLegalName(e.target.value)}
-                  placeholder="Razão social completa"
-                  maxLength={256}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
-                  id="cnpj"
-                  value={cnpj}
-                  onChange={e => setCnpj(e.target.value)}
-                  placeholder="00.000.000/0000-00"
-                  maxLength={18}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="country">
-                  País <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="country"
-                  value={country}
-                  onChange={e => setCountry(e.target.value)}
-                  placeholder="Brasil"
-                  required
-                  maxLength={100}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="isActive">Status</Label>
-                <Select
-                  value={isActive ? 'active' : 'inactive'}
-                  onValueChange={value => setIsActive(value === 'active')}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Ativo</SelectItem>
-                    <SelectItem value="inactive">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="rating">Avaliação (0-5)</Label>
-                <Input
-                  id="rating"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={rating}
-                  onChange={e => setRating(e.target.value)}
-                  placeholder="0.0"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Contato */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contato</h3>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="contato@fabricante.com"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={e => setPhone(formatPhone(e.target.value))}
-                  placeholder="(00) 00000-0000"
-                  maxLength={20}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="website">Website</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  value={website}
-                  onChange={e => setWebsite(e.target.value)}
-                  placeholder="https://fabricante.com"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Endereço */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Endereço</h3>
-
-            <div className="grid gap-2">
-              <Label htmlFor="addressLine1">Endereço Linha 1</Label>
-              <Input
-                id="addressLine1"
-                value={addressLine1}
-                onChange={e => setAddressLine1(e.target.value)}
-                placeholder="Rua, número"
-                maxLength={255}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="addressLine2">Endereço Linha 2</Label>
-              <Input
-                id="addressLine2"
-                value={addressLine2}
-                onChange={e => setAddressLine2(e.target.value)}
-                placeholder="Complemento, bairro"
-                maxLength={255}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="grid gap-2">
-                <Label htmlFor="city">Cidade</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={e => setCity(e.target.value)}
-                  placeholder="São Paulo"
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="state">Estado</Label>
-                <Input
-                  id="state"
-                  value={state}
-                  onChange={e => setState(e.target.value)}
-                  placeholder="SP"
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="postalCode">CEP</Label>
-                <Input
-                  id="postalCode"
-                  value={postalCode}
-                  onChange={e => setPostalCode(formatCEP(e.target.value))}
-                  placeholder="00000-000"
-                  maxLength={20}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Observações */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Observações</h3>
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notas</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                placeholder="Observações adicionais"
-                rows={4}
-                maxLength={1000}
+            <div className="flex items-center gap-3">
+              <Label htmlFor="status-switch" className="text-sm text-muted-foreground">
+                {isActive ? 'Ativo' : 'Inativo'}
+              </Label>
+              <Switch
+                id="status-switch"
+                checked={isActive}
+                onCheckedChange={setIsActive}
               />
             </div>
           </div>
-        </form>
-      </Card>
-    </div>
+        </Card>
+
+        {/* Form Card */}
+        <Card className="bg-white/5 overflow-hidden py-2">
+          <form
+            id="manufacturer-form"
+            onSubmit={handleSubmit}
+            className="space-y-8 px-6 py-4"
+          >
+            {/* Identificação */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={Info}
+                title="Identificação"
+                subtitle="Dados principais do fabricante"
+              />
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                {/* Linha 1: Razão Social + Nome Fantasia */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="legalName">Razão Social</Label>
+                    <Input
+                      id="legalName"
+                      value={legalName}
+                      onChange={e => setLegalName(e.target.value)}
+                      placeholder="Razão social completa"
+                      maxLength={256}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">
+                      Nome Fantasia <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Nome do fabricante"
+                      required
+                      maxLength={255}
+                    />
+                  </div>
+                </div>
+
+                {/* Linha 2: CNPJ + País */}
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="cnpj">CNPJ</Label>
+                    <Input
+                      id="cnpj"
+                      value={cnpj}
+                      onChange={e => setCnpj(e.target.value)}
+                      placeholder="00.000.000/0000-00"
+                      maxLength={18}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>
+                      País <span className="text-rose-500">*</span>
+                    </Label>
+                    <CountrySelect
+                      value={countryCode}
+                      onValueChange={setCountryCode}
+                    />
+                  </div>
+                </div>
+
+                {/* Linha 3: Website + Avaliação (estrelas) */}
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      type="url"
+                      value={website}
+                      onChange={e => setWebsite(e.target.value)}
+                      placeholder="https://fabricante.com"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Avaliação</Label>
+                    <div className="flex items-center gap-1 h-9">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRating(rating === star ? 0 : star)}
+                          className="p-0.5 rounded hover:scale-110 transition-transform"
+                        >
+                          <Star
+                            className={`h-5 w-5 ${
+                              star <= rating
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'fill-none text-gray-300 dark:text-gray-600 hover:text-amber-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                      {rating > 0 && (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {rating}/5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contato */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={Phone}
+                title="Contato"
+                subtitle="Informações de contato"
+              />
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="contato@fabricante.com"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="phone">Telefone</Label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={e => setPhone(formatPhone(e.target.value))}
+                      placeholder="(00) 00000-0000"
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Endereço */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={MapPinHouse}
+                title="Endereço"
+                subtitle="Localização do fabricante"
+              />
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="addressLine1">Endereço Linha 1</Label>
+                    <Input
+                      id="addressLine1"
+                      value={addressLine1}
+                      onChange={e => setAddressLine1(e.target.value)}
+                      placeholder="Rua, número"
+                      maxLength={255}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="addressLine2">Endereço Linha 2</Label>
+                    <Input
+                      id="addressLine2"
+                      value={addressLine2}
+                      onChange={e => setAddressLine2(e.target.value)}
+                      placeholder="Complemento, bairro"
+                      maxLength={255}
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-2">
+                    <Label htmlFor="city">Cidade</Label>
+                    <Input
+                      id="city"
+                      value={city}
+                      onChange={e => setCity(e.target.value)}
+                      placeholder="São Paulo"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="state">Estado</Label>
+                    <Input
+                      id="state"
+                      value={state}
+                      onChange={e => setState(e.target.value)}
+                      placeholder="SP"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="postalCode">CEP</Label>
+                    <Input
+                      id="postalCode"
+                      value={postalCode}
+                      onChange={e => setPostalCode(formatCEP(e.target.value))}
+                      placeholder="00000-000"
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Observações */}
+            <div className="space-y-5">
+              <SectionHeader
+                icon={NotebookText}
+                title="Observações"
+                subtitle="Notas adicionais"
+              />
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                <div className="grid gap-2">
+                  <Label htmlFor="notes">Notas</Label>
+                  <Textarea
+                    id="notes"
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    placeholder="Observações adicionais"
+                    rows={4}
+                    maxLength={1000}
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+        </Card>
+      </PageBody>
+
+      {/* Delete PIN Confirmation Modal */}
+      <VerifyActionPinModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onSuccess={handleDelete}
+        title="Excluir Fabricante"
+        description={`Digite seu PIN de ação para excluir o fabricante "${manufacturer.name}". Esta ação não pode ser desfeita.`}
+      />
+    </PageLayout>
   );
 }

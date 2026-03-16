@@ -149,7 +149,9 @@ export default function EditTagPage({
         title: 'Excluir',
         icon: Trash2,
         onClick: handleDeleteClick,
-        variant: 'destructive' as const,
+        variant: 'default' as const,
+        className:
+          'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-[#334155] dark:text-white dark:hover:bg-rose-600',
         disabled: isLoading || isDeleting,
       },
       {

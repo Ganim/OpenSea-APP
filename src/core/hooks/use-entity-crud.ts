@@ -342,10 +342,14 @@ export function useEntityCrud<T extends BaseEntity>(
   // RETURN
   // =============================================================================
 
+  // When not authenticated, useQuery returns isLoading=false + data=undefined.
+  // Treat this as loading to prevent flash of empty state.
+  const effectiveIsLoading = isLoading || (!isAuthenticated && !error);
+
   return {
     // Queries
     items,
-    isLoading,
+    isLoading: effectiveIsLoading,
     error: error as Error | null,
     refetch,
 

@@ -17,22 +17,37 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Card } from '@/components/ui/card';
 import { categoriesConfig } from '@/config/entities/categories.config';
 import { EntityCard, EntityContextMenu, EntityGrid } from '@/core';
-import { useCategories, useCategory } from '@/hooks/stock/use-categories';
-import type { Category } from '@/types/stock';
 import {
+  useCategories,
+  useCategory,
+  useReorderCategories,
+} from '@/hooks/stock/use-categories';
+import { categoriesService } from '@/services/stock';
+import type { Category } from '@/types/stock';
+import { Button } from '@/components/ui/button';
+import {
+  ArrowUpDown,
   Calendar,
+  Check,
+  ChevronRight,
   Clock,
   Edit,
   FileText,
   FolderTree,
-  Layers,
   Package,
+  Plus,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { PiFolderOpenDuotone } from 'react-icons/pi';
+import {
+  SortableCategoryList,
+  type SortableCategoryListRef,
+} from '../src/components/sortable-category-list';
+import { CreateModal } from '../src/modals';
 
 // ============================================================================
 // SECTION HEADER
@@ -43,11 +58,13 @@ function SectionHeader({
   title,
   subtitle,
   badge,
+  action,
 }: {
   icon: React.ElementType;
   title: string;
   subtitle: string;
   badge?: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="space-y-3">
@@ -59,7 +76,10 @@ function SectionHeader({
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </div>
-        {badge}
+        <div className="flex items-center gap-2">
+          {badge}
+          {action}
+        </div>
       </div>
       <div className="border-b border-border" />
     </div>
@@ -87,14 +107,17 @@ export default function ProductCategoryDetailPage() {
   } = useCategory(categoryId);
   const category = categoryData?.category;
 
-  const { data: allCategoriesData } = useCategories();
+  const { data: allCategoriesData, isLoading: isLoadingCategories } = useCategories();
   const allCategories = useMemo(
     () => allCategoriesData?.categories || [],
     [allCategoriesData]
   );
 
   const subcategories = useMemo(
-    () => allCategories.filter(c => c.parentId === categoryId),
+    () =>
+      allCategories
+        .filter(c => c.parentId === categoryId)
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)),
     [allCategories, categoryId]
   );
 
@@ -106,6 +129,18 @@ export default function ProductCategoryDetailPage() {
     [allCategories, category]
   );
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const sortableRef = useRef<SortableCategoryListRef>(null);
+  const reorderMutation = useReorderCategories();
+
+  const handleFinishReorder = useCallback(() => {
+    if (sortableRef.current) {
+      reorderMutation.mutate(sortableRef.current.getReorderedItems());
+    }
+    setIsReorderMode(false);
+  }, [reorderMutation]);
+
   // ============================================================================
   // ACTION BAR BUTTONS
   // ============================================================================
@@ -114,19 +149,6 @@ export default function ProductCategoryDetailPage() {
     if (!category) return [];
 
     const buttons: HeaderButton[] = [];
-
-    if (subcategories.length > 0) {
-      buttons.push({
-        id: 'view-subcategories',
-        title: `Ver ${subcategories.length} Subcategoria${subcategories.length !== 1 ? 's' : ''}`,
-        icon: FolderTree,
-        onClick: () => {
-          const el = document.getElementById('subcategories-section');
-          el?.scrollIntoView({ behavior: 'smooth' });
-        },
-        variant: 'outline' as const,
-      });
-    }
 
     if ((category.productCount || 0) > 0) {
       buttons.push({
@@ -149,13 +171,16 @@ export default function ProductCategoryDetailPage() {
     });
 
     return buttons;
-  }, [category, subcategories.length, router, categoryId]);
+  }, [category, router, categoryId]);
 
   // ============================================================================
   // SUBCATEGORY CARD RENDERERS
   // ============================================================================
 
   const renderSubcategoryGridCard = (item: Category) => {
+    const subCount = item.childrenCount || 0;
+    const prodCount = item.productCount || 0;
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -172,32 +197,43 @@ export default function ProductCategoryDetailPage() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={`${item.childrenCount || 0} subcategorias · ${item.productCount || 0} produtos`}
+          subtitle={`Posição de exibição: ${item.displayOrder || 0}`}
           thumbnail={item.iconUrl || undefined}
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-6 h-6 text-white" />
           }
           iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
-          badges={[
-            {
-              label: item.isActive ? 'Ativa' : 'Inativa',
-              variant: item.isActive ? 'default' : 'secondary',
+          footer={{
+            type: 'split',
+            left: {
+              icon: FolderTree,
+              label: `${subCount} subcategoria${subCount !== 1 ? 's' : ''}`,
+              href: `/stock/product-categories/${item.id}`,
+              color: 'emerald',
             },
-          ]}
-          clickable={true}
-          onClick={() => router.push(`/stock/product-categories/${item.id}`)}
+            right: {
+              icon: Package,
+              label: `${prodCount} produto${prodCount !== 1 ? 's' : ''}`,
+              href: `/stock/products?category=${item.id}`,
+              color: 'emerald',
+            },
+          }}
+          clickable={false}
+          onDoubleClick={() =>
+            router.push(`/stock/product-categories/${item.id}`)
+          }
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
-        >
-          <p className="text-sm text-muted-foreground line-clamp-2 h-10">
-            {item.description || 'Sem descrição'}
-          </p>
-        </EntityCard>
+          showStatusBadges={true}
+        />
       </EntityContextMenu>
     );
   };
 
   const renderSubcategoryListCard = (item: Category) => {
+    const subCount = item.childrenCount || 0;
+    const prodCount = item.productCount || 0;
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -213,27 +249,52 @@ export default function ProductCategoryDetailPage() {
         <EntityCard
           id={item.id}
           variant="list"
-          title={item.name}
-          subtitle={`${item.childrenCount || 0} subcategorias · ${item.productCount || 0} produtos`}
+          title={
+            <span className="flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-gray-900 dark:text-white truncate">
+                {item.name}
+              </span>
+              {!item.isActive && (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border shrink-0 border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300">
+                  Inativa
+                </span>
+              )}
+            </span>
+          }
+          subtitle={`Posição de exibição: ${item.displayOrder || 0}`}
           thumbnail={item.iconUrl || undefined}
           thumbnailFallback={
             <PiFolderOpenDuotone className="w-5 h-5 text-white" />
           }
           iconBgColor="bg-linear-to-br from-blue-500 to-purple-600"
-          badges={[
-            {
-              label: item.isActive ? 'Ativa' : 'Inativa',
-              variant: item.isActive ? 'default' : 'secondary',
-            },
-          ]}
-          clickable={true}
-          onClick={() => router.push(`/stock/product-categories/${item.id}`)}
+          clickable={false}
+          onDoubleClick={() =>
+            router.push(`/stock/product-categories/${item.id}`)
+          }
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
+          showStatusBadges={true}
         >
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {item.description || 'Sem descrição'}
-          </p>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/stock/product-categories/${item.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              <FolderTree className="h-3.5 w-3.5" />
+              {subCount} subcategoria{subCount !== 1 ? 's' : ''}
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+            <Link
+              href={`/stock/products?category=${item.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              <Package className="h-3.5 w-3.5" />
+              {prodCount} produto{prodCount !== 1 ? 's' : ''}
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
         </EntityCard>
       </EntityContextMenu>
     );
@@ -383,24 +444,26 @@ export default function ProductCategoryDetailPage() {
 
             {/* Center: Title + subtitle chips */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold truncate">{category.name}</h1>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                {/* Status chip */}
-                <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground">
-                  <Layers className="h-3 w-3" />
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold truncate">{category.name}</h1>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium border shrink-0 ${
+                    category.isActive
+                      ? 'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300'
+                      : 'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300'
+                  }`}
+                >
                   {category.isActive ? 'Ativa' : 'Inativa'}
-                </div>
-                {/* Slug chip */}
-                <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground font-mono">
-                  {category.slug}
-                </div>
-                {/* Parent chip */}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                {/* Parent chip (only if has parent) */}
                 {parentCategory && (
                   <Link
                     href={`/stock/product-categories/${parentCategory.id}`}
                     className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <FolderTree className="h-3 w-3" />
+                    <PiFolderOpenDuotone className="h-3 w-3" />
                     {parentCategory.name}
                   </Link>
                 )}
@@ -453,20 +516,60 @@ export default function ProductCategoryDetailPage() {
                 icon={FolderTree}
                 title="Subcategorias"
                 subtitle="Categorias filhas desta categoria"
-                badge={
-                  subcategories.length > 0 ? (
-                    <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground">
-                      <FolderTree className="h-3 w-3" />
-                      {subcategories.length}{' '}
-                      {subcategories.length === 1
-                        ? 'Subcategoria'
-                        : 'Subcategorias'}
-                    </div>
-                  ) : undefined
+                action={
+                  <div className="flex items-center gap-2">
+                    {isReorderMode ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsReorderMode(false)}
+                        >
+                          <X className="h-4 w-4" />
+                          <span className="hidden sm:inline">Cancelar</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleFinishReorder}
+                        >
+                          <Check className="h-4 w-4" />
+                          <span className="hidden sm:inline">Concluir</span>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        {subcategories.length > 1 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setIsReorderMode(true)}
+                          >
+                            <ArrowUpDown className="h-4 w-4" />
+                            <span className="hidden sm:inline">Reordenar</span>
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCreateModalOpen(true)}
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span className="hidden sm:inline">Adicionar</span>
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 }
               />
 
-              {subcategories.length > 0 ? (
+              {isLoadingCategories ? (
+                <GridLoading count={3} layout="grid" size="md" gap="gap-4" />
+              ) : isReorderMode && subcategories.length > 0 ? (
+                <SortableCategoryList
+                  ref={sortableRef}
+                  items={subcategories}
+                />
+              ) : subcategories.length > 0 ? (
                 <EntityGrid
                   config={categoriesConfig}
                   items={subcategories}
@@ -475,6 +578,19 @@ export default function ProductCategoryDetailPage() {
                   isLoading={false}
                   isSearching={false}
                   showSorting={false}
+                  showItemCount={false}
+                  defaultSortField="custom"
+                  customSortFn={(a, b) =>
+                    (a.displayOrder || 0) - (b.displayOrder || 0)
+                  }
+                  toolbarStart={
+                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                      Total de {subcategories.length}{' '}
+                      {subcategories.length === 1
+                        ? 'subcategoria'
+                        : 'subcategorias'}
+                    </p>
+                  }
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -487,6 +603,19 @@ export default function ProductCategoryDetailPage() {
             </div>
           </div>
         </Card>
+        {/* Create Subcategory Modal (pre-filled with parent) */}
+        <CreateModal
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          onSubmit={async data => {
+            await categoriesService.createCategory({
+              ...data,
+              parentId: categoryId,
+            } as Parameters<typeof categoriesService.createCategory>[0]);
+            setCreateModalOpen(false);
+            window.location.reload();
+          }}
+        />
       </PageBody>
     </PageLayout>
   );
