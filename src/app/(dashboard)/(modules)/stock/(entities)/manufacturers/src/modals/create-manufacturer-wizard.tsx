@@ -21,6 +21,7 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { formatCEP, formatPhone } from '@/helpers/formatters';
 import { logger } from '@/lib/logger';
 import { brasilApiService } from '@/services/brasilapi.service';
 import type { BrasilAPICompanyData } from '@/types/brasilapi';
@@ -132,28 +133,6 @@ function StepCnpjInput({
 // STEP 2 (CNPJ FLOW): PREVIEW DOS DADOS
 // =============================================================================
 
-function PreviewRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string | null | undefined;
-  mono?: boolean;
-}) {
-  if (!value) return null;
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-2 border-b border-violet-100 dark:border-violet-800/60 last:border-b-0">
-      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
-      <span
-        className={`text-sm text-right ${mono ? 'font-mono' : 'font-medium'}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
 function StepCnpjPreview({
   companyData,
 }: {
@@ -171,34 +150,39 @@ function StepCnpjPreview({
     .filter(Boolean)
     .join('/');
 
+  const rows: { label: string; value: string | null | undefined }[] = [
+    { label: 'Razão Social', value: companyData.razao_social },
+    { label: 'Nome Fantasia', value: companyData.nome_fantasia },
+    { label: 'CNPJ', value: formatCNPJ(companyData.cnpj) },
+    { label: 'Endereço', value: address },
+    { label: 'Cidade/UF', value: cityUf },
+    { label: 'CEP', value: formatCEP(companyData.cep) },
+    { label: 'Telefone', value: formatPhone(companyData.ddd_telefone_1) },
+    { label: 'E-mail', value: companyData.email },
+  ].filter(r => r.value);
+
   return (
-    <div className="space-y-4">
-      <Card className="overflow-hidden border border-violet-200 dark:border-violet-800">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-violet-50 dark:bg-violet-950/30 border-b border-violet-200 dark:border-violet-800">
-          <CheckCircle className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-          <p className="text-sm font-medium text-violet-900 dark:text-violet-100">
-            Dados encontrados
-          </p>
-        </div>
-
-        <div className="px-4 py-1">
-          <PreviewRow label="Razão Social" value={companyData.razao_social} />
-          <PreviewRow label="Nome Fantasia" value={companyData.nome_fantasia} />
-          <PreviewRow label="CNPJ" value={companyData.cnpj} mono />
-          <PreviewRow label="Endereço" value={address} />
-          <PreviewRow label="Cidade/UF" value={cityUf} />
-          <PreviewRow label="CEP" value={companyData.cep} mono />
-          <PreviewRow label="Telefone" value={companyData.ddd_telefone_1} />
-          <PreviewRow label="E-mail" value={companyData.email} />
-        </div>
-      </Card>
-
-      <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
-        <p className="text-xs text-muted-foreground">
-          Ao importar, os dados serão preenchidos automaticamente. Você poderá
-          editar qualquer informação depois na página de edição.
-        </p>
-      </div>
+    <div className="border rounded-lg overflow-hidden w-full">
+      <table className="w-full text-sm table-fixed">
+        <thead>
+          <tr className="bg-muted/50 text-left">
+            <th className="px-3 py-2 font-medium w-[35%]">Campo</th>
+            <th className="px-3 py-2 font-medium w-[65%]">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr key={row.label} className="border-t">
+              <td className="px-3 py-2 text-muted-foreground">
+                {row.label}
+              </td>
+              <td className="px-3 py-2">
+                {row.value}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -605,28 +589,18 @@ export function CreateManufacturerWizard({
     content: companyData ? <StepCnpjPreview companyData={companyData} /> : null,
     onBack: handleBackToStep1,
     footer: (
-      <>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleBackToStep1}
-          disabled={isSubmitting}
-        >
-          ← Voltar
-        </Button>
-        <Button
-          type="button"
-          onClick={handleSubmitCnpj}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Check className="h-4 w-4 mr-2" />
-          )}
-          Importar Fabricante
-        </Button>
-      </>
+      <Button
+        type="button"
+        onClick={handleSubmitCnpj}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <Check className="h-4 w-4 mr-2" />
+        )}
+        Importar Fabricante
+      </Button>
     ),
   };
 
@@ -650,28 +624,18 @@ export function CreateManufacturerWizard({
     ),
     onBack: handleBackToStep1,
     footer: (
-      <>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleBackToStep1}
-          disabled={isSubmitting}
-        >
-          ← Voltar
-        </Button>
-        <Button
-          type="button"
-          onClick={handleSubmitManual}
-          disabled={isSubmitting || !manualName.trim() || !!manualCnpjDuplicate}
-        >
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Check className="h-4 w-4 mr-2" />
-          )}
-          Criar Fabricante
-        </Button>
-      </>
+      <Button
+        type="button"
+        onClick={handleSubmitManual}
+        disabled={isSubmitting || !manualName.trim() || !!manualCnpjDuplicate}
+      >
+        {isSubmitting ? (
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <Check className="h-4 w-4 mr-2" />
+        )}
+        Criar Fabricante
+      </Button>
     ),
   };
 

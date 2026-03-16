@@ -646,7 +646,6 @@ export function CreateModal({
                 type="button"
                 onClick={handleConfirmPreset}
                 disabled={isSubmitting}
-                className="w-full"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -730,7 +729,6 @@ export function CreateModal({
                 type="button"
                 onClick={handleConfirmManual}
                 disabled={isSubmitting || !manualName.trim()}
-                className="w-full"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
