@@ -17,7 +17,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/auth-context';
-import { LogOut, Moon, Settings, Sun, Users } from 'lucide-react';
+import {
+  useFullscreen,
+  useUltrawide,
+} from '@/hooks/use-layout-preferences';
+import {
+  LogOut,
+  Maximize,
+  Minimize,
+  MonitorIcon,
+  Moon,
+  Settings,
+  Sun,
+  Users,
+} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
@@ -38,12 +51,31 @@ export function UserDropdown() {
     }
   }, [logout]);
 
+  const { isUltrawide, toggleUltrawide } = useUltrawide();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
   const toggleTheme = useCallback(
     (e: Event) => {
       e.preventDefault();
       setTheme(theme === 'dark' ? 'light' : 'dark');
     },
     [theme, setTheme]
+  );
+
+  const handleToggleUltrawide = useCallback(
+    (e: Event) => {
+      e.preventDefault();
+      toggleUltrawide();
+    },
+    [toggleUltrawide]
+  );
+
+  const handleToggleFullscreen = useCallback(
+    (e: Event) => {
+      e.preventDefault();
+      toggleFullscreen();
+    },
+    [toggleFullscreen]
   );
 
   const userName = useMemo(() => {
@@ -65,7 +97,7 @@ export function UserDropdown() {
             surname={user?.profile?.surname}
             avatarUrl={user?.profile?.avatarUrl}
             size="sm"
-            className="ring-2 ring-gray-300 dark:ring-white/70"
+            className="ring-2 ring-emerald-500"
           />
         </Button>
       </DropdownMenuTrigger>
@@ -82,7 +114,7 @@ export function UserDropdown() {
             {userEmail}
           </p>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-white/10" />
 
         <DropdownMenuItem
           className="px-3 py-3 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
@@ -100,7 +132,7 @@ export function UserDropdown() {
           <span className="text-sm font-medium">Configurações</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-white/10" />
 
         <DropdownMenuItem
           onSelect={toggleTheme}
@@ -120,7 +152,36 @@ export function UserDropdown() {
           </div>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="my-2" />
+        {/* Desktop-only layout options */}
+        <DropdownMenuItem
+          onSelect={handleToggleUltrawide}
+          className="hidden lg:flex px-3 py-3 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        >
+          <div className="flex items-center w-full">
+            <MonitorIcon className="w-5 h-5 mr-3" />
+            <span className="text-sm font-medium">
+              {isUltrawide ? 'Layout Padrão' : 'Layout Ultrawide'}
+            </span>
+          </div>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onSelect={handleToggleFullscreen}
+          className="hidden lg:flex px-3 py-3 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        >
+          <div className="flex items-center w-full">
+            {isFullscreen ? (
+              <Minimize className="w-5 h-5 mr-3" />
+            ) : (
+              <Maximize className="w-5 h-5 mr-3" />
+            )}
+            <span className="text-sm font-medium">
+              {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
+            </span>
+          </div>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-white/10" />
 
         <DropdownMenuItem
           className="px-3 py-3 cursor-pointer rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors"

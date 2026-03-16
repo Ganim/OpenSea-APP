@@ -6,6 +6,7 @@ import { ToolsPanel } from '@/components/layout/tools-panel';
 import { menuItems } from '@/config/menu-items';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
+import { useUltrawide } from '@/hooks/use-layout-preferences';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -21,6 +22,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isUltrawide } = useUltrawide();
   const {
     currentTenant,
     isLoading: isTenantLoading,
@@ -108,9 +110,11 @@ export default function DashboardLayout({
             <main
               id="main-content"
               tabIndex={-1}
-              className="pt-28 px-3 sm:px-4 md:px-6 pb-12"
+              className={`pt-28 pb-12 ${isUltrawide ? 'px-6 md:px-10 xl:px-16' : 'px-3 sm:px-4 md:px-6'}`}
             >
-              <div className="max-w-[1600px] mx-auto">{children}</div>
+              <div className={isUltrawide ? '' : 'max-w-[1600px] mx-auto'}>
+                {children}
+              </div>
             </main>
           </div>
         </div>
