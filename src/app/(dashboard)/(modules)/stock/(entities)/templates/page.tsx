@@ -29,7 +29,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { productsService, templatesService } from '@/services/stock';
 import type { Template } from '@/types/stock';
-import { Copy, Import, Package, Pencil, Plus, Shirt, Trash2 } from 'lucide-react';
+import { Copy, Import, Package, Pencil, Plus, Shirt, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GrObjectGroup } from 'react-icons/gr';
@@ -242,24 +242,31 @@ export default function TemplatesPage() {
   // ============================================================================
 
   const getTemplateBadges = (item: Template) => {
-    const badges: { label: string; variant: 'default' | 'secondary' | 'warning' }[] = [
-      { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
-    ];
-    if (item.specialModules?.includes('CARE_INSTRUCTIONS')) {
-      badges.push({ label: 'Conservação Têxtil', variant: 'secondary' });
-    }
-    if (!item.isActive) {
-      badges.push({ label: 'Inativo', variant: 'warning' });
-    }
-    return badges;
-  };
-
-  const getAttributesLabel = (item: Template) => {
     const count =
       (Object.keys(item.productAttributes || {}).length || 0) +
       (Object.keys(item.variantAttributes || {}).length || 0) +
       (Object.keys(item.itemAttributes || {}).length || 0);
-    return `${count} atributo${count !== 1 ? 's' : ''} definido${count !== 1 ? 's' : ''}`;
+
+    const badges: { label: string; variant: 'outline'; icon?: typeof Package; color?: string }[] = [
+      {
+        label: `${count} atributo${count !== 1 ? 's' : ''}`,
+        variant: 'outline',
+        icon: SlidersHorizontal,
+        color: 'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+      },
+    ];
+    if (item.specialModules?.includes('CARE_INSTRUCTIONS')) {
+      badges.push({
+        label: 'Conservação Têxtil',
+        variant: 'outline',
+        icon: Shirt,
+        color: 'border-purple-600/25 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-500/8 text-purple-700 dark:text-purple-300',
+      });
+    }
+    if (!item.isActive) {
+      badges.push({ label: 'Inativo', variant: 'outline', color: 'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300' });
+    }
+    return badges;
   };
 
   const renderGridCard = (item: Template, isSelected: boolean) => {
@@ -276,7 +283,7 @@ export default function TemplatesPage() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={getAttributesLabel(item)}
+          subtitle={getUnitLabel(item.unitOfMeasure)}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-6 h-6 text-white" />}
           iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
@@ -315,7 +322,7 @@ export default function TemplatesPage() {
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={getAttributesLabel(item)}
+          subtitle={getUnitLabel(item.unitOfMeasure)}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-5 h-5 text-white" />}
           iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
@@ -326,7 +333,7 @@ export default function TemplatesPage() {
               icon: Package,
               label: `${productsCount} produto${productsCount !== 1 ? 's' : ''}`,
               href: `/stock/products?template=${item.id}`,
-              color: 'emerald',
+              color: 'blue',
             },
           }}
           isSelected={isSelected}
