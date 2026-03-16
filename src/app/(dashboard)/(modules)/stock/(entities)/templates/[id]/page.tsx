@@ -446,14 +446,10 @@ export default function TemplateDetailPage() {
                   <Hash className="h-3 w-3" />
                   {getUnitLabel(template.unitOfMeasure)}
                 </div>
-                <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground">
-                  <SlidersHorizontal className="h-3 w-3" />
-                  {totalAttributes} atributo{totalAttributes !== 1 ? 's' : ''}
-                </div>
-                {productsCount !== null && (
+                {productsCount !== null && productsCount === 0 && (
                   <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground">
                     <Layers className="h-3 w-3" />
-                    {productsCount} produto{productsCount !== 1 ? 's' : ''}
+                    Nenhum produto utiliza este template
                   </div>
                 )}
               </div>
@@ -526,7 +522,7 @@ export default function TemplateDetailPage() {
                   totalAttributes > 0 ? (
                     <div className="flex items-center gap-1.5 rounded-md border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] px-2 py-1 text-xs text-muted-foreground">
                       <SlidersHorizontal className="h-3 w-3" />
-                      {totalAttributes} total
+                      {totalAttributes} {totalAttributes === 1 ? 'Atributo' : 'Atributos'}
                     </div>
                   ) : undefined
                 }
