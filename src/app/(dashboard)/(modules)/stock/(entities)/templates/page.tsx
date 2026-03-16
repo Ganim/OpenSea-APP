@@ -29,7 +29,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { productsService, templatesService } from '@/services/stock';
 import type { Template } from '@/types/stock';
-import { Copy, Import, Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Copy, Import, Package, Pencil, Plus, Shirt, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GrObjectGroup } from 'react-icons/gr';
@@ -241,11 +241,28 @@ export default function TemplatesPage() {
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const renderGridCard = (item: Template, isSelected: boolean) => {
-    const attributesCount =
+  const getTemplateBadges = (item: Template) => {
+    const badges: { label: string; variant: 'default' | 'secondary' | 'warning' }[] = [
+      { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
+    ];
+    if (item.specialModules?.includes('CARE_INSTRUCTIONS')) {
+      badges.push({ label: 'Conservação Têxtil', variant: 'secondary' });
+    }
+    if (!item.isActive) {
+      badges.push({ label: 'Inativo', variant: 'warning' });
+    }
+    return badges;
+  };
+
+  const getAttributesLabel = (item: Template) => {
+    const count =
       (Object.keys(item.productAttributes || {}).length || 0) +
       (Object.keys(item.variantAttributes || {}).length || 0) +
       (Object.keys(item.itemAttributes || {}).length || 0);
+    return `${count} atributo${count !== 1 ? 's' : ''} definido${count !== 1 ? 's' : ''}`;
+  };
+
+  const renderGridCard = (item: Template, isSelected: boolean) => {
     const productsCount = productsCountByTemplateId[item.id] ?? 0;
 
     return (
@@ -259,13 +276,11 @@ export default function TemplatesPage() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={`${attributesCount} atributos definidos`}
+          subtitle={getAttributesLabel(item)}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-6 h-6 text-white" />}
           iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
-          badges={[
-            { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
-          ]}
+          badges={getTemplateBadges(item)}
           footer={{
             type: 'single',
             button: {
@@ -287,10 +302,6 @@ export default function TemplatesPage() {
   };
 
   const renderListCard = (item: Template, isSelected: boolean) => {
-    const attributesCount =
-      (Object.keys(item.productAttributes || {}).length || 0) +
-      (Object.keys(item.variantAttributes || {}).length || 0) +
-      (Object.keys(item.itemAttributes || {}).length || 0);
     const productsCount = productsCountByTemplateId[item.id] ?? 0;
 
     return (
@@ -304,13 +315,11 @@ export default function TemplatesPage() {
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={`${attributesCount} atributos definidos`}
+          subtitle={getAttributesLabel(item)}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-5 h-5 text-white" />}
           iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
-          badges={[
-            { label: getUnitLabel(item.unitOfMeasure), variant: 'default' },
-          ]}
+          badges={getTemplateBadges(item)}
           footer={{
             type: 'single',
             button: {
@@ -465,6 +474,13 @@ export default function TemplatesPage() {
                 page.handlers.handleItemDoubleClick(item)
               }
               showSorting={true}
+              showItemCount={false}
+              toolbarStart={
+                <p className="text-sm text-muted-foreground whitespace-nowrap">
+                  Total de {page.filteredItems.length}{' '}
+                  {page.filteredItems.length === 1 ? 'template' : 'templates'}
+                </p>
+              }
               defaultSortField="name"
               defaultSortDirection="asc"
               customSortFn={customSortByUnit}
