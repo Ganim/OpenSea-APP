@@ -219,6 +219,7 @@ export interface TemplatePayload {
   productAttributes?: Record<string, unknown>;
   variantAttributes?: Record<string, unknown>;
   itemAttributes?: Record<string, unknown>;
+  specialModules?: string[];
 }
 
 export async function createTemplateViaApi(

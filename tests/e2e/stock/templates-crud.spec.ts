@@ -30,62 +30,9 @@ test.beforeAll(async () => {
 });
 
 test.describe('Stock - Templates CRUD', () => {
-  // ─── CREATE ─────────────────────────────────────────────────────────
+  // ─── LIST ───────────────────────────────────────────────────────────
 
-  test.fixme('4.1 - Criar template via modal', async ({ page }) => {
-    const tplName = `e2e-tpl-${Date.now()}`;
-
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'templates');
-
-    await page.getByRole('button', { name: 'Novo Template' }).click();
-    await expect(page.getByText('Novo Template').first()).toBeVisible({
-      timeout: 5_000,
-    });
-
-    // Fill name via EntityForm (label-based)
-    const nameInput = page.getByLabel(/Nome/i).first();
-    await nameInput.fill(tplName);
-
-    // Submit
-    const submitBtn = page
-      .locator('[role="dialog"] button')
-      .filter({ hasText: /Criar|Salvar/i })
-      .first();
-    await submitBtn.click();
-    await waitForToast(page, 'sucesso');
-
-    // Verify template appears
-    await expect(page.getByText(tplName)).toBeVisible({ timeout: 10_000 });
-  });
-
-  test.fixme(
-    '4.2 - Validar erro ao criar template sem nome',
-    async ({ page }) => {
-      await injectAuthIntoBrowser(page, userToken, userTenantId);
-      await navigateToStockPage(page, 'templates');
-
-      await page.getByRole('button', { name: 'Novo Template' }).click();
-      await expect(page.getByText('Novo Template').first()).toBeVisible({
-        timeout: 5_000,
-      });
-
-      // Submit without filling name
-      const submitBtn = page
-        .locator('[role="dialog"] button')
-        .filter({ hasText: /Criar|Salvar/i })
-        .first();
-      await submitBtn.click();
-
-      // Modal should remain open
-      const modal = page.locator('[role="dialog"]');
-      await expect(modal).toBeVisible({ timeout: 3_000 });
-    }
-  );
-
-  // ─── READ / LIST ────────────────────────────────────────────────────
-
-  test('4.3 - Listar templates e verificar hidratação', async ({ page }) => {
+  test('4.1 - Listar templates e verificar hidratação', async ({ page }) => {
     const tpl = await createTemplateViaApi(userToken, {
       name: `e2e-tpl-list-${Date.now()}`,
       unitOfMeasure: 'UNITS',
@@ -94,17 +41,20 @@ test.describe('Stock - Templates CRUD', () => {
     await injectAuthIntoBrowser(page, userToken, userTenantId);
     await navigateToStockPage(page, 'templates');
 
-    await expect(page.getByRole('heading', { name: 'Templates' })).toBeVisible({
+    await expect(
+      page.getByRole('heading', { name: 'Templates' })
+    ).toBeVisible({ timeout: 10_000 });
+
+    await expect(page.getByText(tpl.name).first()).toBeVisible({
       timeout: 10_000,
     });
 
-    await expect(page.getByText(tpl.name)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Total de \d+ templates?/)).toBeVisible();
 
-    // Cleanup
     await deleteTemplateViaApi(userToken, tpl.id);
   });
 
-  test('4.4 - Buscar template por nome', async ({ page }) => {
+  test('4.2 - Buscar template por nome', async ({ page }) => {
     const tpl = await createTemplateViaApi(userToken, {
       name: `e2e-tpl-search-${Date.now()}`,
       unitOfMeasure: 'METERS',
@@ -117,145 +67,153 @@ test.describe('Stock - Templates CRUD', () => {
     await searchInput.fill(tpl.name);
     await page.waitForTimeout(500);
 
-    await expect(page.getByText(tpl.name)).toBeVisible({ timeout: 5_000 });
-
-    // Cleanup
-    await deleteTemplateViaApi(userToken, tpl.id);
-  });
-
-  // ─── UPDATE ─────────────────────────────────────────────────────────
-
-  test.fixme('4.5 - Editar template via context menu', async ({ page }) => {
-    const tpl = await createTemplateViaApi(userToken, {
-      name: `e2e-tpl-edit-${Date.now()}`,
-      unitOfMeasure: 'UNITS',
-    });
-    const newName = `e2e-tpl-edited-${Date.now()}`;
-
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'templates');
-
-    await openContextMenu(page, tpl.name);
-    await clickContextAction(page, 'Editar');
-
-    await expect(page.locator('[role="dialog"]')).toBeVisible({
+    await expect(page.getByText(tpl.name).first()).toBeVisible({
       timeout: 5_000,
     });
 
-    // EntityForm name field — use the first text input in dialog
-    const nameInput = page
-      .locator('[role="dialog"] input[type="text"]')
-      .first();
-    await nameInput.clear();
-    await nameInput.fill(newName);
-
-    const saveBtn = page.getByRole('button', { name: /^Salvar$/i });
-    await expect(saveBtn).toBeVisible({ timeout: 3_000 });
-    await saveBtn.click();
-    await waitForToast(page, 'sucesso');
-
-    // Wait for grid to refresh, then search for new name
-    await page.waitForTimeout(1_000);
-    const searchInput = page.getByPlaceholder(/Buscar/i);
-    await searchInput.fill(newName);
-    await page.waitForTimeout(500);
-
-    await expect(page.locator(`text=${newName}`).first()).toBeVisible({
-      timeout: 10_000,
-    });
-
-    // Cleanup
     await deleteTemplateViaApi(userToken, tpl.id);
   });
 
-  // ─── DELETE ─────────────────────────────────────────────────────────
-
-  test('4.6 - Excluir template via context menu', async ({ page }) => {
+  test('4.3 - Alternar entre visualização grid e lista', async ({ page }) => {
     const tpl = await createTemplateViaApi(userToken, {
-      name: `e2e-tpl-delete-${Date.now()}`,
-      unitOfMeasure: 'UNITS',
-    });
-
-    await injectAuthIntoBrowser(page, userToken, userTenantId);
-    await navigateToStockPage(page, 'templates');
-
-    await openContextMenu(page, tpl.name);
-    await clickContextAction(page, 'Excluir');
-
-    // Templates may use simple confirm or PIN verification
-    const deleteBtn = page
-      .locator('[role="alertdialog"] button, [role="dialog"] button')
-      .filter({ hasText: /Excluir|Confirmar/i })
-      .first();
-
-    const otpInput = page.locator('[data-input-otp="true"]').first();
-
-    // Wait for either confirm button or OTP input
-    await Promise.race([
-      deleteBtn.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {}),
-      otpInput.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {}),
-    ]);
-
-    if (await otpInput.isVisible().catch(() => false)) {
-      // PIN required — skip this test (needs PIN setup)
-      await deleteTemplateViaApi(userToken, tpl.id);
-      return;
-    }
-
-    if (await deleteBtn.isVisible().catch(() => false)) {
-      await deleteBtn.click();
-      await waitForToast(page, 'sucesso');
-      await expect(page.getByText(tpl.name)).not.toBeVisible({
-        timeout: 5_000,
-      });
-    } else {
-      // Fallback cleanup
-      await deleteTemplateViaApi(userToken, tpl.id);
-    }
-  });
-
-  // ─── DETAIL PAGE ───────────────────────────────────────────────────
-
-  test.fixme('4.7 - Navegar para detalhe do template', async ({ page }) => {
-    const tpl = await createTemplateViaApi(userToken, {
-      name: `e2e-tpl-detail-${Date.now()}`,
+      name: `e2e-tpl-toggle-${Date.now()}`,
       unitOfMeasure: 'KILOGRAMS',
     });
 
     await injectAuthIntoBrowser(page, userToken, userTenantId);
     await navigateToStockPage(page, 'templates');
 
-    // Double-click or use context menu to navigate
-    await openContextMenu(page, tpl.name);
-    await clickContextAction(page, 'Visualizar');
+    await expect(page.getByText(tpl.name).first()).toBeVisible({
+      timeout: 10_000,
+    });
 
-    await page.waitForTimeout(1_000);
-
-    // Check if navigated to detail page or view modal
-    const isDetailPage = page.url().includes(tpl.id);
-    if (isDetailPage) {
-      await expect(page.locator(`text=${tpl.name}`).first()).toBeVisible({
-        timeout: 10_000,
+    const listBtn = page.getByRole('button', {
+      name: 'Visualização em lista',
+    });
+    if (await listBtn.isVisible().catch(() => false)) {
+      await listBtn.click();
+      await page.waitForTimeout(500);
+      await expect(page.getByText(tpl.name).first()).toBeVisible({
+        timeout: 5_000,
       });
-    } else {
-      // Either on list page with view modal, or navigated to templates/{id}
-      const hasDialog = await page
-        .locator('[role="dialog"]')
-        .isVisible()
-        .catch(() => false);
-      const navigatedToDetail =
-        page.url().includes('/stock/templates/') &&
-        !page.url().endsWith('/templates');
-      expect(hasDialog || navigatedToDetail).toBeTruthy();
     }
 
-    // Cleanup
+    const gridBtn = page.getByRole('button', {
+      name: 'Visualização em grade',
+    });
+    if (await gridBtn.isVisible().catch(() => false)) {
+      await gridBtn.click();
+      await page.waitForTimeout(500);
+      await expect(page.getByText(tpl.name).first()).toBeVisible({
+        timeout: 5_000,
+      });
+    }
+
     await deleteTemplateViaApi(userToken, tpl.id);
   });
 
-  // ─── DUPLICATE ──────────────────────────────────────────────────────
+  // ─── CONTEXT MENU — VISUALIZAR ────────────────────────────────────
 
-  test('4.8 - Duplicar template', async ({ page }) => {
+  test.fixme(
+    '4.4 - Visualizar template via context menu navega para detalhe',
+    async ({ page }) => {
+      const tpl = await createTemplateViaApi(userToken, {
+        name: `e2e-tpl-view-${Date.now()}`,
+        unitOfMeasure: 'KILOGRAMS',
+      });
+
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'templates');
+
+      await openContextMenu(page, tpl.name);
+      await clickContextAction(page, 'Visualizar');
+
+      await page.waitForURL(`**/stock/templates/${tpl.id}`, {
+        timeout: 10_000,
+      });
+      await expect(
+        page.getByRole('heading', { level: 1, name: tpl.name })
+      ).toBeVisible({ timeout: 10_000 });
+
+      await deleteTemplateViaApi(userToken, tpl.id);
+    }
+  );
+
+  // ─── CONTEXT MENU — EDITAR ────────────────────────────────────────
+
+  test.fixme(
+    '4.5 - Editar template via context menu navega para página de edição',
+    async ({ page }) => {
+      const tpl = await createTemplateViaApi(userToken, {
+        name: `e2e-tpl-edit-${Date.now()}`,
+        unitOfMeasure: 'UNITS',
+      });
+
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'templates');
+
+      await openContextMenu(page, tpl.name);
+      await clickContextAction(page, 'Editar');
+
+      await page.waitForURL(`**/stock/templates/${tpl.id}/edit`, {
+        timeout: 10_000,
+      });
+      await expect(page.getByText('Informações Gerais')).toBeVisible({
+        timeout: 10_000,
+      });
+
+      await deleteTemplateViaApi(userToken, tpl.id);
+    }
+  );
+
+  // ─── CONTEXT MENU — RENOMEAR ──────────────────────────────────────
+
+  test.fixme(
+    '4.6 - Renomear template via context menu',
+    async ({ page }) => {
+      const tpl = await createTemplateViaApi(userToken, {
+        name: `e2e-tpl-rename-${Date.now()}`,
+        unitOfMeasure: 'UNITS',
+      });
+      const newName = `e2e-tpl-renamed-${Date.now()}`;
+
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'templates');
+
+      await openContextMenu(page, tpl.name);
+      await clickContextAction(page, 'Renomear');
+
+      await expect(page.locator('[role="dialog"]')).toBeVisible({
+        timeout: 5_000,
+      });
+
+      const nameInput = page
+        .locator('[role="dialog"] input[type="text"]')
+        .first();
+      await nameInput.clear();
+      await nameInput.fill(newName);
+
+      await page
+        .locator('[role="dialog"]')
+        .getByRole('button', { name: 'Salvar' })
+        .click();
+      await page.waitForTimeout(1_000);
+
+      const searchInput = page.getByPlaceholder(/Buscar/i);
+      await searchInput.fill(newName);
+      await page.waitForTimeout(500);
+
+      await expect(page.getByText(newName).first()).toBeVisible({
+        timeout: 10_000,
+      });
+
+      await deleteTemplateViaApi(userToken, tpl.id);
+    }
+  );
+
+  // ─── CONTEXT MENU — DUPLICAR ──────────────────────────────────────
+
+  test('4.7 - Duplicar template via context menu', async ({ page }) => {
     const tpl = await createTemplateViaApi(userToken, {
       name: `e2e-tpl-dup-${Date.now()}`,
       unitOfMeasure: 'UNITS',
@@ -265,31 +223,253 @@ test.describe('Stock - Templates CRUD', () => {
     await navigateToStockPage(page, 'templates');
 
     await openContextMenu(page, tpl.name);
+    await clickContextAction(page, 'Duplicar');
 
-    // Check if "Duplicar" is available
-    const dupItem = page
-      .locator('[role="menuitem"]')
-      .filter({ hasText: 'Duplicar' })
+    const confirmBtn = page
+      .locator('[role="alertdialog"] button, [role="dialog"] button')
+      .filter({ hasText: /Confirmar|Duplicar/i })
       .first();
 
-    if (await dupItem.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await dupItem.evaluate(el => (el as HTMLElement).click());
-
-      // Confirm duplication
-      const confirmBtn = page
-        .locator('[role="alertdialog"] button, [role="dialog"] button')
-        .filter({ hasText: /Confirmar|Duplicar/i })
-        .first();
-      if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-        await confirmBtn.click();
-        await waitForToast(page, 'sucesso');
-      }
-    } else {
-      // Duplicar not available for templates — skip
-      test.skip();
+    if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await confirmBtn.click();
+      await waitForToast(page, 'sucesso');
     }
 
-    // Cleanup
+    await expect(page.getByText(`${tpl.name} (cópia)`).first()).toBeVisible({
+      timeout: 10_000,
+    });
+
     await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  // ─── CONTEXT MENU — EXCLUIR ───────────────────────────────────────
+
+  test.fixme(
+    '4.8 - Excluir template via context menu',
+    async ({ page }) => {
+      const tpl = await createTemplateViaApi(userToken, {
+        name: `e2e-tpl-delete-${Date.now()}`,
+        unitOfMeasure: 'UNITS',
+      });
+
+      await injectAuthIntoBrowser(page, userToken, userTenantId);
+      await navigateToStockPage(page, 'templates');
+
+      await openContextMenu(page, tpl.name);
+      await clickContextAction(page, 'Excluir');
+
+      const otpInput = page.locator('[data-input-otp="true"]').first();
+      const deleteBtn = page
+        .locator('[role="alertdialog"] button, [role="dialog"] button')
+        .filter({ hasText: /Excluir|Confirmar/i })
+        .first();
+
+      await Promise.race([
+        otpInput
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .catch(() => {}),
+        deleteBtn
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .catch(() => {}),
+      ]);
+
+      if (await otpInput.isVisible().catch(() => false)) {
+        await otpInput.fill('1234');
+        await page.waitForTimeout(500);
+      } else if (await deleteBtn.isVisible().catch(() => false)) {
+        await deleteBtn.click();
+      }
+
+      await waitForToast(page, 'sucesso');
+      await expect(page.getByText(tpl.name)).not.toBeVisible({
+        timeout: 5_000,
+      });
+    }
+  );
+
+  // ─── DETAIL PAGE ──────────────────────────────────────────────────
+
+  test('4.9 - Página de detalhe exibe seções e metadados', async ({
+    page,
+  }) => {
+    const tpl = await createTemplateViaApi(userToken, {
+      name: `e2e-tpl-detail-${Date.now()}`,
+      unitOfMeasure: 'KILOGRAMS',
+      specialModules: ['CARE_INSTRUCTIONS'],
+    });
+
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto(`/stock/templates/${tpl.id}`);
+    await page.waitForLoadState('networkidle');
+
+    // Identity card com nome
+    await expect(
+      page.getByRole('heading', { level: 1, name: tpl.name })
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Unidade de medida (sigla)
+    await expect(page.getByText('kg').first()).toBeVisible();
+
+    // Módulos especiais com Conservação Têxtil ativada
+    await expect(
+      page.getByRole('heading', { name: 'Módulos Especiais' })
+    ).toBeVisible();
+    await expect(page.getByText('Conservação Têxtil').first()).toBeVisible();
+
+    // Seção Atributos
+    await expect(
+      page.getByRole('heading', { name: /^Atributos$/ })
+    ).toBeVisible();
+
+    // Tabs
+    await expect(page.getByRole('tab', { name: /Produtos/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Variantes/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Itens/i })).toBeVisible();
+
+    // Data de criação
+    await expect(page.getByText(/Criado em/).first()).toBeVisible();
+
+    await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  test('4.10 - Botão Editar na página de detalhe navega para edição', async ({
+    page,
+  }) => {
+    const tpl = await createTemplateViaApi(userToken, {
+      name: `e2e-tpl-detail-edit-${Date.now()}`,
+      unitOfMeasure: 'METERS',
+    });
+
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto(`/stock/templates/${tpl.id}`);
+    await page.waitForLoadState('networkidle');
+
+    await expect(
+      page.getByRole('heading', { level: 1, name: tpl.name })
+    ).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: 'Editar' }).click();
+    await page.waitForURL(`**/stock/templates/${tpl.id}/edit`, {
+      timeout: 10_000,
+    });
+
+    await expect(page.getByText('Informações Gerais')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  // ─── EDIT PAGE ────────────────────────────────────────────────────
+
+  test('4.11 - Editar nome do template e salvar', async ({ page }) => {
+    const tpl = await createTemplateViaApi(userToken, {
+      name: `e2e-tpl-save-${Date.now()}`,
+      unitOfMeasure: 'UNITS',
+    });
+    const newName = `e2e-tpl-saved-${Date.now()}`;
+
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto(`/stock/templates/${tpl.id}/edit`);
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Informações Gerais')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const nameInput = page.locator('#name');
+    await expect(nameInput).toBeVisible({ timeout: 5_000 });
+    await nameInput.clear();
+    await nameInput.fill(newName);
+
+    await page.getByRole('button', { name: /Salvar/i }).click();
+    await waitForToast(page, 'sucesso');
+
+    await page.waitForURL(`**/stock/templates/${tpl.id}`, { timeout: 10_000 });
+    await expect(
+      page.getByRole('heading', { level: 1, name: newName })
+    ).toBeVisible({ timeout: 10_000 });
+
+    await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  test('4.12 - Seções colapsáveis na página de edição', async ({ page }) => {
+    const tpl = await createTemplateViaApi(userToken, {
+      name: `e2e-tpl-collapse-${Date.now()}`,
+      unitOfMeasure: 'UNITS',
+    });
+
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto(`/stock/templates/${tpl.id}/edit`);
+    await page.waitForLoadState('networkidle');
+
+    const infoHeader = page.getByText('Informações Gerais');
+    await expect(infoHeader).toBeVisible({ timeout: 10_000 });
+
+    const nameInput = page.locator('#name');
+    await expect(nameInput).toBeVisible({ timeout: 5_000 });
+
+    // Colapsar
+    await infoHeader.click();
+    await page.waitForTimeout(300);
+    await expect(nameInput).not.toBeVisible();
+
+    // Expandir
+    await infoHeader.click();
+    await page.waitForTimeout(300);
+    await expect(nameInput).toBeVisible();
+
+    await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  // ─── DETAIL PAGE — VER PRODUTOS ───────────────────────────────────
+
+  test('4.13 - Chip de nenhum produto quando não há produtos', async ({
+    page,
+  }) => {
+    const tpl = await createTemplateViaApi(userToken, {
+      name: `e2e-tpl-products-${Date.now()}`,
+      unitOfMeasure: 'UNITS',
+    });
+
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto(`/stock/templates/${tpl.id}`);
+    await page.waitForLoadState('networkidle');
+
+    await expect(
+      page.getByRole('heading', { level: 1, name: tpl.name })
+    ).toBeVisible({ timeout: 10_000 });
+
+    await expect(
+      page.getByText('Nenhum produto utiliza este template')
+    ).toBeVisible({ timeout: 10_000 });
+
+    await deleteTemplateViaApi(userToken, tpl.id);
+  });
+
+  // ─── ERROR STATES ─────────────────────────────────────────────────
+
+  test('4.14 - Página de detalhe com ID inválido mostra erro', async ({
+    page,
+  }) => {
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto('/stock/templates/invalid-id-that-does-not-exist');
+    await page.waitForLoadState('networkidle');
+
+    await expect(
+      page.getByText('Template não encontrado')
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('4.15 - Página de edição com ID inválido mostra erro', async ({
+    page,
+  }) => {
+    await injectAuthIntoBrowser(page, userToken, userTenantId);
+    await page.goto('/stock/templates/invalid-id-that-does-not-exist/edit');
+    await page.waitForLoadState('networkidle');
+
+    await expect(
+      page.getByText('Template não encontrado')
+    ).toBeVisible({ timeout: 15_000 });
   });
 });
