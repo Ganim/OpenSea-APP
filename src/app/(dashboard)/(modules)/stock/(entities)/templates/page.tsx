@@ -27,6 +27,7 @@ import {
   type SortDirection,
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
 import { productsService, templatesService } from '@/services/stock';
 import type { Template } from '@/types/stock';
 import { ChevronRight, Copy, Import, Package, Pencil, Plus, Shirt, SlidersHorizontal, Trash2 } from 'lucide-react';
@@ -311,6 +312,7 @@ export default function TemplatesPage() {
 
   const renderListCard = (item: Template, isSelected: boolean) => {
     const productsCount = productsCountByTemplateId[item.id] ?? 0;
+    const listBadges = getTemplateBadges(item);
 
     return (
       <EntityContextMenu
@@ -322,12 +324,29 @@ export default function TemplatesPage() {
         <EntityCard
           id={item.id}
           variant="list"
-          title={item.name}
+          title={
+            <span className="flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-gray-900 dark:text-white truncate">
+                {item.name}
+              </span>
+              {listBadges.map((badge, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border shrink-0',
+                    badge.color
+                  )}
+                >
+                  {badge.icon && <badge.icon className="w-3 h-3" />}
+                  {badge.label}
+                </span>
+              ))}
+            </span>
+          }
           subtitle={getUnitLabel(item.unitOfMeasure)}
           thumbnail={item.iconUrl}
           thumbnailFallback={<GrObjectGroup className="w-5 h-5 text-white" />}
           iconBgColor="bg-linear-to-br from-purple-500 to-pink-600"
-          badges={getTemplateBadges(item)}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}

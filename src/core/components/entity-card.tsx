@@ -97,8 +97,8 @@ export interface EntityCardProps {
   variant?: EntityCardVariant;
 
   // Conteúdo Principal
-  /** Título/nome do item (truncado automaticamente) */
-  title: string;
+  /** Título/nome do item (truncado automaticamente). Aceita ReactNode para composição com badges. */
+  title: ReactNode;
   /** Subtítulo/descrição (max 2 linhas no grid, truncado no list/compact) */
   subtitle?: string;
   /** Linha de metadados (ReactNode para flexibilidade) */
@@ -593,7 +593,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
                   iconBgStyle={iconBgStyle}
                   thumbnail={thumbnail}
                   thumbnailFallback={thumbnailFallback}
-                  title={title}
+                  title={typeof title === 'string' ? title : ''}
                   isSelected={isSelected}
                 />
                 <div className="min-w-0 flex-1">
@@ -660,7 +660,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
                 iconBgColor={iconBgColor}
                 thumbnail={thumbnail}
                 thumbnailFallback={thumbnailFallback}
-                title={title}
+                title={typeof title === 'string' ? title : ''}
                 isSelected={isSelected}
               />
               <div className="flex-1 min-w-0">
@@ -719,7 +719,7 @@ export const EntityCard = forwardRef<HTMLDivElement, EntityCardProps>(
             iconBgColor={iconBgColor}
             thumbnail={thumbnail}
             thumbnailFallback={thumbnailFallback}
-            title={title}
+            title={typeof title === 'string' ? title : ''}
             isSelected={isSelected}
           />
           <div className="flex-1 min-w-0">
