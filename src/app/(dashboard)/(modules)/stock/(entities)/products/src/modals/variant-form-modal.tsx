@@ -1,18 +1,12 @@
 /**
  * VariantFormModal - Unified modal for creating and editing variants
- * Uses sidebar navigation pattern with all variant fields across 5 sections.
- * Replaces both QuickAddVariantModal and EditVariantModal.
+ * Uses NavigationWizardDialog with 5 sections:
+ * Informações, Aparência, Preços, Estoque, Atributos (conditional)
  */
 
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   InputGroup,
@@ -21,7 +15,10 @@ import {
   MoneyInput,
 } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  NavigationWizardDialog,
+  type NavigationSection,
+} from '@/components/ui/navigation-wizard-dialog';
 import {
   Select,
   SelectContent,
@@ -41,19 +38,21 @@ import { cn } from '@/lib/utils';
 import { variantsService } from '@/services/stock';
 import type {
   CreateVariantRequest,
+  Pattern,
   Product,
   TemplateAttribute,
   UpdateVariantRequest,
   Variant,
 } from '@/types/stock';
+import { PATTERN_LABELS } from '@/types/stock';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ChevronRight,
   DollarSign,
   FileText,
   Info,
   Loader2,
   Package,
+  Palette,
   Plus,
   Save,
   SlidersHorizontal,
@@ -72,20 +71,17 @@ interface VariantFormModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type SectionId = 'basic' | 'pricing' | 'stock' | 'attributes';
-
-interface SectionItem {
-  id: SectionId;
-  label: string;
-  icon: React.ReactNode;
-  description: string;
-}
+type SectionId = 'basic' | 'appearance' | 'pricing' | 'stock' | 'attributes';
 
 interface FormData {
   name: string;
+  sku: string;
   reference: string;
   colorHex: string;
   colorPantone: string;
+  secondaryColorHex: string;
+  secondaryColorPantone: string;
+  pattern: string;
   outOfLine: boolean;
   isActive: boolean;
   // Pricing
@@ -105,38 +101,15 @@ interface FormData {
 // Constants
 // ---------------------------------------------------------------------------
 
-const SECTIONS: SectionItem[] = [
-  {
-    id: 'basic',
-    label: 'Informações',
-    icon: <FileText className="w-4 h-4" />,
-    description: 'Nome, cor, referência',
-  },
-  {
-    id: 'pricing',
-    label: 'Preços',
-    icon: <DollarSign className="w-4 h-4" />,
-    description: 'Custo, margem, venda',
-  },
-  {
-    id: 'stock',
-    label: 'Estoque',
-    icon: <Package className="w-4 h-4" />,
-    description: 'Mín, máx, reposição',
-  },
-  {
-    id: 'attributes',
-    label: 'Atributos',
-    icon: <SlidersHorizontal className="w-4 h-4" />,
-    description: 'Atributos do template',
-  },
-];
-
 const INITIAL_FORM: FormData = {
   name: '',
+  sku: '',
   reference: '',
   colorHex: '',
   colorPantone: '',
+  secondaryColorHex: '',
+  secondaryColorPantone: '',
+  pattern: '',
   outOfLine: false,
   isActive: true,
   informedCostPrice: 0,
@@ -164,12 +137,16 @@ export function VariantFormModal({
 
   const [activeSection, setActiveSection] = useState<SectionId>('basic');
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+  const [sectionErrors, setSectionErrors] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Fetch template for dynamic attributes
   const { data: template } = useTemplate(product?.templateId || '');
 
   // ---------------------------------------------------------------------------
-  // Populate form in edit mode
+  // Populate form / reset on open
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
@@ -184,9 +161,13 @@ export function VariantFormModal({
       }
       setFormData({
         name: variant.name || '',
+        sku: variant.sku || '',
         reference: variant.reference || '',
         colorHex: variant.colorHex || '',
         colorPantone: variant.colorPantone || '',
+        secondaryColorHex: variant.secondaryColorHex || '',
+        secondaryColorPantone: variant.secondaryColorPantone || '',
+        pattern: variant.pattern || '',
         outOfLine: variant.outOfLine ?? false,
         isActive: variant.isActive ?? true,
         informedCostPrice: variant.costPrice || 0,
@@ -202,6 +183,8 @@ export function VariantFormModal({
       setFormData(INITIAL_FORM);
     }
     setActiveSection('basic');
+    setSectionErrors({});
+    setFieldErrors({});
   }, [variant, open]);
 
   // ---------------------------------------------------------------------------
@@ -247,6 +230,47 @@ export function VariantFormModal({
   const hasAttributes = Object.keys(variantAttributes).length > 0;
 
   // ---------------------------------------------------------------------------
+  // Sections (dynamic)
+  // ---------------------------------------------------------------------------
+
+  const sections: NavigationSection[] = useMemo(
+    () => [
+      {
+        id: 'basic',
+        label: 'Informações',
+        icon: <FileText className="w-4 h-4" />,
+        description: 'Nome, SKU, referência',
+      },
+      {
+        id: 'appearance',
+        label: 'Aparência',
+        icon: <Palette className="w-4 h-4" />,
+        description: 'Cores e padrão',
+      },
+      {
+        id: 'pricing',
+        label: 'Preços',
+        icon: <DollarSign className="w-4 h-4" />,
+        description: 'Custo, margem, venda',
+      },
+      {
+        id: 'stock',
+        label: 'Estoque',
+        icon: <Package className="w-4 h-4" />,
+        description: 'Mín, máx, reposição',
+      },
+      {
+        id: 'attributes',
+        label: 'Atributos',
+        icon: <SlidersHorizontal className="w-4 h-4" />,
+        description: 'Atributos do template',
+        hidden: !hasAttributes,
+      },
+    ],
+    [hasAttributes]
+  );
+
+  // ---------------------------------------------------------------------------
   // Mutations
   // ---------------------------------------------------------------------------
 
@@ -289,60 +313,53 @@ export function VariantFormModal({
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   // ---------------------------------------------------------------------------
-  // Handlers
+  // Validation
   // ---------------------------------------------------------------------------
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
+  const validate = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+    const sections: Record<string, boolean> = {};
 
-      if (!product?.id || !formData.name.trim()) {
-        toast.error('Preencha todos os campos obrigatórios');
-        return;
-      }
+    if (!formData.name.trim()) {
+      errors.name = 'Nome é obrigatório';
+      sections.basic = true;
+    }
 
-      const salePrice =
-        formData.definedSalePrice > 0
-          ? formData.definedSalePrice
-          : calculatedSalePrice || 0;
+    setFieldErrors(errors);
+    setSectionErrors(sections);
 
-      const cleanData = {
-        name: formData.name.trim(),
-        reference: formData.reference.trim() || undefined,
-        colorHex: formData.colorHex.trim() || undefined,
-        colorPantone: formData.colorPantone.trim() || undefined,
-        outOfLine: formData.outOfLine,
-        isActive: formData.isActive,
-        price: salePrice,
-        costPrice: formData.informedCostPrice || undefined,
-        profitMargin: formData.profitMarginPercent || undefined,
-        minStock: formData.minStock || undefined,
-        maxStock: formData.maxStock || undefined,
-        reorderPoint: formData.reorderPoint || undefined,
-        reorderQuantity: formData.reorderQuantity || undefined,
-        attributes: formData.attributes,
-      };
+    if (Object.keys(errors).length > 0) {
+      toast.error('Preencha os campos obrigatórios');
+      const firstErrorSection = Object.keys(sections)[0] as SectionId;
+      if (firstErrorSection) setActiveSection(firstErrorSection);
+      return false;
+    }
+    return true;
+  }, [formData]);
 
-      if (isEditMode && variant) {
-        updateMutation.mutate({ id: variant.id, data: cleanData });
-      } else {
-        createMutation.mutate({ ...cleanData, productId: product.id });
-      }
-    },
-    [
-      product,
-      variant,
-      formData,
-      isEditMode,
-      calculatedSalePrice,
-      createMutation,
-      updateMutation,
-    ]
-  );
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
 
   const updateField = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
       setFormData(prev => ({ ...prev, [key]: value }));
+      // Clear field error
+      setFieldErrors(prev => {
+        if (!(key in prev)) return prev;
+        const next = { ...prev };
+        delete next[key as string];
+        return next;
+      });
+      // Clear section error for basic section fields
+      if (key === 'name' || key === 'sku' || key === 'reference') {
+        setSectionErrors(prev => {
+          if (!prev.basic) return prev;
+          const next = { ...prev };
+          delete next.basic;
+          return next;
+        });
+      }
     },
     []
   );
@@ -358,159 +375,146 @@ export function VariantFormModal({
     onOpenChange(false);
   }, [onOpenChange]);
 
+  const handleSubmit = useCallback(() => {
+    if (!product?.id) return;
+    if (!validate()) return;
+
+    const salePrice =
+      formData.definedSalePrice > 0
+        ? formData.definedSalePrice
+        : calculatedSalePrice || 0;
+
+    const cleanData = {
+      name: formData.name.trim(),
+      sku: formData.sku.trim() || undefined,
+      reference: formData.reference.trim() || undefined,
+      colorHex: formData.colorHex.trim() || undefined,
+      colorPantone: formData.colorPantone.trim() || undefined,
+      secondaryColorHex: formData.secondaryColorHex.trim() || undefined,
+      secondaryColorPantone:
+        formData.secondaryColorPantone.trim() || undefined,
+      pattern:
+        formData.pattern && formData.pattern !== 'none'
+          ? (formData.pattern as Pattern)
+          : undefined,
+      outOfLine: formData.outOfLine,
+      isActive: formData.isActive,
+      price: salePrice,
+      costPrice: formData.informedCostPrice || undefined,
+      profitMargin: formData.profitMarginPercent || undefined,
+      minStock: formData.minStock || undefined,
+      maxStock: formData.maxStock || undefined,
+      reorderPoint: formData.reorderPoint || undefined,
+      reorderQuantity: formData.reorderQuantity || undefined,
+      attributes: formData.attributes,
+    };
+
+    if (isEditMode && variant) {
+      updateMutation.mutate({ id: variant.id, data: cleanData });
+    } else {
+      createMutation.mutate({ ...cleanData, productId: product.id });
+    }
+  }, [
+    product,
+    variant,
+    formData,
+    isEditMode,
+    calculatedSalePrice,
+    validate,
+    createMutation,
+    updateMutation,
+  ]);
+
   // ---------------------------------------------------------------------------
-  // Render helpers
+  // Render
   // ---------------------------------------------------------------------------
 
   if (!product) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-6xl p-0 gap-0 max-h-[85vh] flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <DialogTitle>
-            {isEditMode ? 'Editar Variante' : 'Nova Variante'}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {isEditMode
-              ? `Editando ${variant?.name}`
-              : `Adicionar variante para ${product.name}`}
-          </p>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex flex-1 min-h-0">
-            {/* Sidebar */}
-            <nav className="w-48 shrink-0 border-r p-2 space-y-1 overflow-auto">
-              {SECTIONS.map(section => (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => setActiveSection(section.id)}
-                  className={cn(
-                    'w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg transition-all duration-200',
-                    'text-left group',
-                    activeSection === section.id
-                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'p-1.5 rounded-md transition-colors',
-                      activeSection === section.id
-                        ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 group-hover:bg-gray-200 dark:group-hover:bg-white/15'
-                    )}
-                  >
-                    {section.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={cn(
-                        'font-medium text-xs',
-                        activeSection === section.id
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-900 dark:text-white'
-                      )}
-                    >
-                      {section.label}
-                    </p>
-                    <p className="text-[10px] text-gray-500 dark:text-white/40 truncate">
-                      {section.description}
-                    </p>
-                  </div>
-                  <ChevronRight
-                    className={cn(
-                      'w-3.5 h-3.5 shrink-0 transition-transform',
-                      activeSection === section.id
-                        ? 'text-blue-500 translate-x-0'
-                        : 'text-gray-400 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
-                    )}
-                  />
-                </button>
-              ))}
-            </nav>
-
-            {/* Content Area */}
-            <ScrollArea className="flex-1">
-              <div className="p-6 space-y-4">
-                {/* Section: Basic */}
-                {activeSection === 'basic' && (
-                  <BasicSection
-                    formData={formData}
-                    updateField={updateField}
-                    isPending={isPending}
-                  />
-                )}
-
-                {/* Section: Pricing */}
-                {activeSection === 'pricing' && (
-                  <PricingSection
-                    formData={formData}
-                    updateField={updateField}
-                    calculatedCostPrice={calculatedCostPrice}
-                    calculatedSalePrice={calculatedSalePrice}
-                    calculatedProfitMargin={calculatedProfitMargin}
-                    isPending={isPending}
-                  />
-                )}
-
-                {/* Section: Stock */}
-                {activeSection === 'stock' && (
-                  <StockSection
-                    formData={formData}
-                    updateField={updateField}
-                    isPending={isPending}
-                  />
-                )}
-
-                {/* Section: Attributes */}
-                {activeSection === 'attributes' && (
-                  <AttributesSection
-                    formData={formData}
-                    variantAttributes={variantAttributes}
-                    hasAttributes={hasAttributes}
-                    updateAttribute={updateAttribute}
-                    isPending={isPending}
-                  />
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t shrink-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Salvando...' : 'Criando...'}
-                </>
-              ) : isEditMode ? (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Variante
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <NavigationWizardDialog
+      open={open}
+      onOpenChange={handleClose}
+      title={isEditMode ? 'Editar Variante' : 'Nova Variante'}
+      subtitle={
+        isEditMode
+          ? `Editando ${variant?.name}`
+          : `Adicionar variante para ${product.name}`
+      }
+      sections={sections}
+      activeSection={activeSection}
+      onSectionChange={id => setActiveSection(id as SectionId)}
+      sectionErrors={sectionErrors}
+      isPending={isPending}
+      footer={
+        <>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {isEditMode ? 'Salvando...' : 'Criando...'}
+              </>
+            ) : isEditMode ? (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Variante
+              </>
+            )}
+          </Button>
+        </>
+      }
+    >
+      {activeSection === 'basic' && (
+        <BasicSection
+          formData={formData}
+          updateField={updateField}
+          isPending={isPending}
+          isEditMode={isEditMode}
+          fieldErrors={fieldErrors}
+        />
+      )}
+      {activeSection === 'appearance' && (
+        <AppearanceSection
+          formData={formData}
+          updateField={updateField}
+          isPending={isPending}
+        />
+      )}
+      {activeSection === 'pricing' && (
+        <PricingSection
+          formData={formData}
+          updateField={updateField}
+          calculatedCostPrice={calculatedCostPrice}
+          calculatedSalePrice={calculatedSalePrice}
+          calculatedProfitMargin={calculatedProfitMargin}
+          isPending={isPending}
+        />
+      )}
+      {activeSection === 'stock' && (
+        <StockSection
+          formData={formData}
+          updateField={updateField}
+          isPending={isPending}
+        />
+      )}
+      {activeSection === 'attributes' && (
+        <AttributesSection
+          formData={formData}
+          variantAttributes={variantAttributes}
+          hasAttributes={hasAttributes}
+          updateAttribute={updateAttribute}
+          isPending={isPending}
+        />
+      )}
+    </NavigationWizardDialog>
   );
 }
 
@@ -528,85 +532,64 @@ interface SectionProps {
 // Basic Section
 // ---------------------------------------------------------------------------
 
-function BasicSection({ formData, updateField, isPending }: SectionProps) {
+interface BasicSectionProps extends SectionProps {
+  isEditMode: boolean;
+  fieldErrors: Record<string, string>;
+}
+
+function BasicSection({
+  formData,
+  updateField,
+  isPending,
+  isEditMode,
+  fieldErrors,
+}: BasicSectionProps) {
   return (
     <div className="space-y-4">
-      {/* Nome + Referência */}
+      {/* Nome + SKU */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="vfm-name">
-            Nome da Variante <span className="text-red-500">*</span>
+            Nome da Variante <span className="text-rose-500">*</span>
           </Label>
           <Input
             id="vfm-name"
             placeholder="Ex: Azul P, 100ml, etc."
             value={formData.name}
             onChange={e => updateField('name', e.target.value)}
-            required
-            autoFocus
+            autoFocus={!isEditMode}
             disabled={isPending}
+            className={cn(fieldErrors.name && 'border-rose-500')}
           />
+          {fieldErrors.name && (
+            <p className="text-xs text-rose-500">{fieldErrors.name}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="vfm-reference">Referência</Label>
+          <Label htmlFor="vfm-sku">SKU</Label>
           <Input
-            id="vfm-reference"
-            placeholder="Código de referência"
-            value={formData.reference}
-            onChange={e => updateField('reference', e.target.value)}
-            maxLength={128}
+            id="vfm-sku"
+            placeholder="Código SKU"
+            value={formData.sku}
+            onChange={e => updateField('sku', e.target.value)}
+            maxLength={64}
             disabled={isPending}
           />
         </div>
       </div>
 
-      {/* Cor e Pantone */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="vfm-colorHex">Cor de Exibição</Label>
-          <div className="flex items-center gap-2">
-            <input
-              id="vfm-colorHex"
-              type="color"
-              value={formData.colorHex || '#000000'}
-              onChange={e => updateField('colorHex', e.target.value)}
-              className="h-9 w-12 cursor-pointer rounded border border-input bg-transparent p-0.5"
-              disabled={isPending}
-            />
-            <Input
-              value={formData.colorHex}
-              onChange={e => updateField('colorHex', e.target.value)}
-              placeholder="#000000"
-              maxLength={7}
-              className="flex-1"
-              disabled={isPending}
-            />
-            {formData.colorHex && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-xs text-muted-foreground"
-                onClick={() => updateField('colorHex', '')}
-              >
-                Limpar
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="vfm-colorPantone">Pantone</Label>
-          <Input
-            id="vfm-colorPantone"
-            value={formData.colorPantone}
-            onChange={e => updateField('colorPantone', e.target.value)}
-            placeholder="Ex: PANTONE 19-4052"
-            maxLength={50}
-            disabled={isPending}
-          />
-        </div>
+      {/* Referência */}
+      <div className="space-y-1.5">
+        <Label htmlFor="vfm-reference">Referência</Label>
+        <Input
+          id="vfm-reference"
+          placeholder="Código de referência do fornecedor/fabricante"
+          value={formData.reference}
+          onChange={e => updateField('reference', e.target.value)}
+          maxLength={128}
+          disabled={isPending}
+        />
       </div>
 
       {/* Switches: Fora de Linha + Ativo */}
@@ -644,6 +627,126 @@ function BasicSection({ formData, updateField, isPending }: SectionProps) {
             disabled={isPending}
           />
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Appearance Section (NEW)
+// ---------------------------------------------------------------------------
+
+function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
+  return (
+    <div className="space-y-6">
+      {/* Cor Primária */}
+      <div className="space-y-1.5">
+        <Label>Cor Primária</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={formData.colorHex || '#000000'}
+              onChange={e => updateField('colorHex', e.target.value)}
+              className="h-9 w-12 cursor-pointer rounded border border-input bg-transparent p-0.5"
+              disabled={isPending}
+            />
+            <Input
+              value={formData.colorHex}
+              onChange={e => updateField('colorHex', e.target.value)}
+              placeholder="#000000"
+              maxLength={7}
+              className="flex-1"
+              disabled={isPending}
+            />
+            {formData.colorHex && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => updateField('colorHex', '')}
+              >
+                Limpar
+              </Button>
+            )}
+          </div>
+          <Input
+            value={formData.colorPantone}
+            onChange={e => updateField('colorPantone', e.target.value)}
+            placeholder="Ex: PANTONE 19-4052"
+            maxLength={32}
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
+      {/* Cor Secundária */}
+      <div className="space-y-1.5">
+        <Label>Cor Secundária</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={formData.secondaryColorHex || '#000000'}
+              onChange={e => updateField('secondaryColorHex', e.target.value)}
+              className="h-9 w-12 cursor-pointer rounded border border-input bg-transparent p-0.5"
+              disabled={isPending}
+            />
+            <Input
+              value={formData.secondaryColorHex}
+              onChange={e => updateField('secondaryColorHex', e.target.value)}
+              placeholder="#000000"
+              maxLength={7}
+              className="flex-1"
+              disabled={isPending}
+            />
+            {formData.secondaryColorHex && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => updateField('secondaryColorHex', '')}
+              >
+                Limpar
+              </Button>
+            )}
+          </div>
+          <Input
+            value={formData.secondaryColorPantone}
+            onChange={e =>
+              updateField('secondaryColorPantone', e.target.value)
+            }
+            placeholder="Ex: PANTONE 19-4052"
+            maxLength={32}
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
+      {/* Padrão */}
+      <div className="space-y-1.5">
+        <Label>Padrão</Label>
+        <Select
+          value={formData.pattern || 'none'}
+          onValueChange={value =>
+            updateField('pattern', value === 'none' ? '' : value)
+          }
+          disabled={isPending}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um padrão..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum</SelectItem>
+            {Object.entries(PATTERN_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
@@ -778,7 +881,9 @@ function PricingSection({
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <Label htmlFor="vfm-calculatedMargin">Margem Calculada (%)</Label>
+              <Label htmlFor="vfm-calculatedMargin">
+                Margem Calculada (%)
+              </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
@@ -926,7 +1031,7 @@ function AttributesSection({
                       <Label htmlFor={`vfm-attr-${key}`} className="text-sm">
                         {config.label || key}
                         {config.required && (
-                          <span className="text-red-500"> *</span>
+                          <span className="text-rose-500"> *</span>
                         )}
                       </Label>
                       {config.description && (
@@ -948,7 +1053,9 @@ function AttributesSection({
                         currentValue === 'sim' ||
                         currentValue === '1'
                       }
-                      onCheckedChange={checked => updateAttribute(key, checked)}
+                      onCheckedChange={checked =>
+                        updateAttribute(key, checked)
+                      }
                       disabled={isPending}
                     />
                   </div>
@@ -958,7 +1065,7 @@ function AttributesSection({
                       <Label htmlFor={`vfm-attr-${key}`} className="text-sm">
                         {config.label || key}
                         {config.required && (
-                          <span className="text-red-500"> *</span>
+                          <span className="text-rose-500"> *</span>
                         )}
                       </Label>
                       {config.description && (
@@ -996,10 +1103,12 @@ function AttributesSection({
                         type="number"
                         value={currentValue}
                         onChange={e =>
-                          updateAttribute(key, parseFloat(e.target.value) || 0)
+                          updateAttribute(
+                            key,
+                            parseFloat(e.target.value) || 0
+                          )
                         }
                         placeholder={config.placeholder || ''}
-                        required={config.required}
                         disabled={isPending}
                       />
                     ) : config.type === 'date' ? (
@@ -1008,7 +1117,6 @@ function AttributesSection({
                         type="date"
                         value={currentValue}
                         onChange={e => updateAttribute(key, e.target.value)}
-                        required={config.required}
                         disabled={isPending}
                       />
                     ) : (
@@ -1018,7 +1126,6 @@ function AttributesSection({
                         value={currentValue}
                         onChange={e => updateAttribute(key, e.target.value)}
                         placeholder={config.placeholder || ''}
-                        required={config.required}
                         disabled={isPending}
                       />
                     )}
