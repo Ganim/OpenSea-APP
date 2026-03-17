@@ -206,8 +206,10 @@ function ChipInput({
   const localRef = useRef<HTMLInputElement>(null);
   const ref = inputRef ?? localRef;
 
-  // Filter out already-added chips from suggestions
-  const filteredSuggestions = suggestions.filter(s => !chips.includes(s.email));
+  // Filter out already-added chips and deduplicate by email
+  const filteredSuggestions = suggestions
+    .filter(s => !chips.includes(s.email))
+    .filter((s, i, arr) => arr.findIndex(x => x.email === s.email) === i);
 
   function addChip(value: string) {
     const trimmed = value.trim();
