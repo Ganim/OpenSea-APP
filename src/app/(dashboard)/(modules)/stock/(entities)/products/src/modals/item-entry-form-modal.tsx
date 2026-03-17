@@ -1,18 +1,12 @@
 /**
- * ItemEntryFormModal - Unified modal for registering item entries
- * Uses sidebar navigation pattern with all entry fields across 4 sections.
- * Replaces QuickAddItemModal.
+ * ItemEntryFormModal - Modal for registering item entries
+ * Uses NavigationWizardDialog with 4 sections:
+ * Entrada, Custos, Rastreabilidade (with uniqueCode), Atributos (conditional)
  */
 
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   InputGroup,
@@ -21,7 +15,10 @@ import {
   MoneyInput,
 } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  NavigationWizardDialog,
+  type NavigationSection,
+} from '@/components/ui/navigation-wizard-dialog';
 import {
   Select,
   SelectContent,
@@ -50,7 +47,6 @@ import type {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarDays,
-  ChevronRight,
   DollarSign,
   Info,
   Loader2,
@@ -77,13 +73,6 @@ interface ItemEntryFormModalProps {
 
 type SectionId = 'entry' | 'costs' | 'batch' | 'attributes';
 
-interface SectionItem {
-  id: SectionId;
-  label: string;
-  icon: React.ReactNode;
-  description: string;
-}
-
 interface FormData {
   // Entry
   entryType: EntryMovementType;
@@ -92,6 +81,7 @@ interface FormData {
   // Costs
   unitCost: number;
   // Batch & Traceability
+  uniqueCode: string;
   batchNumber: string;
   manufacturingDate: string;
   expiryDate: string;
@@ -104,33 +94,6 @@ interface FormData {
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const SECTIONS: SectionItem[] = [
-  {
-    id: 'entry',
-    label: 'Entrada',
-    icon: <Package className="w-4 h-4" />,
-    description: 'Tipo, local, quantidade',
-  },
-  {
-    id: 'costs',
-    label: 'Custos',
-    icon: <DollarSign className="w-4 h-4" />,
-    description: 'Preço de custo',
-  },
-  {
-    id: 'batch',
-    label: 'Rastreabilidade',
-    icon: <CalendarDays className="w-4 h-4" />,
-    description: 'Lote, validade, NF',
-  },
-  {
-    id: 'attributes',
-    label: 'Atributos',
-    icon: <SlidersHorizontal className="w-4 h-4" />,
-    description: 'Atributos do template',
-  },
-];
 
 const ENTRY_TYPE_OPTIONS: {
   type: EntryMovementType;
@@ -157,6 +120,7 @@ const INITIAL_FORM: FormData = {
   binId: '',
   quantity: '1',
   unitCost: 0,
+  uniqueCode: '',
   batchNumber: '',
   manufacturingDate: '',
   expiryDate: '',
@@ -178,6 +142,10 @@ export function ItemEntryFormModal({
   const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState<SectionId>('entry');
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+  const [sectionErrors, setSectionErrors] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Fetch template for dynamic attributes
   const { data: template } = useTemplate(product?.templateId || '');
@@ -190,6 +158,8 @@ export function ItemEntryFormModal({
     if (open) {
       setFormData(INITIAL_FORM);
       setActiveSection('entry');
+      setSectionErrors({});
+      setFieldErrors({});
     }
   }, [open]);
 
@@ -231,6 +201,41 @@ export function ItemEntryFormModal({
   const hasAttributes = Object.keys(itemAttributes).length > 0;
 
   // ---------------------------------------------------------------------------
+  // Sections (dynamic)
+  // ---------------------------------------------------------------------------
+
+  const sections: NavigationSection[] = useMemo(
+    () => [
+      {
+        id: 'entry',
+        label: 'Entrada',
+        icon: <Package className="w-4 h-4" />,
+        description: 'Tipo, local, quantidade',
+      },
+      {
+        id: 'costs',
+        label: 'Custos',
+        icon: <DollarSign className="w-4 h-4" />,
+        description: 'Preço de custo',
+      },
+      {
+        id: 'batch',
+        label: 'Rastreabilidade',
+        icon: <CalendarDays className="w-4 h-4" />,
+        description: 'Lote, validade, NF',
+      },
+      {
+        id: 'attributes',
+        label: 'Atributos',
+        icon: <SlidersHorizontal className="w-4 h-4" />,
+        description: 'Atributos do template',
+        hidden: !hasAttributes,
+      },
+    ],
+    [hasAttributes]
+  );
+
+  // ---------------------------------------------------------------------------
   // Mutation
   // ---------------------------------------------------------------------------
 
@@ -255,54 +260,60 @@ export function ItemEntryFormModal({
     },
   });
 
+  const isPending = createItemMutation.isPending;
+
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
+
+  const validate = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+    const secs: Record<string, boolean> = {};
+
+    if (!formData.binId) {
+      errors.binId = 'Localização é obrigatória';
+      secs.entry = true;
+    }
+    if (parsedQuantity <= 0) {
+      errors.quantity = 'Quantidade inválida';
+      secs.entry = true;
+    }
+
+    setFieldErrors(errors);
+    setSectionErrors(secs);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error('Preencha os campos obrigatórios');
+      const firstErrorSection = Object.keys(secs)[0] as SectionId;
+      if (firstErrorSection) setActiveSection(firstErrorSection);
+      return false;
+    }
+    return true;
+  }, [formData.binId, parsedQuantity]);
+
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!variant?.id) return;
-
-      if (!formData.binId) {
-        toast.error('Selecione uma localização');
-        return;
-      }
-
-      if (parsedQuantity <= 0) {
-        toast.error('Quantidade inválida');
-        return;
-      }
-
-      // Build notes: prepend invoice number if present
-      let notes = formData.notes.trim() || undefined;
-      if (formData.invoiceNumber.trim()) {
-        const invoiceLine = `NF: ${formData.invoiceNumber.trim()}`;
-        notes = notes ? `${invoiceLine} | ${notes}` : invoiceLine;
-      }
-
-      const createData: RegisterItemEntryRequest = {
-        variantId: variant.id,
-        binId: formData.binId,
-        quantity: parsedQuantity,
-        movementType: formData.entryType,
-        unitCost: formData.unitCost > 0 ? formData.unitCost : undefined,
-        attributes: formData.attributes,
-        batchNumber: formData.batchNumber.trim() || undefined,
-        manufacturingDate: formData.manufacturingDate || undefined,
-        expiryDate: formData.expiryDate || undefined,
-        notes,
-      };
-
-      createItemMutation.mutate(createData);
-    },
-    [variant, formData, parsedQuantity, createItemMutation]
-  );
-
   const updateField = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
       setFormData(prev => ({ ...prev, [key]: value }));
+      // Clear field error
+      setFieldErrors(prev => {
+        if (!(key in prev)) return prev;
+        const next = { ...prev };
+        delete next[key as string];
+        return next;
+      });
+      // Clear entry section errors
+      if (key === 'binId' || key === 'quantity') {
+        setSectionErrors(prev => {
+          if (!prev.entry) return prev;
+          const next = { ...prev };
+          delete next.entry;
+          return next;
+        });
+      }
     },
     []
   );
@@ -318,149 +329,108 @@ export function ItemEntryFormModal({
     onOpenChange(false);
   }, [onOpenChange]);
 
+  const handleSubmit = useCallback(() => {
+    if (!variant?.id) return;
+    if (!validate()) return;
+
+    // Build notes: prepend invoice number if present
+    let notes = formData.notes.trim() || undefined;
+    if (formData.invoiceNumber.trim()) {
+      const invoiceLine = `NF: ${formData.invoiceNumber.trim()}`;
+      notes = notes ? `${invoiceLine} | ${notes}` : invoiceLine;
+    }
+
+    const createData: RegisterItemEntryRequest = {
+      variantId: variant.id,
+      binId: formData.binId,
+      quantity: parsedQuantity,
+      movementType: formData.entryType,
+      uniqueCode: formData.uniqueCode.trim() || undefined,
+      unitCost: formData.unitCost > 0 ? formData.unitCost : undefined,
+      attributes: formData.attributes,
+      batchNumber: formData.batchNumber.trim() || undefined,
+      manufacturingDate: formData.manufacturingDate || undefined,
+      expiryDate: formData.expiryDate || undefined,
+      notes,
+    };
+
+    createItemMutation.mutate(createData);
+  }, [variant, formData, parsedQuantity, validate, createItemMutation]);
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
   if (!product || !variant) return null;
 
-  const isPending = createItemMutation.isPending;
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-6xl p-0 gap-0 max-h-[85vh] flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <DialogTitle>Registrar Entrada</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Adicionar item para {variant.name}
-          </p>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex flex-1 min-h-0">
-            {/* Sidebar */}
-            <nav className="w-48 shrink-0 border-r p-2 space-y-1 overflow-auto">
-              {SECTIONS.map(section => (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => setActiveSection(section.id)}
-                  className={cn(
-                    'w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg transition-all duration-200',
-                    'text-left group',
-                    activeSection === section.id
-                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'p-1.5 rounded-md transition-colors',
-                      activeSection === section.id
-                        ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
-                        : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 group-hover:bg-gray-200 dark:group-hover:bg-white/15'
-                    )}
-                  >
-                    {section.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={cn(
-                        'font-medium text-xs',
-                        activeSection === section.id
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-900 dark:text-white'
-                      )}
-                    >
-                      {section.label}
-                    </p>
-                    <p className="text-[10px] text-gray-500 dark:text-white/40 truncate">
-                      {section.description}
-                    </p>
-                  </div>
-                  <ChevronRight
-                    className={cn(
-                      'w-3.5 h-3.5 shrink-0 transition-transform',
-                      activeSection === section.id
-                        ? 'text-blue-500 translate-x-0'
-                        : 'text-gray-400 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'
-                    )}
-                  />
-                </button>
-              ))}
-            </nav>
-
-            {/* Content Area */}
-            <ScrollArea className="flex-1">
-              <div className="p-6 space-y-4">
-                {activeSection === 'entry' && (
-                  <EntrySection
-                    formData={formData}
-                    updateField={updateField}
-                    unitOfMeasure={unitOfMeasure}
-                    isPending={isPending}
-                  />
-                )}
-
-                {activeSection === 'costs' && (
-                  <CostsSection
-                    formData={formData}
-                    updateField={updateField}
-                    totalCost={totalCost}
-                    parsedQuantity={parsedQuantity}
-                    unitOfMeasure={unitOfMeasure}
-                    isPending={isPending}
-                  />
-                )}
-
-                {activeSection === 'batch' && (
-                  <BatchSection
-                    formData={formData}
-                    updateField={updateField}
-                    isPending={isPending}
-                  />
-                )}
-
-                {activeSection === 'attributes' && (
-                  <AttributesSection
-                    formData={formData}
-                    itemAttributes={itemAttributes}
-                    hasAttributes={hasAttributes}
-                    updateAttribute={updateAttribute}
-                    isPending={isPending}
-                  />
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t shrink-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isPending || !formData.binId}>
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Registrando...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Registrar Entrada
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <NavigationWizardDialog
+      open={open}
+      onOpenChange={handleClose}
+      title="Registrar Entrada"
+      subtitle={`Adicionar item para ${variant.name}`}
+      sections={sections}
+      activeSection={activeSection}
+      onSectionChange={id => setActiveSection(id as SectionId)}
+      sectionErrors={sectionErrors}
+      isPending={isPending}
+      footer={
+        <>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Registrando...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Registrar Entrada
+              </>
+            )}
+          </Button>
+        </>
+      }
+    >
+      {activeSection === 'entry' && (
+        <EntrySection
+          formData={formData}
+          updateField={updateField}
+          unitOfMeasure={unitOfMeasure}
+          isPending={isPending}
+          fieldErrors={fieldErrors}
+        />
+      )}
+      {activeSection === 'costs' && (
+        <CostsSection
+          formData={formData}
+          updateField={updateField}
+          totalCost={totalCost}
+          parsedQuantity={parsedQuantity}
+          unitOfMeasure={unitOfMeasure}
+          isPending={isPending}
+        />
+      )}
+      {activeSection === 'batch' && (
+        <BatchSection
+          formData={formData}
+          updateField={updateField}
+          isPending={isPending}
+        />
+      )}
+      {activeSection === 'attributes' && (
+        <AttributesSection
+          formData={formData}
+          itemAttributes={itemAttributes}
+          hasAttributes={hasAttributes}
+          updateAttribute={updateAttribute}
+          isPending={isPending}
+        />
+      )}
+    </NavigationWizardDialog>
   );
 }
 
@@ -480,6 +450,7 @@ interface SectionProps {
 
 interface EntrySectionProps extends SectionProps {
   unitOfMeasure: string;
+  fieldErrors: Record<string, string>;
 }
 
 function EntrySection({
@@ -487,13 +458,14 @@ function EntrySection({
   updateField,
   unitOfMeasure,
   isPending,
+  fieldErrors,
 }: EntrySectionProps) {
   return (
     <div className="space-y-4">
       {/* Tipo de Entrada */}
       <div className="space-y-1.5">
         <Label>
-          Tipo de Entrada <span className="text-red-500">*</span>
+          Tipo de Entrada <span className="text-rose-500">*</span>
         </Label>
         <div className="grid grid-cols-2 gap-3">
           {ENTRY_TYPE_OPTIONS.map(option => {
@@ -538,7 +510,7 @@ function EntrySection({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>
-            Localização (Bin) <span className="text-red-500">*</span>
+            Localização (Bin) <span className="text-rose-500">*</span>
           </Label>
           <BinSelector
             value={formData.binId}
@@ -546,11 +518,14 @@ function EntrySection({
             placeholder="Buscar localização..."
             disabled={isPending}
           />
+          {fieldErrors.binId && (
+            <p className="text-xs text-rose-500">{fieldErrors.binId}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="ief-quantity">
-            Quantidade <span className="text-red-500">*</span>
+            Quantidade <span className="text-rose-500">*</span>
           </Label>
           <InputGroup className="rounded-md">
             <Input
@@ -563,17 +538,23 @@ function EntrySection({
                 const sanitized = sanitizeQuantityInput(e.target.value);
                 updateField('quantity', sanitized);
               }}
-              required
               disabled={isPending}
-              className="rounded-r-none"
+              className={cn(
+                'rounded-r-none',
+                fieldErrors.quantity && 'border-rose-500'
+              )}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupText>{unitOfMeasure}</InputGroupText>
             </InputGroupAddon>
           </InputGroup>
-          <p className="text-xs text-muted-foreground">
-            Máximo 3 casas decimais
-          </p>
+          {fieldErrors.quantity ? (
+            <p className="text-xs text-rose-500">{fieldErrors.quantity}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Máximo 3 casas decimais
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -653,12 +634,28 @@ function CostsSection({
 }
 
 // ---------------------------------------------------------------------------
-// Batch Section
+// Batch Section (with uniqueCode)
 // ---------------------------------------------------------------------------
 
 function BatchSection({ formData, updateField, isPending }: SectionProps) {
   return (
     <div className="space-y-4">
+      {/* Código Único */}
+      <div className="space-y-1.5">
+        <Label htmlFor="ief-uniqueCode">Código Único</Label>
+        <Input
+          id="ief-uniqueCode"
+          value={formData.uniqueCode}
+          onChange={e => updateField('uniqueCode', e.target.value)}
+          placeholder="Código de identificação próprio (opcional)"
+          maxLength={128}
+          disabled={isPending}
+        />
+        <p className="text-xs text-muted-foreground">
+          Número de série, código de patrimônio ou identificador interno
+        </p>
+      </div>
+
       {/* Lote + NF */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
@@ -786,7 +783,7 @@ function AttributesSection({
                       <Label htmlFor={`ief-attr-${key}`} className="text-sm">
                         {config.label || key}
                         {config.required && (
-                          <span className="text-red-500"> *</span>
+                          <span className="text-rose-500"> *</span>
                         )}
                       </Label>
                       {config.description && (
@@ -808,7 +805,9 @@ function AttributesSection({
                         currentValue === 'sim' ||
                         currentValue === '1'
                       }
-                      onCheckedChange={checked => updateAttribute(key, checked)}
+                      onCheckedChange={checked =>
+                        updateAttribute(key, checked)
+                      }
                       disabled={isPending}
                     />
                   </div>
@@ -818,7 +817,7 @@ function AttributesSection({
                       <Label htmlFor={`ief-attr-${key}`} className="text-sm">
                         {config.label || key}
                         {config.required && (
-                          <span className="text-red-500"> *</span>
+                          <span className="text-rose-500"> *</span>
                         )}
                       </Label>
                       {config.description && (
@@ -856,10 +855,12 @@ function AttributesSection({
                         type="number"
                         value={currentValue}
                         onChange={e =>
-                          updateAttribute(key, parseFloat(e.target.value) || 0)
+                          updateAttribute(
+                            key,
+                            parseFloat(e.target.value) || 0
+                          )
                         }
                         placeholder={config.placeholder || ''}
-                        required={config.required}
                         disabled={isPending}
                       />
                     ) : config.type === 'date' ? (
@@ -868,7 +869,6 @@ function AttributesSection({
                         type="date"
                         value={currentValue}
                         onChange={e => updateAttribute(key, e.target.value)}
-                        required={config.required}
                         disabled={isPending}
                       />
                     ) : (
@@ -878,7 +878,6 @@ function AttributesSection({
                         value={currentValue}
                         onChange={e => updateAttribute(key, e.target.value)}
                         placeholder={config.placeholder || ''}
-                        required={config.required}
                         disabled={isPending}
                       />
                     )}
