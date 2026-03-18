@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { usePrintQueue } from '@/core/print-queue';
-import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
+import { formatQuantity, formatUnitAbbreviation } from '@/helpers/formatters';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
@@ -329,7 +329,7 @@ export function ProductVariantsItemsModal({
   if (!product) return null;
 
   const templateName = product.template?.name || 'Template';
-  const unitOfMeasure = formatUnitOfMeasure(
+  const unitOfMeasure = formatUnitAbbreviation(
     product.template?.unitOfMeasure || 'UNITS'
   );
   const manufacturerName = product.manufacturer?.name;
@@ -681,7 +681,7 @@ function VariantDetailHeader({
           <div className="text-right">
             <p className="text-lg font-bold tabular-nums leading-none">
               {formatQuantity(totalQuantity)}
-              <span className="text-xs font-normal text-muted-foreground">
+              <span className="text-xs font-normal text-muted-foreground ml-1">
                 {unitLabel}
               </span>
             </p>

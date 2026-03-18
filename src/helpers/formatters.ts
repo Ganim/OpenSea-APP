@@ -170,6 +170,20 @@ export function formatUnitOfMeasure(
   return unitMap[unitOfMeasure] || unitOfMeasure;
 }
 
+export function formatUnitAbbreviation(
+  unitOfMeasure: string | null | undefined
+): string {
+  if (!unitOfMeasure) return 'un';
+
+  const abbrMap: Record<string, string> = {
+    UNITS: 'un',
+    KILOGRAMS: 'kg',
+    METERS: 'm',
+  };
+
+  return abbrMap[unitOfMeasure] || unitOfMeasure;
+}
+
 /**
  * Retorna a abreviação da unidade de medida (ex: "kg", "m", "L")
  * Extrai o conteúdo entre parênteses do formatUnitOfMeasure()

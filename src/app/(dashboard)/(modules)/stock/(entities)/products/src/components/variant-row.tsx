@@ -121,7 +121,7 @@ export function VariantRow({
           )}
         >
           {formatQuantity(totalQuantity)}
-          <span className="text-[10px] font-normal text-muted-foreground">
+          <span className="text-[10px] font-normal text-muted-foreground ml-0.5">
             {unitLabel}
           </span>
         </span>
