@@ -638,11 +638,9 @@ function BasicSection({
 function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
   const pattern = formData.pattern || '';
   const isNoPattern = !pattern || pattern === 'none';
-  const isSolid = pattern === 'SOLID';
 
-  // Disable colors when no pattern; disable secondary when solid
-  const primaryDisabled = isPending || isNoPattern;
-  const secondaryDisabled = isPending || isNoPattern || isSolid;
+  // Colors disabled only when no pattern selected
+  const colorsDisabled = isPending || isNoPattern;
 
   return (
     <div className="space-y-6">
@@ -683,7 +681,7 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
       />
 
       {/* Cor Primária */}
-      <div className={cn('space-y-1.5', primaryDisabled && 'opacity-50')}>
+      <div className={cn('space-y-1.5', colorsDisabled && 'opacity-50')}>
         <Label>Cor Primária</Label>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
@@ -692,7 +690,7 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
               value={formData.colorHex || '#000000'}
               onChange={e => updateField('colorHex', e.target.value)}
               className="h-9 w-12 cursor-pointer rounded border border-input bg-transparent p-0.5"
-              disabled={primaryDisabled}
+              disabled={colorsDisabled}
             />
             <Input
               value={formData.colorHex}
@@ -700,9 +698,9 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
               placeholder="#000000"
               maxLength={7}
               className="flex-1"
-              disabled={primaryDisabled}
+              disabled={colorsDisabled}
             />
-            {formData.colorHex && !primaryDisabled && (
+            {formData.colorHex && !colorsDisabled && (
               <Button
                 type="button"
                 variant="ghost"
@@ -719,18 +717,18 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
             onChange={e => updateField('colorPantone', e.target.value)}
             placeholder="Ex: PANTONE 19-4052"
             maxLength={32}
-            disabled={primaryDisabled}
+            disabled={colorsDisabled}
           />
         </div>
       </div>
 
       {/* Cor Secundária */}
-      <div className={cn('space-y-1.5', secondaryDisabled && 'opacity-50')}>
+      <div className={cn('space-y-1.5', colorsDisabled && 'opacity-50')}>
         <div className="flex items-center gap-2">
           <Label>Cor Secundária</Label>
-          {isSolid && !isNoPattern && (
+          {pattern === 'SOLID' && (
             <span className="text-[10px] text-muted-foreground">
-              (não aplicável para padrão sólido)
+              (com segunda cor, exibe diagonal metade/metade)
             </span>
           )}
         </div>
@@ -741,7 +739,7 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
               value={formData.secondaryColorHex || '#000000'}
               onChange={e => updateField('secondaryColorHex', e.target.value)}
               className="h-9 w-12 cursor-pointer rounded border border-input bg-transparent p-0.5"
-              disabled={secondaryDisabled}
+              disabled={colorsDisabled}
             />
             <Input
               value={formData.secondaryColorHex}
@@ -749,9 +747,9 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
               placeholder="#000000"
               maxLength={7}
               className="flex-1"
-              disabled={secondaryDisabled}
+              disabled={colorsDisabled}
             />
-            {formData.secondaryColorHex && !secondaryDisabled && (
+            {formData.secondaryColorHex && !colorsDisabled && (
               <Button
                 type="button"
                 variant="ghost"
@@ -768,7 +766,7 @@ function AppearanceSection({ formData, updateField, isPending }: SectionProps) {
             onChange={e => updateField('secondaryColorPantone', e.target.value)}
             placeholder="Ex: PANTONE 19-4052"
             maxLength={32}
-            disabled={secondaryDisabled}
+            disabled={colorsDisabled}
           />
         </div>
       </div>
@@ -792,6 +790,7 @@ function PatternPreview({
   secondaryColor,
 }: PatternPreviewProps) {
   const primary = primaryColor || '#cbd5e1'; // slate-300 fallback
+  const hasSecondary = !!secondaryColor;
   const secondary = secondaryColor || '#94a3b8'; // slate-400 fallback
   const isNoPattern = !pattern || pattern === 'none';
   const patternLabel =
@@ -799,7 +798,7 @@ function PatternPreview({
 
   if (isNoPattern) {
     return (
-      <div className="flex items-center justify-center h-20 rounded-xl border border-dashed border-border bg-muted/30">
+      <div className="flex items-center justify-center h-16 rounded-xl border border-dashed border-border bg-muted/30">
         <p className="text-xs text-muted-foreground">
           Selecione um padrão para visualizar
         </p>
@@ -807,7 +806,7 @@ function PatternPreview({
     );
   }
 
-  const bgStyle = getPatternBackground(pattern, primary, secondary);
+  const bgStyle = getPatternBackground(pattern, primary, secondary, hasSecondary);
 
   return (
     <div className="space-y-1.5">
@@ -818,7 +817,7 @@ function PatternPreview({
         </span>
       </div>
       <div
-        className="h-20 rounded-xl border border-border overflow-hidden"
+        className="h-16 rounded-xl border border-border overflow-hidden transition-all duration-300"
         style={bgStyle}
       />
     </div>
@@ -828,10 +827,17 @@ function PatternPreview({
 function getPatternBackground(
   pattern: string,
   primary: string,
-  secondary: string
+  secondary: string,
+  hasSecondary: boolean
 ): React.CSSProperties {
   switch (pattern) {
     case 'SOLID':
+      // With secondary color: diagonal half/half split
+      if (hasSecondary) {
+        return {
+          background: `linear-gradient(135deg, ${primary} 50%, ${secondary} 50%)`,
+        };
+      }
       return { background: primary };
 
     case 'STRIPED':
@@ -839,9 +845,9 @@ function getPatternBackground(
         background: `repeating-linear-gradient(
           45deg,
           ${primary},
-          ${primary} 10px,
-          ${secondary} 10px,
-          ${secondary} 20px
+          ${primary} 5px,
+          ${secondary} 5px,
+          ${secondary} 10px
         )`,
       };
 
@@ -851,16 +857,16 @@ function getPatternBackground(
           repeating-linear-gradient(
             0deg,
             transparent,
-            transparent 14px,
-            ${secondary}33 14px,
-            ${secondary}33 28px
+            transparent 8px,
+            ${secondary}40 8px,
+            ${secondary}40 10px
           ),
           repeating-linear-gradient(
             90deg,
             transparent,
-            transparent 14px,
-            ${secondary}33 14px,
-            ${secondary}33 28px
+            transparent 8px,
+            ${secondary}40 8px,
+            ${secondary}40 10px
           ),
           ${primary}`,
       };
@@ -868,11 +874,14 @@ function getPatternBackground(
     case 'PRINTED':
       return {
         background: `
-          radial-gradient(circle 6px at 25% 25%, ${secondary} 99%, transparent),
-          radial-gradient(circle 4px at 75% 60%, ${secondary} 99%, transparent),
-          radial-gradient(circle 5px at 50% 80%, ${secondary} 99%, transparent),
-          radial-gradient(circle 3px at 15% 70%, ${secondary} 99%, transparent),
-          radial-gradient(circle 4px at 85% 25%, ${secondary} 99%, transparent),
+          radial-gradient(circle 3px at 20% 30%, ${secondary} 99%, transparent),
+          radial-gradient(circle 2.5px at 50% 15%, ${secondary} 99%, transparent),
+          radial-gradient(circle 3.5px at 80% 40%, ${secondary} 99%, transparent),
+          radial-gradient(circle 2px at 35% 70%, ${secondary} 99%, transparent),
+          radial-gradient(circle 3px at 65% 80%, ${secondary} 99%, transparent),
+          radial-gradient(circle 2px at 10% 55%, ${secondary} 99%, transparent),
+          radial-gradient(circle 2.5px at 90% 70%, ${secondary} 99%, transparent),
+          radial-gradient(circle 2px at 45% 50%, ${secondary} 99%, transparent),
           ${primary}`,
       };
 
@@ -887,7 +896,7 @@ function getPatternBackground(
           repeating-conic-gradient(
             ${primary} 0% 25%,
             ${secondary} 0% 50%
-          ) 0 0 / 20px 20px`,
+          ) 0 0 / 12px 12px`,
       };
 
     default:
