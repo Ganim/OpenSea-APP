@@ -18,3 +18,4 @@ export * from './use-labels';
 export * from './use-movements';
 export * from './use-scan';
 export * from './use-volumes';
+export * from './use-warehouses';

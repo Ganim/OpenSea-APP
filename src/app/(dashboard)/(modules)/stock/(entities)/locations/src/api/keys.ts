@@ -31,6 +31,15 @@ export const QUERY_KEYS = {
 
   // Labels
   labelPreview: (binId: string) => ['labels', 'preview', binId] as const,
+
+  // Health
+  health: ['locations-health'] as const,
+
+  // Search
+  searchLocation: (query: string) => ['locations-search', query] as const,
+
+  // Setup
+  setup: ['locations-setup'] as const,
 };
 
 // ============================================
@@ -114,5 +123,20 @@ export const API_ENDPOINTS = {
     list: '/v1/item-reservations',
     get: (id: string) => `/v1/item-reservations/${id}`,
     release: (id: string) => `/v1/item-reservations/${id}/release`,
+  },
+
+  // Health
+  health: {
+    summary: '/v1/locations/health-summary',
+  },
+
+  // Search
+  search: {
+    location: '/v1/items/search-location',
+  },
+
+  // Setup
+  setup: {
+    create: '/v1/locations/setup',
   },
 };
