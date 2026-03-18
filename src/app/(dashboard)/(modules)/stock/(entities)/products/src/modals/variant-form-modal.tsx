@@ -822,8 +822,11 @@ function PatternPreview({
         </span>
       </div>
       <div
-        className="h-16 rounded-xl border border-border overflow-hidden transition-all duration-300"
-        style={bgStyle}
+        className="h-16 rounded-xl overflow-hidden transition-all duration-300"
+        style={{
+          ...bgStyle,
+          boxShadow: `inset 0 0 0 1px ${primary}40, 0 0 0 1px ${primary}20`,
+        }}
       />
     </div>
   );
