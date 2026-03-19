@@ -152,23 +152,21 @@ export function StepImport({
         ),
       ];
 
-      // Extract unique category names from product data
-      const categoryNames = [
+      // Manufacturers are resolved by CNPJ in Step 5 (BrasilAPI),
+      // not by name from the spreadsheet. Build manufacturer names
+      // from the Step 5 validation results (manufacturersToCreate).
+      const manufacturerNames = [
         ...new Set(
-          groupedProducts
-            .map(p => String(p.productData.categoryName || ''))
-            .filter(Boolean)
+          validationResult.manufacturersToCreate
+            .filter(m => !m.error && m.name)
+            .map(m => m.name!)
         ),
       ];
 
-      // Extract unique manufacturer names from product data
-      const manufacturerNames = [
-        ...new Set(
-          groupedProducts
-            .map(p => String(p.productData.manufacturerName || ''))
-            .filter(Boolean)
-        ),
-      ];
+      // Categories are not mapped from the spreadsheet in the current
+      // column mapper — they would need to be pre-selected or added
+      // via template/product configuration. Send empty for now.
+      const categoryNames: string[] = [];
 
       const response = await importService.bulkValidateProducts({
         productNames,
@@ -192,13 +190,6 @@ export function StepImport({
       const blockingErrors: string[] = [];
       const warnings: string[] = [];
 
-      // Missing categories = BLOCKING
-      if (response.missingCategories.length > 0) {
-        blockingErrors.push(
-          `Categorias não encontradas: ${response.missingCategories.join(', ')}`
-        );
-      }
-
       // Template not valid = BLOCKING
       if (!response.templateValid) {
         blockingErrors.push(
@@ -206,9 +197,9 @@ export function StepImport({
         );
       }
 
-      // Missing manufacturers
+      // Missing manufacturers: ones that need to be created but don't
+      // exist and don't have valid CNPJ data from BrasilAPI
       if (response.missingManufacturers.length > 0) {
-        // Check which ones have CNPJ data in validationResult.manufacturersToCreate
         const manufacturersWithCnpj = new Set(
           validationResult.manufacturersToCreate
             .filter(m => !m.error && m.name)
@@ -224,6 +215,38 @@ export function StepImport({
             `Fabricantes não encontrados e sem dados para criação: ${trulyMissing.join(', ')}`
           );
         }
+
+        // Manufacturers that will be created = WARNING (informative)
+        const toCreate = response.missingManufacturers.filter(name =>
+          manufacturersWithCnpj.has(name)
+        );
+        if (toCreate.length > 0) {
+          warnings.push(
+            `${toCreate.length} fabricante(s) serão criados automaticamente: ${toCreate.join(', ')}`
+          );
+        }
+      }
+
+      // Check for products without required fields
+      const productsWithoutName = groupedProducts.filter(
+        p => !p.productData.name || String(p.productData.name).trim() === ''
+      );
+      if (productsWithoutName.length > 0) {
+        blockingErrors.push(
+          `${productsWithoutName.length} produto(s) sem nome definido. Verifique o mapeamento de colunas.`
+        );
+      }
+
+      // Check for variants without required fields
+      const variantsWithoutName = groupedProducts.flatMap(p =>
+        p.variants.filter(
+          v => !v.data.name || String(v.data.name).trim() === ''
+        )
+      );
+      if (variantsWithoutName.length > 0) {
+        warnings.push(
+          `${variantsWithoutName.length} variante(s) sem nome. Serão nomeadas automaticamente.`
+        );
       }
 
       // Duplicate products = WARNING
@@ -351,28 +374,14 @@ export function StepImport({
         | string
         | undefined;
 
-      // Map category name to ID
-      const categoryName = product.productData.categoryName as
-        | string
-        | undefined;
-      const categoryIds: string[] = [];
-      if (categoryName && serverValidation.categoryNameToId.has(categoryName)) {
-        categoryIds.push(serverValidation.categoryNameToId.get(categoryName)!);
-      }
-
-      // Map manufacturer name to ID (try name first, then CNPJ-based)
-      const manufacturerName = product.productData.manufacturerName as
-        | string
-        | undefined;
+      // Resolve manufacturer by CNPJ → name → ID
       const manufacturerCnpj = product.productData.manufacturerCnpj as
         | string
         | undefined;
       let manufacturerId: string | undefined;
 
-      if (manufacturerName && manufacturerNameToId.has(manufacturerName)) {
-        manufacturerId = manufacturerNameToId.get(manufacturerName);
-      } else if (manufacturerCnpj) {
-        // Look up by CNPJ in the manufacturersToCreate list that was already created
+      if (manufacturerCnpj) {
+        // Find the manufacturer name from Step 5 BrasilAPI lookup
         const mfrEntry = validationResult.manufacturersToCreate.find(
           m => m.cnpj === manufacturerCnpj && m.name
         );
@@ -390,7 +399,6 @@ export function StepImport({
         description,
         templateId: template.id,
         manufacturerId,
-        categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
         attributes,
       };
     });
