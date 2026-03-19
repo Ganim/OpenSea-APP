@@ -3,8 +3,8 @@
 import { AuthBackground } from '@/components/ui/auth-background';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useResetPassword } from '@/hooks/use-auth';
 import { logger } from '@/lib/logger';
@@ -178,20 +178,18 @@ function ResetPasswordForm() {
                     {field => (
                       <div className="space-y-2">
                         <Label htmlFor="password">Nova Senha</Label>
-                        <div className="relative">
-                          <Lock className="absolute z-10 left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
-                          <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={field.state.value}
-                            onChange={e => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                            autoFocus
-                            className="pl-12"
-                            minLength={6}
-                          />
-                        </div>
+                        <PasswordInput
+                          id="password"
+                          placeholder="••••••••"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          autoFocus
+                          minLength={6}
+                          iconLeft={
+                            <Lock className="w-5 h-5 text-gray-500 dark:text-white/40" />
+                          }
+                        />
                         <p className="text-xs text-gray-500 dark:text-white/50">
                           Mínimo de 6 caracteres
                         </p>
@@ -206,19 +204,17 @@ function ResetPasswordForm() {
                         <Label htmlFor="confirmPassword">
                           Confirmar Nova Senha
                         </Label>
-                        <div className="relative">
-                          <Lock className="absolute  z-10 left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40" />
-                          <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            value={field.state.value}
-                            onChange={e => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                            className="pl-12"
-                            minLength={6}
-                          />
-                        </div>
+                        <PasswordInput
+                          id="confirmPassword"
+                          placeholder="••••••••"
+                          value={field.state.value}
+                          onChange={e => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          minLength={6}
+                          iconLeft={
+                            <Lock className="w-5 h-5 text-gray-500 dark:text-white/40" />
+                          }
+                        />
                       </div>
                     )}
                   </form.Field>

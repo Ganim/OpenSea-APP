@@ -10,6 +10,7 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
@@ -27,8 +28,6 @@ import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   Check,
-  Eye,
-  EyeOff,
   Globe,
   Key,
   KeyRound,
@@ -61,7 +60,6 @@ export function SecurityTab() {
 function PasswordChangeSection() {
   const updatePassword = useUpdatePassword();
   const [isEditing, setIsEditing] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -143,29 +141,15 @@ function PasswordChangeSection() {
           <Separator className="mt-3 mb-6" />
           <div className="space-y-2">
             <Label htmlFor="newPassword">Nova Senha</Label>
-            <div className="relative">
-              <Input
-                id="newPassword"
-                type={showNewPassword ? 'text' : 'password'}
-                value={formData.newPassword}
-                onChange={e =>
-                  setFormData({ ...formData, newPassword: e.target.value })
-                }
-                className={cn(errors.newPassword && 'border-red-500')}
-                placeholder="Digite sua nova senha"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showNewPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
-            </div>
+            <PasswordInput
+              id="newPassword"
+              value={formData.newPassword}
+              onChange={e =>
+                setFormData({ ...formData, newPassword: e.target.value })
+              }
+              className={cn(errors.newPassword && 'border-red-500')}
+              placeholder="Digite sua nova senha"
+            />
             {errors.newPassword && (
               <p className="text-xs text-red-500">{errors.newPassword}</p>
             )}
@@ -177,9 +161,8 @@ function PasswordChangeSection() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               value={formData.confirmPassword}
               onChange={e =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
@@ -603,9 +586,8 @@ function AccessPinSection({ hasPin }: PinSectionProps) {
 
           <div className="space-y-2">
             <Label htmlFor="accessPinPassword">Senha Atual</Label>
-            <Input
+            <PasswordInput
               id="accessPinPassword"
-              type="password"
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
               placeholder="Digite sua senha para confirmar"
@@ -767,9 +749,8 @@ function ActionPinSection({ hasPin }: PinSectionProps) {
 
           <div className="space-y-2">
             <Label htmlFor="actionPinPassword">Senha Atual</Label>
-            <Input
+            <PasswordInput
               id="actionPinPassword"
-              type="password"
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
               placeholder="Digite sua senha para confirmar"

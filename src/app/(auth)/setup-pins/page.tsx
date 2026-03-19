@@ -3,7 +3,6 @@
 import { AuthBackground } from '@/components/ui/auth-background';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   InputOTP,
   InputOTPGroup,
@@ -13,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useSetAccessPin, useSetActionPin } from '@/hooks/use-pins';
 import { translateError } from '@/lib/error-messages';
-import { KeyRound, Lock, Shield } from 'lucide-react';
+import { KeyRound, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -22,7 +21,6 @@ type Step = 'access' | 'action' | 'done';
 export default function SetupPinsPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('access');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [accessPin, setAccessPin] = useState('');
   const [accessPinConfirm, setAccessPinConfirm] = useState('');
   const [actionPin, setActionPin] = useState('');
@@ -43,7 +41,6 @@ export default function SetupPinsPage() {
 
     try {
       await setAccessPinMutation.mutateAsync({
-        currentPassword,
         newAccessPin: accessPin,
       });
       setStep('action');
@@ -65,7 +62,6 @@ export default function SetupPinsPage() {
 
     try {
       await setActionPinMutation.mutateAsync({
-        currentPassword,
         newActionPin: actionPin,
       });
       setStep('done');
@@ -141,28 +137,13 @@ export default function SetupPinsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Senha Atual</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
-                        <Input
-                          id="currentPassword"
-                          type="password"
-                          placeholder="Digite sua senha"
-                          value={currentPassword}
-                          onChange={e => setCurrentPassword(e.target.value)}
-                          autoFocus
-                          className="pl-12"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
                       <Label>Novo PIN de Acesso (6 dígitos)</Label>
                       <div className="flex justify-center">
                         <InputOTP
                           maxLength={6}
                           value={accessPin}
                           onChange={setAccessPin}
+                          autoFocus
                         >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} masked />
@@ -202,7 +183,6 @@ export default function SetupPinsPage() {
                       size="lg"
                       disabled={
                         setAccessPinMutation.isPending ||
-                        !currentPassword ||
                         accessPin.length !== 6 ||
                         accessPinConfirm.length !== 6
                       }

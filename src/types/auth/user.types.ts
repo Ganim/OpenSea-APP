@@ -90,12 +90,12 @@ export interface LoginWithPinCredentials {
 }
 
 export interface SetAccessPinRequest {
-  currentPassword: string;
+  currentPassword?: string;
   newAccessPin: string;
 }
 
 export interface SetActionPinRequest {
-  currentPassword: string;
+  currentPassword?: string;
   newActionPin: string;
 }
 

@@ -3,12 +3,12 @@
 import { AuthBackground } from '@/components/ui/auth-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp';
+import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 // Tenant auto-selection is now handled by the backend during login
@@ -399,15 +399,16 @@ export default function FastLoginPage() {
             </h1>
 
             {/* Password input */}
-            <div className="relative w-full mb-6">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 z-10 pointer-events-none" />
-              <Input
-                type="password"
+            <div className="w-full mb-6">
+              <PasswordInput
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 autoFocus
-                className="pl-12 h-12 text-base"
+                className="h-12 text-base"
+                iconLeft={
+                  <Lock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                }
               />
             </div>
 

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 // Tenant auto-selection is now handled by the backend during login
@@ -202,19 +203,17 @@ export default function LoginPage() {
                       {field => (
                         <div className="space-y-2">
                           <Label htmlFor="password">Senha</Label>
-                          <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
-                            <Input
-                              id="password"
-                              type="password"
-                              placeholder="••••••••"
-                              value={field.state.value}
-                              onChange={e => field.handleChange(e.target.value)}
-                              onBlur={field.handleBlur}
-                              autoFocus
-                              className="pl-12"
-                            />
-                          </div>
+                          <PasswordInput
+                            id="password"
+                            placeholder="••••••••"
+                            value={field.state.value}
+                            onChange={e => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            autoFocus
+                            iconLeft={
+                              <Lock className="w-5 h-5 text-gray-500 dark:text-white/40" />
+                            }
+                          />
                         </div>
                       )}
                     </form.Field>
