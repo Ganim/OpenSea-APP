@@ -20,12 +20,47 @@ import type {
   UpdateTemplateRequest,
 } from '@/types/stock';
 
+/** Shared paginated query params for list endpoints */
+interface PaginatedListQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+/** Shared paginated response shape from backend */
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number; pages: number };
+}
+
+/** Build URL with query params, skipping undefined values */
+function buildPaginatedUrl(base: string, query?: PaginatedListQuery): string {
+  if (!query) return base;
+  const params = new URLSearchParams();
+  if (query.page) params.append('page', query.page.toString());
+  if (query.limit) params.append('limit', query.limit.toString());
+  if (query.search) params.append('search', query.search);
+  if (query.sortBy) params.append('sortBy', query.sortBy);
+  if (query.sortOrder) params.append('sortOrder', query.sortOrder);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
 // Manufacturers Service
 export const manufacturersService = {
   async listManufacturers(): Promise<ManufacturersResponse> {
     return apiClient.get<ManufacturersResponse>(
       API_ENDPOINTS.MANUFACTURERS.LIST
     );
+  },
+
+  async listPaginated(
+    query?: PaginatedListQuery
+  ): Promise<PaginatedResponse<ManufacturerResponse['manufacturer']>> {
+    const url = buildPaginatedUrl(API_ENDPOINTS.MANUFACTURERS.LIST, query);
+    return apiClient.get(url);
   },
 
   async getManufacturer(id: string): Promise<ManufacturerResponse> {
@@ -96,6 +131,13 @@ export const tagsService = {
     return apiClient.get<TagsResponse>(API_ENDPOINTS.TAGS.LIST);
   },
 
+  async listPaginated(
+    query?: PaginatedListQuery
+  ): Promise<PaginatedResponse<TagResponse['tag']>> {
+    const url = buildPaginatedUrl(API_ENDPOINTS.TAGS.LIST, query);
+    return apiClient.get(url);
+  },
+
   async getTag(id: string): Promise<TagResponse> {
     return apiClient.get<TagResponse>(API_ENDPOINTS.TAGS.GET(id));
   },
@@ -117,6 +159,13 @@ export const tagsService = {
 export const templatesService = {
   async listTemplates(): Promise<TemplatesResponse> {
     return apiClient.get<TemplatesResponse>(API_ENDPOINTS.TEMPLATES.LIST);
+  },
+
+  async listPaginated(
+    query?: PaginatedListQuery
+  ): Promise<PaginatedResponse<TemplateResponse['template']>> {
+    const url = buildPaginatedUrl(API_ENDPOINTS.TEMPLATES.LIST, query);
+    return apiClient.get(url);
   },
 
   async getTemplate(id: string): Promise<TemplateResponse> {

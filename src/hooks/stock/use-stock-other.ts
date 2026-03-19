@@ -12,13 +12,30 @@ import type {
   CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
+  Manufacturer,
+  Tag,
+  Template,
   UpdateManufacturerRequest,
   UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
   LocationsResponse,
 } from '@/types/stock';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+
+/** Shared filters for infinite scroll hooks */
+export interface InfiniteListFilters {
+  search?: string;
+  sortBy?: 'name' | 'createdAt' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+const INFINITE_PAGE_SIZE = 20;
 
 const QUERY_KEYS = {
   MANUFACTURERS: ['manufacturers'],
@@ -41,6 +58,35 @@ export function useManufacturers() {
     queryKey: QUERY_KEYS.MANUFACTURERS,
     queryFn: () => manufacturersService.listManufacturers(),
   });
+}
+
+export function useManufacturersInfinite(filters?: InfiniteListFilters) {
+  const result = useInfiniteQuery({
+    queryKey: ['manufacturers', 'infinite', filters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await manufacturersService.listPaginated({
+        page: pageParam,
+        limit: INFINITE_PAGE_SIZE,
+        ...filters,
+      });
+      const raw = response as unknown as Record<string, unknown>;
+      const items = (raw.manufacturers ?? raw.data ?? []) as Manufacturer[];
+      const meta = (raw.meta ?? {}) as Record<string, number>;
+      return {
+        items,
+        meta: { total: meta.total ?? 0, page: meta.page ?? pageParam, limit: meta.limit ?? INFINITE_PAGE_SIZE, pages: meta.pages ?? 1 },
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.page < lastPage.meta.pages ? lastPage.meta.page + 1 : undefined,
+    staleTime: 30_000,
+  });
+  return {
+    ...result,
+    items: result.data?.pages.flatMap((p) => p.items) ?? [],
+    total: result.data?.pages[0]?.meta.total ?? 0,
+  };
 }
 
 export function useManufacturer(id: string) {
@@ -158,6 +204,35 @@ export function useTags() {
   });
 }
 
+export function useTagsInfinite(filters?: InfiniteListFilters) {
+  const result = useInfiniteQuery({
+    queryKey: ['tags', 'infinite', filters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await tagsService.listPaginated({
+        page: pageParam,
+        limit: INFINITE_PAGE_SIZE,
+        ...filters,
+      });
+      const raw = response as unknown as Record<string, unknown>;
+      const items = (raw.tags ?? raw.data ?? []) as Tag[];
+      const meta = (raw.meta ?? {}) as Record<string, number>;
+      return {
+        items,
+        meta: { total: meta.total ?? 0, page: meta.page ?? pageParam, limit: meta.limit ?? INFINITE_PAGE_SIZE, pages: meta.pages ?? 1 },
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.page < lastPage.meta.pages ? lastPage.meta.page + 1 : undefined,
+    staleTime: 30_000,
+  });
+  return {
+    ...result,
+    items: result.data?.pages.flatMap((p) => p.items) ?? [],
+    total: result.data?.pages[0]?.meta.total ?? 0,
+  };
+}
+
 export function useTag(id: string) {
   return useQuery({
     queryKey: QUERY_KEYS.TAG(id),
@@ -204,6 +279,35 @@ export function useDeleteTag() {
 }
 
 // ==================== TEMPLATES ====================
+
+export function useTemplatesInfinite(filters?: InfiniteListFilters) {
+  const result = useInfiniteQuery({
+    queryKey: ['templates', 'infinite', filters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await templatesService.listPaginated({
+        page: pageParam,
+        limit: INFINITE_PAGE_SIZE,
+        ...filters,
+      });
+      const raw = response as unknown as Record<string, unknown>;
+      const items = (raw.templates ?? raw.data ?? []) as Template[];
+      const meta = (raw.meta ?? {}) as Record<string, number>;
+      return {
+        items,
+        meta: { total: meta.total ?? 0, page: meta.page ?? pageParam, limit: meta.limit ?? INFINITE_PAGE_SIZE, pages: meta.pages ?? 1 },
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.page < lastPage.meta.pages ? lastPage.meta.page + 1 : undefined,
+    staleTime: 30_000,
+  });
+  return {
+    ...result,
+    items: result.data?.pages.flatMap((p) => p.items) ?? [],
+    total: result.data?.pages[0]?.meta.total ?? 0,
+  };
+}
 
 export function useTemplates() {
   return useQuery({
