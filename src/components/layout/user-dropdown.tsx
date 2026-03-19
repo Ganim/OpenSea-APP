@@ -33,7 +33,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { Kbd } from '@/components/ui/kbd';
+import { useCallback, useEffect, useMemo } from 'react';
 
 export function UserDropdown() {
   const router = useRouter();
@@ -54,12 +55,29 @@ export function UserDropdown() {
   const { isUltrawide, toggleUltrawide } = useUltrawide();
   const { isFullscreen, toggleFullscreen } = useFullscreen();
 
+  const switchTheme = useCallback(() => {
+    const isDark = theme === 'dark';
+    const overlay = document.createElement('div');
+    overlay.className = 'theme-fade-overlay';
+    overlay.style.backgroundColor = isDark ? '#0f172a' : '#ffffff';
+    document.body.appendChild(overlay);
+
+    // Force reflow then fade out
+    requestAnimationFrame(() => {
+      setTheme(isDark ? 'light' : 'dark');
+      requestAnimationFrame(() => {
+        overlay.classList.add('fade-out');
+        overlay.addEventListener('transitionend', () => overlay.remove());
+      });
+    });
+  }, [theme, setTheme]);
+
   const toggleTheme = useCallback(
     (e: Event) => {
       e.preventDefault();
-      setTheme(theme === 'dark' ? 'light' : 'dark');
+      switchTheme();
     },
-    [theme, setTheme]
+    [switchTheme]
   );
 
   const handleToggleUltrawide = useCallback(
@@ -77,6 +95,21 @@ export function UserDropdown() {
     },
     [toggleFullscreen]
   );
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F9') {
+        e.preventDefault();
+        switchTheme();
+      } else if (e.key === 'F10') {
+        e.preventDefault();
+        toggleUltrawide();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [switchTheme, toggleUltrawide]);
 
   const userName = useMemo(() => {
     if (user?.profile?.name) {
@@ -97,7 +130,7 @@ export function UserDropdown() {
             surname={user?.profile?.surname}
             avatarUrl={user?.profile?.avatarUrl}
             size="sm"
-            className="ring-2 ring-emerald-500"
+            className="ring-2 ring-emerald-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900"
           />
         </Button>
       </DropdownMenuTrigger>
@@ -146,9 +179,10 @@ export function UserDropdown() {
                 <Moon className="w-5 h-5" />
               )}
             </div>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium flex-1">
               {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
             </span>
+            <Kbd>F9</Kbd>
           </div>
         </DropdownMenuItem>
 
@@ -159,9 +193,10 @@ export function UserDropdown() {
         >
           <div className="flex items-center w-full">
             <MonitorIcon className="w-5 h-5 mr-3" />
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium flex-1">
               {isUltrawide ? 'Layout Padrão' : 'Layout Ultrawide'}
             </span>
+            <Kbd>F10</Kbd>
           </div>
         </DropdownMenuItem>
 
@@ -175,9 +210,10 @@ export function UserDropdown() {
             ) : (
               <Maximize className="w-5 h-5 mr-3" />
             )}
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium flex-1">
               {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
             </span>
+            <Kbd>F11</Kbd>
           </div>
         </DropdownMenuItem>
 

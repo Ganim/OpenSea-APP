@@ -778,9 +778,20 @@ body {
   font-feature-settings:
     'rlig' 1,
     'calt' 1;
-  transition:
-    background-color var(--transition-normal) ease,
-    color var(--transition-normal) ease;
+}
+
+/* Theme transition overlay — fade out after theme switch */
+.theme-fade-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 400ms ease;
+}
+
+.theme-fade-overlay.fade-out {
+  opacity: 0;
 }
 
 @theme {

@@ -110,9 +110,15 @@ export default function DashboardLayout({
             <main
               id="main-content"
               tabIndex={-1}
-              className={`pt-28 pb-12 ${isUltrawide ? 'px-6 md:px-10 xl:px-16' : 'px-3 sm:px-4 md:px-6'}`}
+              className="pt-28 pb-12 outline-none"
             >
-              <div className={isUltrawide ? '' : 'max-w-[1600px] mx-auto'}>
+              <div
+                className={`mx-auto transition-[max-width,padding] duration-[1000ms] ease-linear ${
+                  isUltrawide
+                    ? 'max-w-[3840px] px-6 md:px-10 xl:px-16'
+                    : 'max-w-[1600px] px-3 sm:px-4 md:px-6'
+                }`}
+              >
                 {children}
               </div>
             </main>
