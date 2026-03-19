@@ -3,7 +3,7 @@
 // Hook React para parsing de arquivos Excel/CSV
 // ============================================
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   parseFile,
   getExcelSheetNames,
@@ -15,6 +15,7 @@ import {
   type ParseOptions,
   type SheetStatistics,
 } from '../../_shared/utils/excel-parser';
+import type { WorkerResponse } from '../../_shared/utils/excel-parser.worker';
 
 // ============================================
 // TYPES
@@ -81,6 +82,50 @@ const initialState: UseFileParserState = {
 
 export function useFileParser(): UseFileParserReturn {
   const [state, setState] = useState<UseFileParserState>(initialState);
+  const workerRef = useRef<Worker | null>(null);
+  const workerSupportedRef = useRef<boolean | null>(null);
+
+  // ============================================
+  // WORKER LIFECYCLE
+  // ============================================
+
+  /**
+   * Cria o worker lazily na primeira chamada.
+   * Retorna null se workers não são suportados (ex: SSR).
+   */
+  const getWorker = useCallback((): Worker | null => {
+    // Se já sabemos que não é suportado, retorna null
+    if (workerSupportedRef.current === false) return null;
+
+    // Se já existe, retorna
+    if (workerRef.current) return workerRef.current;
+
+    try {
+      const worker = new Worker(
+        new URL(
+          '../../_shared/utils/excel-parser.worker.ts',
+          import.meta.url
+        )
+      );
+      workerRef.current = worker;
+      workerSupportedRef.current = true;
+      return worker;
+    } catch {
+      // Worker não suportado (SSR, browser antigo, etc.)
+      workerSupportedRef.current = false;
+      return null;
+    }
+  }, []);
+
+  // Cleanup worker on unmount
+  useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+    };
+  }, []);
 
   // ============================================
   // COMPUTED VALUES
@@ -147,6 +192,63 @@ export function useFileParser(): UseFileParserReturn {
   );
 
   /**
+   * Parseia um arquivo usando Web Worker (com fallback para main thread)
+   */
+  const parseFileViaWorker = useCallback(
+    (
+      file: File,
+      options?: ParseOptions
+    ): Promise<ParseResult> => {
+      const worker = getWorker();
+
+      if (!worker) {
+        // Fallback: parse on main thread
+        return parseFile(file, options);
+      }
+
+      return new Promise<ParseResult>((resolve, reject) => {
+        const handleMessage = (event: MessageEvent<WorkerResponse>) => {
+          cleanup();
+          if (event.data.type === 'result') {
+            resolve(event.data.data);
+          } else {
+            reject(new Error(event.data.message));
+          }
+        };
+
+        const handleError = (event: ErrorEvent) => {
+          cleanup();
+          reject(new Error(event.message || 'Erro no Web Worker'));
+        };
+
+        const cleanup = () => {
+          worker.removeEventListener('message', handleMessage);
+          worker.removeEventListener('error', handleError);
+        };
+
+        worker.addEventListener('message', handleMessage);
+        worker.addEventListener('error', handleError);
+
+        file.arrayBuffer().then(buffer => {
+          worker.postMessage(
+            {
+              type: 'parse',
+              fileBuffer: buffer,
+              fileName: file.name,
+              options,
+            },
+            [buffer]
+          );
+        }).catch(err => {
+          cleanup();
+          reject(err);
+        });
+      });
+    },
+    [getWorker]
+  );
+
+  /**
    * Parseia um arquivo
    */
   const parseFileFn = useCallback(
@@ -173,7 +275,7 @@ export function useFileParser(): UseFileParserReturn {
       }));
 
       try {
-        const result = await parseFile(file, options);
+        const result = await parseFileViaWorker(file, options);
 
         if (!result.success) {
           setState({
@@ -227,7 +329,7 @@ export function useFileParser(): UseFileParserReturn {
         return null;
       }
     },
-    [validateFile]
+    [validateFile, parseFileViaWorker]
   );
 
   /**
