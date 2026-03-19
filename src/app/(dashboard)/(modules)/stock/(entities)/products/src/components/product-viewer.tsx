@@ -882,7 +882,7 @@ export function ProductViewer({
         <TabsContent value="variants" className="flex-col w-full space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* LEFT COLUMN - Variants */}
-            <div className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden">
+            <div className="flex flex-col bg-white/5 rounded-lg border shadow-sm overflow-hidden max-h-[calc(100vh-16rem)]">
               {/* Variants Header */}
               <div className="p-4 bg-linear-to-r from-muted/50 to-muted/30 dark:from-muted/30 dark:to-muted/30 border-b">
                 <div className="flex items-center justify-between mb-3 min-h-[28px]">
@@ -909,7 +909,7 @@ export function ProductViewer({
               </div>
 
               {/* Variants List */}
-              <div className="flex-1 overflow-auto p-4 space-y-2">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
                 {isLoadingVariants ? (
                   <div className="space-y-2">
                     {[1, 2, 3].map(i => (
@@ -956,7 +956,7 @@ export function ProductViewer({
             </div>
 
             {/* RIGHT COLUMN - Items */}
-            <div className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden">
+            <div className="flex flex-col bg-white/5 rounded-lg border shadow-sm overflow-hidden max-h-[calc(100vh-16rem)]">
               {selectedVariant ? (
                 <>
                   {/* Items Header */}
@@ -1017,7 +1017,7 @@ export function ProductViewer({
                   </div>
 
                   {/* Items List */}
-                  <div className="flex-1 overflow-auto p-4 space-y-2">
+                  <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
                     {isLoadingItems ? (
                       <div className="space-y-2">
                         {[1, 2, 3].map(i => (
