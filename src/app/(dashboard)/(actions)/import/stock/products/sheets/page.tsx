@@ -554,10 +554,6 @@ export default function ProductsSheetsPage() {
       });
   }, [columnsConfig, allAvailableFields]);
 
-  const customAttributeCount = useMemo(() => {
-    return enabledFields.filter(f => f.key.startsWith('attributes.')).length;
-  }, [enabledFields]);
-
   // Handlers
   const handleToggleColumn = useCallback((key: string) => {
     setColumnsConfig(prev => {
@@ -730,12 +726,6 @@ export default function ProductsSheetsPage() {
                 {spreadsheet.filledRowCount === 1 ? 'linha' : 'linhas'}{' '}
                 preenchidas
               </Badge>
-              {customAttributeCount > 0 && (
-                <Badge variant="secondary" className="gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  {customAttributeCount} atributos
-                </Badge>
-              )}
               {validationResult &&
                 (validationResult.valid ? (
                   <Badge variant="default" className="gap-1 bg-green-600">
