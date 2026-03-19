@@ -43,10 +43,13 @@ import {
   AlertTriangle,
   CheckCircle2,
   Columns3,
+  Download,
+  FileSpreadsheet,
   GripVertical,
   Package,
   Play,
   Sparkles,
+  Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -56,6 +59,7 @@ import {
   ENTITY_DEFINITIONS,
   getBasePath,
 } from '../../../_shared/config/entity-definitions';
+import { downloadExcelTemplate, parseImportFile } from '../../../_shared/utils/excel-utils';
 import { useImportProcess } from '../../../_shared/hooks/use-import-process';
 import {
   useImportSpreadsheet,
@@ -629,6 +633,79 @@ export default function ProductsSheetsPage() {
     setValidationResult(null);
   }, []);
 
+  // File upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDownloadTemplate = useCallback(() => {
+    if (enabledFields.length === 0) return;
+    downloadExcelTemplate(enabledFields, 'Produtos', { includeExamples: true });
+    toast.success('Template baixado com sucesso!');
+  }, [enabledFields]);
+
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const parsed = await parseImportFile(file);
+        if (parsed.rows.length === 0) {
+          toast.error('O arquivo está vazio ou não contém dados válidos.');
+          return;
+        }
+
+        // Map file headers to field keys
+        const headerMapping: Record<number, number> = {};
+        parsed.headers.forEach((fileHeader, fileIndex) => {
+          const normalized = fileHeader.toLowerCase().trim();
+          const matchIndex = enabledFields.findIndex(h => {
+            const fieldLabel = h.label.toLowerCase().trim();
+            const fieldKey = h.key.toLowerCase().trim();
+            return (
+              fieldLabel === normalized ||
+              fieldKey === normalized ||
+              fieldLabel.includes(normalized) ||
+              normalized.includes(fieldLabel)
+            );
+          });
+          if (matchIndex !== -1) {
+            headerMapping[fileIndex] = matchIndex;
+          }
+        });
+
+        const newRows = parsed.rows.map(row => {
+          const newRow = enabledFields.map(h => ({ value: '', fieldKey: h.key }));
+          row.forEach((cellValue, fileIndex) => {
+            const mappedIndex = headerMapping[fileIndex];
+            if (mappedIndex !== undefined && cellValue) {
+              newRow[mappedIndex] = {
+                value: cellValue.trim(),
+                fieldKey: enabledFields[mappedIndex].key,
+              };
+            }
+          });
+          return newRow;
+        });
+
+        // Keep header row
+        const currentData = spreadsheet.data;
+        const hasHeaderRow = currentData[0]?.some(cell => cell.isHeader);
+        if (hasHeaderRow) {
+          spreadsheet.setData([currentData[0], ...newRows]);
+        } else {
+          spreadsheet.setData(newRows);
+        }
+
+        toast.success(`${parsed.rows.length} linhas importadas do arquivo.`);
+      } catch {
+        toast.error('Erro ao processar o arquivo. Verifique o formato.');
+      }
+
+      event.target.value = '';
+    },
+    [enabledFields, spreadsheet]
+  );
+
   // Selected template name
   const selectedTemplateName = useMemo(() => {
     if (!selectedTemplateId || !templates) return null;
@@ -781,6 +858,53 @@ export default function ProductsSheetsPage() {
                   </PopoverContent>
                 </Popover>
               )}
+
+              {/* File import popover */}
+              {selectedTemplateId && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 px-2.5 gap-1.5">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      <span className="hidden sm:inline">Arquivo</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-3">
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-semibold text-sm mb-1">Importar de Arquivo</h4>
+                        <p className="text-xs text-muted-foreground">Baixe o template ou envie um arquivo preenchido.</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start h-9 px-2.5"
+                        onClick={handleDownloadTemplate}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Baixar Template Excel
+                      </Button>
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".xlsx,.xls,.csv,.txt"
+                          className="hidden"
+                          onChange={handleFileUpload}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start h-9 px-2.5"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Enviar Arquivo
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
         </div>
@@ -814,8 +938,8 @@ export default function ProductsSheetsPage() {
             validationResult={validationResult}
             referenceData={referenceDataMap}
             entityName="Produtos"
-            showFileUpload={true}
-            showDownloadTemplate={true}
+            showFileUpload={false}
+            showDownloadTemplate={false}
           />
         </Card>
       )}
