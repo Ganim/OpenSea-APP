@@ -45,6 +45,11 @@ import {
   Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -507,7 +512,21 @@ function ProductsPageContent() {
         <EntityCard
           id={item.id}
           variant="grid"
-          title={item.name}
+          title={
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="truncate">{item.name}</span>
+              {item.outOfLine && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center shrink-0 rounded px-1 py-0.5 text-[10px] font-bold border border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300">
+                      FL
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Fora de Linha</TooltipContent>
+                </Tooltip>
+              )}
+            </span>
+          }
           subtitle={manufacturerName || 'Fabricante não informado'}
           icon={Package}
           iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
@@ -521,9 +540,6 @@ function ProductsPageContent() {
               color:
                 'border-teal-600/25 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/8 text-teal-700 dark:text-teal-300',
             },
-            ...(item.outOfLine
-              ? [{ label: 'Fora de Linha', variant: 'warning' as const }]
-              : []),
             ...(item.status !== 'ACTIVE'
               ? [
                   {
@@ -594,16 +610,6 @@ function ProductsPageContent() {
         color:
           'border-teal-600/25 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/8 text-teal-700 dark:text-teal-300',
       },
-      ...(item.outOfLine
-        ? [
-            {
-              label: 'Fora de Linha',
-              variant: 'outline' as const,
-              color:
-                'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
-            },
-          ]
-        : []),
       ...(item.status !== 'ACTIVE'
         ? [
             {
@@ -660,6 +666,16 @@ function ProductsPageContent() {
               <span className="font-semibold text-gray-900 dark:text-white truncate">
                 {item.name}
               </span>
+              {item.outOfLine && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center shrink-0 rounded px-1 py-0.5 text-[10px] font-bold border border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300">
+                      FL
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Fora de Linha</TooltipContent>
+                </Tooltip>
+              )}
               {manufacturerName && (
                 <span className="text-xs text-muted-foreground shrink-0">
                   {manufacturerName}

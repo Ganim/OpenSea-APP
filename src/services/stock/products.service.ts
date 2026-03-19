@@ -18,6 +18,7 @@ export const productsService = {
       | { templateId?: string; manufacturerId?: string; categoryId?: string }
   ): Promise<ProductsResponse> {
     const searchParams = new URLSearchParams();
+    searchParams.append('limit', '100');
     if (typeof params === 'string') {
       searchParams.append('templateId', params);
     } else if (params) {
@@ -28,10 +29,7 @@ export const productsService = {
       if (params.categoryId)
         searchParams.append('categoryId', params.categoryId);
     }
-    const query = searchParams.toString();
-    const url = query
-      ? `${API_ENDPOINTS.PRODUCTS.LIST}?${query}`
-      : API_ENDPOINTS.PRODUCTS.LIST;
+    const url = `${API_ENDPOINTS.PRODUCTS.LIST}?${searchParams.toString()}`;
     return apiClient.get<ProductsResponse>(url);
   },
 
