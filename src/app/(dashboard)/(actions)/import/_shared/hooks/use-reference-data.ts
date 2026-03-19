@@ -15,6 +15,40 @@ interface ListResponse<T> {
   [key: string]: T[];
 }
 
+// Helper to fetch all pages from paginated endpoints
+interface PaginatedMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+async function fetchAllPages<T>(
+  endpoint: string,
+  dataKey: string
+): Promise<T[]> {
+  const allItems: T[] = [];
+  let page = 1;
+  const limit = 100; // max allowed by backend
+
+  while (true) {
+    const response = await apiClient.get<Record<string, unknown>>(
+      `${endpoint}?page=${page}&limit=${limit}`
+    );
+
+    const items = response[dataKey] as T[] | undefined;
+    if (items && items.length > 0) {
+      allItems.push(...items);
+    }
+
+    const meta = response.meta as PaginatedMeta | undefined;
+    if (!meta || page >= meta.pages) break;
+    page++;
+  }
+
+  return allItems;
+}
+
 // ============================================
 // API FETCHERS
 // ============================================
@@ -71,9 +105,7 @@ interface ProductWithTemplate {
 }
 
 async function fetchProducts(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<ListResponse<BaseEntity>>('/v1/products');
-  const products = response.products || [];
+  const products = await fetchAllPages<BaseEntity>('/v1/products', 'products');
   return products.map(p => ({
     value: p.id,
     label: p.name,
@@ -81,18 +113,15 @@ async function fetchProducts(): Promise<FieldOption[]> {
 }
 
 async function fetchProductsWithTemplates(): Promise<ProductWithTemplate[]> {
-  const response = await apiClient.get<{ products: ProductWithTemplate[] }>(
-    '/v1/products'
-  );
-  return response.products || [];
+  return fetchAllPages<ProductWithTemplate>('/v1/products', 'products');
 }
 
 async function fetchVariants(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<
-      ListResponse<{ id: string; name: string; sku?: string }>
-    >('/v1/variants');
-  const variants = response.variants || [];
+  const variants = await fetchAllPages<{
+    id: string;
+    name: string;
+    sku?: string;
+  }>('/v1/variants', 'variants');
   return variants.map(v => ({
     value: v.id,
     label: v.sku ? `${v.name} (${v.sku})` : v.name,
@@ -211,31 +240,24 @@ export interface VariantWithDetails {
 }
 
 async function fetchVariantsWithDetails(): Promise<VariantWithDetails[]> {
-  // Fetch variants and products in parallel
-  const [variantsResponse, productsResponse] = await Promise.all([
-    apiClient.get<{
-      variants: Array<{
-        id: string;
-        name: string;
-        sku?: string;
-        reference?: string;
-        productId: string;
-      }>;
-    }>('/v1/variants'),
-    apiClient.get<{
-      products: Array<{
-        id: string;
-        name: string;
-        code?: string;
-        templateId?: string;
-        template?: { id: string; name: string };
-        manufacturer?: { id: string; name?: string; tradeName?: string };
-      }>;
-    }>('/v1/products'),
+  // Fetch all variants and products in parallel (paginated)
+  const [variants, products] = await Promise.all([
+    fetchAllPages<{
+      id: string;
+      name: string;
+      sku?: string;
+      reference?: string;
+      productId: string;
+    }>('/v1/variants', 'variants'),
+    fetchAllPages<{
+      id: string;
+      name: string;
+      code?: string;
+      templateId?: string;
+      template?: { id: string; name: string };
+      manufacturer?: { id: string; name?: string; tradeName?: string };
+    }>('/v1/products', 'products'),
   ]);
-
-  const variants = variantsResponse.variants || [];
-  const products = productsResponse.products || [];
 
   // Create a map for quick product lookup
   const productMap = new Map(products.map(p => [p.id, p]));
