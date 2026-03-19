@@ -364,24 +364,30 @@ export default function ProductsSheetsPage() {
     [allAvailableFields]
   );
 
+  // Track which template+fields combo we last initialized for
+  const lastInitRef = useRef<string>('');
+
   // Initialize/update columns config when template or fields change
   useEffect(() => {
     if (!selectedTemplateId) {
       setColumnsConfig([]);
+      lastInitRef.current = '';
       return;
     }
+
+    // Only initialize once per template+fields combo
+    const initKey = `${selectedTemplateId}:${availableFieldKeys}`;
+    if (initKey === lastInitRef.current) return;
+    lastInitRef.current = initKey;
 
     // Try to load from localStorage
     const stored = loadColumnsConfig(selectedTemplateId);
     if (stored) {
-      // Merge stored config with available fields (add new fields, remove deleted ones)
       const storedKeys = new Set(stored.map(c => c.key));
       const availableKeys = new Set(availableFieldKeys.split(','));
 
-      // Keep stored items that still exist
       const merged = stored.filter(c => availableKeys.has(c.key));
 
-      // Add new fields not in stored config
       let maxOrder = Math.max(...merged.map(c => c.order), 0);
       allAvailableFields.forEach(f => {
         if (!storedKeys.has(f.key)) {
@@ -392,7 +398,6 @@ export default function ProductsSheetsPage() {
 
       setColumnsConfig(merged);
     } else {
-      // Default: enable all fields
       const defaultConfig: ColumnConfig[] = allAvailableFields.map((f, i) => ({
         key: f.key,
         enabled: true,
@@ -532,15 +537,19 @@ export default function ProductsSheetsPage() {
     }
   }, []);
 
-  // Stable key for enabled fields — prevents infinite re-render loops
+  // Stable key for enabled fields — used to trigger header updates
   const enabledFieldsKey = useMemo(
     () => enabledFields.map(f => f.key).join(','),
     [enabledFields]
   );
 
-  // Update spreadsheet headers when enabled fields change
+  // Track previous key to detect actual changes
+  const prevFieldsKeyRef = useRef(enabledFieldsKey);
+
+  // Update spreadsheet headers only when fields actually change
   useEffect(() => {
-    if (enabledFields.length > 0) {
+    if (enabledFieldsKey && enabledFieldsKey !== prevFieldsKeyRef.current) {
+      prevFieldsKeyRef.current = enabledFieldsKey;
       spreadsheet.updateHeaders(enabledFields);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
