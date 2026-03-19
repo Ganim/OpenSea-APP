@@ -1,18 +1,32 @@
 import { productsService } from '@/services/stock';
 import type {
   CreateProductRequest,
+  Product,
   ProductsQuery,
   UpdateProductRequest,
 } from '@/types/stock';
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
   keepPreviousData,
 } from '@tanstack/react-query';
 
+export interface ProductsFilters {
+  search?: string;
+  templateId?: string;
+  manufacturerId?: string;
+  categoryId?: string;
+}
+
 const QUERY_KEYS = {
   PRODUCTS: ['products'],
+  PRODUCTS_INFINITE: (filters?: ProductsFilters) => [
+    'products',
+    'infinite',
+    filters,
+  ],
   PRODUCTS_PAGINATED: (query?: ProductsQuery) => [
     'products',
     'paginated',
@@ -40,6 +54,57 @@ export function useProductsPaginated(query?: ProductsQuery) {
   });
 }
 
+// GET /v1/products - Infinite scroll com filtros server-side
+const PRODUCTS_PAGE_SIZE = 20;
+
+export function useProductsInfinite(filters?: ProductsFilters) {
+  const result = useInfiniteQuery({
+    queryKey: QUERY_KEYS.PRODUCTS_INFINITE(filters),
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await productsService.list({
+        page: pageParam,
+        limit: PRODUCTS_PAGE_SIZE,
+        search: filters?.search || undefined,
+        templateId: filters?.templateId || undefined,
+        manufacturerId: filters?.manufacturerId || undefined,
+        categoryId: filters?.categoryId || undefined,
+      });
+      // Backend retorna { products, meta: { total, page, limit, pages } }
+      // mas o tipo usa { products, pagination }. Normalizamos aqui.
+      const raw = response as unknown as Record<string, unknown>;
+      const products = (raw.products ?? []) as Product[];
+      const meta = (raw.meta ?? raw.pagination ?? {}) as Record<string, number>;
+      return {
+        products,
+        meta: {
+          total: meta.total ?? 0,
+          page: meta.page ?? pageParam,
+          limit: meta.limit ?? PRODUCTS_PAGE_SIZE,
+          pages: meta.totalPages ?? meta.pages ?? 1,
+        },
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.page < lastPage.meta.pages) {
+        return lastPage.meta.page + 1;
+      }
+      return undefined;
+    },
+    staleTime: 30_000,
+  });
+
+  // Flatten pages into single array
+  const products = result.data?.pages.flatMap((p) => p.products) ?? [];
+  const total = result.data?.pages[0]?.meta.total ?? 0;
+
+  return {
+    ...result,
+    products,
+    total,
+  };
+}
+
 // GET /v1/products/:productId - Busca um produto específico
 export function useProduct(productId: string) {
   return useQuery({
@@ -57,7 +122,7 @@ export function useCreateProduct() {
     mutationFn: (data: CreateProductRequest) =>
       productsService.createProduct(data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 }
@@ -75,7 +140,7 @@ export function useUpdateProduct() {
       data: UpdateProductRequest;
     }) => productsService.updateProduct(productId, data),
     onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.PRODUCT(variables.productId),
       });
@@ -90,7 +155,7 @@ export function useDeleteProduct() {
   return useMutation({
     mutationFn: (productId: string) => productsService.deleteProduct(productId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 }

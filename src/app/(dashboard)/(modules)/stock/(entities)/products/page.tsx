@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Products Page
- * Página de gerenciamento de produtos usando o novo sistema OpenSea OS
+ * Página de gerenciamento de produtos com infinite scroll e filtros server-side
  */
 
 'use client';
@@ -24,12 +24,19 @@ import {
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  useEntityCrud,
-  useEntityPage,
 } from '@/core';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { formatUnitOfMeasure } from '@/helpers/formatters';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useCategories } from '@/hooks/stock/use-categories';
+import { useManufacturers, useTemplates } from '@/hooks/stock/use-stock-other';
+import {
+  useProductsInfinite,
+  useUpdateProduct,
+  useCreateProduct,
+  useDeleteProduct,
+  type ProductsFilters,
+} from '@/hooks/stock/use-products';
 import { productsService } from '@/services/stock';
 import type { Item, Product, UpdateProductRequest } from '@/types/stock';
 import {
@@ -37,6 +44,7 @@ import {
   ExternalLink,
   Factory,
   Grid3x3,
+  Loader2,
   Package,
   Pencil,
   Plus,
@@ -51,7 +59,14 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { CreateProductWizard } from './src/components/create-product-wizard';
 import {
@@ -80,6 +95,11 @@ function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { hasPermission } = usePermissions();
+
+  // ============================================================================
+  // FILTER STATE (synced with URL params)
+  // ============================================================================
+
   const templateIds = useMemo(() => {
     const raw = searchParams.get('template');
     return raw ? raw.split(',').filter(Boolean) : [];
@@ -95,12 +115,23 @@ function ProductsPageContent() {
     return raw ? raw.split(',').filter(Boolean) : [];
   }, [searchParams]);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // ============================================================================
   // STATE
   // ============================================================================
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productModalOpen, setProductModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
   // Quick-action modals state
   const [renameModalOpen, setRenameModalOpen] = useState(false);
@@ -108,213 +139,93 @@ function ProductsPageContent() {
   const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
   const [assignManufacturerOpen, setAssignManufacturerOpen] = useState(false);
   const [actionProductIds, setActionProductIds] = useState<string[]>([]);
+  const [createOpen, setCreateOpen] = useState(false);
 
   // ============================================================================
-  // CRUD SETUP (always fetches ALL products - filtering is client-side)
+  // DATA: Infinite scroll products + filter dropdown sources
   // ============================================================================
 
-  const crud = useEntityCrud<Product>({
-    entityName: 'Produto',
-    entityNamePlural: 'Produtos',
-    queryKey: ['products'],
-    baseUrl: '/api/v1/products',
-    listFn: async () => {
-      const response = await productsService.listProducts();
-      return response.products;
-    },
-    getFn: (id: string) => productsService.getProduct(id).then(r => r.product),
-    createFn: data =>
-      productsService
-        .createProduct(data as ProductFormData)
-        .then(r => r.product),
-    updateFn: (id, data) =>
-      productsService
-        .updateProduct(id, data as UpdateProductRequest)
-        .then(r => r.product),
-    deleteFn: id => productsService.deleteProduct(id),
-  });
-
-  // ============================================================================
-  // PAGE SETUP
-  // ============================================================================
-
-  const page = useEntityPage<Product>({
-    entityName: 'Produto',
-    entityNamePlural: 'Produtos',
-    queryKey: ['products'],
-    crud,
-    viewRoute: id => `/stock/products/${id}`,
-    filterFn: (item, query) => {
-      const q = query.toLowerCase();
-      return (
-        item.name.toLowerCase().includes(q) ||
-        (item.fullCode?.toLowerCase().includes(q) ?? false) ||
-        (item.description?.toLowerCase().includes(q) ?? false)
-      );
-    },
-  });
-
-  // ============================================================================
-  // CLIENT-SIDE URL FILTERS (applied on top of text-search filtered items)
-  // ============================================================================
-
-  // Apply URL-based filters on top of the text-search filtered items
-  const displayedProducts = useMemo(() => {
-    let items = page.filteredItems || [];
-    if (templateIds.length > 0) {
-      const set = new Set(templateIds);
-      items = items.filter(
-        (p: Product) => p.templateId && set.has(p.templateId)
-      );
-    }
-    if (manufacturerIds.length > 0) {
-      const set = new Set(manufacturerIds);
-      items = items.filter(
-        (p: Product) => p.manufacturerId && set.has(p.manufacturerId)
-      );
-    }
-    if (categoryIds.length > 0) {
-      const hasNone = categoryIds.includes('__none__');
-      const realIds = categoryIds.filter(id => id !== '__none__');
-      const set = new Set(realIds);
-      items = items.filter((p: Product) => {
-        const hasCategories =
-          p.productCategories && p.productCategories.length > 0;
-        if (hasNone && !hasCategories) return true;
-        if (set.size > 0 && hasCategories) {
-          return p.productCategories!.some(pc => set.has(pc.id));
-        }
-        return false;
-      });
-    }
-    return items;
-  }, [page.filteredItems, templateIds, manufacturerIds, categoryIds]);
-
-  // Interdependent filter options: derive from ALL products (page.items = unfiltered)
-  const allProducts = page.items || [];
-
-  // Helper: narrow products by other active filters (excluding the one being computed)
-  const narrowProducts = useCallback(
-    (exclude: 'template' | 'manufacturer' | 'category') => {
-      let filtered = allProducts;
-      if (exclude !== 'template' && templateIds.length > 0) {
-        const set = new Set(templateIds);
-        filtered = filtered.filter(p => p.templateId && set.has(p.templateId));
-      }
-      if (exclude !== 'manufacturer' && manufacturerIds.length > 0) {
-        const set = new Set(manufacturerIds);
-        filtered = filtered.filter(
-          p => p.manufacturerId && set.has(p.manufacturerId)
-        );
-      }
-      if (exclude !== 'category' && categoryIds.length > 0) {
-        const hasNone = categoryIds.includes('__none__');
-        const realIds = categoryIds.filter(id => id !== '__none__');
-        const set = new Set(realIds);
-        filtered = filtered.filter(p => {
-          const hasCategories =
-            p.productCategories && p.productCategories.length > 0;
-          if (hasNone && !hasCategories) return true;
-          if (set.size > 0 && hasCategories) {
-            return p.productCategories!.some(pc => set.has(pc.id));
-          }
-          return false;
-        });
-      }
-      return filtered;
-    },
-    [allProducts, templateIds, manufacturerIds, categoryIds]
+  const filters: ProductsFilters = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      templateId: templateIds[0] || undefined,
+      manufacturerId: manufacturerIds[0] || undefined,
+      categoryId: categoryIds[0] || undefined,
+    }),
+    [debouncedSearch, templateIds, manufacturerIds, categoryIds]
   );
 
-  // Extract unique templates from products data
-  const availableTemplates = useMemo(() => {
-    const templateMap = new Map<string, { id: string; name: string }>();
-    for (const product of allProducts) {
-      if (product.templateId && product.template) {
-        templateMap.set(product.templateId, {
-          id: product.templateId,
-          name: product.template.name,
-        });
-      }
-    }
+  const {
+    products,
+    total,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useProductsInfinite(filters);
 
-    if (manufacturerIds.length === 0 && categoryIds.length === 0) {
-      return Array.from(templateMap.values());
-    }
+  // Dropdown sources from dedicated endpoints (A1 strategy)
+  const { data: allTemplates = [] } = useTemplates();
+  const { data: allManufacturers } = useManufacturers();
+  const { data: allCategories } = useCategories();
 
-    const filtered = narrowProducts('template');
-    const idsInFiltered = new Set(
-      filtered.map(p => p.templateId).filter(Boolean)
+  const templateOptions = useMemo(
+    () => allTemplates.map(t => ({ id: t.id, label: t.name })),
+    [allTemplates]
+  );
+
+  const manufacturerOptions = useMemo(
+    () =>
+      (allManufacturers?.manufacturers ?? []).map(m => ({
+        id: m.id,
+        label: m.name,
+      })),
+    [allManufacturers]
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      (allCategories?.categories ?? []).map(c => ({
+        id: c.id,
+        label: c.name,
+      })),
+    [allCategories]
+  );
+
+  // Mutations
+  const updateMutation = useUpdateProduct();
+  const createMutation = useCreateProduct();
+  const deleteMutation = useDeleteProduct();
+
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
     );
-    return Array.from(templateMap.values()).filter(t =>
-      idsInFiltered.has(t.id)
-    );
-  }, [allProducts, manufacturerIds, categoryIds, narrowProducts]);
 
-  // Extract unique manufacturers from products data
-  const availableManufacturers = useMemo(() => {
-    const manufacturerMap = new Map<string, { id: string; name: string }>();
-    for (const product of allProducts) {
-      if (product.manufacturerId && product.manufacturer) {
-        manufacturerMap.set(product.manufacturerId, {
-          id: product.manufacturerId,
-          name: product.manufacturer.name,
-        });
-      }
-    }
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    if (templateIds.length === 0 && categoryIds.length === 0) {
-      return Array.from(manufacturerMap.values());
-    }
+  // ============================================================================
+  // URL FILTER HELPERS
+  // ============================================================================
 
-    const filtered = narrowProducts('manufacturer');
-    const idsInFiltered = new Set(
-      filtered.map(p => p.manufacturerId).filter(Boolean)
-    );
-    return Array.from(manufacturerMap.values()).filter(m =>
-      idsInFiltered.has(m.id)
-    );
-  }, [allProducts, templateIds, categoryIds, narrowProducts]);
-
-  // Extract unique categories from products data (with "Sem Categoria" virtual option)
-  const availableCategories = useMemo(() => {
-    const noneOption = { id: '__none__', name: 'Sem categoria' };
-    const categoryMap = new Map<string, { id: string; name: string }>();
-    let hasUncategorized = false;
-
-    for (const product of allProducts) {
-      if (
-        !product.productCategories ||
-        product.productCategories.length === 0
-      ) {
-        hasUncategorized = true;
-      }
-      product.productCategories?.forEach(pc => {
-        categoryMap.set(pc.id, { id: pc.id, name: pc.name });
-      });
-    }
-
-    if (templateIds.length === 0 && manufacturerIds.length === 0) {
-      const result = Array.from(categoryMap.values());
-      return hasUncategorized ? [noneOption, ...result] : result;
-    }
-
-    const filtered = narrowProducts('category');
-    const idsInFiltered = new Set<string>();
-    let filteredHasUncategorized = false;
-    for (const p of filtered) {
-      if (!p.productCategories || p.productCategories.length === 0) {
-        filteredHasUncategorized = true;
-      }
-      p.productCategories?.forEach(pc => idsInFiltered.add(pc.id));
-    }
-    const result = Array.from(categoryMap.values()).filter(c =>
-      idsInFiltered.has(c.id)
-    );
-    return filteredHasUncategorized ? [noneOption, ...result] : result;
-  }, [allProducts, templateIds, manufacturerIds, narrowProducts]);
-
-  // Build URL preserving all filter params (comma-separated for multi-select)
   const buildFilterUrl = useCallback(
     (params: {
       template?: string[];
@@ -339,23 +250,17 @@ function ProductsPageContent() {
   );
 
   const setTemplateFilter = useCallback(
-    (ids: string[]) => {
-      router.push(buildFilterUrl({ template: ids }));
-    },
+    (ids: string[]) => router.push(buildFilterUrl({ template: ids })),
     [router, buildFilterUrl]
   );
 
   const setManufacturerFilter = useCallback(
-    (ids: string[]) => {
-      router.push(buildFilterUrl({ manufacturer: ids }));
-    },
+    (ids: string[]) => router.push(buildFilterUrl({ manufacturer: ids })),
     [router, buildFilterUrl]
   );
 
   const setCategoryFilter = useCallback(
-    (ids: string[]) => {
-      router.push(buildFilterUrl({ category: ids }));
-    },
+    (ids: string[]) => router.push(buildFilterUrl({ category: ids })),
     [router, buildFilterUrl]
   );
 
@@ -372,9 +277,10 @@ function ProductsPageContent() {
     // TODO: Implement item movement modal
   }, []);
 
-  // Context menu handlers
   const handleContextView = (ids: string[]) => {
-    page.handlers.handleItemsView(ids);
+    if (ids.length === 1) {
+      router.push(`/stock/products/${ids[0]}`);
+    }
   };
 
   const handleContextEdit = (ids: string[]) => {
@@ -384,18 +290,17 @@ function ProductsPageContent() {
   };
 
   const handleContextDelete = (ids: string[]) => {
-    page.modals.setItemsToDelete(ids);
-    page.modals.open('delete');
+    setItemsToDelete(ids);
+    setDeleteModalOpen(true);
   };
 
-  // Quick-action context menu handlers
   const handleContextRename = useCallback(
     (ids: string[]) => {
-      const product = crud.items?.find(p => p.id === ids[0]) || null;
+      const product = products.find(p => p.id === ids[0]) || null;
       setRenameProduct(product);
       setRenameModalOpen(true);
     },
-    [crud.items]
+    [products]
   );
 
   const handleContextAssignCategory = useCallback((ids: string[]) => {
@@ -408,25 +313,39 @@ function ProductsPageContent() {
     setAssignManufacturerOpen(true);
   }, []);
 
-  // Quick-action submit handlers
   const handleRenameSubmit = useCallback(
     async (id: string, data: { name: string }) => {
-      await crud.update(id, data as UpdateProductRequest);
-      await crud.invalidate();
+      await updateMutation.mutateAsync({
+        productId: id,
+        data: data as UpdateProductRequest,
+      });
       setRenameModalOpen(false);
       setRenameProduct(null);
     },
-    [crud]
+    [updateMutation]
   );
+
+  const handleDeleteConfirm = useCallback(async () => {
+    for (const id of itemsToDelete) {
+      await deleteMutation.mutateAsync(id);
+    }
+    setDeleteModalOpen(false);
+    setItemsToDelete([]);
+    toast.success(
+      itemsToDelete.length === 1
+        ? 'Produto excluído com sucesso!'
+        : `${itemsToDelete.length} produtos excluídos!`
+    );
+  }, [itemsToDelete, deleteMutation]);
 
   const handleAssignCategorySubmit = useCallback(
     async (ids: string[], categoryId: string) => {
       for (const id of ids) {
-        await crud.update(id, {
-          categoryIds: [categoryId],
-        } as UpdateProductRequest);
+        await updateMutation.mutateAsync({
+          productId: id,
+          data: { categoryIds: [categoryId] } as UpdateProductRequest,
+        });
       }
-      await crud.invalidate();
       setAssignCategoryOpen(false);
       setActionProductIds([]);
       toast.success(
@@ -435,15 +354,17 @@ function ProductsPageContent() {
           : `Categoria atribuída a ${ids.length} produtos!`
       );
     },
-    [crud]
+    [updateMutation]
   );
 
   const handleAssignManufacturerSubmit = useCallback(
     async (ids: string[], manufacturerId: string) => {
       for (const id of ids) {
-        await crud.update(id, { manufacturerId } as UpdateProductRequest);
+        await updateMutation.mutateAsync({
+          productId: id,
+          data: { manufacturerId } as UpdateProductRequest,
+        });
       }
-      await crud.invalidate();
       setAssignManufacturerOpen(false);
       setActionProductIds([]);
       toast.success(
@@ -452,7 +373,7 @@ function ProductsPageContent() {
           : `Fabricante atribuído a ${ids.length} produtos!`
       );
     },
-    [crud]
+    [updateMutation]
   );
 
   // ============================================================================
@@ -728,21 +649,7 @@ function ProductsPageContent() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const selectedIds = useMemo(
-    () => Array.from(page.selection?.state.selectedIds || []),
-    [page.selection?.state.selectedIds]
-  );
-
-  const hasSelection = selectedIds.length > 0;
-
-  // Memoize initialIds para evitar recálculos desnecessários
-  const initialIds = useMemo(
-    () =>
-      (Array.isArray(displayedProducts) ? displayedProducts : []).map(
-        i => i.id
-      ),
-    [displayedProducts]
-  );
+  const initialIds = useMemo(() => products.map(i => i.id), [products]);
 
   // ============================================================================
   // HEADER BUTTONS CONFIGURATION (permission-aware)
@@ -753,8 +660,8 @@ function ProductsPageContent() {
   }, [router]);
 
   const handleCreate = useCallback(() => {
-    page.modals.open('create');
-  }, [page.modals]);
+    setCreateOpen(true);
+  }, []);
 
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
@@ -819,152 +726,132 @@ function ProductsPageContent() {
           {/* Search Bar */}
           <SearchBar
             placeholder={productsConfig.display.labels.searchPlaceholder}
-            value={page.searchQuery}
-            onSearch={value => page.handlers.handleSearch(value)}
-            onClear={() => page.handlers.handleSearch('')}
+            value={searchQuery}
+            onSearch={setSearchQuery}
+            onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : error ? (
             <GridError
               type="server"
               title="Erro ao carregar produtos"
               message="Ocorreu um erro ao tentar carregar os produtos. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => crud.refetch(),
+                onClick: () => { refetch(); },
               }}
             />
           ) : (
-            <EntityGrid
-              config={productsConfig}
-              items={displayedProducts}
-              showItemCount={false}
-              toolbarStart={
-                <>
-                  <FilterDropdown
-                    label="Template"
-                    icon={Blocks}
-                    options={availableTemplates.map(t => ({
-                      id: t.id,
-                      label: t.name,
-                    }))}
-                    selected={templateIds}
-                    onSelectionChange={setTemplateFilter}
-                    activeColor="emerald"
-                    searchPlaceholder="Buscar template..."
-                    emptyText="Nenhum template encontrado."
-                    footerAction={{
-                      icon: ExternalLink,
-                      label: 'Ver todos os templates',
-                      onClick: () => router.push('/stock/templates'),
-                      color: 'emerald',
-                    }}
-                  />
-                  <FilterDropdown
-                    label="Fabricante"
-                    icon={Factory}
-                    options={availableManufacturers.map(m => ({
-                      id: m.id,
-                      label: m.name,
-                    }))}
-                    selected={manufacturerIds}
-                    onSelectionChange={setManufacturerFilter}
-                    activeColor="violet"
-                    searchPlaceholder="Buscar fabricante..."
-                    emptyText="Nenhum fabricante encontrado."
-                    footerAction={{
-                      icon: ExternalLink,
-                      label: 'Ver todos os fabricantes',
-                      onClick: () => router.push('/stock/manufacturers'),
-                      color: 'violet',
-                    }}
-                  />
-                  <FilterDropdown
-                    label="Categoria"
-                    icon={Tag}
-                    options={availableCategories.map(c => ({
-                      id: c.id,
-                      label: c.name,
-                    }))}
-                    selected={categoryIds}
-                    onSelectionChange={setCategoryFilter}
-                    activeColor="cyan"
-                    searchPlaceholder="Buscar categoria..."
-                    emptyText="Nenhuma categoria encontrada."
-                    footerAction={{
-                      icon: ExternalLink,
-                      label: 'Ver todas as categorias',
-                      onClick: () => router.push('/stock/categories'),
-                      color: 'cyan',
-                    }}
-                  />
-                  <p className="text-sm text-muted-foreground whitespace-nowrap">
-                    Total de {displayedProducts.length}{' '}
-                    {displayedProducts.length === 1 ? 'produto' : 'produtos'}
-                    {selectedIds.length > 0 &&
-                      ` · ${selectedIds.length} selecionado${selectedIds.length > 1 ? 's' : ''}`}
-                  </p>
-                </>
-              }
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={page.isLoading}
-              isSearching={!!page.searchQuery}
-              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
-              onItemDoubleClick={item =>
-                page.handlers.handleItemDoubleClick(item)
-              }
-              showSorting={true}
-              defaultSortField="name"
-              defaultSortDirection="asc"
-            />
-          )}
+            <>
+              <EntityGrid
+                config={productsConfig}
+                items={products}
+                showItemCount={false}
+                toolbarStart={
+                  <>
+                    <FilterDropdown
+                      label="Template"
+                      icon={Blocks}
+                      options={templateOptions}
+                      selected={templateIds}
+                      onSelectionChange={setTemplateFilter}
+                      activeColor="emerald"
+                      searchPlaceholder="Buscar template..."
+                      emptyText="Nenhum template encontrado."
+                      footerAction={{
+                        icon: ExternalLink,
+                        label: 'Ver todos os templates',
+                        onClick: () => router.push('/stock/templates'),
+                        color: 'emerald',
+                      }}
+                    />
+                    <FilterDropdown
+                      label="Fabricante"
+                      icon={Factory}
+                      options={manufacturerOptions}
+                      selected={manufacturerIds}
+                      onSelectionChange={setManufacturerFilter}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar fabricante..."
+                      emptyText="Nenhum fabricante encontrado."
+                      footerAction={{
+                        icon: ExternalLink,
+                        label: 'Ver todos os fabricantes',
+                        onClick: () => router.push('/stock/manufacturers'),
+                        color: 'violet',
+                      }}
+                    />
+                    <FilterDropdown
+                      label="Categoria"
+                      icon={Tag}
+                      options={categoryOptions}
+                      selected={categoryIds}
+                      onSelectionChange={setCategoryFilter}
+                      activeColor="cyan"
+                      searchPlaceholder="Buscar categoria..."
+                      emptyText="Nenhuma categoria encontrada."
+                      footerAction={{
+                        icon: ExternalLink,
+                        label: 'Ver todas as categorias',
+                        onClick: () => router.push('/stock/categories'),
+                        color: 'cyan',
+                      }}
+                    />
+                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                      {total} {total === 1 ? 'produto' : 'produtos'}
+                      {products.length < total &&
+                        ` (${products.length} carregados)`}
+                    </p>
+                  </>
+                }
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!debouncedSearch}
+                onItemClick={(item) => router.push(`/stock/products/${item.id}`)}
+                onItemDoubleClick={item =>
+                  router.push(`/stock/products/${item.id}`)
+                }
+                showSorting={true}
+                defaultSortField="name"
+                defaultSortDirection="asc"
+              />
 
-          {/* Selection Toolbar */}
-          {hasSelection && (
-            <SelectionToolbar
-              selectedIds={selectedIds}
-              totalItems={displayedProducts.length}
-              onClear={() => page.selection?.actions.clear()}
-              onSelectAll={() => page.selection?.actions.selectAll()}
-              defaultActions={{
-                view: true,
-                edit: true,
-                duplicate: false,
-                delete: true,
-              }}
-              handlers={{
-                onView: page.handlers.handleItemsView,
-                onEdit: page.handlers.handleItemsEdit,
-                onDelete: page.handlers.handleItemsDelete,
-              }}
-            />
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
           {/* Create Wizard */}
           <CreateProductWizard
-            open={page.modals.isOpen('create')}
-            onOpenChange={open => !open && page.modals.close('create')}
+            open={createOpen}
+            onOpenChange={open => !open && setCreateOpen(false)}
             onSubmit={async data => {
-              await crud.create(data);
+              await createMutation.mutateAsync(data as ProductFormData);
+              setCreateOpen(false);
             }}
           />
 
           {/* Delete Confirmation */}
           <VerifyActionPinModal
-            isOpen={page.modals.isOpen('delete')}
-            onClose={() => page.modals.close('delete')}
-            onSuccess={() => page.handlers.handleDeleteConfirm()}
+            isOpen={deleteModalOpen}
+            onClose={() => setDeleteModalOpen(false)}
+            onSuccess={handleDeleteConfirm}
             title="Confirmar Exclusão"
             description={
-              page.modals.itemsToDelete.length === 1
+              itemsToDelete.length === 1
                 ? 'Digite seu PIN de ação para excluir este produto. Esta ação não pode ser desfeita.'
-                : `Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} produtos. Esta ação não pode ser desfeita.`
+                : `Digite seu PIN de ação para excluir ${itemsToDelete.length} produtos. Esta ação não pode ser desfeita.`
             }
           />
 
@@ -976,7 +863,7 @@ function ProductsPageContent() {
               setRenameProduct(null);
             }}
             product={renameProduct}
-            isSubmitting={crud.isUpdating}
+            isSubmitting={updateMutation.isPending}
             onSubmit={handleRenameSubmit}
           />
 
@@ -988,7 +875,7 @@ function ProductsPageContent() {
               setActionProductIds([]);
             }}
             productIds={actionProductIds}
-            isSubmitting={crud.isUpdating}
+            isSubmitting={updateMutation.isPending}
             onSubmit={handleAssignCategorySubmit}
           />
 
@@ -1000,7 +887,7 @@ function ProductsPageContent() {
               setActionProductIds([]);
             }}
             productIds={actionProductIds}
-            isSubmitting={crud.isUpdating}
+            isSubmitting={updateMutation.isPending}
             onSubmit={handleAssignManufacturerSubmit}
           />
 
