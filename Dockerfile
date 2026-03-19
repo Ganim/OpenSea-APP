@@ -30,6 +30,13 @@ ENV NEXT_PUBLIC_EXTERNAL_API_BASE_URL=${NEXT_PUBLIC_EXTERNAL_API_BASE_URL}
 # Build the application
 RUN npm run build
 
+# Next.js 16 standalone output nests files under a project-name subdirectory.
+# Flatten it so server.js is at the root of /app/.next/standalone/
+RUN if [ ! -f .next/standalone/server.js ]; then \
+      subdir=$(find .next/standalone -maxdepth 2 -name server.js -type f | head -1 | xargs dirname) && \
+      cp -r "$subdir"/. .next/standalone/ ; \
+    fi
+
 # Stage 3: Runner (production)
 FROM node:22-alpine AS runner
 WORKDIR /app
@@ -43,20 +50,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy necessary files from builder
-# Next.js 16 standalone output nests files under a project-name subdirectory.
-# We flatten it so server.js lives at /app/server.js.
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-# Copy standalone — try nested path first (Next.js 16+), fall back to flat (Next.js 14/15)
-RUN --mount=from=builder,source=/app/.next/standalone,target=/tmp/standalone \
-    if [ -f /tmp/standalone/server.js ]; then \
-      cp -r /tmp/standalone/. ./; \
-    else \
-      dir=$(ls -d /tmp/standalone/*/server.js 2>/dev/null | head -1 | xargs dirname); \
-      cp -r "$dir"/. ./; \
-      cp -r /tmp/standalone/node_modules ./node_modules; \
-    fi
 
 # Set correct ownership
 RUN chown -R nextjs:nodejs /app
