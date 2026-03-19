@@ -99,9 +99,9 @@ function CellDataViewer({ cell }: DataViewerProps<SpreadsheetCell>) {
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="flex items-center gap-1 w-full">
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />
+            <span className="flex items-center justify-between gap-1 w-full">
               <span className="truncate">{value}</span>
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />
             </span>
           </TooltipTrigger>
           <TooltipContent
