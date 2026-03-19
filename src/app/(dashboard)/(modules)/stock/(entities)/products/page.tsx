@@ -380,8 +380,9 @@ function ProductsPageContent() {
       item.template?.unitOfMeasure || 'UNITS'
     );
     const manufacturerName = item.manufacturer?.name;
-    const variantLabel = item.variants?.length
-      ? `${item.variants.length} variante${item.variants.length !== 1 ? 's' : ''}`
+    const hasVariants = (item.variants?.length ?? 0) > 0;
+    const variantLabel = hasVariants
+      ? `${item.variants!.length} variante${item.variants!.length !== 1 ? 's' : ''}`
       : 'Ver variantes';
     const categoryNames =
       item.productCategories && item.productCategories.length > 0
@@ -444,7 +445,7 @@ function ProductsPageContent() {
           }
           subtitle={manufacturerName || 'Fabricante não informado'}
           icon={Package}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor={item.outOfLine ? 'bg-linear-to-br from-amber-500 to-amber-600' : 'bg-linear-to-br from-blue-500 to-cyan-600'}
           badges={[
             { label: templateName, variant: 'default' },
             { label: unitOfMeasure, variant: 'default' },
@@ -470,7 +471,7 @@ function ProductsPageContent() {
               icon: Grid3x3,
               label: variantLabel,
               onClick: () => handleProductClick(item),
-              color: 'emerald',
+              color: hasVariants ? 'emerald' : 'secondary',
             },
           }}
           isSelected={isSelected}
@@ -491,7 +492,8 @@ function ProductsPageContent() {
     );
     const manufacturerName = item.manufacturer?.name;
     const variantCount = item.variants?.length ?? 0;
-    const variantLabel = variantCount
+    const hasVariants = variantCount > 0;
+    const variantLabel = hasVariants
       ? `${variantCount} variante${variantCount !== 1 ? 's' : ''}`
       : 'Ver variantes';
     const categoryNames =
@@ -615,7 +617,7 @@ function ProductsPageContent() {
             </div>
           }
           icon={Package}
-          iconBgColor="bg-linear-to-br from-blue-500 to-cyan-600"
+          iconBgColor={item.outOfLine ? 'bg-linear-to-br from-amber-500 to-amber-600' : 'bg-linear-to-br from-blue-500 to-cyan-600'}
           isSelected={isSelected}
           showSelection={false}
           clickable={false}
@@ -629,7 +631,12 @@ function ProductsPageContent() {
               e.stopPropagation();
               handleProductClick(item);
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15 transition-colors cursor-pointer"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap border transition-colors cursor-pointer',
+              hasVariants
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
+                : 'bg-gray-50 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-500/20 hover:bg-gray-100 dark:hover:bg-gray-500/15'
+            )}
           >
             <Grid3x3 className="h-3.5 w-3.5" />
             {variantLabel}

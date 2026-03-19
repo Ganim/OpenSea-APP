@@ -49,7 +49,8 @@ export type FooterButtonColor =
   | 'blue'
   | 'violet'
   | 'cyan'
-  | 'amber';
+  | 'amber'
+  | 'secondary';
 
 /** Botão de footer com ação ou link */
 export interface FooterButton {
@@ -172,6 +173,8 @@ const FOOTER_BUTTON_COLORS_GRID: Record<FooterButtonColor, string> = {
   cyan: 'bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-400',
   amber:
     'bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400',
+  secondary:
+    'bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500',
 };
 
 /** Mapa de cores para botões do footer - variante list (texto colorido) */
@@ -184,6 +187,8 @@ const FOOTER_BUTTON_COLORS_LIST: Record<FooterButtonColor, string> = {
   cyan: 'text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300',
   amber:
     'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300',
+  secondary:
+    'text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
 };
 
 // =============================================================================

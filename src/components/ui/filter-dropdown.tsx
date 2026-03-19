@@ -90,6 +90,13 @@ const footerColorMap = {
   blue: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10',
 } as const;
 
+function capitalizeLabel(text: string): string {
+  return text
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export function FilterDropdown({
   label,
   icon: Icon,
@@ -249,7 +256,7 @@ export function FilterDropdown({
                   )}
                 >
                   <Check className={cn('w-4 h-4 shrink-0', colors.check)} />
-                  <span className="truncate">{option.label}</span>
+                  <span className="truncate">{capitalizeLabel(option.label)}</span>
                 </button>
               ))}
 
@@ -266,7 +273,7 @@ export function FilterDropdown({
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
                   <Check className="w-4 h-4 shrink-0 opacity-0" />
-                  <span className="truncate">{option.label}</span>
+                  <span className="truncate">{capitalizeLabel(option.label)}</span>
                 </button>
               ))}
             </>
