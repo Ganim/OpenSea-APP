@@ -48,6 +48,8 @@ import {
   GripVertical,
   Package,
   Play,
+  Plus,
+  RotateCcw,
   Sparkles,
   Upload,
 } from 'lucide-react';
@@ -817,10 +819,10 @@ export default function ProductsSheetsPage() {
                 ))}
             </div>
 
-            {/* Right: decimal toggle + columns button */}
-            <div className="flex items-center gap-3">
+            {/* Right: actions */}
+            <div className="flex items-center gap-2">
               {/* Decimal separator toggle */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mr-1">
                 <Label
                   htmlFor="decimal-separator"
                   className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
@@ -836,28 +838,6 @@ export default function ProductsSheetsPage() {
                   }
                 />
               </div>
-
-              {/* Columns popover */}
-              {selectedTemplateId && columnsConfig.length > 0 && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 px-2.5 gap-1.5">
-                      <Columns3 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Colunas</span>
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 min-w-5 justify-center">
-                        {enabledFields.length}
-                      </Badge>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="p-0 w-auto">
-                    <ColumnsPopoverContent
-                      columns={columnsForPopover}
-                      onToggle={handleToggleColumn}
-                      onReorder={handleReorderColumns}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
 
               {/* File import popover */}
               {selectedTemplateId && (
@@ -904,6 +884,42 @@ export default function ProductsSheetsPage() {
                     </div>
                   </PopoverContent>
                 </Popover>
+              )}
+
+              {/* Columns popover */}
+              {selectedTemplateId && columnsConfig.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 px-2.5 gap-1.5">
+                      <Columns3 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Colunas</span>
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 min-w-5 justify-center">
+                        {enabledFields.length}
+                      </Badge>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="p-0 w-auto">
+                    <ColumnsPopoverContent
+                      columns={columnsForPopover}
+                      onToggle={handleToggleColumn}
+                      onReorder={handleReorderColumns}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {/* Add row + Clear */}
+              {selectedTemplateId && (
+                <>
+                  <Button variant="outline" size="sm" className="h-9 px-2.5" onClick={spreadsheet.addRow}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Linha
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-9 px-2.5" onClick={spreadsheet.clearAll}>
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Limpar
+                  </Button>
+                </>
               )}
             </div>
           </div>

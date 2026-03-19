@@ -439,88 +439,8 @@ export function ImportSpreadsheet({
   }, [headers, entityName]);
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">Tabela de Importacao</CardTitle>
-            <CardDescription>
-              Cole dados do Excel (Ctrl+V). Para campos de selecao, pressione
-              Enter para escolher.
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Stats */}
-            <div className="flex items-center gap-2 mr-4">
-              <Badge variant="outline" className="gap-1">
-                {filledRows} {filledRows === 1 ? 'linha' : 'linhas'}
-              </Badge>
-              {validationResult && (
-                <>
-                  {validationResult.valid ? (
-                    <Badge variant="default" className="gap-1 bg-green-600">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Valido
-                    </Badge>
-                  ) : (
-                    <Badge variant="destructive" className="gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {validationResult.errors.length}{' '}
-                      {validationResult.errors.length === 1 ? 'erro' : 'erros'}
-                    </Badge>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Actions */}
-            {showDownloadTemplate && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadTemplate}
-              >
-                <FileSpreadsheet className="w-4 h-4 mr-1" />
-                Template
-              </Button>
-            )}
-            {showFileUpload && (
-              <>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv,.txt"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4 mr-1" />
-                  Importar
-                </Button>
-              </>
-            )}
-            {onDownload && (
-              <Button variant="outline" size="sm" onClick={onDownload}>
-                <Download className="w-4 h-4 mr-1" />
-                Baixar
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={onAddRow}>
-              <Plus className="w-4 h-4 mr-1" />
-              Linha
-            </Button>
-            <Button variant="outline" size="sm" onClick={onClearAll}>
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Limpar
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
+    <div className={cn('overflow-hidden flex flex-col', className)}>
+      <div className="flex-1 min-h-0">
         <div
           ref={spreadsheetContainerRef}
           className="overflow-auto max-h-[600px] border-t import-spreadsheet-container"
@@ -562,7 +482,7 @@ export function ImportSpreadsheet({
             </ul>
           </div>
         )}
-      </CardContent>
+      </div>
 
       {/* Select Dialog */}
       <Dialog
@@ -625,6 +545,6 @@ export function ImportSpreadsheet({
           </Command>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }
