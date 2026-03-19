@@ -259,6 +259,7 @@ function validateCell(
         'true',
         'false',
         'sim',
+        'não',
         'nao',
         'yes',
         'no',
@@ -266,13 +267,15 @@ function validateCell(
         '0',
         's',
         'n',
+        'verdadeiro',
+        'falso',
       ];
       if (!boolValues.includes(value.toLowerCase())) {
         return {
           row: rowIndex,
           column: colIndex,
           fieldKey: field.key,
-          message: 'Valor deve ser Sim/Nao, True/False ou 1/0',
+          message: 'Valor deve ser Sim/Não, True/False ou 1/0',
           value,
         };
       }
@@ -603,7 +606,7 @@ export function useImportSpreadsheet(
             break;
           case 'boolean':
             const boolValue = (value as string).toLowerCase();
-            value = ['true', 'sim', 'yes', '1', 's'].includes(boolValue);
+            value = ['true', 'sim', 'yes', '1', 's', 'verdadeiro'].includes(boolValue);
             break;
           case 'date':
             value = new Date(value as string).toISOString();
