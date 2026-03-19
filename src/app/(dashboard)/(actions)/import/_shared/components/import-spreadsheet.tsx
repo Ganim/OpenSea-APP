@@ -45,12 +45,6 @@ import {
   Upload,
   FileSpreadsheet,
 } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import type {
   ImportFieldConfig,
   ImportSpreadsheetData,
@@ -89,29 +83,22 @@ interface SpreadsheetCell extends CellBase<string> {
   errorMessage?: string;
 }
 
-// Custom cell viewer with error icon + tooltip
+// Custom cell viewer with error icon + native title tooltip
+// Uses native HTML title instead of Radix Tooltip to avoid compose-refs
+// setState explosion when hundreds of cells are remounted simultaneously
 function CellDataViewer({ cell }: DataViewerProps<SpreadsheetCell>) {
   const value = cell?.value ?? '';
   const errorMessage = cell?.errorMessage;
 
   if (errorMessage) {
     return (
-      <TooltipProvider delayDuration={200}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="flex items-center justify-between gap-1 w-full">
-              <span className="truncate">{value}</span>
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />
-            </span>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            className="max-w-xs bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800"
-          >
-            <p className="text-xs">{errorMessage}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <span
+        className="flex items-center justify-between gap-1 w-full"
+        title={errorMessage}
+      >
+        <span className="truncate">{value}</span>
+        <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />
+      </span>
     );
   }
 

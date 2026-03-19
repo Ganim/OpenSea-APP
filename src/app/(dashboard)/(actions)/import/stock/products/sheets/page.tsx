@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DndContext,
@@ -552,7 +552,10 @@ export default function ProductsSheetsPage() {
   useEffect(() => {
     if (enabledFieldsKey && enabledFieldsKey !== prevFieldsKeyRef.current) {
       prevFieldsKeyRef.current = enabledFieldsKey;
-      spreadsheet.updateHeaders(enabledFields);
+      // Use startTransition to avoid blocking the main render and causing state conflicts
+      startTransition(() => {
+        spreadsheet.updateHeaders(enabledFields);
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabledFieldsKey]);
@@ -820,8 +823,8 @@ export default function ProductsSheetsPage() {
         </div>
       </Card>
 
-      {/* Spreadsheet Card or prompt */}
-      {!selectedTemplateId ? (
+      {/* Prompt when no template selected */}
+      {!selectedTemplateId && (
         <Card className="bg-white shadow-sm dark:shadow-none dark:bg-white/5 border-gray-200 dark:border-white/10 flex-1 min-h-0 flex items-center justify-center">
           <div className="text-center py-12">
             <div className="p-4 rounded-full bg-blue-500/10 inline-flex mb-4">
@@ -834,7 +837,10 @@ export default function ProductsSheetsPage() {
             </p>
           </div>
         </Card>
-      ) : (
+      )}
+
+      {/* Spreadsheet — always mounted, hidden when no template (avoids remount loops) */}
+      {selectedTemplateId && enabledFields.length > 0 && (
         <Card className="bg-white shadow-sm dark:shadow-none dark:bg-white/5 border-gray-200 dark:border-white/10 flex-1 min-h-0 flex flex-col overflow-hidden">
           <ImportSpreadsheet
             data={spreadsheet.data}
