@@ -28,6 +28,8 @@ export type {
 
 // Components
 export { ModuleTabList } from './components/module-tab-list';
+export { PermissionMatrixTable } from './components/permission-matrix-table';
+export type { ResourcePermissionMap } from './components/permission-matrix-table';
 
 // Utils
 export {
