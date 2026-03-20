@@ -168,12 +168,15 @@ export function StepImport({
       // via template/product configuration. Send empty for now.
       const categoryNames: string[] = [];
 
-      const response = await importService.bulkValidateProducts({
+      const validatePayload = {
         productNames,
         categoryNames,
         manufacturerNames,
         templateId: template.id,
-      });
+      };
+      console.log('[IMPORT DEBUG] Validate payload:', JSON.stringify(validatePayload, null, 2));
+      const response = await importService.bulkValidateProducts(validatePayload);
+      console.log('[IMPORT DEBUG] Validate response:', JSON.stringify(response, null, 2));
 
       // Build name→ID maps
       const categoryNameToId = new Map<string, string>();
@@ -263,6 +266,9 @@ export function StepImport({
         categoryNameToId,
         manufacturerNameToId,
       };
+
+      console.log('[IMPORT DEBUG] Blocking errors:', blockingErrors);
+      console.log('[IMPORT DEBUG] Warnings:', warnings);
 
       setServerValidation(validation);
 
@@ -475,11 +481,14 @@ export function StepImport({
       setCurrentBatch(i + 1);
 
       try {
+        const batchPayload = {
+          products: batches[i],
+          options: { skipDuplicates: true },
+        };
+        console.log(`[IMPORT DEBUG] Batch ${i + 1} payload:`, JSON.stringify(batchPayload, null, 2));
         const result: BulkCreateProductsResponse =
-          await importService.bulkCreateProducts({
-            products: batches[i],
-            options: { skipDuplicates: true },
-          });
+          await importService.bulkCreateProducts(batchPayload);
+        console.log(`[IMPORT DEBUG] Batch ${i + 1} result:`, JSON.stringify(result, null, 2));
 
         summary.totalCreated += result.created.length;
         summary.totalSkipped += result.skipped.length;
