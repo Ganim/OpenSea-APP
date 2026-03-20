@@ -298,7 +298,18 @@ function validateCell(
     }
 
     case 'reference': {
-      if (referenceOptions && referenceOptions.length > 0) {
+      if (referenceOptions) {
+        if (referenceOptions.length === 0) {
+          // No options loaded — value can't be validated, flag it
+          return {
+            row: rowIndex,
+            column: colIndex,
+            fieldKey: field.key,
+            message: `${field.label || field.key}: nenhum registro cadastrado no sistema`,
+            value,
+          };
+        }
+
         const validIds = new Set(referenceOptions.map(o => o.value));
         const validLabels = new Set(
           referenceOptions.map(o => o.label.toLowerCase())
@@ -306,14 +317,11 @@ function validateCell(
 
         // Accept both ID and label (name)
         if (!validIds.has(value) && !validLabels.has(value.toLowerCase())) {
-          const entityLabel = field.referenceDisplayField === 'name'
-            ? (field.label || field.key)
-            : field.key;
           return {
             row: rowIndex,
             column: colIndex,
             fieldKey: field.key,
-            message: `${entityLabel} "${value}" não encontrado(a) no sistema`,
+            message: `${field.label || field.key} "${value}" não encontrado(a) no sistema`,
             value,
           };
         }
