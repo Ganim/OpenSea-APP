@@ -1,6 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +24,7 @@ import type {
   PermissionGroup,
   PermissionWithEffect,
 } from '@/types/rbac';
-import { Loader2, Shield } from 'lucide-react';
+import { ChevronRight, Loader2, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
@@ -53,6 +59,7 @@ export function ManagePermissionsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState(MATRIX_TABS[0].id);
+  const [showUnmapped, setShowUnmapped] = useState(false);
 
   // Load data when modal opens
   const loadData = useCallback(async () => {
@@ -95,19 +102,18 @@ export function ManagePermissionsModal({
   // Build permission maps for matrix
   // ---------------------------------------------------------------------------
 
-  const { permissionMaps, selectedCounts, totalCounts } = useMemo(() => {
-    if (!allPermissions)
-      return {
-        permissionMaps: {} as Record<string, ResourcePermissionMap[]>,
-        selectedCounts: {} as Record<string, number>,
-        totalCounts: {} as Record<string, number>,
-      };
+  const { permissionMaps, selectedCounts, totalCounts, unmappedCodes } =
+    useMemo(() => {
+      if (!allPermissions)
+        return {
+          permissionMaps: {} as Record<string, ResourcePermissionMap[]>,
+          selectedCounts: {} as Record<string, number>,
+          totalCounts: {} as Record<string, number>,
+          unmappedCodes: [] as string[],
+        };
 
     // Build a map: "module.resource" → { action → Set<code> }
-    const codesByBackendResource = new Map<
-      string,
-      Map<string, Set<string>>
-    >();
+    const codesByBackendResource = new Map<string, Map<string, Set<string>>>();
 
     for (const moduleGroup of allPermissions.permissions) {
       const moduleLower = moduleGroup.module.toLowerCase();
@@ -177,10 +183,38 @@ export function ManagePermissionsModal({
       totCounts[tab.id] = tabTotal;
     }
 
+    // Collect all mapped codes across all tabs
+    const mappedCodes = new Set<string>();
+    for (const tab of MATRIX_TABS) {
+      const maps = allPermMaps[tab.id];
+      if (!maps) continue;
+      for (const pm of maps) {
+        const resource = tab.resources[pm.resourceIndex];
+        for (const action of resource.availableActions) {
+          for (const code of pm.actionCodes[action]) {
+            mappedCodes.add(code);
+          }
+        }
+      }
+    }
+
+    // Collect all API codes and find unmapped ones
+    const allApiCodes: string[] = [];
+    for (const moduleGroup of allPermissions.permissions) {
+      for (const [, resourceGroup] of Object.entries(moduleGroup.resources)) {
+        for (const perm of resourceGroup.permissions) {
+          allApiCodes.push(perm.code);
+        }
+      }
+    }
+
+    const unmapped = allApiCodes.filter(c => !mappedCodes.has(c));
+
     return {
       permissionMaps: allPermMaps,
       selectedCounts: selCounts,
       totalCounts: totCounts,
+      unmappedCodes: unmapped,
     };
   }, [allPermissions, selectedCodes]);
 
@@ -189,11 +223,14 @@ export function ManagePermissionsModal({
   // ---------------------------------------------------------------------------
 
   const allCodesCount = useMemo(() => {
-    return Object.values(totalCounts).reduce((sum, n) => sum + n, 0);
-  }, [totalCounts]);
+    return (
+      Object.values(totalCounts).reduce((sum, n) => sum + n, 0) +
+      unmappedCodes.length
+    );
+  }, [totalCounts, unmappedCodes]);
 
   const activeTabConfig = useMemo(
-    () => MATRIX_TABS.find((t) => t.id === activeTab),
+    () => MATRIX_TABS.find(t => t.id === activeTab),
     [activeTab]
   );
 
@@ -203,19 +240,19 @@ export function ManagePermissionsModal({
 
   const handleToggleCodes = useCallback(
     (codes: string[], forceState?: boolean) => {
-      setSelectedCodes((prev) => {
+      setSelectedCodes(prev => {
         const next = new Set(prev);
         if (forceState === true) {
-          codes.forEach((c) => next.add(c));
+          codes.forEach(c => next.add(c));
         } else if (forceState === false) {
-          codes.forEach((c) => next.delete(c));
+          codes.forEach(c => next.delete(c));
         } else {
           // Toggle: if all selected, deselect; otherwise select all
-          const allSelected = codes.every((c) => next.has(c));
+          const allSelected = codes.every(c => next.has(c));
           if (allSelected) {
-            codes.forEach((c) => next.delete(c));
+            codes.forEach(c => next.delete(c));
           } else {
-            codes.forEach((c) => next.add(c));
+            codes.forEach(c => next.add(c));
           }
         }
         return next;
@@ -225,7 +262,7 @@ export function ManagePermissionsModal({
   );
 
   const handleToggleCode = useCallback((code: string) => {
-    setSelectedCodes((prev) => {
+    setSelectedCodes(prev => {
       const next = new Set(prev);
       if (next.has(code)) next.delete(code);
       else next.add(code);
@@ -240,13 +277,13 @@ export function ManagePermissionsModal({
   const handleSelectAllInTab = useCallback(() => {
     const maps = permissionMaps[activeTab];
     if (!maps) return;
-    const tab = MATRIX_TABS.find((t) => t.id === activeTab);
+    const tab = MATRIX_TABS.find(t => t.id === activeTab);
     if (!tab) return;
     const codes: string[] = [];
-    maps.forEach((pm) => {
+    maps.forEach(pm => {
       const resource = tab.resources[pm.resourceIndex];
       for (const action of resource.availableActions) {
-        pm.actionCodes[action].forEach((c) => codes.push(c));
+        pm.actionCodes[action].forEach(c => codes.push(c));
       }
     });
     handleToggleCodes(codes, true);
@@ -255,13 +292,13 @@ export function ManagePermissionsModal({
   const handleClearAllInTab = useCallback(() => {
     const maps = permissionMaps[activeTab];
     if (!maps) return;
-    const tab = MATRIX_TABS.find((t) => t.id === activeTab);
+    const tab = MATRIX_TABS.find(t => t.id === activeTab);
     if (!tab) return;
     const codes: string[] = [];
-    maps.forEach((pm) => {
+    maps.forEach(pm => {
       const resource = tab.resources[pm.resourceIndex];
       for (const action of resource.availableActions) {
-        pm.actionCodes[action].forEach((c) => codes.push(c));
+        pm.actionCodes[action].forEach(c => codes.push(c));
       }
     });
     handleToggleCodes(codes, false);
@@ -277,21 +314,21 @@ export function ManagePermissionsModal({
 
     try {
       // Compute diff
-      const toAdd = [...selectedCodes].filter((c) => !currentCodes.has(c));
-      const toRemove = [...currentCodes].filter((c) => !selectedCodes.has(c));
+      const toAdd = [...selectedCodes].filter(c => !currentCodes.has(c));
+      const toRemove = [...currentCodes].filter(c => !selectedCodes.has(c));
 
       // Bulk add
       if (toAdd.length > 0) {
         await rbacService.addPermissionsToGroupBulk(
           group.id,
-          toAdd.map((code) => ({ permissionCode: code, effect: 'allow' }))
+          toAdd.map(code => ({ permissionCode: code, effect: 'allow' }))
         );
       }
 
       // Remove one by one
       if (toRemove.length > 0) {
         await Promise.all(
-          toRemove.map((code) =>
+          toRemove.map(code =>
             rbacService.removePermissionFromGroup(group.id, code)
           )
         );
@@ -317,12 +354,12 @@ export function ManagePermissionsModal({
 
   const hasChanges =
     selectedCodes.size !== currentCodes.size ||
-    [...selectedCodes].some((c) => !currentCodes.has(c));
+    [...selectedCodes].some(c => !currentCodes.has(c));
 
   if (!group) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="max-w-6xl h-[85vh] flex flex-col p-0">
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
@@ -330,8 +367,7 @@ export function ManagePermissionsModal({
             <div
               className={cn(
                 'flex items-center justify-center text-white shrink-0 p-2 rounded-lg',
-                !group.color &&
-                  'bg-linear-to-br from-purple-500 to-pink-600'
+                !group.color && 'bg-linear-to-br from-purple-500 to-pink-600'
               )}
               style={
                 group.color
@@ -380,8 +416,7 @@ export function ManagePermissionsModal({
                   </h3>
                   <p className="text-sm text-muted-foreground tabular-nums">
                     {selectedCounts[activeTab] ?? 0} de{' '}
-                    {totalCounts[activeTab] ?? 0} permissões ativas neste
-                    módulo
+                    {totalCounts[activeTab] ?? 0} permissões ativas neste módulo
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -411,6 +446,43 @@ export function ManagePermissionsModal({
                   onToggleCode={handleToggleCode}
                   onToggleCodes={handleToggleCodes}
                 />
+
+                {/* Unmapped permissions overflow */}
+                {unmappedCodes.length > 0 && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <Collapsible
+                      open={showUnmapped}
+                      onOpenChange={setShowUnmapped}
+                    >
+                      <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted/30 rounded-lg transition-colors">
+                        <ChevronRight
+                          className={cn(
+                            'h-4 w-4 transition-transform',
+                            showUnmapped && 'rotate-90'
+                          )}
+                        />
+                        Outras permissões ({unmappedCodes.length})
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="grid grid-cols-2 gap-1 px-3 py-2">
+                          {unmappedCodes.map(code => (
+                            <label
+                              key={code}
+                              className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30 cursor-pointer text-sm"
+                            >
+                              <Checkbox
+                                checked={selectedCodes.has(code)}
+                                onCheckedChange={() => handleToggleCode(code)}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="truncate text-xs">{code}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -420,17 +492,14 @@ export function ManagePermissionsModal({
         <DialogFooter className="px-6 py-4 border-t shrink-0">
           <div className="flex items-center justify-between w-full">
             <p className="text-xs text-muted-foreground">
-              Dica: Clique no ícone → para selecionar toda a linha, ou ↓
-              para toda a coluna
+              Dica: Clique no ícone → para selecionar toda a linha, ou ↓ para
+              toda a coluna
             </p>
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={onClose} disabled={isSaving}>
                 Cancelar
               </Button>
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || !hasChanges}
-              >
+              <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
                 {isSaving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
