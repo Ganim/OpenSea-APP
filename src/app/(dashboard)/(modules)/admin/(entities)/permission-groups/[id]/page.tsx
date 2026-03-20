@@ -14,7 +14,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -33,8 +32,6 @@ import type { User } from '@/types/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
-  ChevronDown,
-  ChevronRight,
   Clock,
   Edit,
   Plus,
@@ -46,6 +43,18 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import {
+  MATRIX_TABS,
+  STANDARD_ACTIONS,
+  mapActionToStandard,
+  type StandardAction,
+} from '../src/config/permission-matrix-config';
+import { ModuleTabList } from '../src/components/module-tab-list';
+import {
+  PermissionMatrixTable,
+  type ResourcePermissionMap,
+} from '../src/components/permission-matrix-table';
+
 export default function PermissionGroupDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -55,10 +64,7 @@ export default function PermissionGroupDetailPage() {
   const [activeTab, setActiveTab] = useState('users');
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
   const [searchUser, setSearchUser] = useState('');
-  const [searchPermission, setSearchPermission] = useState('');
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(
-    new Set()
-  );
+  const [activePermTab, setActivePermTab] = useState(MATRIX_TABS[0].id);
   const [searchAvailableUser, setSearchAvailableUser] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [confirmRemoveUserId, setConfirmRemoveUserId] = useState<string | null>(
@@ -258,62 +264,107 @@ export default function PermissionGroupDetailPage() {
     }
   };
 
-  const toggleModule = (module: string) => {
-    setExpandedModules(prev => {
-      const next = new Set(prev);
-      if (next.has(module)) {
-        next.delete(module);
-      } else {
-        next.add(module);
-      }
-      return next;
-    });
-  };
-
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
 
-  const permissionsStructure = useMemo(() => {
-    if (!allPermissionsData?.permissions) return [];
+  const groupPermissionCodes = useMemo(
+    () => new Set(groupPermissions.map(p => p.code)),
+    [groupPermissions]
+  );
 
-    const groupPermissionCodes = new Set(groupPermissions.map(p => p.code));
-
-    return allPermissionsData.permissions
-      .map(moduleData => {
-        const filteredResources = Object.entries(moduleData.resources)
-          .map(([resourceName, resourceData]) => {
-            const filteredPermissions = resourceData.permissions.filter(
-              perm => {
-                if (!searchPermission) return true;
-                const search = searchPermission.toLowerCase();
-                return (
-                  perm.name.toLowerCase().includes(search) ||
-                  perm.code.toLowerCase().includes(search) ||
-                  perm.action.toLowerCase().includes(search)
-                );
-              }
-            );
-            if (filteredPermissions.length === 0) return null;
-            return {
-              name: resourceName,
-              description: resourceData.description,
-              permissions: filteredPermissions.map(perm => ({
-                ...perm,
-                isActive: groupPermissionCodes.has(perm.code),
-              })),
-            };
-          })
-          .filter((r): r is NonNullable<typeof r> => r !== null);
-
+  const { matrixPermissionMaps, matrixSelectedCounts, matrixTotalCounts } =
+    useMemo(() => {
+      if (!allPermissionsData)
         return {
-          module: moduleData.module,
-          description: moduleData.description,
-          resources: filteredResources,
+          matrixPermissionMaps: {} as Record<string, ResourcePermissionMap[]>,
+          matrixSelectedCounts: {} as Record<string, number>,
+          matrixTotalCounts: {} as Record<string, number>,
         };
-      })
-      .filter(module => module.resources.length > 0);
-  }, [allPermissionsData, groupPermissions, searchPermission]);
+
+      // Build a map: "module.resource" → { action → Set<code> }
+      const codesByBackendResource = new Map<
+        string,
+        Map<string, Set<string>>
+      >();
+
+      for (const moduleGroup of allPermissionsData.permissions) {
+        const moduleLower = moduleGroup.module.toLowerCase();
+        for (const [resourceKey, resourceGroup] of Object.entries(
+          moduleGroup.resources
+        )) {
+          const backendKey = `${moduleLower}.${resourceKey}`;
+          if (!codesByBackendResource.has(backendKey)) {
+            codesByBackendResource.set(backendKey, new Map());
+          }
+          const actionMap = codesByBackendResource.get(backendKey)!;
+          for (const perm of resourceGroup.permissions) {
+            const standardAction = mapActionToStandard(perm.action);
+            if (!actionMap.has(standardAction)) {
+              actionMap.set(standardAction, new Set());
+            }
+            actionMap.get(standardAction)!.add(perm.code);
+          }
+        }
+      }
+
+      // For each tab, build ResourcePermissionMap[] and counts
+      const allPermMaps: Record<string, ResourcePermissionMap[]> = {};
+      const selCounts: Record<string, number> = {};
+      const totCounts: Record<string, number> = {};
+
+      for (const tab of MATRIX_TABS) {
+        const maps: ResourcePermissionMap[] = [];
+        let tabTotal = 0;
+        let tabSelected = 0;
+
+        tab.resources.forEach((resource, idx) => {
+          const actionCodes = {} as Record<StandardAction, Set<string>>;
+          for (const action of STANDARD_ACTIONS) {
+            actionCodes[action] = new Set();
+          }
+
+          for (const br of resource.backendResources) {
+            const actionMap = codesByBackendResource.get(br);
+            if (!actionMap) continue;
+            for (const [action, codes] of actionMap) {
+              const stdAction = action as StandardAction;
+              for (const code of codes) {
+                actionCodes[stdAction].add(code);
+              }
+            }
+          }
+
+          let resourceTotal = 0;
+          let resourceSelected = 0;
+          for (const action of resource.availableActions) {
+            for (const code of actionCodes[action]) {
+              resourceTotal++;
+              if (groupPermissionCodes.has(code)) resourceSelected++;
+            }
+          }
+          tabTotal += resourceTotal;
+          tabSelected += resourceSelected;
+
+          maps.push({ resourceIndex: idx, actionCodes });
+        });
+
+        allPermMaps[tab.id] = maps;
+        selCounts[tab.id] = tabSelected;
+        totCounts[tab.id] = tabTotal;
+      }
+
+      return {
+        matrixPermissionMaps: allPermMaps,
+        matrixSelectedCounts: selCounts,
+        matrixTotalCounts: totCounts,
+      };
+    }, [allPermissionsData, groupPermissionCodes]);
+
+  const activePermTabConfig = useMemo(
+    () => MATRIX_TABS.find(t => t.id === activePermTab),
+    [activePermTab]
+  );
 
   // ============================================================================
   // LOADING STATE
@@ -567,132 +618,34 @@ export default function PermissionGroupDetailPage() {
                 </Badge>
               </div>
 
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar permissão..."
-                  value={searchPermission}
-                  onChange={e => setSearchPermission(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
               {groupLoading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
                 </div>
-              ) : permissionsStructure.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>Nenhuma permissão encontrada</p>
-                </div>
               ) : (
-                <div className="space-y-4">
-                  {permissionsStructure.map(moduleGroup => (
-                    <div
-                      key={moduleGroup.module}
-                      className="border rounded-lg bg-linear-to-r from-slate-100 dark:from-slate-800 to-transparent"
-                    >
-                      <button
-                        onClick={() => toggleModule(moduleGroup.module)}
-                        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          {expandedModules.has(moduleGroup.module) ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          <span className="font-semibold capitalize">
-                            {moduleGroup.module}
-                          </span>
-                        </div>
-                        <Badge variant="secondary">
-                          {moduleGroup.resources.reduce(
-                            (acc, res) =>
-                              acc +
-                              res.permissions.filter(p => p.isActive).length,
-                            0
-                          )}
-                          /
-                          {moduleGroup.resources.reduce(
-                            (acc, res) => acc + res.permissions.length,
-                            0
-                          )}
-                        </Badge>
-                      </button>
-
-                      {expandedModules.has(moduleGroup.module) && (
-                        <div className="border-t">
-                          {moduleGroup.resources.map(resource => (
-                            <div
-                              key={resource.name}
-                              className="border-b last:border-b-0"
-                            >
-                              <div className="bg-muted/30 px-4 py-2">
-                                <h4 className="font-medium text-sm capitalize">
-                                  {resource.name}
-                                </h4>
-                                {resource.description && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {resource.description}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-4">
-                                {resource.permissions.map(perm => (
-                                  <div
-                                    key={perm.id}
-                                    className={cn(
-                                      'flex items-center gap-3 p-2 rounded-lg transition-colors border',
-                                      perm.isActive
-                                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-600/20'
-                                        : 'border-slate-200 dark:border-slate-600 bg-slate-600/20'
-                                    )}
-                                  >
-                                    <Checkbox
-                                      id={perm.id}
-                                      checked={perm.isActive}
-                                      disabled
-                                      className={
-                                        !perm.isActive ? 'bg-slate-200/20' : ''
-                                      }
-                                    />
-                                    <label
-                                      htmlFor={perm.id}
-                                      className="flex-1 text-sm cursor-default"
-                                    >
-                                      <p
-                                        className={cn(
-                                          'font-medium flex items-center gap-1',
-                                          perm.isActive &&
-                                            'text-emerald-700 dark:text-emerald-400'
-                                        )}
-                                      >
-                                        {perm.name}
-                                        {perm.isDeprecated && (
-                                          <Badge
-                                            variant="outline"
-                                            className="text-xs"
-                                          >
-                                            deprecated
-                                          </Badge>
-                                        )}
-                                      </p>
-                                      <p className="text-xs text-muted-foreground font-mono">
-                                        {perm.action}
-                                      </p>
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="flex gap-0 h-[500px]">
+                  <div className="py-2">
+                    <ModuleTabList
+                      tabs={MATRIX_TABS}
+                      activeTabId={activePermTab}
+                      onTabChange={setActivePermTab}
+                      selectedCounts={matrixSelectedCounts}
+                      totalCounts={matrixTotalCounts}
+                    />
+                  </div>
+                  <div className="flex-1 overflow-y-auto py-2 px-2">
+                    <PermissionMatrixTable
+                      resources={activePermTabConfig?.resources ?? []}
+                      permissionMaps={
+                        matrixPermissionMaps[activePermTab] ?? []
+                      }
+                      selectedCodes={groupPermissionCodes}
+                      onToggleCode={() => {}}
+                      onToggleCodes={() => {}}
+                      readOnly
+                    />
+                  </div>
                 </div>
               )}
             </Card>
