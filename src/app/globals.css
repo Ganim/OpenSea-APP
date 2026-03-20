@@ -977,12 +977,13 @@ body {
 
 /* Row indicators — compact, subtle */
 .Spreadsheet__header--row {
-  opacity: 0.5;
-  min-width: 36px !important;
-  max-width: 36px !important;
-  width: 36px !important;
-  font-size: 11px !important;
+  opacity: 0.4;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  width: 28px !important;
+  font-size: 10px !important;
   text-align: center !important;
+  padding: 0 2px !important;
 }
 
 /* Regular cells */
@@ -1108,9 +1109,17 @@ body {
 }
 
 /* Column minimum width */
-.Spreadsheet__header,
+/* Column headers — resizable by user drag */
+.Spreadsheet__header:not(.Spreadsheet__header--row) {
+  min-width: 100px !important;
+  resize: horizontal !important;
+  overflow: hidden !important;
+  cursor: col-resize;
+}
+
+/* Data cells follow column width from headers */
 .Spreadsheet__cell {
-  min-width: 120px !important;
+  min-width: 100px !important;
 }
 
 

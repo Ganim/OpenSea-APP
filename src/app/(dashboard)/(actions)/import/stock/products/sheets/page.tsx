@@ -764,11 +764,25 @@ export default function ProductsSheetsPage() {
                 <Package className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Importar Produtos
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Importar Produtos
+                  </h1>
+                  {validationResult &&
+                    (validationResult.valid ? (
+                      <Badge variant="default" className="gap-1 bg-emerald-600 text-white hover:bg-emerald-600">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Dados válidos
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        {validationResult.errors.length} erros
+                      </Badge>
+                    ))}
+                </div>
                 <p className="text-sm text-slate-500 dark:text-white/60">
-                  Preencha a planilha ou cole dados do Excel (Ctrl+V)
+                  Preencha a planilha, faça o upload de uma ou cole dados de outra planilha
                 </p>
               </div>
             </div>
@@ -806,18 +820,6 @@ export default function ProductsSheetsPage() {
                 {spreadsheet.filledRowCount === 1 ? 'linha' : 'linhas'}{' '}
                 preenchidas
               </Badge>
-              {validationResult &&
-                (validationResult.valid ? (
-                  <Badge variant="default" className="gap-1 bg-emerald-600 text-white hover:bg-emerald-600">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Dados válidos
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive" className="gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    {validationResult.errors.length} erros
-                  </Badge>
-                ))}
             </div>
 
             {/* Right: actions */}
