@@ -1,336 +1,146 @@
 /**
  * OpenSea OS - Stock Permissions Constants
  *
- * Constantes de permissões para o módulo de estoque.
- * Usar com PermissionGate para controle de acesso em componentes.
- *
- * @example
- * ```tsx
- * import { STOCK_PERMISSIONS } from '@/app/(dashboard)/(modules)/stock/_shared/constants';
- *
- * // Uso com hook
- * const { hasPermission } = usePermissions();
- * if (hasPermission(STOCK_PERMISSIONS.PRODUCTS.CREATE)) {
- *   // Pode criar produtos
- * }
- *
- * // Uso com componente
- * <PermissionGate permission={STOCK_PERMISSIONS.ITEMS.DELETE}>
- *   <DeleteButton />
- * </PermissionGate>
- * ```
+ * Proxy de conveniência sobre os códigos centrais em permission-codes.ts.
+ * Mantém a API antiga (LIST, VIEW, CREATE, UPDATE, DELETE, MANAGE, EXPORT, IMPORT)
+ * mapeando para as novas ações (ACCESS, REGISTER, MODIFY, REMOVE, ADMIN, EXPORT, IMPORT).
  */
 
 import {
-  DATA_PERMISSIONS,
   STOCK_PERMISSIONS as STOCK_CODES,
+  FINANCE_PERMISSIONS as FINANCE_CODES,
 } from '@/config/rbac/permission-codes';
 
 export const STOCK_PERMISSIONS = {
-  /**
-   * Permissões de Produtos
-   */
   PRODUCTS: {
-    /** Listar produtos */
-    LIST: STOCK_CODES.PRODUCTS.LIST,
-    /** Visualizar detalhes de produto */
-    VIEW: STOCK_CODES.PRODUCTS.READ,
-    /** Criar novo produto */
-    CREATE: STOCK_CODES.PRODUCTS.CREATE,
-    /** Atualizar produto existente */
-    UPDATE: STOCK_CODES.PRODUCTS.UPDATE,
-    /** Excluir produto */
-    DELETE: STOCK_CODES.PRODUCTS.DELETE,
-    /** Exportar produtos */
-    EXPORT: DATA_PERMISSIONS.EXPORT.PRODUCTS,
-    /** Importar produtos */
-    IMPORT: DATA_PERMISSIONS.IMPORT.PRODUCTS,
-    /** Solicitar produto */
-    REQUEST: STOCK_CODES.PRODUCTS.REQUEST,
-    /** Aprovar produto */
-    APPROVE: STOCK_CODES.PRODUCTS.APPROVE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.PRODUCTS.MANAGE,
+    LIST: STOCK_CODES.PRODUCTS.ACCESS,
+    VIEW: STOCK_CODES.PRODUCTS.ACCESS,
+    CREATE: STOCK_CODES.PRODUCTS.REGISTER,
+    UPDATE: STOCK_CODES.PRODUCTS.MODIFY,
+    DELETE: STOCK_CODES.PRODUCTS.REMOVE,
+    EXPORT: STOCK_CODES.PRODUCTS.EXPORT,
+    IMPORT: STOCK_CODES.PRODUCTS.IMPORT,
+    MANAGE: STOCK_CODES.PRODUCTS.ADMIN,
   },
 
-  /**
-   * Permissões de Variantes
-   */
   VARIANTS: {
-    /** Listar variantes */
-    LIST: STOCK_CODES.VARIANTS.LIST,
-    /** Visualizar detalhes de variante */
-    VIEW: STOCK_CODES.VARIANTS.READ,
-    /** Criar nova variante */
-    CREATE: STOCK_CODES.VARIANTS.CREATE,
-    /** Atualizar variante existente */
-    UPDATE: STOCK_CODES.VARIANTS.UPDATE,
-    /** Excluir variante */
-    DELETE: STOCK_CODES.VARIANTS.DELETE,
-    /** Exportar variantes */
-    EXPORT: DATA_PERMISSIONS.EXPORT.VARIANTS,
-    /** Importar variantes */
-    IMPORT: DATA_PERMISSIONS.IMPORT.VARIANTS,
-    /** Solicitar variante */
-    REQUEST: STOCK_CODES.VARIANTS.REQUEST,
-    /** Aprovar variante */
-    APPROVE: STOCK_CODES.VARIANTS.APPROVE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.VARIANTS.MANAGE,
+    LIST: STOCK_CODES.VARIANTS.ACCESS,
+    VIEW: STOCK_CODES.VARIANTS.ACCESS,
+    CREATE: STOCK_CODES.VARIANTS.REGISTER,
+    UPDATE: STOCK_CODES.VARIANTS.MODIFY,
+    DELETE: STOCK_CODES.VARIANTS.REMOVE,
+    EXPORT: STOCK_CODES.VARIANTS.EXPORT,
+    IMPORT: STOCK_CODES.VARIANTS.IMPORT,
+    MANAGE: STOCK_CODES.VARIANTS.ADMIN,
   },
 
-  /**
-   * Permissões de Itens
-   */
   ITEMS: {
-    /** Listar itens */
-    LIST: STOCK_CODES.ITEMS.LIST,
-    /** Visualizar detalhes de item */
-    VIEW: STOCK_CODES.ITEMS.READ,
-    /** Criar novo item */
-    CREATE: STOCK_CODES.ITEMS.CREATE,
-    /** Atualizar item existente */
-    UPDATE: STOCK_CODES.ITEMS.UPDATE,
-    /** Excluir item */
-    DELETE: STOCK_CODES.ITEMS.DELETE,
-    /** Registrar entrada */
-    ENTRY: STOCK_CODES.ITEMS.ENTRY,
-    /** Registrar saída */
-    EXIT: STOCK_CODES.ITEMS.EXIT,
-    /** Transferir item */
-    TRANSFER: STOCK_CODES.ITEMS.TRANSFER,
-    /** Solicitar item */
-    REQUEST: STOCK_CODES.ITEMS.REQUEST,
-    /** Aprovar item */
-    APPROVE: STOCK_CODES.ITEMS.APPROVE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.ITEMS.MANAGE,
+    LIST: STOCK_CODES.ITEMS.ACCESS,
+    VIEW: STOCK_CODES.ITEMS.ACCESS,
+    CREATE: STOCK_CODES.ITEMS.ACCESS,
+    UPDATE: STOCK_CODES.ITEMS.ACCESS,
+    DELETE: STOCK_CODES.ITEMS.ADMIN,
+    EXPORT: STOCK_CODES.ITEMS.EXPORT,
+    MANAGE: STOCK_CODES.ITEMS.ADMIN,
   },
 
-  /**
-   * Permissões de Movimentações
-   */
-  MOVEMENTS: {
-    /** Listar movimentações */
-    LIST: STOCK_CODES.MOVEMENTS.LIST,
-    /** Visualizar detalhes de movimentação */
-    VIEW: STOCK_CODES.MOVEMENTS.READ,
-    /** Criar movimentação */
-    CREATE: STOCK_CODES.MOVEMENTS.CREATE,
-    /** Aprovar movimentação */
-    APPROVE: STOCK_CODES.MOVEMENTS.APPROVE,
-    /** Exportar movimentações */
-    EXPORT: DATA_PERMISSIONS.EXPORT.MOVEMENTS,
-  },
-
-  /**
-   * Permissões de Localizações
-   */
-  LOCATIONS: {
-    /** Listar localizações */
-    LIST: STOCK_CODES.LOCATIONS.LIST,
-    /** Visualizar detalhes de localização */
-    VIEW: STOCK_CODES.LOCATIONS.READ,
-    /** Criar nova localização */
-    CREATE: STOCK_CODES.LOCATIONS.CREATE,
-    /** Atualizar localização existente */
-    UPDATE: STOCK_CODES.LOCATIONS.UPDATE,
-    /** Excluir localização */
-    DELETE: STOCK_CODES.LOCATIONS.DELETE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.LOCATIONS.MANAGE,
-  },
-
-  /**
-   * Permissões de Armazéns
-   */
-  WAREHOUSES: {
-    /** Listar armazéns */
-    LIST: STOCK_CODES.WAREHOUSES.LIST,
-    /** Visualizar detalhes de armazém */
-    VIEW: STOCK_CODES.WAREHOUSES.READ,
-    /** Criar novo armazém */
-    CREATE: STOCK_CODES.WAREHOUSES.CREATE,
-    /** Atualizar armazém existente */
-    UPDATE: STOCK_CODES.WAREHOUSES.UPDATE,
-    /** Excluir armazém */
-    DELETE: STOCK_CODES.WAREHOUSES.DELETE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.WAREHOUSES.MANAGE,
-  },
-
-  /**
-   * Permissões de Zonas
-   */
-  ZONES: {
-    /** Listar zonas */
-    LIST: STOCK_CODES.ZONES.LIST,
-    /** Visualizar detalhes de zona */
-    VIEW: STOCK_CODES.ZONES.READ,
-    /** Criar nova zona */
-    CREATE: STOCK_CODES.ZONES.CREATE,
-    /** Atualizar zona existente */
-    UPDATE: STOCK_CODES.ZONES.UPDATE,
-    /** Excluir zona */
-    DELETE: STOCK_CODES.ZONES.DELETE,
-    /** Configurar zona */
-    CONFIGURE: STOCK_CODES.ZONES.CONFIGURE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.ZONES.MANAGE,
-  },
-
-  /**
-   * Permissões de Bins
-   */
-  BINS: {
-    /** Listar bins */
-    LIST: STOCK_CODES.BINS.LIST,
-    /** Visualizar detalhes de bin */
-    VIEW: STOCK_CODES.BINS.READ,
-    /** Atualizar bin existente */
-    UPDATE: STOCK_CODES.BINS.UPDATE,
-    /** Pesquisar bins */
-    SEARCH: STOCK_CODES.BINS.SEARCH,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.BINS.MANAGE,
-  },
-
-  /**
-   * Permissões de Templates
-   */
   TEMPLATES: {
-    /** Listar templates */
-    LIST: STOCK_CODES.TEMPLATES.LIST,
-    /** Visualizar detalhes de template */
-    VIEW: STOCK_CODES.TEMPLATES.READ,
-    /** Criar novo template */
-    CREATE: STOCK_CODES.TEMPLATES.CREATE,
-    /** Atualizar template existente */
-    UPDATE: STOCK_CODES.TEMPLATES.UPDATE,
-    /** Excluir template */
-    DELETE: STOCK_CODES.TEMPLATES.DELETE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.TEMPLATES.MANAGE,
+    LIST: STOCK_CODES.TEMPLATES.ACCESS,
+    VIEW: STOCK_CODES.TEMPLATES.ACCESS,
+    CREATE: STOCK_CODES.TEMPLATES.REGISTER,
+    UPDATE: STOCK_CODES.TEMPLATES.MODIFY,
+    DELETE: STOCK_CODES.TEMPLATES.REMOVE,
+    MANAGE: STOCK_CODES.TEMPLATES.REMOVE,
   },
 
-  /**
-   * Permissões de Categorias
-   */
   CATEGORIES: {
-    /** Listar categorias */
-    LIST: STOCK_CODES.CATEGORIES.LIST,
-    /** Visualizar detalhes de categoria */
-    VIEW: STOCK_CODES.CATEGORIES.READ,
-    /** Criar nova categoria */
-    CREATE: STOCK_CODES.CATEGORIES.CREATE,
-    /** Atualizar categoria existente */
-    UPDATE: STOCK_CODES.CATEGORIES.UPDATE,
-    /** Excluir categoria */
-    DELETE: STOCK_CODES.CATEGORIES.DELETE,
-    /** Importar categorias */
-    IMPORT: DATA_PERMISSIONS.IMPORT.CATEGORIES,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.CATEGORIES.MANAGE,
+    LIST: STOCK_CODES.CATEGORIES.ACCESS,
+    VIEW: STOCK_CODES.CATEGORIES.ACCESS,
+    CREATE: STOCK_CODES.CATEGORIES.REGISTER,
+    UPDATE: STOCK_CODES.CATEGORIES.MODIFY,
+    DELETE: STOCK_CODES.CATEGORIES.REMOVE,
+    IMPORT: STOCK_CODES.CATEGORIES.IMPORT,
+    EXPORT: STOCK_CODES.CATEGORIES.EXPORT,
+    MANAGE: STOCK_CODES.CATEGORIES.REMOVE,
   },
 
-  /**
-   * Permissões de Fabricantes
-   */
   MANUFACTURERS: {
-    /** Listar fabricantes */
-    LIST: STOCK_CODES.MANUFACTURERS.LIST,
-    /** Visualizar detalhes de fabricante */
-    VIEW: STOCK_CODES.MANUFACTURERS.READ,
-    /** Criar novo fabricante */
-    CREATE: STOCK_CODES.MANUFACTURERS.CREATE,
-    /** Atualizar fabricante existente */
-    UPDATE: STOCK_CODES.MANUFACTURERS.UPDATE,
-    /** Excluir fabricante */
-    DELETE: STOCK_CODES.MANUFACTURERS.DELETE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.MANUFACTURERS.MANAGE,
+    LIST: STOCK_CODES.MANUFACTURERS.ACCESS,
+    VIEW: STOCK_CODES.MANUFACTURERS.ACCESS,
+    CREATE: STOCK_CODES.MANUFACTURERS.REGISTER,
+    UPDATE: STOCK_CODES.MANUFACTURERS.MODIFY,
+    DELETE: STOCK_CODES.MANUFACTURERS.REMOVE,
+    IMPORT: STOCK_CODES.MANUFACTURERS.IMPORT,
+    EXPORT: STOCK_CODES.MANUFACTURERS.EXPORT,
+    MANAGE: STOCK_CODES.MANUFACTURERS.REMOVE,
   },
 
-  /**
-   * Permissões de Fornecedores
-   */
   SUPPLIERS: {
-    /** Listar fornecedores */
-    LIST: STOCK_CODES.SUPPLIERS.LIST,
-    /** Visualizar detalhes de fornecedor */
-    VIEW: STOCK_CODES.SUPPLIERS.READ,
-    /** Criar novo fornecedor */
-    CREATE: STOCK_CODES.SUPPLIERS.CREATE,
-    /** Atualizar fornecedor existente */
-    UPDATE: STOCK_CODES.SUPPLIERS.UPDATE,
-    /** Excluir fornecedor */
-    DELETE: STOCK_CODES.SUPPLIERS.DELETE,
-    /** Exportar fornecedores */
-    EXPORT: DATA_PERMISSIONS.EXPORT.SUPPLIERS,
-    /** Importar fornecedores */
-    IMPORT: DATA_PERMISSIONS.IMPORT.SUPPLIERS,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.SUPPLIERS.MANAGE,
+    LIST: FINANCE_CODES.SUPPLIERS.ACCESS,
+    VIEW: FINANCE_CODES.SUPPLIERS.ACCESS,
+    CREATE: FINANCE_CODES.SUPPLIERS.REGISTER,
+    UPDATE: FINANCE_CODES.SUPPLIERS.MODIFY,
+    DELETE: FINANCE_CODES.SUPPLIERS.REMOVE,
+    EXPORT: FINANCE_CODES.SUPPLIERS.EXPORT,
+    IMPORT: FINANCE_CODES.SUPPLIERS.IMPORT,
+    MANAGE: FINANCE_CODES.SUPPLIERS.REMOVE,
   },
 
-  /**
-   * Permissões de Tags
-   */
-  TAGS: {
-    /** Listar tags */
-    LIST: STOCK_CODES.TAGS.LIST,
-    /** Visualizar detalhes de tag */
-    VIEW: STOCK_CODES.TAGS.READ,
-    /** Criar nova tag */
-    CREATE: STOCK_CODES.TAGS.CREATE,
-    /** Atualizar tag existente */
-    UPDATE: STOCK_CODES.TAGS.UPDATE,
-    /** Excluir tag */
-    DELETE: STOCK_CODES.TAGS.DELETE,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.TAGS.MANAGE,
+  LOCATIONS: {
+    LIST: STOCK_CODES.WAREHOUSES.ACCESS,
+    VIEW: STOCK_CODES.WAREHOUSES.ACCESS,
+    CREATE: STOCK_CODES.WAREHOUSES.REGISTER,
+    UPDATE: STOCK_CODES.WAREHOUSES.MODIFY,
+    DELETE: STOCK_CODES.WAREHOUSES.REMOVE,
+    MANAGE: STOCK_CODES.WAREHOUSES.ADMIN,
   },
 
-  /**
-   * Permissões de Pedidos de Compra
-   */
+  WAREHOUSES: {
+    LIST: STOCK_CODES.WAREHOUSES.ACCESS,
+    VIEW: STOCK_CODES.WAREHOUSES.ACCESS,
+    CREATE: STOCK_CODES.WAREHOUSES.REGISTER,
+    UPDATE: STOCK_CODES.WAREHOUSES.MODIFY,
+    DELETE: STOCK_CODES.WAREHOUSES.REMOVE,
+    MANAGE: STOCK_CODES.WAREHOUSES.ADMIN,
+  },
+
   PURCHASE_ORDERS: {
-    /** Listar pedidos de compra */
-    LIST: STOCK_CODES.PURCHASE_ORDERS.LIST,
-    /** Visualizar detalhes de pedido */
-    VIEW: STOCK_CODES.PURCHASE_ORDERS.READ,
-    /** Criar novo pedido */
-    CREATE: STOCK_CODES.PURCHASE_ORDERS.CREATE,
-    /** Atualizar pedido existente */
-    UPDATE: STOCK_CODES.PURCHASE_ORDERS.UPDATE,
-    /** Excluir pedido */
-    DELETE: STOCK_CODES.PURCHASE_ORDERS.DELETE,
-    /** Aprovar pedido */
-    APPROVE: STOCK_CODES.PURCHASE_ORDERS.APPROVE,
-    /** Cancelar pedido */
-    CANCEL: STOCK_CODES.PURCHASE_ORDERS.CANCEL,
-    /** Gerenciamento completo */
-    MANAGE: STOCK_CODES.PURCHASE_ORDERS.MANAGE,
+    LIST: STOCK_CODES.PURCHASE_ORDERS.ACCESS,
+    VIEW: STOCK_CODES.PURCHASE_ORDERS.ACCESS,
+    CREATE: STOCK_CODES.PURCHASE_ORDERS.REGISTER,
+    UPDATE: STOCK_CODES.PURCHASE_ORDERS.MODIFY,
+    DELETE: STOCK_CODES.PURCHASE_ORDERS.REMOVE,
+    EXPORT: STOCK_CODES.PURCHASE_ORDERS.EXPORT,
+    MANAGE: STOCK_CODES.PURCHASE_ORDERS.ADMIN,
   },
 
-  /**
-   * Permissões de Cuidados/Conservação
-   */
-  CARE: {
-    /** Listar instruções */
-    LIST: STOCK_CODES.CARE.LIST,
-    /** Visualizar instruções */
-    VIEW: STOCK_CODES.CARE.READ,
-    /** Definir instruções */
-    SET: STOCK_CODES.CARE.SET,
+  VOLUMES: {
+    LIST: STOCK_CODES.VOLUMES.ACCESS,
+    VIEW: STOCK_CODES.VOLUMES.ACCESS,
+    CREATE: STOCK_CODES.VOLUMES.REGISTER,
+    UPDATE: STOCK_CODES.VOLUMES.MODIFY,
+    DELETE: STOCK_CODES.VOLUMES.REMOVE,
+    EXPORT: STOCK_CODES.VOLUMES.EXPORT,
+    MANAGE: STOCK_CODES.VOLUMES.ADMIN,
   },
 
-  /**
-   * Permissões de Impressão
-   */
+  TAGS: {
+    LIST: STOCK_CODES.PRODUCTS.ACCESS,
+    VIEW: STOCK_CODES.PRODUCTS.ACCESS,
+    CREATE: STOCK_CODES.PRODUCTS.REGISTER,
+    UPDATE: STOCK_CODES.PRODUCTS.MODIFY,
+    DELETE: STOCK_CODES.PRODUCTS.REMOVE,
+    MANAGE: STOCK_CODES.PRODUCTS.ADMIN,
+  },
+
+  MOVEMENTS: {
+    LIST: STOCK_CODES.ITEMS.ACCESS,
+    VIEW: STOCK_CODES.ITEMS.ACCESS,
+    EXPORT: STOCK_CODES.ITEMS.EXPORT,
+  },
+
   PRINT: {
-    /** Imprimir códigos de barras */
-    BARCODES: DATA_PERMISSIONS.PRINT.BARCODES,
+    BARCODES: STOCK_CODES.ITEMS.PRINT,
   },
 } as const;
 
@@ -353,12 +163,6 @@ export type StockLocationsPermission =
 export type StockWarehousesPermission =
   (typeof STOCK_PERMISSIONS.WAREHOUSES)[keyof typeof STOCK_PERMISSIONS.WAREHOUSES];
 
-export type StockZonesPermission =
-  (typeof STOCK_PERMISSIONS.ZONES)[keyof typeof STOCK_PERMISSIONS.ZONES];
-
-export type StockBinsPermission =
-  (typeof STOCK_PERMISSIONS.BINS)[keyof typeof STOCK_PERMISSIONS.BINS];
-
 export type StockTemplatesPermission =
   (typeof STOCK_PERMISSIONS.TEMPLATES)[keyof typeof STOCK_PERMISSIONS.TEMPLATES];
 
@@ -377,9 +181,6 @@ export type StockTagsPermission =
 export type StockPurchaseOrdersPermission =
   (typeof STOCK_PERMISSIONS.PURCHASE_ORDERS)[keyof typeof STOCK_PERMISSIONS.PURCHASE_ORDERS];
 
-export type StockCarePermission =
-  (typeof STOCK_PERMISSIONS.CARE)[keyof typeof STOCK_PERMISSIONS.CARE];
-
 export type StockPermission =
   | StockProductsPermission
   | StockVariantsPermission
@@ -387,14 +188,11 @@ export type StockPermission =
   | StockMovementsPermission
   | StockLocationsPermission
   | StockWarehousesPermission
-  | StockZonesPermission
-  | StockBinsPermission
   | StockTemplatesPermission
   | StockCategoriesPermission
   | StockManufacturersPermission
   | StockSuppliersPermission
   | StockTagsPermission
-  | StockPurchaseOrdersPermission
-  | StockCarePermission;
+  | StockPurchaseOrdersPermission;
 
 export default STOCK_PERMISSIONS;

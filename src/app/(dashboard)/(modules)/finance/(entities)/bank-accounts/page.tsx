@@ -63,10 +63,10 @@ const bankAccountsConfig: EntityConfig<BankAccount> = {
     },
   },
   permissions: {
-    view: FINANCE_PERMISSIONS.BANK_ACCOUNTS.READ,
-    create: FINANCE_PERMISSIONS.BANK_ACCOUNTS.CREATE,
-    update: FINANCE_PERMISSIONS.BANK_ACCOUNTS.UPDATE,
-    delete: FINANCE_PERMISSIONS.BANK_ACCOUNTS.DELETE,
+    view: FINANCE_PERMISSIONS.BANK_ACCOUNTS.ACCESS,
+    create: FINANCE_PERMISSIONS.BANK_ACCOUNTS.REGISTER,
+    update: FINANCE_PERMISSIONS.BANK_ACCOUNTS.MODIFY,
+    delete: FINANCE_PERMISSIONS.BANK_ACCOUNTS.REMOVE,
   },
 };
 
@@ -111,10 +111,10 @@ export default function BankAccountsPage() {
   const { hasPermission } = usePermissions();
 
   // Permissions
-  const canView = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.READ);
-  const canCreate = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.CREATE);
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.DELETE);
+  const canView = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.ACCESS);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.REGISTER);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.REMOVE);
 
   // ============================================================================
   // DATA

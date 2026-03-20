@@ -1,4 +1,4 @@
-import { CORE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SYSTEM_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { LabelTemplate } from '@/core/print-queue/editor';
 import { Copy, Download, Eye, Printer, Plus, Tag, Trash2 } from 'lucide-react';
@@ -69,12 +69,12 @@ export const labelTemplatesConfig = defineEntityConfig<LabelTemplate>()({
   },
 
   permissions: {
-    view: CORE_PERMISSIONS.LABEL_TEMPLATES.READ,
-    create: CORE_PERMISSIONS.LABEL_TEMPLATES.CREATE,
-    update: CORE_PERMISSIONS.LABEL_TEMPLATES.UPDATE,
-    delete: CORE_PERMISSIONS.LABEL_TEMPLATES.DELETE,
-    export: CORE_PERMISSIONS.LABEL_TEMPLATES.READ,
-    import: CORE_PERMISSIONS.LABEL_TEMPLATES.CREATE,
+    view: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
+    create: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REGISTER,
+    update: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.MODIFY,
+    delete: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REMOVE,
+    export: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
+    import: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REGISTER,
   },
 
   features: {
@@ -106,7 +106,7 @@ export const labelTemplatesConfig = defineEntityConfig<LabelTemplate>()({
         label: 'Importar',
         icon: Download,
         variant: 'outline',
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.CREATE,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REGISTER,
         onClick: () => {},
       },
       {
@@ -114,7 +114,7 @@ export const labelTemplatesConfig = defineEntityConfig<LabelTemplate>()({
         label: 'Novo Template',
         icon: Plus,
         variant: 'default',
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.CREATE,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REGISTER,
         onClick: () => {},
       },
     ],
@@ -124,35 +124,35 @@ export const labelTemplatesConfig = defineEntityConfig<LabelTemplate>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.READ,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.DUPLICATE,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
       },
       {
         id: 'export',
         label: 'Exportar JSON',
         icon: Download,
         onClick: () => {},
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.READ,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
       },
       {
         id: 'testPrint',
         label: 'Imprimir Teste',
         icon: Printer,
         onClick: () => {},
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.READ,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: CORE_PERMISSIONS.LABEL_TEMPLATES.DELETE,
+        permission: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Template',
         confirmMessage:

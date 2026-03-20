@@ -3,7 +3,7 @@
  * Configuração de menu do módulo de administração
  */
 
-import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { MenuItem } from '@/types/menu';
 import { Settings } from 'lucide-react';
 
@@ -12,5 +12,5 @@ export const adminMenu: MenuItem = {
   label: 'Administração',
   icon: <Settings className="w-6 h-6" />,
   href: '/admin',
-  requiredPermission: UI_PERMISSIONS.MENU.RBAC,
+  requiredPermission: ADMIN_PERMISSIONS.USERS.ACCESS,
 };

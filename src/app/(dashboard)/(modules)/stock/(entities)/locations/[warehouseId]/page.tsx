@@ -75,11 +75,11 @@ export default function WarehouseDetailPage({ params }: PageProps) {
   const highlightItemId = searchParams.get('item');
   const { hasPermission } = usePermissions();
 
-  const canEditWarehouse = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.UPDATE);
-  const canCreateZone = hasPermission(STOCK_PERMISSIONS.ZONES.CREATE);
-  const canEditZone = hasPermission(STOCK_PERMISSIONS.ZONES.UPDATE);
-  const canDeleteZone = hasPermission(STOCK_PERMISSIONS.ZONES.DELETE);
-  const canConfigureZone = hasPermission(STOCK_PERMISSIONS.ZONES.CONFIGURE);
+  const canEditWarehouse = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.MODIFY);
+  const canCreateZone = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REGISTER);
+  const canEditZone = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.MODIFY);
+  const canDeleteZone = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REMOVE);
+  const canConfigureZone = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.ADMIN);
 
   // ============================================================================
   // DATA FETCHING

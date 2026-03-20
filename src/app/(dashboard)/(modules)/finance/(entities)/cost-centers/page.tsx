@@ -74,10 +74,10 @@ const costCentersConfig: EntityConfig<CostCenter> = {
     },
   },
   permissions: {
-    view: FINANCE_PERMISSIONS.COST_CENTERS.READ,
-    create: FINANCE_PERMISSIONS.COST_CENTERS.CREATE,
-    edit: FINANCE_PERMISSIONS.COST_CENTERS.UPDATE,
-    delete: FINANCE_PERMISSIONS.COST_CENTERS.DELETE,
+    view: FINANCE_PERMISSIONS.COST_CENTERS.ACCESS,
+    create: FINANCE_PERMISSIONS.COST_CENTERS.REGISTER,
+    edit: FINANCE_PERMISSIONS.COST_CENTERS.MODIFY,
+    delete: FINANCE_PERMISSIONS.COST_CENTERS.REMOVE,
   },
 };
 
@@ -118,10 +118,10 @@ export default function CostCentersPage() {
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
   // Permissions
-  const canView = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.READ);
-  const canCreate = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.CREATE);
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.DELETE);
+  const canView = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.ACCESS);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.REGISTER);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.COST_CENTERS.REMOVE);
 
   // ============================================================================
   // DATA

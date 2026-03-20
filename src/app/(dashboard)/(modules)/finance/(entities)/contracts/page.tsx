@@ -355,11 +355,11 @@ export default function ContractsPage() {
   const { hasPermission } = usePermissions();
 
   // Permissions
-  const canList = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.LIST);
-  const canCreate = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.CREATE);
-  const canView = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.READ);
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.DELETE);
+  const canList = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.ACCESS);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.REGISTER);
+  const canView = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.ACCESS);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.REMOVE);
 
   // State
   const [page, setPage] = useState(1);
@@ -456,7 +456,7 @@ export default function ContractsPage() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
-        permission: FINANCE_PERMISSIONS.CONTRACTS.CREATE,
+        permission: FINANCE_PERMISSIONS.CONTRACTS.REGISTER,
       },
     ],
     [handleCreate]

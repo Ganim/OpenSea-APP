@@ -3,7 +3,7 @@
  * Configuração completa da entidade de bonificações
  */
 
-import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { defineEntityConfig } from '@/core/types';
 import type { Bonus } from '@/types/hr';
 import { Eye, PlusCircle, Plus, Trash2 } from 'lucide-react';
@@ -141,7 +141,7 @@ export const bonusesConfig = defineEntityConfig<Bonus>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: HR_PERMISSIONS.BONUSES.READ,
+    view: HR_PERMISSIONS.BONUSES.LIST,
     create: HR_PERMISSIONS.BONUSES.CREATE,
     update: HR_PERMISSIONS.BONUSES.UPDATE,
     delete: HR_PERMISSIONS.BONUSES.DELETE,
@@ -190,7 +190,7 @@ export const bonusesConfig = defineEntityConfig<Bonus>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.BONUSES.READ,
+        permission: HR_PERMISSIONS.BONUSES.LIST,
       },
       {
         id: 'delete',

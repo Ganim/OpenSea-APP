@@ -285,12 +285,12 @@ export const variantsConfig = defineEntityConfig<Variant>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.VARIANTS.READ,
-    create: STOCK_PERMISSIONS.VARIANTS.CREATE,
-    update: STOCK_PERMISSIONS.VARIANTS.UPDATE,
-    delete: STOCK_PERMISSIONS.VARIANTS.DELETE,
-    export: STOCK_PERMISSIONS.VARIANTS.MANAGE,
-    import: STOCK_PERMISSIONS.VARIANTS.MANAGE,
+    view: STOCK_PERMISSIONS.VARIANTS.ACCESS,
+    create: STOCK_PERMISSIONS.VARIANTS.REGISTER,
+    update: STOCK_PERMISSIONS.VARIANTS.MODIFY,
+    delete: STOCK_PERMISSIONS.VARIANTS.REMOVE,
+    export: STOCK_PERMISSIONS.VARIANTS.ADMIN,
+    import: STOCK_PERMISSIONS.VARIANTS.ADMIN,
   },
 
   // ======================== FEATURES ========================
@@ -324,7 +324,7 @@ export const variantsConfig = defineEntityConfig<Variant>()({
         label: 'Nova Variante',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.VARIANTS.CREATE,
+        permission: STOCK_PERMISSIONS.VARIANTS.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -334,28 +334,28 @@ export const variantsConfig = defineEntityConfig<Variant>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VARIANTS.READ,
+        permission: STOCK_PERMISSIONS.VARIANTS.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VARIANTS.UPDATE,
+        permission: STOCK_PERMISSIONS.VARIANTS.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VARIANTS.CREATE,
+        permission: STOCK_PERMISSIONS.VARIANTS.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VARIANTS.DELETE,
+        permission: STOCK_PERMISSIONS.VARIANTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Variante',
         confirmMessage: 'Tem certeza que deseja excluir esta variante?',
@@ -368,7 +368,7 @@ export const variantsConfig = defineEntityConfig<Variant>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.VARIANTS.DELETE,
+        permission: STOCK_PERMISSIONS.VARIANTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Variantes',
         confirmMessage:

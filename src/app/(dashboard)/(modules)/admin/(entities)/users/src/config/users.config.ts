@@ -3,7 +3,7 @@
  * Definição completa da entidade Users
  */
 
-import { CORE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { User } from '@/types/auth';
 import { PiUserDuotone } from 'react-icons/pi';
@@ -73,12 +73,12 @@ export const usersConfig = defineEntityConfig<User>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: CORE_PERMISSIONS.USERS.READ,
-    create: CORE_PERMISSIONS.USERS.CREATE,
-    update: CORE_PERMISSIONS.USERS.UPDATE,
-    delete: CORE_PERMISSIONS.USERS.DELETE,
-    export: CORE_PERMISSIONS.USERS.MANAGE,
-    import: CORE_PERMISSIONS.USERS.MANAGE,
+    view: ADMIN_PERMISSIONS.USERS.ACCESS,
+    create: ADMIN_PERMISSIONS.USERS.REGISTER,
+    update: ADMIN_PERMISSIONS.USERS.MODIFY,
+    delete: ADMIN_PERMISSIONS.USERS.REMOVE,
+    export: ADMIN_PERMISSIONS.USERS.ADMIN,
+    import: ADMIN_PERMISSIONS.USERS.ADMIN,
   },
 
   // ======================== FEATURES ========================

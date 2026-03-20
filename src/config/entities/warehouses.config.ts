@@ -148,12 +148,12 @@ export const warehousesConfig = defineEntityConfig<Warehouse>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.LOCATIONS.READ,
-    create: STOCK_PERMISSIONS.LOCATIONS.CREATE,
-    update: STOCK_PERMISSIONS.LOCATIONS.UPDATE,
-    delete: STOCK_PERMISSIONS.LOCATIONS.DELETE,
-    export: STOCK_PERMISSIONS.LOCATIONS.MANAGE,
-    import: STOCK_PERMISSIONS.LOCATIONS.MANAGE,
+    view: STOCK_PERMISSIONS.WAREHOUSES.ACCESS,
+    create: STOCK_PERMISSIONS.WAREHOUSES.REGISTER,
+    update: STOCK_PERMISSIONS.WAREHOUSES.MODIFY,
+    delete: STOCK_PERMISSIONS.WAREHOUSES.REMOVE,
+    export: STOCK_PERMISSIONS.WAREHOUSES.ADMIN,
+    import: STOCK_PERMISSIONS.WAREHOUSES.ADMIN,
   },
 
   // ======================== FEATURES ========================
@@ -187,7 +187,7 @@ export const warehousesConfig = defineEntityConfig<Warehouse>()({
         label: 'Novo Armazém',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.LOCATIONS.CREATE,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.REGISTER,
         onClick: () => {},
       },
     ],
@@ -197,21 +197,21 @@ export const warehousesConfig = defineEntityConfig<Warehouse>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.LOCATIONS.READ,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.LOCATIONS.UPDATE,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.MODIFY,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.LOCATIONS.DELETE,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Armazém',
         confirmMessage: 'Tem certeza que deseja excluir este armazém?',
@@ -224,7 +224,7 @@ export const warehousesConfig = defineEntityConfig<Warehouse>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.LOCATIONS.DELETE,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Armazéns',
         confirmMessage:

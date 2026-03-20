@@ -3,7 +3,7 @@
  * Definição completa da entidade Audit Logs
  */
 
-import { AUDIT_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { AuditLog } from '../types';
 import { FileText } from 'lucide-react';
@@ -73,12 +73,12 @@ export const auditLogsConfig = defineEntityConfig<AuditLog>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: AUDIT_PERMISSIONS.LOGS.VIEW,
-    create: AUDIT_PERMISSIONS.LOGS.VIEW,
-    update: AUDIT_PERMISSIONS.LOGS.VIEW,
-    delete: AUDIT_PERMISSIONS.LOGS.VIEW,
-    export: AUDIT_PERMISSIONS.LOGS.SEARCH,
-    import: AUDIT_PERMISSIONS.LOGS.VIEW,
+    view: ADMIN_PERMISSIONS.AUDIT.ACCESS,
+    create: ADMIN_PERMISSIONS.AUDIT.ACCESS,
+    update: ADMIN_PERMISSIONS.AUDIT.ACCESS,
+    delete: ADMIN_PERMISSIONS.AUDIT.ACCESS,
+    export: ADMIN_PERMISSIONS.AUDIT.EXPORT,
+    import: ADMIN_PERMISSIONS.AUDIT.ACCESS,
   },
 
   // ======================== FEATURES ========================

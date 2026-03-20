@@ -1,4 +1,4 @@
-import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Company } from '@/types/hr';
 import { Building2, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -217,12 +217,12 @@ export const companiesConfig = defineEntityConfig<Company>()({
   },
 
   permissions: {
-    view: FINANCE_PERMISSIONS.COMPANIES.READ,
-    create: FINANCE_PERMISSIONS.COMPANIES.READ,
-    update: FINANCE_PERMISSIONS.COMPANIES.READ,
-    delete: FINANCE_PERMISSIONS.COMPANIES.READ,
-    export: FINANCE_PERMISSIONS.COMPANIES.READ,
-    import: FINANCE_PERMISSIONS.COMPANIES.READ,
+    view: ADMIN_PERMISSIONS.COMPANIES.ACCESS,
+    create: ADMIN_PERMISSIONS.COMPANIES.REGISTER,
+    update: ADMIN_PERMISSIONS.COMPANIES.MODIFY,
+    delete: ADMIN_PERMISSIONS.COMPANIES.REMOVE,
+    export: ADMIN_PERMISSIONS.COMPANIES.ACCESS,
+    import: ADMIN_PERMISSIONS.COMPANIES.ADMIN,
   },
 
   features: {
@@ -254,7 +254,7 @@ export const companiesConfig = defineEntityConfig<Company>()({
         label: 'Nova Empresa',
         icon: Plus,
         variant: 'default',
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.REGISTER,
         onClick: () => {},
       },
     ],
@@ -264,28 +264,28 @@ export const companiesConfig = defineEntityConfig<Company>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Empresa',
         confirmMessage: 'Tem certeza que deseja excluir esta empresa?',
@@ -298,7 +298,7 @@ export const companiesConfig = defineEntityConfig<Company>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: FINANCE_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Empresas',
         confirmMessage:

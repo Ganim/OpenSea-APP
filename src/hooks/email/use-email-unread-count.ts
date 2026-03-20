@@ -1,6 +1,6 @@
 'use client';
 
-import { EMAIL_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { TOOLS_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import { emailService } from '@/services/email';
@@ -15,8 +15,8 @@ import { useMemo } from 'react';
 export function useEmailUnreadCount(): number {
   const { currentTenant } = useTenant();
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   // Step 1: Fetch accounts (only when tenant is selected)
   const accountsQuery = useQuery({
@@ -62,8 +62,8 @@ export function useEmailUnreadCount(): number {
 export function useEmailAccountUnreadCounts(): Record<string, number> {
   const { currentTenant } = useTenant();
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   const accountsQuery = useQuery({
     queryKey: ['email', 'accounts'],

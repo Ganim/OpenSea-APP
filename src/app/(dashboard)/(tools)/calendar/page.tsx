@@ -22,7 +22,7 @@ import {
 } from '@/hooks/calendar';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/contexts/auth-context';
-import { CALENDAR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { TOOLS_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { apiConfig, authConfig } from '@/config/api';
 import { calendarEventsService } from '@/services/calendar';
 import type { CalendarEvent, EventType } from '@/types/calendar';
@@ -59,21 +59,21 @@ export default function CalendarPage() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const canCreate = hasPermission(CALENDAR_PERMISSIONS.EVENTS.CREATE);
-  const canEdit = hasPermission(CALENDAR_PERMISSIONS.EVENTS.UPDATE);
-  const canDelete = hasPermission(CALENDAR_PERMISSIONS.EVENTS.DELETE);
-  const canInvite = hasPermission(CALENDAR_PERMISSIONS.PARTICIPANTS.INVITE);
-  const canRespond = hasPermission(CALENDAR_PERMISSIONS.PARTICIPANTS.RESPOND);
+  const canCreate = hasPermission(TOOLS_PERMISSIONS.CALENDAR.REGISTER);
+  const canEdit = hasPermission(TOOLS_PERMISSIONS.CALENDAR.MODIFY);
+  const canDelete = hasPermission(TOOLS_PERMISSIONS.CALENDAR.REMOVE);
+  const canInvite = hasPermission(TOOLS_PERMISSIONS.CALENDAR.SHARE);
+  const canRespond = hasPermission(TOOLS_PERMISSIONS.CALENDAR.ACCESS);
   const canManageParticipants = hasPermission(
-    CALENDAR_PERMISSIONS.PARTICIPANTS.MANAGE
+    TOOLS_PERMISSIONS.CALENDAR.ADMIN
   );
   const canManageReminders = hasPermission(
-    CALENDAR_PERMISSIONS.REMINDERS.CREATE
+    TOOLS_PERMISSIONS.CALENDAR.REGISTER
   );
   const canShare =
-    hasPermission(CALENDAR_PERMISSIONS.EVENTS.SHARE_USERS) ||
-    hasPermission(CALENDAR_PERMISSIONS.EVENTS.SHARE_TEAMS);
-  const canExport = hasPermission(CALENDAR_PERMISSIONS.EVENTS.EXPORT);
+    hasPermission(TOOLS_PERMISSIONS.CALENDAR.SHARE) ||
+    hasPermission(TOOLS_PERMISSIONS.CALENDAR.SHARE);
+  const canExport = hasPermission(TOOLS_PERMISSIONS.CALENDAR.EXPORT);
 
   // Read URL query params
   const urlView = searchParams.get('view') as CalendarViewType | null;
@@ -299,7 +299,7 @@ export default function CalendarPage() {
   ];
 
   return (
-    <ProtectedRoute requiredPermission={CALENDAR_PERMISSIONS.EVENTS.LIST}>
+    <ProtectedRoute requiredPermission={TOOLS_PERMISSIONS.CALENDAR.ACCESS}>
       <div className="flex flex-col gap-3 h-[calc(100vh-10rem)]">
         {/* Action Bar */}
         <PageActionBar

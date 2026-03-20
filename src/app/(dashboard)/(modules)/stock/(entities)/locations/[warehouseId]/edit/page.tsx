@@ -75,7 +75,7 @@ export default function WarehouseEditPage({ params }: PageProps) {
   const { warehouseId } = use(params);
   const router = useRouter();
   const { hasPermission } = usePermissions();
-  const canDelete = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.DELETE);
+  const canDelete = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REMOVE);
 
   // Data fetching
   const { data: warehouse, isLoading, error } = useWarehouse(warehouseId);

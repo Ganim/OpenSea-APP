@@ -118,12 +118,12 @@ export const volumesConfig = defineEntityConfig<Volume>()({
 
   // ======================== PERMISSOES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.VOLUMES.READ,
-    create: STOCK_PERMISSIONS.VOLUMES.CREATE,
-    update: STOCK_PERMISSIONS.VOLUMES.UPDATE,
-    delete: STOCK_PERMISSIONS.VOLUMES.DELETE,
-    export: STOCK_PERMISSIONS.VOLUMES.MANAGE,
-    import: STOCK_PERMISSIONS.VOLUMES.MANAGE,
+    view: STOCK_PERMISSIONS.VOLUMES.ACCESS,
+    create: STOCK_PERMISSIONS.VOLUMES.REGISTER,
+    update: STOCK_PERMISSIONS.VOLUMES.MODIFY,
+    delete: STOCK_PERMISSIONS.VOLUMES.REMOVE,
+    export: STOCK_PERMISSIONS.VOLUMES.ADMIN,
+    import: STOCK_PERMISSIONS.VOLUMES.ADMIN,
   },
 
   // ======================== FEATURES ========================
@@ -157,7 +157,7 @@ export const volumesConfig = defineEntityConfig<Volume>()({
         label: 'Novo Volume',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.VOLUMES.CREATE,
+        permission: STOCK_PERMISSIONS.VOLUMES.REGISTER,
         onClick: () => {},
       },
     ],
@@ -167,21 +167,21 @@ export const volumesConfig = defineEntityConfig<Volume>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VOLUMES.READ,
+        permission: STOCK_PERMISSIONS.VOLUMES.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VOLUMES.UPDATE,
+        permission: STOCK_PERMISSIONS.VOLUMES.MODIFY,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.VOLUMES.DELETE,
+        permission: STOCK_PERMISSIONS.VOLUMES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Volume',
         confirmMessage: 'Tem certeza que deseja excluir este volume?',
@@ -194,7 +194,7 @@ export const volumesConfig = defineEntityConfig<Volume>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.VOLUMES.DELETE,
+        permission: STOCK_PERMISSIONS.VOLUMES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Volumes',
         confirmMessage:

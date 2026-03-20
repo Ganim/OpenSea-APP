@@ -135,12 +135,12 @@ export const positionsConfig = defineEntityConfig<Position>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: HR_PERMISSIONS.POSITIONS.READ,
-    create: HR_PERMISSIONS.POSITIONS.CREATE,
-    update: HR_PERMISSIONS.POSITIONS.UPDATE,
-    delete: HR_PERMISSIONS.POSITIONS.DELETE,
-    export: HR_PERMISSIONS.POSITIONS.MANAGE,
-    import: HR_PERMISSIONS.POSITIONS.MANAGE,
+    view: HR_PERMISSIONS.POSITIONS.ACCESS,
+    create: HR_PERMISSIONS.POSITIONS.REGISTER,
+    update: HR_PERMISSIONS.POSITIONS.MODIFY,
+    delete: HR_PERMISSIONS.POSITIONS.REMOVE,
+    export: HR_PERMISSIONS.POSITIONS.REMOVE,
+    import: HR_PERMISSIONS.POSITIONS.REMOVE,
   },
 
   // ======================== FEATURES ========================
@@ -174,7 +174,7 @@ export const positionsConfig = defineEntityConfig<Position>()({
         label: 'Novo Cargo',
         icon: Plus,
         variant: 'default',
-        permission: HR_PERMISSIONS.POSITIONS.CREATE,
+        permission: HR_PERMISSIONS.POSITIONS.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -184,28 +184,28 @@ export const positionsConfig = defineEntityConfig<Position>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.POSITIONS.READ,
+        permission: HR_PERMISSIONS.POSITIONS.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: HR_PERMISSIONS.POSITIONS.UPDATE,
+        permission: HR_PERMISSIONS.POSITIONS.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: HR_PERMISSIONS.POSITIONS.CREATE,
+        permission: HR_PERMISSIONS.POSITIONS.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: HR_PERMISSIONS.POSITIONS.DELETE,
+        permission: HR_PERMISSIONS.POSITIONS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Cargo',
         confirmMessage: 'Tem certeza que deseja excluir este cargo?',
@@ -218,7 +218,7 @@ export const positionsConfig = defineEntityConfig<Position>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: HR_PERMISSIONS.POSITIONS.DELETE,
+        permission: HR_PERMISSIONS.POSITIONS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Cargos',
         confirmMessage:

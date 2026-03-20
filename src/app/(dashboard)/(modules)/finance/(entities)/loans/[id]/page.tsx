@@ -225,7 +225,7 @@ export default function LoanDetailPage({
   const { data, isLoading } = useLoan(id);
   const deleteLoan = useDeleteLoan();
 
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.LOANS.DELETE);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.LOANS.REMOVE);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [paymentInstallment, setPaymentInstallment] =

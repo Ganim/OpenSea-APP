@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { EMAIL_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { TOOLS_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { usePermissions } from '@/hooks/use-permissions';
 import { emailService } from '@/services/email';
 import type {
@@ -96,7 +96,7 @@ function updateMessageReadStateInCache(
 
 export function useEmailAccounts() {
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
 
   return useQuery({
     queryKey: ['email', 'accounts'],
@@ -218,7 +218,7 @@ export function useEmailAccountsHealth(accountIds: string[]) {
 
 export function useEmailFolders(accountId: string | null) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   return useQuery({
     queryKey: ['email', 'folders', accountId],
@@ -237,7 +237,7 @@ export function useEmailMessages(params: {
   search: string;
 }) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   return useInfiniteQuery({
     queryKey: [
@@ -280,7 +280,7 @@ export function useCentralInboxMessages(params: {
   enabled: boolean;
 }) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   const query = useQuery({
     queryKey: [
@@ -318,7 +318,7 @@ export function useCentralInboxMessages(params: {
  */
 export function useAllAccountFolders(accountIds: string[]) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(EMAIL_PERMISSIONS.MESSAGES.LIST);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
 
   return useQueries({
     queries: accountIds.map(accountId => ({

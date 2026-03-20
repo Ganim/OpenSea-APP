@@ -131,12 +131,12 @@ export const payrollConfig = defineEntityConfig<Payroll>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: HR_PERMISSIONS.PAYROLL.READ,
-    create: HR_PERMISSIONS.PAYROLL.CREATE,
-    update: HR_PERMISSIONS.PAYROLL.UPDATE,
-    delete: HR_PERMISSIONS.PAYROLL.DELETE,
-    export: HR_PERMISSIONS.PAYROLL.MANAGE,
-    import: HR_PERMISSIONS.PAYROLL.MANAGE,
+    view: HR_PERMISSIONS.PAYROLL.ACCESS,
+    create: HR_PERMISSIONS.PAYROLL.REGISTER,
+    update: HR_PERMISSIONS.PAYROLL.REGISTER,
+    delete: HR_PERMISSIONS.PAYROLL.ADMIN,
+    export: HR_PERMISSIONS.PAYROLL.ADMIN,
+    import: HR_PERMISSIONS.PAYROLL.ADMIN,
   },
 
   // ======================== FEATURES ========================
@@ -170,7 +170,7 @@ export const payrollConfig = defineEntityConfig<Payroll>()({
         label: 'Nova Folha',
         icon: Plus,
         variant: 'default',
-        permission: HR_PERMISSIONS.PAYROLL.CREATE,
+        permission: HR_PERMISSIONS.PAYROLL.REGISTER,
         onClick: () => {},
       },
     ],
@@ -180,7 +180,7 @@ export const payrollConfig = defineEntityConfig<Payroll>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.PAYROLL.READ,
+        permission: HR_PERMISSIONS.PAYROLL.ACCESS,
       },
     ],
     batch: [],

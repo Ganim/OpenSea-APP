@@ -165,9 +165,9 @@ export default function FinanceCategoriesPage() {
   const createMutation = useCreateFinanceCategory();
   const deleteMutation = useDeleteFinanceCategory();
 
-  const canCreate = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.CREATE);
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.DELETE);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.REGISTER);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.REMOVE);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createType, setCreateType] = useState<FinanceCategoryType>('EXPENSE');

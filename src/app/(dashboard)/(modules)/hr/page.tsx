@@ -8,7 +8,7 @@
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
-import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import {

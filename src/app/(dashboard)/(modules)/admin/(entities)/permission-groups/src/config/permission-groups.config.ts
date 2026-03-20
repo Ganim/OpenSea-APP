@@ -3,7 +3,7 @@
  * Definição completa da entidade Permission Groups
  */
 
-import { RBAC_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { PermissionGroup } from '@/types/rbac';
 import { Users } from 'lucide-react';
@@ -73,10 +73,10 @@ export const permissionGroupsConfig = defineEntityConfig<PermissionGroup>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: RBAC_PERMISSIONS.GROUPS.READ,
-    create: RBAC_PERMISSIONS.GROUPS.CREATE,
-    update: RBAC_PERMISSIONS.GROUPS.UPDATE,
-    delete: RBAC_PERMISSIONS.GROUPS.DELETE,
+    view: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
+    create: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REGISTER,
+    update: ADMIN_PERMISSIONS.PERMISSION_GROUPS.MODIFY,
+    delete: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REMOVE,
   },
 
   // ======================== FEATURES ========================

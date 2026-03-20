@@ -132,12 +132,12 @@ export const templatesConfig = defineEntityConfig<Template>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.TEMPLATES.READ,
-    create: STOCK_PERMISSIONS.TEMPLATES.CREATE,
-    update: STOCK_PERMISSIONS.TEMPLATES.UPDATE,
-    delete: STOCK_PERMISSIONS.TEMPLATES.DELETE,
-    export: STOCK_PERMISSIONS.TEMPLATES.MANAGE,
-    import: STOCK_PERMISSIONS.TEMPLATES.MANAGE,
+    view: STOCK_PERMISSIONS.TEMPLATES.ACCESS,
+    create: STOCK_PERMISSIONS.TEMPLATES.REGISTER,
+    update: STOCK_PERMISSIONS.TEMPLATES.MODIFY,
+    delete: STOCK_PERMISSIONS.TEMPLATES.REMOVE,
+    export: STOCK_PERMISSIONS.TEMPLATES.REMOVE,
+    import: STOCK_PERMISSIONS.TEMPLATES.REMOVE,
   },
 
   // ======================== FEATURES ========================
@@ -171,7 +171,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
         label: 'Novo Template',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.TEMPLATES.CREATE,
+        permission: STOCK_PERMISSIONS.TEMPLATES.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -181,28 +181,28 @@ export const templatesConfig = defineEntityConfig<Template>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.TEMPLATES.READ,
+        permission: STOCK_PERMISSIONS.TEMPLATES.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.TEMPLATES.UPDATE,
+        permission: STOCK_PERMISSIONS.TEMPLATES.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.TEMPLATES.CREATE,
+        permission: STOCK_PERMISSIONS.TEMPLATES.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.TEMPLATES.DELETE,
+        permission: STOCK_PERMISSIONS.TEMPLATES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Template',
         confirmMessage: 'Tem certeza que deseja excluir este template?',
@@ -215,7 +215,7 @@ export const templatesConfig = defineEntityConfig<Template>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.TEMPLATES.DELETE,
+        permission: STOCK_PERMISSIONS.TEMPLATES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Templates',
         confirmMessage:

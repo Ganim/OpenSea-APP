@@ -38,8 +38,8 @@ export default function FinanceCategoryDetailPage({
   const deleteMutation = useDeleteFinanceCategory();
   const category = data?.category;
 
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.DELETE);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.CATEGORIES.REMOVE);
 
   const [isPinOpen, setIsPinOpen] = useState(false);
 

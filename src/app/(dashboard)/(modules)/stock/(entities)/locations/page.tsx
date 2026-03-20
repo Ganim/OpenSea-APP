@@ -153,9 +153,9 @@ function LocationsDashboardContent() {
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const canEdit = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.UPDATE);
-  const canDelete = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.DELETE);
-  const canCreate = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.CREATE);
+  const canEdit = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.MODIFY);
+  const canDelete = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REMOVE);
+  const canCreate = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REGISTER);
 
   const renderGridCard = (item: Warehouse, isSelected: boolean) => {
     const stats = item.stats;

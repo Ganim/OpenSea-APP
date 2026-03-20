@@ -3,7 +3,7 @@
  * Configuração completa da entidade de horas extras
  */
 
-import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { defineEntityConfig } from '@/core/types';
 import type { Overtime } from '@/types/hr';
 import { Coffee, Eye, Plus } from 'lucide-react';
@@ -150,7 +150,7 @@ export const overtimeConfig = defineEntityConfig<Overtime>()({
 
   // ======================== PERMISSOES ========================
   permissions: {
-    view: HR_PERMISSIONS.OVERTIME.READ,
+    view: HR_PERMISSIONS.OVERTIME.LIST,
     create: HR_PERMISSIONS.OVERTIME.CREATE,
     update: HR_PERMISSIONS.OVERTIME.UPDATE,
     delete: HR_PERMISSIONS.OVERTIME.DELETE,
@@ -199,7 +199,7 @@ export const overtimeConfig = defineEntityConfig<Overtime>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.OVERTIME.READ,
+        permission: HR_PERMISSIONS.OVERTIME.LIST,
       },
     ],
     batch: [],

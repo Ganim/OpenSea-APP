@@ -171,12 +171,12 @@ export const categoriesConfig = defineEntityConfig<Category>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.CATEGORIES.READ,
-    create: STOCK_PERMISSIONS.CATEGORIES.CREATE,
-    update: STOCK_PERMISSIONS.CATEGORIES.UPDATE,
-    delete: STOCK_PERMISSIONS.CATEGORIES.DELETE,
-    export: STOCK_PERMISSIONS.CATEGORIES.MANAGE,
-    import: STOCK_PERMISSIONS.CATEGORIES.MANAGE,
+    view: STOCK_PERMISSIONS.CATEGORIES.ACCESS,
+    create: STOCK_PERMISSIONS.CATEGORIES.REGISTER,
+    update: STOCK_PERMISSIONS.CATEGORIES.MODIFY,
+    delete: STOCK_PERMISSIONS.CATEGORIES.REMOVE,
+    export: STOCK_PERMISSIONS.CATEGORIES.REMOVE,
+    import: STOCK_PERMISSIONS.CATEGORIES.REMOVE,
   },
 
   // ======================== FEATURES ========================
@@ -210,7 +210,7 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         label: 'Nova Categoria',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.CATEGORIES.CREATE,
+        permission: STOCK_PERMISSIONS.CATEGORIES.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -220,28 +220,28 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.CATEGORIES.READ,
+        permission: STOCK_PERMISSIONS.CATEGORIES.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.CATEGORIES.UPDATE,
+        permission: STOCK_PERMISSIONS.CATEGORIES.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.CATEGORIES.CREATE,
+        permission: STOCK_PERMISSIONS.CATEGORIES.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.CATEGORIES.DELETE,
+        permission: STOCK_PERMISSIONS.CATEGORIES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Categoria',
         confirmMessage: 'Tem certeza que deseja excluir esta categoria?',
@@ -254,7 +254,7 @@ export const categoriesConfig = defineEntityConfig<Category>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.CATEGORIES.DELETE,
+        permission: STOCK_PERMISSIONS.CATEGORIES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Categorias',
         confirmMessage:

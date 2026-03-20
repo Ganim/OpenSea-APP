@@ -8,10 +8,7 @@
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
-import {
-  DATA_PERMISSIONS,
-  STOCK_PERMISSIONS,
-} from '@/config/rbac/permission-codes';
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
@@ -64,7 +61,7 @@ const sections: {
         href: '/stock/templates',
         gradient: 'from-cyan-500 to-cyan-600',
         hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
-        permission: STOCK_PERMISSIONS.TEMPLATES.LIST,
+        permission: STOCK_PERMISSIONS.TEMPLATES.ACCESS,
         countKey: 'templates',
       },
       {
@@ -75,7 +72,7 @@ const sections: {
         href: '/stock/products',
         gradient: 'from-blue-500 to-blue-600',
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-        permission: STOCK_PERMISSIONS.PRODUCTS.LIST,
+        permission: STOCK_PERMISSIONS.PRODUCTS.ACCESS,
         countKey: 'products',
       },
 
@@ -87,7 +84,7 @@ const sections: {
         href: '/stock/manufacturers',
         gradient: 'from-orange-500 to-orange-600',
         hoverBg: 'hover:bg-orange-50 dark:hover:bg-orange-500/10',
-        permission: STOCK_PERMISSIONS.MANUFACTURERS.LIST,
+        permission: STOCK_PERMISSIONS.MANUFACTURERS.ACCESS,
         countKey: 'manufacturers',
       },
       {
@@ -98,7 +95,7 @@ const sections: {
         href: '/stock/locations',
         gradient: 'from-rose-500 to-rose-600',
         hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
-        permission: STOCK_PERMISSIONS.LOCATIONS.LIST,
+        permission: STOCK_PERMISSIONS.WAREHOUSES.ACCESS,
       },
       {
         id: 'categories',
@@ -108,7 +105,7 @@ const sections: {
         href: '/stock/product-categories',
         gradient: 'from-indigo-500 to-indigo-600',
         hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
-        permission: STOCK_PERMISSIONS.CATEGORIES.LIST,
+        permission: STOCK_PERMISSIONS.CATEGORIES.ACCESS,
         countKey: 'categories',
       },
     ],
@@ -129,7 +126,7 @@ const actionButtons: (CardItem & {
     variant: 'outline',
     gradient: 'from-amber-500 to-amber-600',
     hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-    permission: DATA_PERMISSIONS.IMPORT.PRODUCTS,
+    permission: STOCK_PERMISSIONS.PRODUCTS.IMPORT,
   },
   {
     id: 'purchase-orders',
@@ -141,7 +138,7 @@ const actionButtons: (CardItem & {
     variant: 'default',
     gradient: 'from-purple-500 to-purple-600',
     hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-    permission: STOCK_PERMISSIONS.PURCHASE_ORDERS.LIST,
+    permission: STOCK_PERMISSIONS.PURCHASE_ORDERS.ACCESS,
     countKey: 'purchaseOrders',
   },
 ] as const;
@@ -156,7 +153,7 @@ const heroBannerButtons: (CardItem & { label: string })[] = [
     href: '/stock/overview/list',
     gradient: 'from-emerald-500 to-emerald-600',
     hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
-    permission: STOCK_PERMISSIONS.ITEMS.LIST,
+    permission: STOCK_PERMISSIONS.ITEMS.ACCESS,
     countKey: 'items',
   },
   {
@@ -168,7 +165,7 @@ const heroBannerButtons: (CardItem & { label: string })[] = [
     href: '/stock/overview/movements',
     gradient: 'from-slate-500 to-slate-600',
     hoverBg: 'hover:bg-slate-50 dark:hover:bg-slate-500/10',
-    permission: STOCK_PERMISSIONS.MOVEMENTS.LIST,
+    permission: STOCK_PERMISSIONS.ITEMS.ACCESS,
   },
 ];
 

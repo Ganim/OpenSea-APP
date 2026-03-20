@@ -212,12 +212,12 @@ export const productsConfig = defineEntityConfig<Product>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: STOCK_PERMISSIONS.PRODUCTS.READ,
-    create: STOCK_PERMISSIONS.PRODUCTS.CREATE,
-    update: STOCK_PERMISSIONS.PRODUCTS.UPDATE,
-    delete: STOCK_PERMISSIONS.PRODUCTS.DELETE,
-    export: STOCK_PERMISSIONS.PRODUCTS.MANAGE, // Export uses manage permission
-    import: STOCK_PERMISSIONS.PRODUCTS.MANAGE, // Import uses manage permission
+    view: STOCK_PERMISSIONS.PRODUCTS.ACCESS,
+    create: STOCK_PERMISSIONS.PRODUCTS.REGISTER,
+    update: STOCK_PERMISSIONS.PRODUCTS.MODIFY,
+    delete: STOCK_PERMISSIONS.PRODUCTS.REMOVE,
+    export: STOCK_PERMISSIONS.PRODUCTS.ADMIN, // Export uses manage permission
+    import: STOCK_PERMISSIONS.PRODUCTS.ADMIN, // Import uses manage permission
   },
 
   // ======================== FEATURES ========================
@@ -251,7 +251,7 @@ export const productsConfig = defineEntityConfig<Product>()({
         label: 'Novo Produto',
         icon: Plus,
         variant: 'default',
-        permission: STOCK_PERMISSIONS.PRODUCTS.CREATE,
+        permission: STOCK_PERMISSIONS.PRODUCTS.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -261,28 +261,28 @@ export const productsConfig = defineEntityConfig<Product>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.PRODUCTS.READ,
+        permission: STOCK_PERMISSIONS.PRODUCTS.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.PRODUCTS.UPDATE,
+        permission: STOCK_PERMISSIONS.PRODUCTS.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.PRODUCTS.CREATE,
+        permission: STOCK_PERMISSIONS.PRODUCTS.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: STOCK_PERMISSIONS.PRODUCTS.DELETE,
+        permission: STOCK_PERMISSIONS.PRODUCTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Produto',
         confirmMessage: 'Tem certeza que deseja excluir este produto?',
@@ -295,7 +295,7 @@ export const productsConfig = defineEntityConfig<Product>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: STOCK_PERMISSIONS.PRODUCTS.DELETE,
+        permission: STOCK_PERMISSIONS.PRODUCTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Produtos',
         confirmMessage:

@@ -2,29 +2,14 @@
  * OpenSea OS - Admin Permissions Constants
  *
  * Constantes de permissões para o módulo admin.
- * Usar com PermissionGate para controle de acesso em componentes.
+ * Proxy de conveniência sobre os códigos centrais em permission-codes.ts.
  *
- * @example
- * ```tsx
- * import { ADMIN_PERMISSIONS } from '@/app/(dashboard)/(modules)/admin/_shared/constants';
- *
- * // Uso com hook
- * const { hasPermission } = usePermissions();
- * if (hasPermission(ADMIN_PERMISSIONS.USERS.CREATE)) {
- *   // Pode criar usuários
- * }
- *
- * // Uso com componente
- * <PermissionGate permission={ADMIN_PERMISSIONS.USERS.DELETE}>
- *   <DeleteButton />
- * </PermissionGate>
- * ```
+ * Todas as ações seguem o padrão novo:
+ *   ACCESS, REGISTER, MODIFY, REMOVE, ADMIN
  */
 
 import {
-  AUDIT_PERMISSIONS,
-  CORE_PERMISSIONS,
-  RBAC_PERMISSIONS,
+  ADMIN_PERMISSIONS as ADMIN_CODES,
 } from '@/config/rbac/permission-codes';
 
 export const ADMIN_PERMISSIONS = {
@@ -32,22 +17,21 @@ export const ADMIN_PERMISSIONS = {
    * Permissões de Usuários
    */
   USERS: {
-    /** Listar usuários */
-    LIST: CORE_PERMISSIONS.USERS.LIST,
-    /** Visualizar detalhes de usuário */
-    VIEW: CORE_PERMISSIONS.USERS.READ,
+    /** Listar / visualizar usuários */
+    LIST: ADMIN_CODES.USERS.ACCESS,
+    VIEW: ADMIN_CODES.USERS.ACCESS,
     /** Criar novo usuário */
-    CREATE: CORE_PERMISSIONS.USERS.CREATE,
+    CREATE: ADMIN_CODES.USERS.REGISTER,
     /** Atualizar usuário existente */
-    UPDATE: CORE_PERMISSIONS.USERS.UPDATE,
+    UPDATE: ADMIN_CODES.USERS.MODIFY,
     /** Excluir usuário */
-    DELETE: CORE_PERMISSIONS.USERS.DELETE,
-    /** Gerenciar grupos do usuário */
-    MANAGE_GROUPS: RBAC_PERMISSIONS.USER_GROUPS.MANAGE,
-    /** Forçar reset de senha */
-    FORCE_PASSWORD_RESET: CORE_PERMISSIONS.USERS.MANAGE,
+    DELETE: ADMIN_CODES.USERS.REMOVE,
     /** Gerenciamento completo */
-    MANAGE: CORE_PERMISSIONS.USERS.MANAGE,
+    MANAGE: ADMIN_CODES.USERS.ADMIN,
+    /** Gerenciar grupos do usuário */
+    MANAGE_GROUPS: ADMIN_CODES.PERMISSION_GROUPS.ADMIN,
+    /** Forçar reset de senha */
+    FORCE_PASSWORD_RESET: ADMIN_CODES.USERS.ADMIN,
   },
 
   /**
@@ -55,37 +39,37 @@ export const ADMIN_PERMISSIONS = {
    */
   PERMISSION_GROUPS: {
     /** Listar grupos */
-    LIST: RBAC_PERMISSIONS.GROUPS.LIST,
+    LIST: ADMIN_CODES.PERMISSION_GROUPS.ACCESS,
     /** Visualizar detalhes de grupo */
-    VIEW: RBAC_PERMISSIONS.GROUPS.READ,
+    VIEW: ADMIN_CODES.PERMISSION_GROUPS.ACCESS,
     /** Criar novo grupo */
-    CREATE: RBAC_PERMISSIONS.GROUPS.CREATE,
+    CREATE: ADMIN_CODES.PERMISSION_GROUPS.REGISTER,
     /** Atualizar grupo existente */
-    UPDATE: RBAC_PERMISSIONS.GROUPS.UPDATE,
+    UPDATE: ADMIN_CODES.PERMISSION_GROUPS.MODIFY,
     /** Excluir grupo */
-    DELETE: RBAC_PERMISSIONS.GROUPS.DELETE,
+    DELETE: ADMIN_CODES.PERMISSION_GROUPS.REMOVE,
     /** Gerenciar permissões do grupo */
-    MANAGE_PERMISSIONS: RBAC_PERMISSIONS.ASSOCIATIONS.MANAGE,
+    MANAGE_PERMISSIONS: ADMIN_CODES.PERMISSION_GROUPS.ADMIN,
     /** Atribuir usuários ao grupo */
-    ASSIGN_USERS: RBAC_PERMISSIONS.GROUPS.ASSIGN,
+    ASSIGN_USERS: ADMIN_CODES.PERMISSION_GROUPS.ADMIN,
     /** Gerenciamento completo */
-    MANAGE: RBAC_PERMISSIONS.GROUPS.MANAGE,
+    MANAGE: ADMIN_CODES.PERMISSION_GROUPS.ADMIN,
   },
 
   /**
-   * Permissões de Permissões
+   * Permissões de Permissões (individual permissions — maps to permission-groups)
    */
   PERMISSIONS: {
     /** Listar permissões */
-    LIST: RBAC_PERMISSIONS.PERMISSIONS.LIST,
+    LIST: ADMIN_CODES.PERMISSION_GROUPS.ACCESS,
     /** Visualizar detalhes de permissão */
-    VIEW: RBAC_PERMISSIONS.PERMISSIONS.READ,
+    VIEW: ADMIN_CODES.PERMISSION_GROUPS.ACCESS,
     /** Criar nova permissão */
-    CREATE: RBAC_PERMISSIONS.PERMISSIONS.CREATE,
+    CREATE: ADMIN_CODES.PERMISSION_GROUPS.REGISTER,
     /** Atualizar permissão existente */
-    UPDATE: RBAC_PERMISSIONS.PERMISSIONS.UPDATE,
+    UPDATE: ADMIN_CODES.PERMISSION_GROUPS.MODIFY,
     /** Excluir permissão */
-    DELETE: RBAC_PERMISSIONS.PERMISSIONS.DELETE,
+    DELETE: ADMIN_CODES.PERMISSION_GROUPS.REMOVE,
   },
 
   /**
@@ -93,17 +77,17 @@ export const ADMIN_PERMISSIONS = {
    */
   AUDIT_LOGS: {
     /** Listar logs */
-    LIST: AUDIT_PERMISSIONS.LOGS.VIEW,
+    LIST: ADMIN_CODES.AUDIT.ACCESS,
     /** Visualizar detalhes de log */
-    VIEW: AUDIT_PERMISSIONS.LOGS.VIEW,
+    VIEW: ADMIN_CODES.AUDIT.ACCESS,
     /** Pesquisar logs */
-    SEARCH: AUDIT_PERMISSIONS.LOGS.SEARCH,
+    SEARCH: ADMIN_CODES.AUDIT.ACCESS,
     /** Ver histórico */
-    HISTORY: AUDIT_PERMISSIONS.HISTORY.VIEW,
+    HISTORY: ADMIN_CODES.AUDIT.ACCESS,
     /** Preview de rollback */
-    ROLLBACK_PREVIEW: AUDIT_PERMISSIONS.ROLLBACK.PREVIEW,
+    ROLLBACK_PREVIEW: ADMIN_CODES.AUDIT.ADMIN,
     /** Executar rollback */
-    ROLLBACK_EXECUTE: AUDIT_PERMISSIONS.ROLLBACK.EXECUTE,
+    ROLLBACK_EXECUTE: ADMIN_CODES.AUDIT.ADMIN,
   },
 
   /**
@@ -111,37 +95,54 @@ export const ADMIN_PERMISSIONS = {
    */
   SESSIONS: {
     /** Listar sessões */
-    LIST: CORE_PERMISSIONS.SESSIONS.LIST,
+    LIST: ADMIN_CODES.SESSIONS.ACCESS,
     /** Visualizar sessão */
-    VIEW: CORE_PERMISSIONS.SESSIONS.READ,
+    VIEW: ADMIN_CODES.SESSIONS.ACCESS,
     /** Revogar sessão específica */
-    REVOKE: CORE_PERMISSIONS.SESSIONS.REVOKE,
+    REVOKE: ADMIN_CODES.SESSIONS.ADMIN,
     /** Revogar todas as sessões */
-    REVOKE_ALL: CORE_PERMISSIONS.SESSIONS.REVOKE_ALL,
+    REVOKE_ALL: ADMIN_CODES.SESSIONS.ADMIN,
   },
 
   /**
-   * Permissões de Equipes
+   * Permissões de Equipes — mapped to admin.users.admin
    */
   TEAMS: {
     /** Listar equipes */
-    LIST: CORE_PERMISSIONS.TEAMS.LIST,
+    LIST: ADMIN_CODES.USERS.ADMIN,
     /** Visualizar detalhes de equipe */
-    VIEW: CORE_PERMISSIONS.TEAMS.READ,
+    VIEW: ADMIN_CODES.USERS.ADMIN,
     /** Criar nova equipe */
-    CREATE: CORE_PERMISSIONS.TEAMS.CREATE,
+    CREATE: ADMIN_CODES.USERS.ADMIN,
     /** Atualizar equipe existente */
-    UPDATE: CORE_PERMISSIONS.TEAMS.UPDATE,
+    UPDATE: ADMIN_CODES.USERS.ADMIN,
     /** Excluir equipe */
-    DELETE: CORE_PERMISSIONS.TEAMS.DELETE,
+    DELETE: ADMIN_CODES.USERS.ADMIN,
     /** Gerenciamento completo */
-    MANAGE: CORE_PERMISSIONS.TEAMS.MANAGE,
+    MANAGE: ADMIN_CODES.USERS.ADMIN,
     /** Adicionar membros */
-    ADD_MEMBERS: CORE_PERMISSIONS.TEAMS.MEMBERS.ADD,
+    ADD_MEMBERS: ADMIN_CODES.USERS.ADMIN,
     /** Remover membros */
-    REMOVE_MEMBERS: CORE_PERMISSIONS.TEAMS.MEMBERS.REMOVE,
+    REMOVE_MEMBERS: ADMIN_CODES.USERS.ADMIN,
     /** Gerenciar membros */
-    MANAGE_MEMBERS: CORE_PERMISSIONS.TEAMS.MEMBERS.MANAGE,
+    MANAGE_MEMBERS: ADMIN_CODES.USERS.ADMIN,
+  },
+
+  /**
+   * Permissões de Empresas
+   */
+  COMPANIES: {
+    /** Listar / visualizar empresas */
+    LIST: ADMIN_CODES.COMPANIES.ACCESS,
+    VIEW: ADMIN_CODES.COMPANIES.ACCESS,
+    /** Criar nova empresa */
+    CREATE: ADMIN_CODES.COMPANIES.REGISTER,
+    /** Atualizar empresa existente */
+    UPDATE: ADMIN_CODES.COMPANIES.MODIFY,
+    /** Excluir empresa */
+    DELETE: ADMIN_CODES.COMPANIES.REMOVE,
+    /** Gerenciamento completo */
+    MANAGE: ADMIN_CODES.COMPANIES.ADMIN,
   },
 } as const;
 
@@ -164,12 +165,16 @@ export type AdminSessionsPermission =
 export type AdminTeamsPermission =
   (typeof ADMIN_PERMISSIONS.TEAMS)[keyof typeof ADMIN_PERMISSIONS.TEAMS];
 
+export type AdminCompaniesPermission =
+  (typeof ADMIN_PERMISSIONS.COMPANIES)[keyof typeof ADMIN_PERMISSIONS.COMPANIES];
+
 export type AdminPermission =
   | AdminUsersPermission
   | AdminPermissionGroupsPermission
   | AdminPermissionsPermission
   | AdminAuditLogsPermission
   | AdminSessionsPermission
-  | AdminTeamsPermission;
+  | AdminTeamsPermission
+  | AdminCompaniesPermission;
 
 export default ADMIN_PERMISSIONS;

@@ -3,7 +3,7 @@
  * Definição completa da entidade Teams
  */
 
-import { CORE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Team } from '@/types/core';
 import { PiUsersThreeDuotone } from 'react-icons/pi';
@@ -73,10 +73,10 @@ export const teamsConfig = defineEntityConfig<Team>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: CORE_PERMISSIONS.TEAMS.READ,
-    create: CORE_PERMISSIONS.TEAMS.CREATE,
-    update: CORE_PERMISSIONS.TEAMS.UPDATE,
-    delete: CORE_PERMISSIONS.TEAMS.DELETE,
+    view: ADMIN_PERMISSIONS.USERS.ADMIN,
+    create: ADMIN_PERMISSIONS.USERS.ADMIN,
+    update: ADMIN_PERMISSIONS.USERS.ADMIN,
+    delete: ADMIN_PERMISSIONS.USERS.ADMIN,
   },
 
   // ======================== FEATURES ========================

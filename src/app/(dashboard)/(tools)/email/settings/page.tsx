@@ -24,7 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { EMAIL_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { TOOLS_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { usePermissions } from '@/hooks/use-permissions';
 import { emailService } from '@/services/email';
 import type {
@@ -84,13 +84,13 @@ function getInitials(name: string | null, address: string): string {
 export default function EmailSettingsPage() {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.LIST);
-  const canCreate = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.CREATE);
-  const canUpdate = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.UPDATE);
-  const canDelete = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.DELETE);
-  const canRead = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.READ);
-  const canSync = hasPermission(EMAIL_PERMISSIONS.SYNC.EXECUTE);
-  const canShare = hasPermission(EMAIL_PERMISSIONS.ACCOUNTS.SHARE);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
+  const canCreate = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.REGISTER);
+  const canUpdate = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.MODIFY);
+  const canDelete = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.REMOVE);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
+  const canSync = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ADMIN);
+  const canShare = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.SHARE);
 
   const [form, setForm] = useState<CreateEmailAccountRequest>(initialForm);
   const [showForm, setShowForm] = useState(false);

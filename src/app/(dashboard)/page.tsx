@@ -8,7 +8,12 @@
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
+import {
+  STOCK_PERMISSIONS,
+  FINANCE_PERMISSIONS,
+  HR_PERMISSIONS,
+  ADMIN_PERMISSIONS,
+} from '@/config/rbac/permission-codes';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -34,7 +39,7 @@ const moduleCards = [
     href: '/stock',
     gradient: 'from-emerald-500 to-emerald-600',
     hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
-    permission: UI_PERMISSIONS.MENU.STOCK,
+    permission: STOCK_PERMISSIONS.PRODUCTS.ACCESS,
   },
   {
     id: 'hr',
@@ -45,7 +50,7 @@ const moduleCards = [
     href: '/hr',
     gradient: 'from-blue-500 to-purple-600',
     hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-    permission: UI_PERMISSIONS.MENU.HR,
+    permission: HR_PERMISSIONS.EMPLOYEES.ACCESS,
   },
   {
     id: 'finance',
@@ -55,7 +60,7 @@ const moduleCards = [
     href: '/finance',
     gradient: 'from-blue-500 to-emerald-600',
     hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
-    permission: UI_PERMISSIONS.MENU.FINANCE,
+    permission: FINANCE_PERMISSIONS.ENTRIES.ACCESS,
   },
   {
     id: 'admin',
@@ -65,7 +70,7 @@ const moduleCards = [
     href: '/admin',
     gradient: 'from-purple-500 to-purple-600',
     hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-    permission: UI_PERMISSIONS.MENU.RBAC,
+    permission: ADMIN_PERMISSIONS.USERS.ACCESS,
   },
 ];
 

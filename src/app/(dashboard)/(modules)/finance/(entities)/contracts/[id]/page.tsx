@@ -128,9 +128,9 @@ export default function ContractDetailPage({
   });
 
   // Permissions
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.DELETE);
-  const canManage = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.MANAGE);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.REMOVE);
+  const canManage = hasPermission(FINANCE_PERMISSIONS.CONTRACTS.MODIFY);
 
   // Delete modal
   const [pinModalOpen, setPinModalOpen] = useState(false);

@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/tooltip';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { UserAvatar } from '@/components/shared/user-avatar';
-import { CORE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/contexts/auth-context';
 import { InfoField } from '@/components/shared/info-field';
@@ -104,13 +104,13 @@ export default function TeamDetailPage() {
   const { hasPermission } = usePermissions();
   const { user: currentUser } = useAuth();
 
-  const canEdit = hasPermission(CORE_PERMISSIONS.TEAMS.UPDATE);
-  const canDelete = hasPermission(CORE_PERMISSIONS.TEAMS.DELETE);
-  const canManageMembers = hasPermission(CORE_PERMISSIONS.TEAMS.MEMBERS.ADD);
-  const canReadEmails = hasPermission(CORE_PERMISSIONS.TEAMS.EMAILS.READ);
-  const canLinkEmails = hasPermission(CORE_PERMISSIONS.TEAMS.EMAILS.LINK);
-  const canManageEmails = hasPermission(CORE_PERMISSIONS.TEAMS.EMAILS.MANAGE);
-  const canUnlinkEmails = hasPermission(CORE_PERMISSIONS.TEAMS.EMAILS.UNLINK);
+  const canEdit = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canDelete = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canManageMembers = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canReadEmails = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canLinkEmails = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canManageEmails = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
+  const canUnlinkEmails = hasPermission(ADMIN_PERMISSIONS.USERS.ADMIN);
 
   // State
   const [addMemberOpen, setAddMemberOpen] = useState(false);

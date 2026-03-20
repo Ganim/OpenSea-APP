@@ -76,12 +76,12 @@ export const timeControlConfig = defineEntityConfig<TimeEntry>()({
   },
 
   permissions: {
-    view: HR_PERMISSIONS.EMPLOYEES.LIST,
-    create: HR_PERMISSIONS.EMPLOYEES.LIST,
-    update: HR_PERMISSIONS.EMPLOYEES.LIST,
-    delete: HR_PERMISSIONS.EMPLOYEES.MANAGE,
-    export: HR_PERMISSIONS.EMPLOYEES.MANAGE,
-    import: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+    view: HR_PERMISSIONS.EMPLOYEES.ACCESS,
+    create: HR_PERMISSIONS.EMPLOYEES.ACCESS,
+    update: HR_PERMISSIONS.EMPLOYEES.ACCESS,
+    delete: HR_PERMISSIONS.EMPLOYEES.ADMIN,
+    export: HR_PERMISSIONS.EMPLOYEES.ADMIN,
+    import: HR_PERMISSIONS.EMPLOYEES.ADMIN,
   },
 
   features: {
@@ -113,7 +113,7 @@ export const timeControlConfig = defineEntityConfig<TimeEntry>()({
         label: 'Registrar Entrada',
         icon: LogIn,
         variant: 'default',
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+        permission: HR_PERMISSIONS.EMPLOYEES.ACCESS,
         onClick: () => {},
       },
       {
@@ -121,7 +121,7 @@ export const timeControlConfig = defineEntityConfig<TimeEntry>()({
         label: 'Registrar Saída',
         icon: LogOut,
         variant: 'outline',
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+        permission: HR_PERMISSIONS.EMPLOYEES.ACCESS,
         onClick: () => {},
       },
     ],
@@ -131,7 +131,7 @@ export const timeControlConfig = defineEntityConfig<TimeEntry>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+        permission: HR_PERMISSIONS.EMPLOYEES.ACCESS,
       },
     ],
     batch: [],

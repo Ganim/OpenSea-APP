@@ -3,7 +3,7 @@
  * Configuração completa da entidade de permissões
  */
 
-import { RBAC_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { Permission } from '@/types/rbac';
 import { Shield, Copy, Edit, Eye, Plus, Trash2 } from 'lucide-react';
@@ -218,12 +218,12 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: RBAC_PERMISSIONS.PERMISSIONS.READ,
-    create: RBAC_PERMISSIONS.PERMISSIONS.CREATE,
-    update: RBAC_PERMISSIONS.PERMISSIONS.UPDATE,
-    delete: RBAC_PERMISSIONS.PERMISSIONS.DELETE,
-    export: RBAC_PERMISSIONS.PERMISSIONS.LIST,
-    import: RBAC_PERMISSIONS.PERMISSIONS.LIST,
+    view: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
+    create: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REGISTER,
+    update: ADMIN_PERMISSIONS.PERMISSION_GROUPS.MODIFY,
+    delete: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REMOVE,
+    export: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
+    import: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
   },
 
   // ======================== FEATURES ========================
@@ -257,7 +257,7 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Nova Permissão',
         icon: Plus,
         variant: 'default',
-        permission: RBAC_PERMISSIONS.PERMISSIONS.CREATE,
+        permission: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REGISTER,
         onClick: () => {},
       },
     ],
@@ -267,14 +267,14 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: RBAC_PERMISSIONS.PERMISSIONS.READ,
+        permission: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: RBAC_PERMISSIONS.PERMISSIONS.UPDATE,
+        permission: ADMIN_PERMISSIONS.PERMISSION_GROUPS.MODIFY,
         show: (item: Permission) => !item.isSystem,
       },
       {
@@ -282,7 +282,7 @@ export const permissionsConfig = defineEntityConfig<Permission>()({
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: RBAC_PERMISSIONS.PERMISSIONS.DELETE,
+        permission: ADMIN_PERMISSIONS.PERMISSION_GROUPS.REMOVE,
         show: (item: Permission) => !item.isSystem,
         confirm: true,
         confirmTitle: 'Excluir Permissão',

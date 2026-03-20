@@ -381,11 +381,11 @@ export default function LoansPage() {
   // --------------------------------------------------------------------------
   // Permissions
   // --------------------------------------------------------------------------
-  const canList = hasPermission(FINANCE_PERMISSIONS.LOANS.LIST);
-  const canCreate = hasPermission(FINANCE_PERMISSIONS.LOANS.CREATE);
-  const canView = hasPermission(FINANCE_PERMISSIONS.LOANS.READ);
-  const canEdit = hasPermission(FINANCE_PERMISSIONS.LOANS.UPDATE);
-  const canDelete = hasPermission(FINANCE_PERMISSIONS.LOANS.DELETE);
+  const canList = hasPermission(FINANCE_PERMISSIONS.LOANS.ACCESS);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.LOANS.REGISTER);
+  const canView = hasPermission(FINANCE_PERMISSIONS.LOANS.ACCESS);
+  const canEdit = hasPermission(FINANCE_PERMISSIONS.LOANS.MODIFY);
+  const canDelete = hasPermission(FINANCE_PERMISSIONS.LOANS.REMOVE);
 
   // --------------------------------------------------------------------------
   // State
@@ -487,7 +487,7 @@ export default function LoansPage() {
         icon: Plus,
         onClick: handleCreate,
         variant: 'default',
-        permission: FINANCE_PERMISSIONS.LOANS.CREATE,
+        permission: FINANCE_PERMISSIONS.LOANS.REGISTER,
       },
     ],
     [handleCreate]

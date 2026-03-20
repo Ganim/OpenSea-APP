@@ -1,7 +1,7 @@
 'use client';
 
 import { getFolderDisplayName } from '@/components/email/email-utils';
-import { EMAIL_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { TOOLS_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
   useBulkDelete,
   useBulkMarkRead,
@@ -87,7 +87,7 @@ function syncUrlParams(params: {
 
 export function useEmailPage() {
   const { hasPermission } = usePermissions();
-  const canSend = hasPermission(EMAIL_PERMISSIONS.MESSAGES.SEND);
+  const canSend = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.REGISTER);
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();

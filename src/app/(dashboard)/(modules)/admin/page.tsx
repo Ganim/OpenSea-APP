@@ -8,12 +8,7 @@
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
-import {
-  ADMIN_PERMISSIONS,
-  AUDIT_PERMISSIONS,
-  CORE_PERMISSIONS,
-  RBAC_PERMISSIONS,
-} from '@/config/rbac/permission-codes';
+import { ADMIN_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { teamsService } from '@/services/core/teams.service';
 import { usePermissions } from '@/hooks/use-permissions';
 import { usersService } from '@/services/auth/users.service';
@@ -51,7 +46,7 @@ const sections: {
         href: '/admin/users',
         gradient: 'from-blue-500 to-blue-600',
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-        permission: CORE_PERMISSIONS.USERS.LIST,
+        permission: ADMIN_PERMISSIONS.USERS.ACCESS,
         countKey: 'users',
       },
       {
@@ -62,7 +57,7 @@ const sections: {
         href: '/admin/teams',
         gradient: 'from-cyan-500 to-blue-600',
         hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
-        permission: CORE_PERMISSIONS.TEAMS.LIST,
+        permission: ADMIN_PERMISSIONS.USERS.ADMIN,
         countKey: 'teams',
       },
       {
@@ -73,7 +68,7 @@ const sections: {
         href: '/admin/companies',
         gradient: 'from-emerald-500 to-teal-600',
         hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
-        permission: ADMIN_PERMISSIONS.COMPANIES.READ,
+        permission: ADMIN_PERMISSIONS.COMPANIES.ACCESS,
         countKey: 'companies',
       },
       {
@@ -84,7 +79,7 @@ const sections: {
         href: '/admin/permission-groups',
         gradient: 'from-purple-500 to-purple-600',
         hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-        permission: RBAC_PERMISSIONS.GROUPS.LIST,
+        permission: ADMIN_PERMISSIONS.PERMISSION_GROUPS.ACCESS,
         countKey: 'groups',
       },
     ],
@@ -101,7 +96,7 @@ const heroBannerButtons: (CardItem & { label: string })[] = [
     href: '/admin/overview/audit-logs',
     gradient: 'from-amber-500 to-amber-600',
     hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-    permission: AUDIT_PERMISSIONS.LOGS.VIEW,
+    permission: ADMIN_PERMISSIONS.AUDIT.ACCESS,
   },
 ];
 

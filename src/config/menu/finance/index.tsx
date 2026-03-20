@@ -3,7 +3,7 @@
  * Configuração de menu do módulo financeiro
  */
 
-import { UI_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { MenuItem } from '@/types/menu';
 import { DollarSign } from 'lucide-react';
 
@@ -12,5 +12,5 @@ export const financeMenu: MenuItem = {
   label: 'Financeiro',
   icon: <DollarSign className="w-6 h-6" />,
   href: '/finance',
-  requiredPermission: UI_PERMISSIONS.MENU.FINANCE,
+  requiredPermission: FINANCE_PERMISSIONS.ENTRIES.ACCESS,
 };

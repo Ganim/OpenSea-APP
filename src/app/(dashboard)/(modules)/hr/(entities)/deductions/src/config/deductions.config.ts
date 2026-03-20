@@ -3,7 +3,7 @@
  * Configuração completa da entidade de deduções
  */
 
-import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { defineEntityConfig } from '@/core/types';
 import type { Deduction } from '@/types/hr';
 import { Eye, MinusCircle, Plus, Trash2 } from 'lucide-react';
@@ -140,7 +140,7 @@ export const deductionsConfig = defineEntityConfig<Deduction>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: HR_PERMISSIONS.DEDUCTIONS.READ,
+    view: HR_PERMISSIONS.DEDUCTIONS.LIST,
     create: HR_PERMISSIONS.DEDUCTIONS.CREATE,
     update: HR_PERMISSIONS.DEDUCTIONS.UPDATE,
     delete: HR_PERMISSIONS.DEDUCTIONS.DELETE,
@@ -189,7 +189,7 @@ export const deductionsConfig = defineEntityConfig<Deduction>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.DEDUCTIONS.READ,
+        permission: HR_PERMISSIONS.DEDUCTIONS.LIST,
       },
       {
         id: 'delete',

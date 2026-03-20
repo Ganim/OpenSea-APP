@@ -136,12 +136,12 @@ export const departmentsConfig = defineEntityConfig<Department>()({
 
   // ======================== PERMISSÕES ========================
   permissions: {
-    view: HR_PERMISSIONS.DEPARTMENTS.READ,
-    create: HR_PERMISSIONS.DEPARTMENTS.CREATE,
-    update: HR_PERMISSIONS.DEPARTMENTS.UPDATE,
-    delete: HR_PERMISSIONS.DEPARTMENTS.DELETE,
-    export: HR_PERMISSIONS.DEPARTMENTS.MANAGE,
-    import: HR_PERMISSIONS.DEPARTMENTS.MANAGE,
+    view: HR_PERMISSIONS.DEPARTMENTS.ACCESS,
+    create: HR_PERMISSIONS.DEPARTMENTS.REGISTER,
+    update: HR_PERMISSIONS.DEPARTMENTS.MODIFY,
+    delete: HR_PERMISSIONS.DEPARTMENTS.REMOVE,
+    export: HR_PERMISSIONS.DEPARTMENTS.REMOVE,
+    import: HR_PERMISSIONS.DEPARTMENTS.REMOVE,
   },
 
   // ======================== FEATURES ========================
@@ -175,7 +175,7 @@ export const departmentsConfig = defineEntityConfig<Department>()({
         label: 'Novo Departamento',
         icon: Plus,
         variant: 'default',
-        permission: HR_PERMISSIONS.DEPARTMENTS.CREATE,
+        permission: HR_PERMISSIONS.DEPARTMENTS.REGISTER,
         onClick: () => {}, // Handled by page component
       },
     ],
@@ -185,28 +185,28 @@ export const departmentsConfig = defineEntityConfig<Department>()({
         label: 'Visualizar',
         icon: Eye,
         onClick: () => {},
-        permission: HR_PERMISSIONS.DEPARTMENTS.READ,
+        permission: HR_PERMISSIONS.DEPARTMENTS.ACCESS,
       },
       {
         id: 'edit',
         label: 'Editar',
         icon: Edit,
         onClick: () => {},
-        permission: HR_PERMISSIONS.DEPARTMENTS.UPDATE,
+        permission: HR_PERMISSIONS.DEPARTMENTS.MODIFY,
       },
       {
         id: 'duplicate',
         label: 'Duplicar',
         icon: Copy,
         onClick: () => {},
-        permission: HR_PERMISSIONS.DEPARTMENTS.CREATE,
+        permission: HR_PERMISSIONS.DEPARTMENTS.REGISTER,
       },
       {
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
         onClick: () => {},
-        permission: HR_PERMISSIONS.DEPARTMENTS.DELETE,
+        permission: HR_PERMISSIONS.DEPARTMENTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Departamento',
         confirmMessage: 'Tem certeza que deseja excluir este departamento?',
@@ -219,7 +219,7 @@ export const departmentsConfig = defineEntityConfig<Department>()({
         icon: Trash2,
         onClick: () => {},
         variant: 'destructive',
-        permission: HR_PERMISSIONS.DEPARTMENTS.DELETE,
+        permission: HR_PERMISSIONS.DEPARTMENTS.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Departamentos',
         confirmMessage:
