@@ -1,12 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -22,66 +16,22 @@ import * as rbacService from '@/services/rbac/rbac.service';
 import type {
   AllPermissionsResponse,
   PermissionGroup,
-  PermissionItemSimple,
   PermissionWithEffect,
 } from '@/types/rbac';
-import { CheckCheck, ChevronRight, Loader2, Shield } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-/** Map common actions to PT-BR labels; fallback capitalizes the raw action */
-const ACTION_LABELS: Record<string, string> = {
-  create: 'Criar',
-  read: 'Visualizar',
-  update: 'Editar',
-  delete: 'Excluir',
-  list: 'Listar',
-  manage: 'Gerenciar',
-  export: 'Exportar',
-  import: 'Importar',
-  view: 'Visualizar',
-  send: 'Enviar',
-  approve: 'Aprovar',
-  reject: 'Rejeitar',
-  cancel: 'Cancelar',
-  process: 'Processar',
-  generate: 'Gerar',
-  assign: 'Atribuir',
-  remove: 'Remover',
-  configure: 'Configurar',
-  scan: 'Escanear',
-  register: 'Registrar',
-  transfer: 'Transferir',
-  print: 'Imprimir',
-  upload: 'Upload',
-  download: 'Download',
-  search: 'Buscar',
-  restore: 'Restaurar',
-  close: 'Fechar',
-  reopen: 'Reabrir',
-  complete: 'Completar',
-  deliver: 'Entregar',
-  return: 'Devolver',
-  execute: 'Executar',
-  preview: 'Visualizar',
-  broadcast: 'Transmitir',
-  set: 'Definir',
-  pay: 'Pagar',
-  release: 'Liberar',
-  revoke: 'Revogar',
-  terminate: 'Encerrar',
-  comment: 'Comentar',
-  request: 'Solicitar',
-  schedule: 'Agendar',
-  adjust: 'Ajustar',
-  count: 'Contar',
-  bulk: 'Em massa',
-};
-
-function getActionLabel(action: string): string {
-  if (ACTION_LABELS[action]) return ACTION_LABELS[action];
-  // Fallback: capitalize and replace dashes with spaces
-  return action.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+import {
+  MATRIX_TABS,
+  STANDARD_ACTIONS,
+  mapActionToStandard,
+  type StandardAction,
+} from '../config/permission-matrix-config';
+import { ModuleTabList } from '../components/module-tab-list';
+import {
+  PermissionMatrixTable,
+  type ResourcePermissionMap,
+} from '../components/permission-matrix-table';
 
 interface ManagePermissionsModalProps {
   isOpen: boolean;
@@ -102,15 +52,7 @@ export function ManagePermissionsModal({
   const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [openModules, setOpenModules] = useState<Set<string>>(new Set());
-
-  // All permission codes (for counting)
-  const allCodes = useMemo(() => {
-    if (!allPermissions) return [];
-    return allPermissions.permissions.flatMap(m =>
-      Object.values(m.resources).flatMap(r => r.permissions.map(p => p.code))
-    );
-  }, [allPermissions]);
+  const [activeTab, setActiveTab] = useState(MATRIX_TABS[0].id);
 
   // Load data when modal opens
   const loadData = useCallback(async () => {
@@ -149,86 +91,207 @@ export function ManagePermissionsModal({
     }
   }, [isOpen, group, loadData]);
 
-  // Toggle all permissions in a module
-  const toggleAllInModule = (
-    modulePermissions: PermissionItemSimple[],
-    allModuleSelected: boolean
-  ) => {
-    setSelectedCodes(prev => {
-      const next = new Set(prev);
-      if (allModuleSelected) {
-        modulePermissions.forEach(p => next.delete(p.code));
-      } else {
-        modulePermissions.forEach(p => next.add(p.code));
+  // ---------------------------------------------------------------------------
+  // Build permission maps for matrix
+  // ---------------------------------------------------------------------------
+
+  const { permissionMaps, selectedCounts, totalCounts } = useMemo(() => {
+    if (!allPermissions)
+      return {
+        permissionMaps: {} as Record<string, ResourcePermissionMap[]>,
+        selectedCounts: {} as Record<string, number>,
+        totalCounts: {} as Record<string, number>,
+      };
+
+    // Build a map: "module.resource" → { action → Set<code> }
+    const codesByBackendResource = new Map<
+      string,
+      Map<string, Set<string>>
+    >();
+
+    for (const moduleGroup of allPermissions.permissions) {
+      const moduleLower = moduleGroup.module.toLowerCase();
+      for (const [resourceKey, resourceGroup] of Object.entries(
+        moduleGroup.resources
+      )) {
+        const backendKey = `${moduleLower}.${resourceKey}`;
+        if (!codesByBackendResource.has(backendKey)) {
+          codesByBackendResource.set(backendKey, new Map());
+        }
+        const actionMap = codesByBackendResource.get(backendKey)!;
+        for (const perm of resourceGroup.permissions) {
+          const standardAction = mapActionToStandard(perm.action);
+          if (!actionMap.has(standardAction)) {
+            actionMap.set(standardAction, new Set());
+          }
+          actionMap.get(standardAction)!.add(perm.code);
+        }
       }
+    }
+
+    // For each tab, build ResourcePermissionMap[] and counts
+    const allPermMaps: Record<string, ResourcePermissionMap[]> = {};
+    const selCounts: Record<string, number> = {};
+    const totCounts: Record<string, number> = {};
+
+    for (const tab of MATRIX_TABS) {
+      const maps: ResourcePermissionMap[] = [];
+      let tabTotal = 0;
+      let tabSelected = 0;
+
+      tab.resources.forEach((resource, idx) => {
+        const actionCodes = {} as Record<StandardAction, Set<string>>;
+        for (const action of STANDARD_ACTIONS) {
+          actionCodes[action] = new Set();
+        }
+
+        // Collect codes from all backend resources mapped to this visual resource
+        for (const br of resource.backendResources) {
+          const actionMap = codesByBackendResource.get(br);
+          if (!actionMap) continue;
+          for (const [action, codes] of actionMap) {
+            const stdAction = action as StandardAction;
+            for (const code of codes) {
+              actionCodes[stdAction].add(code);
+            }
+          }
+        }
+
+        // Count totals
+        let resourceTotal = 0;
+        let resourceSelected = 0;
+        for (const action of resource.availableActions) {
+          for (const code of actionCodes[action]) {
+            resourceTotal++;
+            if (selectedCodes.has(code)) resourceSelected++;
+          }
+        }
+        tabTotal += resourceTotal;
+        tabSelected += resourceSelected;
+
+        maps.push({ resourceIndex: idx, actionCodes });
+      });
+
+      allPermMaps[tab.id] = maps;
+      selCounts[tab.id] = tabSelected;
+      totCounts[tab.id] = tabTotal;
+    }
+
+    return {
+      permissionMaps: allPermMaps,
+      selectedCounts: selCounts,
+      totalCounts: totCounts,
+    };
+  }, [allPermissions, selectedCodes]);
+
+  // ---------------------------------------------------------------------------
+  // Derived values
+  // ---------------------------------------------------------------------------
+
+  const allCodesCount = useMemo(() => {
+    return Object.values(totalCounts).reduce((sum, n) => sum + n, 0);
+  }, [totalCounts]);
+
+  const activeTabConfig = useMemo(
+    () => MATRIX_TABS.find((t) => t.id === activeTab),
+    [activeTab]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Toggle handlers
+  // ---------------------------------------------------------------------------
+
+  const handleToggleCodes = useCallback(
+    (codes: string[], forceState?: boolean) => {
+      setSelectedCodes((prev) => {
+        const next = new Set(prev);
+        if (forceState === true) {
+          codes.forEach((c) => next.add(c));
+        } else if (forceState === false) {
+          codes.forEach((c) => next.delete(c));
+        } else {
+          // Toggle: if all selected, deselect; otherwise select all
+          const allSelected = codes.every((c) => next.has(c));
+          if (allSelected) {
+            codes.forEach((c) => next.delete(c));
+          } else {
+            codes.forEach((c) => next.add(c));
+          }
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const handleToggleCode = useCallback((code: string) => {
+    setSelectedCodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
-  };
+  }, []);
 
-  // Toggle a single permission
-  const togglePermission = (code: string) => {
-    setSelectedCodes(prev => {
-      const next = new Set(prev);
-      if (next.has(code)) {
-        next.delete(code);
-      } else {
-        next.add(code);
+  // ---------------------------------------------------------------------------
+  // Tab-level select all / clear all
+  // ---------------------------------------------------------------------------
+
+  const handleSelectAllInTab = useCallback(() => {
+    const maps = permissionMaps[activeTab];
+    if (!maps) return;
+    const tab = MATRIX_TABS.find((t) => t.id === activeTab);
+    if (!tab) return;
+    const codes: string[] = [];
+    maps.forEach((pm) => {
+      const resource = tab.resources[pm.resourceIndex];
+      for (const action of resource.availableActions) {
+        pm.actionCodes[action].forEach((c) => codes.push(c));
       }
-      return next;
     });
-  };
+    handleToggleCodes(codes, true);
+  }, [activeTab, permissionMaps, handleToggleCodes]);
 
-  // Toggle all permissions for a resource
-  const toggleResource = (permissions: PermissionItemSimple[]) => {
-    const codes = permissions.map(p => p.code);
-    const allResourceSelected = codes.every(c => selectedCodes.has(c));
-
-    setSelectedCodes(prev => {
-      const next = new Set(prev);
-      if (allResourceSelected) {
-        codes.forEach(c => next.delete(c));
-      } else {
-        codes.forEach(c => next.add(c));
+  const handleClearAllInTab = useCallback(() => {
+    const maps = permissionMaps[activeTab];
+    if (!maps) return;
+    const tab = MATRIX_TABS.find((t) => t.id === activeTab);
+    if (!tab) return;
+    const codes: string[] = [];
+    maps.forEach((pm) => {
+      const resource = tab.resources[pm.resourceIndex];
+      for (const action of resource.availableActions) {
+        pm.actionCodes[action].forEach((c) => codes.push(c));
       }
-      return next;
     });
-  };
+    handleToggleCodes(codes, false);
+  }, [activeTab, permissionMaps, handleToggleCodes]);
 
-  // Toggle module open/close
-  const toggleModule = (module: string) => {
-    setOpenModules(prev => {
-      const next = new Set(prev);
-      if (next.has(module)) {
-        next.delete(module);
-      } else {
-        next.add(module);
-      }
-      return next;
-    });
-  };
+  // ---------------------------------------------------------------------------
+  // Save changes (diff-based)
+  // ---------------------------------------------------------------------------
 
-  // Save changes
   const handleSave = async () => {
     if (!group) return;
     setIsSaving(true);
 
     try {
       // Compute diff
-      const toAdd = [...selectedCodes].filter(c => !currentCodes.has(c));
-      const toRemove = [...currentCodes].filter(c => !selectedCodes.has(c));
+      const toAdd = [...selectedCodes].filter((c) => !currentCodes.has(c));
+      const toRemove = [...currentCodes].filter((c) => !selectedCodes.has(c));
 
       // Bulk add
       if (toAdd.length > 0) {
         await rbacService.addPermissionsToGroupBulk(
           group.id,
-          toAdd.map(code => ({ permissionCode: code, effect: 'allow' }))
+          toAdd.map((code) => ({ permissionCode: code, effect: 'allow' }))
         );
       }
 
       // Remove one by one
       if (toRemove.length > 0) {
         await Promise.all(
-          toRemove.map(code =>
+          toRemove.map((code) =>
             rbacService.removePermissionFromGroup(group.id, code)
           )
         );
@@ -254,19 +317,21 @@ export function ManagePermissionsModal({
 
   const hasChanges =
     selectedCodes.size !== currentCodes.size ||
-    [...selectedCodes].some(c => !currentCodes.has(c));
+    [...selectedCodes].some((c) => !currentCodes.has(c));
 
   if (!group) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-6xl h-[85vh] flex flex-col p-0">
+        {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogTitle className="flex items-center gap-3">
             <div
               className={cn(
                 'flex items-center justify-center text-white shrink-0 p-2 rounded-lg',
-                !group.color && 'bg-linear-to-br from-purple-500 to-pink-600'
+                !group.color &&
+                  'bg-linear-to-br from-purple-500 to-pink-600'
               )}
               style={
                 group.color
@@ -282,155 +347,101 @@ export function ManagePermissionsModal({
           </DialogTitle>
           {!isLoading && (
             <DialogDescription className="tabular-nums">
-              {selectedCodes.size} de {allCodes.length} permissões selecionadas
+              {selectedCodes.size} de {allCodesCount} permissões selecionadas
             </DialogDescription>
           )}
         </DialogHeader>
 
+        {/* Body */}
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <div className="space-y-2">
-              {allPermissions?.permissions.map(moduleGroup => {
-                const isModuleOpen = openModules.has(moduleGroup.module);
-                const resourceEntries = Object.entries(moduleGroup.resources);
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left: Module tabs */}
+            <div className="py-4 pl-4">
+              <ModuleTabList
+                tabs={MATRIX_TABS}
+                activeTabId={activeTab}
+                onTabChange={setActiveTab}
+                selectedCounts={selectedCounts}
+                totalCounts={totalCounts}
+              />
+            </div>
 
-                // Count selected in this module
-                const allModulePermissions = resourceEntries.flatMap(
-                  ([, r]) => r.permissions
-                );
-                const selectedInModule = allModulePermissions.filter(p =>
-                  selectedCodes.has(p.code)
-                ).length;
-                const allModuleSelected =
-                  allModulePermissions.length > 0 &&
-                  allModulePermissions.every(p => selectedCodes.has(p.code));
-
-                return (
-                  <Collapsible
-                    key={moduleGroup.module}
-                    open={isModuleOpen}
-                    onOpenChange={() => toggleModule(moduleGroup.module)}
+            {/* Right: Matrix */}
+            <div className="flex-1 flex flex-col overflow-hidden py-4 pr-4">
+              {/* Right panel header */}
+              <div className="flex items-center justify-between px-3 pb-3 shrink-0">
+                <div>
+                  <h3 className="text-base font-semibold">
+                    {activeTabConfig?.label}
+                  </h3>
+                  <p className="text-sm text-muted-foreground tabular-nums">
+                    {selectedCounts[activeTab] ?? 0} de{' '}
+                    {totalCounts[activeTab] ?? 0} permissões ativas neste
+                    módulo
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSelectAllInTab}
                   >
-                    <div className="flex items-center rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                      <CollapsibleTrigger className="flex items-center gap-2 flex-1 px-4 py-3">
-                        <ChevronRight
-                          className={cn(
-                            'h-4 w-4 transition-transform shrink-0',
-                            isModuleOpen && 'rotate-90'
-                          )}
-                        />
-                        <span className="font-medium capitalize">
-                          {moduleGroup.module}
-                        </span>
-                      </CollapsibleTrigger>
-                      <div className="flex items-center gap-2 pr-2 shrink-0">
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {selectedInModule}/{allModulePermissions.length}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={e => {
-                            e.stopPropagation();
-                            toggleAllInModule(
-                              allModulePermissions,
-                              allModuleSelected
-                            );
-                          }}
-                        >
-                          <CheckCheck className="h-3.5 w-3.5 mr-1" />
-                          {allModuleSelected ? 'Desmarcar' : 'Marcar todos'}
-                        </Button>
-                      </div>
-                    </div>
+                    Selecionar tudo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearAllInTab}
+                  >
+                    Limpar tudo
+                  </Button>
+                </div>
+              </div>
 
-                    <CollapsibleContent>
-                      <div className="pl-6 pt-2 space-y-3">
-                        {resourceEntries.map(([resourceKey, resourceGroup]) => {
-                          const perms = resourceGroup.permissions;
-                          const allResourceSelected = perms.every(p =>
-                            selectedCodes.has(p.code)
-                          );
-                          const someResourceSelected =
-                            !allResourceSelected &&
-                            perms.some(p => selectedCodes.has(p.code));
-
-                          return (
-                            <div key={resourceKey} className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={
-                                    allResourceSelected
-                                      ? true
-                                      : someResourceSelected
-                                        ? 'indeterminate'
-                                        : false
-                                  }
-                                  onCheckedChange={() => toggleResource(perms)}
-                                  className="h-4 w-4"
-                                />
-                                <span className="text-sm font-medium capitalize">
-                                  {resourceKey}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {resourceGroup.description}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1 pl-6">
-                                {perms.map(perm => (
-                                  <label
-                                    key={perm.code}
-                                    className="flex items-center gap-2 py-1 cursor-pointer hover:bg-muted/30 rounded px-2 -mx-2"
-                                  >
-                                    <Checkbox
-                                      checked={selectedCodes.has(perm.code)}
-                                      onCheckedChange={() =>
-                                        togglePermission(perm.code)
-                                      }
-                                      className="h-3.5 w-3.5"
-                                    />
-                                    <span className="text-sm">
-                                      {getActionLabel(perm.action)}
-                                    </span>
-                                    {perm.isDeprecated && (
-                                      <span className="text-xs text-muted-foreground italic">
-                                        (deprecated)
-                                      </span>
-                                    )}
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                );
-              })}
+              {/* Table */}
+              <div className="flex-1 overflow-y-auto">
+                <PermissionMatrixTable
+                  resources={activeTabConfig?.resources ?? []}
+                  permissionMaps={permissionMaps[activeTab] ?? []}
+                  selectedCodes={selectedCodes}
+                  onToggleCode={handleToggleCode}
+                  onToggleCodes={handleToggleCodes}
+                />
+              </div>
             </div>
           </div>
         )}
 
-        <DialogFooter className="px-6 py-4 border-t shrink-0 gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              'Salvar'
-            )}
-          </Button>
+        {/* Footer */}
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <div className="flex items-center justify-between w-full">
+            <p className="text-xs text-muted-foreground">
+              Dica: Clique no ícone → para selecionar toda a linha, ou ↓
+              para toda a coluna
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={onClose} disabled={isSaving}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving || !hasChanges}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar Permissões'
+                )}
+              </Button>
+            </div>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
