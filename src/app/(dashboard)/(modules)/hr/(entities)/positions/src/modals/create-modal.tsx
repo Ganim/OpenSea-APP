@@ -3,29 +3,23 @@
 import { companiesApi } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
 import { departmentsApi } from '@/app/(dashboard)/(modules)/hr/(entities)/departments/src';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import type { Company, Department, Position } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Briefcase, Building2, X } from 'lucide-react';
+import {
+  ArrowRight,
+  BookUser,
+  Briefcase,
+  Building2,
+  Loader2,
+  Search,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface CreateModalProps {
@@ -35,21 +29,22 @@ interface CreateModalProps {
   onSubmit: (data: Partial<Position>) => Promise<void>;
 }
 
-type Step = 1 | 2;
-
 export function CreateModal({
   isOpen,
   onClose,
   isSubmitting,
   onSubmit,
 }: CreateModalProps) {
-  const [step, setStep] = useState<Step>(1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [departmentId, setDepartmentId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
 
-  // Buscar departamentos
-  const { data: departmentsData } = useQuery<Department[]>({
+  // Fetch departments
+  const { data: departmentsData, isLoading: isLoadingDepartments } = useQuery<
+    Department[]
+  >({
     queryKey: ['departments'],
     queryFn: async () => {
       const response = await departmentsApi.list();
@@ -58,7 +53,7 @@ export function CreateModal({
     enabled: isOpen,
   });
 
-  // Buscar empresas para fazer o merge
+  // Fetch companies for merge
   const { data: companiesData } = useQuery<Company[]>({
     queryKey: ['companies', 'list-for-departments'],
     queryFn: async () => {
@@ -71,48 +66,41 @@ export function CreateModal({
     enabled: isOpen,
   });
 
-  // Merge departamentos com empresas
+  // Merge departments with companies
   const departments = useMemo(() => {
     const depts = departmentsData || [];
     const companies = companiesData || [];
-
-    // Criar mapa de empresas por ID
     const companiesMap = new Map<string, Company>();
-    companies.forEach(company => {
-      companiesMap.set(company.id, company);
-    });
+    companies.forEach(company => companiesMap.set(company.id, company));
 
-    // Adicionar empresa ao departamento se não existir
-    return depts.map(dept => {
-      if (!dept.company && dept.companyId) {
-        const company = companiesMap.get(dept.companyId);
-        if (company) {
-          return { ...dept, company };
+    return depts
+      .filter(d => d.isActive)
+      .map(dept => {
+        if (!dept.company && dept.companyId) {
+          const company = companiesMap.get(dept.companyId);
+          if (company) return { ...dept, company };
         }
-      }
-      return dept;
-    });
+        return dept;
+      });
   }, [departmentsData, companiesData]);
 
-  // Função auxiliar para mostrar nome do departamento com empresa
-  const getDepartmentDisplayName = (dept: Department) => {
-    const companyName = dept.company?.tradeName || dept.company?.legalName;
-    if (companyName) {
-      return `${dept.name} - ${companyName}`;
-    }
-    return dept.name;
-  };
+  const filteredDepartments = departments.filter(dept => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const companyName =
+      dept.company?.tradeName || dept.company?.legalName || '';
+    return (
+      dept.name.toLowerCase().includes(query) ||
+      dept.code.toLowerCase().includes(query) ||
+      companyName.toLowerCase().includes(query)
+    );
+  });
 
-  const handleNext = () => {
-    if (step === 1 && departmentId) {
-      setStep(2);
-    }
-  };
+  const selectedDepartment = departments.find(d => d.id === departmentId);
 
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-    }
+  const handleSelectDepartment = (dept: Department) => {
+    setDepartmentId(dept.id);
+    setCurrentStep(2);
   };
 
   const handleSubmit = async () => {
@@ -127,207 +115,173 @@ export function CreateModal({
   };
 
   const handleClose = () => {
-    setStep(1);
+    setCurrentStep(1);
     setDepartmentId('');
+    setSearchQuery('');
     setName('');
     setCode('');
     onClose();
   };
 
-  const canProceedStep1 = departmentId !== '';
-  const canSubmit = name !== '' && code !== '';
-
-  return (
-    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-          <DialogTitle className="text-lg font-semibold">
-            <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
-                <Briefcase className="h-5 w-5" />
-              </div>
-              <div className="flex-col flex">
-                <span className="text-base">Novo Cargo</span>
-                <span className="text-xs text-slate-500/50 font-normal">
-                  Etapa {step} de 2
-                </span>
-              </div>
+  const steps: WizardStep[] = useMemo(
+    () => [
+      {
+        title: 'Selecione o Departamento',
+        description: 'Escolha o departamento ao qual este cargo pertence',
+        icon: <BookUser className="h-16 w-16 text-indigo-500/60" />,
+        isValid: false,
+        footer: (
+          <Button variant="outline" onClick={handleClose}>
+            Cancelar
+          </Button>
+        ),
+        content: (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar departamento por nome, código ou empresa..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          </DialogTitle>
-          <div className="flex items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClose}
-                  className="gap-2"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Fechar</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Etapa 1: Selecionar Departamento */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  Selecione o Departamento
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Escolha o departamento ao qual este cargo pertence
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="department">
-                  Departamento <span className="text-red-500">*</span>
-                </Label>
-                <Select value={departmentId} onValueChange={setDepartmentId}>
-                  <SelectTrigger id="department">
-                    <SelectValue placeholder="Selecione um departamento">
-                      {departmentId && (
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {getDepartmentDisplayName(
-                              departments.find(d => d.id === departmentId)!
-                            )}
+            <ScrollArea className="max-h-[300px]">
+              <div className="space-y-1">
+                {isLoadingDepartments ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredDepartments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchQuery
+                      ? 'Nenhum departamento encontrado'
+                      : 'Nenhum departamento cadastrado'}
+                  </div>
+                ) : (
+                  filteredDepartments.map(dept => (
+                    <div
+                      key={dept.id}
+                      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => handleSelectDepartment(dept)}
+                    >
+                      <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
+                        <BookUser className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate flex items-center gap-2">
+                          {dept.name}
+                          <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-500/10 dark:text-slate-400">
+                            {dept.code}
                           </span>
-                        </div>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments
-                      .filter(d => d.isActive)
-                      .map(dept => (
-                        <SelectItem key={dept.id} value={dept.id}>
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex flex-col">
-                              <span>{dept.name}</span>
-                              {dept.company && (
-                                <span className="text-xs text-muted-foreground">
-                                  {dept.company.tradeName ||
-                                    dept.company.legalName}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs text-muted-foreground ml-auto">
-                              ({dept.code})
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={handleClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceedStep1}
-                  className="gap-2"
-                >
-                  Próximo
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Etapa 2: Informações do Cargo */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  Informações do Cargo
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Preencha as informações básicas do cargo
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    Nome do Cargo <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Ex: Gerente de Vendas, Analista de TI"
-                    autoFocus
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="code">
-                    Código <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="code"
-                    value={code}
-                    onChange={e => setCode(e.target.value)}
-                    placeholder="Ex: GER-VEN, ANA-TI"
-                  />
-                </div>
-
-                <div className="rounded-lg bg-muted p-4">
-                  <div className="flex items-start gap-3">
-                    <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        Departamento Selecionado
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {getDepartmentDisplayName(
-                          departments.find(d => d.id === departmentId)!
+                        </p>
+                        {dept.company && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {dept.company.tradeName || dept.company.legalName}
+                          </p>
                         )}
-                      </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        ),
+      },
+      {
+        title: 'Informações do Cargo',
+        description: 'Preencha as informações básicas do cargo',
+        icon: <Briefcase className="h-16 w-16 text-indigo-500/60" />,
+        isValid: name !== '' && code !== '' && !isSubmitting,
+        onBack: () => setCurrentStep(1),
+        content: (
+          <div className="space-y-4">
+            {selectedDepartment && (
+              <div className="rounded-lg bg-muted p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 shrink-0">
+                    <BookUser className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      Departamento
+                    </p>
+                    <p className="font-medium text-sm truncate">
+                      {selectedDepartment.name}
+                      {selectedDepartment.company && (
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">
+                          —{' '}
+                          {selectedDepartment.company.tradeName ||
+                            selectedDepartment.company.legalName}
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="flex justify-between gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleClose}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!canSubmit || isSubmitting}
-                    className="gap-2"
-                  >
-                    {isSubmitting ? 'Criando...' : 'Criar Cargo'}
-                  </Button>
-                </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">
+                  Nome do Cargo <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Ex: Gerente de Vendas, Analista de TI"
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="code">
+                  Código <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="code"
+                  value={code}
+                  onChange={e => setCode(e.target.value)}
+                  placeholder="Ex: GER-VEN, ANA-TI"
+                />
               </div>
             </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        ),
+        footer: (
+          <Button
+            onClick={handleSubmit}
+            disabled={!name || !code || isSubmitting}
+          >
+            {isSubmitting ? 'Criando...' : 'Criar Cargo'}
+          </Button>
+        ),
+      },
+    ],
+    [
+      searchQuery,
+      isLoadingDepartments,
+      filteredDepartments,
+      selectedDepartment,
+      departments,
+      name,
+      code,
+      isSubmitting,
+    ]
+  );
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => !open && handleClose()}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }

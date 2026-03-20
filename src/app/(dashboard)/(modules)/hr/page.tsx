@@ -11,7 +11,6 @@ import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useTenant } from '@/contexts/tenant-context';
 import { usePermissions } from '@/hooks/use-permissions';
-import { companiesService } from '@/services/admin/companies.service';
 import {
   departmentsService,
   employeesService,
@@ -20,7 +19,6 @@ import {
 
 import {
   BookUser,
-  Building2,
   BarChart3,
   CalendarDays,
   Clock,
@@ -56,17 +54,6 @@ const sections: {
   {
     title: 'Cadastros',
     cards: [
-      {
-        id: 'companies',
-        title: 'Empresas',
-        description: 'Cadastro de empresas e filiais',
-        icon: Building2,
-        href: '/admin/companies',
-        gradient: 'from-purple-500 to-purple-600',
-        hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-        permission: HR_PERMISSIONS.COMPANIES.READ,
-        countKey: 'companies',
-      },
       {
         id: 'departments',
         title: 'Departamentos',
@@ -233,13 +220,11 @@ export default function HRLandingPage() {
 
   useEffect(() => {
     async function fetchCounts() {
-      const [employees, companies, departments, positions] =
-        await Promise.allSettled([
-          employeesService.listEmployees({ page: 1, perPage: 1 }),
-          companiesService.listCompanies({ page: 1, perPage: 100 }),
-          departmentsService.listDepartments({ page: 1, perPage: 1 }),
-          positionsService.listPositions({ page: 1, perPage: 1 }),
-        ]);
+      const [employees, departments, positions] = await Promise.allSettled([
+        employeesService.listEmployees({ page: 1, perPage: 1 }),
+        departmentsService.listDepartments({ page: 1, perPage: 1 }),
+        positionsService.listPositions({ page: 1, perPage: 1 }),
+      ]);
 
       const extractCount = (
         result: PromiseSettledResult<unknown>,
@@ -262,7 +247,6 @@ export default function HRLandingPage() {
 
       setCounts({
         employees: extractCount(employees, 'employees'),
-        companies: extractCount(companies, 'companies'),
         departments: extractCount(departments, 'departments'),
         positions: extractCount(positions, 'positions'),
       });

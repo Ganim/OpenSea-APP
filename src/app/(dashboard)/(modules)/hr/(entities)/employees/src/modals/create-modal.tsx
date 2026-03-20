@@ -5,44 +5,31 @@ import { departmentsApi } from '@/app/(dashboard)/(modules)/hr/(entities)/depart
 import { positionsApi } from '@/app/(dashboard)/(modules)/hr/(entities)/positions/src';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { Switch } from '@/components/ui/switch';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { listPermissionGroups } from '@/services/rbac/rbac.service';
 import type { Company, Department, Employee, Position } from '@/types/hr';
 import type { PermissionGroup } from '@/types/rbac';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
-  ArrowLeft,
   ArrowRight,
   Briefcase,
   Building2,
   Eye,
   EyeOff,
+  Loader2,
   Lock,
   Mail,
-  Shield,
+  Search,
+  UserPlus,
   Users,
-  X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -60,29 +47,26 @@ interface CreateModalProps {
   ) => Promise<void>;
 }
 
-type Step = 1 | 2 | 3;
-
 export function CreateModal({
   isOpen,
   onClose,
   isSubmitting,
   onSubmit,
 }: CreateModalProps) {
-  const [step, setStep] = useState<Step>(1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [positionId, setPositionId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [fullName, setFullName] = useState('');
   const [cpf, setCpf] = useState('');
-  const [baseSalary, setBaseSalary] = useState<string>('');
   const [cpfError, setCpfError] = useState<string>('');
   const [createUser, setCreateUser] = useState<boolean>(false);
-  const [permissionGroupId, setPermissionGroupId] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [userPassword, setUserPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
 
-  // Buscar departamentos
+  // Fetch departments
   const { data: departmentsData } = useQuery<Department[]>({
     queryKey: ['departments'],
     queryFn: async () => {
@@ -92,7 +76,7 @@ export function CreateModal({
     enabled: isOpen,
   });
 
-  // Buscar empresas para fazer o merge com departamentos
+  // Fetch companies
   const { data: companiesData } = useQuery<Company[]>({
     queryKey: ['companies', 'list-for-departments'],
     queryFn: async () => {
@@ -105,8 +89,10 @@ export function CreateModal({
     enabled: isOpen,
   });
 
-  // Buscar cargos
-  const { data: positionsData } = useQuery<Position[]>({
+  // Fetch positions
+  const { data: positionsData, isLoading: isLoadingPositions } = useQuery<
+    Position[]
+  >({
     queryKey: ['positions'],
     queryFn: async () => {
       const response = await positionsApi.list();
@@ -115,41 +101,44 @@ export function CreateModal({
     enabled: isOpen,
   });
 
-  // Buscar grupos de permissão
+  // Fetch permission groups to find default "Usuário" group
   const { data: permissionGroupsData } = useQuery<PermissionGroup[]>({
     queryKey: ['permission-groups'],
     queryFn: async () => {
       return await listPermissionGroups({ isActive: true });
     },
-    enabled: isOpen && step >= 3,
+    enabled: isOpen,
   });
 
-  // Criar mapa de empresas
+  // Auto-select "Usuário" group as default
+  const defaultPermissionGroupId = useMemo(() => {
+    const groups = permissionGroupsData || [];
+    const userGroup = groups.find(g => g.name === 'Usuário');
+    return userGroup?.id || '';
+  }, [permissionGroupsData]);
+
+  // Companies map
   const companiesMap = useMemo(() => {
     const map = new Map<string, Company>();
-    (companiesData || []).forEach(company => {
-      map.set(company.id, company);
-    });
+    (companiesData || []).forEach(company => map.set(company.id, company));
     return map;
   }, [companiesData]);
 
-  // Criar mapa de departamentos enriquecido com empresas
+  // Departments map enriched with companies
   const departmentsMap = useMemo(() => {
     const map = new Map<string, Department>();
     (departmentsData || []).forEach(dept => {
       let enrichedDept = dept;
       if (!dept.company && dept.companyId) {
         const company = companiesMap.get(dept.companyId);
-        if (company) {
-          enrichedDept = { ...dept, company };
-        }
+        if (company) enrichedDept = { ...dept, company };
       }
       map.set(dept.id, enrichedDept);
     });
     return map;
   }, [departmentsData, companiesMap]);
 
-  // Cargos com departamento e empresa enriquecidos
+  // Positions enriched with department and company
   const positions = useMemo(() => {
     return (positionsData || [])
       .filter(p => p.isActive)
@@ -157,9 +146,7 @@ export function CreateModal({
         let enrichedPos = pos;
         if (pos.departmentId && !pos.department) {
           const dept = departmentsMap.get(pos.departmentId);
-          if (dept) {
-            enrichedPos = { ...pos, department: dept };
-          }
+          if (dept) enrichedPos = { ...pos, department: dept };
         } else if (
           pos.department &&
           !pos.department.company &&
@@ -177,88 +164,86 @@ export function CreateModal({
       });
   }, [positionsData, departmentsMap, companiesMap]);
 
-  const permissionGroups = permissionGroupsData || [];
-
-  // Cargo selecionado
   const selectedPosition = positions.find(p => p.id === positionId);
   const selectedDepartment = selectedPosition?.department;
   const selectedCompany = selectedDepartment?.company;
 
-  // Função auxiliar para mostrar nome do departamento com empresa
+  const filteredPositions = positions.filter(pos => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const deptName = pos.department?.name || '';
+    const companyName =
+      pos.department?.company?.tradeName ||
+      pos.department?.company?.legalName ||
+      '';
+    return (
+      pos.name.toLowerCase().includes(query) ||
+      pos.code.toLowerCase().includes(query) ||
+      deptName.toLowerCase().includes(query) ||
+      companyName.toLowerCase().includes(query)
+    );
+  });
+
+  const handleSelectPosition = (pos: Position) => {
+    setPositionId(pos.id);
+    setCurrentStep(2);
+  };
+
   const getDepartmentDisplayName = (dept: Department | null | undefined) => {
     if (!dept) return '';
     const companyName = dept.company?.tradeName || dept.company?.legalName;
-    if (companyName) {
-      return `${dept.name} - ${companyName}`;
-    }
+    if (companyName) return `${dept.name} - ${companyName}`;
     return dept.name;
   };
 
-  // Validar CPF
+  // CPF validation
   const validateCPF = (cpfValue: string): boolean => {
     const cleanCpf = cpfValue.replace(/\D/g, '');
-
     if (cleanCpf.length !== 11) return false;
-
-    // Verifica se todos os dígitos são iguais
     if (/^(\d)\1{10}$/.test(cleanCpf)) return false;
 
-    // Valida primeiro dígito verificador
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
     }
     let remainder = 11 - (sum % 11);
     const digit1 = remainder >= 10 ? 0 : remainder;
-
     if (digit1 !== parseInt(cleanCpf.charAt(9))) return false;
 
-    // Valida segundo dígito verificador
     sum = 0;
     for (let i = 0; i < 10; i++) {
       sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
     }
     remainder = 11 - (sum % 11);
     const digit2 = remainder >= 10 ? 0 : remainder;
-
     if (digit2 !== parseInt(cleanCpf.charAt(10))) return false;
 
     return true;
   };
 
-  // Validar Email
   const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Validate CPF when it changes
+  // Validate CPF
   useEffect(() => {
     if (cpf && cpf.replace(/\D/g, '').length === 11) {
-      if (!validateCPF(cpf)) {
-        setCpfError('CPF inválido');
-      } else {
-        setCpfError('');
-      }
+      setCpfError(!validateCPF(cpf) ? 'CPF inválido' : '');
     } else if (cpf && cpf.replace(/\D/g, '').length > 0) {
       setCpfError('');
     }
   }, [cpf]);
 
-  // Validate email when it changes
+  // Validate email
   useEffect(() => {
     if (userEmail && userEmail.length > 0) {
-      if (!validateEmail(userEmail)) {
-        setEmailError('Email inválido');
-      } else {
-        setEmailError('');
-      }
+      setEmailError(!validateEmail(userEmail) ? 'Email inválido' : '');
     } else {
       setEmailError('');
     }
   }, [userEmail]);
 
-  // Validate password when it changes
+  // Validate password
   useEffect(() => {
     if (userPassword && userPassword.length > 0 && userPassword.length < 6) {
       setPasswordError('A senha deve ter pelo menos 6 caracteres');
@@ -267,25 +252,8 @@ export function CreateModal({
     }
   }, [userPassword]);
 
-  const handleNext = () => {
-    if (step === 1 && positionId) {
-      setStep(2);
-    } else if (step === 2 && fullName && !cpfError && baseSalary) {
-      setStep(3);
-    }
-  };
-
-  const handleBack = () => {
-    if (step === 3) {
-      setStep(2);
-    } else if (step === 2) {
-      setStep(1);
-    }
-  };
-
   const handleSubmit = async () => {
-    if (fullName && cpf && baseSalary) {
-      const salaryValue = parseFloat(baseSalary.replace(/\D/g, '')) / 100;
+    if (fullName && cpf) {
       const cleanCpf = cpf.replace(/\D/g, '');
 
       await onSubmit({
@@ -296,12 +264,11 @@ export function CreateModal({
         registrationNumber: `EMP${Date.now()}`,
         cpf: cleanCpf,
         hireDate: new Date().toISOString(),
-        baseSalary: salaryValue,
         contractType: 'CLT',
         workRegime: 'FULL_TIME',
         weeklyHours: 40,
         createUser,
-        permissionGroupId: createUser ? permissionGroupId : undefined,
+        permissionGroupId: createUser ? defaultPermissionGroupId : undefined,
         userEmail: createUser ? userEmail : undefined,
         userPassword: createUser ? userPassword : undefined,
       });
@@ -310,14 +277,13 @@ export function CreateModal({
   };
 
   const handleClose = () => {
-    setStep(1);
+    setCurrentStep(1);
     setPositionId('');
+    setSearchQuery('');
     setFullName('');
     setCpf('');
-    setBaseSalary('');
     setCpfError('');
     setCreateUser(false);
-    setPermissionGroupId('');
     setUserEmail('');
     setUserPassword('');
     setShowPassword(false);
@@ -328,516 +294,315 @@ export function CreateModal({
 
   const canProceedStep1 = positionId !== '';
   const canProceedStep2 =
-    fullName !== '' &&
-    cpf.replace(/\D/g, '').length === 11 &&
-    !cpfError &&
-    baseSalary !== '';
+    fullName !== '' && cpf.replace(/\D/g, '').length === 11 && !cpfError;
   const canSubmit =
     !createUser ||
     (createUser &&
-      permissionGroupId !== '' &&
       userEmail !== '' &&
       !emailError &&
       userPassword !== '' &&
       !passwordError);
 
-  return (
-    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-          <DialogTitle className="text-lg font-semibold">
-            <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-emerald-500 to-teal-600 p-2 rounded-lg">
-                <Users className="h-5 w-5" />
-              </div>
-              <div className="flex-col flex">
-                <span className="text-base">Novo Funcionário</span>
-                <span className="text-xs text-slate-500/50 font-normal">
-                  Etapa {step} de 3
-                </span>
-              </div>
+  const steps: WizardStep[] = useMemo(
+    () => [
+      {
+        title: 'Selecione o Cargo',
+        description: 'O departamento e empresa serão definidos automaticamente',
+        icon: <Briefcase className="h-16 w-16 text-teal-500/60" />,
+        isValid: false,
+        footer: (
+          <Button variant="outline" onClick={handleClose}>
+            Cancelar
+          </Button>
+        ),
+        content: (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar cargo por nome, código, departamento..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          </DialogTitle>
-          <div className="flex items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClose}
-                  className="gap-2"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Fechar</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Etapa 1: Selecionar Cargo */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Selecione o Cargo</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Escolha o cargo que o funcionário irá ocupar. O departamento e
-                  empresa serão definidos automaticamente.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="position">
-                  Cargo <span className="text-red-500">*</span>
-                </Label>
-                <Select value={positionId} onValueChange={setPositionId}>
-                  <SelectTrigger id="position">
-                    <SelectValue placeholder="Selecione um cargo">
-                      {positionId && selectedPosition && (
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4 text-muted-foreground" />
-                          <span>{selectedPosition.name}</span>
-                        </div>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {positions.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-muted-foreground">
-                        Nenhum cargo encontrado
-                      </div>
-                    ) : (
-                      positions.map(pos => (
-                        <SelectItem key={pos.id} value={pos.id}>
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex flex-col">
-                              <span>{pos.name}</span>
-                              {pos.department && (
-                                <span className="text-xs text-muted-foreground">
-                                  {pos.department.name}
-                                  {pos.department.company &&
-                                    ` - ${pos.department.company.tradeName || pos.department.company.legalName}`}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs text-muted-foreground ml-auto">
-                              ({pos.code})
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {selectedPosition && (
-                <div className="rounded-lg bg-muted p-4 space-y-2 animate-in fade-in-50 duration-300">
-                  <div className="flex items-start gap-3">
-                    <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Departamento</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedDepartment
-                          ? getDepartmentDisplayName(selectedDepartment)
-                          : 'Não definido'}
-                      </p>
-                    </div>
+            <ScrollArea className="max-h-[300px]">
+              <div className="space-y-1">
+                {isLoadingPositions ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
-                  {selectedCompany && (
-                    <div className="flex items-start gap-3">
-                      <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Empresa</p>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedCompany.tradeName ||
-                            selectedCompany.legalName}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={handleClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceedStep1}
-                  className="gap-2"
-                >
-                  Próximo
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Etapa 2: Informações do Funcionário */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  Informações do Funcionário
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Preencha as informações básicas do funcionário
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="rounded-lg bg-muted p-4 space-y-2">
-                  <div className="flex items-start gap-3">
-                    <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Cargo</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedPosition?.name}
-                      </p>
-                    </div>
+                ) : filteredPositions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchQuery
+                      ? 'Nenhum cargo encontrado'
+                      : 'Nenhum cargo cadastrado'}
                   </div>
-                  {selectedDepartment && (
-                    <div className="flex items-start gap-3">
-                      <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Departamento</p>
-                        <p className="text-sm text-muted-foreground">
-                          {getDepartmentDisplayName(selectedDepartment)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">
-                    Nome Completo <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="fullName"
-                    value={fullName}
-                    onChange={e => setFullName(e.target.value)}
-                    placeholder="Ex: João da Silva"
-                    autoFocus
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cpf">
-                    CPF <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="cpf"
-                    value={cpf}
-                    onChange={e => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      if (value.length <= 11) {
-                        const formatted = value
-                          .replace(/(\d{3})(\d)/, '$1.$2')
-                          .replace(/(\d{3})(\d)/, '$1.$2')
-                          .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                        setCpf(formatted);
-                      }
-                    }}
-                    placeholder="000.000.000-00"
-                    maxLength={14}
-                    className={
-                      cpfError
-                        ? 'border-red-500 focus-visible:ring-red-500'
-                        : ''
-                    }
-                  />
-                  {cpfError && (
-                    <Alert variant="destructive" className="py-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="text-sm">
-                        {cpfError}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="baseSalary">
-                    Salário Base <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="baseSalary"
-                    value={baseSalary}
-                    onChange={e => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      const formatted = (
-                        parseInt(value || '0') / 100
-                      ).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      });
-                      setBaseSalary(formatted);
-                    }}
-                    placeholder="R$ 0,00"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleClose}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    disabled={!canProceedStep2}
-                    className="gap-2"
-                  >
-                    Próximo
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Etapa 3: Criar Usuário (Opcional) */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  Criar Usuário do Sistema
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Opcionalmente, crie um usuário de acesso ao sistema para este
-                  funcionário
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="rounded-lg bg-muted p-4 space-y-2">
-                  <div className="flex items-start gap-3">
-                    <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Funcionário</p>
-                      <p className="text-sm text-muted-foreground">
-                        {fullName}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Cargo</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedPosition?.name}
-                      </p>
-                    </div>
-                  </div>
-                  {selectedDepartment && (
-                    <div className="flex items-start gap-3">
-                      <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Departamento</p>
-                        <p className="text-sm text-muted-foreground">
-                          {getDepartmentDisplayName(selectedDepartment)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label
-                      htmlFor="createUser"
-                      className="text-base cursor-pointer"
+                ) : (
+                  filteredPositions.map(pos => (
+                    <div
+                      key={pos.id}
+                      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => handleSelectPosition(pos)}
                     >
-                      Criar usuário de acesso
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Permite que o funcionário faça login no sistema
-                    </p>
-                  </div>
-                  <Switch
-                    id="createUser"
-                    checked={createUser}
-                    onCheckedChange={setCreateUser}
-                  />
-                </div>
-
-                {createUser && (
-                  <div className="space-y-4 animate-in fade-in-50 duration-300">
-                    <div className="space-y-2">
-                      <Label htmlFor="userEmail">
-                        Email <span className="text-red-500">*</span>
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="userEmail"
-                          type="email"
-                          value={userEmail}
-                          onChange={e => setUserEmail(e.target.value)}
-                          placeholder="email@exemplo.com"
-                          className={`pl-10 ${
-                            emailError
-                              ? 'border-red-500 focus-visible:ring-red-500'
-                              : ''
-                          }`}
-                        />
+                      <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-linear-to-br from-teal-500 to-emerald-600 shrink-0">
+                        <Briefcase className="h-4 w-4 text-white" />
                       </div>
-                      {emailError && (
-                        <Alert variant="destructive" className="py-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription className="text-sm">
-                            {emailError}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="userPassword">
-                        Senha <span className="text-red-500">*</span>
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="userPassword"
-                          type={showPassword ? 'text' : 'password'}
-                          value={userPassword}
-                          onChange={e => setUserPassword(e.target.value)}
-                          placeholder="Mínimo 6 caracteres"
-                          className={`pl-10 pr-10 ${
-                            passwordError
-                              ? 'border-red-500 focus-visible:ring-red-500'
-                              : ''
-                          }`}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                          onClick={() => setShowPassword(!showPassword)}
-                          aria-label={
-                            showPassword ? 'Ocultar senha' : 'Mostrar senha'
-                          }
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
-                      {passwordError && (
-                        <Alert variant="destructive" className="py-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription className="text-sm">
-                            {passwordError}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="permissionGroup">
-                        Grupo de Permissão{' '}
-                        <span className="text-red-500">*</span>
-                      </Label>
-                      <Select
-                        value={permissionGroupId}
-                        onValueChange={setPermissionGroupId}
-                      >
-                        <SelectTrigger id="permissionGroup">
-                          <SelectValue placeholder="Selecione um grupo de permissão">
-                            {permissionGroupId && (
-                              <div className="flex items-center gap-2">
-                                <Shield className="h-4 w-4 text-muted-foreground" />
-                                <span>
-                                  {
-                                    permissionGroups.find(
-                                      g => g.id === permissionGroupId
-                                    )?.name
-                                  }
-                                </span>
-                              </div>
-                            )}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {permissionGroups.length === 0 ? (
-                            <div className="p-4 text-center text-sm text-muted-foreground">
-                              Nenhum grupo de permissão disponível
-                            </div>
-                          ) : (
-                            permissionGroups.map(group => (
-                              <SelectItem key={group.id} value={group.id}>
-                                <div className="flex items-center gap-2">
-                                  <Shield className="h-4 w-4 text-muted-foreground" />
-                                  <div>
-                                    <p className="font-medium">{group.name}</p>
-                                    {group.description && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {group.description}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      {!permissionGroupId && (
-                        <p className="text-xs text-muted-foreground">
-                          Selecione um grupo de permissão para definir o nível
-                          de acesso do usuário
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate flex items-center gap-2">
+                          {pos.name}
+                          <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-500/10 dark:text-slate-400">
+                            {pos.code}
+                          </span>
                         </p>
-                      )}
+                        {pos.department && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {pos.department.company
+                              ? `${pos.department.company.tradeName || pos.department.company.legalName} — ${pos.department.name}`
+                              : pos.department.name}
+                          </p>
+                        )}
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
-                  </div>
+                  ))
                 )}
               </div>
-
-              <div className="flex justify-between gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleClose}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!canSubmit || isSubmitting}
-                    className="gap-2"
-                  >
-                    {isSubmitting ? 'Criando...' : 'Criar Funcionário'}
-                  </Button>
+            </ScrollArea>
+          </div>
+        ),
+      },
+      {
+        title: 'Dados do Funcionário',
+        description: 'Informações pessoais e contratuais',
+        icon: <Users className="h-16 w-16 text-teal-500/60" />,
+        isValid: canProceedStep2,
+        onBack: () => setCurrentStep(1),
+        content: (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-muted p-3">
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      Departamento
+                    </p>
+                    <p className="text-sm font-medium truncate">
+                      {selectedDepartment?.name || 'Não definido'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg bg-muted p-3">
+                <div className="flex items-start gap-3">
+                  <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Cargo</p>
+                    <p className="text-sm font-medium truncate">
+                      {selectedPosition?.name}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+
+            <div className="space-y-2">
+              <Label htmlFor="fullName">
+                Nome Completo <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="fullName"
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                placeholder="Ex: João da Silva"
+                autoFocus
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cpf">
+                CPF <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="cpf"
+                value={cpf}
+                onChange={e => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  if (value.length <= 11) {
+                    const formatted = value
+                      .replace(/(\d{3})(\d)/, '$1.$2')
+                      .replace(/(\d{3})(\d)/, '$1.$2')
+                      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                    setCpf(formatted);
+                  }
+                }}
+                placeholder="000.000.000-00"
+                maxLength={14}
+                className={
+                  cpfError ? 'border-red-500 focus-visible:ring-red-500' : ''
+                }
+              />
+              {cpfError && (
+                <Alert variant="destructive" className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    {cpfError}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="createUser" className="text-sm cursor-pointer">
+                  Criar usuário de acesso
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Permite que o funcionário faça login no sistema
+                </p>
+              </div>
+              <Switch
+                id="createUser"
+                checked={createUser}
+                onCheckedChange={setCreateUser}
+              />
+            </div>
+          </div>
+        ),
+        footer: (
+          <Button
+            onClick={createUser ? () => setCurrentStep(3) : handleSubmit}
+            disabled={!canProceedStep2 || isSubmitting}
+          >
+            {isSubmitting
+              ? 'Criando...'
+              : createUser
+                ? 'Avançar →'
+                : 'Criar Funcionário'}
+          </Button>
+        ),
+      },
+      {
+        title: 'Dados de Acesso',
+        description: 'Defina o email e senha temporária do novo usuário',
+        icon: <UserPlus className="h-16 w-16 text-teal-500/60" />,
+        isValid: canSubmit && !isSubmitting,
+        onBack: () => setCurrentStep(2),
+        content: (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="userEmail">
+                Email <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="userEmail"
+                  type="email"
+                  value={userEmail}
+                  onChange={e => setUserEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                  autoFocus
+                  className={`pl-10 ${
+                    emailError
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }`}
+                />
+              </div>
+              {emailError && (
+                <Alert variant="destructive" className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    {emailError}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="userPassword">
+                Senha Temporária <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="userPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={userPassword}
+                  onChange={e => setUserPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  className={`pl-10 pr-10 ${
+                    passwordError
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }`}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              {passwordError && (
+                <Alert variant="destructive" className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    {passwordError}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </div>
+        ),
+        footer: (
+          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
+            {isSubmitting ? 'Criando...' : 'Criar Funcionário'}
+          </Button>
+        ),
+      },
+    ],
+    [
+      searchQuery,
+      isLoadingPositions,
+      filteredPositions,
+      selectedPosition,
+      selectedDepartment,
+      fullName,
+      cpf,
+      cpfError,
+      createUser,
+      userEmail,
+      emailError,
+      userPassword,
+      passwordError,
+      showPassword,
+      defaultPermissionGroupId,
+      isSubmitting,
+      canProceedStep2,
+      canSubmit,
+    ]
+  );
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => !open && handleClose()}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }
