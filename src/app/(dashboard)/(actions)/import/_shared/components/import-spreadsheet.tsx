@@ -107,6 +107,7 @@ export function ImportSpreadsheet({
   // trigger react-spreadsheet's compose-refs setState explosion
   const currentSelectionRef = useRef<Selection | null>(null);
 
+
   // Get data rows only (skip header row if it exists)
   const dataRows = useMemo(() => {
     if (data.length === 0) return [];
@@ -159,6 +160,19 @@ export function ImportSpreadsheet({
   // Handle spreadsheet change
   const handleChange = useCallback(
     (newData: Matrix<SpreadsheetCell>) => {
+      // Guard against react-spreadsheet bug #279: onChange fires in loop
+      // because internal useEffect compares arrays by reference.
+      // Quick check: if row/col count matches and all values are the same, skip.
+      if (
+        newData.length === dataRows.length &&
+        newData.every((row, ri) =>
+          row.length === dataRows[ri]?.length &&
+          row.every((cell, ci) => (cell?.value ?? '') === (dataRows[ri]?.[ci]?.value ?? ''))
+        )
+      ) {
+        return; // No actual change — suppress the buggy onChange
+      }
+
       const hasHeaderRow = data[0]?.some(cell => cell.isHeader);
       const headerRow = hasHeaderRow ? data[0] : null;
 
