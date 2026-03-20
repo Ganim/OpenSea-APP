@@ -842,6 +842,28 @@ export default function ProductsSheetsPage() {
                 />
               </div>
 
+              {/* Columns popover */}
+              {selectedTemplateId && columnsConfig.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 px-2.5 gap-1.5">
+                      <Columns3 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Colunas</span>
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 min-w-5 justify-center">
+                        {enabledFields.length}
+                      </Badge>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="p-0 w-auto">
+                    <ColumnsPopoverContent
+                      columns={columnsForPopover}
+                      onToggle={handleToggleColumn}
+                      onReorder={handleReorderColumns}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+
               {/* File import popover */}
               {selectedTemplateId && (
                 <Popover>
@@ -885,28 +907,6 @@ export default function ProductsSheetsPage() {
                         </Button>
                       </div>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {/* Columns popover */}
-              {selectedTemplateId && columnsConfig.length > 0 && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 px-2.5 gap-1.5">
-                      <Columns3 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Colunas</span>
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 min-w-5 justify-center">
-                        {enabledFields.length}
-                      </Badge>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="p-0 w-auto">
-                    <ColumnsPopoverContent
-                      columns={columnsForPopover}
-                      onToggle={handleToggleColumn}
-                      onReorder={handleReorderColumns}
-                    />
                   </PopoverContent>
                 </Popover>
               )}

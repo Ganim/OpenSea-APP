@@ -973,6 +973,12 @@ body {
   color: var(--spreadsheet-cell-text) !important;
 }
 
+/* Selected headers — subtle highlight instead of lib's hardcoded #5f6268 */
+.Spreadsheet__header--selected {
+  background: var(--outline-background-color) !important;
+  color: var(--spreadsheet-cell-text) !important;
+}
+
 /* Row indicators — compact, subtle */
 .Spreadsheet__header--row {
   opacity: 0.4;
