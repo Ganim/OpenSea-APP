@@ -390,8 +390,45 @@ export function ManagePermissionsModal({
 
         {/* Body */}
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="flex-1 flex overflow-hidden">
+            {/* Skeleton left sidebar */}
+            <div className="w-[52px] sm:w-[180px] shrink-0 border-r border-border py-4 pl-4 pr-3 space-y-2">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5">
+                  <div className="h-4 w-4 rounded bg-muted animate-pulse" />
+                  <div className="flex-1 space-y-1 hidden sm:block">
+                    <div className="h-3.5 w-20 rounded bg-muted animate-pulse" />
+                    <div className="h-2.5 w-10 rounded bg-muted animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Skeleton right area */}
+            <div className="flex-1 py-4 pr-4 space-y-3 px-3">
+              {/* Header skeleton */}
+              <div className="space-y-1 pb-3">
+                <div className="h-5 w-32 rounded bg-muted animate-pulse" />
+                <div className="h-3.5 w-48 rounded bg-muted animate-pulse" />
+              </div>
+              {/* Table header skeleton */}
+              <div className="flex gap-1 pb-2">
+                <div className="h-3 w-[220px] rounded bg-muted animate-pulse" />
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="h-3 w-[72px] rounded bg-muted animate-pulse" />
+                ))}
+              </div>
+              {/* Table rows skeleton */}
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-1 py-1.5">
+                  <div className="h-4 w-[220px] rounded bg-muted animate-pulse" />
+                  {Array.from({ length: 8 }).map((_, j) => (
+                    <div key={j} className="h-4 w-[72px] flex items-center justify-center">
+                      <div className="h-4 w-4 rounded bg-muted animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex-1 flex overflow-hidden">

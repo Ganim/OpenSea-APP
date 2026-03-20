@@ -119,7 +119,7 @@ export function PermissionMatrixTable({
 
   const handleToggleRow = useCallback(
     (resourceIndex: number) => {
-      const pm = permissionMaps.find((p) => p.resourceIndex === resourceIndex);
+      const pm = permissionMaps.find(p => p.resourceIndex === resourceIndex);
       if (!pm) return;
       const resource = resources[resourceIndex];
       if (!resource) return;
@@ -155,6 +155,14 @@ export function PermissionMatrixTable({
 
   // ----- Render ------------------------------------------------------------
 
+  if (resources.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground text-sm">
+        Nenhuma permissão disponível neste módulo
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -169,7 +177,7 @@ export function PermissionMatrixTable({
             </th>
 
             {/* Action column headers */}
-            {STANDARD_ACTIONS.map((action) => {
+            {STANDARD_ACTIONS.map(action => {
               const state = getSelectionState(
                 columnCodes[action],
                 selectedCodes
@@ -215,7 +223,7 @@ export function PermissionMatrixTable({
         {/* Body */}
         <tbody>
           {resources.map((resource, idx) => {
-            const pm = permissionMaps.find((p) => p.resourceIndex === idx);
+            const pm = permissionMaps.find(p => p.resourceIndex === idx);
 
             // Row select-all state
             const rowCodes = new Set<string>();
@@ -272,7 +280,7 @@ export function PermissionMatrixTable({
                 </td>
 
                 {/* Action cells */}
-                {STANDARD_ACTIONS.map((action) => {
+                {STANDARD_ACTIONS.map(action => {
                   const isAvailable =
                     resource.availableActions.includes(action);
                   const actionSet = pm?.actionCodes[action];
@@ -305,15 +313,11 @@ export function PermissionMatrixTable({
                         <Checkbox
                           checked={checked}
                           disabled={readOnly}
-                          onCheckedChange={() =>
-                            handleToggleCell(pm!, action)
-                          }
+                          onCheckedChange={() => handleToggleCell(pm!, action)}
                           className={cn(
                             isManage &&
                               'data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500',
-                            readOnly &&
-                              cellState === 'none' &&
-                              'opacity-70'
+                            readOnly && cellState === 'none' && 'opacity-70'
                           )}
                         />
                       </div>
