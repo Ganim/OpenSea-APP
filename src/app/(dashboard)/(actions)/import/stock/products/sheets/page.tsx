@@ -20,6 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@/components/ui/badge';
+import { Kbd } from '@/components/ui/kbd';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -822,7 +823,7 @@ export default function ProductsSheetsPage() {
                 preenchidas
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Pressione ENTER em uma célula para ver os valores possíveis.
+                Pressione <Kbd>Enter</Kbd> em uma célula para ver os valores possíveis.
               </span>
             </div>
 
