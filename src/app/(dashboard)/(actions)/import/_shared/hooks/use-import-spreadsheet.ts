@@ -426,6 +426,7 @@ export function useImportSpreadsheet(
 
   // Atualizar quando headers mudam
   const updateHeaders = useCallback((newHeaders: ImportFieldConfig[]) => {
+    headersRef.current = newHeaders;
     setData(prevData => {
       // Manter dados existentes e adaptar as novas colunas
       const headerRow = createHeaderRow(newHeaders);
