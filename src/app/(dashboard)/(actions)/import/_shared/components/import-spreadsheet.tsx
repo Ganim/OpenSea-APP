@@ -103,10 +103,9 @@ export function ImportSpreadsheet({
     currentValue: string;
   } | null>(null);
 
-  // Track current selection
-  const [currentSelection, setCurrentSelection] = useState<Selection | null>(
-    null
-  );
+  // Track current selection via ref (not state) to avoid re-renders that
+  // trigger react-spreadsheet's compose-refs setState explosion
+  const currentSelectionRef = useRef<Selection | null>(null);
 
   // Get data rows only (skip header row if it exists)
   const dataRows = useMemo(() => {
@@ -224,25 +223,26 @@ export function ImportSpreadsheet({
     [headers, onDataChange, data, dataRows, referenceData]
   );
 
-  // Handle selection change
+  // Handle selection change — uses ref to avoid re-render
   const handleSelect = useCallback((selection: Selection) => {
-    setCurrentSelection(selection);
+    currentSelectionRef.current = selection;
   }, []);
 
-  // Get selected cell from selection
+  // Get selected cell from selection ref
   const getSelectedCell = useCallback((): {
     row: number;
     col: number;
   } | null => {
-    if (!currentSelection) return null;
-    if (currentSelection instanceof RangeSelection) {
+    const sel = currentSelectionRef.current;
+    if (!sel) return null;
+    if (sel instanceof RangeSelection) {
       return {
-        row: currentSelection.range.start.row,
-        col: currentSelection.range.start.column,
+        row: sel.range.start.row,
+        col: sel.range.start.column,
       };
     }
     return null;
-  }, [currentSelection]);
+  }, []);
 
   // Handle key down for opening select dialog
   const handleKeyDown = useCallback(
