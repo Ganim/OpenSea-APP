@@ -534,6 +534,12 @@ export function useImportSpreadsheet(
     let invalidRows = 0;
     let totalRows = 0;
 
+    // Track values of 'name' fields for duplicate detection
+    const nameFieldIndex = currentHeaders.findIndex(
+      h => h.key === 'name' && h.required
+    );
+    const seenNames = new Map<string, number>(); // lowercase name → first row
+
     dataRows.forEach((row, rowIndex) => {
       // Verificar se a linha tem algum dado
       const hasData = row.some(cell => cell.value && cell.value.trim() !== '');
@@ -564,6 +570,27 @@ export function useImportSpreadsheet(
           rowHasError = true;
         }
       });
+
+      // Check for duplicate names within the spreadsheet
+      if (nameFieldIndex >= 0) {
+        const nameValue = row[nameFieldIndex]?.value?.trim();
+        if (nameValue) {
+          const nameLower = nameValue.toLowerCase();
+          const firstRow = seenNames.get(nameLower);
+          if (firstRow !== undefined) {
+            errors.push({
+              row: rowIndex + 1,
+              column: nameFieldIndex,
+              fieldKey: 'name',
+              message: `Nome duplicado na planilha (mesmo que linha ${firstRow})`,
+              value: nameValue,
+            });
+            rowHasError = true;
+          } else {
+            seenNames.set(nameLower, rowIndex + 1);
+          }
+        }
+      }
 
       if (rowHasError) {
         invalidRows++;

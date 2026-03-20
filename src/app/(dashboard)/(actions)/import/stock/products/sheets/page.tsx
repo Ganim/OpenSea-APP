@@ -625,12 +625,9 @@ export default function ProductsSheetsPage() {
   const handleProgressClose = useCallback(() => {
     setShowProgressDialog(false);
     importProcess.reset();
-
-    if (importProcess.isCompleted) {
-      spreadsheet.clearAll();
-      router.push(basePath);
-    }
-  }, [importProcess, spreadsheet, router, basePath]);
+    spreadsheet.clearAll();
+    router.push('/stock/products');
+  }, [importProcess, spreadsheet, router]);
 
   const handleTemplateChange = useCallback((value: string) => {
     setSelectedTemplateId(value === '__none__' ? '' : value);
