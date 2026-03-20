@@ -821,6 +821,9 @@ export default function ProductsSheetsPage() {
                 {spreadsheet.filledRowCount === 1 ? 'linha' : 'linhas'}{' '}
                 preenchidas
               </Badge>
+              <span className="text-xs text-muted-foreground">
+                Pressione ENTER em uma célula para ver os valores possíveis.
+              </span>
             </div>
 
             {/* Right: actions */}
