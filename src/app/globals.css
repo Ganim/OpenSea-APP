@@ -967,9 +967,10 @@ body {
   overflow: hidden !important;
 }
 
-/* Header cells (column labels) — matches cell bg via --header-background-color */
+/* Header cells (column labels) */
 .Spreadsheet__header {
   font-weight: 600 !important;
+  color: var(--spreadsheet-cell-text) !important;
 }
 
 /* Row indicators — compact, subtle */
