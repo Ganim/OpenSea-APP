@@ -636,10 +636,9 @@ export default function PermissionGroupDetailPage() {
                   </div>
                   <div className="flex-1 overflow-y-auto py-2 px-2">
                     <PermissionMatrixTable
+                      tab={activePermTabConfig!}
                       resources={activePermTabConfig?.resources ?? []}
-                      permissionMaps={
-                        matrixPermissionMaps[activePermTab] ?? []
-                      }
+                      permissionMaps={matrixPermissionMaps[activePermTab] ?? []}
                       selectedCodes={groupPermissionCodes}
                       onToggleCode={() => {}}
                       onToggleCodes={() => {}}

@@ -10,31 +10,29 @@ import {
 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
-// Standard Actions
+// Standard Actions (7 humanized capabilities)
 // ---------------------------------------------------------------------------
 
 export const STANDARD_ACTIONS = [
-  'create',
-  'update',
-  'delete',
-  'export',
-  'manage',
+  'access',
+  'register',
+  'modify',
+  'remove',
   'import',
-  'list',
-  'read',
+  'export',
+  'admin',
 ] as const;
 
 export type StandardAction = (typeof STANDARD_ACTIONS)[number];
 
 export const ACTION_LABELS: Record<StandardAction, string> = {
-  create: 'Criar',
-  update: 'Editar',
-  delete: 'Excluir',
-  export: 'Exportar',
-  manage: 'Gerenciar',
+  access: 'Acessar',
+  register: 'Cadastrar',
+  modify: 'Alterar',
+  remove: 'Remover',
   import: 'Importar',
-  list: 'Listar',
-  read: 'Ver',
+  export: 'Exportar',
+  admin: 'Administrar',
 };
 
 // ---------------------------------------------------------------------------
@@ -43,7 +41,8 @@ export const ACTION_LABELS: Record<StandardAction, string> = {
 
 export interface MatrixResource {
   label: string;
-  subtitle?: string;
+  /** Visual group header this resource belongs to within the tab */
+  group: string;
   backendResources: string[];
   availableActions: StandardAction[];
 }
@@ -66,9 +65,65 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Estoque',
     icon: Package,
     resources: [
+      // Cadastros
+      {
+        label: 'Produtos',
+        group: 'Cadastros',
+        backendResources: [
+          'stock.products',
+          'stock.product-attachments',
+          'stock.product-care-instructions',
+          'stock.care',
+        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export', 'admin'],
+      },
+      {
+        label: 'Variantes',
+        group: 'Cadastros',
+        backendResources: ['stock.variants', 'stock.variant-attachments'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export', 'admin'],
+      },
+      {
+        label: 'Templates',
+        group: 'Cadastros',
+        backendResources: ['stock.templates'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
+      },
+      {
+        label: 'Categorias',
+        group: 'Cadastros',
+        backendResources: ['stock.categories'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export'],
+      },
+      {
+        label: 'Fabricantes',
+        group: 'Cadastros',
+        backendResources: ['stock.manufacturers'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export'],
+      },
+      // Operações
+      {
+        label: 'Itens',
+        group: 'Operações',
+        backendResources: ['stock.items', 'stock.movements'],
+        availableActions: ['access', 'export', 'admin'],
+      },
+      {
+        label: 'Ordens de Compra',
+        group: 'Operações',
+        backendResources: ['stock.purchase-orders'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
+      },
+      {
+        label: 'Volumes',
+        group: 'Operações',
+        backendResources: ['stock.volumes'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
+      },
+      // Infraestrutura
       {
         label: 'Armazéns',
-        subtitle: 'zonas, bins, endereços, etiquetas',
+        group: 'Infraestrutura',
         backendResources: [
           'stock.warehouses',
           'stock.zones',
@@ -76,114 +131,7 @@ export const MATRIX_TABS: MatrixTab[] = [
           'stock.locations',
           'stock.warehouse-labels',
         ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Categorias',
-        backendResources: ['stock.categories'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'import',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Fabricantes',
-        backendResources: ['stock.manufacturers'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'import',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Itens',
-        subtitle: 'movimentações, localização',
-        backendResources: ['stock.items', 'stock.movements'],
-        availableActions: ['export', 'manage', 'list', 'read'],
-      },
-      {
-        label: 'Ordens de Compra',
-        subtitle: 'aprovar, cancelar',
-        backendResources: ['stock.purchase-orders'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Produtos',
-        subtitle: 'attachments, instruções de cuidado',
-        backendResources: [
-          'stock.products',
-          'stock.product-attachments',
-          'stock.product-care-instructions',
-          'stock.care',
-        ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'import',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Templates',
-        backendResources: ['stock.templates'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
-      },
-      {
-        label: 'Variantes',
-        subtitle: 'attachments',
-        backendResources: ['stock.variants', 'stock.variant-attachments'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'import',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Volumes',
-        subtitle: 'fechar, entregar, romaneio',
-        backendResources: ['stock.volumes'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
     ],
   },
@@ -194,94 +142,61 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Financeiro',
     icon: DollarSign,
     resources: [
+      // Cadastros
       {
         label: 'Categorias',
+        group: 'Cadastros',
         backendResources: ['finance.categories'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Centros de Custo',
+        group: 'Cadastros',
         backendResources: ['finance.cost-centers'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
-      },
-      {
-        label: 'Consórcios',
-        subtitle: 'pagar, contemplar',
-        backendResources: ['finance.consortia'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Contas Bancárias',
+        group: 'Cadastros',
         backendResources: ['finance.bank-accounts'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
-      },
-      {
-        label: 'Contratos',
-        backendResources: ['finance.contracts'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Empréstimos',
-        subtitle: 'pagar parcela',
-        backendResources: ['finance.loans'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Fornecedores',
+        group: 'Cadastros',
         backendResources: ['stock.suppliers'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'import',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export'],
       },
       {
+        label: 'Contratos',
+        group: 'Cadastros',
+        backendResources: ['finance.contracts'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export'],
+      },
+      // Operações
+      {
         label: 'Lançamentos',
-        subtitle: 'pagar, cancelar, attachments',
+        group: 'Operações',
         backendResources: ['finance.entries', 'finance.attachments'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'import',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export', 'admin'],
+      },
+      {
+        label: 'Consórcios',
+        group: 'Operações',
+        backendResources: ['finance.consortia'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
+      },
+      {
+        label: 'Empréstimos',
+        group: 'Operações',
+        backendResources: ['finance.loans'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
       },
       {
         label: 'Recorrências',
-        subtitle: 'pausar, retomar, cancelar',
+        group: 'Operações',
         backendResources: ['finance.recurring'],
-        availableActions: ['create', 'update', 'manage', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'admin'],
       },
     ],
   },
@@ -292,58 +207,47 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Recursos Humanos',
     icon: Users,
     resources: [
-      {
-        label: 'Ausências',
-        subtitle: 'aprovar, cancelar',
-        backendResources: ['hr.absences'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
+      // Cadastros
       {
         label: 'Cargos',
+        group: 'Cadastros',
         backendResources: ['hr.positions'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
-      },
-      {
-        label: 'Colaboradores',
-        subtitle: 'suspender, reativar, licença',
-        backendResources: ['hr.employees'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'import',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Departamentos',
+        group: 'Cadastros',
         backendResources: ['hr.departments'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Escalas de Trabalho',
+        group: 'Cadastros',
         backendResources: ['hr.work-schedules'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
+      },
+      // Operações
+      {
+        label: 'Colaboradores',
+        group: 'Operações',
+        backendResources: ['hr.employees'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export', 'admin'],
       },
       {
         label: 'Férias',
-        subtitle: 'aprovar',
+        group: 'Operações',
         backendResources: ['hr.vacations', 'hr.vacation-periods'],
-        availableActions: ['create', 'update', 'manage', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'admin'],
+      },
+      {
+        label: 'Ausências',
+        group: 'Operações',
+        backendResources: ['hr.absences'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Folha de Pagamento',
-        subtitle: 'bônus, descontos, processar',
+        group: 'Operações',
         backendResources: [
           'hr.payrolls',
           'hr.bonuses',
@@ -351,18 +255,18 @@ export const MATRIX_TABS: MatrixTab[] = [
           'hr.fiscal-settings',
           'hr.stakeholders',
         ],
-        availableActions: ['create', 'export', 'manage', 'list', 'read'],
+        availableActions: ['access', 'register', 'export', 'admin'],
       },
       {
         label: 'Ponto',
-        subtitle: 'controle de ponto, banco de horas',
+        group: 'Operações',
         backendResources: [
           'hr.time-entries',
           'hr.time-control',
           'hr.time-bank',
           'hr.overtime',
         ],
-        availableActions: ['create', 'export', 'list', 'read'],
+        availableActions: ['access', 'register', 'export'],
       },
     ],
   },
@@ -373,41 +277,29 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Vendas',
     icon: ShoppingCart,
     resources: [
+      // Cadastros
       {
         label: 'Clientes',
+        group: 'Cadastros',
         backendResources: ['sales.customers'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'import',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'import', 'export'],
       },
       {
+        label: 'Promoções',
+        group: 'Cadastros',
+        backendResources: ['sales.promotions'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
+      },
+      // Operações
+      {
         label: 'Pedidos',
-        subtitle: 'alterar status, cancelar',
+        group: 'Operações',
         backendResources: [
           'sales.orders',
           'sales.reservations',
           'sales.comments',
         ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Promoções',
-        backendResources: ['sales.promotions'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
       },
     ],
   },
@@ -418,39 +310,21 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Administração',
     icon: Building2,
     resources: [
+      // Gestão
       {
-        label: 'Auditoria: Logs',
-        subtitle: 'comparar, histórico, rollback',
+        label: 'Usuários',
+        group: 'Gestão',
         backendResources: [
-          'audit.logs',
-          'audit.history',
-          'audit.compare',
-          'audit.rollback',
+          'core.users',
+          'core.teams',
+          'core.teams.members',
+          'core.teams.emails',
         ],
-        availableActions: ['manage', 'list', 'read'],
-      },
-      {
-        label: 'Empresas',
-        subtitle: 'endereços, CNAEs, fiscal, sócios',
-        backendResources: [
-          'admin.companies',
-          'admin.company-addresses',
-          'admin.company-cnaes',
-          'admin.company-fiscal-settings',
-          'admin.company-stakeholder',
-        ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Grupos de Permissão',
-        subtitle: 'atribuir permissões',
+        group: 'Gestão',
         backendResources: [
           'rbac.groups',
           'rbac.permissions',
@@ -458,38 +332,37 @@ export const MATRIX_TABS: MatrixTab[] = [
           'rbac.user-groups',
           'rbac.user-permissions',
         ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
+      {
+        label: 'Empresas',
+        group: 'Gestão',
+        backendResources: [
+          'admin.companies',
+          'admin.company-addresses',
+          'admin.company-cnaes',
+          'admin.company-fiscal-settings',
+          'admin.company-stakeholder',
+        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
+      },
+      // Sistema
       {
         label: 'Sessões',
-        subtitle: 'revogar sessões',
+        group: 'Sistema',
         backendResources: ['core.sessions'],
-        availableActions: ['manage', 'list', 'read'],
+        availableActions: ['access', 'admin'],
       },
       {
-        label: 'Usuários',
-        subtitle: 'atribuir grupos, permissões diretas',
+        label: 'Auditoria',
+        group: 'Sistema',
         backendResources: [
-          'core.users',
-          'core.teams',
-          'core.teams.members',
-          'core.teams.emails',
+          'audit.logs',
+          'audit.history',
+          'audit.compare',
+          'audit.rollback',
         ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'admin'],
       },
     ],
   },
@@ -500,81 +373,29 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Ferramentas',
     icon: Wrench,
     resources: [
-      {
-        label: 'Agenda',
-        subtitle: 'compartilhar, participantes, lembretes',
-        backendResources: [
-          'calendar.events',
-          'calendar.participants',
-          'calendar.reminders',
-        ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'export',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Armazenamento: Arquivos',
-        subtitle: 'versões, compartilhar, download',
-        backendResources: [
-          'storage.files',
-          'storage.versions',
-          'storage.stats',
-          'storage.security',
-        ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
-      {
-        label: 'Armazenamento: Pastas',
-        subtitle: 'compartilhar com usuário/grupo',
-        backendResources: [
-          'storage.user-folders',
-          'storage.filter-folders',
-          'storage.system-folders',
-          'storage.interface',
-        ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
-      },
+      // Comunicação
       {
         label: 'Email: Contas',
-        subtitle: 'compartilhar, sincronizar',
+        group: 'Comunicação',
         backendResources: ['email.accounts', 'email.sync'],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Email: Mensagens',
+        group: 'Comunicação',
         backendResources: ['email.messages'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
+      },
+      // Produtividade
+      {
+        label: 'Tarefas: Quadros',
+        group: 'Produtividade',
+        backendResources: ['tasks.boards'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Tarefas: Cartões',
-        subtitle: 'mover, atribuir, anexos, comentários',
+        group: 'Produtividade',
         backendResources: [
           'tasks.cards',
           'tasks.comments',
@@ -583,19 +404,40 @@ export const MATRIX_TABS: MatrixTab[] = [
           'tasks.attachments',
           'tasks.watchers',
         ],
-        availableActions: [
-          'create',
-          'update',
-          'delete',
-          'manage',
-          'list',
-          'read',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
-        label: 'Tarefas: Quadros',
-        backendResources: ['tasks.boards'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        label: 'Agenda',
+        group: 'Produtividade',
+        backendResources: [
+          'calendar.events',
+          'calendar.participants',
+          'calendar.reminders',
+        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin'],
+      },
+      // Arquivos
+      {
+        label: 'Pastas',
+        group: 'Arquivos',
+        backendResources: [
+          'storage.user-folders',
+          'storage.filter-folders',
+          'storage.system-folders',
+          'storage.interface',
+        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
+      },
+      {
+        label: 'Arquivos',
+        group: 'Arquivos',
+        backendResources: [
+          'storage.files',
+          'storage.versions',
+          'storage.stats',
+          'storage.security',
+        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
     ],
   },
@@ -608,18 +450,19 @@ export const MATRIX_TABS: MatrixTab[] = [
     resources: [
       {
         label: 'Modelos de Etiqueta',
+        group: 'Geral',
         backendResources: ['core.label-templates'],
-        availableActions: ['create', 'update', 'delete', 'list', 'read'],
+        availableActions: ['access', 'register', 'modify', 'remove'],
       },
       {
         label: 'Notificações',
-        subtitle: 'enviar, agendar',
+        group: 'Geral',
         backendResources: ['notifications._root'],
-        availableActions: ['manage'],
+        availableActions: ['admin'],
       },
       {
         label: 'Permissões Pessoais',
-        subtitle: 'perfil, sessões, férias, ausências, ponto',
+        group: 'Geral',
         backendResources: [
           'self.profile',
           'self.sessions',
@@ -636,7 +479,7 @@ export const MATRIX_TABS: MatrixTab[] = [
           'self.overtime',
           'self.requests',
         ],
-        availableActions: ['update', 'manage', 'read'],
+        availableActions: ['access', 'modify', 'admin'],
       },
     ],
   },
@@ -667,23 +510,40 @@ export function buildBackendResourceToTabMap(): Map<
   return map;
 }
 
-const STANDARD_ACTION_SET = new Set<string>(STANDARD_ACTIONS);
+/**
+ * Maps a backend action string to one of the 7 humanized actions.
+ *
+ * Backend actions `list` and `read` both map to `access`.
+ * `create` → `register`, `update` → `modify`, `delete` → `remove`,
+ * `manage` → `admin`. `import` and `export` stay as-is.
+ * Any unknown action maps to `admin`.
+ */
+const BACKEND_ACTION_MAP: Record<string, StandardAction> = {
+  list: 'access',
+  read: 'access',
+  create: 'register',
+  update: 'modify',
+  delete: 'remove',
+  import: 'import',
+  export: 'export',
+  manage: 'admin',
+};
+
+export function mapActionToStandard(action: string): StandardAction {
+  return BACKEND_ACTION_MAP[action] ?? 'admin';
+}
 
 /**
- * Maps any backend action string to one of the 8 standard actions.
- *
- * If the action is already one of the 8 standard actions, it is returned as-is.
- * Otherwise it is bucketed under `'manage'`.
- *
- * **Note:** When computing a `ResourcePermissionMap`, if this function returns
- * `'manage'` for a non-standard action but the resource's `availableActions`
- * does not include `'manage'`, you should dynamically add `'manage'` to
- * `availableActions` for that resource.
+ * Extracts unique ordered group names from a tab's resources.
  */
-export function mapActionToStandard(action: string): StandardAction {
-  if (STANDARD_ACTION_SET.has(action)) {
-    return action as StandardAction;
+export function getResourceGroups(tab: MatrixTab): string[] {
+  const seen = new Set<string>();
+  const groups: string[] = [];
+  for (const r of tab.resources) {
+    if (!seen.has(r.group)) {
+      seen.add(r.group);
+      groups.push(r.group);
+    }
   }
-
-  return 'manage';
+  return groups;
 }
