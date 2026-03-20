@@ -967,10 +967,15 @@ body {
   overflow: hidden !important;
 }
 
-/* Header cells (column labels) */
+/* Header cells (column labels) — slate tones */
 .Spreadsheet__header {
   font-weight: 600 !important;
-  color: var(--spreadsheet-cell-text) !important;
+  color: rgb(var(--os-slate-500)) !important;
+}
+
+.dark .Spreadsheet__header,
+.Spreadsheet--dark-mode .Spreadsheet__header {
+  color: rgb(var(--os-slate-400)) !important;
 }
 
 /* Selected headers — override lib's hardcoded #5f6268 */
