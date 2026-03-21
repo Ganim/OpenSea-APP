@@ -8,3 +8,7 @@ export * from './comment.types';
 export * from './promotion.types';
 export * from './reservation.types';
 export * from './notification.types';
+export * from './price-table.types';
+export * from './campaign.types';
+export * from './coupon.types';
+export * from './combo.types';

@@ -6,3 +6,7 @@ export * from './use-activities';
 export * from './use-timeline';
 export * from './use-sales-orders';
 export * from './use-sales-other';
+export * from './use-price-tables';
+export * from './use-campaigns';
+export * from './use-coupons';
+export * from './use-combos';

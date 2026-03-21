@@ -6,3 +6,7 @@ export * from './activities.service';
 export * from './timeline.service';
 export * from './other.service';
 export * from './sales-orders.service';
+export * from './price-tables.service';
+export * from './campaigns.service';
+export * from './coupons.service';
+export * from './combos.service';
