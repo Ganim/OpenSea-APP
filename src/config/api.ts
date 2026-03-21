@@ -968,6 +968,27 @@ export const API_ENDPOINTS = {
       MOVEMENT: '/v1/pos/cash/movement',
     },
   },
+  // Sales - Bids (Licitacoes)
+  BIDS: {
+    LIST: '/v1/bids',
+    GET: (id: string) => `/v1/bids/${id}`,
+    CREATE: '/v1/bids',
+    UPDATE: (id: string) => `/v1/bids/${id}`,
+    DELETE: (id: string) => `/v1/bids/${id}`,
+    ITEMS: (bidId: string) => `/v1/bids/${bidId}/items`,
+    HISTORY: (bidId: string) => `/v1/bids/${bidId}/history`,
+  },
+  BID_DOCUMENTS: {
+    LIST: '/v1/bid-documents',
+    CREATE: '/v1/bid-documents',
+  },
+  BID_CONTRACTS: {
+    LIST: '/v1/bid-contracts',
+    CREATE: '/v1/bid-contracts',
+  },
+  BID_EMPENHOS: {
+    CREATE: '/v1/bid-empenhos',
+  },
   // Health
   HEALTH: '/health',
 } as const;

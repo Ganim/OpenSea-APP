@@ -11,3 +11,4 @@ export * from './use-campaigns';
 export * from './use-coupons';
 export * from './use-combos';
 export * from './use-pos';
+export * from './use-bids';
