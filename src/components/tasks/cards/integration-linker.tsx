@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { CardIntegration, IntegrationType } from '@/types/tasks';
 import { INTEGRATION_CONFIG } from '@/types/tasks';
+import { IntegrationSearchModal } from './integration-search-modal';
 
 import { customersService } from '@/services/sales/customers.service';
 import { productsService } from '@/services/stock/products.service';
@@ -82,6 +83,7 @@ export function IntegrationLinker({
   onRemove,
 }: IntegrationLinkerProps) {
   const [open, setOpen] = useState(false);
+  const [modalType, setModalType] = useState<IntegrationType | null>(null);
   const [typeSearch, setTypeSearch] = useState('');
   const [selectedType, setSelectedType] = useState<IntegrationType | null>(null);
   const [entitySearch, setEntitySearch] = useState('');
@@ -162,8 +164,14 @@ export function IntegrationLinker({
   function handleTypeClick(type: IntegrationType) {
     const config = INTEGRATION_CONFIG[type];
 
-    // Modal-based types are not yet implemented
     if (config.interaction === 'modal') {
+      if (type === 'FINANCE_ENTRY') {
+        setOpen(false);
+        setTypeSearch('');
+        setModalType(type);
+        return;
+      }
+      // Other modal types not yet implemented
       toast.info('Em breve');
       setOpen(false);
       setTypeSearch('');
@@ -325,6 +333,21 @@ export function IntegrationLinker({
           )}
         </PopoverContent>
       </Popover>
+
+      {/* Modal-based integration search */}
+      {modalType && (
+        <IntegrationSearchModal
+          open={!!modalType}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setModalType(null);
+          }}
+          type={modalType}
+          onSelect={(entityId, entityLabel) => {
+            onAdd(modalType, entityId, entityLabel);
+            setModalType(null);
+          }}
+        />
+      )}
     </div>
   );
 }
