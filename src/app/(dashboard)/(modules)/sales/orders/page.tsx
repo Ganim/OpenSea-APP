@@ -25,7 +25,7 @@ import {
   useDeleteOrder,
   type OrdersFilters,
 } from '@/hooks/sales/use-orders';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { OrderDTO } from '@/types/sales';
 import {
   ClipboardList,
@@ -82,10 +82,10 @@ function formatCurrency(value: number): string {
 export default function OrdersPage() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
-  const canCreate = hasPermission(PERMISSIONS.SALES.ORDERS.REGISTER);
-  const canView = hasPermission(PERMISSIONS.SALES.ORDERS.ACCESS);
-  const canEdit = hasPermission(PERMISSIONS.SALES.ORDERS.MODIFY);
-  const canDelete = hasPermission(PERMISSIONS.SALES.ORDERS.REMOVE);
+  const canCreate = hasPermission(SALES_PERMISSIONS.ORDERS.REGISTER);
+  const canView = hasPermission(SALES_PERMISSIONS.ORDERS.ACCESS);
+  const canEdit = hasPermission(SALES_PERMISSIONS.ORDERS.MODIFY);
+  const canDelete = hasPermission(SALES_PERMISSIONS.ORDERS.REMOVE);
 
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<OrdersFilters>({});

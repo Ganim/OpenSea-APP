@@ -20,7 +20,7 @@ import {
   useCancelOrder,
   useConvertQuote,
 } from '@/hooks/sales/use-orders';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { AiContextPanel } from '@/components/sales/ai-context-panel';
 import {
   CheckCircle,
@@ -70,8 +70,8 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const orderId = params.id as string;
   const { hasPermission } = usePermissions();
-  const canEdit = hasPermission(PERMISSIONS.SALES.ORDERS.MODIFY);
-  const canDelete = hasPermission(PERMISSIONS.SALES.ORDERS.REMOVE);
+  const canEdit = hasPermission(SALES_PERMISSIONS.ORDERS.MODIFY);
+  const canDelete = hasPermission(SALES_PERMISSIONS.ORDERS.REMOVE);
 
   const { data, isLoading, error } = useOrder(orderId);
   const deleteOrder = useDeleteOrder();

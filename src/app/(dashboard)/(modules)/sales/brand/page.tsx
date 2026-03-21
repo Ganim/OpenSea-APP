@@ -14,14 +14,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useBrand, useUpdateBrand } from '@/hooks/sales/use-catalogs';
 import { usePermissions } from '@/hooks/use-permissions';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { Palette, Save, Type } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function BrandPage() {
   const { hasPermission } = usePermissions();
-  const canEdit = hasPermission(PERMISSIONS.SALES.BRAND.MODIFY);
+  const canEdit = hasPermission(SALES_PERMISSIONS.BRAND.MODIFY);
 
   const { data, isLoading, error } = useBrand();
   const updateMutation = useUpdateBrand();

@@ -28,7 +28,7 @@ import {
   useDeleteCatalog,
 } from '@/hooks/sales/use-catalogs';
 import { usePermissions } from '@/hooks/use-permissions';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
   BookOpen,
   Calendar,
@@ -45,7 +45,7 @@ export default function EditCatalogPage() {
   const catalogId = params.id as string;
   const { hasPermission } = usePermissions();
 
-  const canDelete = hasPermission(PERMISSIONS.SALES.CATALOGS.REMOVE);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.REMOVE);
 
   const { data, isLoading, error } = useCatalog(catalogId);
   const updateMutation = useUpdateCatalog();

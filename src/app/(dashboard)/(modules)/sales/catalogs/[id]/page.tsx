@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCatalog } from '@/hooks/sales/use-catalogs';
 import { usePermissions } from '@/hooks/use-permissions';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { AiContextPanel } from '@/components/sales/ai-context-panel';
 import {
   BookOpen,
@@ -57,7 +57,7 @@ export default function CatalogDetailPage() {
   const catalogId = params.id as string;
   const { hasPermission } = usePermissions();
 
-  const canEdit = hasPermission(PERMISSIONS.SALES.CATALOGS.MODIFY);
+  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.MODIFY);
 
   const { data, isLoading, error } = useCatalog(catalogId);
   const catalog = data?.catalog;

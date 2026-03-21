@@ -22,7 +22,7 @@ import {
   useDeleteCatalog,
 } from '@/hooks/sales/use-catalogs';
 import { useDebounce } from '@/hooks/use-debounce';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { Catalog } from '@/types/sales';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { Button } from '@/components/ui/button';
@@ -59,10 +59,10 @@ export default function CatalogsPage() {
   const { hasPermission } = usePermissions();
 
   // Permissions
-  const canView = hasPermission(PERMISSIONS.SALES.CATALOGS.ACCESS);
-  const canCreate = hasPermission(PERMISSIONS.SALES.CATALOGS.REGISTER);
-  const canEdit = hasPermission(PERMISSIONS.SALES.CATALOGS.MODIFY);
-  const canDelete = hasPermission(PERMISSIONS.SALES.CATALOGS.REMOVE);
+  const canView = hasPermission(SALES_PERMISSIONS.CATALOGS.ACCESS);
+  const canCreate = hasPermission(SALES_PERMISSIONS.CATALOGS.REGISTER);
+  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.MODIFY);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.REMOVE);
 
   // State
   const [searchQuery, setSearchQuery] = useState('');

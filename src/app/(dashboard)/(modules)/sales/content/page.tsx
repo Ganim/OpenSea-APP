@@ -22,7 +22,7 @@ import {
   useApproveContent,
 } from '@/hooks/sales/use-catalogs';
 import { useDebounce } from '@/hooks/use-debounce';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { GeneratedContent } from '@/types/sales';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { Badge } from '@/components/ui/badge';
@@ -92,9 +92,9 @@ function getTypeIcon(type: string) {
 export default function ContentPage() {
   const { hasPermission } = usePermissions();
 
-  const canView = hasPermission(PERMISSIONS.SALES.CONTENT.ACCESS);
-  const canDelete = hasPermission(PERMISSIONS.SALES.CONTENT.REMOVE);
-  const canApprove = hasPermission(PERMISSIONS.SALES.CONTENT.ADMIN);
+  const canView = hasPermission(SALES_PERMISSIONS.CONTENT.ACCESS);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CONTENT.REMOVE);
+  const canApprove = hasPermission(SALES_PERMISSIONS.CONTENT.ADMIN);
 
   // State
   const [searchQuery, setSearchQuery] = useState('');

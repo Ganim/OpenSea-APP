@@ -18,7 +18,7 @@ import {
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useReturnsInfinite } from '@/hooks/sales/use-returns';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { OrderReturnDTO } from '@/types/sales';
 import { RotateCcw } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -67,7 +67,7 @@ function formatCurrency(value: number): string {
 
 export default function ReturnsPage() {
   const { hasPermission } = usePermissions();
-  const canView = hasPermission(PERMISSIONS.SALES.ORDERS.ACCESS);
+  const canView = hasPermission(SALES_PERMISSIONS.ORDERS.ACCESS);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
