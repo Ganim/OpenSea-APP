@@ -76,7 +76,7 @@ export const STOCK_PERMISSIONS = {
     'admin',
     'onlyself'
   ),
-  TEMPLATES: perm('stock', 'templates', 'access', 'register', 'modify', 'remove'),
+  TEMPLATES: perm('stock', 'templates', 'access', 'register', 'modify', 'remove', 'import'),
   CATEGORIES: perm(
     'stock',
     'categories',
@@ -97,7 +97,7 @@ export const STOCK_PERMISSIONS = {
     'import',
     'export'
   ),
-  ITEMS: perm('stock', 'items', 'access', 'export', 'print', 'admin'),
+  ITEMS: perm('stock', 'items', 'access', 'export', 'print', 'admin', 'import'),
   PURCHASE_ORDERS: perm(
     'stock',
     'purchase-orders',
@@ -233,14 +233,15 @@ export const FINANCE_PERMISSIONS = {
 // =============================================================================
 
 export const HR_PERMISSIONS = {
-  POSITIONS: perm('hr', 'positions', 'access', 'register', 'modify', 'remove'),
+  POSITIONS: perm('hr', 'positions', 'access', 'register', 'modify', 'remove', 'import'),
   DEPARTMENTS: perm(
     'hr',
     'departments',
     'access',
     'register',
     'modify',
-    'remove'
+    'remove',
+    'import'
   ),
   WORK_SCHEDULES: perm(
     'hr',
@@ -344,7 +345,8 @@ export const ADMIN_PERMISSIONS = {
     'register',
     'modify',
     'remove',
-    'admin'
+    'admin',
+    'import'
   ),
   PERMISSION_GROUPS: perm(
     'admin',
@@ -362,7 +364,8 @@ export const ADMIN_PERMISSIONS = {
     'register',
     'modify',
     'remove',
-    'admin'
+    'admin',
+    'import'
   ),
   SESSIONS: perm('admin', 'sessions', 'access', 'admin'),
   AUDIT: perm('admin', 'audit', 'access', 'export', 'admin'),
