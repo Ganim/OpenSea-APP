@@ -17,7 +17,6 @@ export const FINANCE_CARD_GRADIENTS = {
   bankAccounts: 'from-purple-500 to-purple-600',
   costCenters: 'from-emerald-500 to-emerald-600',
   categories: 'from-cyan-500 to-cyan-600',
-  companies: 'from-indigo-500 to-indigo-600',
 
   // Crédito
   loans: 'from-orange-500 to-orange-600',
@@ -45,7 +44,6 @@ export const FINANCE_CARD_HOVER_BG = {
   bankAccounts: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
   costCenters: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
   categories: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
-  companies: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
   loans: 'hover:bg-orange-50 dark:hover:bg-orange-500/10',
   consortia: 'hover:bg-pink-50 dark:hover:bg-pink-500/10',
   contracts: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',

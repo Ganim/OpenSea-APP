@@ -126,15 +126,6 @@ const sections: {
         gradient: FINANCE_CARD_GRADIENTS.categories,
         hoverBg: FINANCE_CARD_HOVER_BG.categories,
       },
-      {
-        id: 'companies',
-        title: 'Empresas',
-        description: 'Cadastro de empresas vinculadas',
-        icon: Building2,
-        href: '/finance/companies',
-        gradient: FINANCE_CARD_GRADIENTS.companies,
-        hoverBg: FINANCE_CARD_HOVER_BG.companies,
-      },
     ],
   },
   {
