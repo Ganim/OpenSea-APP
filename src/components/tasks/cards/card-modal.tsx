@@ -39,7 +39,7 @@ import { useBoard } from '@/hooks/tasks/use-boards';
 import { useLabels } from '@/hooks/tasks/use-labels';
 import { useCustomFields, useSetCustomFieldValues } from '@/hooks/tasks/use-custom-fields';
 import { useAttachments, useUploadAttachment, useDeleteAttachment } from '@/hooks/tasks/use-attachments';
-import { useIntegrations, useDeleteIntegration } from '@/hooks/tasks/use-integrations';
+import { useIntegrations, useCreateIntegration, useDeleteIntegration } from '@/hooks/tasks/use-integrations';
 import { useCardMembers, useAddCardMember, useRemoveCardMember } from '@/hooks/tasks/use-card-members';
 import { useComments, useCreateComment } from '@/hooks/tasks/use-comments';
 
@@ -49,7 +49,7 @@ import { CardModalGeneralTab } from './card-modal-general-tab';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { getGradientForBoard } from '@/components/tasks/shared/board-gradients';
 import { storageFilesService } from '@/services/storage/files.service';
-import { attachmentsService } from '@/services/tasks';
+import { attachmentsService, integrationsService } from '@/services/tasks';
 
 import type {
   CardPriority,
@@ -160,6 +160,7 @@ export function CardModal({
   const setFieldValues = useSetCustomFieldValues(boardId);
   const uploadAttachment = useUploadAttachment(boardId, cardId ?? '');
   const deleteAttachment = useDeleteAttachment(boardId, cardId ?? '');
+  const createIntegration = useCreateIntegration(boardId, cardId ?? '');
   const deleteIntegration = useDeleteIntegration(boardId, cardId ?? '');
   const addCardMember = useAddCardMember(boardId, cardId ?? '');
   const removeCardMember = useRemoveCardMember(boardId, cardId ?? '');
@@ -184,6 +185,9 @@ export function CardModal({
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [pendingIntegrations, setPendingIntegrations] = useState<
+    { type: IntegrationType; entityId: string; entityLabel: string }[]
+  >([]);
 
   const initializedRef = useRef(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -493,10 +497,23 @@ export function CardModal({
   );
 
   const handleAddIntegration = useCallback(
-    (_type: IntegrationType, _entityId: string, _entityLabel: string) => {
-      toast.info('Em breve — busca de integrações será implementada');
+    (type: IntegrationType, entityId: string, entityLabel: string) => {
+      if (isEditMode && cardId) {
+        createIntegration.mutate(
+          { type, entityId, entityLabel },
+          {
+            onSuccess: () => toast.success('Integração adicionada'),
+            onError: () =>
+              toast.error('Não foi possível adicionar a integração. Tente novamente.'),
+          }
+        );
+      } else {
+        // Create mode — buffer locally
+        setPendingIntegrations((prev) => [...prev, { type, entityId, entityLabel }]);
+        toast.success('Integração será criada ao salvar o cartão');
+      }
     },
-    []
+    [isEditMode, cardId, createIntegration]
   );
 
   const handleRemoveIntegration = useCallback(
@@ -506,6 +523,9 @@ export function CardModal({
           onSuccess: () => toast.success('Integração removida'),
           onError: () => toast.error('Não foi possível remover a integração. Tente novamente.'),
         });
+      } else if (integrationId.startsWith('pending-')) {
+        const idx = parseInt(integrationId.replace('pending-', ''), 10);
+        setPendingIntegrations((prev) => prev.filter((_, i) => i !== idx));
       }
     },
     [isEditMode, deleteIntegration]
@@ -626,6 +646,17 @@ export function CardModal({
           );
         }
 
+        // Create pending integrations
+        for (const integration of pendingIntegrations) {
+          promises.push(
+            integrationsService.create(boardId, newCardId, {
+              type: integration.type,
+              entityId: integration.entityId,
+              entityLabel: integration.entityLabel,
+            })
+          );
+        }
+
         // Upload pending files
         for (const file of pendingFiles) {
           promises.push(
@@ -663,7 +694,7 @@ export function CardModal({
   }, [
     title, description, columnId, priority, assigneeId, dueDate, startDate,
     estimatedHours, selectedLabelIds, parentCardId, customFieldValues, pendingFiles,
-    boardId, createCard, setFieldValues, onOpenChange,
+    pendingIntegrations, boardId, createCard, setFieldValues, onOpenChange,
   ]);
 
   // ── Save (edit mode) — batch custom fields ──
@@ -932,7 +963,19 @@ export function CardModal({
                   onParentCardChange={setParentCardId}
                   estimatedHours={estimatedHours}
                   onEstimatedHoursChange={handleEstimatedHoursChange}
-                  integrations={isEditMode ? integrations : []}
+                  integrations={
+                    isEditMode
+                      ? integrations
+                      : pendingIntegrations.map((pi, idx) => ({
+                          id: `pending-${idx}`,
+                          cardId: '',
+                          type: pi.type,
+                          entityId: pi.entityId,
+                          entityLabel: pi.entityLabel,
+                          createdAt: new Date().toISOString(),
+                          createdBy: '',
+                        }))
+                  }
                   onAddIntegration={handleAddIntegration}
                   onRemoveIntegration={handleRemoveIntegration}
                 />

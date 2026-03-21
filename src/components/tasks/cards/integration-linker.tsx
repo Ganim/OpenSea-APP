@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, X, Search } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Plus, X, Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Popover,
@@ -13,36 +13,184 @@ import { cn } from '@/lib/utils';
 import type { CardIntegration, IntegrationType } from '@/types/tasks';
 import { INTEGRATION_CONFIG } from '@/types/tasks';
 
+import { customersService } from '@/services/sales/customers.service';
+import { productsService } from '@/services/stock/products.service';
+import { departmentsService } from '@/services/hr/departments.service';
+import { calendarEventsService } from '@/services/calendar/calendar-events.service';
+
 interface IntegrationLinkerProps {
   integrations: CardIntegration[];
   onAdd: (type: IntegrationType, entityId: string, entityLabel: string) => void;
   onRemove: (integrationId: string) => void;
 }
 
+interface SearchResult {
+  id: string;
+  label: string;
+}
+
 const INTEGRATION_TYPES = Object.keys(INTEGRATION_CONFIG) as IntegrationType[];
+
+async function searchEntities(
+  type: IntegrationType,
+  search: string
+): Promise<SearchResult[]> {
+  switch (type) {
+    case 'CUSTOMER': {
+      const response = await customersService.listCustomers();
+      const filtered = search
+        ? response.customers.filter((c) =>
+            c.name.toLowerCase().includes(search.toLowerCase())
+          )
+        : response.customers;
+      return filtered.slice(0, 10).map((c) => ({ id: c.id, label: c.name }));
+    }
+    case 'PRODUCT': {
+      const response = await productsService.list({
+        search: search || undefined,
+        limit: 10,
+      });
+      return response.products.map((p) => ({ id: p.id, label: p.name }));
+    }
+    case 'DEPARTMENT': {
+      const response = await departmentsService.listDepartments({
+        search: search || undefined,
+        perPage: 10,
+      });
+      return response.departments.map((d) => ({ id: d.id, label: d.name }));
+    }
+    case 'CALENDAR_EVENT': {
+      const now = new Date();
+      const startDate = new Date(now.getTime() - 30 * 86400000).toISOString();
+      const endDate = new Date(now.getTime() + 90 * 86400000).toISOString();
+      const response = await calendarEventsService.list({
+        startDate,
+        endDate,
+        search: search || undefined,
+        limit: 10,
+      });
+      return response.events.map((e) => ({ id: e.id, label: e.title }));
+    }
+    default:
+      return [];
+  }
+}
 
 export function IntegrationLinker({
   integrations,
+  onAdd,
   onRemove,
 }: IntegrationLinkerProps) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [typeSearch, setTypeSearch] = useState('');
+  const [selectedType, setSelectedType] = useState<IntegrationType | null>(null);
+  const [entitySearch, setEntitySearch] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const filteredTypes = INTEGRATION_TYPES.filter(type => {
+  const filteredTypes = INTEGRATION_TYPES.filter((type) => {
     const config = INTEGRATION_CONFIG[type];
-    return config.label.toLowerCase().includes(search.toLowerCase());
+    return config.label.toLowerCase().includes(typeSearch.toLowerCase());
   });
 
-  function handleTypeClick(_type: IntegrationType) {
-    toast.info('Em breve — busca de integrações será implementada');
+  // Reset state when popover closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedType(null);
+      setTypeSearch('');
+      setEntitySearch('');
+      setResults([]);
+      setIsLoading(false);
+    }
+  }, [open]);
+
+  // Auto-focus search input when entering search mode
+  useEffect(() => {
+    if (selectedType) {
+      // Small delay so the DOM updates before focusing
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedType]);
+
+  const doSearch = useCallback(
+    async (type: IntegrationType, term: string) => {
+      setIsLoading(true);
+      try {
+        const data = await searchEntities(type, term);
+        setResults(data);
+      } catch {
+        toast.error('Erro ao buscar registros. Tente novamente.');
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  // Trigger initial search when type is selected
+  useEffect(() => {
+    if (selectedType) {
+      doSearch(selectedType, '');
+    }
+  }, [selectedType, doSearch]);
+
+  // Debounced search on entity search term change
+  useEffect(() => {
+    if (!selectedType) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      doSearch(selectedType, entitySearch);
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [entitySearch, selectedType, doSearch]);
+
+  function handleTypeClick(type: IntegrationType) {
+    const config = INTEGRATION_CONFIG[type];
+
+    // Modal-based types are not yet implemented
+    if (config.interaction === 'modal') {
+      toast.info('Em breve');
+      setOpen(false);
+      setTypeSearch('');
+      return;
+    }
+
+    setSelectedType(type);
+    setEntitySearch('');
+    setResults([]);
+  }
+
+  function handleResultClick(result: SearchResult) {
+    if (!selectedType) return;
+    onAdd(selectedType, result.id, result.label);
     setOpen(false);
-    setSearch('');
+  }
+
+  function handleBack() {
+    setSelectedType(null);
+    setEntitySearch('');
+    setResults([]);
   }
 
   return (
     <div className="space-y-1.5">
       {/* Existing integrations */}
-      {integrations.map(integration => {
+      {integrations.map((integration) => {
         const config = INTEGRATION_CONFIG[integration.type];
         return (
           <div
@@ -83,37 +231,98 @@ export function IntegrationLinker({
             Vincular
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-52 p-2" align="start">
-          <div className="relative mb-2">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar tipo..."
-              className="h-7 text-xs pl-7"
-            />
-          </div>
-          <div className="space-y-0.5 max-h-48 overflow-y-auto">
-            {filteredTypes.map(type => {
-              const config = INTEGRATION_CONFIG[type];
-              return (
+        <PopoverContent className="w-56 p-2" align="start">
+          {selectedType ? (
+            /* ── Search view ── */
+            <div>
+              {/* Header with back button */}
+              <div className="flex items-center gap-1.5 mb-2">
                 <button
-                  key={type}
                   type="button"
-                  className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted transition-colors"
-                  onClick={() => handleTypeClick(type)}
+                  className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  onClick={handleBack}
                 >
-                  <span>{config.icon}</span>
-                  <span>{config.label}</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
                 </button>
-              );
-            })}
-            {filteredTypes.length === 0 && (
-              <p className="text-[10px] text-muted-foreground px-2 py-2">
-                Nenhum tipo encontrado
-              </p>
-            )}
-          </div>
+                <span className="text-xs font-medium truncate">
+                  Buscar {INTEGRATION_CONFIG[selectedType].label}
+                </span>
+              </div>
+
+              {/* Search input */}
+              <div className="relative mb-2">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  ref={searchInputRef}
+                  value={entitySearch}
+                  onChange={(e) => setEntitySearch(e.target.value)}
+                  placeholder="Digite para buscar..."
+                  className="h-7 text-xs pl-7"
+                />
+              </div>
+
+              {/* Results */}
+              <div className="max-h-48 overflow-y-auto space-y-0.5">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                ) : results.length > 0 ? (
+                  results.map((result) => (
+                    <button
+                      key={result.id}
+                      type="button"
+                      className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted transition-colors text-left"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      <span className="shrink-0">
+                        {INTEGRATION_CONFIG[selectedType].icon}
+                      </span>
+                      <span className="truncate">{result.label}</span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-muted-foreground px-2 py-2 text-center">
+                    Nenhum resultado encontrado
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* ── Type list view ── */
+            <div>
+              <div className="relative mb-2">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  value={typeSearch}
+                  onChange={(e) => setTypeSearch(e.target.value)}
+                  placeholder="Buscar tipo..."
+                  className="h-7 text-xs pl-7"
+                />
+              </div>
+              <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                {filteredTypes.map((type) => {
+                  const config = INTEGRATION_CONFIG[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted transition-colors"
+                      onClick={() => handleTypeClick(type)}
+                    >
+                      <span>{config.icon}</span>
+                      <span>{config.label}</span>
+                    </button>
+                  );
+                })}
+                {filteredTypes.length === 0 && (
+                  <p className="text-[10px] text-muted-foreground px-2 py-2">
+                    Nenhum tipo encontrado
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>
