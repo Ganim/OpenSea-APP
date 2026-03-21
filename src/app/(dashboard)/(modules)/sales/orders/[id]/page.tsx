@@ -21,6 +21,7 @@ import {
   useConvertQuote,
 } from '@/hooks/sales/use-orders';
 import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { AiContextPanel } from '@/components/sales/ai-context-panel';
 import {
   CheckCircle,
   FileText,
@@ -403,6 +404,9 @@ export default function OrderDetailPage() {
             </div>
           </Card>
         )}
+
+        {/* AI Insights */}
+        <AiContextPanel entityType="order" entityId={orderId} />
 
         <VerifyActionPinModal
           isOpen={deleteModalOpen}

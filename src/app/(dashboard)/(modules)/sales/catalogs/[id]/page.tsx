@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/card';
 import { useCatalog } from '@/hooks/sales/use-catalogs';
 import { usePermissions } from '@/hooks/use-permissions';
 import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { AiContextPanel } from '@/components/sales/ai-context-panel';
 import {
   BookOpen,
   Calendar,
@@ -215,6 +216,8 @@ export default function CatalogDetailPage() {
             </div>
           </div>
         </Card>
+        {/* AI Insights */}
+        <AiContextPanel entityType="catalog" entityId={catalogId} />
       </PageBody>
     </PageLayout>
   );
