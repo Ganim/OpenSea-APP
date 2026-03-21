@@ -271,6 +271,71 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/v1/customers/${id}`,
     DELETE: (id: string) => `/v1/customers/${id}`,
   },
+  // Sales - Contacts
+  CONTACTS: {
+    LIST: '/v1/contacts',
+    GET: (id: string) => `/v1/contacts/${id}`,
+    CREATE: '/v1/contacts',
+    UPDATE: (id: string) => `/v1/contacts/${id}`,
+    DELETE: (id: string) => `/v1/contacts/${id}`,
+  },
+  // Sales - Pipelines
+  PIPELINES: {
+    LIST: '/v1/pipelines',
+    GET: (id: string) => `/v1/pipelines/${id}`,
+    CREATE: '/v1/pipelines',
+    UPDATE: (id: string) => `/v1/pipelines/${id}`,
+    DELETE: (id: string) => `/v1/pipelines/${id}`,
+    STAGES: {
+      LIST: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
+      CREATE: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
+      UPDATE: (stageId: string) => `/v1/pipeline-stages/${stageId}`,
+      DELETE: (stageId: string) => `/v1/pipeline-stages/${stageId}`,
+      REORDER: (pipelineId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/reorder`,
+    },
+  },
+  // Sales - Price Tables
+  PRICE_TABLES: {
+    LIST: '/v1/price-tables',
+    GET: (id: string) => `/v1/price-tables/${id}`,
+    CREATE: '/v1/price-tables',
+    UPDATE: (id: string) => `/v1/price-tables/${id}`,
+    DELETE: (id: string) => `/v1/price-tables/${id}`,
+    ITEMS: (id: string) => `/v1/price-tables/${id}/items`,
+    UPSERT_ITEM: (id: string) => `/v1/price-tables/${id}/items`,
+    RESOLVE: '/v1/price-resolver',
+  },
+  // Sales - Customer Prices
+  CUSTOMER_PRICES: {
+    LIST: '/v1/customer-prices',
+    CREATE: '/v1/customer-prices',
+    UPDATE: (id: string) => `/v1/customer-prices/${id}`,
+    DELETE: (id: string) => `/v1/customer-prices/${id}`,
+  },
+  // Sales - Campaigns
+  CAMPAIGNS: {
+    LIST: '/v1/campaigns',
+    GET: (id: string) => `/v1/campaigns/${id}`,
+    CREATE: '/v1/campaigns',
+    UPDATE: (id: string) => `/v1/campaigns/${id}`,
+    DELETE: (id: string) => `/v1/campaigns/${id}`,
+    ACTIVATE: (id: string) => `/v1/campaigns/${id}/activate`,
+  },
+  // Sales - Coupons
+  COUPONS: {
+    LIST: '/v1/coupons',
+    CREATE: '/v1/coupons',
+    DELETE: (id: string) => `/v1/coupons/${id}`,
+    VALIDATE: '/v1/coupons/validate',
+  },
+  // Sales - Combos
+  COMBOS: {
+    LIST: '/v1/combos',
+    GET: (id: string) => `/v1/combos/${id}`,
+    CREATE: '/v1/combos',
+    DELETE: (id: string) => `/v1/combos/${id}`,
+  },
   // Sales - Sales Orders
   SALES_ORDERS: {
     LIST: '/v1/sales-orders',
