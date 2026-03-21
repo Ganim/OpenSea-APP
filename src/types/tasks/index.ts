@@ -7,6 +7,7 @@ export * from './checklist.types';
 export * from './column.types';
 export * from './comment.types';
 export * from './custom-field.types';
+export * from './integration.types';
 export * from './label.types';
 export * from './member.types';
 export * from './subtask.types';
