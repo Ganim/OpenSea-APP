@@ -239,70 +239,72 @@ function SkillModuleSection({
   return (
     <CentralCard className="overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center gap-3 p-4 text-left hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-            <ChevronRight
-              className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`}
-              style={{ color: 'var(--central-text-secondary)' }}
-            />
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{
-                backgroundColor: 'var(--central-accent)',
-                color: '#fff',
-              }}
+        <div className="flex items-center gap-3 p-4">
+          <CollapsibleTrigger asChild>
+            <button
+              className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+              type="button"
             >
-              <Icon className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: 'var(--central-text-primary)' }}
-              >
-                {node.skill.name}
-              </span>
-              <span
-                className="text-xs ml-2"
+              <ChevronRight
+                className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`}
                 style={{ color: 'var(--central-text-secondary)' }}
+              />
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{
+                  backgroundColor: 'var(--central-accent)',
+                  color: '#fff',
+                }}
               >
-                {node.skill.code}
-              </span>
-            </div>
-
-            {pricing ? (
-              <>
-                <CentralBadge
-                  variant={
-                    PRICING_BADGE_VARIANT[pricing.pricingType] ?? 'default'
-                  }
-                >
-                  {PRICING_LABELS[pricing.pricingType] ?? pricing.pricingType}
-                </CentralBadge>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
                 <span
-                  className="text-xs font-medium"
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--central-text-primary)' }}
+                >
+                  {node.skill.name}
+                </span>
+                <span
+                  className="text-xs ml-2"
                   style={{ color: 'var(--central-text-secondary)' }}
                 >
-                  {formatPricing(pricing)}
+                  {node.skill.code}
                 </span>
-              </>
-            ) : (
-              <CentralBadge variant="default">Sem preço</CentralBadge>
-            )}
+              </div>
+            </button>
+          </CollapsibleTrigger>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={e => {
-                e.stopPropagation();
-                onEdit(node);
-              }}
-            >
-              <Pencil className="w-3 h-3 mr-1" />
-              Editar
-            </Button>
-          </button>
-        </CollapsibleTrigger>
+          {pricing ? (
+            <>
+              <CentralBadge
+                variant={
+                  PRICING_BADGE_VARIANT[pricing.pricingType] ?? 'default'
+                }
+              >
+                {PRICING_LABELS[pricing.pricingType] ?? pricing.pricingType}
+              </CentralBadge>
+              <span
+                className="text-xs font-medium"
+                style={{ color: 'var(--central-text-secondary)' }}
+              >
+                {formatPricing(pricing)}
+              </span>
+            </>
+          ) : (
+            <CentralBadge variant="default">Sem preço</CentralBadge>
+          )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs shrink-0"
+            onClick={() => onEdit(node)}
+          >
+            <Pencil className="w-3 h-3 mr-1" />
+            Editar
+          </Button>
+        </div>
 
         <CollapsibleContent>
           <div
