@@ -421,6 +421,37 @@ export const API_ENDPOINTS = {
       DELETE: (id: string) => `/v1/admin/plans/${id}`,
       SET_MODULES: (id: string) => `/v1/admin/plans/${id}/modules`,
     },
+    // Catalog (Skills)
+    CATALOG: {
+      SKILLS: '/v1/admin/catalog/skills',
+      SKILL_TREE: '/v1/admin/catalog/skill-tree',
+      PRICING: '/v1/admin/catalog/pricing',
+      UPSERT_PRICING: (skillCode: string) =>
+        `/v1/admin/catalog/skills/${skillCode}/pricing`,
+    },
+    // Tenant Subscriptions
+    SUBSCRIPTIONS: {
+      GET: (tenantId: string) => `/v1/admin/tenants/${tenantId}/subscriptions`,
+      ADD: (tenantId: string) => `/v1/admin/tenants/${tenantId}/subscriptions`,
+      REMOVE: (tenantId: string, skillCode: string) =>
+        `/v1/admin/tenants/${tenantId}/subscriptions/${skillCode}`,
+      DISCOUNT: (tenantId: string) =>
+        `/v1/admin/tenants/${tenantId}/subscriptions/discount`,
+      CONSUMPTION: (tenantId: string) =>
+        `/v1/admin/tenants/${tenantId}/consumption`,
+      OVERRIDE_LIMIT: (tenantId: string) =>
+        `/v1/admin/tenants/${tenantId}/consumption/override`,
+      OVERVIEW: (tenantId: string) => `/v1/admin/tenants/${tenantId}/overview`,
+      INTEGRATIONS: (tenantId: string) =>
+        `/v1/admin/tenants/${tenantId}/integrations`,
+    },
+    // Central Team
+    TEAM: {
+      LIST: '/v1/admin/team',
+      INVITE: '/v1/admin/team',
+      UPDATE_ROLE: (userId: string) => `/v1/admin/team/${userId}/role`,
+      REMOVE: (userId: string) => `/v1/admin/team/${userId}`,
+    },
   },
   // Finance - Cost Centers
   COST_CENTERS: {

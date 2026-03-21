@@ -12,9 +12,30 @@ export const adminKeys = {
   plans: () => [...adminKeys.all, 'plans'] as const,
   plan: (id: string) => [...adminKeys.all, 'plan', id] as const,
   tenantFlags: (id: string) => [...adminKeys.all, 'tenant-flags', id] as const,
+  // Catalog
+  skillDefinitions: (module?: string) =>
+    [...adminKeys.all, 'skills', module] as const,
+  skillTree: (module?: string) =>
+    [...adminKeys.all, 'skill-tree', module] as const,
+  skillPricing: (pricingType?: string) =>
+    [...adminKeys.all, 'pricing', pricingType] as const,
+  // Tenant Subscriptions
+  tenantSubscription: (tenantId: string) =>
+    [...adminKeys.all, 'tenant', tenantId, 'subscription'] as const,
+  tenantConsumption: (tenantId: string, period?: string) =>
+    [...adminKeys.all, 'tenant', tenantId, 'consumption', period] as const,
+  tenantOverview: (tenantId: string) =>
+    [...adminKeys.all, 'tenant', tenantId, 'overview'] as const,
+  tenantIntegrations: (tenantId: string) =>
+    [...adminKeys.all, 'tenant', tenantId, 'integrations'] as const,
+  // Team
+  centralUsers: (role?: string) => [...adminKeys.all, 'team', role] as const,
 };
 
+// =====================
 // Dashboard
+// =====================
+
 export function useDashboardStats() {
   return useQuery({
     queryKey: adminKeys.dashboard(),
@@ -22,7 +43,10 @@ export function useDashboardStats() {
   });
 }
 
+// =====================
 // Tenants
+// =====================
+
 export function useAdminTenants(
   page = 1,
   limit = 20,
@@ -192,7 +216,10 @@ export function useSetUserSecurityKey() {
   });
 }
 
+// =====================
 // Plans
+// =====================
+
 export function useAdminPlans() {
   return useQuery({
     queryKey: adminKeys.plans(),
@@ -253,6 +280,220 @@ export function useSetPlanModules() {
       adminApi.setPlanModules(id, modules),
     onSuccess: async (_, { id }) => {
       await queryClient.invalidateQueries({ queryKey: adminKeys.plan(id) });
+    },
+  });
+}
+
+// =====================
+// Catalog (Skills)
+// =====================
+
+export function useSkillDefinitions(module?: string) {
+  return useQuery({
+    queryKey: adminKeys.skillDefinitions(module),
+    queryFn: () => adminApi.listSkillDefinitions({ module }),
+  });
+}
+
+export function useSkillTree(module?: string) {
+  return useQuery({
+    queryKey: adminKeys.skillTree(module),
+    queryFn: () => adminApi.getSkillTree({ module }),
+  });
+}
+
+export function useSkillPricing(pricingType?: string) {
+  return useQuery({
+    queryKey: adminKeys.skillPricing(pricingType),
+    queryFn: () => adminApi.listSkillPricing({ pricingType }),
+  });
+}
+
+export function useUpsertSkillPricing() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      skillCode,
+      data,
+    }: {
+      skillCode: string;
+      data: Parameters<typeof adminApi.upsertSkillPricing>[1];
+    }) => adminApi.upsertSkillPricing(skillCode, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [...adminKeys.all, 'pricing'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: [...adminKeys.all, 'skill-tree'],
+      });
+    },
+  });
+}
+
+// =====================
+// Tenant Subscriptions
+// =====================
+
+export function useTenantSubscription(tenantId: string) {
+  return useQuery({
+    queryKey: adminKeys.tenantSubscription(tenantId),
+    queryFn: () => adminApi.getTenantSubscription(tenantId),
+    enabled: !!tenantId,
+  });
+}
+
+export function useTenantConsumption(tenantId: string, period?: string) {
+  return useQuery({
+    queryKey: adminKeys.tenantConsumption(tenantId, period),
+    queryFn: () => adminApi.getTenantConsumption(tenantId, period),
+    enabled: !!tenantId,
+  });
+}
+
+export function useTenantOverview(tenantId: string) {
+  return useQuery({
+    queryKey: adminKeys.tenantOverview(tenantId),
+    queryFn: () => adminApi.getTenantOverview(tenantId),
+    enabled: !!tenantId,
+  });
+}
+
+export function useTenantIntegrations(tenantId: string) {
+  return useQuery({
+    queryKey: adminKeys.tenantIntegrations(tenantId),
+    queryFn: () => adminApi.getTenantIntegrations(tenantId),
+    enabled: !!tenantId,
+  });
+}
+
+export function useAddTenantSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tenantId,
+      data,
+    }: {
+      tenantId: string;
+      data: Parameters<typeof adminApi.addTenantSubscription>[1];
+    }) => adminApi.addTenantSubscription(tenantId, data),
+    onSuccess: async (_, { tenantId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantSubscription(tenantId),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantOverview(tenantId),
+      });
+    },
+  });
+}
+
+export function useRemoveTenantSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tenantId,
+      skillCode,
+    }: {
+      tenantId: string;
+      skillCode: string;
+    }) => adminApi.removeTenantSubscription(tenantId, skillCode),
+    onSuccess: async (_, { tenantId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantSubscription(tenantId),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantOverview(tenantId),
+      });
+    },
+  });
+}
+
+export function useApplyTenantDiscount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tenantId,
+      data,
+    }: {
+      tenantId: string;
+      data: Parameters<typeof adminApi.applyTenantDiscount>[1];
+    }) => adminApi.applyTenantDiscount(tenantId, data),
+    onSuccess: async (_, { tenantId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantSubscription(tenantId),
+      });
+    },
+  });
+}
+
+export function useOverrideTenantLimit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tenantId,
+      data,
+    }: {
+      tenantId: string;
+      data: Parameters<typeof adminApi.overrideTenantLimit>[1];
+    }) => adminApi.overrideTenantLimit(tenantId, data),
+    onSuccess: async (_, { tenantId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: adminKeys.tenantConsumption(tenantId),
+      });
+    },
+  });
+}
+
+// =====================
+// Central Team
+// =====================
+
+export function useCentralUsers(role?: string) {
+  return useQuery({
+    queryKey: adminKeys.centralUsers(role),
+    queryFn: () => adminApi.listCentralUsers({ role }),
+  });
+}
+
+export function useInviteCentralUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Parameters<typeof adminApi.inviteCentralUser>[0]) =>
+      adminApi.inviteCentralUser(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [...adminKeys.all, 'team'],
+      });
+    },
+  });
+}
+
+export function useUpdateCentralUserRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      userId,
+      data,
+    }: {
+      userId: string;
+      data: Parameters<typeof adminApi.updateCentralUserRole>[1];
+    }) => adminApi.updateCentralUserRole(userId, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [...adminKeys.all, 'team'],
+      });
+    },
+  });
+}
+
+export function useRemoveCentralUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => adminApi.removeCentralUser(userId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [...adminKeys.all, 'team'],
+      });
     },
   });
 }

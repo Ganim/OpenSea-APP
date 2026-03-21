@@ -1,5 +1,15 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import type {
+  CentralUser,
+  SkillDefinition,
+  SkillPricing,
+  SkillTreeNode,
+  TenantConsumption,
+  TenantIntegrationStatus,
+  TenantOverview,
+  TenantSubscription,
+} from '@/types/admin';
 import {
   AdminFeatureFlagSchema,
   AdminPlanDetailSchema,
@@ -242,5 +252,176 @@ export const adminApi = {
       { modules }
     );
     return (response as Record<string, unknown>).modules as AdminPlanModule[];
+  },
+
+  // === Catalog ===
+  listSkillDefinitions: async (params?: { module?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.module) searchParams.set('module', params.module);
+    const query = searchParams.toString();
+    const url = `${API_ENDPOINTS.ADMIN.CATALOG.SKILLS}${query ? `?${query}` : ''}`;
+    const response = await apiClient.get<unknown>(url);
+    return (response as Record<string, unknown>).skills as SkillDefinition[];
+  },
+
+  getSkillTree: async (params?: { module?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.module) searchParams.set('module', params.module);
+    const query = searchParams.toString();
+    const url = `${API_ENDPOINTS.ADMIN.CATALOG.SKILL_TREE}${query ? `?${query}` : ''}`;
+    const response = await apiClient.get<unknown>(url);
+    return (response as Record<string, unknown>).tree as SkillTreeNode[];
+  },
+
+  listSkillPricing: async (params?: { pricingType?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.pricingType)
+      searchParams.set('pricingType', params.pricingType);
+    const query = searchParams.toString();
+    const url = `${API_ENDPOINTS.ADMIN.CATALOG.PRICING}${query ? `?${query}` : ''}`;
+    const response = await apiClient.get<unknown>(url);
+    return (response as Record<string, unknown>).pricing as SkillPricing[];
+  },
+
+  upsertSkillPricing: async (
+    skillCode: string,
+    data: {
+      pricingType: string;
+      flatPrice?: number;
+      unitPrice?: number;
+      unitMetric?: string;
+      unitMetricLabel?: string;
+      usageIncluded?: number;
+      usagePrice?: number;
+      usageMetric?: string;
+      usageMetricLabel?: string;
+      annualDiscount?: number;
+    }
+  ) => {
+    const response = await apiClient.put<unknown>(
+      API_ENDPOINTS.ADMIN.CATALOG.UPSERT_PRICING(skillCode),
+      data
+    );
+    return (response as Record<string, unknown>).pricing as SkillPricing;
+  },
+
+  // === Tenant Subscriptions ===
+  getTenantSubscription: async (tenantId: string) => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.GET(tenantId)
+    );
+    return (response as Record<string, unknown>)
+      .subscriptions as TenantSubscription[];
+  },
+
+  addTenantSubscription: async (
+    tenantId: string,
+    data: {
+      skillCode: string;
+      quantity?: number;
+      customPrice?: number;
+      discountPercent?: number;
+      notes?: string;
+    }
+  ) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.ADD(tenantId),
+      data
+    );
+    return (response as Record<string, unknown>)
+      .subscription as TenantSubscription;
+  },
+
+  removeTenantSubscription: async (tenantId: string, skillCode: string) => {
+    await apiClient.delete<void>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.REMOVE(tenantId, skillCode)
+    );
+  },
+
+  applyTenantDiscount: async (
+    tenantId: string,
+    data: {
+      skillCode?: string;
+      discountPercent?: number;
+      customPrice?: number;
+      notes?: string;
+    }
+  ) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.DISCOUNT(tenantId),
+      data
+    );
+    return response;
+  },
+
+  getTenantConsumption: async (tenantId: string, period?: string) => {
+    const searchParams = new URLSearchParams();
+    if (period) searchParams.set('period', period);
+    const query = searchParams.toString();
+    const url = `${API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.CONSUMPTION(tenantId)}${query ? `?${query}` : ''}`;
+    const response = await apiClient.get<unknown>(url);
+    return (response as Record<string, unknown>)
+      .consumption as TenantConsumption[];
+  },
+
+  overrideTenantLimit: async (
+    tenantId: string,
+    data: {
+      metric: string;
+      newLimit: number;
+      expiresAt?: string;
+      notes?: string;
+    }
+  ) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.OVERRIDE_LIMIT(tenantId),
+      data
+    );
+    return response;
+  },
+
+  getTenantOverview: async (tenantId: string) => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.OVERVIEW(tenantId)
+    );
+    return response as TenantOverview;
+  },
+
+  getTenantIntegrations: async (tenantId: string) => {
+    const response = await apiClient.get<unknown>(
+      API_ENDPOINTS.ADMIN.SUBSCRIPTIONS.INTEGRATIONS(tenantId)
+    );
+    return (response as Record<string, unknown>)
+      .integrations as TenantIntegrationStatus[];
+  },
+
+  // === Team ===
+  listCentralUsers: async (params?: { role?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.role) searchParams.set('role', params.role);
+    const query = searchParams.toString();
+    const url = `${API_ENDPOINTS.ADMIN.TEAM.LIST}${query ? `?${query}` : ''}`;
+    const response = await apiClient.get<unknown>(url);
+    return (response as Record<string, unknown>).users as CentralUser[];
+  },
+
+  inviteCentralUser: async (data: { userId: string; role: string }) => {
+    const response = await apiClient.post<unknown>(
+      API_ENDPOINTS.ADMIN.TEAM.INVITE,
+      data
+    );
+    return (response as Record<string, unknown>).user as CentralUser;
+  },
+
+  updateCentralUserRole: async (userId: string, data: { role: string }) => {
+    const response = await apiClient.patch<unknown>(
+      API_ENDPOINTS.ADMIN.TEAM.UPDATE_ROLE(userId),
+      data
+    );
+    return (response as Record<string, unknown>).user as CentralUser;
+  },
+
+  removeCentralUser: async (userId: string) => {
+    await apiClient.delete<void>(API_ENDPOINTS.ADMIN.TEAM.REMOVE(userId));
   },
 };
