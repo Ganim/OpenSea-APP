@@ -180,6 +180,7 @@ export function CardModal({
   const [memberIds, setMemberIds] = useState<string[]>([]);
 
   const initializedRef = useRef(false);
+  const titleRef = useRef<HTMLInputElement>(null);
 
   // ── Initialize form from card data (edit mode) ──
   useEffect(() => {
@@ -211,6 +212,14 @@ export function CardModal({
       setMemberIds(cardMemberIds);
     }
   }, [isEditMode, cardMemberIds, memberIds.length]);
+
+  // Auto-focus title in edit mode after card data loads
+  useEffect(() => {
+    if (isEditMode && card && initializedRef.current) {
+      // Small delay to ensure DOM is ready
+      requestAnimationFrame(() => titleRef.current?.focus());
+    }
+  }, [isEditMode, card]);
 
   // Set default column when board loads (create mode)
   useEffect(() => {
@@ -645,7 +654,7 @@ export function CardModal({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="h-[100dvh] w-full max-w-full sm:h-auto sm:max-w-[800px] sm:max-h-[85vh] overflow-hidden p-0 gap-0 rounded-none sm:rounded-lg"
+          className="h-[100dvh] w-full max-w-full md:h-auto md:max-w-[800px] md:max-h-[90vh] overflow-hidden p-0 gap-0 rounded-none md:rounded-lg"
           showCloseButton={false}
         >
           {isError ? (
@@ -673,7 +682,7 @@ export function CardModal({
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             </div>
           ) : (
-            <div className="flex flex-col h-full sm:max-h-[85vh]">
+            <div className="flex flex-col h-full md:max-h-[90vh]">
               {/* ── Fixed area: Title + Description ── */}
               <div className="shrink-0 px-5 pt-4 pb-3 border-b border-border">
                 <div className="flex items-start gap-3">
@@ -681,12 +690,19 @@ export function CardModal({
                     {/* Title row + Members */}
                     <div className="flex items-center gap-3">
                       <Input
+                        ref={titleRef}
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                         onBlur={handleTitleBlur}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            titleRef.current?.blur();
+                          }
+                        }}
                         placeholder="Título do cartão"
                         className="text-lg font-bold border-none shadow-none px-0 focus-visible:ring-0 h-auto py-0 flex-1"
-                        autoFocus={!isEditMode}
+                        autoFocus
                       />
                       <CardModalMembers
                         boardId={boardId}
@@ -731,7 +747,7 @@ export function CardModal({
               </div>
 
               {/* ── Two-panel area ── */}
-              <div className="flex flex-1 min-h-0 overflow-hidden">
+              <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
                 {/* Left panel */}
                 <div className="flex-1 flex flex-col min-w-0">
                   {/* Tab bar */}
@@ -780,6 +796,7 @@ export function CardModal({
                             ? () => setActiveTab('comentarios')
                             : undefined
                         }
+                        isCreateMode={!isEditMode}
                       />
                     )}
 
@@ -819,7 +836,7 @@ export function CardModal({
                     )}
                     {activeTab === 'atividade' && !isEditMode && (
                       <p className="text-sm text-muted-foreground py-8 text-center">
-                        Atividades estarão disponíveis após criar o cartão
+                        O histórico de atividades aparecerá após a criação do cartão
                       </p>
                     )}
                   </div>
@@ -845,6 +862,8 @@ export function CardModal({
                   onStartDateChange={handleStartDateChange}
                   dueDate={dueDate}
                   onDueDateChange={handleDueDateChange}
+                  parentCardId={parentCardId}
+                  onParentCardChange={setParentCardId}
                   estimatedHours={estimatedHours}
                   onEstimatedHoursChange={handleEstimatedHoursChange}
                   integrations={isEditMode ? integrations : []}

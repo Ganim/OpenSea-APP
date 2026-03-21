@@ -208,9 +208,10 @@ export function CustomFieldsSection({
             Campos personalizados
           </p>
         </div>
-        <p className="text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground py-2">
+          <Settings2 className="h-3.5 w-3.5 opacity-50" />
           Nenhum campo configurado neste quadro
-        </p>
+        </div>
       </div>
     );
   }
