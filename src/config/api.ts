@@ -271,6 +271,52 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/v1/customers/${id}`,
     DELETE: (id: string) => `/v1/customers/${id}`,
   },
+  // Sales - Contacts
+  CONTACTS: {
+    LIST: '/v1/contacts',
+    GET: (id: string) => `/v1/contacts/${id}`,
+    CREATE: '/v1/contacts',
+    UPDATE: (id: string) => `/v1/contacts/${id}`,
+    DELETE: (id: string) => `/v1/contacts/${id}`,
+  },
+  // Sales - Pipelines
+  PIPELINES: {
+    LIST: '/v1/pipelines',
+    GET: (id: string) => `/v1/pipelines/${id}`,
+    CREATE: '/v1/pipelines',
+    UPDATE: (id: string) => `/v1/pipelines/${id}`,
+    DELETE: (id: string) => `/v1/pipelines/${id}`,
+    STAGES: {
+      LIST: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
+      CREATE: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
+      UPDATE: (pipelineId: string, stageId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/${stageId}`,
+      DELETE: (pipelineId: string, stageId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/${stageId}`,
+      REORDER: (pipelineId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/reorder`,
+    },
+  },
+  // Sales - Deals
+  DEALS: {
+    LIST: '/v1/deals',
+    GET: (id: string) => `/v1/deals/${id}`,
+    CREATE: '/v1/deals',
+    UPDATE: (id: string) => `/v1/deals/${id}`,
+    DELETE: (id: string) => `/v1/deals/${id}`,
+    CHANGE_STAGE: (id: string) => `/v1/deals/${id}/stage`,
+  },
+  // Sales - Activities
+  ACTIVITIES: {
+    LIST: '/v1/activities',
+    CREATE: '/v1/activities',
+    UPDATE: (id: string) => `/v1/activities/${id}`,
+    DELETE: (id: string) => `/v1/activities/${id}`,
+  },
+  // Sales - Timeline
+  TIMELINE: {
+    GET: '/v1/timeline',
+  },
   // Sales - Sales Orders
   SALES_ORDERS: {
     LIST: '/v1/sales-orders',
