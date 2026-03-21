@@ -27,7 +27,7 @@ const CalendarView = lazy(() =>
     default: m.CalendarView,
   }))
 );
-import { CardDetailModal } from '@/components/tasks/cards/card-detail-modal';
+import { CardModal } from '@/components/tasks/cards/card-modal';
 import { BoardSettingsDialog } from '@/components/tasks/boards/board-settings-dialog';
 import { getGradientForBoard } from '@/components/tasks/shared/board-gradients';
 import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
@@ -346,9 +346,9 @@ function BoardPageContent() {
         )}
       </div>
 
-      {/* Unified Card Detail Modal */}
+      {/* Unified Card Modal (view / edit / create) */}
       {selectedCardId && (
-        <CardDetailModal
+        <CardModal
           open={!!selectedCardId}
           onOpenChange={open => {
             if (!open) setSelectedCardId(null);
