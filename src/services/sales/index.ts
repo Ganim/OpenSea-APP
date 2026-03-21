@@ -2,3 +2,7 @@ export * from './customers.service';
 export * from './other.service';
 export * from './sales-orders.service';
 export * from './catalogs.service';
+export * from './orders.service';
+export * from './payment-conditions.service';
+export * from './returns.service';
+export * from './store-credits.service';

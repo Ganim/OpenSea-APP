@@ -280,6 +280,36 @@ export const API_ENDPOINTS = {
     CANCEL: (id: string) => `/v1/sales-orders/${id}/cancel`,
     DELETE: (id: string) => `/v1/sales-orders/${id}`,
   },
+  // Sales - Orders (new pipeline-based)
+  ORDERS: {
+    LIST: '/v1/orders',
+    GET: (id: string) => `/v1/orders/${id}`,
+    CREATE: '/v1/orders',
+    UPDATE: (id: string) => `/v1/orders/${id}`,
+    DELETE: (id: string) => `/v1/orders/${id}`,
+    CONFIRM: (id: string) => `/v1/orders/${id}/confirm`,
+    CANCEL: (id: string) => `/v1/orders/${id}/cancel`,
+    CHANGE_STAGE: (id: string) => `/v1/orders/${id}/stage`,
+    CONVERT_QUOTE: (id: string) => `/v1/orders/${id}/convert-quote`,
+  },
+  // Sales - Payment Conditions
+  PAYMENT_CONDITIONS: {
+    LIST: '/v1/payment-conditions',
+    CREATE: '/v1/payment-conditions',
+    UPDATE: (id: string) => `/v1/payment-conditions/${id}`,
+    DELETE: (id: string) => `/v1/payment-conditions/${id}`,
+  },
+  // Sales - Order Returns
+  RETURNS: {
+    LIST: '/v1/returns',
+    CREATE: '/v1/returns',
+    APPROVE: (id: string) => `/v1/returns/${id}/approve`,
+  },
+  // Sales - Store Credits
+  STORE_CREDITS: {
+    BALANCE: '/v1/store-credits/balance',
+    CREATE: '/v1/store-credits',
+  },
   // Sales - Comments
   COMMENTS: {
     LIST: (salesOrderId: string) => `/v1/comments/${salesOrderId}`,

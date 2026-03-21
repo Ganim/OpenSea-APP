@@ -5,3 +5,7 @@ export * from './promotion.types';
 export * from './reservation.types';
 export * from './notification.types';
 export * from './catalog.types';
+export * from './order-new.types';
+export * from './payment-condition.types';
+export * from './order-return.types';
+export * from './store-credit.types';
