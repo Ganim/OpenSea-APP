@@ -1,7 +1,6 @@
 'use client';
 
-import { GlassCard } from '@/components/central/glass-card';
-import { StatCard } from '@/components/central/stat-card';
+import { CentralCard } from '@/components/central/central-card';
 import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
 import { useCentralTheme } from '@/contexts/central-theme-context';
 import { useDashboardStats } from '@/hooks/admin/use-admin';
@@ -118,7 +117,7 @@ function formatRelativeDate(date: Date): string {
 export default function CentralDashboardPage() {
   const { data: stats, isLoading } = useDashboardStats();
   const { theme } = useCentralTheme();
-  const isDark = theme === 'dark-blue';
+  const isDark = theme === 'dark';
 
   // Prepare chart data
   const tierData = stats
@@ -163,40 +162,64 @@ export default function CentralDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total de Empresas"
-          value={stats?.totalTenants ?? 0}
-          icon={Building2}
-          color="blue"
-          isLoading={isLoading}
-        />
-        <StatCard
-          label="Total de Usuários"
-          value={stats?.totalUsers ?? 0}
-          icon={Users}
-          color="purple"
-          isLoading={isLoading}
-        />
-        <StatCard
-          label="Planos Ativos"
-          value={stats?.activePlans ?? 0}
-          icon={CreditCard}
-          color="green"
-          isLoading={isLoading}
-        />
-        <StatCard
-          label="Receita Mensal"
-          value={formatMrr(stats?.mrr ?? 0)}
-          icon={DollarSign}
-          color="amber"
-          isLoading={isLoading}
-        />
+        {[
+          {
+            label: 'Total de Empresas',
+            value: stats?.totalTenants ?? 0,
+            Icon: Building2,
+            color: 'text-blue-500',
+          },
+          {
+            label: 'Total de Usuários',
+            value: stats?.totalUsers ?? 0,
+            Icon: Users,
+            color: 'text-violet-500',
+          },
+          {
+            label: 'Planos Ativos',
+            value: stats?.activePlans ?? 0,
+            Icon: CreditCard,
+            color: 'text-emerald-500',
+          },
+          {
+            label: 'Receita Mensal',
+            value: formatMrr(stats?.mrr ?? 0),
+            Icon: DollarSign,
+            color: 'text-amber-500',
+          },
+        ].map(stat => (
+          <CentralCard key={stat.label} hover className="p-5">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p
+                  className="text-sm font-medium mb-1"
+                  style={{ color: 'var(--central-text-secondary)' }}
+                >
+                  {stat.label}
+                </p>
+                {isLoading ? (
+                  <div className="h-8 w-24 rounded animate-pulse bg-zinc-200 dark:bg-zinc-800" />
+                ) : (
+                  <p
+                    className="text-3xl font-bold"
+                    style={{ color: 'var(--central-text-primary)' }}
+                  >
+                    {stat.value}
+                  </p>
+                )}
+              </div>
+              <div className={`p-3 rounded-xl ${stat.color}`}>
+                <stat.Icon className="h-6 w-6" />
+              </div>
+            </div>
+          </CentralCard>
+        ))}
       </div>
 
       {/* Charts Row */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Monthly Growth Line Chart */}
-        <GlassCard className="p-6">
+        <CentralCard className="p-6">
           <h3 className="text-lg font-semibold central-text mb-4">
             Crescimento Mensal
           </h3>
@@ -243,10 +266,10 @@ export default function CentralDashboardPage() {
               </p>
             </div>
           )}
-        </GlassCard>
+        </CentralCard>
 
         {/* Tenants by Tier Bar Chart */}
-        <GlassCard className="p-6">
+        <CentralCard className="p-6">
           <h3 className="text-lg font-semibold central-text mb-4">
             Empresas por Plano
           </h3>
@@ -292,13 +315,13 @@ export default function CentralDashboardPage() {
               </p>
             </div>
           )}
-        </GlassCard>
+        </CentralCard>
       </div>
 
       {/* Bottom Row: Status Donut + Recent Activity */}
       <div className="grid gap-4 lg:grid-cols-5">
         {/* Status Donut Chart */}
-        <GlassCard className="p-6 lg:col-span-2">
+        <CentralCard className="p-6 lg:col-span-2">
           <h3 className="text-lg font-semibold central-text mb-4">
             Status das Empresas
           </h3>
@@ -362,10 +385,10 @@ export default function CentralDashboardPage() {
               </p>
             </div>
           )}
-        </GlassCard>
+        </CentralCard>
 
         {/* Recent Activity */}
-        <GlassCard className="p-6 lg:col-span-3">
+        <CentralCard className="p-6 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="h-5 w-5 central-text-muted" />
             <h3 className="text-lg font-semibold central-text">
@@ -411,7 +434,7 @@ export default function CentralDashboardPage() {
               </p>
             </div>
           )}
-        </GlassCard>
+        </CentralCard>
       </div>
     </div>
   );

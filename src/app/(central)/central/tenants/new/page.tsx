@@ -1,16 +1,16 @@
 'use client';
 
-import { GlassBadge } from '@/components/central/glass-badge';
-import { GlassButton } from '@/components/central/glass-button';
-import { GlassCard } from '@/components/central/glass-card';
-import { GlassInput } from '@/components/central/glass-input';
+import { CentralBadge } from '@/components/central/central-badge';
+import { CentralCard } from '@/components/central/central-card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  GlassSelect,
-  GlassSelectContent,
-  GlassSelectItem,
-  GlassSelectTrigger,
-  GlassSelectValue,
-} from '@/components/central/glass-select';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
   useAdminPlans,
@@ -147,13 +147,9 @@ export default function NewTenantPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/central/tenants">
-          <GlassButton
-            variant="ghost"
-            size="sm"
-            aria-label="Voltar para empresas"
-          >
+          <Button variant="ghost" size="sm" aria-label="Voltar para empresas">
             <ArrowLeft className="h-4 w-4" />
-          </GlassButton>
+          </Button>
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight central-text">
@@ -222,7 +218,7 @@ export default function NewTenantPage() {
       <div className="max-w-2xl mx-auto">
         {/* Step 1: Tenant Data */}
         {step === 0 && (
-          <GlassCard className="p-6 space-y-5">
+          <CentralCard className="p-6 space-y-5">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-xl central-accent-blue central-accent-gradient border border-[rgb(var(--os-blue-500)/0.3)]">
                 <Building2 className="h-5 w-5 central-accent-text" />
@@ -245,7 +241,7 @@ export default function NewTenantPage() {
                 >
                   Nome *
                 </label>
-                <GlassInput
+                <Input
                   id="name"
                   value={tenantForm.name}
                   onChange={e =>
@@ -261,7 +257,7 @@ export default function NewTenantPage() {
                 >
                   Slug (opcional)
                 </label>
-                <GlassInput
+                <Input
                   id="slug"
                   value={tenantForm.slug}
                   onChange={e =>
@@ -280,7 +276,7 @@ export default function NewTenantPage() {
                 >
                   URL do Logo (opcional)
                 </label>
-                <GlassInput
+                <Input
                   id="logoUrl"
                   value={tenantForm.logoUrl}
                   onChange={e =>
@@ -296,24 +292,24 @@ export default function NewTenantPage() {
                 >
                   Status
                 </label>
-                <GlassSelect
+                <Select
                   value={tenantForm.status}
                   onValueChange={v => setTenantForm(f => ({ ...f, status: v }))}
                 >
-                  <GlassSelectTrigger className="w-[200px]">
-                    <GlassSelectValue />
-                  </GlassSelectTrigger>
-                  <GlassSelectContent>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                     {STATUS_OPTIONS.map(opt => (
-                      <GlassSelectItem key={opt.value} value={opt.value}>
+                      <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
-                      </GlassSelectItem>
+                      </SelectItem>
                     ))}
-                  </GlassSelectContent>
-                </GlassSelect>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </GlassCard>
+          </CentralCard>
         )}
 
         {/* Step 2: Plan Selection */}
@@ -349,7 +345,7 @@ export default function NewTenantPage() {
                   .map(plan => {
                     const isSelected = selectedPlanId === plan.id;
                     return (
-                      <GlassCard
+                      <CentralCard
                         key={plan.id}
                         hover
                         className={cn(
@@ -367,9 +363,9 @@ export default function NewTenantPage() {
                             <h3 className="font-semibold central-text text-lg">
                               {plan.name}
                             </h3>
-                            <GlassBadge variant="default" className="mt-1">
+                            <CentralBadge variant="default" className="mt-1">
                               {plan.tier}
-                            </GlassBadge>
+                            </CentralBadge>
                           </div>
                           {isSelected && (
                             <div className="p-1.5 rounded-full bg-[rgb(var(--color-primary))] text-white">
@@ -388,7 +384,7 @@ export default function NewTenantPage() {
                           <p>{plan.maxWarehouses} armazéns</p>
                           <p>{plan.maxProducts} produtos</p>
                         </div>
-                      </GlassCard>
+                      </CentralCard>
                     );
                   })}
               </div>
@@ -404,7 +400,7 @@ export default function NewTenantPage() {
 
         {/* Step 3: Owner User */}
         {step === 2 && (
-          <GlassCard className="p-6 space-y-5">
+          <CentralCard className="p-6 space-y-5">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-xl central-accent-green central-accent-gradient border border-[rgb(34_197_94/0.3)]">
                 <UserPlus className="h-5 w-5 central-accent-text" />
@@ -427,7 +423,7 @@ export default function NewTenantPage() {
                 >
                   Email
                 </label>
-                <GlassInput
+                <Input
                   id="user-email"
                   type="email"
                   value={userForm.email}
@@ -444,7 +440,7 @@ export default function NewTenantPage() {
                 >
                   Username (opcional)
                 </label>
-                <GlassInput
+                <Input
                   id="user-username"
                   value={userForm.username}
                   onChange={e =>
@@ -460,7 +456,7 @@ export default function NewTenantPage() {
                 >
                   Senha
                 </label>
-                <GlassInput
+                <Input
                   id="user-password"
                   type="password"
                   value={userForm.password}
@@ -478,12 +474,12 @@ export default function NewTenantPage() {
                 pular.
               </p>
             )}
-          </GlassCard>
+          </CentralCard>
         )}
 
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between mt-6">
-          <GlassButton
+          <Button
             variant="ghost"
             onClick={handleBack}
             disabled={step === 0}
@@ -491,28 +487,28 @@ export default function NewTenantPage() {
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar
-          </GlassButton>
+          </Button>
 
           {step < STEPS.length - 1 ? (
-            <GlassButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleNext}
               disabled={!canAdvance}
               className="gap-2"
             >
               Avançar
               <ArrowRight className="h-4 w-4" />
-            </GlassButton>
+            </Button>
           ) : (
-            <GlassButton
-              variant="primary"
+            <Button
+              variant="default"
               onClick={handleSubmit}
               disabled={isSubmitting || !isStep1Valid}
               className="gap-2"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Criar Empresa
-            </GlassButton>
+            </Button>
           )}
         </div>
       </div>

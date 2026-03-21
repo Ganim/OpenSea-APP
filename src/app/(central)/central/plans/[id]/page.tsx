@@ -1,7 +1,8 @@
 'use client';
 
-import { GlassBadge, GlassButton, GlassCard } from '@/components/central';
-import { GlassInput } from '@/components/central/glass-input';
+import { CentralBadge, CentralCard } from '@/components/central';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -145,18 +146,18 @@ export default function EditPlanPage() {
 
   if (error || !data) {
     return (
-      <GlassCard className="p-8 text-center">
+      <CentralCard className="p-8 text-center">
         <AlertCircle className="h-12 w-12 mx-auto mb-4 central-text-subtle" />
         <p className="central-text-muted">
           {error instanceof Error ? error.message : 'Plano não encontrado'}
         </p>
         <Link href="/central/plans" className="mt-4 inline-block">
-          <GlassButton variant="secondary" className="gap-2">
+          <Button variant="secondary" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Voltar para lista
-          </GlassButton>
+          </Button>
         </Link>
-      </GlassCard>
+      </CentralCard>
     );
   }
 
@@ -169,9 +170,9 @@ export default function EditPlanPage() {
 
   const tierBadgeColor = {
     FREE: 'default',
-    STARTER: 'info',
-    PROFESSIONAL: 'success',
-    ENTERPRISE: 'warning',
+    STARTER: 'sky',
+    PROFESSIONAL: 'violet',
+    ENTERPRISE: 'orange',
   } as const;
 
   return (
@@ -180,29 +181,26 @@ export default function EditPlanPage() {
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           <Link href="/central/plans">
-            <GlassButton variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Voltar
-            </GlassButton>
+            </Button>
           </Link>
           <div>
             <h1 className="text-4xl font-bold central-text">Editar Plano</h1>
             <p className="central-text-muted text-lg mt-1">{form.name}</p>
           </div>
         </div>
-        <GlassBadge
+        <CentralBadge
           variant={tierBadgeColor[form.tier as keyof typeof tierBadgeColor]}
         >
           {form.tier}
-        </GlassBadge>
+        </CentralBadge>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Informações Principais */}
-        <GlassCard
-          variant="gradient"
-          className="p-6 lg:col-span-2 central-accent-blue"
-        >
+        <CentralCard className="p-6 lg:col-span-2 central-accent-blue">
           <div className="flex items-center gap-3 mb-6">
             <div
               className={`p-3 rounded-xl bg-linear-to-br ${tierColors[form.tier as keyof typeof tierColors]}`}
@@ -221,7 +219,7 @@ export default function EditPlanPage() {
                 <Label htmlFor="name" className="central-text">
                   Nome do Plano
                 </Label>
-                <GlassInput
+                <Input
                   id="name"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
@@ -231,7 +229,7 @@ export default function EditPlanPage() {
                 <Label htmlFor="price" className="central-text">
                   Preço Mensal (R$)
                 </Label>
-                <GlassInput
+                <Input
                   id="price"
                   type="number"
                   step="0.01"
@@ -298,10 +296,10 @@ export default function EditPlanPage() {
               </div>
             </div>
           </div>
-        </GlassCard>
+        </CentralCard>
 
         {/* Card de Resumo */}
-        <GlassCard className="p-6 h-fit">
+        <CentralCard className="p-6 h-fit">
           <div className="space-y-4">
             <div>
               <p className="central-text-muted text-sm">Valor Mensal</p>
@@ -330,13 +328,13 @@ export default function EditPlanPage() {
               <p className="central-text font-bold mt-2">{form.tier}</p>
             </div>
           </div>
-        </GlassCard>
+        </CentralCard>
       </div>
 
       {/* Limites e Módulos */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Limites */}
-        <GlassCard variant="gradient" className="p-6 central-accent-cyan">
+        <CentralCard className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl central-accent-gradient">
               <Package className="h-5 w-5 central-accent-text" />
@@ -352,7 +350,7 @@ export default function EditPlanPage() {
               <Label htmlFor="maxUsers" className="central-text">
                 Máximo de Usuários
               </Label>
-              <GlassInput
+              <Input
                 id="maxUsers"
                 type="number"
                 value={form.maxUsers}
@@ -371,7 +369,7 @@ export default function EditPlanPage() {
               <Label htmlFor="maxWarehouses" className="central-text">
                 Máximo de Armazéns
               </Label>
-              <GlassInput
+              <Input
                 id="maxWarehouses"
                 type="number"
                 value={form.maxWarehouses}
@@ -387,7 +385,7 @@ export default function EditPlanPage() {
               <Label htmlFor="maxProducts" className="central-text">
                 Máximo de Produtos
               </Label>
-              <GlassInput
+              <Input
                 id="maxProducts"
                 type="number"
                 value={form.maxProducts}
@@ -425,10 +423,10 @@ export default function EditPlanPage() {
               </p>
             </div>
           </div>
-        </GlassCard>
+        </CentralCard>
 
         {/* Módulos */}
-        <GlassCard variant="gradient" className="p-6 central-accent-amber">
+        <CentralCard className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 rounded-xl central-accent-gradient">
               <Zap className="h-5 w-5 central-accent-text" />
@@ -479,23 +477,23 @@ export default function EditPlanPage() {
               </div>
             ))}
           </div>
-        </GlassCard>
+        </CentralCard>
       </div>
 
       {/* Ações */}
       <div className="flex items-center justify-between pt-4 border-t central-divider">
-        <GlassButton variant="danger" onClick={handleDelete} className="gap-2">
+        <Button variant="destructive" onClick={handleDelete} className="gap-2">
           <Trash2 className="h-4 w-4" />
           Desativar Plano
-        </GlassButton>
-        <GlassButton
+        </Button>
+        <Button
           onClick={handleSave}
           disabled={updatePlan.isPending}
           className="gap-2"
         >
           <Save className="h-4 w-4" />
           Salvar Alterações
-        </GlassButton>
+        </Button>
       </div>
     </div>
   );

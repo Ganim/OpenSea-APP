@@ -1,16 +1,16 @@
 'use client';
 
-import { GlassButton } from '@/components/central/glass-button';
-import { GlassCard } from '@/components/central/glass-card';
-import { GlassInput } from '@/components/central/glass-input';
+import { CentralCard } from '@/components/central/central-card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  GlassSelect,
-  GlassSelectContent,
-  GlassSelectItem,
-  GlassSelectTrigger,
-  GlassSelectValue,
-} from '@/components/central/glass-select';
-import { GlassTextarea } from '@/components/central/glass-textarea';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -103,13 +103,9 @@ export default function NewPlanPage() {
     <div className="space-y-6 pb-8">
       <div className="flex items-center gap-4">
         <Link href="/central/plans">
-          <GlassButton
-            variant="ghost"
-            size="sm"
-            aria-label="Voltar para planos"
-          >
+          <Button variant="ghost" size="sm" aria-label="Voltar para planos">
             <ArrowLeft className="h-4 w-4" />
-          </GlassButton>
+          </Button>
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight central-text">
@@ -122,7 +118,7 @@ export default function NewPlanPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <GlassCard className="p-6 space-y-5">
+        <CentralCard className="p-6 space-y-5">
           <h2 className="text-lg font-semibold central-text">Informações</h2>
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -132,7 +128,7 @@ export default function NewPlanPage() {
               >
                 Nome
               </label>
-              <GlassInput
+              <Input
                 id="name"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
@@ -146,23 +142,23 @@ export default function NewPlanPage() {
               >
                 Tier
               </label>
-              <GlassSelect
+              <Select
                 value={form.tier}
                 onValueChange={v =>
                   setForm(f => ({ ...f, tier: v as PlanTier }))
                 }
               >
-                <GlassSelectTrigger>
-                  <GlassSelectValue />
-                </GlassSelectTrigger>
-                <GlassSelectContent>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
                   {TIER_OPTIONS.map(t => (
-                    <GlassSelectItem key={t.value} value={t.value}>
+                    <SelectItem key={t.value} value={t.value}>
                       {t.label}
-                    </GlassSelectItem>
+                    </SelectItem>
                   ))}
-                </GlassSelectContent>
-              </GlassSelect>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label
@@ -171,7 +167,7 @@ export default function NewPlanPage() {
               >
                 Descrição
               </label>
-              <GlassTextarea
+              <Textarea
                 id="description"
                 value={form.description}
                 onChange={e =>
@@ -187,7 +183,7 @@ export default function NewPlanPage() {
               >
                 Preço (R$)
               </label>
-              <GlassInput
+              <Input
                 id="price"
                 type="number"
                 step="0.01"
@@ -211,10 +207,10 @@ export default function NewPlanPage() {
               </label>
             </div>
           </div>
-        </GlassCard>
+        </CentralCard>
 
         <div className="space-y-6">
-          <GlassCard className="p-6 space-y-5">
+          <CentralCard className="p-6 space-y-5">
             <h2 className="text-lg font-semibold central-text">Limites</h2>
             <div className="space-y-4">
               <div className="space-y-1.5">
@@ -224,7 +220,7 @@ export default function NewPlanPage() {
                 >
                   Máximo de Usuários
                 </label>
-                <GlassInput
+                <Input
                   id="maxUsers"
                   type="number"
                   value={form.maxUsers}
@@ -243,7 +239,7 @@ export default function NewPlanPage() {
                 >
                   Máximo de Armazéns
                 </label>
-                <GlassInput
+                <Input
                   id="maxWarehouses"
                   type="number"
                   value={form.maxWarehouses}
@@ -262,7 +258,7 @@ export default function NewPlanPage() {
                 >
                   Máximo de Produtos
                 </label>
-                <GlassInput
+                <Input
                   id="maxProducts"
                   type="number"
                   value={form.maxProducts}
@@ -275,9 +271,9 @@ export default function NewPlanPage() {
                 />
               </div>
             </div>
-          </GlassCard>
+          </CentralCard>
 
-          <GlassCard className="p-6 space-y-5">
+          <CentralCard className="p-6 space-y-5">
             <h2 className="text-lg font-semibold central-text">Módulos</h2>
             <div className="space-y-3">
               {ALL_MODULES.map(mod => (
@@ -332,20 +328,20 @@ export default function NewPlanPage() {
                 </div>
               ))}
             </div>
-          </GlassCard>
+          </CentralCard>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <GlassButton
-          variant="primary"
+        <Button
+          variant="default"
           onClick={handleCreate}
           disabled={createPlan.isPending || !form.name}
-          isLoading={createPlan.isPending}
           className="gap-2"
         >
-          <Save className="h-4 w-4" /> Criar Plano
-        </GlassButton>
+          <Save className="h-4 w-4" />{' '}
+          {createPlan.isPending ? 'Criando...' : 'Criar Plano'}
+        </Button>
       </div>
     </div>
   );

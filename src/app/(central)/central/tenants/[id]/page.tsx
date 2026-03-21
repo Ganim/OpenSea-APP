@@ -1,11 +1,7 @@
 'use client';
 
-import {
-  GlassBadge,
-  GlassButton,
-  GlassCard,
-  GlassInput,
-} from '@/components/central';
+import { CentralBadge, CentralCard } from '@/components/central';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -132,10 +128,10 @@ export default function TenantDetailPage() {
 
   if (!data?.tenant) {
     return (
-      <GlassCard className="p-12 text-center">
+      <CentralCard className="p-12 text-center">
         <AlertCircle className="h-16 w-16 mx-auto mb-4 central-text-subtle" />
         <p className="text-lg central-text-muted">Empresa não encontrada</p>
-      </GlassCard>
+      </CentralCard>
     );
   }
 
@@ -145,9 +141,9 @@ export default function TenantDetailPage() {
   const currentPlan = plans.find(p => p.id === selectedPlanId);
 
   const statusColor = {
-    ACTIVE: 'success',
-    INACTIVE: 'warning',
-    SUSPENDED: 'error',
+    ACTIVE: 'emerald',
+    INACTIVE: 'orange',
+    SUSPENDED: 'rose',
   } as const;
 
   const handleStatusChange = async (newStatus: string) => {
@@ -262,26 +258,26 @@ export default function TenantDetailPage() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-6">
           <Link href="/central/tenants">
-            <GlassButton
+            <Button
               variant="ghost"
               size="sm"
               className="gap-2 mb-1 cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
               <label className="cursor-pointer">Voltar</label>
-            </GlassButton>
+            </Button>
           </Link>
           <div className="flex items-center justify-between gap-4">
-            <GlassButton
-              variant="danger"
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               className="gap-2"
               size="sm"
             >
               <Trash2 className="h-5 w-5" />
               Desativar Empresa
-            </GlassButton>
-            <GlassButton
+            </Button>
+            <Button
               onClick={handleSave}
               disabled={updateTenant.isPending || !form.name.trim()}
               className="gap-2"
@@ -289,7 +285,7 @@ export default function TenantDetailPage() {
             >
               <Save className="h-5 w-5" />
               Salvar Alterações
-            </GlassButton>
+            </Button>
           </div>
         </div>
         <div className="flex items-end justify-between gap-6">
@@ -301,7 +297,7 @@ export default function TenantDetailPage() {
               </p>
             </div>
           </div>
-          <GlassBadge
+          <CentralBadge
             variant={
               statusColor[tenant.status as keyof typeof statusColor] ||
               'default'
@@ -309,16 +305,13 @@ export default function TenantDetailPage() {
             className="text-base px-4 py-2"
           >
             {tenant.status}
-          </GlassBadge>
+          </CentralBadge>
         </div>
       </div>
 
       {/* Quick Stats - Premium Look */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <GlassCard
-          variant="gradient"
-          className="p-6 flex flex-col justify-between central-accent-blue"
-        >
+        <CentralCard className="p-6 flex flex-col justify-between central-accent-blue">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-sm font-medium mb-1 central-text-muted">
@@ -333,12 +326,9 @@ export default function TenantDetailPage() {
           <p className="text-xs central-text-subtle">
             {users.filter(u => u.role === 'owner').length} proprietário(s)
           </p>
-        </GlassCard>
+        </CentralCard>
 
-        <GlassCard
-          variant="gradient"
-          className="p-6 flex flex-col justify-between central-accent-purple"
-        >
+        <CentralCard className="p-6 flex flex-col justify-between central-accent-purple">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-sm font-medium mb-1 central-text-muted">
@@ -357,12 +347,9 @@ export default function TenantDetailPage() {
               ? `Tier: ${currentPlan.tier}`
               : 'Configure o plano nas opções abaixo'}
           </p>
-        </GlassCard>
+        </CentralCard>
 
-        <GlassCard
-          variant="gradient"
-          className="p-6 flex flex-col justify-between central-accent-amber"
-        >
+        <CentralCard className="p-6 flex flex-col justify-between central-accent-amber">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-sm font-medium mb-1 central-text-muted">
@@ -383,7 +370,7 @@ export default function TenantDetailPage() {
             )}{' '}
             dias atrás
           </p>
-        </GlassCard>
+        </CentralCard>
       </div>
 
       {/* Tabs Modernas */}
@@ -424,7 +411,7 @@ export default function TenantDetailPage() {
 
         {/* Info Tab */}
         <TabsContent value="info" className="space-y-6 w-full">
-          <GlassCard variant="gradient" className="p-8 w-full">
+          <CentralCard className="p-8 w-full">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-3 rounded-xl border central-accent-blue central-accent-gradient border-[rgb(var(--os-blue-500)/0.3)]">
                 <Building2 className="h-6 w-6 central-accent-text" />
@@ -527,7 +514,7 @@ export default function TenantDetailPage() {
                 </div>
               </div>
             </div>
-          </GlassCard>
+          </CentralCard>
         </TabsContent>
 
         {/* Users Tab */}
@@ -535,10 +522,10 @@ export default function TenantDetailPage() {
           <div className="flex justify-end w-full">
             <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
               <DialogTrigger asChild>
-                <GlassButton className="gap-2" size="sm">
+                <Button className="gap-2" size="sm">
                   <Plus className="h-5 w-5" />
                   Novo Usuário
-                </GlassButton>
+                </Button>
               </DialogTrigger>
               <DialogContent className="border shadow-2xl central-glass-strong">
                 <DialogHeader>
@@ -616,7 +603,7 @@ export default function TenantDetailPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <GlassButton
+                  <Button
                     onClick={handleCreateUser}
                     disabled={
                       createTenantUser.isPending ||
@@ -627,7 +614,7 @@ export default function TenantDetailPage() {
                   >
                     <Plus className="h-4 w-4" />
                     Criar Usuário
-                  </GlassButton>
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -636,7 +623,7 @@ export default function TenantDetailPage() {
           {users.length > 0 ? (
             <div className="grid gap-4">
               {users.map(u => (
-                <GlassCard
+                <CentralCard
                   key={u.id}
                   className="p-5 flex items-center justify-between central-transition central-glass-hover"
                 >
@@ -665,12 +652,12 @@ export default function TenantDetailPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <GlassBadge
-                      variant={u.role === 'owner' ? 'success' : 'info'}
+                    <CentralBadge
+                      variant={u.role === 'owner' ? 'emerald' : 'sky'}
                     >
                       {u.role === 'owner' ? 'Proprietário' : 'Membro'}
-                    </GlassBadge>
-                    <GlassButton
+                    </CentralBadge>
+                    <Button
                       variant="ghost"
                       size="sm"
                       onClick={() =>
@@ -683,9 +670,9 @@ export default function TenantDetailPage() {
                       title="Chave de segurança"
                     >
                       <KeyRound className="h-4 w-4" />
-                    </GlassButton>
+                    </Button>
                     {u.role !== 'owner' && (
-                      <GlassButton
+                      <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveUser(u.userId)}
@@ -693,25 +680,25 @@ export default function TenantDetailPage() {
                         className="text-[rgb(var(--color-destructive))] hover:text-[rgb(var(--color-destructive-hover))]"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </GlassButton>
+                      </Button>
                     )}
                   </div>
-                </GlassCard>
+                </CentralCard>
               ))}
             </div>
           ) : (
-            <GlassCard className="p-12 text-center">
+            <CentralCard className="p-12 text-center">
               <Users className="h-16 w-16 mx-auto mb-4 central-text-subtle" />
               <p className="text-lg central-text-muted">
                 Nenhum usuário nesta empresa
               </p>
-            </GlassCard>
+            </CentralCard>
           )}
         </TabsContent>
 
         {/* Plan Tab */}
         <TabsContent value="plan" className="flex flex-col space-y-6 w-full">
-          <GlassCard className="p-6 central-accent-cyan">
+          <CentralCard className="p-6 central-accent-cyan">
             <div className="flex items-center gap-3 mb-6">
               <Settings className="h-5 w-5 central-accent-text" />
               <h3 className="text-xl font-bold central-text">
@@ -733,8 +720,8 @@ export default function TenantDetailPage() {
                 ))}
               </SelectContent>
             </Select>
-          </GlassCard>
-          <GlassCard className="p-12 text-center w-full">
+          </CentralCard>
+          <CentralCard className="p-12 text-center w-full">
             <AlertCircle className="h-16 w-16 mx-auto mb-4 central-text-subtle" />
             <p className="text-lg mb-2 central-text-muted">
               Nenhum plano atribuído
@@ -742,7 +729,7 @@ export default function TenantDetailPage() {
             <p className="text-sm central-text-subtle">
               Escolha um plano para esta empresa usando a opção abaixo
             </p>
-          </GlassCard>
+          </CentralCard>
         </TabsContent>
 
         {/* Flags Tab */}
@@ -794,9 +781,11 @@ export default function TenantDetailPage() {
                 return (
                   <>
                     {grouped.map(cat => (
-                      <GlassCard key={cat.key} className="p-6">
+                      <CentralCard key={cat.key} className="p-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <GlassBadge variant="default">{cat.label}</GlassBadge>
+                          <CentralBadge variant="default">
+                            {cat.label}
+                          </CentralBadge>
                         </div>
                         <div className="space-y-3">
                           {cat.flags.map(sf => {
@@ -830,14 +819,16 @@ export default function TenantDetailPage() {
                             );
                           })}
                         </div>
-                      </GlassCard>
+                      </CentralCard>
                     ))}
 
                     {/* Custom Flags */}
-                    <GlassCard className="p-6">
+                    <CentralCard className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <GlassBadge variant="info">Customizadas</GlassBadge>
+                          <CentralBadge variant="sky">
+                            Customizadas
+                          </CentralBadge>
                         </div>
                       </div>
 
@@ -866,7 +857,7 @@ export default function TenantDetailPage() {
                       )}
 
                       <div className="flex gap-2">
-                        <GlassInput
+                        <Input
                           value={customFlagName}
                           onChange={e =>
                             setCustomFlagName(
@@ -878,7 +869,7 @@ export default function TenantDetailPage() {
                           placeholder="NOME_DA_FLAG"
                           className="flex-1 font-mono"
                         />
-                        <GlassButton
+                        <Button
                           variant="secondary"
                           size="sm"
                           disabled={
@@ -892,9 +883,9 @@ export default function TenantDetailPage() {
                         >
                           <Plus className="h-4 w-4" />
                           Adicionar Flag
-                        </GlassButton>
+                        </Button>
                       </div>
-                    </GlassCard>
+                    </CentralCard>
                   </>
                 );
               })()}
@@ -939,7 +930,7 @@ export default function TenantDetailPage() {
             />
           </div>
           <DialogFooter>
-            <GlassButton
+            <Button
               variant="ghost"
               onClick={() => {
                 setSecurityKeyState(null);
@@ -947,15 +938,15 @@ export default function TenantDetailPage() {
               }}
             >
               Cancelar
-            </GlassButton>
-            <GlassButton
+            </Button>
+            <Button
               onClick={handleSetSecurityKey}
               disabled={setSecurityKey.isPending}
               className="gap-2"
             >
               <KeyRound className="h-4 w-4" />
               {securityKeyInput.trim() ? 'Definir chave' : 'Remover chave'}
-            </GlassButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

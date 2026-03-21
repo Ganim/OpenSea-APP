@@ -1,8 +1,8 @@
 'use client';
 
-import { GlassBadge } from '@/components/central/glass-badge';
-import { GlassButton } from '@/components/central/glass-button';
-import { GlassCard } from '@/components/central/glass-card';
+import { CentralBadge } from '@/components/central/central-badge';
+import { CentralCard } from '@/components/central/central-card';
+import { Button } from '@/components/ui/button';
 import { useAdminPlans } from '@/hooks/admin/use-admin';
 import {
   Check,
@@ -15,11 +15,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const tierColors: Record<string, 'default' | 'info' | 'success' | 'warning'> = {
+const tierColors: Record<string, 'default' | 'sky' | 'violet' | 'orange'> = {
   FREE: 'default',
-  STARTER: 'info',
-  PROFESSIONAL: 'success',
-  ENTERPRISE: 'warning',
+  STARTER: 'sky',
+  PROFESSIONAL: 'violet',
+  ENTERPRISE: 'orange',
 };
 
 const tierGradients: Record<string, string> = {
@@ -45,10 +45,10 @@ export default function PlansListPage() {
           </p>
         </div>
         <Link href="/central/plans/new">
-          <GlassButton variant="primary" className="gap-2">
+          <Button variant="default" className="gap-2">
             <Plus className="h-4 w-4" />
             Novo Plano
-          </GlassButton>
+          </Button>
         </Link>
       </div>
 
@@ -65,9 +65,8 @@ export default function PlansListPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {data?.plans.map(plan => (
-            <GlassCard
+            <CentralCard
               key={plan.id}
-              variant="gradient"
               hover
               className="p-6 flex flex-col relative overflow-hidden group"
             >
@@ -86,9 +85,9 @@ export default function PlansListPage() {
                       <CreditCard className="h-5 w-5 central-text" />
                     </div>
                   </div>
-                  <GlassBadge variant={tierColors[plan.tier] ?? 'default'}>
+                  <CentralBadge variant={tierColors[plan.tier] ?? 'default'}>
                     {plan.tier}
-                  </GlassBadge>
+                  </CentralBadge>
                 </div>
 
                 {/* Plan Name */}
@@ -152,21 +151,21 @@ export default function PlansListPage() {
               {/* Footer */}
               <div className="relative z-10 flex items-center justify-between pt-4 mt-4 border-t central-divider">
                 {plan.isActive ? (
-                  <GlassBadge variant="success" className="gap-1">
+                  <CentralBadge variant="emerald" className="gap-1">
                     <Check className="h-3 w-3" />
                     Ativo
-                  </GlassBadge>
+                  </CentralBadge>
                 ) : (
-                  <GlassBadge variant="default">Inativo</GlassBadge>
+                  <CentralBadge variant="default">Inativo</CentralBadge>
                 )}
                 <Link href={`/central/plans/${plan.id}`}>
-                  <GlassButton variant="ghost" size="sm" className="gap-1.5">
+                  <Button variant="ghost" size="sm" className="gap-1.5">
                     <Pencil className="h-3.5 w-3.5" />
                     Editar
-                  </GlassButton>
+                  </Button>
                 </Link>
               </div>
-            </GlassCard>
+            </CentralCard>
           ))}
         </div>
       )}
@@ -174,7 +173,7 @@ export default function PlansListPage() {
       {/* Empty State */}
       {!isLoading && data?.plans.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16">
-          <GlassCard variant="gradient" className="p-12 max-w-md text-center">
+          <CentralCard className="p-12 max-w-md text-center">
             <CreditCard className="h-16 w-16 central-text-subtle mx-auto mb-4" />
             <h3 className="text-xl font-semibold central-text mb-2">
               Nenhum plano cadastrado
@@ -183,12 +182,12 @@ export default function PlansListPage() {
               Comece criando o primeiro plano de assinatura do sistema
             </p>
             <Link href="/central/plans/new">
-              <GlassButton variant="primary" className="gap-2">
+              <Button variant="default" className="gap-2">
                 <Plus className="h-4 w-4" />
                 Criar primeiro plano
-              </GlassButton>
+              </Button>
             </Link>
-          </GlassCard>
+          </CentralCard>
         </div>
       )}
     </div>

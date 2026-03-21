@@ -1,16 +1,16 @@
 'use client';
 
-import { GlassBadge } from '@/components/central/glass-badge';
-import { GlassButton } from '@/components/central/glass-button';
-import { GlassInput } from '@/components/central/glass-input';
+import { CentralBadge } from '@/components/central/central-badge';
 import {
-  GlassTable,
-  GlassTableBody,
-  GlassTableCell,
-  GlassTableHead,
-  GlassTableHeader,
-  GlassTableRow,
-} from '@/components/central/glass-table';
+  CentralTable,
+  CentralTableBody,
+  CentralTableCell,
+  CentralTableHead,
+  CentralTableHeader,
+  CentralTableRow,
+} from '@/components/central/central-table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAdminTenants } from '@/hooks/admin/use-admin';
 import {
   Building2,
@@ -27,11 +27,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const statusVariants: Record<
   string,
-  'success' | 'warning' | 'error' | 'default'
+  'emerald' | 'orange' | 'rose' | 'default'
 > = {
-  ACTIVE: 'success',
-  INACTIVE: 'warning',
-  SUSPENDED: 'error',
+  ACTIVE: 'emerald',
+  INACTIVE: 'orange',
+  SUSPENDED: 'rose',
 };
 
 const STATUS_OPTIONS = [
@@ -85,22 +85,25 @@ export default function TenantsListPage() {
           </p>
         </div>
         <Link href="/central/tenants/new">
-          <GlassButton variant="primary" className="gap-2">
+          <Button variant="default" className="gap-2">
             <Plus className="h-4 w-4" />
             Nova Empresa
-          </GlassButton>
+          </Button>
         </Link>
       </div>
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 max-w-md">
-          <GlassInput
-            placeholder="Buscar por nome ou slug..."
-            value={searchInput}
-            onChange={e => handleSearchChange(e.target.value)}
-            icon={<Search className="h-4 w-4" />}
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome ou slug..."
+              value={searchInput}
+              onChange={e => handleSearchChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 central-text-muted" />
@@ -116,7 +119,7 @@ export default function TenantsListPage() {
             ))}
           </select>
           {(debouncedSearch || statusFilter) && (
-            <GlassButton
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => {
@@ -129,7 +132,7 @@ export default function TenantsListPage() {
             >
               <X className="h-3 w-3" />
               Limpar
-            </GlassButton>
+            </Button>
           )}
         </div>
       </div>
@@ -145,20 +148,20 @@ export default function TenantsListPage() {
           ))}
         </div>
       ) : (
-        <GlassTable>
-          <GlassTableHeader>
-            <GlassTableRow>
-              <GlassTableHead>Empresa</GlassTableHead>
-              <GlassTableHead>Slug</GlassTableHead>
-              <GlassTableHead>Status</GlassTableHead>
-              <GlassTableHead>Criado em</GlassTableHead>
-              <GlassTableHead className="w-[80px]">Ações</GlassTableHead>
-            </GlassTableRow>
-          </GlassTableHeader>
-          <GlassTableBody>
+        <CentralTable>
+          <CentralTableHeader>
+            <CentralTableRow>
+              <CentralTableHead>Empresa</CentralTableHead>
+              <CentralTableHead>Slug</CentralTableHead>
+              <CentralTableHead>Status</CentralTableHead>
+              <CentralTableHead>Criado em</CentralTableHead>
+              <CentralTableHead className="w-[80px]">Ações</CentralTableHead>
+            </CentralTableRow>
+          </CentralTableHeader>
+          <CentralTableBody>
             {tenants.map(tenant => (
-              <GlassTableRow key={tenant.id}>
-                <GlassTableCell>
+              <CentralTableRow key={tenant.id}>
+                <CentralTableCell>
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl central-accent-blue central-accent-gradient border border-[rgb(var(--os-blue-500)/0.3)]">
                       <Building2 className="h-5 w-5 central-accent-text" />
@@ -167,36 +170,36 @@ export default function TenantsListPage() {
                       {tenant.name}
                     </span>
                   </div>
-                </GlassTableCell>
-                <GlassTableCell>
+                </CentralTableCell>
+                <CentralTableCell>
                   <span className="central-text-muted font-mono text-sm">
                     {tenant.slug}
                   </span>
-                </GlassTableCell>
-                <GlassTableCell>
-                  <GlassBadge
+                </CentralTableCell>
+                <CentralTableCell>
+                  <CentralBadge
                     variant={statusVariants[tenant.status] ?? 'default'}
                   >
                     {tenant.status}
-                  </GlassBadge>
-                </GlassTableCell>
-                <GlassTableCell>
+                  </CentralBadge>
+                </CentralTableCell>
+                <CentralTableCell>
                   <span className="central-text-muted">
                     {new Date(tenant.createdAt).toLocaleDateString('pt-BR')}
                   </span>
-                </GlassTableCell>
-                <GlassTableCell>
+                </CentralTableCell>
+                <CentralTableCell>
                   <Link href={`/central/tenants/${tenant.id}`}>
-                    <GlassButton variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm">
                       <Eye className="h-4 w-4" />
-                    </GlassButton>
+                    </Button>
                   </Link>
-                </GlassTableCell>
-              </GlassTableRow>
+                </CentralTableCell>
+              </CentralTableRow>
             ))}
             {tenants.length === 0 && (
-              <GlassTableRow>
-                <GlassTableCell colSpan={5} className="text-center py-12">
+              <CentralTableRow>
+                <CentralTableCell colSpan={5} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Building2 className="h-12 w-12 central-text-subtle" />
                     <p className="central-text-subtle">
@@ -205,11 +208,11 @@ export default function TenantsListPage() {
                         : 'Nenhuma empresa encontrada'}
                     </p>
                   </div>
-                </GlassTableCell>
-              </GlassTableRow>
+                </CentralTableCell>
+              </CentralTableRow>
             )}
-          </GlassTableBody>
-        </GlassTable>
+          </CentralTableBody>
+        </CentralTable>
       )}
 
       {/* Pagination */}
@@ -220,7 +223,7 @@ export default function TenantsListPage() {
             {data.meta.totalPages}
           </p>
           <div className="flex gap-2">
-            <GlassButton
+            <Button
               variant="secondary"
               size="sm"
               disabled={page <= 1}
@@ -229,8 +232,8 @@ export default function TenantsListPage() {
             >
               <ChevronLeft className="h-4 w-4" />
               Anterior
-            </GlassButton>
-            <GlassButton
+            </Button>
+            <Button
               variant="secondary"
               size="sm"
               disabled={page >= data.meta.totalPages}
@@ -239,7 +242,7 @@ export default function TenantsListPage() {
             >
               Próximo
               <ChevronRight className="h-4 w-4" />
-            </GlassButton>
+            </Button>
           </div>
         </div>
       )}

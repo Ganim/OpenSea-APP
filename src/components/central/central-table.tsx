@@ -1,29 +1,28 @@
 import { cn } from '@/lib/utils';
-import { GlassContainer } from './glass-container';
 
-export interface GlassTableProps {
+export interface CentralTableProps {
   children: React.ReactNode;
   className?: string;
 }
 
 /**
- * Tabela com efeito glassmorphism
- * Usa design tokens CSS para adaptar automaticamente ao tema (light/dark-blue)
+ * Tabela limpa com hover rows para o Central.
+ * Usa CSS variables do tema para cores de fundo e texto.
  */
-export function GlassTable({ children, className }: GlassTableProps) {
+export function CentralTable({ children, className }: CentralTableProps) {
   return (
-    <GlassContainer
-      variant="medium"
-      className={cn('overflow-hidden', className)}
+    <div
+      className={cn('central-card overflow-hidden', className)}
+      style={{ padding: 0 }}
     >
       <div className="overflow-x-auto">
         <table className="w-full">{children}</table>
       </div>
-    </GlassContainer>
+    </div>
   );
 }
 
-export function GlassTableHeader({
+export function CentralTableHeader({
   children,
   className,
 }: {
@@ -32,17 +31,15 @@ export function GlassTableHeader({
 }) {
   return (
     <thead
-      className={cn(
-        'border-b border-[rgb(var(--glass-border)/var(--glass-border-opacity))]',
-        className
-      )}
+      className={cn('border-b', className)}
+      style={{ borderColor: 'var(--central-separator)' }}
     >
       {children}
     </thead>
   );
 }
 
-export function GlassTableBody({
+export function CentralTableBody({
   children,
   className,
 }: {
@@ -52,7 +49,7 @@ export function GlassTableBody({
   return <tbody className={className}>{children}</tbody>;
 }
 
-export function GlassTableRow({
+export function CentralTableRow({
   children,
   className,
   ...props
@@ -61,10 +58,10 @@ export function GlassTableRow({
     <tr
       className={cn(
         'border-b central-transition',
-        'border-[rgb(var(--glass-border)/calc(var(--glass-border-opacity)*0.5))]',
-        'hover:bg-[rgb(var(--glass-bg)/calc(var(--glass-bg-opacity)*0.5))]',
+        'hover:brightness-95 [data-central-theme="dark"]_&:hover:brightness-110',
         className
       )}
+      style={{ borderColor: 'var(--central-separator)' }}
       {...props}
     >
       {children}
@@ -72,7 +69,7 @@ export function GlassTableRow({
   );
 }
 
-export function GlassTableHead({
+export function CentralTableHead({
   children,
   className,
 }: {
@@ -83,16 +80,16 @@ export function GlassTableHead({
     <th
       className={cn(
         'px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider',
-        'central-text-muted',
         className
       )}
+      style={{ color: 'var(--central-text-muted)' }}
     >
       {children}
     </th>
   );
 }
 
-export function GlassTableCell({
+export function CentralTableCell({
   children,
   className,
   colSpan,
@@ -104,7 +101,8 @@ export function GlassTableCell({
   return (
     <td
       colSpan={colSpan}
-      className={cn('px-6 py-4 text-sm central-text', className)}
+      className={cn('px-6 py-4 text-sm', className)}
+      style={{ color: 'var(--central-text-primary)' }}
     >
       {children}
     </td>
