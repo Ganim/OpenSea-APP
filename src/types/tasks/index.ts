@@ -3,6 +3,7 @@ export * from './attachment.types';
 export * from './automation.types';
 export * from './board.types';
 export * from './card.types';
+export * from './card-member.types';
 export * from './checklist.types';
 export * from './column.types';
 export * from './comment.types';

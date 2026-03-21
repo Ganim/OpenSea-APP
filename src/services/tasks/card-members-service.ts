@@ -1,27 +1,15 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import type {
+  CardMember,
+  CardMembersResponse,
+  CardMemberResponse,
+} from '@/types/tasks';
 
-export interface CardMember {
-  userId: string;
-  userName: string | null;
-  userEmail: string | null;
-  userAvatarUrl: string | null;
-  addedAt: string;
-}
-
-export interface CardMembersResponse {
-  members: CardMember[];
-}
-
-export interface CardMemberResponse {
-  member: CardMember;
-}
+export type { CardMember, CardMembersResponse, CardMemberResponse };
 
 export const cardMembersService = {
-  async list(
-    boardId: string,
-    cardId: string
-  ): Promise<CardMembersResponse> {
+  async list(boardId: string, cardId: string): Promise<CardMembersResponse> {
     return apiClient.get<CardMembersResponse>(
       API_ENDPOINTS.TASKS.MEMBERS.LIST(boardId, cardId)
     );
@@ -38,11 +26,7 @@ export const cardMembersService = {
     );
   },
 
-  async remove(
-    boardId: string,
-    cardId: string,
-    userId: string
-  ): Promise<void> {
+  async remove(boardId: string, cardId: string, userId: string): Promise<void> {
     await apiClient.delete<void>(
       API_ENDPOINTS.TASKS.MEMBERS.REMOVE(boardId, cardId, userId)
     );
