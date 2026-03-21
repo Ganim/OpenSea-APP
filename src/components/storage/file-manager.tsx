@@ -95,25 +95,25 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
     // Compute permission objects for context menus
     const folderPermissions = useMemo<FolderPermissions>(
       () => ({
-        canEditUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.MODIFY),
-        canDeleteUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.REMOVE),
-        canShareUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.SHARE),
-        canShareSystemFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.SHARE),
-        canShareFilterFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.SHARE),
-        canDownloadUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS),
-        canDownloadSystemFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS),
-        canDownloadFilterFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS),
+        canEditUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.MODIFY),
+        canDeleteUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.REMOVE),
+        canShareUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.SHARE),
+        canShareSystemFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.SHARE),
+        canShareFilterFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.SHARE),
+        canDownloadUserFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS),
+        canDownloadSystemFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS),
+        canDownloadFilterFolders: hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS),
       }),
       [hasPermission]
     );
 
     const filePermissions = useMemo<FilePermissions>(
       () => ({
-        canRead: hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.ACCESS),
-        canUpdate: hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.MODIFY),
-        canDelete: hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.REMOVE),
-        canDownload: hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.ACCESS),
-        canViewVersions: hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.ACCESS),
+        canRead: hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.ACCESS),
+        canUpdate: hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.MODIFY),
+        canDelete: hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.REMOVE),
+        canDownload: hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.ACCESS),
+        canViewVersions: hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.ACCESS),
       }),
       [hasPermission]
     );
@@ -745,7 +745,7 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
       setIsDragOver(false);
     }, []);
 
-    const canUpload = hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.REGISTER);
+    const canUpload = hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.REGISTER);
 
     const handleDrop = useCallback(
       (e: React.DragEvent) => {
@@ -852,12 +852,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
         showHidden={manager.showHidden}
         onToggleHidden={handleToggleHidden}
         onUpload={
-          hideToolbarActions || !hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.REGISTER)
+          hideToolbarActions || !hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.REGISTER)
             ? undefined
             : () => setShowUpload(true)
         }
         onNewFolder={
-          hideToolbarActions || !hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.REGISTER)
+          hideToolbarActions || !hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.REGISTER)
             ? undefined
             : () => setShowNewFolder(true)
         }
@@ -989,12 +989,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
                   onProtectFolder={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleProtectFolder
                       : undefined
                   }
                   onHideFolder={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleHideFolder
                       : undefined
                   }
@@ -1004,12 +1004,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
                   onProtectFile={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleProtectFile
                       : undefined
                   }
                   onHideFile={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleHideFile
                       : undefined
                   }
@@ -1039,12 +1039,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onDeleteFolder={handleDeleteFolder}
                   onDownloadFolder={handleDownloadFolder}
                   onProtectFolder={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleProtectFolder
                       : undefined
                   }
                   onHideFolder={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleHideFolder
                       : undefined
                   }
@@ -1054,12 +1054,12 @@ export const FileManager = forwardRef<FileManagerRef, FileManagerProps>(
                   onFileVersions={handleFileVersions}
                   onShareFile={handleShareFile}
                   onProtectFile={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleProtectFile
                       : undefined
                   }
                   onHideFile={
-                    hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN)
+                    hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN)
                       ? handleHideFile
                       : undefined
                   }

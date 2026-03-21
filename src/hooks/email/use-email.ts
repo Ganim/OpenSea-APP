@@ -96,7 +96,7 @@ function updateMessageReadStateInCache(
 
 export function useEmailAccounts() {
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS);
 
   return useQuery({
     queryKey: ['email', 'accounts'],
@@ -218,7 +218,7 @@ export function useEmailAccountsHealth(accountIds: string[]) {
 
 export function useEmailFolders(accountId: string | null) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL.MESSAGES.ACCESS);
 
   return useQuery({
     queryKey: ['email', 'folders', accountId],
@@ -237,7 +237,7 @@ export function useEmailMessages(params: {
   search: string;
 }) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL.MESSAGES.ACCESS);
 
   return useInfiniteQuery({
     queryKey: [
@@ -280,7 +280,7 @@ export function useCentralInboxMessages(params: {
   enabled: boolean;
 }) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL.MESSAGES.ACCESS);
 
   const query = useQuery({
     queryKey: [
@@ -318,7 +318,7 @@ export function useCentralInboxMessages(params: {
  */
 export function useAllAccountFolders(accountIds: string[]) {
   const { hasPermission } = usePermissions();
-  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL.MESSAGES.ACCESS);
 
   return useQueries({
     queries: accountIds.map(accountId => ({

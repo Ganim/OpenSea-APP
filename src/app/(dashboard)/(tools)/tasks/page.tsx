@@ -72,7 +72,7 @@ function BoardSection({
 
 export default function TasksPage() {
   const { hasPermission } = usePermissions();
-  const canCreate = hasPermission(TOOLS_PERMISSIONS.TASK_BOARDS.REGISTER);
+  const canCreate = hasPermission(TOOLS_PERMISSIONS.TASKS.BOARDS.REGISTER);
 
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);

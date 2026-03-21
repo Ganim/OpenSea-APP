@@ -37,8 +37,8 @@ export function FileVersionPanel({
   const restoreMutation = useRestoreVersion();
   const { hasPermission } = usePermissions();
 
-  const canDownload = hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.ACCESS);
-  const canRestore = hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.ADMIN);
+  const canDownload = hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.ACCESS);
+  const canRestore = hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.ADMIN);
 
   const handleDownloadVersion = useCallback(
     (version: number) => {

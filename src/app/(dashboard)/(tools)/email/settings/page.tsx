@@ -84,13 +84,13 @@ function getInitials(name: string | null, address: string): string {
 export default function EmailSettingsPage() {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
-  const canCreate = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.REGISTER);
-  const canUpdate = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.MODIFY);
-  const canDelete = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.REMOVE);
-  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS);
-  const canSync = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ADMIN);
-  const canShare = hasPermission(TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.SHARE);
+  const canList = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS);
+  const canCreate = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.REGISTER);
+  const canUpdate = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.MODIFY);
+  const canDelete = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.REMOVE);
+  const canRead = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS);
+  const canSync = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ADMIN);
+  const canShare = hasPermission(TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.SHARE);
 
   const [form, setForm] = useState<CreateEmailAccountRequest>(initialForm);
   const [showForm, setShowForm] = useState(false);

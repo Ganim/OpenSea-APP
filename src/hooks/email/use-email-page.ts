@@ -87,7 +87,7 @@ function syncUrlParams(params: {
 
 export function useEmailPage() {
   const { hasPermission } = usePermissions();
-  const canSend = hasPermission(TOOLS_PERMISSIONS.EMAIL_MESSAGES.REGISTER);
+  const canSend = hasPermission(TOOLS_PERMISSIONS.EMAIL.MESSAGES.REGISTER);
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();

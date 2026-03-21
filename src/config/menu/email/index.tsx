@@ -7,5 +7,5 @@ export const emailMenu: MenuItem = {
   label: 'E-mail',
   icon: <Mail className="w-6 h-6" />,
   href: '/email',
-  requiredPermission: TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS,
+  requiredPermission: TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS,
 };

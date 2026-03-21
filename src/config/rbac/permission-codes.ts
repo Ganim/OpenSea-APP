@@ -373,45 +373,49 @@ export const ADMIN_PERMISSIONS = {
 // =============================================================================
 
 export const TOOLS_PERMISSIONS = {
-  EMAIL_ACCOUNTS: perm(
-    'tools',
-    'email-accounts',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'admin',
-    'share'
-  ),
-  EMAIL_MESSAGES: perm(
-    'tools',
-    'email-messages',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'onlyself'
-  ),
-  TASK_BOARDS: perm(
-    'tools',
-    'task-boards',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'share'
-  ),
-  TASK_CARDS: perm(
-    'tools',
-    'task-cards',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'admin',
-    'share',
-    'onlyself'
-  ),
+  EMAIL: {
+    ACCOUNTS: perm(
+      'tools',
+      'email.accounts',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin',
+      'share'
+    ),
+    MESSAGES: perm(
+      'tools',
+      'email.messages',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'onlyself'
+    ),
+  },
+  TASKS: {
+    BOARDS: perm(
+      'tools',
+      'tasks.boards',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'share'
+    ),
+    CARDS: perm(
+      'tools',
+      'tasks.cards',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin',
+      'share',
+      'onlyself'
+    ),
+  },
   CALENDAR: perm(
     'tools',
     'calendar',
@@ -424,27 +428,29 @@ export const TOOLS_PERMISSIONS = {
     'share',
     'onlyself'
   ),
-  STORAGE_FOLDERS: perm(
-    'tools',
-    'storage-folders',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'admin',
-    'share'
-  ),
-  STORAGE_FILES: perm(
-    'tools',
-    'storage-files',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'admin',
-    'share',
-    'onlyself'
-  ),
+  STORAGE: {
+    FOLDERS: perm(
+      'tools',
+      'storage.folders',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin',
+      'share'
+    ),
+    FILES: perm(
+      'tools',
+      'storage.files',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin',
+      'share',
+      'onlyself'
+    ),
+  },
 } as const;
 
 // =============================================================================

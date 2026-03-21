@@ -196,22 +196,22 @@ export const MATRIX_TABS: MatrixTab[] = [
     icon: Wrench,
     resources: [
       // Comunicação
-      { label: 'Email: Contas', group: 'Comunicação', backendResources: ['tools.email-accounts'],
+      { label: 'Email: Contas', group: 'Comunicação', backendResources: ['tools.email.accounts'],
         availableActions: ['access', 'register', 'modify', 'remove', 'admin', 'share'] },
-      { label: 'Email: Mensagens', group: 'Comunicação', backendResources: ['tools.email-messages'],
+      { label: 'Email: Mensagens', group: 'Comunicação', backendResources: ['tools.email.messages'],
         availableActions: ['access', 'register', 'modify', 'remove', 'onlyself'] },
       // Produtividade
-      { label: 'Tarefas: Quadros', group: 'Produtividade', backendResources: ['tools.task-boards'],
+      { label: 'Tarefas: Quadros', group: 'Produtividade', backendResources: ['tools.tasks.boards'],
         availableActions: ['access', 'register', 'modify', 'remove', 'share'] },
-      { label: 'Tarefas: Cartões', group: 'Produtividade', backendResources: ['tools.task-cards'],
+      { label: 'Tarefas: Cartões', group: 'Produtividade', backendResources: ['tools.tasks.cards'],
         availableActions: ['access', 'register', 'modify', 'remove', 'admin', 'share', 'onlyself'] },
       { label: 'Agenda', group: 'Produtividade', backendResources: ['tools.calendar'],
         availableActions: ['access', 'register', 'modify', 'remove', 'export', 'admin', 'share', 'onlyself'] },
       // Arquivos
-      { label: 'Pastas', group: 'Arquivos', backendResources: ['tools.storage-folders'],
+      { label: 'Pastas', group: 'Arquivos', backendResources: ['tools.storage.folders'],
         availableActions: ['access', 'register', 'modify', 'remove', 'admin', 'share'] },
-      { label: 'Arquivos', group: 'Arquivos', backendResources: ['tools.storage-files'],
-        availableActions: ['access', 'register', 'modify', 'remove', 'admin', 'share'] },
+      { label: 'Arquivos', group: 'Arquivos', backendResources: ['tools.storage.files'],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin', 'share', 'onlyself'] },
     ],
   },
 
@@ -221,12 +221,14 @@ export const MATRIX_TABS: MatrixTab[] = [
     label: 'Sistema',
     icon: Settings,
     resources: [
-      { label: 'Modelos de Etiqueta', group: 'Geral', backendResources: ['system.label-templates'],
-        availableActions: ['access', 'register', 'modify', 'remove'] },
-      { label: 'Notificações', group: 'Geral', backendResources: ['system.notifications'],
-        availableActions: ['admin'] },
-      { label: 'Permissões Pessoais', group: 'Geral', backendResources: ['system.self'],
+      // Usuário
+      { label: 'Perfil', group: 'Usuário', backendResources: ['system.self'],
         availableActions: ['access', 'modify', 'admin'] },
+      { label: 'Notificações', group: 'Usuário', backendResources: ['system.notifications'],
+        availableActions: ['admin'] },
+      // Sistema
+      { label: 'Etiquetas', group: 'Sistema', backendResources: ['system.label-templates'],
+        availableActions: ['access', 'register', 'modify', 'remove'] },
     ],
   },
 ];

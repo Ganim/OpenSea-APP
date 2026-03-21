@@ -23,7 +23,7 @@ export const TOOLS: ToolConfig[] = [
     description: 'Gerencie documentos e arquivos da empresa',
     icon: 'FolderOpen',
     href: '/file-manager',
-    requiredPermission: TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS,
+    requiredPermission: TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS,
   },
   {
     id: 'calendar',
@@ -39,7 +39,7 @@ export const TOOLS: ToolConfig[] = [
     description: 'Caixa de entrada e envio de e-mails',
     icon: 'Mail',
     href: '/email',
-    requiredPermission: TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS,
+    requiredPermission: TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS,
   },
   {
     id: 'tasks',
@@ -47,6 +47,6 @@ export const TOOLS: ToolConfig[] = [
     description: 'Quadros de tarefas e gerenciamento de projetos',
     icon: 'KanbanSquare',
     href: '/tasks',
-    requiredPermission: TOOLS_PERMISSIONS.TASK_BOARDS.ACCESS,
+    requiredPermission: TOOLS_PERMISSIONS.TASKS.BOARDS.ACCESS,
   },
 ];

@@ -83,8 +83,8 @@ function getFolderSharePermissions(folder: StorageFolder | null) {
 
   // All folder types use the same centralized share permission
   return {
-    shareUserCode: TOOLS_PERMISSIONS.STORAGE_FOLDERS.SHARE,
-    shareTeamCode: TOOLS_PERMISSIONS.STORAGE_FOLDERS.SHARE,
+    shareUserCode: TOOLS_PERMISSIONS.STORAGE.FOLDERS.SHARE,
+    shareTeamCode: TOOLS_PERMISSIONS.STORAGE.FOLDERS.SHARE,
   };
 }
 

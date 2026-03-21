@@ -23,8 +23,8 @@ export default function FileManagerPage() {
   const fileManagerRef = useRef<FileManagerRef>(null);
   const { hasPermission } = usePermissions();
   const { isSuperAdmin } = useAuth();
-  const canCreate = hasPermission(TOOLS_PERMISSIONS.STORAGE_FOLDERS.REGISTER);
-  const canUpload = hasPermission(TOOLS_PERMISSIONS.STORAGE_FILES.REGISTER);
+  const canCreate = hasPermission(TOOLS_PERMISSIONS.STORAGE.FOLDERS.REGISTER);
+  const canUpload = hasPermission(TOOLS_PERMISSIONS.STORAGE.FILES.REGISTER);
   const [viewAll, setViewAll] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
 
@@ -61,7 +61,7 @@ export default function FileManagerPage() {
   ];
 
   return (
-    <ProtectedRoute requiredPermission={TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS}>
+    <ProtectedRoute requiredPermission={TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS}>
       <div className="flex flex-col gap-6 h-[calc(100vh-10rem)]">
         {/* Quota Warning */}
         <QuotaWarningBanner />

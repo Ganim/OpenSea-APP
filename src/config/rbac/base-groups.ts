@@ -213,18 +213,18 @@ export const baseGroups: Array<
       { code: FINANCE_PERMISSIONS.SUPPLIERS.REMOVE, effect: 'allow' },
 
       // Tools — admin access
-      { code: TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.EMAIL_ACCOUNTS.ADMIN, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.EMAIL_MESSAGES.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.TASK_BOARDS.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.TASK_CARDS.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.TASK_CARDS.ADMIN, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.EMAIL.ACCOUNTS.ADMIN, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.EMAIL.MESSAGES.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.TASKS.BOARDS.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.TASKS.CARDS.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.TASKS.CARDS.ADMIN, effect: 'allow' },
       { code: TOOLS_PERMISSIONS.CALENDAR.ACCESS, effect: 'allow' },
       { code: TOOLS_PERMISSIONS.CALENDAR.ADMIN, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.STORAGE_FOLDERS.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.STORAGE_FOLDERS.ADMIN, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.STORAGE_FILES.ACCESS, effect: 'allow' },
-      { code: TOOLS_PERMISSIONS.STORAGE_FILES.ADMIN, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.STORAGE.FOLDERS.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.STORAGE.FOLDERS.ADMIN, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.STORAGE.FILES.ACCESS, effect: 'allow' },
+      { code: TOOLS_PERMISSIONS.STORAGE.FILES.ADMIN, effect: 'allow' },
 
       // System
       { code: SYSTEM_PERMISSIONS.LABEL_TEMPLATES.ACCESS, effect: 'allow' },
