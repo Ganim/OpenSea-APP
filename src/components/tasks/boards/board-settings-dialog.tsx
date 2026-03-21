@@ -18,10 +18,11 @@ import {
 } from '@/hooks/tasks/use-columns';
 import type { BoardVisibility } from '@/types/tasks';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Settings2 } from 'lucide-react';
 import { BoardSettingsGeneral } from './board-settings-general';
 import { BoardSettingsGradient } from './board-settings-gradient';
 import { BoardSettingsColumns } from './board-settings-columns';
+import { BoardCustomFieldsDialog } from './board-custom-fields-dialog';
 
 interface BoardSettingsDialogProps {
   open: boolean;
@@ -46,6 +47,7 @@ export function BoardSettingsDialog({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState<BoardVisibility>('PRIVATE');
+  const [customFieldsOpen, setCustomFieldsOpen] = useState(false);
 
   useEffect(() => {
     if (board) {
@@ -83,6 +85,7 @@ export function BoardSettingsDialog({
   }
 
   return (
+  <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -112,6 +115,24 @@ export function BoardSettingsDialog({
             deleteColumn={deleteColumn}
             reorderColumns={reorderColumns}
           />
+
+          {/* Custom Fields */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">Campos Personalizados</h3>
+            <p className="text-xs text-muted-foreground">
+              Defina campos extras para os cartões deste quadro.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-2.5 gap-1.5"
+              onClick={() => setCustomFieldsOpen(true)}
+              type="button"
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              Gerenciar Campos
+            </Button>
+          </div>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0 mt-4">
@@ -132,5 +153,12 @@ export function BoardSettingsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <BoardCustomFieldsDialog
+      open={customFieldsOpen}
+      onOpenChange={setCustomFieldsOpen}
+      boardId={boardId}
+    />
+  </>
   );
 }

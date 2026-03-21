@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Select,
   SelectContent,
@@ -17,7 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarIcon, Clock, User, Tag, Columns3 } from 'lucide-react';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { Clock, User, Tag, Columns3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
 import { LabelBadge } from '@/components/tasks/shared/label-badge';
@@ -32,8 +32,6 @@ import type {
   IntegrationType,
 } from '@/types/tasks';
 import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/tasks';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface CardModalSidebarProps {
   // Column
@@ -116,8 +114,6 @@ export function CardModalSidebar({
 }: CardModalSidebarProps) {
   const [labelsOpen, setLabelsOpen] = useState(false);
   const [assigneeOpen, setAssigneeOpen] = useState(false);
-  const [startDateOpen, setStartDateOpen] = useState(false);
-  const [dueDateOpen, setDueDateOpen] = useState(false);
 
   const selectedLabels = allLabels.filter(l => selectedLabelIds.includes(l.id));
 
@@ -411,48 +407,11 @@ export function CardModalSidebar({
           <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
             Início
           </p>
-          <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs w-full justify-start gap-1.5"
-                type="button"
-              >
-                <CalendarIcon className="h-3 w-3 shrink-0" />
-                {startDate
-                  ? format(startDate, "dd 'de' MMM", { locale: ptBR })
-                  : 'Definir'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={d => {
-                  onStartDateChange(d);
-                  setStartDateOpen(false);
-                }}
-                locale={ptBR}
-              />
-              {startDate && (
-                <div className="px-3 pb-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    className="w-full text-xs text-rose-500"
-                    onClick={() => {
-                      onStartDateChange(undefined);
-                      setStartDateOpen(false);
-                    }}
-                  >
-                    Remover data
-                  </Button>
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
+          <DateTimePicker
+            value={startDate ?? null}
+            onChange={(date) => onStartDateChange(date ?? undefined)}
+            placeholder="Definir início"
+          />
         </div>
 
         {/* ── Prazo ── */}
@@ -460,48 +419,11 @@ export function CardModalSidebar({
           <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
             Prazo
           </p>
-          <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs w-full justify-start gap-1.5"
-                type="button"
-              >
-                <CalendarIcon className="h-3 w-3 shrink-0" />
-                {dueDate
-                  ? format(dueDate, "dd 'de' MMM", { locale: ptBR })
-                  : 'Definir'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={d => {
-                  onDueDateChange(d);
-                  setDueDateOpen(false);
-                }}
-                locale={ptBR}
-              />
-              {dueDate && (
-                <div className="px-3 pb-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    className="w-full text-xs text-rose-500"
-                    onClick={() => {
-                      onDueDateChange(undefined);
-                      setDueDateOpen(false);
-                    }}
-                  >
-                    Remover prazo
-                  </Button>
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
+          <DateTimePicker
+            value={dueDate ?? null}
+            onChange={(date) => onDueDateChange(date ?? undefined)}
+            placeholder="Definir prazo"
+          />
         </div>
 
         {/* ── Tempo de Execução ── */}

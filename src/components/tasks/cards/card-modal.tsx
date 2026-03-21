@@ -38,7 +38,7 @@ import {
 import { useBoard } from '@/hooks/tasks/use-boards';
 import { useLabels } from '@/hooks/tasks/use-labels';
 import { useCustomFields, useSetCustomFieldValues } from '@/hooks/tasks/use-custom-fields';
-import { useAttachments, useDeleteAttachment } from '@/hooks/tasks/use-attachments';
+import { useAttachments, useUploadAttachment, useDeleteAttachment } from '@/hooks/tasks/use-attachments';
 import { useIntegrations, useDeleteIntegration } from '@/hooks/tasks/use-integrations';
 import { useCardMembers, useAddCardMember, useRemoveCardMember } from '@/hooks/tasks/use-card-members';
 import { useComments, useCreateComment } from '@/hooks/tasks/use-comments';
@@ -47,6 +47,9 @@ import { CardModalMembers } from './card-modal-members';
 import { CardModalSidebar } from './card-modal-sidebar';
 import { CardModalGeneralTab } from './card-modal-general-tab';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { getGradientForBoard } from '@/components/tasks/shared/board-gradients';
+import { storageFilesService } from '@/services/storage/files.service';
+import { attachmentsService } from '@/services/tasks';
 
 import type {
   CardPriority,
@@ -155,6 +158,7 @@ export function CardModal({
   const deleteCard = useDeleteCard(boardId);
   const manageLabels = useManageCardLabels(boardId);
   const setFieldValues = useSetCustomFieldValues(boardId);
+  const uploadAttachment = useUploadAttachment(boardId, cardId ?? '');
   const deleteAttachment = useDeleteAttachment(boardId, cardId ?? '');
   const deleteIntegration = useDeleteIntegration(boardId, cardId ?? '');
   const addCardMember = useAddCardMember(boardId, cardId ?? '');
@@ -179,6 +183,7 @@ export function CardModal({
   const [estimatedHours, setEstimatedHours] = useState('');
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
   const [memberIds, setMemberIds] = useState<string[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const initializedRef = useRef(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -246,6 +251,7 @@ export function CardModal({
       setEstimatedHours('');
       setCustomFieldValues({});
       setMemberIds([]);
+      setPendingFiles([]);
       setActiveTab('geral');
       setDeleteModalOpen(false);
     }
@@ -443,11 +449,33 @@ export function CardModal({
   );
 
   const handleUploadAttachment = useCallback(
-    (_file: File) => {
-      // Upload logic — for now, show toast
-      toast.info('Upload de arquivo será implementado em breve');
+    async (file: File) => {
+      if (!isEditMode || !cardId) {
+        // Buffer files for upload after card creation
+        setPendingFiles(prev => [...prev, file]);
+        toast.info('Arquivo será enviado ao salvar o cartão');
+        return;
+      }
+
+      try {
+        // 1. Upload file to storage
+        const storageResult = await storageFilesService.uploadFile(null, file, {
+          entityType: 'task-attachment',
+          entityId: cardId,
+        });
+
+        // 2. Link to card as attachment
+        await uploadAttachment.mutateAsync({
+          fileId: storageResult.file.id,
+          fileName: file.name,
+        });
+
+        toast.success('Anexo adicionado');
+      } catch {
+        toast.error('Não foi possível enviar o anexo. Tente novamente.');
+      }
     },
-    []
+    [isEditMode, cardId, uploadAttachment]
   );
 
   const handleAddComment = useCallback(
@@ -598,6 +626,23 @@ export function CardModal({
           );
         }
 
+        // Upload pending files
+        for (const file of pendingFiles) {
+          promises.push(
+            storageFilesService
+              .uploadFile(null, file, {
+                entityType: 'task-attachment',
+                entityId: newCardId,
+              })
+              .then((storageResult) =>
+                attachmentsService.upload(boardId, newCardId, {
+                  fileId: storageResult.file.id,
+                  fileName: file.name,
+                })
+              )
+          );
+        }
+
         if (promises.length > 0) {
           const results = await Promise.allSettled(promises);
           const failures = results.filter(r => r.status === 'rejected');
@@ -617,8 +662,8 @@ export function CardModal({
     }
   }, [
     title, description, columnId, priority, assigneeId, dueDate, startDate,
-    estimatedHours, selectedLabelIds, parentCardId, customFieldValues,
-    createCard, setFieldValues, onOpenChange,
+    estimatedHours, selectedLabelIds, parentCardId, customFieldValues, pendingFiles,
+    boardId, createCard, setFieldValues, onOpenChange,
   ]);
 
   // ── Save (edit mode) — batch custom fields ──
@@ -665,6 +710,8 @@ export function CardModal({
   const isError = isEditMode && isCardError;
   const isPending = createCard.isPending;
 
+  const gradient = getGradientForBoard(boardId, board?.gradientId);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -672,6 +719,12 @@ export function CardModal({
           className="h-[100dvh] w-full max-w-full md:h-auto md:max-w-[800px] md:max-h-[90vh] overflow-hidden p-0 gap-0 rounded-none md:rounded-lg"
           showCloseButton={false}
         >
+          {/* Board color header strip */}
+          <div
+            className="h-1.5 w-full shrink-0 rounded-t-lg"
+            style={{ background: `linear-gradient(to right, ${gradient.from}, ${gradient.to})` }}
+          />
+
           {isError ? (
             <div className="flex flex-col items-center justify-center p-20 gap-3">
               <DialogHeader className="sr-only">
