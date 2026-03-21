@@ -2,7 +2,6 @@
 
 import './central.css';
 import { SuperAdminGuard } from '@/components/auth/super-admin-guard';
-import { CentralNavbar } from '@/components/central/central-navbar';
 import { CentralSidebar } from '@/components/central/central-sidebar';
 import { CentralThemeProvider } from '@/contexts/central-theme-context';
 
@@ -15,7 +14,8 @@ export default function CentralLayout({
     <SuperAdminGuard>
       <CentralThemeProvider>
         <div
-          className="min-h-screen flex"
+          data-central-theme
+          className="flex h-screen"
           style={{ background: 'var(--central-bg)' }}
         >
           <a
@@ -25,12 +25,13 @@ export default function CentralLayout({
             Pular para o conteudo principal
           </a>
           <CentralSidebar />
-          <div className="flex-1 flex flex-col min-h-screen">
-            <CentralNavbar />
-            <main id="main-content" tabIndex={-1} className="flex-1 p-6">
-              <div className="max-w-[1600px] mx-auto">{children}</div>
-            </main>
-          </div>
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="flex-1 overflow-y-auto"
+          >
+            {children}
+          </main>
         </div>
       </CentralThemeProvider>
     </SuperAdminGuard>
