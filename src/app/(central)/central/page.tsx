@@ -1,440 +1,484 @@
 'use client';
 
+import { CentralAlertBar } from '@/components/central/central-alert-bar';
+import { CentralBadge } from '@/components/central/central-badge';
 import { CentralCard } from '@/components/central/central-card';
-import { PageBreadcrumb } from '@/components/layout/page-breadcrumb';
+import { CentralHero } from '@/components/central/central-hero';
+import { CentralStatPill } from '@/components/central/central-stat-pill';
 import { useCentralTheme } from '@/contexts/central-theme-context';
 import { useDashboardStats } from '@/hooks/admin/use-admin';
-import type { RecentActivity } from '@/schemas/admin.schemas';
+import { Building2, Clock, DollarSign, Users } from 'lucide-react';
 import {
-  Activity,
-  Building2,
-  CreditCard,
-  DollarSign,
-  Users,
-} from 'lucide-react';
-import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
 
-// Cores para gráficos por tier
-const TIER_COLORS: Record<string, string> = {
-  FREE: '#94a3b8',
-  STARTER: '#3b82f6',
-  PROFESSIONAL: '#8b5cf6',
-  ENTERPRISE: '#f59e0b',
+// ========================
+// Color definitions
+// ========================
+
+const MODULE_COLORS = {
+  light: {
+    SALES: '#8b5cf6',
+    HR: '#0ea5e9',
+    STOCK: '#10b981',
+    FIN: '#f43f5e',
+    TOOLS: '#14b8a6',
+    AI: '#6366f1',
+  },
+  dark: {
+    SALES: '#a78bfa',
+    HR: '#38bdf8',
+    STOCK: '#34d399',
+    FIN: '#fb7185',
+    TOOLS: '#2dd4bf',
+    AI: '#818cf8',
+  },
 };
 
-// Cores para status donut
-const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: '#22c55e',
-  INACTIVE: '#94a3b8',
-  SUSPENDED: '#ef4444',
+const PRIORITY_COLORS = {
+  critical: '#f43f5e',
+  medium: '#f97316',
+  low: '#10b981',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Ativas',
-  INACTIVE: 'Inativas',
-  SUSPENDED: 'Suspensas',
-};
+const TENANT_AVATAR_COLORS = ['#8b5cf6', '#0ea5e9', '#10b981', '#f43f5e'];
 
-const TIER_LABELS: Record<string, string> = {
-  FREE: 'Free',
-  STARTER: 'Starter',
-  PROFESSIONAL: 'Professional',
-  ENTERPRISE: 'Enterprise',
-};
+// ========================
+// Mock data (until backend integration)
+// ========================
 
-const ACTION_LABELS: Record<string, string> = {
-  CREATE: 'Criação',
-  UPDATE: 'Atualização',
-  DELETE: 'Exclusão',
-  STATUS_CHANGE: 'Status',
-  PLAN_CHANGE: 'Plano',
-  FLAG_CHANGE: 'Flag',
-  SECURITY_KEY_CHANGE: 'Chave',
-};
+const MOCK_REVENUE_DATA = [
+  { name: 'SALES', value: 4200 },
+  { name: 'HR', value: 3100 },
+  { name: 'STOCK', value: 2800 },
+  { name: 'FIN', value: 2100 },
+  { name: 'TOOLS', value: 1500 },
+  { name: 'AI', value: 900 },
+];
 
-const ENTITY_LABELS: Record<string, string> = {
-  TENANT: 'Empresa',
-  PLAN: 'Plano',
-  TENANT_USER: 'Usuário',
-  FEATURE_FLAG: 'Feature Flag',
-};
+const MOCK_TICKETS = [
+  {
+    id: '1',
+    priority: 'critical' as const,
+    number: '#1842',
+    tenant: 'Acme Corp',
+    description: 'Falha na sincronização de estoque',
+    time: '12min',
+  },
+  {
+    id: '2',
+    priority: 'medium' as const,
+    number: '#1841',
+    tenant: 'TechFlow',
+    description: 'Relatório financeiro incompleto',
+    time: '45min',
+  },
+  {
+    id: '3',
+    priority: 'low' as const,
+    number: '#1840',
+    tenant: 'StartUp Inc',
+    description: 'Solicitação de novo módulo',
+    time: '2h',
+  },
+];
+
+const MOCK_TOP_TENANTS = [
+  {
+    id: '1',
+    name: 'Acme Corporation',
+    initials: 'AC',
+    modules: 'SALES, HR, STOCK, FIN',
+    mrr: 'R$2.450',
+    color: TENANT_AVATAR_COLORS[0],
+  },
+  {
+    id: '2',
+    name: 'TechFlow Solutions',
+    initials: 'TF',
+    modules: 'SALES, HR, TOOLS',
+    mrr: 'R$1.890',
+    color: TENANT_AVATAR_COLORS[1],
+  },
+  {
+    id: '3',
+    name: 'StartUp Inc',
+    initials: 'SI',
+    modules: 'SALES, STOCK',
+    mrr: 'R$980',
+    color: TENANT_AVATAR_COLORS[2],
+  },
+];
+
+const MOCK_GROWTH_DATA = [
+  { month: 'Out', tenants: 28, users: 240 },
+  { month: 'Nov', tenants: 31, users: 280 },
+  { month: 'Dez', tenants: 34, users: 310 },
+  { month: 'Jan', tenants: 36, users: 330 },
+  { month: 'Fev', tenants: 39, users: 355 },
+  { month: 'Mar', tenants: 42, users: 380 },
+];
+
+// ========================
+// Helpers
+// ========================
 
 function formatMrr(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  if (value >= 1000) {
+    return `R$${(value / 1000).toFixed(1)}k`;
+  }
+  return `R$${value}`;
 }
 
-function formatMonth(month: string): string {
-  const [year, m] = month.split('-');
-  const monthNames = [
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Set',
-    'Out',
-    'Nov',
-    'Dez',
-  ];
-  return `${monthNames[parseInt(m, 10) - 1]} ${year?.slice(2)}`;
-}
-
-function formatRelativeDate(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - new Date(date).getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMin < 1) return 'agora';
-  if (diffMin < 60) return `${diffMin}min atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 7) return `${diffDays}d atrás`;
-  return new Date(date).toLocaleDateString('pt-BR');
-}
+// ========================
+// Page Component
+// ========================
 
 export default function CentralDashboardPage() {
   const { data: stats, isLoading } = useDashboardStats();
   const { theme } = useCentralTheme();
   const isDark = theme === 'dark';
 
-  // Prepare chart data
-  const tierData = stats
-    ? Object.entries(stats.tenantsByTier).map(([tier, count]) => ({
-        name: TIER_LABELS[tier] ?? tier,
-        value: count,
-        tier,
-      }))
-    : [];
-
-  const statusData = stats
-    ? Object.entries(stats.tenantsByStatus).map(([status, count]) => ({
-        name: STATUS_LABELS[status] ?? status,
-        value: count,
-        status,
-      }))
-    : [];
-
-  const growthData = stats
-    ? stats.monthlyGrowth.map(item => ({
-        month: formatMonth(item.month),
-        count: item.count,
-      }))
-    : [];
-
   const chartTextColor = isDark ? '#94a3b8' : '#64748b';
   const chartGridColor = isDark
-    ? 'rgba(148,163,184,0.1)'
-    : 'rgba(100,116,139,0.15)';
+    ? 'rgba(148,163,184,0.08)'
+    : 'rgba(100,116,139,0.12)';
+  const tooltipBg = isDark ? '#1e293b' : '#ffffff';
+  const tooltipBorder = isDark ? 'rgba(148,163,184,0.2)' : 'rgba(0,0,0,0.1)';
+  const tooltipColor = isDark ? '#f1f5f9' : '#1e293b';
+
+  const moduleColors = isDark ? MODULE_COLORS.dark : MODULE_COLORS.light;
+  const moduleColorMap: Record<string, string> = {
+    SALES: moduleColors.SALES,
+    HR: moduleColors.HR,
+    STOCK: moduleColors.STOCK,
+    FIN: moduleColors.FIN,
+    TOOLS: moduleColors.TOOLS,
+    AI: moduleColors.AI,
+  };
+
+  // Use real data if available, otherwise mock
+  const totalTenants = stats?.totalTenants ?? 42;
+  const totalUsers = stats?.totalUsers ?? 380;
+  const mrr = stats?.mrr ?? 12500;
+
+  const lineStroke = isDark ? '#a78bfa' : '#8b5cf6';
 
   return (
-    <div className="space-y-6 pb-8">
-      <PageBreadcrumb items={[{ label: 'Central', href: '/central' }]} />
+    <div>
+      {/* Hero Banner */}
+      <CentralHero
+        greeting="Bom dia, Admin"
+        subtitle="Visão geral do sistema e métricas em tempo real"
+      >
+        <CentralStatPill
+          icon={<Building2 className="h-3.5 w-3.5" />}
+          iconColor="violet"
+          value={String(totalTenants)}
+          label="Tenants"
+          change="+3"
+          changeType="up"
+        />
+        <CentralStatPill
+          icon={<Users className="h-3.5 w-3.5" />}
+          iconColor="sky"
+          value={String(totalUsers)}
+          label="Usuários"
+          change="+28"
+          changeType="up"
+        />
+        <CentralStatPill
+          icon={<DollarSign className="h-3.5 w-3.5" />}
+          iconColor="emerald"
+          value={formatMrr(mrr)}
+          label="MRR"
+          change="+8%"
+          changeType="up"
+        />
+        <CentralStatPill
+          icon={<Clock className="h-3.5 w-3.5" />}
+          iconColor="teal"
+          value="12"
+          label="Tickets"
+          change="2 SLA"
+          changeType="warn"
+        />
+      </CentralHero>
 
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold central-text">Painel Central</h1>
-        <p className="text-sm central-text-muted mt-1">
-          Visão geral do sistema e métricas em tempo real
-        </p>
-      </div>
+      {/* Content area */}
+      <div className="px-6 py-4 space-y-3">
+        {/* Alert bar */}
+        <CentralAlertBar
+          items={[
+            { text: '3 tenants com overage' },
+            { text: '2 integrações com erro' },
+            { text: '1 cert. expirando' },
+          ]}
+        />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {[
-          {
-            label: 'Total de Empresas',
-            value: stats?.totalTenants ?? 0,
-            Icon: Building2,
-            color: 'text-blue-500',
-          },
-          {
-            label: 'Total de Usuários',
-            value: stats?.totalUsers ?? 0,
-            Icon: Users,
-            color: 'text-violet-500',
-          },
-          {
-            label: 'Planos Ativos',
-            value: stats?.activePlans ?? 0,
-            Icon: CreditCard,
-            color: 'text-emerald-500',
-          },
-          {
-            label: 'Receita Mensal',
-            value: formatMrr(stats?.mrr ?? 0),
-            Icon: DollarSign,
-            color: 'text-amber-500',
-          },
-        ].map(stat => (
-          <CentralCard key={stat.label} hover className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p
-                  className="text-sm font-medium mb-1"
-                  style={{ color: 'var(--central-text-secondary)' }}
-                >
-                  {stat.label}
-                </p>
-                {isLoading ? (
-                  <div className="h-8 w-24 rounded animate-pulse bg-zinc-200 dark:bg-zinc-800" />
-                ) : (
-                  <p
-                    className="text-3xl font-bold"
-                    style={{ color: 'var(--central-text-primary)' }}
-                  >
-                    {stat.value}
-                  </p>
-                )}
-              </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
-                <stat.Icon className="h-6 w-6" />
-              </div>
+        {/* Row 1: Revenue chart + Tickets */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-3">
+          {/* Revenue by Module */}
+          <CentralCard className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span
+                className="font-semibold text-xs"
+                style={{ color: 'var(--central-text-primary)' }}
+              >
+                Receita por Módulo
+              </span>
+              <CentralBadge variant="violet">Mar 2026</CentralBadge>
             </div>
-          </CentralCard>
-        ))}
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Monthly Growth Line Chart */}
-        <CentralCard className="p-6">
-          <h3 className="text-lg font-semibold central-text mb-4">
-            Crescimento Mensal
-          </h3>
-          {isLoading ? (
-            <div className="h-[250px] animate-pulse central-glass-subtle rounded-lg" />
-          ) : growthData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: chartTextColor, fontSize: 12 }}
-                  axisLine={{ stroke: chartGridColor }}
-                />
-                <YAxis
-                  tick={{ fill: chartTextColor, fontSize: 12 }}
-                  axisLine={{ stroke: chartGridColor }}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                    border: `1px solid ${isDark ? 'rgba(148,163,184,0.2)' : 'rgba(0,0,0,0.1)'}`,
-                    borderRadius: '8px',
-                    color: isDark ? '#f1f5f9' : '#1e293b',
-                  }}
-                  labelStyle={{ fontWeight: 600 }}
-                  formatter={(value: number) => [value, 'Empresas criadas']}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, fill: '#3b82f6' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center">
-              <p className="text-sm central-text-muted">
-                Nenhum dado de crescimento disponível
-              </p>
-            </div>
-          )}
-        </CentralCard>
-
-        {/* Tenants by Tier Bar Chart */}
-        <CentralCard className="p-6">
-          <h3 className="text-lg font-semibold central-text mb-4">
-            Empresas por Plano
-          </h3>
-          {isLoading ? (
-            <div className="h-[250px] animate-pulse central-glass-subtle rounded-lg" />
-          ) : tierData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={tierData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fill: chartTextColor, fontSize: 12 }}
-                  axisLine={{ stroke: chartGridColor }}
-                />
-                <YAxis
-                  tick={{ fill: chartTextColor, fontSize: 12 }}
-                  axisLine={{ stroke: chartGridColor }}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                    border: `1px solid ${isDark ? 'rgba(148,163,184,0.2)' : 'rgba(0,0,0,0.1)'}`,
-                    borderRadius: '8px',
-                    color: isDark ? '#f1f5f9' : '#1e293b',
-                  }}
-                  formatter={(value: number) => [value, 'Empresas']}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {tierData.map(entry => (
-                    <Cell
-                      key={entry.tier}
-                      fill={TIER_COLORS[entry.tier] ?? '#3b82f6'}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center">
-              <p className="text-sm central-text-muted">
-                Nenhuma empresa com plano associado
-              </p>
-            </div>
-          )}
-        </CentralCard>
-      </div>
-
-      {/* Bottom Row: Status Donut + Recent Activity */}
-      <div className="grid gap-4 lg:grid-cols-5">
-        {/* Status Donut Chart */}
-        <CentralCard className="p-6 lg:col-span-2">
-          <h3 className="text-lg font-semibold central-text mb-4">
-            Status das Empresas
-          </h3>
-          {isLoading ? (
-            <div className="h-[200px] animate-pulse central-glass-subtle rounded-lg" />
-          ) : statusData.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="60%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {statusData.map(entry => (
-                      <Cell
-                        key={entry.status}
-                        fill={STATUS_COLORS[entry.status] ?? '#94a3b8'}
-                      />
-                    ))}
-                  </Pie>
+            {isLoading ? (
+              <div
+                className="h-[200px] animate-pulse rounded-lg"
+                style={{ background: 'var(--central-card-bg)' }}
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={MOCK_REVENUE_DATA} barCategoryGap="20%">
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={chartGridColor}
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: chartTextColor, fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: chartTextColor, fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                      border: `1px solid ${isDark ? 'rgba(148,163,184,0.2)' : 'rgba(0,0,0,0.1)'}`,
+                      backgroundColor: tooltipBg,
+                      border: `1px solid ${tooltipBorder}`,
                       borderRadius: '8px',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
+                      color: tooltipColor,
+                      fontSize: '11px',
                     }}
-                    formatter={(value: number) => [value, 'Empresas']}
+                    formatter={(value: number) => [
+                      `R$${value.toLocaleString('pt-BR')}`,
+                      'Receita',
+                    ]}
                   />
-                </PieChart>
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {MOCK_REVENUE_DATA.map(entry => (
+                      <Cell
+                        key={entry.name}
+                        fill={moduleColorMap[entry.name] ?? '#8b5cf6'}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
-              <div className="flex flex-col gap-3">
-                {statusData.map(entry => (
-                  <div key={entry.status} className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{
-                        backgroundColor:
-                          STATUS_COLORS[entry.status] ?? '#94a3b8',
-                      }}
-                    />
-                    <span className="text-sm central-text-muted">
-                      {entry.name}
-                    </span>
-                    <span className="text-sm font-semibold central-text ml-auto">
-                      {entry.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center">
-              <p className="text-sm central-text-muted">
-                Nenhuma empresa cadastrada
-              </p>
-            </div>
-          )}
-        </CentralCard>
+            )}
+          </CentralCard>
 
-        {/* Recent Activity */}
-        <CentralCard className="p-6 lg:col-span-3">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity className="h-5 w-5 central-text-muted" />
-            <h3 className="text-lg font-semibold central-text">
-              Atividade Recente
-            </h3>
-          </div>
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-12 animate-pulse central-glass-subtle rounded-lg"
-                />
-              ))}
+          {/* Recent Tickets */}
+          <CentralCard className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span
+                className="font-semibold text-xs"
+                style={{ color: 'var(--central-text-primary)' }}
+              >
+                Tickets Recentes
+              </span>
+              <CentralBadge variant="rose">3 novos</CentralBadge>
             </div>
-          ) : stats?.recentActivity && stats.recentActivity.length > 0 ? (
-            <div className="space-y-2 max-h-[280px] overflow-y-auto">
-              {stats.recentActivity.map((activity: RecentActivity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center gap-3 p-3 rounded-lg central-glass-subtle"
-                >
+            <div className="space-y-3">
+              {MOCK_TICKETS.map(ticket => (
+                <div key={ticket.id} className="flex items-start gap-2.5">
+                  {/* Priority dot */}
+                  <span
+                    className="mt-1.5 flex-shrink-0 rounded-full"
+                    style={{
+                      width: 7,
+                      height: 7,
+                      backgroundColor: PRIORITY_COLORS[ticket.priority],
+                    }}
+                  />
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium central-text truncate">
-                      {activity.description ??
-                        `${ACTION_LABELS[activity.action] ?? activity.action} de ${ENTITY_LABELS[activity.entity] ?? activity.entity}`}
+                    <p className="text-xs leading-tight">
+                      <span
+                        className="font-bold"
+                        style={{ color: 'var(--central-text-primary)' }}
+                      >
+                        {ticket.number}
+                      </span>
+                      <span
+                        className="ml-1.5"
+                        style={{ color: isDark ? '#a78bfa' : '#8b5cf6' }}
+                      >
+                        {ticket.tenant}
+                      </span>
                     </p>
-                    <p className="text-xs central-text-muted">
-                      {ENTITY_LABELS[activity.entity] ?? activity.entity} •{' '}
-                      {ACTION_LABELS[activity.action] ?? activity.action}
+                    <p
+                      className="text-[11px] mt-0.5 truncate"
+                      style={{ color: 'var(--central-text-secondary)' }}
+                    >
+                      {ticket.description}
                     </p>
                   </div>
-                  <span className="text-xs central-text-muted whitespace-nowrap">
-                    {formatRelativeDate(activity.createdAt)}
+                  {/* Time */}
+                  <span
+                    className="text-[10px] flex-shrink-0 mt-0.5"
+                    style={{ color: 'var(--central-text-secondary)' }}
+                  >
+                    {ticket.time}
                   </span>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center">
-              <p className="text-sm central-text-muted">
-                Nenhuma atividade registrada
-              </p>
+          </CentralCard>
+        </div>
+
+        {/* Row 2: Top Tenants + Growth chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Top Tenants by Revenue */}
+          <CentralCard className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span
+                className="font-semibold text-xs"
+                style={{ color: 'var(--central-text-primary)' }}
+              >
+                Top Tenants por Receita
+              </span>
             </div>
-          )}
-        </CentralCard>
+            <div className="space-y-3">
+              {MOCK_TOP_TENANTS.map(tenant => (
+                <div key={tenant.id} className="flex items-center gap-3">
+                  {/* Circular avatar */}
+                  <div
+                    className="flex items-center justify-center rounded-full flex-shrink-0"
+                    style={{
+                      width: 30,
+                      height: 30,
+                      backgroundColor: tenant.color,
+                    }}
+                  >
+                    <span className="text-white text-[10px] font-bold">
+                      {tenant.initials}
+                    </span>
+                  </div>
+                  {/* Name + Modules */}
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="font-semibold text-xs truncate"
+                      style={{ color: 'var(--central-text-primary)' }}
+                    >
+                      {tenant.name}
+                    </p>
+                    <p
+                      className="text-[9px] truncate"
+                      style={{ color: 'var(--central-text-secondary)' }}
+                    >
+                      {tenant.modules}
+                    </p>
+                  </div>
+                  {/* MRR */}
+                  <span
+                    className="font-bold text-xs flex-shrink-0"
+                    style={{ color: 'var(--central-text-primary)' }}
+                  >
+                    {tenant.mrr}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CentralCard>
+
+          {/* Growth Chart */}
+          <CentralCard className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span
+                className="font-semibold text-xs"
+                style={{ color: 'var(--central-text-primary)' }}
+              >
+                Crescimento
+              </span>
+              <CentralBadge variant="sky">6 meses</CentralBadge>
+            </div>
+            {isLoading ? (
+              <div
+                className="h-[200px] animate-pulse rounded-lg"
+                style={{ background: 'var(--central-card-bg)' }}
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={MOCK_GROWTH_DATA}>
+                  <defs>
+                    <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor={lineStroke}
+                        stopOpacity={0.15}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={lineStroke}
+                        stopOpacity={0.02}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={chartGridColor}
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fill: chartTextColor, fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: chartTextColor, fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: tooltipBg,
+                      border: `1px solid ${tooltipBorder}`,
+                      borderRadius: '8px',
+                      color: tooltipColor,
+                      fontSize: '11px',
+                    }}
+                    formatter={(value: number, name: string) => [
+                      value,
+                      name === 'tenants' ? 'Tenants' : 'Usuários',
+                    ]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="tenants"
+                    stroke={lineStroke}
+                    strokeWidth={2}
+                    fill="url(#growthFill)"
+                    dot={{ fill: lineStroke, strokeWidth: 0, r: 3 }}
+                    activeDot={{ r: 5, fill: lineStroke }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CentralCard>
+        </div>
       </div>
     </div>
   );
