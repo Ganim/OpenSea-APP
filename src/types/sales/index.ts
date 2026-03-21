@@ -9,3 +9,4 @@ export * from './order-new.types';
 export * from './payment-condition.types';
 export * from './order-return.types';
 export * from './store-credit.types';
+export * from './analytics.types';

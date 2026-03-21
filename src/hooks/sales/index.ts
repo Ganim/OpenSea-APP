@@ -5,3 +5,4 @@ export * from './use-catalogs';
 export * from './use-orders';
 export * from './use-payment-conditions';
 export * from './use-returns';
+export * from './use-analytics';
