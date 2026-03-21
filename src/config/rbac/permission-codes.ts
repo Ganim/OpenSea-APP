@@ -476,6 +476,40 @@ export const TOOLS_PERMISSIONS = {
       'onlyself'
     ),
   },
+  SIGNATURE: {
+    ENVELOPES: perm(
+      'tools',
+      'signature.envelopes',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin'
+    ),
+    CERTIFICATES: perm(
+      'tools',
+      'signature.certificates',
+      'access',
+      'register',
+      'remove',
+      'admin'
+    ),
+    TEMPLATES: perm(
+      'tools',
+      'signature.templates',
+      'access',
+      'register',
+      'modify',
+      'remove'
+    ),
+  },
+  AI: {
+    CHAT: perm('tools', 'ai.chat', 'access'),
+    INSIGHTS: perm('tools', 'ai.insights', 'access'),
+    CONFIG: perm('tools', 'ai.config', 'access', 'modify'),
+    FAVORITES: perm('tools', 'ai.favorites', 'access', 'register', 'remove'),
+    ACTIONS: perm('tools', 'ai.actions', 'access'),
+  },
 } as const;
 
 // =============================================================================

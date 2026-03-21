@@ -971,6 +971,32 @@ export const API_ENDPOINTS = {
       GET: (token: string) => `/v1/sales/analytics/customer-portal/${token}`,
     },
   },
+  // AI Assistant
+  AI: {
+    CHAT: {
+      SEND: '/v1/ai/chat',
+      LIST_CONVERSATIONS: '/v1/ai/chat/conversations',
+      GET_CONVERSATION: (id: string) => `/v1/ai/chat/conversations/${id}`,
+      ARCHIVE_CONVERSATION: (id: string) => `/v1/ai/chat/conversations/${id}/archive`,
+    },
+    INSIGHTS: {
+      LIST: '/v1/ai/insights',
+      VIEW: (id: string) => `/v1/ai/insights/${id}/view`,
+      DISMISS: (id: string) => `/v1/ai/insights/${id}/dismiss`,
+    },
+    CONFIG: {
+      GET: '/v1/ai/config',
+      UPDATE: '/v1/ai/config',
+    },
+    FAVORITES: {
+      LIST: '/v1/ai/favorites',
+      CREATE: '/v1/ai/favorites',
+      DELETE: (id: string) => `/v1/ai/favorites/${id}`,
+    },
+    ACTIONS: {
+      LIST: '/v1/ai/actions',
+    },
+  },
   // Health
   HEALTH: '/health',
 } as const;
