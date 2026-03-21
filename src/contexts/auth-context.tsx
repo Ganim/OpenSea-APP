@@ -350,7 +350,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Logout
   const logout = useCallback(async () => {
-    // CRITICAL: Clear tokens FIRST to prevent refresh race condition
+    // Notify backend BEFORE clearing tokens (needs auth header)
+    try {
+      await logoutMutation.mutateAsync();
+    } catch (error) {
+      logger.error('Erro ao notificar backend sobre logout', error as Error, {
+        action: 'logout',
+        userId: user?.id,
+      });
+    }
+
+    // Clear tokens after API call
     const tm = apiClient.getTokenManager();
     tm.clearTokens();
 
@@ -363,16 +373,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('session_id');
     localStorage.removeItem('selected_tenant_id');
     setHasToken(false);
-
-    // Notify backend (fire-and-forget, tokens already cleared)
-    try {
-      await logoutMutation.mutateAsync();
-    } catch (error) {
-      logger.error('Erro ao notificar backend sobre logout', error as Error, {
-        action: 'logout',
-        userId: user?.id,
-      });
-    }
 
     router.push('/fast-login');
   }, [logoutMutation, user?.id, router]);

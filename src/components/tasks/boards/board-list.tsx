@@ -36,11 +36,13 @@ export const BoardList = memo(function BoardList({
 
   if (boards.length === 0) {
     return (
-      <EmptyState
-        icon={KanbanSquare}
-        title={emptyTitle}
-        description={emptyDescription}
-      />
+      <div className="rounded-xl bg-white/5">
+        <EmptyState
+          icon={KanbanSquare}
+          title={emptyTitle}
+          description={emptyDescription}
+        />
+      </div>
     );
   }
 

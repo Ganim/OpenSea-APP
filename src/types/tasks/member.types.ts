@@ -1,4 +1,4 @@
-export type BoardMemberRole = 'VIEWER' | 'EDITOR';
+export type BoardMemberRole = 'OWNER' | 'VIEWER' | 'EDITOR';
 
 export interface BoardMember {
   id: string;

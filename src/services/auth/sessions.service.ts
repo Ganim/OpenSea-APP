@@ -75,7 +75,9 @@ export const sessionsService = {
   // Backend retorna 204 No Content
   async logout(): Promise<void> {
     try {
-      await apiClient.patch<void>(API_ENDPOINTS.SESSIONS.LOGOUT);
+      await apiClient.patch<void>(API_ENDPOINTS.SESSIONS.LOGOUT, undefined, {
+        skipRefresh: true,
+      });
     } finally {
       authService.clearTokens();
     }

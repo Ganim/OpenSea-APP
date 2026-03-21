@@ -30,6 +30,7 @@ const CalendarView = lazy(() =>
 import { CardDetailModal } from '@/components/tasks/cards/card-detail-modal';
 import { BoardSettingsDialog } from '@/components/tasks/boards/board-settings-dialog';
 import { getGradientForBoard } from '@/components/tasks/shared/board-gradients';
+import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -128,18 +129,22 @@ function BoardPageContent() {
       setViewHeight(undefined);
       return;
     }
-    // Wait a frame for layout to settle
-    requestAnimationFrame(updateViewHeight);
+    // Wait two frames for layout to fully settle after data load
+    let rafId: number;
+    rafId = requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(updateViewHeight);
+    });
     window.addEventListener('resize', updateViewHeight);
 
     // Lock page scroll when kanban is active
     document.documentElement.style.overflow = 'hidden';
 
     return () => {
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updateViewHeight);
       document.documentElement.style.overflow = '';
     };
-  }, [currentView, updateViewHeight]);
+  }, [currentView, updateViewHeight, boardLoading]);
 
   // Loading state
   if (boardLoading) {
@@ -241,6 +246,26 @@ function BoardPageContent() {
                 )}
               </div>
             </div>
+
+            {/* Member avatars */}
+            {board.members && board.members.length > 0 && (
+              <div className="flex items-center -space-x-2">
+                {board.members.slice(0, 5).map(member => (
+                  <MemberAvatar
+                    key={member.id}
+                    name={member.userName}
+                    avatarUrl={member.userAvatarUrl}
+                    size="md"
+                    className="ring-2 ring-white dark:ring-white/10"
+                  />
+                ))}
+                {board.members.length > 5 && (
+                  <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-xs font-semibold text-slate-600 dark:text-white/70 ring-2 ring-white dark:ring-white/10">
+                    +{board.members.length - 5}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Toolbar: search + filters | view modes */}
