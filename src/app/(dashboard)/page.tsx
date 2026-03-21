@@ -12,6 +12,7 @@ import {
   STOCK_PERMISSIONS,
   FINANCE_PERMISSIONS,
   HR_PERMISSIONS,
+  SALES_PERMISSIONS,
   ADMIN_PERMISSIONS,
 } from '@/config/rbac/permission-codes';
 import { useAuth } from '@/contexts/auth-context';
@@ -24,6 +25,7 @@ import {
   DollarSign,
   Package,
   Settings,
+  ShoppingBag,
   Sparkles,
   UserRoundCog,
 } from 'lucide-react';
@@ -51,6 +53,16 @@ const moduleCards = [
     gradient: 'from-blue-500 to-purple-600',
     hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
     permission: HR_PERMISSIONS.EMPLOYEES.ACCESS,
+  },
+  {
+    id: 'sales',
+    title: 'Vendas',
+    description: 'Clientes, pedidos, promoções e gestão comercial',
+    icon: ShoppingBag,
+    href: '/sales',
+    gradient: 'from-orange-500 to-amber-600',
+    hoverBg: 'hover:bg-orange-50 dark:hover:bg-orange-500/10',
+    permission: SALES_PERMISSIONS.CUSTOMERS.ACCESS,
   },
   {
     id: 'finance',
