@@ -16,7 +16,17 @@ export interface ChecklistItemResponse {
   item: ChecklistItem;
 }
 
+export interface ChecklistsResponse {
+  checklists: Checklist[];
+}
+
 export const checklistsService = {
+  async list(boardId: string, cardId: string): Promise<ChecklistsResponse> {
+    return apiClient.get<ChecklistsResponse>(
+      API_ENDPOINTS.TASKS.CHECKLISTS.LIST(boardId, cardId)
+    );
+  },
+
   async create(
     boardId: string,
     cardId: string,
@@ -66,7 +76,8 @@ export const checklistsService = {
     boardId: string,
     cardId: string,
     checklistId: string,
-    itemId: string
+    itemId: string,
+    isCompleted: boolean
   ): Promise<ChecklistItemResponse> {
     return apiClient.patch<ChecklistItemResponse>(
       API_ENDPOINTS.TASKS.CHECKLISTS.TOGGLE_ITEM(
@@ -74,7 +85,8 @@ export const checklistsService = {
         cardId,
         checklistId,
         itemId
-      )
+      ),
+      { isCompleted }
     );
   },
 

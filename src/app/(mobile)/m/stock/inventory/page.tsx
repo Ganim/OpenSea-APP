@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 import { usePermissions } from '@/hooks/use-permissions';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
   useInventorySessions,
   useCreateInventorySession,
@@ -298,7 +298,7 @@ function BinScanModal({
 export default function InventoryHubPage() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
-  const canAccess = hasPermission(PERMISSIONS.STOCK.INVENTORY.access);
+  const canAccess = hasPermission(STOCK_PERMISSIONS.INVENTORY.ACCESS);
 
   const [showBinScan, setShowBinScan] = useState(false);
   const sessionsQuery = useInventorySessions();
@@ -376,7 +376,7 @@ export default function InventoryHubPage() {
 
   if (!canAccess) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Conferência" showBack />
         <div className="flex flex-1 items-center justify-center px-6">
           <p className="text-sm text-slate-500">
@@ -388,7 +388,7 @@ export default function InventoryHubPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-950">
+    <div className="flex min-h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar title="Conferência de Estoque" />
 
       <div className="flex-1 space-y-6 px-4 py-4">

@@ -310,47 +310,6 @@ export const API_ENDPOINTS = {
         `/v1/pipelines/${pipelineId}/stages/reorder`,
     },
   },
-  // Sales - Price Tables
-  PRICE_TABLES: {
-    LIST: '/v1/price-tables',
-    GET: (id: string) => `/v1/price-tables/${id}`,
-    CREATE: '/v1/price-tables',
-    UPDATE: (id: string) => `/v1/price-tables/${id}`,
-    DELETE: (id: string) => `/v1/price-tables/${id}`,
-    ITEMS: (id: string) => `/v1/price-tables/${id}/items`,
-    UPSERT_ITEM: (id: string) => `/v1/price-tables/${id}/items`,
-    RESOLVE: '/v1/price-resolver',
-  },
-  // Sales - Customer Prices
-  CUSTOMER_PRICES: {
-    LIST: '/v1/customer-prices',
-    CREATE: '/v1/customer-prices',
-    UPDATE: (id: string) => `/v1/customer-prices/${id}`,
-    DELETE: (id: string) => `/v1/customer-prices/${id}`,
-  },
-  // Sales - Campaigns
-  CAMPAIGNS: {
-    LIST: '/v1/campaigns',
-    GET: (id: string) => `/v1/campaigns/${id}`,
-    CREATE: '/v1/campaigns',
-    UPDATE: (id: string) => `/v1/campaigns/${id}`,
-    DELETE: (id: string) => `/v1/campaigns/${id}`,
-    ACTIVATE: (id: string) => `/v1/campaigns/${id}/activate`,
-  },
-  // Sales - Coupons
-  COUPONS: {
-    LIST: '/v1/coupons',
-    CREATE: '/v1/coupons',
-    DELETE: (id: string) => `/v1/coupons/${id}`,
-    VALIDATE: '/v1/coupons/validate',
-  },
-  // Sales - Combos
-  COMBOS: {
-    LIST: '/v1/combos',
-    GET: (id: string) => `/v1/combos/${id}`,
-    CREATE: '/v1/combos',
-    DELETE: (id: string) => `/v1/combos/${id}`,
-  },
   // Sales - Deals
   DEALS: {
     LIST: '/v1/deals',
@@ -968,6 +927,8 @@ export const API_ENDPOINTS = {
         `/v1/tasks/boards/${boardId}/cards/${cardId}/subtasks/${subtaskId}/complete`,
     },
     CHECKLISTS: {
+      LIST: (boardId: string, cardId: string) =>
+        `/v1/tasks/boards/${boardId}/cards/${cardId}/checklists`,
       CREATE: (boardId: string, cardId: string) =>
         `/v1/tasks/boards/${boardId}/cards/${cardId}/checklists`,
       UPDATE: (boardId: string, cardId: string, checklistId: string) =>

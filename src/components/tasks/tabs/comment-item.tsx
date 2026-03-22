@@ -4,22 +4,16 @@ import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   useUpdateComment,
   useDeleteComment,
   useAddReaction,
-  useRemoveReaction,
 } from '@/hooks/tasks/use-comments';
 import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
+import { EmojiPicker } from '@/components/tasks/shared/emoji-picker';
 import { formatRelativeTime } from '@/components/tasks/tabs/_utils';
-import { CommentEmojiPicker } from './comment-emoji-picker';
 import type { Comment } from '@/types/tasks';
 
 interface CommentItemProps {
@@ -38,7 +32,6 @@ export function CommentItem({
   const updateComment = useUpdateComment(boardId, cardId);
   const deleteComment = useDeleteComment(boardId, cardId);
   const addReaction = useAddReaction(boardId, cardId);
-  const removeReaction = useRemoveReaction(boardId, cardId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
@@ -81,32 +74,17 @@ export function CommentItem({
 
   const handleToggleReaction = useCallback(
     (emoji: string) => {
-      const existingReaction = comment.reactions?.find(
-        r => r.emoji === emoji && r.userId === currentUserId
+      addReaction.mutate(
+        { commentId: comment.id, emoji },
+        {
+          onError: () =>
+            toast.error(
+              'Não foi possível atualizar a reação. Tente novamente.'
+            ),
+        }
       );
-      if (existingReaction) {
-        removeReaction.mutate(
-          { commentId: comment.id, emoji },
-          {
-            onError: () =>
-              toast.error(
-                'Não foi possível remover a reação. Tente novamente.'
-              ),
-          }
-        );
-      } else {
-        addReaction.mutate(
-          { commentId: comment.id, emoji },
-          {
-            onError: () =>
-              toast.error(
-                'Não foi possível adicionar a reação. Tente novamente.'
-              ),
-          }
-        );
-      }
     },
-    [comment.id, comment.reactions, currentUserId, addReaction, removeReaction]
+    [comment.id, addReaction]
   );
 
   // Group reactions by emoji
@@ -144,33 +122,6 @@ export function CommentItem({
               (editado)
             </span>
           )}
-
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 ml-auto opacity-0 group-hover/comment:opacity-100 transition-opacity"
-                >
-                  <MoreHorizontal className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleStartEdit}>
-                  <Pencil className="h-3.5 w-3.5 mr-2" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-2" />
-                  Excluir
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
 
         {isEditing ? (
@@ -207,27 +158,56 @@ export function CommentItem({
           </p>
         )}
 
-        {/* Reactions */}
-        {Object.keys(groupedReactions).length > 0 && (
-          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+        {/* Reactions + Actions */}
+        <div className="flex items-center justify-between mt-1.5 gap-2">
+          {/* Existing reactions */}
+          <div className="flex items-center gap-1 flex-wrap">
             {Object.entries(groupedReactions).map(([emoji, data]) => (
               <button
                 key={emoji}
-                className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] border transition-colors ${
+                type="button"
+                className={cn(
+                  'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] border transition-colors',
                   data.userReacted
-                    ? 'border-primary/50 bg-primary/10'
-                    : 'border-border hover:bg-muted'
-                }`}
+                    ? 'border-primary/50 bg-primary/10 text-primary'
+                    : 'border-border hover:bg-muted text-foreground'
+                )}
                 onClick={() => handleToggleReaction(emoji)}
               >
                 <span>{emoji}</span>
-                <span className="font-medium">{data.count}</span>
+                <span className="font-semibold">{data.count}</span>
               </button>
             ))}
-
-            <CommentEmojiPicker onSelectEmoji={handleToggleReaction} />
           </div>
-        )}
+
+          {/* Action buttons — right side, visible on hover */}
+          <div className="flex items-center gap-0.5 opacity-0 group-hover/comment:opacity-100 transition-opacity shrink-0">
+            <EmojiPicker
+              onSelect={handleToggleReaction}
+              triggerClassName="h-6 w-6 rounded-full flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted transition-colors"
+            />
+            {isOwner && (
+              <>
+                <button
+                  type="button"
+                  title="Editar"
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted transition-colors"
+                  onClick={handleStartEdit}
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  title="Excluir"
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-muted-foreground/50 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

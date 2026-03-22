@@ -33,10 +33,10 @@ function BidDocumentsContent() {
   return (
     <PageLayout>
       <PageHeader>
-        <PageActionBar breadcrumbs={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Documentos' }]} />
+        <PageActionBar breadcrumbItems={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Documentos' }]} />
       </PageHeader>
       <PageBody>
-        <Header title="Documentos de Licitacao" subtitle="Certidoes, atestados e documentos de habilitacao" />
+        <Header title="Documentos de Licitacao" description="Certidoes, atestados e documentos de habilitacao" />
 
         <div className="flex gap-2 mb-4">
           <FilterDropdown label="Tipo" value={typeFilter} options={typeOptions} onChange={(v) => setTypeFilter(v as BidDocumentType | '')} />

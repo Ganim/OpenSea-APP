@@ -28,13 +28,11 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { usePermissions } from '@/hooks/use-permissions';
 import {
   useContactsInfinite,
+  useCreateContact,
   useDeleteContact,
 } from '@/hooks/sales/use-contacts';
-import type {
-  Contact,
-  LeadTemperature,
-  LifecycleStage,
-} from '@/types/sales';
+import { CreateContactWizard } from './src/components/create-contact-wizard';
+import type { Contact, LeadTemperature, LifecycleStage } from '@/types/sales';
 import {
   LIFECYCLE_STAGE_LABELS,
   LEAD_TEMPERATURE_LABELS,
@@ -166,6 +164,7 @@ function ContactsPageContent() {
   // STATE
   // ============================================================================
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
@@ -190,6 +189,7 @@ function ContactsPageContent() {
     sortOrder,
   });
 
+  const createMutation = useCreateContact();
   const deleteMutation = useDeleteContact();
 
   // Client-side role filter (backend may not support it)
@@ -349,6 +349,7 @@ function ContactsPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={
+          contactsConfig.permissions.update &&
           hasPermission(contactsConfig.permissions.update)
             ? handleContextEdit
             : undefined
@@ -375,7 +376,6 @@ function ContactsPageContent() {
           subtitle={item.email || item.jobTitle || 'Sem e-mail'}
           icon={UserCircle}
           iconBgColor="bg-linear-to-br from-teal-500 to-emerald-600"
-
           badges={[
             {
               label: stageLabel,
@@ -424,7 +424,8 @@ function ContactsPageContent() {
 
   const renderListCard = (item: Contact, isSelected: boolean) => {
     const stageColor =
-      LIFECYCLE_STAGE_COLORS[item.lifecycleStage] || LIFECYCLE_STAGE_COLORS.LEAD;
+      LIFECYCLE_STAGE_COLORS[item.lifecycleStage] ||
+      LIFECYCLE_STAGE_COLORS.LEAD;
     const stageLabel =
       LIFECYCLE_STAGE_LABELS[item.lifecycleStage] || item.lifecycleStage;
     const tempIndicator = getLeadTemperatureIndicator(item.leadTemperature);
@@ -484,6 +485,7 @@ function ContactsPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={
+          contactsConfig.permissions.update &&
           hasPermission(contactsConfig.permissions.update)
             ? handleContextEdit
             : undefined
@@ -561,8 +563,8 @@ function ContactsPageContent() {
   // ============================================================================
 
   const handleCreate = useCallback(() => {
-    router.push('/sales/contacts/new');
-  }, [router]);
+    setCreateOpen(true);
+  }, []);
 
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
@@ -609,10 +611,7 @@ function ContactsPageContent() {
             buttons={visibleActionButtons}
           />
 
-          <Header
-            title="Contatos"
-            description="Gerencie os contatos do CRM"
-          />
+          <Header title="Contatos" description="Gerencie os contatos do CRM" />
         </PageHeader>
 
         <PageBody>
@@ -655,7 +654,7 @@ function ContactsPageContent() {
                       options={lifecycleOptions}
                       selected={lifecycleFilter}
                       onSelectionChange={setLifecycleFilter}
-                      activeColor="teal"
+                      activeColor="cyan"
                       searchPlaceholder="Buscar estagio..."
                       emptyText="Nenhum estagio encontrado."
                     />
@@ -665,7 +664,7 @@ function ContactsPageContent() {
                       options={temperatureOptions}
                       selected={temperatureFilter}
                       onSelectionChange={setTemperatureFilter}
-                      activeColor="amber"
+                      activeColor="cyan"
                       searchPlaceholder="Buscar temperatura..."
                       emptyText="Nenhuma temperatura encontrada."
                     />
@@ -706,6 +705,16 @@ function ContactsPageContent() {
               <div ref={sentinelRef} className="h-1" />
             </>
           )}
+
+          <CreateContactWizard
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            onSubmit={async data => {
+              await createMutation.mutateAsync(data);
+              toast.success('Contato criado com sucesso!');
+            }}
+            isSubmitting={createMutation.isPending}
+          />
 
           {/* Delete Confirmation */}
           <VerifyActionPinModal

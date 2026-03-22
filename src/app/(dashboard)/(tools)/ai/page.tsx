@@ -35,44 +35,44 @@ export default function AiPage() {
     setActiveView('chat');
   };
 
+  // Dashboard layout: pt-28 (7rem top) + pb-12 (3rem bottom) = 10rem from viewport
+  // -mb-12 reclaims the bottom padding so the chat input reaches the viewport edge
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Action Bar with buttons — shrink-0 to keep fixed height */}
-      <div className="shrink-0">
-        <PageActionBar
-          breadcrumbItems={[
-            { label: 'Ferramentas' },
-            { label: 'Assistente IA' },
-          ]}
-          buttons={[
-            {
-              id: 'conversations',
-              title: 'Conversas anteriores',
-              icon: History,
-              variant: 'outline' as const,
-              onClick: () => setDrawerOpen(true),
-            },
-            {
-              id: 'new-conversation',
-              title: 'Nova Conversa',
-              icon: MessageSquarePlus,
-              variant: 'default' as const,
-              onClick: handleNewConversation,
-            },
-          ]}
-        />
-      </div>
+    <div className="flex flex-col gap-3 h-[calc(100vh-10rem)] overflow-hidden -mb-12">
+      {/* Action Bar */}
+      <PageActionBar
+        breadcrumbItems={[
+          { label: 'Ferramentas' },
+          { label: 'Assistente IA' },
+        ]}
+        buttons={[
+          {
+            id: 'conversations',
+            title: 'Conversas anteriores',
+            icon: History,
+            variant: 'outline' as const,
+            onClick: () => setDrawerOpen(true),
+          },
+          {
+            id: 'new-conversation',
+            title: 'Nova Conversa',
+            icon: MessageSquarePlus,
+            variant: 'default' as const,
+            onClick: handleNewConversation,
+          },
+        ]}
+      />
 
-      {/* Hero Banner — shrink-0 to keep fixed height */}
-      <div className="shrink-0 px-4 pt-3">
+      {/* Hero Banner */}
+      <div className="mt-1">
         <AiHeroBanner
           activeView={activeView}
           onViewChange={setActiveView}
         />
       </div>
 
-      {/* Dynamic content area — flex-1 min-h-0 to fill remaining space without overflow */}
-      <div className="flex-1 min-h-0 flex flex-col mt-3">
+      {/* Dynamic content area — fills remaining space */}
+      <div className="flex-1 min-h-0 flex flex-col">
         {activeView === 'chat' && (
           <AiChatView
             selectedConversationId={selectedConversationId}

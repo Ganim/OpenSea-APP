@@ -27,6 +27,7 @@ import { COUPON_TYPE_LABELS } from '@/types/sales';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { CreateCouponWizard } from './src/components/create-coupon-wizard';
 import {
   Plus,
   Tag,
@@ -37,7 +38,6 @@ import { useRouter } from 'next/navigation';
 import {
   Suspense,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -62,6 +62,7 @@ function CouponsPageContent() {
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
@@ -81,21 +82,36 @@ function CouponsPageContent() {
 
   const deleteMutation = useDeleteCoupon();
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = sentinelRef.current;
+  // Infinite scroll — refs prevent observer teardown/re-creation loop
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  hasNextPageRef.current = hasNextPage;
+  isFetchingNextPageRef.current = isFetchingNextPage;
+  fetchNextPageRef.current = fetchNextPage;
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          entries[0].isIntersecting &&
+          hasNextPageRef.current &&
+          !isFetchingNextPageRef.current
+        ) {
+          fetchNextPageRef.current();
         }
       },
       { rootMargin: '300px' },
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    observerRef.current = observer;
+  }, []);
 
   const typeOptions = useMemo(
     () =>
@@ -141,13 +157,13 @@ function CouponsPageContent() {
             { label: 'Cupons', href: '/sales/coupons' },
           ]}
           buttons={
-            hasPermission(SALES_PERMISSIONS.COUPONS.REGISTER)
+            hasPermission(SALES_PERMISSIONS.COUPONS.ADMIN)
               ? [
                   {
-                    id: 'create',
+                    id: 'create-coupon',
                     title: 'Novo Cupom',
                     icon: Plus,
-                    onClick: () => router.push('/sales/coupons/new'),
+                    onClick: () => setCreateOpen(true),
                     variant: 'default',
                   },
                 ]
@@ -177,7 +193,7 @@ function CouponsPageContent() {
             type="server"
             title="Erro ao carregar cupons"
             message="Ocorreu um erro. Por favor, tente novamente."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
           />
         ) : (
           <>
@@ -188,7 +204,7 @@ function CouponsPageContent() {
                 options={typeOptions}
                 selected={typeFilter}
                 onSelectionChange={setTypeFilter}
-                activeColor="teal"
+                activeColor="cyan"
                 searchPlaceholder="Buscar tipo..."
                 emptyText="Nenhum tipo encontrado."
               />
@@ -255,7 +271,7 @@ function CouponsPageContent() {
                       )}
                     </div>
 
-                    {hasPermission(SALES_PERMISSIONS.COUPONS.REMOVE) && (
+                    {hasPermission(SALES_PERMISSIONS.COUPONS.ADMIN) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -274,6 +290,11 @@ function CouponsPageContent() {
             <div ref={sentinelRef} className="h-1" />
           </>
         )}
+
+        <CreateCouponWizard
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
 
         <VerifyActionPinModal
           isOpen={deleteModalOpen}

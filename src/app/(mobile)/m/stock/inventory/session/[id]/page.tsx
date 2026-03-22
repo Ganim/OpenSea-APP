@@ -330,7 +330,7 @@ export default function InventorySessionPage() {
   // Loading state
   if (sessionQuery.isLoading) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Conferência" showBack />
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
@@ -342,7 +342,7 @@ export default function InventorySessionPage() {
   // Error state
   if (sessionQuery.error || !session) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Conferência" showBack />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/10">
@@ -375,7 +375,7 @@ export default function InventorySessionPage() {
   );
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar
         title={session.binLabel || session.zoneName || 'Conferência'}
         subtitle={progressLabel}

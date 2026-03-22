@@ -1,13 +1,15 @@
 'use client';
 
 import { PageActionBar } from '@/components/layout/page-action-bar';
-import { PageBody } from '@/components/layout/page-body';
-import { PageLayout } from '@/components/layout/page-layout';
+import {
+  PageBody,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GridLoading } from '@/components/shared/grid-loading';
-import { GridError } from '@/components/shared/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { GridError } from '@/components/handlers/grid-error';
 import { usePosTerminals } from '@/hooks/sales';
 import { useRouter } from 'next/navigation';
 import {
@@ -53,7 +55,7 @@ export default function PosTerminalSelectorPage() {
   return (
     <PageLayout>
       <PageActionBar
-        breadcrumbs={[{ label: 'Vendas', href: '/sales' }, { label: 'PDV' }]}
+        breadcrumbItems={[{ label: 'Vendas', href: '/sales' }, { label: 'PDV' }]}
         actions={
           <div className="flex gap-2">
             <Button

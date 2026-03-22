@@ -120,7 +120,7 @@ export default function ReceivingListPage() {
   } = usePendingPurchaseOrders(search || undefined);
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar title="Recebimento" showBack />
 
       {/* Search */}

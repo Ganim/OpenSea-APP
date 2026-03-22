@@ -17,3 +17,5 @@ export * from './campaigns.service';
 export * from './coupons.service';
 export * from './combos.service';
 export * from './pos.service';
+export * from './bids.service';
+export * from './marketplaces.service';

@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
-import { Clock, User, Tag, Columns3 } from 'lucide-react';
+import { Clock, User, Tag, Columns3, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MemberAvatar } from '@/components/tasks/shared/member-avatar';
 import { LabelBadge } from '@/components/tasks/shared/label-badge';
@@ -49,6 +49,7 @@ interface CardModalSidebarProps {
   allLabels: Label[];
   selectedLabelIds: string[];
   onToggleLabel: (labelId: string) => void;
+  onCreateLabel?: (name: string, color: string) => void;
   // Parent card
   parentCards?: { id: string; title: string }[];
   parentCardId: string | null;
@@ -67,11 +68,21 @@ interface CardModalSidebarProps {
   onEstimatedHoursChange: (value: string) => void;
   // Integrations
   integrations: CardIntegration[];
-  onAddIntegration: (type: IntegrationType, entityId: string, entityLabel: string) => void;
+  onAddIntegration: (
+    type: IntegrationType,
+    entityId: string,
+    entityLabel: string
+  ) => void;
   onRemoveIntegration: (integrationId: string) => void;
 }
 
-const PRIORITY_OPTIONS: CardPriority[] = ['NONE', 'LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+const PRIORITY_OPTIONS: CardPriority[] = [
+  'NONE',
+  'LOW',
+  'MEDIUM',
+  'HIGH',
+  'URGENT',
+];
 
 const PRIORITY_DOT_COLORS: Record<CardPriority, string> = {
   NONE: 'bg-gray-400',
@@ -80,6 +91,19 @@ const PRIORITY_DOT_COLORS: Record<CardPriority, string> = {
   HIGH: 'bg-orange-500',
   URGENT: 'bg-red-500',
 };
+
+const LABEL_COLORS = [
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#14b8a6',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#64748b',
+];
 
 const PARENT_NONE_VALUE = '__NONE__';
 const ASSIGNEE_NONE_VALUE = '__NONE__';
@@ -96,6 +120,7 @@ export function CardModalSidebar({
   allLabels,
   selectedLabelIds,
   onToggleLabel,
+  onCreateLabel,
   parentCards = [],
   parentCardId,
   onParentCardChange,
@@ -114,15 +139,18 @@ export function CardModalSidebar({
 }: CardModalSidebarProps) {
   const [labelsOpen, setLabelsOpen] = useState(false);
   const [assigneeOpen, setAssigneeOpen] = useState(false);
+  const [showCreateLabel, setShowCreateLabel] = useState(false);
+  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelColor, setNewLabelColor] = useState('#3b82f6');
 
   const selectedLabels = allLabels.filter(l => selectedLabelIds.includes(l.id));
 
   return (
-    <div className="w-full md:w-[210px] shrink-0 border-t md:border-t-0 md:border-l border-border/50 bg-slate-50 dark:bg-white/5 overflow-y-auto">
+    <div className="w-full md:w-[210px] shrink-0 border-t md:border-t-0 md:border-l border-border bg-slate-50/80 dark:bg-slate-900/50 overflow-y-auto">
       <div className="p-3 space-y-3">
         {/* ── Coluna ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Coluna
           </p>
           <Select value={columnId} onValueChange={onColumnChange}>
@@ -151,7 +179,7 @@ export function CardModalSidebar({
         {/* ── Status (edit mode only) ── */}
         {showStatus && (
           <div className="space-y-1">
-            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
               Status
             </p>
             <Select
@@ -198,7 +226,7 @@ export function CardModalSidebar({
 
         {/* ── Prioridade ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Prioridade
           </p>
           <div className="flex items-center gap-1">
@@ -216,10 +244,7 @@ export function CardModalSidebar({
                 onClick={() => onPriorityChange(p)}
               >
                 <span
-                  className={cn(
-                    'h-3 w-3 rounded-full',
-                    PRIORITY_DOT_COLORS[p]
-                  )}
+                  className={cn('h-3 w-3 rounded-full', PRIORITY_DOT_COLORS[p])}
                 />
               </button>
             ))}
@@ -228,7 +253,7 @@ export function CardModalSidebar({
 
         {/* ── Labels ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Etiquetas
           </p>
           {selectedLabels.length > 0 && (
@@ -257,32 +282,113 @@ export function CardModalSidebar({
                   : 'Nenhuma'}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-2" align="start">
-              <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                {allLabels.length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-2 py-1">
-                    Nenhuma etiqueta neste quadro
+            <PopoverContent className="w-60 p-2 z-[60]" align="start">
+              {showCreateLabel ? (
+                /* ── Create label form ── */
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground px-1">
+                    Nova etiqueta
                   </p>
-                ) : (
-                  allLabels.map(label => {
-                    const isSelected = selectedLabelIds.includes(label.id);
-                    return (
+                  <Input
+                    value={newLabelName}
+                    onChange={e => setNewLabelName(e.target.value)}
+                    placeholder="Nome da etiqueta"
+                    className="h-7 text-xs"
+                    autoFocus
+                    onKeyDown={e => {
+                      if (
+                        e.key === 'Enter' &&
+                        newLabelName.trim() &&
+                        onCreateLabel
+                      ) {
+                        onCreateLabel(newLabelName.trim(), newLabelColor);
+                        setNewLabelName('');
+                        setShowCreateLabel(false);
+                      }
+                      if (e.key === 'Escape') setShowCreateLabel(false);
+                    }}
+                  />
+                  <div className="flex flex-wrap gap-1.5 px-1">
+                    {LABEL_COLORS.map(color => (
                       <button
-                        key={label.id}
+                        key={color}
                         type="button"
-                        className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors"
-                        onClick={() => onToggleLabel(label.id)}
-                      >
-                        <Checkbox
-                          checked={isSelected}
-                          className="pointer-events-none"
-                        />
-                        <LabelBadge name={label.name} color={label.color} />
-                      </button>
-                    );
-                  })
-                )}
-              </div>
+                        className={cn(
+                          'h-5 w-5 rounded-full transition-all',
+                          newLabelColor === color
+                            ? 'ring-2 ring-offset-1 ring-offset-background ring-primary scale-110'
+                            : 'hover:scale-110'
+                        )}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setNewLabelColor(color)}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5 pt-1">
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs flex-1"
+                      disabled={!newLabelName.trim()}
+                      onClick={() => {
+                        if (newLabelName.trim() && onCreateLabel) {
+                          onCreateLabel(newLabelName.trim(), newLabelColor);
+                          setNewLabelName('');
+                          setShowCreateLabel(false);
+                        }
+                      }}
+                    >
+                      Criar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs"
+                      onClick={() => setShowCreateLabel(false)}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                /* ── Labels list ── */
+                <>
+                  <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                    {allLabels.length === 0 ? (
+                      <p className="text-xs text-muted-foreground px-2 py-1">
+                        Nenhuma etiqueta neste quadro
+                      </p>
+                    ) : (
+                      allLabels.map(label => {
+                        const isSelected = selectedLabelIds.includes(label.id);
+                        return (
+                          <button
+                            key={label.id}
+                            type="button"
+                            className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors"
+                            onClick={() => onToggleLabel(label.id)}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none"
+                            />
+                            <LabelBadge name={label.name} color={label.color} />
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                  {onCreateLabel && (
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-primary hover:bg-muted transition-colors mt-1 border-t border-border pt-2"
+                      onClick={() => setShowCreateLabel(true)}
+                    >
+                      <Plus className="h-3 w-3" />
+                      Criar etiqueta
+                    </button>
+                  )}
+                </>
+              )}
             </PopoverContent>
           </Popover>
         </div>
@@ -290,7 +396,7 @@ export function CardModalSidebar({
         {/* ── Card Pai ── */}
         {parentCards.length > 0 && onParentCardChange && (
           <div className="space-y-1">
-            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
               Card Pai
             </p>
             <Select
@@ -318,7 +424,7 @@ export function CardModalSidebar({
 
         {/* ── Responsável ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Responsável
           </p>
           <Popover open={assigneeOpen} onOpenChange={setAssigneeOpen}>
@@ -359,7 +465,7 @@ export function CardModalSidebar({
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-52 p-2" align="start">
+            <PopoverContent className="w-52 p-2 z-[60]" align="start">
               <div className="space-y-0.5 max-h-48 overflow-y-auto">
                 <button
                   type="button"
@@ -404,31 +510,31 @@ export function CardModalSidebar({
 
         {/* ── Início ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Início
           </p>
           <DateTimePicker
             value={startDate ?? null}
-            onChange={(date) => onStartDateChange(date ?? undefined)}
+            onChange={date => onStartDateChange(date ?? undefined)}
             placeholder="Definir início"
           />
         </div>
 
         {/* ── Prazo ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Prazo
           </p>
           <DateTimePicker
             value={dueDate ?? null}
-            onChange={(date) => onDueDateChange(date ?? undefined)}
+            onChange={date => onDueDateChange(date ?? undefined)}
             placeholder="Definir prazo"
           />
         </div>
 
         {/* ── Tempo de Execução ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Tempo de Execução
           </p>
           <div className="flex items-center gap-1.5">
@@ -450,7 +556,7 @@ export function CardModalSidebar({
 
         {/* ── Integrações ── */}
         <div className="space-y-1">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-foreground/60 uppercase tracking-wider">
             Integrações
           </p>
           <IntegrationLinker

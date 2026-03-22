@@ -1,4 +1,4 @@
-import { customersService } from '@/services/sales';
+import { customersService } from '@/services/sales/customers.service';
 import type {
   CreateCustomerRequest,
   Customer,
@@ -41,7 +41,7 @@ export function useCreateFinanceCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateCustomerRequest) =>
-      customersService.createCustomer(data),
+      customersService.create(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.FINANCE_CUSTOMERS,

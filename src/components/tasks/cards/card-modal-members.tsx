@@ -46,7 +46,10 @@ export function CardModalMembers({
         <div
           key={member.userId}
           className="shrink-0"
-          style={{ marginLeft: i > 0 ? '-6px' : 0, zIndex: selectedMembers.length - i }}
+          style={{
+            marginLeft: i > 0 ? '-6px' : 0,
+            zIndex: selectedMembers.length - i,
+          }}
         >
           <MemberAvatar
             name={member.userName}
@@ -71,7 +74,7 @@ export function CardModalMembers({
             <Plus className="h-3 w-3" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-60 p-2" align="start">
+        <PopoverContent className="w-60 p-2 z-[60]" align="start">
           <p className="text-xs font-medium text-muted-foreground px-2 pb-2">
             Membros do cartão
           </p>

@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import {
+  useChecklists,
   useCreateChecklist,
   useUpdateChecklist,
   useDeleteChecklist,
@@ -25,7 +26,6 @@ import type { Checklist } from '@/types/tasks';
 interface CardChecklistTabProps {
   boardId: string;
   cardId: string;
-  checklists: Checklist[];
 }
 
 function ChecklistSection({
@@ -101,9 +101,9 @@ function ChecklistSection({
   }, [checklist.id, newItemTitle, addItem]);
 
   const handleToggleItem = useCallback(
-    (itemId: string) => {
+    (itemId: string, currentlyCompleted: boolean) => {
       toggleItem.mutate(
-        { checklistId: checklist.id, itemId },
+        { checklistId: checklist.id, itemId, isCompleted: !currentlyCompleted },
         {
           onError: () =>
             toast.error('Não foi possível atualizar o item. Tente novamente.'),
@@ -197,7 +197,9 @@ function ChecklistSection({
               >
                 <Checkbox
                   checked={item.isCompleted}
-                  onCheckedChange={() => handleToggleItem(item.id)}
+                  onCheckedChange={() =>
+                    handleToggleItem(item.id, item.isCompleted)
+                  }
                 />
                 <span
                   className={`flex-1 text-sm ${item.isCompleted ? 'line-through text-muted-foreground' : ''}`}
@@ -239,11 +241,10 @@ function ChecklistSection({
   );
 }
 
-export function CardChecklistTab({
-  boardId,
-  cardId,
-  checklists,
-}: CardChecklistTabProps) {
+export function CardChecklistTab({ boardId, cardId }: CardChecklistTabProps) {
+  const { data: checklistsData, isLoading } = useChecklists(boardId, cardId);
+  const checklists = checklistsData?.checklists ?? [];
+
   const createChecklist = useCreateChecklist(boardId, cardId);
   const [showCreate, setShowCreate] = useState(false);
   const [newChecklistTitle, setNewChecklistTitle] = useState('');
@@ -266,26 +267,33 @@ export function CardChecklistTab({
   }, [newChecklistTitle, createChecklist]);
 
   return (
-    <div className="space-y-4 flex-col w-full">
-      {checklists.length === 0 && !showCreate ? (
-        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-          <CheckSquare className="h-8 w-8 mb-2 opacity-50" />
-          <p className="text-sm">Nenhum checklist</p>
+    <div className="space-y-3 flex-col w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-secondary rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="h-4 w-4 text-secondary-foreground/70" />
+          <span className="text-sm font-semibold text-secondary-foreground">
+            Checklists
+          </span>
+          {checklists.length > 0 && (
+            <span className="text-xs text-secondary-foreground/60">
+              ({checklists.length})
+            </span>
+          )}
         </div>
-      ) : (
-        <div className="space-y-3">
-          {checklists.map(cl => (
-            <ChecklistSection
-              key={cl.id}
-              checklist={cl}
-              boardId={boardId}
-              cardId={cardId}
-            />
-          ))}
-        </div>
-      )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-xs gap-1 text-secondary-foreground/70 hover:text-secondary-foreground"
+          onClick={() => setShowCreate(true)}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Adicionar
+        </Button>
+      </div>
 
-      {showCreate ? (
+      {/* Inline create */}
+      {showCreate && (
         <div className="flex items-center gap-2">
           <Input
             value={newChecklistTitle}
@@ -325,16 +333,29 @@ export function CardChecklistTab({
             Cancelar
           </Button>
         </div>
+      )}
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      ) : checklists.length === 0 && !showCreate ? (
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <CheckSquare className="h-8 w-8 mb-2 opacity-50" />
+          <p className="text-sm">Nenhum checklist</p>
+        </div>
       ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => setShowCreate(true)}
-        >
-          <Plus className="h-4 w-4" />
-          Adicionar checklist
-        </Button>
+        <div className="space-y-3">
+          {checklists.map(cl => (
+            <ChecklistSection
+              key={cl.id}
+              checklist={cl}
+              boardId={boardId}
+              cardId={cardId}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

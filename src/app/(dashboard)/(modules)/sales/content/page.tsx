@@ -89,8 +89,8 @@ export default function ContentPage() {
   const { hasPermission } = usePermissions();
 
   const canView = hasPermission(SALES_PERMISSIONS.CONTENT.ACCESS);
-  const canDelete = hasPermission(SALES_PERMISSIONS.CONTENT.REMOVE);
-  const canApprove = hasPermission(SALES_PERMISSIONS.CONTENT.ADMIN);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CONTENT.APPROVE);
+  const canApprove = hasPermission(SALES_PERMISSIONS.CONTENT.APPROVE);
 
   // State
   const [searchQuery, setSearchQuery] = useState('');

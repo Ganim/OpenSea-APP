@@ -40,7 +40,9 @@ function DateTimePicker({
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     value ?? undefined
   );
-  const [hours, setHours] = React.useState<number>(value ? value.getHours() : 0);
+  const [hours, setHours] = React.useState<number>(
+    value ? value.getHours() : 0
+  );
   const [minutes, setMinutes] = React.useState<number>(
     value ? value.getMinutes() : 0
   );
@@ -105,7 +107,7 @@ function DateTimePicker({
     hours === h && minutes === m;
 
   const displayValue = value
-    ? format(value, "dd MMM yyyy HH:mm", { locale: ptBR })
+    ? format(value, 'dd MMM yyyy HH:mm', { locale: ptBR })
     : null;
 
   return (
@@ -124,12 +126,18 @@ function DateTimePicker({
           {displayValue ?? placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className="w-[280px] p-0 z-[60]"
+        align="start"
+        onOpenAutoFocus={e => e.preventDefault()}
+      >
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={ptBR}
+          className="w-full"
+          classNames={{ root: 'w-full' }}
         />
 
         {/* Divider */}
@@ -163,7 +171,7 @@ function DateTimePicker({
 
           {/* Quick time chips */}
           <div className="mt-2 flex flex-wrap gap-1">
-            {QUICK_TIMES.map((qt) => (
+            {QUICK_TIMES.map(qt => (
               <button
                 key={qt.label}
                 type="button"
@@ -194,9 +202,25 @@ function DateTimePicker({
           >
             Limpar
           </Button>
-          <Button variant="default" size="sm" onClick={handleConfirm}>
-            Confirmar
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const now = new Date();
+                setSelectedDate(now);
+                setHours(now.getHours());
+                setMinutes(now.getMinutes());
+                onChange(now);
+                setOpen(false);
+              }}
+            >
+              Hoje
+            </Button>
+            <Button variant="default" size="sm" onClick={handleConfirm}>
+              Confirmar
+            </Button>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

@@ -120,7 +120,7 @@ export default function MarketplacesPage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Marketplaces' },
           ]}

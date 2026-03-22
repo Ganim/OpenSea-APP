@@ -31,6 +31,7 @@ import {
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { CreateCampaignWizard } from './src/components/create-campaign-wizard';
 import {
   Megaphone,
   Plus,
@@ -41,7 +42,6 @@ import { useRouter } from 'next/navigation';
 import {
   Suspense,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -67,6 +67,7 @@ function CampaignsPageContent() {
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
@@ -87,21 +88,36 @@ function CampaignsPageContent() {
 
   const deleteMutation = useDeleteCampaign();
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = sentinelRef.current;
+  // Infinite scroll — refs prevent observer teardown/re-creation loop
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  hasNextPageRef.current = hasNextPage;
+  isFetchingNextPageRef.current = isFetchingNextPage;
+  fetchNextPageRef.current = fetchNextPage;
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          entries[0].isIntersecting &&
+          hasNextPageRef.current &&
+          !isFetchingNextPageRef.current
+        ) {
+          fetchNextPageRef.current();
         }
       },
       { rootMargin: '300px' },
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    observerRef.current = observer;
+  }, []);
 
   const statusOptions = useMemo(
     () =>
@@ -159,10 +175,10 @@ function CampaignsPageContent() {
             hasPermission(SALES_PERMISSIONS.CAMPAIGNS.ACCESS)
               ? [
                   {
-                    id: 'create',
+                    id: 'create-campaign',
                     title: 'Nova Campanha',
                     icon: Plus,
-                    onClick: () => router.push('/sales/campaigns/new'),
+                    onClick: () => setCreateOpen(true),
                     variant: 'default',
                   },
                 ]
@@ -192,7 +208,7 @@ function CampaignsPageContent() {
             type="server"
             title="Erro ao carregar campanhas"
             message="Ocorreu um erro. Por favor, tente novamente."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
           />
         ) : (
           <>
@@ -268,7 +284,7 @@ function CampaignsPageContent() {
                     )}
                   </div>
 
-                  {hasPermission(SALES_PERMISSIONS.CAMPAIGNS.REMOVE) && (
+                  {hasPermission(SALES_PERMISSIONS.CAMPAIGNS.ADMIN) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -286,6 +302,11 @@ function CampaignsPageContent() {
             <div ref={sentinelRef} className="h-1" />
           </>
         )}
+
+        <CreateCampaignWizard
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
 
         <VerifyActionPinModal
           isOpen={deleteModalOpen}

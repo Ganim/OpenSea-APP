@@ -13,8 +13,12 @@ export interface CardAttachment {
   fileId: string;
   fileName: string | null;
   addedBy: string;
-  addedByName: string | null;
+  addedByName?: string | null;
   createdAt: string;
+  /** Flat fields returned by backend */
+  fileMimeType?: string | null;
+  fileSizeBytes?: number | null;
+  /** Nested file object (may not be present depending on endpoint) */
   file?: AttachmentFile;
 }
 

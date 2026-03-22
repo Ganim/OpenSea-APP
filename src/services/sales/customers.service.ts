@@ -19,7 +19,7 @@ export const customersService = {
   async list(query?: CustomersQuery): Promise<PaginatedCustomersResponse> {
     const params = new URLSearchParams();
     if (query?.page) params.append('page', query.page.toString());
-    if (query?.limit) params.append('limit', query.limit.toString());
+    if (query?.limit) params.append('perPage', query.limit.toString());
     if (query?.sortBy) params.append('sortBy', query.sortBy);
     if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
     if (query?.search) params.append('search', query.search);
@@ -34,7 +34,19 @@ export const customersService = {
       ? `${API_ENDPOINTS.CUSTOMERS.LIST}?${params.toString()}`
       : API_ENDPOINTS.CUSTOMERS.LIST;
 
-    return apiClient.get<PaginatedCustomersResponse>(url);
+    const raw = await apiClient.get<Record<string, unknown>>(url);
+    // Normalize: backend returns flat { customers, total, page, perPage, totalPages }
+    // Frontend expects { customers, meta: { total, page, limit, pages } }
+    if (raw.meta) return raw as unknown as PaginatedCustomersResponse;
+    return {
+      customers: raw.customers as PaginatedCustomersResponse['customers'],
+      meta: {
+        total: raw.total as number,
+        page: raw.page as number,
+        limit: (raw.perPage ?? raw.limit ?? 20) as number,
+        pages: (raw.totalPages ?? 1) as number,
+      },
+    };
   },
 
   // GET /v1/customers/:customerId

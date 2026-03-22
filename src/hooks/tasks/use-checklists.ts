@@ -4,7 +4,7 @@ import type {
   UpdateChecklistRequest,
   CreateChecklistItemRequest,
 } from '@/types/tasks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CARD_QUERY_KEYS } from './use-cards';
 
 export const CHECKLIST_QUERY_KEYS = {
@@ -15,12 +15,23 @@ export const CHECKLIST_QUERY_KEYS = {
   ],
 } as const;
 
+export function useChecklists(boardId: string, cardId: string) {
+  return useQuery({
+    queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+    queryFn: () => checklistsService.list(boardId, cardId),
+    enabled: !!boardId && !!cardId,
+  });
+}
+
 export function useCreateChecklist(boardId: string, cardId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateChecklistRequest) =>
       checklistsService.create(boardId, cardId, data),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
@@ -40,6 +51,9 @@ export function useUpdateChecklist(boardId: string, cardId: string) {
       data: UpdateChecklistRequest;
     }) => checklistsService.update(boardId, cardId, checklistId, data),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
@@ -54,6 +68,9 @@ export function useDeleteChecklist(boardId: string, cardId: string) {
     mutationFn: (checklistId: string) =>
       checklistsService.delete(boardId, cardId, checklistId),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
@@ -73,6 +90,9 @@ export function useAddChecklistItem(boardId: string, cardId: string) {
       data: CreateChecklistItemRequest;
     }) => checklistsService.addItem(boardId, cardId, checklistId, data),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
@@ -87,11 +107,23 @@ export function useToggleChecklistItem(boardId: string, cardId: string) {
     mutationFn: ({
       checklistId,
       itemId,
+      isCompleted,
     }: {
       checklistId: string;
       itemId: string;
-    }) => checklistsService.toggleItem(boardId, cardId, checklistId, itemId),
+      isCompleted: boolean;
+    }) =>
+      checklistsService.toggleItem(
+        boardId,
+        cardId,
+        checklistId,
+        itemId,
+        isCompleted
+      ),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
@@ -111,6 +143,9 @@ export function useDeleteChecklistItem(boardId: string, cardId: string) {
       itemId: string;
     }) => checklistsService.deleteItem(boardId, cardId, checklistId, itemId),
     onSuccess: async () => {
+      await qc.invalidateQueries({
+        queryKey: CHECKLIST_QUERY_KEYS.CHECKLISTS(boardId, cardId),
+      });
       await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
       await qc.invalidateQueries({
         queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),

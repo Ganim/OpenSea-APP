@@ -82,7 +82,7 @@ function CampaignDetailContent() {
     });
 
   const canActivate =
-    hasPermission(SALES_PERMISSIONS.CAMPAIGNS.MODIFY) &&
+    hasPermission(SALES_PERMISSIONS.CAMPAIGNS.ADMIN) &&
     campaign.status !== 'ACTIVE' &&
     campaign.status !== 'ENDED' &&
     campaign.status !== 'ARCHIVED';
@@ -108,7 +108,7 @@ function CampaignDetailContent() {
                   },
                 ]
               : []),
-            ...(hasPermission(SALES_PERMISSIONS.CAMPAIGNS.MODIFY)
+            ...(hasPermission(SALES_PERMISSIONS.CAMPAIGNS.ADMIN)
               ? [
                   {
                     id: 'edit',
@@ -120,7 +120,7 @@ function CampaignDetailContent() {
                   },
                 ]
               : []),
-            ...(hasPermission(SALES_PERMISSIONS.CAMPAIGNS.REMOVE)
+            ...(hasPermission(SALES_PERMISSIONS.CAMPAIGNS.ADMIN)
               ? [
                   {
                     id: 'delete',

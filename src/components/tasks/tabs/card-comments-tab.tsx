@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { useComments, useCreateComment } from '@/hooks/tasks/use-comments';
 import { useAuth } from '@/contexts/auth-context';
 import { CommentItem } from './comment-item';
+import { CommentInput } from '@/components/tasks/shared/comment-input';
 
 interface CardCommentsTabProps {
   boardId: string;
@@ -28,7 +27,10 @@ export function CardCommentsTab({
   const comments = commentsData?.comments ?? [];
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [newContent, setNewContent] = useState('');
+  const userName = user?.profile?.name
+    ? `${user.profile.name}${user.profile.surname ? ` ${user.profile.surname}` : ''}`
+    : (user?.username ?? null);
+  const userAvatarUrl = user?.profile?.avatarUrl ?? null;
 
   // Auto-scroll to bottom when new comments arrive (messaging mode)
   useEffect(() => {
@@ -37,32 +39,19 @@ export function CardCommentsTab({
     }
   }, [comments.length, messagingLayout]);
 
-  const handleCreateComment = useCallback(() => {
-    const content = newContent.trim();
-    if (!content) return;
-
-    createComment.mutate(
-      { content },
-      {
-        onSuccess: () => {
-          setNewContent('');
-        },
-        onError: () =>
-          toast.error(
-            'Não foi possível adicionar o comentário. Tente novamente.'
-          ),
-      }
-    );
-  }, [newContent, createComment]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleCreateComment();
-      }
+  const handleCreateComment = useCallback(
+    (content: string) => {
+      createComment.mutate(
+        { content },
+        {
+          onError: () =>
+            toast.error(
+              'Não foi possível adicionar o comentário. Tente novamente.'
+            ),
+        }
+      );
     },
-    [handleCreateComment]
+    [createComment]
   );
 
   // Messaging layout: messages above, input pinned below
@@ -100,24 +89,14 @@ export function CardCommentsTab({
 
         {/* Pinned input at bottom */}
         <div className="shrink-0 border-t border-border/50 p-3 bg-muted/30">
-          <div className="flex items-end gap-2">
-            <Textarea
-              value={newContent}
-              onChange={e => setNewContent(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Escreva um comentário... (Enter para enviar)"
-              rows={1}
-              className="text-sm min-h-[36px] max-h-[100px] resize-none"
-            />
-            <Button
-              size="icon"
-              className="h-9 w-9 shrink-0"
-              onClick={handleCreateComment}
-              disabled={createComment.isPending || !newContent.trim()}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+          <CommentInput
+            userName={userName}
+            userAvatarUrl={userAvatarUrl}
+            onSubmit={handleCreateComment}
+            disabled={createComment.isPending}
+            placeholder="Escreva um comentário... (Enter para enviar)"
+            rows={2}
+          />
         </div>
       </div>
     );
@@ -127,23 +106,13 @@ export function CardCommentsTab({
   return (
     <div className="space-y-4 flex-col w-full">
       {/* Comment input */}
-      <div className="space-y-2">
-        <Textarea
-          value={newContent}
-          onChange={e => setNewContent(e.target.value)}
-          placeholder="Escreva um comentário..."
-          rows={3}
-        />
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={handleCreateComment}
-            disabled={createComment.isPending || !newContent.trim()}
-          >
-            Comentar
-          </Button>
-        </div>
-      </div>
+      <CommentInput
+        userName={userName}
+        userAvatarUrl={userAvatarUrl}
+        onSubmit={handleCreateComment}
+        disabled={createComment.isPending}
+        rows={3}
+      />
 
       {/* Comments list */}
       {isLoading ? (

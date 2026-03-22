@@ -302,7 +302,7 @@ export default function ActiveReceivingPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Carregando..." showBack />
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
@@ -313,7 +313,7 @@ export default function ActiveReceivingPage() {
 
   if (error || !order) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Erro" showBack />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10">
@@ -330,7 +330,7 @@ export default function ActiveReceivingPage() {
   // ─── Render ───────────────────────────────────────────────────
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       {/* Top bar */}
       <MobileTopBar
         title={order.orderNumber}

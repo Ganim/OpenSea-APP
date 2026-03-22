@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { useGoalsInfinite, useDeleteGoal } from '@/hooks/sales/use-analytics';
 import type { AnalyticsGoal } from '@/types/sales';
+import { CreateGoalWizard } from './src/components/create-goal-wizard';
 import { Plus, Target, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -78,6 +79,7 @@ function formatCurrency(value: number): string {
 export default function GoalsPage() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState('');
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [deleteGoalId, setDeleteGoalId] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +129,7 @@ export default function GoalsPage() {
           <Button
             size="sm"
             className="h-9 px-2.5"
-            onClick={() => router.push('/sales/analytics/goals/new')}
+            onClick={() => setWizardOpen(true)}
           >
             <Plus className="h-4 w-4 mr-1" />
             Nova Meta
@@ -248,6 +250,11 @@ export default function GoalsPage() {
           onSuccess={handleDeleteConfirm}
           title="Confirmar Exclusão"
           description="Digite seu PIN de ação para excluir esta meta."
+        />
+
+        <CreateGoalWizard
+          open={wizardOpen}
+          onOpenChange={setWizardOpen}
         />
       </PageBody>
     </PageLayout>

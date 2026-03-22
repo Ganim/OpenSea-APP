@@ -29,6 +29,7 @@ interface ListViewProps {
   cards: Card[];
   boardId: string;
   onCardClick?: (card: Card) => void;
+  compact?: boolean;
 }
 
 export function ListView({
@@ -36,6 +37,7 @@ export function ListView({
   cards,
   boardId,
   onCardClick,
+  compact,
 }: ListViewProps) {
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
     new Set()
@@ -211,6 +213,7 @@ export function ListView({
                                         provided={dragProvided}
                                         isDragging={dragSnapshot.isDragging}
                                         onClick={() => onCardClick?.(card)}
+                                        compact={compact}
                                       />
                                     )}
                                   </Draggable>
@@ -251,6 +254,7 @@ interface ListCardRowProps {
   provided: import('@hello-pangea/dnd').DraggableProvided;
   isDragging: boolean;
   onClick: () => void;
+  compact?: boolean;
 }
 
 function ListCardRow({
@@ -259,10 +263,11 @@ function ListCardRow({
   provided,
   isDragging,
   onClick,
+  compact,
 }: ListCardRowProps) {
   const priorityConfig = PRIORITY_CONFIG[card.priority];
   const overdue = isOverdue(card.dueDate, card.status);
-  const hasComments = card._count && card._count.comments > 0;
+  const hasComments = (card.commentCount ?? 0) > 0;
 
   return (
     <div
@@ -328,7 +333,7 @@ function ListCardRow({
       {hasComments && (
         <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground shrink-0">
           <MessageSquare className="h-3 w-3" />
-          {card._count!.comments}
+          {card.commentCount}
         </span>
       )}
 

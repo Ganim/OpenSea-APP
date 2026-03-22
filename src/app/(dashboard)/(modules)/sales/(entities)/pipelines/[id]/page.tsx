@@ -20,7 +20,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { usePipeline } from '@/hooks/sales/use-pipelines';
 import { useDealsInfinite, useChangeDealStage } from '@/hooks/sales/use-deals';
 import { usePermissions } from '@/hooks/use-permissions';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -115,8 +115,8 @@ function PipelineKanbanContent() {
   const queryClient = useQueryClient();
 
   const { hasPermission } = usePermissions();
-  const canAccessDeals = hasPermission(PERMISSIONS.SALES.DEALS.ACCESS);
-  const canCreateDeals = hasPermission(PERMISSIONS.SALES.DEALS.REGISTER);
+  const canAccessDeals = hasPermission(SALES_PERMISSIONS.DEALS.ACCESS);
+  const canCreateDeals = hasPermission(SALES_PERMISSIONS.DEALS.REGISTER);
 
   const {
     data: pipelineData,

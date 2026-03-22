@@ -162,7 +162,7 @@ export default function VolumeDetailPage({
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Volume" showBack />
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
@@ -174,7 +174,7 @@ export default function VolumeDetailPage({
   // Error state
   if (isError || !volume) {
     return (
-      <div className="flex h-dvh flex-col bg-slate-950">
+      <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
         <MobileTopBar title="Volume" showBack />
         <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
           <AlertCircle className="h-8 w-8 text-rose-400" />
@@ -185,7 +185,7 @@ export default function VolumeDetailPage({
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar
         title={volume.code}
         subtitle={

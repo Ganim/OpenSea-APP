@@ -27,9 +27,11 @@ import {
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
-  useCustomers,
+  useCreateCustomer,
+  useCustomersInfinite,
   useDeleteCustomer,
 } from '@/hooks/sales/use-customers';
+import { CreateCustomerWizard } from './src/components/create-customer-wizard';
 import type { Customer } from '@/types/sales';
 import {
   Building2,
@@ -106,6 +108,7 @@ function CustomersPageContent() {
   // STATE
   // ============================================================================
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
@@ -114,17 +117,19 @@ function CustomersPageContent() {
   // ============================================================================
 
   const {
-    data: customersData,
+    customers: customersData,
+    total: customersTotal,
     isLoading,
     error,
     refetch,
-  } = useCustomers();
+  } = useCustomersInfinite();
 
+  const createMutation = useCreateCustomer();
   const deleteMutation = useDeleteCustomer();
 
   // Client-side filtering (until backend supports query params)
   const customers = useMemo(() => {
-    let list = customersData?.customers ?? [];
+    let list = customersData ?? [];
 
     // Search filter
     if (debouncedSearch) {
@@ -262,6 +267,7 @@ function CustomersPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={
+          customersConfig.permissions.update &&
           hasPermission(customersConfig.permissions.update)
             ? handleContextEdit
             : undefined
@@ -386,6 +392,7 @@ function CustomersPageContent() {
         itemId={item.id}
         onView={handleContextView}
         onEdit={
+          customersConfig.permissions.update &&
           hasPermission(customersConfig.permissions.update)
             ? handleContextEdit
             : undefined
@@ -464,8 +471,8 @@ function CustomersPageContent() {
   // ============================================================================
 
   const handleCreate = useCallback(() => {
-    router.push('/sales/customers/new');
-  }, [router]);
+    setCreateOpen(true);
+  }, []);
 
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
@@ -591,6 +598,16 @@ function CustomersPageContent() {
           )}
 
           {/* Delete Confirmation */}
+          <CreateCustomerWizard
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            onSubmit={async data => {
+              await createMutation.mutateAsync(data);
+              toast.success('Cliente criado com sucesso!');
+            }}
+            isSubmitting={createMutation.isPending}
+          />
+
           <VerifyActionPinModal
             isOpen={deleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}

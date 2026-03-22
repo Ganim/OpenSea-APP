@@ -127,7 +127,7 @@ export default function ListingsPage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Marketplaces', href: '/sales/marketplaces' },
             { label: connection?.name ?? '...', href: `/sales/marketplaces/${connectionId}` },

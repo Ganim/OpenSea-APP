@@ -39,7 +39,8 @@ export function ScannerCamera({ onScan, onError, enabled = true, className }: Sc
   useEffect(() => {
     if (!enabled || !containerRef.current) return;
 
-    const scanner = new Html5Qrcode('scanner-region', { formatsToSupport: SUPPORTED_FORMATS });
+    let cancelled = false;
+    const scanner = new Html5Qrcode('scanner-region', { formatsToSupport: SUPPORTED_FORMATS, verbose: false });
     scannerRef.current = scanner;
 
     scanner.start(
@@ -47,13 +48,26 @@ export function ScannerCamera({ onScan, onError, enabled = true, className }: Sc
       { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
       handleScan,
       () => {}, // ignore scan failures (continuous)
-    ).catch((err) => {
-      onError?.(err?.message || 'Falha ao acessar câmera');
+    ).then(() => {
+      // If unmounted before start completed, stop immediately
+      if (cancelled) {
+        scanner.stop().then(() => scanner.clear()).catch(() => {});
+      }
+    }).catch((err) => {
+      if (!cancelled) {
+        onError?.(err?.message || 'Falha ao acessar câmera');
+      }
     });
 
     return () => {
-      scanner.stop().catch(() => {});
-      scanner.clear();
+      cancelled = true;
+      const state = scanner.getState();
+      // Only stop if scanner is actually running or paused (state 2 = SCANNING, 3 = PAUSED)
+      if (state === 2 || state === 3) {
+        scanner.stop().then(() => scanner.clear()).catch(() => {});
+      } else {
+        try { scanner.clear(); } catch { /* already cleared */ }
+      }
     };
   }, [enabled, handleScan, onError]);
 

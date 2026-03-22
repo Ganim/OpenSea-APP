@@ -67,7 +67,7 @@ export default function CatalogDetailPage() {
   const catalogId = params.id as string;
   const { hasPermission } = usePermissions();
 
-  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.MODIFY);
+  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.ADMIN);
 
   const { data, isLoading, error } = useCatalog(catalogId);
   const catalog = data?.catalog;

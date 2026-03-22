@@ -121,11 +121,7 @@ export default function ContactDetailPage() {
   // DATA FETCHING
   // ============================================================================
 
-  const {
-    data: contactData,
-    isLoading,
-    error,
-  } = useContact(contactId);
+  const { data: contactData, isLoading, error } = useContact(contactId);
 
   const contact = contactData?.contact as Contact | undefined;
 
@@ -134,7 +130,8 @@ export default function ContactDetailPage() {
   // ============================================================================
 
   const actionButtons: HeaderButton[] = [
-    ...(hasPermission(contactsConfig.permissions.update)
+    ...(contactsConfig.permissions.update &&
+    hasPermission(contactsConfig.permissions.update)
       ? [
           {
             id: 'edit',
@@ -245,9 +242,7 @@ export default function ContactDetailPage() {
               <p className="text-sm text-muted-foreground">
                 {contact.jobTitle || 'Contato'}
               </p>
-              <h1 className="text-xl font-bold truncate">
-                {contact.fullName}
-              </h1>
+              <h1 className="text-xl font-bold truncate">{contact.fullName}</h1>
               {roleLabel && (
                 <p className="text-sm text-muted-foreground">{roleLabel}</p>
               )}
@@ -350,11 +345,7 @@ export default function ContactDetailPage() {
 
                 <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InfoRow
-                      icon={Mail}
-                      label="E-mail"
-                      value={contact.email}
-                    />
+                    <InfoRow icon={Mail} label="E-mail" value={contact.email} />
                     <InfoRow
                       icon={Phone}
                       label="Telefone"
@@ -392,9 +383,7 @@ export default function ContactDetailPage() {
                   <div className="flex items-center gap-3">
                     <Linkedin className="h-5 w-5 text-foreground" />
                     <div>
-                      <h3 className="text-base font-semibold">
-                        Redes Sociais
-                      </h3>
+                      <h3 className="text-base font-semibold">Redes Sociais</h3>
                       <p className="text-sm text-muted-foreground">
                         Perfis nas redes sociais
                       </p>

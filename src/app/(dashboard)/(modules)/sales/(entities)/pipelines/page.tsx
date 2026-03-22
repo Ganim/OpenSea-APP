@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
 import { usePipelines, useDeletePipeline } from '@/hooks/sales/use-pipelines';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -43,8 +43,8 @@ const TYPE_COLORS: Record<PipelineType, string> = {
 export default function PipelinesListPage() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
-  const canAccess = hasPermission(PERMISSIONS.SALES.PIPELINES.ACCESS);
-  const canAdmin = hasPermission(PERMISSIONS.SALES.PIPELINES.ADMIN);
+  const canAccess = hasPermission(SALES_PERMISSIONS.PIPELINES.ACCESS);
+  const canAdmin = hasPermission(SALES_PERMISSIONS.PIPELINES.ADMIN);
 
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Pipeline | null>(null);

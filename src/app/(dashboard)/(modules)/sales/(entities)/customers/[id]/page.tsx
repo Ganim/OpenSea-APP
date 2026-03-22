@@ -71,11 +71,7 @@ export default function CustomerDetailPage() {
   // DATA FETCHING
   // ============================================================================
 
-  const {
-    data: customerData,
-    isLoading,
-    error,
-  } = useCustomer(customerId);
+  const { data: customerData, isLoading, error } = useCustomer(customerId);
 
   const customer = customerData?.customer as Customer | undefined;
 
@@ -84,7 +80,8 @@ export default function CustomerDetailPage() {
   // ============================================================================
 
   const actionButtons: HeaderButton[] = [
-    ...(hasPermission(customersConfig.permissions.update)
+    ...(customersConfig.permissions.update &&
+    hasPermission(customersConfig.permissions.update)
       ? [
           {
             id: 'edit',
@@ -151,7 +148,12 @@ export default function CustomerDetailPage() {
 
   const isCompany = customer.type === 'BUSINESS';
   const typeLabel = isCompany ? 'Pessoa Juridica' : 'Pessoa Fisica';
-  const fullAddress = [customer.address, customer.city, customer.state, customer.zipCode]
+  const fullAddress = [
+    customer.address,
+    customer.city,
+    customer.state,
+    customer.zipCode,
+  ]
     .filter(Boolean)
     .join(', ');
 
@@ -243,7 +245,11 @@ export default function CustomerDetailPage() {
 
                 <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InfoRow icon={Mail} label="E-mail" value={customer.email} />
+                    <InfoRow
+                      icon={Mail}
+                      label="E-mail"
+                      value={customer.email}
+                    />
                     <InfoRow
                       icon={Phone}
                       label="Telefone"

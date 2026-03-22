@@ -59,7 +59,7 @@ export default function ConnectMarketplacePage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Marketplaces', href: '/sales/marketplaces' },
             { label: 'Conectar' },

@@ -12,10 +12,12 @@ import { CoreProvider, EntityCard, EntityContextMenu, EntityGrid } from '@/core'
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useBidsInfinite, useDeleteBid } from '@/hooks/sales/use-bids';
+import { bidsConfig } from '@/config/entities/bids.config';
 import type { Bid, BidStatus, BidModality } from '@/types/sales';
 import { BID_STATUS_LABELS, BID_MODALITY_LABELS } from '@/types/sales';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Calendar, DollarSign, FileText, Gavel, Plus, Trash2 } from 'lucide-react';
+import { CreateBidWizard } from './src/components/create-bid-wizard';
+import { Building2, Calendar, DollarSign, Gavel, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
@@ -41,6 +43,7 @@ function BidsPageContent() {
   const [statusFilter, setStatusFilter] = useState<BidStatus | ''>('');
   const [modalityFilter, setModalityFilter] = useState<BidModality | ''>('');
   const [deleteTarget, setDeleteTarget] = useState<Bid | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
 
   const { hasPermission } = usePermissions();
@@ -74,6 +77,23 @@ function BidsPageContent() {
     router.push(`/sales/bids/${bid.id}/edit`);
   }, [router]);
 
+  const handleContextView = useCallback((ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/sales/bids/${ids[0]}`);
+    }
+  }, [router]);
+
+  const handleContextEdit = useCallback((ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/sales/bids/${ids[0]}/edit`);
+    }
+  }, [router]);
+
+  const handleContextDelete = useCallback((ids: string[]) => {
+    const bid = bids.find(b => b.id === ids[0]);
+    if (bid) setDeleteTarget(bid);
+  }, [bids]);
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     try {
@@ -86,7 +106,7 @@ function BidsPageContent() {
   }, [deleteTarget, deleteMutation]);
 
   const headerButtons: HeaderButton[] = canCreate
-    ? [{ label: 'Nova Licitacao', icon: <Plus className="h-4 w-4" />, onClick: () => router.push('/sales/bids/new'), variant: 'default' }]
+    ? [{ title: 'Nova Licitação', icon: Plus, onClick: () => setWizardOpen(true), variant: 'default' }]
     : [];
 
   const formatCurrency = (value: number | null) => {
@@ -107,14 +127,128 @@ function BidsPageContent() {
     value, label,
   }));
 
+  const renderGridItem = (bid: Bid, _isSelected: boolean) => (
+    <EntityContextMenu
+      itemId={bid.id}
+      onView={handleContextView}
+      onEdit={canEdit ? handleContextEdit : undefined}
+      actions={[
+        ...(canDelete
+          ? [{
+              id: 'delete',
+              label: 'Excluir',
+              icon: Trash2,
+              onClick: handleContextDelete,
+              variant: 'destructive' as const,
+              separator: 'before' as const,
+            }]
+          : []),
+      ]}
+    >
+      <EntityCard
+        id={bid.id}
+        variant="grid"
+        title={bid.editalNumber}
+        subtitle={bid.organName}
+        icon={Gavel}
+        iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
+        badges={[
+          {
+            label: BID_STATUS_LABELS[bid.status] ?? bid.status,
+            variant: 'default',
+          },
+        ]}
+        footer={{
+          type: 'single' as const,
+          button: {
+            icon: DollarSign,
+            label: formatCurrency(bid.estimatedValue),
+            onClick: () => {},
+            color: 'secondary' as const,
+          },
+        }}
+        isSelected={_isSelected}
+        showSelection={false}
+        clickable={false}
+        createdAt={bid.createdAt}
+        updatedAt={bid.updatedAt ?? undefined}
+      />
+    </EntityContextMenu>
+  );
+
+  const renderListItem = (bid: Bid, _isSelected: boolean) => (
+    <EntityContextMenu
+      itemId={bid.id}
+      onView={handleContextView}
+      onEdit={canEdit ? handleContextEdit : undefined}
+      actions={[
+        ...(canDelete
+          ? [{
+              id: 'delete',
+              label: 'Excluir',
+              icon: Trash2,
+              onClick: handleContextDelete,
+              variant: 'destructive' as const,
+              separator: 'before' as const,
+            }]
+          : []),
+      ]}
+    >
+      <EntityCard
+        id={bid.id}
+        variant="list"
+        title={bid.editalNumber}
+        subtitle={bid.organName}
+        icon={Gavel}
+        iconBgColor="bg-linear-to-br from-indigo-500 to-purple-600"
+        metadata={
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <Badge className={cn('shrink-0 text-xs', STATUS_COLOR[bid.status] ?? 'bg-slate-100 text-slate-700')}>
+              {BID_STATUS_LABELS[bid.status] ?? bid.status}
+            </Badge>
+            <span className="flex items-center gap-1">
+              <DollarSign className="h-3.5 w-3.5" />
+              {formatCurrency(bid.estimatedValue)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {formatDate(bid.openingDate)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Building2 className="h-3.5 w-3.5" />
+              {bid.organState ?? '-'}
+            </span>
+          </div>
+        }
+        isSelected={_isSelected}
+        showSelection={false}
+        clickable={false}
+        createdAt={bid.createdAt}
+        updatedAt={bid.updatedAt ?? undefined}
+      />
+    </EntityContextMenu>
+  );
+
   return (
     <PageLayout>
       <PageHeader>
-        <PageActionBar breadcrumbs={[{ label: 'Vendas' }, { label: 'Licitacoes' }]} />
+        <PageActionBar
+          breadcrumbItems={[{ label: 'Vendas' }, { label: 'Licitacoes' }]}
+          buttons={headerButtons}
+        />
+
+        <Header
+          title="Licitacoes"
+          description="Gerenciamento de licitacoes e pregoes"
+        />
       </PageHeader>
       <PageBody>
-        <Header title="Licitacoes" subtitle="Gerenciamento de licitacoes e pregoes" buttons={headerButtons} />
-        <SearchBar value={search} onChange={handleSearch} placeholder="Buscar por numero, orgao ou objeto..." />
+        <SearchBar
+          value={search}
+          onSearch={handleSearch}
+          onClear={() => setSearch('')}
+          placeholder="Buscar por numero, orgao ou objeto..."
+        />
 
         {isLoading ? (
           <GridLoading />
@@ -122,72 +256,27 @@ function BidsPageContent() {
           <GridError message="Erro ao carregar licitacoes" />
         ) : (
           <EntityGrid
+            config={bidsConfig}
             items={bids}
-            getKey={(bid) => bid.id}
             toolbarStart={
               <>
                 <FilterDropdown
                   label="Status"
                   value={statusFilter}
                   options={statusOptions}
-                  onChange={(v) => setStatusFilter(v as BidStatus | '')}
+                  onChange={(v: string) => setStatusFilter(v as BidStatus | '')}
                 />
                 <FilterDropdown
                   label="Modalidade"
                   value={modalityFilter}
                   options={modalityOptions}
-                  onChange={(v) => setModalityFilter(v as BidModality | '')}
+                  onChange={(v: string) => setModalityFilter(v as BidModality | '')}
                 />
               </>
             }
-            renderItem={(bid) => (
-              <EntityCard onClick={() => handleView(bid)}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10">
-                      <Gavel className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">{bid.editalNumber}</p>
-                      <p className="truncate text-xs text-muted-foreground">{bid.organName}</p>
-                    </div>
-                  </div>
-                  <Badge className={cn('shrink-0 text-xs', STATUS_COLOR[bid.status] ?? 'bg-slate-100 text-slate-700')}>
-                    {BID_STATUS_LABELS[bid.status] ?? bid.status}
-                  </Badge>
-                </div>
-                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{bid.object}</p>
-                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <DollarSign className="h-3.5 w-3.5" />
-                    {formatCurrency(bid.estimatedValue)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {formatDate(bid.openingDate)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Building2 className="h-3.5 w-3.5" />
-                    {bid.organState ?? '-'}
-                  </span>
-                </div>
-                <EntityContextMenu
-                  onView={() => handleView(bid)}
-                  onEdit={canEdit ? () => handleEdit(bid) : undefined}
-                  actions={[
-                    ...(canDelete
-                      ? [{
-                          label: 'Excluir',
-                          icon: <Trash2 className="h-4 w-4" />,
-                          onClick: () => setDeleteTarget(bid),
-                          variant: 'destructive' as const,
-                          separator: 'before' as const,
-                        }]
-                      : []),
-                  ]}
-                />
-              </EntityCard>
-            )}
+            renderGridItem={renderGridItem}
+            renderListItem={renderListItem}
+            onItemDoubleClick={(bid) => handleView(bid)}
           />
         )}
 
@@ -203,9 +292,16 @@ function BidsPageContent() {
           isOpen={!!deleteTarget}
           onClose={() => setDeleteTarget(null)}
           onSuccess={handleDeleteConfirm}
-          title="Confirmar Exclusao"
-          description={`Digite seu PIN de acao para excluir a licitacao ${deleteTarget?.editalNumber ?? ''}.`}
+          title="Confirmar Exclusão"
+          description={`Digite seu PIN de ação para excluir a licitação ${deleteTarget?.editalNumber ?? ''}.`}
         />
+
+        {canCreate && (
+          <CreateBidWizard
+            open={wizardOpen}
+            onOpenChange={setWizardOpen}
+          />
+        )}
       </PageBody>
     </PageLayout>
   );

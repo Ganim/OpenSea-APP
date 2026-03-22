@@ -106,7 +106,7 @@ function CompactFieldInput({
                 : 'Selecionar...'}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 z-[60]" align="start">
             <Calendar
               mode="single"
               selected={dateValue}
@@ -233,7 +233,7 @@ export function CustomFieldsSection({
               Campos
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-52 p-2" align="end">
+          <PopoverContent className="w-52 p-2 z-[60]" align="end">
             <div className="space-y-0.5 max-h-48 overflow-y-auto">
               {fields.map(field => (
                 <button
@@ -261,9 +261,7 @@ export function CustomFieldsSection({
             <div key={field.id} className="space-y-0.5">
               <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-0.5">
                 {field.name}
-                {field.isRequired && (
-                  <span className="text-rose-500">*</span>
-                )}
+                {field.isRequired && <span className="text-rose-500">*</span>}
               </label>
               <CompactFieldInput
                 field={field}

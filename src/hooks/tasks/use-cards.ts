@@ -89,6 +89,12 @@ export function useUpdateCard(boardId: string) {
         }
       }
     },
+    onSettled: async (_, __, { cardId }) => {
+      await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
+      await qc.invalidateQueries({
+        queryKey: CARD_QUERY_KEYS.CARD(boardId, cardId),
+      });
+    },
   });
 }
 
@@ -200,6 +206,9 @@ export function useMoveCard(boardId: string) {
           qc.setQueryData(key, data);
         }
       }
+    },
+    onSettled: async () => {
+      await qc.invalidateQueries({ queryKey: CARD_QUERY_KEYS.CARDS(boardId) });
     },
   });
 }

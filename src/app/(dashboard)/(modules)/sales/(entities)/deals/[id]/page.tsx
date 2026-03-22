@@ -15,7 +15,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { useDeal, useUpdateDeal, useDeleteDeal, useChangeDealStage } from '@/hooks/sales/use-deals';
 import { useTimeline } from '@/hooks/sales/use-timeline';
 import { useActivitiesInfinite, useCreateActivity } from '@/hooks/sales/use-activities';
-import { PERMISSIONS } from '@/config/rbac/permission-codes';
+import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn, formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -90,8 +90,8 @@ function DealDetailContent() {
   const dealId = params.id as string;
 
   const { hasPermission } = usePermissions();
-  const canModify = hasPermission(PERMISSIONS.SALES.DEALS.MODIFY);
-  const canDelete = hasPermission(PERMISSIONS.SALES.DEALS.REMOVE);
+  const canModify = hasPermission(SALES_PERMISSIONS.DEALS.MODIFY);
+  const canDelete = hasPermission(SALES_PERMISSIONS.DEALS.REMOVE);
 
   const { data: dealData, isLoading, isError } = useDeal(dealId);
   const changeDealStage = useChangeDealStage();

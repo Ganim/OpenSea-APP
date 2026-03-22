@@ -83,7 +83,7 @@ export default function BidEditPage() {
   if (isLoading) {
     return (
       <PageLayout>
-        <PageHeader><PageActionBar breadcrumbs={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Carregando...' }]} /></PageHeader>
+        <PageHeader><PageActionBar breadcrumbItems={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Carregando...' }]} /></PageHeader>
         <PageBody><GridLoading /></PageBody>
       </PageLayout>
     );
@@ -92,7 +92,7 @@ export default function BidEditPage() {
   if (error || !bid) {
     return (
       <PageLayout>
-        <PageHeader><PageActionBar breadcrumbs={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Erro' }]} /></PageHeader>
+        <PageHeader><PageActionBar breadcrumbItems={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Erro' }]} /></PageHeader>
         <PageBody><GridError message="Licitacao nao encontrada" /></PageBody>
       </PageLayout>
     );
@@ -102,7 +102,7 @@ export default function BidEditPage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Licitacoes', href: '/sales/bids' },
             { label: bid.editalNumber, href: `/sales/bids/${bidId}` },

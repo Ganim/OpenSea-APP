@@ -99,12 +99,13 @@ export function PageActionBar({
 
         {/* Renderiza HeaderButtons se fornecidos */}
         {buttons
-          ? buttons.map(button => {
+          ? buttons.map((button, index) => {
+              const buttonKey = button.id || button.title || button.label || `btn-${index}`;
               const isIconOnly = !!button.tooltip;
 
               const btn = (
                 <Button
-                  key={button.id}
+                  key={buttonKey}
                   variant={button.variant || 'default'}
                   size="sm"
                   onClick={button.onClick}
@@ -136,7 +137,7 @@ export function PageActionBar({
 
               if (isIconOnly) {
                 return (
-                  <Tooltip key={button.id}>
+                  <Tooltip key={buttonKey}>
                     <TooltipTrigger asChild>{btn}</TooltipTrigger>
                     <TooltipContent side="bottom">
                       {button.tooltip}

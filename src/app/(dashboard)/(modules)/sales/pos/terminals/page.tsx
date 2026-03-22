@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { PageActionBar } from '@/components/layout/page-action-bar';
-import { PageBody } from '@/components/layout/page-body';
-import { PageLayout } from '@/components/layout/page-layout';
+import {
+  PageBody,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { GridLoading } from '@/components/shared/grid-loading';
-import { GridError } from '@/components/shared/grid-error';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { GridError } from '@/components/handlers/grid-error';
 import {
   usePosTerminals,
   useCreatePosTerminal,
@@ -103,7 +105,7 @@ export default function PosTerminalsPage() {
   return (
     <PageLayout>
       <PageActionBar
-        breadcrumbs={[
+        breadcrumbItems={[
           { label: 'Vendas', href: '/sales' },
           { label: 'PDV', href: '/sales/pos' },
           { label: 'Terminais' },

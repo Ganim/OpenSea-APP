@@ -19,11 +19,14 @@ export interface Card {
   position: number;
   dueDate: string | null;
   startDate: string | null;
-  estimatedHours: number | null;
+  estimatedMinutes: number | null;
   assigneeId: string | null;
   assigneeName: string | null;
-  createdBy: string;
-  creatorName: string | null;
+  reporterId: string;
+  reporterName: string | null;
+  completedAt: string | null;
+  coverColor: string | null;
+  coverImageId: string | null;
   archivedAt: string | null;
   deletedAt: string | null;
   createdAt: string;
@@ -32,12 +35,12 @@ export interface Card {
   subtasks?: Card[];
   checklists?: Checklist[];
   customFieldValues?: CardCustomFieldValue[];
-  _count?: {
-    subtasks: number;
-    completedSubtasks: number;
-    comments: number;
-    attachments: number;
-  };
+  subtaskCount?: number;
+  subtaskCompletedCount?: number;
+  commentCount?: number;
+  attachmentCount?: number;
+  checklistProgress?: { total: number; completed: number };
+  isOverdue?: boolean;
 }
 
 export interface CreateCardRequest {
@@ -50,7 +53,7 @@ export interface CreateCardRequest {
   position?: number;
   dueDate?: string | null;
   startDate?: string | null;
-  estimatedHours?: number | null;
+  estimatedMinutes?: number | null;
   assigneeId?: string | null;
   labelIds?: string[];
 }
@@ -65,7 +68,7 @@ export interface UpdateCardRequest {
   position?: number;
   dueDate?: string | null;
   startDate?: string | null;
-  estimatedHours?: number | null;
+  estimatedMinutes?: number | null;
   assigneeId?: string | null;
 }
 

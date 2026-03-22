@@ -27,6 +27,7 @@ import { COMBO_TYPE_LABELS } from '@/types/sales';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { CreateComboWizard } from './src/components/create-combo-wizard';
 import {
   Layers,
   Package,
@@ -37,7 +38,6 @@ import { useRouter } from 'next/navigation';
 import {
   Suspense,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -62,6 +62,7 @@ function CombosPageContent() {
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
 
@@ -81,21 +82,36 @@ function CombosPageContent() {
 
   const deleteMutation = useDeleteCombo();
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = sentinelRef.current;
+  // Infinite scroll — refs prevent observer teardown/re-creation loop
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  hasNextPageRef.current = hasNextPage;
+  isFetchingNextPageRef.current = isFetchingNextPage;
+  fetchNextPageRef.current = fetchNextPage;
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          entries[0].isIntersecting &&
+          hasNextPageRef.current &&
+          !isFetchingNextPageRef.current
+        ) {
+          fetchNextPageRef.current();
         }
       },
       { rootMargin: '300px' },
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    observerRef.current = observer;
+  }, []);
 
   const typeOptions = useMemo(
     () =>
@@ -133,13 +149,13 @@ function CombosPageContent() {
             { label: 'Combos', href: '/sales/combos' },
           ]}
           buttons={
-            hasPermission(SALES_PERMISSIONS.COMBOS.REGISTER)
+            hasPermission(SALES_PERMISSIONS.COMBOS.ADMIN)
               ? [
                   {
-                    id: 'create',
+                    id: 'create-combo',
                     title: 'Novo Combo',
                     icon: Plus,
-                    onClick: () => router.push('/sales/combos/new'),
+                    onClick: () => setCreateOpen(true),
                     variant: 'default',
                   },
                 ]
@@ -169,7 +185,7 @@ function CombosPageContent() {
             type="server"
             title="Erro ao carregar combos"
             message="Ocorreu um erro. Por favor, tente novamente."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
           />
         ) : (
           <>
@@ -180,7 +196,7 @@ function CombosPageContent() {
                 options={typeOptions}
                 selected={typeFilter}
                 onSelectionChange={setTypeFilter}
-                activeColor="orange"
+                activeColor="violet"
                 searchPlaceholder="Buscar tipo..."
                 emptyText="Nenhum tipo encontrado."
               />
@@ -234,7 +250,7 @@ function CombosPageContent() {
                     )}
                   </div>
 
-                  {hasPermission(SALES_PERMISSIONS.COMBOS.REMOVE) && (
+                  {hasPermission(SALES_PERMISSIONS.COMBOS.ADMIN) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -252,6 +268,11 @@ function CombosPageContent() {
             <div ref={sentinelRef} className="h-1" />
           </>
         )}
+
+        <CreateComboWizard
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
 
         <VerifyActionPinModal
           isOpen={deleteModalOpen}

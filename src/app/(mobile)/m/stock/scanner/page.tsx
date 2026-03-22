@@ -6,6 +6,7 @@ import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 import { ScanModeChips, type ScanMode } from '@/components/mobile/scan-mode-chips';
 import { ScanResultSheet } from '@/components/mobile/scan-result-sheet';
 import { useCodeLookup } from '@/hooks/mobile/use-code-lookup';
+import { cn } from '@/lib/utils';
 import { Search, ScanLine, Loader2, AlertCircle } from 'lucide-react';
 
 const ScannerCamera = dynamic(
@@ -61,7 +62,7 @@ export default function ScannerPage() {
     });
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar
         title="Scanner"
         subtitle={mode !== 'lookup' ? `Modo: ${mode}` : undefined}
@@ -98,9 +99,11 @@ export default function ScannerPage() {
         )}
 
         {/* Mode chips overlay at bottom of camera */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent pt-8">
-          <ScanModeChips value={mode} onChange={setMode} />
-        </div>
+        {!cameraError && (
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent pt-8">
+            <ScanModeChips value={mode} onChange={setMode} />
+          </div>
+        )}
       </div>
 
       {/* Last scan bar */}

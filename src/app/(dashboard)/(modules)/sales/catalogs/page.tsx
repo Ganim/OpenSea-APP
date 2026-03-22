@@ -17,6 +17,7 @@ import {
   useCreateCatalog,
   useDeleteCatalog,
 } from '@/hooks/sales/use-catalogs';
+import { CreateCatalogWizard } from './src/components/create-catalog-wizard';
 import { useDebounce } from '@/hooks/use-debounce';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { Catalog } from '@/types/sales';
@@ -25,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, Eye, Globe, Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const STATUS_OPTIONS = [
   { label: 'Todos', value: '' },
@@ -48,11 +50,12 @@ export default function CatalogsPage() {
 
   // Permissions
   const canView = hasPermission(SALES_PERMISSIONS.CATALOGS.ACCESS);
-  const canCreate = hasPermission(SALES_PERMISSIONS.CATALOGS.REGISTER);
-  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.MODIFY);
-  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.REMOVE);
+  const canCreate = hasPermission(SALES_PERMISSIONS.CATALOGS.ADMIN);
+  const canEdit = hasPermission(SALES_PERMISSIONS.CATALOGS.ADMIN);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.ADMIN);
 
   // State
+  const [createOpen, setCreateOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState('');
@@ -84,6 +87,7 @@ export default function CatalogsPage() {
   );
 
   // Mutations
+  const createMutation = useCreateCatalog();
   const deleteMutation = useDeleteCatalog();
 
   // Sentinel ref for infinite scroll
@@ -142,13 +146,13 @@ export default function CatalogsPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[{ label: 'Vendas' }, { label: 'Catálogos' }]}
-          actions={
+          buttons={
             canCreate
               ? [
                   {
-                    label: 'Novo Catálogo',
+                    title: 'Novo Catálogo',
                     icon: Plus,
-                    onClick: () => router.push('/sales/catalogs/new'),
+                    onClick: () => setCreateOpen(true),
                   },
                 ]
               : []
@@ -281,6 +285,16 @@ export default function CatalogsPage() {
 
         {/* Sentinel for infinite scroll */}
         <div ref={sentinelRef} className="h-1" />
+
+        <CreateCatalogWizard
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={async data => {
+            await createMutation.mutateAsync(data);
+            toast.success('Catálogo criado com sucesso!');
+          }}
+          isSubmitting={createMutation.isPending}
+        />
 
         {/* Delete confirmation */}
         <VerifyActionPinModal

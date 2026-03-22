@@ -108,7 +108,7 @@ export const contactsConfig = defineEntityConfig<Contact>()({
     selectable: true,
     searchableFields: ['fullName', 'email', 'phone'],
     defaultSort: {
-      field: 'name',
+      field: 'fullName',
       direction: 'asc',
     },
     pageSize: 20,

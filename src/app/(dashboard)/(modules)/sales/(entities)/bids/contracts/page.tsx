@@ -38,10 +38,10 @@ function BidContractsContent() {
   return (
     <PageLayout>
       <PageHeader>
-        <PageActionBar breadcrumbs={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Contratos' }]} />
+        <PageActionBar breadcrumbItems={[{ label: 'Vendas' }, { label: 'Licitacoes', href: '/sales/bids' }, { label: 'Contratos' }]} />
       </PageHeader>
       <PageBody>
-        <Header title="Contratos de Licitacao" subtitle="Contratos firmados a partir de licitacoes vencidas" />
+        <Header title="Contratos de Licitacao" description="Contratos firmados a partir de licitacoes vencidas" />
 
         <div className="flex gap-2 mb-4">
           <FilterDropdown label="Status" value={statusFilter} options={statusOptions} onChange={(v) => setStatusFilter(v as BidContractStatus | '')} />

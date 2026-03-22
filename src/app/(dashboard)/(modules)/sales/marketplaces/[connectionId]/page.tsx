@@ -71,7 +71,7 @@ export default function ConnectionDetailPage() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            breadcrumbs={[
+            breadcrumbItems={[
               { label: 'Vendas' },
               { label: 'Marketplaces', href: '/sales/marketplaces' },
               { label: 'Carregando...' },
@@ -88,7 +88,7 @@ export default function ConnectionDetailPage() {
       <PageLayout>
         <PageHeader>
           <PageActionBar
-            breadcrumbs={[
+            breadcrumbItems={[
               { label: 'Vendas' },
               { label: 'Marketplaces', href: '/sales/marketplaces' },
               { label: 'Erro' },
@@ -107,7 +107,7 @@ export default function ConnectionDetailPage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Marketplaces', href: '/sales/marketplaces' },
             { label: connection.name },

@@ -40,25 +40,25 @@ async function searchEntities(
     case 'CUSTOMER': {
       const response = await customersService.listCustomers();
       const filtered = search
-        ? response.customers.filter((c) =>
+        ? response.customers.filter(c =>
             c.name.toLowerCase().includes(search.toLowerCase())
           )
         : response.customers;
-      return filtered.slice(0, 10).map((c) => ({ id: c.id, label: c.name }));
+      return filtered.slice(0, 10).map(c => ({ id: c.id, label: c.name }));
     }
     case 'PRODUCT': {
       const response = await productsService.list({
         search: search || undefined,
         limit: 10,
       });
-      return response.products.map((p) => ({ id: p.id, label: p.name }));
+      return response.products.map(p => ({ id: p.id, label: p.name }));
     }
     case 'DEPARTMENT': {
       const response = await departmentsService.listDepartments({
         search: search || undefined,
         perPage: 10,
       });
-      return response.departments.map((d) => ({ id: d.id, label: d.name }));
+      return response.departments.map(d => ({ id: d.id, label: d.name }));
     }
     case 'CALENDAR_EVENT': {
       const now = new Date();
@@ -70,7 +70,7 @@ async function searchEntities(
         search: search || undefined,
         limit: 10,
       });
-      return response.events.map((e) => ({ id: e.id, label: e.title }));
+      return response.events.map(e => ({ id: e.id, label: e.title }));
     }
     default:
       return [];
@@ -85,14 +85,16 @@ export function IntegrationLinker({
   const [open, setOpen] = useState(false);
   const [modalType, setModalType] = useState<IntegrationType | null>(null);
   const [typeSearch, setTypeSearch] = useState('');
-  const [selectedType, setSelectedType] = useState<IntegrationType | null>(null);
+  const [selectedType, setSelectedType] = useState<IntegrationType | null>(
+    null
+  );
   const [entitySearch, setEntitySearch] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const filteredTypes = INTEGRATION_TYPES.filter((type) => {
+  const filteredTypes = INTEGRATION_TYPES.filter(type => {
     const config = INTEGRATION_CONFIG[type];
     return config.label.toLowerCase().includes(typeSearch.toLowerCase());
   });
@@ -119,21 +121,18 @@ export function IntegrationLinker({
     }
   }, [selectedType]);
 
-  const doSearch = useCallback(
-    async (type: IntegrationType, term: string) => {
-      setIsLoading(true);
-      try {
-        const data = await searchEntities(type, term);
-        setResults(data);
-      } catch {
-        toast.error('Erro ao buscar registros. Tente novamente.');
-        setResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+  const doSearch = useCallback(async (type: IntegrationType, term: string) => {
+    setIsLoading(true);
+    try {
+      const data = await searchEntities(type, term);
+      setResults(data);
+    } catch {
+      toast.error('Erro ao buscar registros. Tente novamente.');
+      setResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Trigger initial search when type is selected
   useEffect(() => {
@@ -191,7 +190,7 @@ export function IntegrationLinker({
   return (
     <div className="space-y-1.5">
       {/* Existing integrations */}
-      {integrations.map((integration) => {
+      {integrations.map(integration => {
         const config = INTEGRATION_CONFIG[integration.type];
         return (
           <div
@@ -232,7 +231,7 @@ export function IntegrationLinker({
             Vincular
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-56 p-2" align="start">
+        <PopoverContent className="w-56 p-2 z-[60]" align="start">
           {selectedType ? (
             /* ── Search view ── */
             <div>
@@ -256,7 +255,7 @@ export function IntegrationLinker({
                 <Input
                   ref={searchInputRef}
                   value={entitySearch}
-                  onChange={(e) => setEntitySearch(e.target.value)}
+                  onChange={e => setEntitySearch(e.target.value)}
                   placeholder="Digite para buscar..."
                   className="h-7 text-xs pl-7"
                 />
@@ -269,7 +268,7 @@ export function IntegrationLinker({
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   </div>
                 ) : results.length > 0 ? (
-                  results.map((result) => (
+                  results.map(result => (
                     <button
                       key={result.id}
                       type="button"
@@ -296,13 +295,13 @@ export function IntegrationLinker({
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   value={typeSearch}
-                  onChange={(e) => setTypeSearch(e.target.value)}
+                  onChange={e => setTypeSearch(e.target.value)}
                   placeholder="Buscar tipo..."
                   className="h-7 text-xs pl-7"
                 />
               </div>
               <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                {filteredTypes.map((type) => {
+                {filteredTypes.map(type => {
                   const config = INTEGRATION_CONFIG[type];
                   return (
                     <button
@@ -331,7 +330,7 @@ export function IntegrationLinker({
       {modalType && (
         <IntegrationSearchModal
           open={!!modalType}
-          onOpenChange={(isOpen) => {
+          onOpenChange={isOpen => {
             if (!isOpen) setModalType(null);
           }}
           type={modalType}

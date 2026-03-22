@@ -6,7 +6,7 @@ import type { Card } from '@/types/tasks';
 import { PRIORITY_CONFIG } from '@/types/tasks';
 import { isOverdue, formatDueDate, PRIORITY_HEX } from '../_utils';
 import type { DraggableProvided } from '@hello-pangea/dnd';
-import { MessageSquare, Paperclip, CalendarClock } from 'lucide-react';
+import { MessageSquare, Paperclip, CalendarClock, CheckSquare } from 'lucide-react';
 import { MemberAvatar } from '../shared/member-avatar';
 
 interface CardItemProps {
@@ -15,6 +15,7 @@ interface CardItemProps {
   boardId: string;
   provided?: DraggableProvided;
   isDragging?: boolean;
+  compact?: boolean;
 }
 
 function getCardTopColor(card: Card): string | null {
@@ -33,19 +34,22 @@ export const CardItem = memo(function CardItem({
   boardId,
   provided,
   isDragging = false,
+  compact = false,
 }: CardItemProps) {
   const topColor = getCardTopColor(card);
   const overdue = isOverdue(card.dueDate, card.status);
-  const counts = card._count;
-  const hasSubtasks = counts && counts.subtasks > 0;
-  const hasComments = counts && counts.comments > 0;
-  const hasAttachments = counts && counts.attachments > 0;
+  const hasSubtasks = (card.subtaskCount ?? 0) > 0;
+  const hasComments = (card.commentCount ?? 0) > 0;
+  const hasAttachments = (card.attachmentCount ?? 0) > 0;
+  const hasChecklist = (card.checklistProgress?.total ?? 0) > 0;
+  const isSubtask = !!card.parentCardId;
   const hasBottomRow =
     card.assigneeName ||
     card.dueDate ||
     hasComments ||
     hasAttachments ||
-    hasSubtasks;
+    hasSubtasks ||
+    hasChecklist;
 
   return (
     <div
@@ -81,7 +85,7 @@ export const CardItem = memo(function CardItem({
 
       <div className="p-3">
         {/* Labels as compact colored dots */}
-        {card.labels && card.labels.length > 0 && (
+        {!compact && card.labels && card.labels.length > 0 && (
           <div className="flex items-center gap-1 mb-2">
             {card.labels.map(label => (
               <span
@@ -94,13 +98,23 @@ export const CardItem = memo(function CardItem({
           </div>
         )}
 
+        {/* Subtask badge */}
+        {!compact && isSubtask && (
+          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 rounded px-1 py-0.5 mb-1 w-fit">
+            Sub
+          </span>
+        )}
+
         {/* Title */}
-        <p className="text-sm font-medium leading-snug line-clamp-2">
+        <p className={cn(
+          'text-sm font-medium leading-snug',
+          compact ? 'line-clamp-1' : 'line-clamp-2'
+        )}>
           {card.title}
         </p>
 
         {/* Bottom row */}
-        {hasBottomRow && (
+        {!compact && hasBottomRow && (
           <div className="flex items-center justify-between gap-2 mt-2.5">
             <div className="flex items-center gap-2 text-muted-foreground">
               {/* Due date */}
@@ -125,11 +139,11 @@ export const CardItem = memo(function CardItem({
                     <span
                       className="h-full bg-primary rounded-full block"
                       style={{
-                        width: `${counts.subtasks > 0 ? (counts.completedSubtasks / counts.subtasks) * 100 : 0}%`,
+                        width: `${(card.subtaskCount ?? 0) > 0 ? ((card.subtaskCompletedCount ?? 0) / (card.subtaskCount ?? 1)) * 100 : 0}%`,
                       }}
                     />
                   </span>
-                  {counts.completedSubtasks}/{counts.subtasks}
+                  {card.subtaskCompletedCount ?? 0}/{card.subtaskCount ?? 0}
                 </span>
               )}
 
@@ -137,7 +151,7 @@ export const CardItem = memo(function CardItem({
               {hasComments && (
                 <span className="inline-flex items-center gap-0.5 text-[11px]">
                   <MessageSquare className="h-3 w-3" />
-                  {counts.comments}
+                  {card.commentCount}
                 </span>
               )}
 
@@ -145,7 +159,15 @@ export const CardItem = memo(function CardItem({
               {hasAttachments && (
                 <span className="inline-flex items-center gap-0.5 text-[11px]">
                   <Paperclip className="h-3 w-3" />
-                  {counts.attachments}
+                  {card.attachmentCount}
+                </span>
+              )}
+
+              {/* Checklist progress */}
+              {hasChecklist && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium">
+                  <CheckSquare className="h-3 w-3" />
+                  {card.checklistProgress!.completed}/{card.checklistProgress!.total}
                 </span>
               )}
             </div>

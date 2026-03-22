@@ -1,6 +1,13 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+} from 'react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -21,8 +28,10 @@ import {
   FileText,
   MessageSquare,
   ListChecks,
+  CheckSquare,
   Activity,
   X,
+  ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -35,12 +44,28 @@ import {
   useDeleteCard,
   useManageCardLabels,
 } from '@/hooks/tasks/use-cards';
+import { useAuth } from '@/contexts/auth-context';
 import { useBoard } from '@/hooks/tasks/use-boards';
-import { useLabels } from '@/hooks/tasks/use-labels';
-import { useCustomFields, useSetCustomFieldValues } from '@/hooks/tasks/use-custom-fields';
-import { useAttachments, useUploadAttachment, useDeleteAttachment } from '@/hooks/tasks/use-attachments';
-import { useIntegrations, useCreateIntegration, useDeleteIntegration } from '@/hooks/tasks/use-integrations';
-import { useCardMembers, useAddCardMember, useRemoveCardMember } from '@/hooks/tasks/use-card-members';
+import { useLabels, useCreateLabel } from '@/hooks/tasks/use-labels';
+import {
+  useCustomFields,
+  useSetCustomFieldValues,
+} from '@/hooks/tasks/use-custom-fields';
+import {
+  useAttachments,
+  useUploadAttachment,
+  useDeleteAttachment,
+} from '@/hooks/tasks/use-attachments';
+import {
+  useIntegrations,
+  useCreateIntegration,
+  useDeleteIntegration,
+} from '@/hooks/tasks/use-integrations';
+import {
+  useCardMembers,
+  useAddCardMember,
+  useRemoveCardMember,
+} from '@/hooks/tasks/use-card-members';
 import { useComments, useCreateComment } from '@/hooks/tasks/use-comments';
 
 import { CardModalMembers } from './card-modal-members';
@@ -62,16 +87,24 @@ import type {
 
 // Lazy-loaded tab components
 const CardCommentsTab = lazy(() =>
-  import('../tabs/card-comments-tab').then(m => ({ default: m.CardCommentsTab }))
+  import('../tabs/card-comments-tab').then(m => ({
+    default: m.CardCommentsTab,
+  }))
 );
 const CardSubtasksTab = lazy(() =>
-  import('../tabs/card-subtasks-tab').then(m => ({ default: m.CardSubtasksTab }))
+  import('../tabs/card-subtasks-tab').then(m => ({
+    default: m.CardSubtasksTab,
+  }))
 );
 const CardChecklistTab = lazy(() =>
-  import('../tabs/card-checklist-tab').then(m => ({ default: m.CardChecklistTab }))
+  import('../tabs/card-checklist-tab').then(m => ({
+    default: m.CardChecklistTab,
+  }))
 );
 const CardActivityTab = lazy(() =>
-  import('../tabs/card-activity-tab').then(m => ({ default: m.CardActivityTab }))
+  import('../tabs/card-activity-tab').then(m => ({
+    default: m.CardActivityTab,
+  }))
 );
 
 interface CardModalProps {
@@ -82,13 +115,44 @@ interface CardModalProps {
   defaultColumnId?: string;
 }
 
-type ModalTab = 'geral' | 'comentarios' | 'subtarefas' | 'atividade';
+type ModalTab =
+  | 'geral'
+  | 'comentarios'
+  | 'subtarefas'
+  | 'checklist'
+  | 'atividade';
 
-const TABS: { key: ModalTab; label: string; icon: React.ElementType; color: string }[] = [
+const TABS: {
+  key: ModalTab;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+}[] = [
   { key: 'geral', label: 'Geral', icon: FileText, color: 'text-blue-500' },
-  { key: 'comentarios', label: 'Comentários', icon: MessageSquare, color: 'text-emerald-500' },
-  { key: 'subtarefas', label: 'Subtarefas', icon: ListChecks, color: 'text-violet-500' },
-  { key: 'atividade', label: 'Atividade', icon: Activity, color: 'text-orange-500' },
+  {
+    key: 'comentarios',
+    label: 'Comentários',
+    icon: MessageSquare,
+    color: 'text-emerald-500',
+  },
+  {
+    key: 'subtarefas',
+    label: 'Subtarefas',
+    icon: ListChecks,
+    color: 'text-violet-500',
+  },
+  {
+    key: 'checklist',
+    label: 'Checklist',
+    icon: CheckSquare,
+    color: 'text-teal-500',
+  },
+  {
+    key: 'atividade',
+    label: 'Atividade',
+    icon: Activity,
+    color: 'text-orange-500',
+  },
 ];
 
 function TabSkeleton() {
@@ -107,6 +171,12 @@ export function CardModal({
   defaultColumnId,
 }: CardModalProps) {
   const isEditMode = !!cardId;
+  const { user } = useAuth();
+
+  const currentUserName = user?.profile?.name
+    ? `${user.profile.name}${user.profile.surname ? ` ${user.profile.surname}` : ''}`
+    : (user?.username ?? null);
+  const currentUserAvatarUrl = user?.profile?.avatarUrl ?? null;
 
   // ── Data queries ──
   const { data: boardData } = useBoard(boardId);
@@ -138,13 +208,21 @@ export function CardModal({
   );
   const recentComments = (commentsData?.comments ?? [])
     .slice(0, 3)
-    .map((c: { id: string; content: string; authorName: string | null; authorAvatarUrl?: string | null; createdAt: string }) => ({
-      id: c.id,
-      content: c.content,
-      authorName: c.authorName,
-      authorAvatarUrl: c.authorAvatarUrl,
-      createdAt: c.createdAt,
-    }));
+    .map(
+      (c: {
+        id: string;
+        content: string;
+        authorName: string | null;
+        authorAvatarUrl?: string | null;
+        createdAt: string;
+      }) => ({
+        id: c.id,
+        content: c.content,
+        authorName: c.authorName,
+        authorAvatarUrl: c.authorAvatarUrl,
+        createdAt: c.createdAt,
+      })
+    );
 
   const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
   const firstColumnId = sortedColumns[0]?.id ?? '';
@@ -157,6 +235,7 @@ export function CardModal({
   const archiveCard = useArchiveCard(boardId);
   const deleteCard = useDeleteCard(boardId);
   const manageLabels = useManageCardLabels(boardId);
+  const createLabel = useCreateLabel(boardId);
   const setFieldValues = useSetCustomFieldValues(boardId);
   const uploadAttachment = useUploadAttachment(boardId, cardId ?? '');
   const deleteAttachment = useDeleteAttachment(boardId, cardId ?? '');
@@ -182,7 +261,9 @@ export function CardModal({
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [estimatedHours, setEstimatedHours] = useState('');
-  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [customFieldValues, setCustomFieldValues] = useState<
+    Record<string, string>
+  >({});
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [pendingIntegrations, setPendingIntegrations] = useState<
@@ -205,7 +286,9 @@ export function CardModal({
       setParentCardId(card.parentCardId);
       setStartDate(card.startDate ? new Date(card.startDate) : undefined);
       setDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
-      setEstimatedHours(card.estimatedHours != null ? String(card.estimatedHours) : '');
+      setEstimatedHours(
+        card.estimatedMinutes != null ? String(card.estimatedMinutes / 60) : ''
+      );
       // Initialize custom field values
       const vals: Record<string, string> = {};
       for (const fv of card.customFieldValues ?? []) {
@@ -266,7 +349,9 @@ export function CardModal({
   const handleToggleLabel = useCallback(
     (labelId: string) => {
       setSelectedLabelIds(prev =>
-        prev.includes(labelId) ? prev.filter(id => id !== labelId) : [...prev, labelId]
+        prev.includes(labelId)
+          ? prev.filter(id => id !== labelId)
+          : [...prev, labelId]
       );
       // Auto-save in edit mode
       if (isEditMode && cardId) {
@@ -277,7 +362,9 @@ export function CardModal({
           { cardId, labelIds: newIds },
           {
             onError: () =>
-              toast.error('Não foi possível atualizar as etiquetas. Tente novamente.'),
+              toast.error(
+                'Não foi possível atualizar as etiquetas. Tente novamente.'
+              ),
           }
         );
       }
@@ -293,7 +380,8 @@ export function CardModal({
           { cardId, data: { columnId: newColumnId, position: 0 } },
           {
             onSuccess: () => toast.success('Cartão movido'),
-            onError: () => toast.error('Não foi possível mover o cartão. Tente novamente.'),
+            onError: () =>
+              toast.error('Não foi possível mover o cartão. Tente novamente.'),
           }
         );
       }
@@ -309,7 +397,10 @@ export function CardModal({
           { cardId, data: { status: newStatus } },
           {
             onSuccess: () => toast.success('Status atualizado'),
-            onError: () => toast.error('Não foi possível atualizar o status. Tente novamente.'),
+            onError: () =>
+              toast.error(
+                'Não foi possível atualizar o status. Tente novamente.'
+              ),
           }
         );
       }
@@ -326,7 +417,9 @@ export function CardModal({
           {
             onSuccess: () => toast.success('Prioridade atualizada'),
             onError: () =>
-              toast.error('Não foi possível atualizar a prioridade. Tente novamente.'),
+              toast.error(
+                'Não foi possível atualizar a prioridade. Tente novamente.'
+              ),
           }
         );
       }
@@ -342,9 +435,13 @@ export function CardModal({
           { cardId, assigneeId: newAssigneeId },
           {
             onSuccess: () =>
-              toast.success(newAssigneeId ? 'Responsável atribuído' : 'Responsável removido'),
+              toast.success(
+                newAssigneeId ? 'Responsável atribuído' : 'Responsável removido'
+              ),
             onError: () =>
-              toast.error('Não foi possível atribuir o responsável. Tente novamente.'),
+              toast.error(
+                'Não foi possível atribuir o responsável. Tente novamente.'
+              ),
           }
         );
       }
@@ -359,9 +456,14 @@ export function CardModal({
         updateCard.mutate(
           { cardId, data: { startDate: date ? date.toISOString() : null } },
           {
-            onSuccess: () => toast.success(date ? 'Data de início definida' : 'Data de início removida'),
+            onSuccess: () =>
+              toast.success(
+                date ? 'Data de início definida' : 'Data de início removida'
+              ),
             onError: () =>
-              toast.error('Não foi possível atualizar a data de início. Tente novamente.'),
+              toast.error(
+                'Não foi possível atualizar a data de início. Tente novamente.'
+              ),
           }
         );
       }
@@ -376,8 +478,12 @@ export function CardModal({
         updateCard.mutate(
           { cardId, data: { dueDate: date ? date.toISOString() : null } },
           {
-            onSuccess: () => toast.success(date ? 'Prazo definido' : 'Prazo removido'),
-            onError: () => toast.error('Não foi possível atualizar o prazo. Tente novamente.'),
+            onSuccess: () =>
+              toast.success(date ? 'Prazo definido' : 'Prazo removido'),
+            onError: () =>
+              toast.error(
+                'Não foi possível atualizar o prazo. Tente novamente.'
+              ),
           }
         );
       }
@@ -385,23 +491,23 @@ export function CardModal({
     [isEditMode, cardId, updateCard]
   );
 
-  const handleEstimatedHoursChange = useCallback(
-    (value: string) => {
-      setEstimatedHours(value);
-    },
-    []
-  );
+  const handleEstimatedHoursChange = useCallback((value: string) => {
+    setEstimatedHours(value);
+  }, []);
 
   // Auto-save estimated hours on blur in edit mode
   const handleEstimatedHoursBlur = useCallback(() => {
     if (isEditMode && cardId) {
       const hours = estimatedHours ? parseFloat(estimatedHours) : null;
+      const minutes = hours != null ? Math.round(hours * 60) : null;
       updateCard.mutate(
-        { cardId, data: { estimatedHours: hours } },
+        { cardId, data: { estimatedMinutes: minutes } },
         {
           onSuccess: () => toast.success('Estimativa atualizada'),
           onError: () =>
-            toast.error('Não foi possível atualizar a estimativa. Tente novamente.'),
+            toast.error(
+              'Não foi possível atualizar a estimativa. Tente novamente.'
+            ),
         }
       );
     }
@@ -420,7 +526,9 @@ export function CardModal({
       if (isEditMode && cardId) {
         addCardMember.mutate(userId, {
           onError: () =>
-            toast.error('Não foi possível adicionar o membro. Tente novamente.'),
+            toast.error(
+              'Não foi possível adicionar o membro. Tente novamente.'
+            ),
         });
       }
     },
@@ -445,7 +553,8 @@ export function CardModal({
       if (isEditMode) {
         deleteAttachment.mutate(attachmentId, {
           onSuccess: () => toast.success('Anexo removido'),
-          onError: () => toast.error('Não foi possível remover o anexo. Tente novamente.'),
+          onError: () =>
+            toast.error('Não foi possível remover o anexo. Tente novamente.'),
         });
       }
     },
@@ -483,7 +592,12 @@ export function CardModal({
   );
 
   const handleLinkStorageFile = useCallback(
-    async (file: { id: string; name: string; size: number; mimeType: string }) => {
+    async (file: {
+      id: string;
+      name: string;
+      size: number;
+      mimeType: string;
+    }) => {
       if (!isEditMode || !cardId) {
         toast.info('Salve o cartão antes de vincular arquivos do Storage');
         return;
@@ -509,7 +623,8 @@ export function CardModal({
         { content: content.trim() },
         {
           onSuccess: () => toast.success('Comentário adicionado'),
-          onError: () => toast.error('Não foi possível adicionar o comentário.'),
+          onError: () =>
+            toast.error('Não foi possível adicionar o comentário.'),
         }
       );
     },
@@ -524,12 +639,17 @@ export function CardModal({
           {
             onSuccess: () => toast.success('Integração adicionada'),
             onError: () =>
-              toast.error('Não foi possível adicionar a integração. Tente novamente.'),
+              toast.error(
+                'Não foi possível adicionar a integração. Tente novamente.'
+              ),
           }
         );
       } else {
         // Create mode — buffer locally
-        setPendingIntegrations((prev) => [...prev, { type, entityId, entityLabel }]);
+        setPendingIntegrations(prev => [
+          ...prev,
+          { type, entityId, entityLabel },
+        ]);
         toast.success('Integração será criada ao salvar o cartão');
       }
     },
@@ -541,11 +661,14 @@ export function CardModal({
       if (isEditMode) {
         deleteIntegration.mutate(integrationId, {
           onSuccess: () => toast.success('Integração removida'),
-          onError: () => toast.error('Não foi possível remover a integração. Tente novamente.'),
+          onError: () =>
+            toast.error(
+              'Não foi possível remover a integração. Tente novamente.'
+            ),
         });
       } else if (integrationId.startsWith('pending-')) {
         const idx = parseInt(integrationId.replace('pending-', ''), 10);
-        setPendingIntegrations((prev) => prev.filter((_, i) => i !== idx));
+        setPendingIntegrations(prev => prev.filter((_, i) => i !== idx));
       }
     },
     [isEditMode, deleteIntegration]
@@ -569,7 +692,9 @@ export function CardModal({
       { cardId, archive: !isArchived },
       {
         onSuccess: () => {
-          toast.success(isArchived ? 'Cartão desarquivado' : 'Cartão arquivado');
+          toast.success(
+            isArchived ? 'Cartão desarquivado' : 'Cartão arquivado'
+          );
           if (!isArchived) onOpenChange(false);
         },
         onError: () =>
@@ -600,7 +725,8 @@ export function CardModal({
       { cardId, data: { title: title.trim() } },
       {
         onSuccess: () => toast.success('Título atualizado'),
-        onError: () => toast.error('Não foi possível atualizar o título. Tente novamente.'),
+        onError: () =>
+          toast.error('Não foi possível atualizar o título. Tente novamente.'),
       }
     );
   }, [isEditMode, cardId, card, title, updateCard]);
@@ -613,7 +739,10 @@ export function CardModal({
       { cardId, data: { description: newDesc } },
       {
         onSuccess: () => toast.success('Descrição atualizada'),
-        onError: () => toast.error('Não foi possível atualizar a descrição. Tente novamente.'),
+        onError: () =>
+          toast.error(
+            'Não foi possível atualizar a descrição. Tente novamente.'
+          ),
       }
     );
   }, [isEditMode, cardId, card, description, updateCard]);
@@ -639,7 +768,9 @@ export function CardModal({
         assigneeId: assigneeId || null,
         dueDate: dueDate ? dueDate.toISOString() : null,
         startDate: startDate ? startDate.toISOString() : null,
-        estimatedHours: estimatedHours ? parseFloat(estimatedHours) : null,
+        estimatedMinutes: estimatedHours
+          ? Math.round(parseFloat(estimatedHours) * 60)
+          : null,
         labelIds: selectedLabelIds.length > 0 ? selectedLabelIds : undefined,
         parentCardId: parentCardId || null,
       });
@@ -685,7 +816,7 @@ export function CardModal({
                 entityType: 'task-attachment',
                 entityId: newCardId,
               })
-              .then((storageResult) =>
+              .then(storageResult =>
                 attachmentsService.upload(boardId, newCardId, {
                   fileId: storageResult.file.id,
                   fileName: file.name,
@@ -708,13 +839,28 @@ export function CardModal({
       toast.success('Cartão criado com sucesso!');
       onOpenChange(false);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Erro ao criar cartão.';
+      const message =
+        error instanceof Error ? error.message : 'Erro ao criar cartão.';
       toast.error(message);
     }
   }, [
-    title, description, columnId, priority, assigneeId, dueDate, startDate,
-    estimatedHours, selectedLabelIds, parentCardId, customFieldValues, pendingFiles,
-    pendingIntegrations, boardId, createCard, setFieldValues, onOpenChange,
+    title,
+    description,
+    columnId,
+    priority,
+    assigneeId,
+    dueDate,
+    startDate,
+    estimatedHours,
+    selectedLabelIds,
+    parentCardId,
+    customFieldValues,
+    pendingFiles,
+    pendingIntegrations,
+    boardId,
+    createCard,
+    setFieldValues,
+    onOpenChange,
   ]);
 
   // ── Save (edit mode) — batch custom fields ──
@@ -727,7 +873,8 @@ export function CardModal({
     const changedValues = customFields
       .map(field => {
         const newValue = customFieldValues[field.id] ?? '';
-        const existingValue = existingValues.find(v => v.fieldId === field.id)?.value ?? '';
+        const existingValue =
+          existingValues.find(v => v.fieldId === field.id)?.value ?? '';
         if (newValue === existingValue) return null;
         return { fieldId: field.id, value: newValue || null };
       })
@@ -749,8 +896,13 @@ export function CardModal({
 
     onOpenChange(false);
   }, [
-    cardId, card, customFields, customFieldValues, setFieldValues,
-    handleEstimatedHoursBlur, onOpenChange,
+    cardId,
+    card,
+    customFields,
+    customFieldValues,
+    setFieldValues,
+    handleEstimatedHoursBlur,
+    onOpenChange,
   ]);
 
   // ── Render ──
@@ -772,8 +924,10 @@ export function CardModal({
         >
           {/* Board color header strip */}
           <div
-            className="h-1.5 w-full shrink-0 rounded-t-lg"
-            style={{ background: `linear-gradient(to right, ${gradient.from}, ${gradient.to})` }}
+            className="h-2.5 w-full shrink-0 rounded-t-lg"
+            style={{
+              background: `linear-gradient(to right, ${gradient.from}, ${gradient.to})`,
+            }}
           />
 
           {isError ? (
@@ -788,7 +942,11 @@ export function CardModal({
               <p className="text-sm text-muted-foreground">
                 Erro ao carregar o cartão. Tente novamente.
               </p>
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+              >
                 Fechar
               </Button>
             </div>
@@ -796,7 +954,9 @@ export function CardModal({
             <div className="flex items-center justify-center p-20">
               <DialogHeader className="sr-only">
                 <DialogTitle>Carregando cartão...</DialogTitle>
-                <DialogDescription>Carregando detalhes do cartão</DialogDescription>
+                <DialogDescription>
+                  Carregando detalhes do cartão
+                </DialogDescription>
               </DialogHeader>
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             </div>
@@ -832,6 +992,23 @@ export function CardModal({
                         onRemove={handleRemoveMember}
                       />
                     </div>
+                    {isEditMode && card?.parentCardId && (
+                      <button
+                        type="button"
+                        className="shrink-0 inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
+                        onClick={() => {
+                          onOpenChange(false);
+                          setTimeout(() => {
+                            window.dispatchEvent(
+                              new CustomEvent('open-card', { detail: { cardId: card.parentCardId, boardId } })
+                            );
+                          }, 300);
+                        }}
+                      >
+                        <ArrowUpRight className="h-3 w-3" />
+                        Card pai
+                      </button>
+                    )}
                     <DialogHeader className="sr-only">
                       <DialogTitle>
                         {isEditMode ? 'Editar cartão' : 'Novo cartão'}
@@ -853,7 +1030,6 @@ export function CardModal({
                     <span className="sr-only">Fechar</span>
                   </Button>
                 </div>
-
               </div>
 
               {/* ── Two-panel area ── */}
@@ -861,7 +1037,7 @@ export function CardModal({
                 {/* Left panel */}
                 <div className="flex-1 flex flex-col min-w-0">
                   {/* Tab bar */}
-                  <div className="shrink-0 flex items-center gap-0.5 px-4 border-b border-border/50 bg-slate-50 dark:bg-white/5 overflow-x-auto scrollbar-none">
+                  <div className="shrink-0 flex items-center gap-0.5 px-4 border-b border-border bg-muted/50 dark:bg-white/[0.03] overflow-x-auto scrollbar-none">
                     {TABS.map(tab => {
                       const Icon = tab.icon;
                       const isActive = activeTab === tab.key;
@@ -878,7 +1054,10 @@ export function CardModal({
                           onClick={() => setActiveTab(tab.key)}
                         >
                           <Icon
-                            className={cn('h-3.5 w-3.5', isActive ? tab.color : '')}
+                            className={cn(
+                              'h-3.5 w-3.5',
+                              isActive ? tab.color : ''
+                            )}
                           />
                           {tab.label}
                           {isActive && (
@@ -890,10 +1069,14 @@ export function CardModal({
                   </div>
 
                   {/* Tab content */}
-                  <div className={cn(
-                    'flex-1 min-h-0 px-5 py-4',
-                    activeTab === 'geral' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex-1 min-h-0 px-5 py-4',
+                      activeTab === 'geral'
+                        ? 'flex flex-col overflow-hidden'
+                        : 'overflow-y-auto'
+                    )}
+                  >
                     {activeTab === 'geral' && (
                       <CardModalGeneralTab
                         description={description}
@@ -902,18 +1085,25 @@ export function CardModal({
                         attachments={isEditMode ? attachments : []}
                         onUploadAttachment={handleUploadAttachment}
                         onRemoveAttachment={handleRemoveAttachment}
-                        onLinkStorageFile={isEditMode ? handleLinkStorageFile : undefined}
+                        onLinkStorageFile={
+                          isEditMode ? handleLinkStorageFile : undefined
+                        }
                         boardId={boardId}
                         customFields={customFields}
                         customFieldValues={customFieldValues}
                         onCustomFieldChange={handleCustomFieldChange}
                         recentComments={isEditMode ? recentComments : []}
-                        onAddComment={isEditMode && cardId ? handleAddComment : undefined}
+                        totalComments={commentsData?.meta?.total}
+                        onAddComment={
+                          isEditMode && cardId ? handleAddComment : undefined
+                        }
                         onViewAllComments={
                           isEditMode
                             ? () => setActiveTab('comentarios')
                             : undefined
                         }
+                        currentUserName={currentUserName}
+                        currentUserAvatarUrl={currentUserAvatarUrl}
                         isCreateMode={!isEditMode}
                       />
                     )}
@@ -931,19 +1121,34 @@ export function CardModal({
 
                     {activeTab === 'subtarefas' && isEditMode && cardId && (
                       <Suspense fallback={<TabSkeleton />}>
-                        <div className="space-y-3">
-                          <CardSubtasksTab boardId={boardId} cardId={cardId} />
-                          <CardChecklistTab
-                            boardId={boardId}
-                            cardId={cardId}
-                            checklists={card?.checklists ?? []}
-                          />
-                        </div>
+                        <CardSubtasksTab
+                          boardId={boardId}
+                          cardId={cardId}
+                          onOpenSubtask={(subtaskId) => {
+                            onOpenChange(false);
+                            setTimeout(() => {
+                              window.dispatchEvent(
+                                new CustomEvent('open-card', { detail: { cardId: subtaskId, boardId } })
+                              );
+                            }, 300);
+                          }}
+                        />
                       </Suspense>
                     )}
                     {activeTab === 'subtarefas' && !isEditMode && (
                       <p className="text-sm text-muted-foreground py-8 text-center">
                         Subtarefas estarão disponíveis após criar o cartão
+                      </p>
+                    )}
+
+                    {activeTab === 'checklist' && isEditMode && cardId && (
+                      <Suspense fallback={<TabSkeleton />}>
+                        <CardChecklistTab boardId={boardId} cardId={cardId} />
+                      </Suspense>
+                    )}
+                    {activeTab === 'checklist' && !isEditMode && (
+                      <p className="text-sm text-muted-foreground py-8 text-center">
+                        Checklists estarão disponíveis após criar o cartão
                       </p>
                     )}
 
@@ -954,7 +1159,8 @@ export function CardModal({
                     )}
                     {activeTab === 'atividade' && !isEditMode && (
                       <p className="text-sm text-muted-foreground py-8 text-center">
-                        O histórico de atividades aparecerá após a criação do cartão
+                        O histórico de atividades aparecerá após a criação do
+                        cartão
                       </p>
                     )}
                   </div>
@@ -973,6 +1179,16 @@ export function CardModal({
                   allLabels={allLabels}
                   selectedLabelIds={selectedLabelIds}
                   onToggleLabel={handleToggleLabel}
+                  onCreateLabel={(name, color) => {
+                    createLabel.mutate(
+                      { name, color },
+                      {
+                        onSuccess: () => toast.success('Etiqueta criada'),
+                        onError: () =>
+                          toast.error('Não foi possível criar a etiqueta.'),
+                      }
+                    );
+                  }}
                   members={members}
                   assigneeId={assigneeId}
                   onAssigneeChange={handleAssigneeChange}
@@ -1003,7 +1219,7 @@ export function CardModal({
               </div>
 
               {/* ── Footer ── */}
-              <div className="shrink-0 border-t border-border px-5 py-3 flex items-center justify-between">
+              <div className="shrink-0 border-t border-border bg-muted/30 dark:bg-white/[0.02] px-5 py-3 flex items-center justify-between">
                 {/* Left: Actions (edit mode) */}
                 <div className="flex items-center gap-1">
                   {isEditMode && (

@@ -11,6 +11,7 @@ import {
   Layers,
   BoxSelect,
   ChevronRight,
+  Monitor,
 } from 'lucide-react';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 
@@ -58,7 +59,18 @@ const colorMap = {
 export default function MobileStockHome() {
   return (
     <div className="min-h-screen bg-slate-950">
-      <MobileTopBar title="Estoque" />
+      <MobileTopBar
+        title="Estoque"
+        rightContent={
+          <Link
+            href="/stock"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-300 active:bg-slate-700 transition-colors"
+          >
+            <Monitor className="h-3.5 w-3.5" />
+            Desktop
+          </Link>
+        }
+      />
 
       <div className="p-4 space-y-6">
         {/* Stats Grid */}

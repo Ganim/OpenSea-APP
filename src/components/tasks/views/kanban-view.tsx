@@ -44,6 +44,7 @@ interface KanbanViewProps {
   cards: Card[];
   boardId: string;
   onCardClick?: (card: Card) => void;
+  compact?: boolean;
 }
 
 export function KanbanView({
@@ -51,6 +52,7 @@ export function KanbanView({
   cards,
   boardId,
   onCardClick,
+  compact,
 }: KanbanViewProps) {
   const moveCard = useMoveCard(boardId);
   const reorderColumns = useReorderColumns(boardId);
@@ -135,6 +137,7 @@ export function KanbanView({
                         onCardClick={onCardClick}
                         provided={colProvided}
                         isDragging={colSnapshot.isDragging}
+                        compact={compact}
                       />
                     )}
                   </Draggable>
@@ -163,6 +166,7 @@ interface KanbanColumnProps {
   onCardClick?: (card: Card) => void;
   provided: import('@hello-pangea/dnd').DraggableProvided;
   isDragging: boolean;
+  compact?: boolean;
 }
 
 function KanbanColumn({
@@ -174,6 +178,7 @@ function KanbanColumn({
   onCardClick,
   provided,
   isDragging,
+  compact,
 }: KanbanColumnProps) {
   // Inline rename state
   const [isEditing, setIsEditing] = useState(false);
@@ -234,8 +239,8 @@ function KanbanColumn({
       <div
         className="group/header flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl border border-b-0 border-gray-200 dark:border-white/10"
         style={{
-          background: `linear-gradient(135deg, ${colColor}12, ${colColor}06)`,
-          borderTopColor: `${colColor}30`,
+          background: colColor,
+          borderTopColor: colColor,
         }}
       >
         {/* Drag handle — visible on hover */}
@@ -246,7 +251,7 @@ function KanbanColumn({
           aria-label={`Arrastar coluna ${column.title}`}
           {...provided.dragHandleProps}
         >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <GripVertical className="h-4 w-4 text-white/60" />
         </button>
 
         {/* Color dot */}
@@ -274,7 +279,7 @@ function KanbanColumn({
           />
         ) : (
           <h3
-            className="text-sm font-semibold truncate flex-1 cursor-text hover:bg-black/5 dark:hover:bg-white/5 rounded px-1.5 py-0.5 -mx-1 transition-colors"
+            className="text-sm font-semibold truncate flex-1 cursor-text hover:bg-white/10 rounded px-1.5 py-0.5 -mx-1 transition-colors text-white"
             onClick={startEditing}
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -296,7 +301,7 @@ function KanbanColumn({
             'text-xs font-medium tabular-nums px-1.5 py-0.5 rounded-md shrink-0',
             isOverWip
               ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/15'
-              : 'text-muted-foreground bg-muted/50'
+              : 'text-white/80 bg-white/20'
           )}
           aria-label={
             column.wipLimit
@@ -347,6 +352,7 @@ function KanbanColumn({
                     onClick={() => onCardClick?.(card)}
                     provided={cardProvided}
                     isDragging={cardSnapshot.isDragging}
+                    compact={compact}
                   />
                 )}
               </Draggable>

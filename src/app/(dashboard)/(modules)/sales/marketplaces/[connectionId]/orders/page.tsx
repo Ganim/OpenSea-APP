@@ -171,7 +171,7 @@ export default function MarketplaceOrdersPage() {
     <PageLayout>
       <PageHeader>
         <PageActionBar
-          breadcrumbs={[
+          breadcrumbItems={[
             { label: 'Vendas' },
             { label: 'Marketplaces', href: '/sales/marketplaces' },
             {

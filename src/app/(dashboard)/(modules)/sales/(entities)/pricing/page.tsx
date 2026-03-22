@@ -27,6 +27,7 @@ import { PRICE_TABLE_TYPE_LABELS } from '@/types/sales';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { CreatePriceTableWizard } from './src/components/create-price-table-wizard';
 import {
   DollarSign,
   Plus,
@@ -37,7 +38,6 @@ import { useRouter } from 'next/navigation';
 import {
   Suspense,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -65,6 +65,9 @@ function PricingPageContent() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Wizard modal
+  const [wizardOpen, setWizardOpen] = useState(false);
+
   // Delete modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
@@ -88,22 +91,40 @@ function PricingPageContent() {
 
   const deleteMutation = useDeletePriceTable();
 
-  // Infinite scroll sentinel
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = sentinelRef.current;
+  // Infinite scroll sentinel — store volatile values in refs so the
+  // IntersectionObserver is created only once (when the sentinel mounts)
+  // instead of being torn down & re-created on every fetch-state change,
+  // which caused an infinite rapid-fire loop that froze the browser.
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  hasNextPageRef.current = hasNextPage;
+  isFetchingNextPageRef.current = isFetchingNextPage;
+  fetchNextPageRef.current = fetchNextPage;
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((el: HTMLDivElement | null) => {
+    // Disconnect previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          entries[0].isIntersecting &&
+          hasNextPageRef.current &&
+          !isFetchingNextPageRef.current
+        ) {
+          fetchNextPageRef.current();
         }
       },
       { rootMargin: '300px' },
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    observerRef.current = observer;
+  }, []);
 
   // Filter options
   const typeOptions = useMemo(
@@ -149,7 +170,7 @@ function PricingPageContent() {
                     id: 'create',
                     title: 'Nova Tabela',
                     icon: Plus,
-                    onClick: () => router.push('/sales/pricing/new'),
+                    onClick: () => setWizardOpen(true),
                     variant: 'default',
                   },
                 ]
@@ -179,7 +200,7 @@ function PricingPageContent() {
             type="server"
             title="Erro ao carregar tabelas de preco"
             message="Ocorreu um erro. Por favor, tente novamente."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
           />
         ) : (
           <>
@@ -273,9 +294,16 @@ function PricingPageContent() {
           isOpen={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           onSuccess={handleDeleteConfirm}
-          title="Confirmar Exclusao"
-          description="Digite seu PIN de acao para excluir esta tabela de preco. Esta acao nao pode ser desfeita."
+          title="Confirmar Exclusão"
+          description="Digite seu PIN de ação para excluir esta tabela de preço. Esta ação não pode ser desfeita."
         />
+
+        {hasPermission(SALES_PERMISSIONS.PRICE_TABLES.REGISTER) && (
+          <CreatePriceTableWizard
+            open={wizardOpen}
+            onOpenChange={setWizardOpen}
+          />
+        )}
       </PageBody>
     </PageLayout>
   );

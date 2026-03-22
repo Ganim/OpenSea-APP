@@ -15,30 +15,30 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import {
   CoreProvider,
   EntityCard,
-  EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
   useOrdersInfinite,
+  useCreateOrder,
   useDeleteOrder,
   type OrdersFilters,
 } from '@/hooks/sales/use-orders';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
-import type { OrderDTO } from '@/types/sales';
+import type { OrderDTO, CreateOrderRequest } from '@/types/sales';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import {
   ClipboardList,
-  Eye,
-  Pencil,
-  Plus,
-  Trash2,
   FileText,
+  Plus,
   ShoppingCart,
+  Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { CreateOrderWizard } from './src/components/create-order-wizard';
 
 const ORDER_TYPE_LABELS: Record<string, string> = {
   QUOTE: 'Orçamento',
@@ -90,6 +90,7 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<OrdersFilters>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
@@ -104,6 +105,7 @@ export default function OrdersPage() {
     isFetchingNextPage,
   } = useOrdersInfinite({ ...filters, search: search || undefined });
 
+  const createOrder = useCreateOrder();
   const deleteOrder = useDeleteOrder();
 
   const orders = useMemo(
@@ -146,6 +148,18 @@ export default function OrdersPage() {
     }
   }, [deleteTargetId, deleteOrder]);
 
+  const handleCreateOrder = useCallback(
+    async (data: CreateOrderRequest) => {
+      await createOrder.mutateAsync(data);
+      toast.success(
+        data.type === 'QUOTE'
+          ? 'Orçamento criado com sucesso!'
+          : 'Pedido criado com sucesso!'
+      );
+    },
+    [createOrder]
+  );
+
   const handleFilterChange = useCallback(
     (key: keyof OrdersFilters, value: string) => {
       setFilters(prev => ({
@@ -180,15 +194,17 @@ export default function OrdersPage() {
     { label: 'Pedidos' },
   ];
 
-  const headerButtons = canCreate
-    ? [
-        {
-          label: 'Novo Pedido',
-          icon: Plus,
-          onClick: () => router.push('/sales/orders/new'),
-        },
-      ]
-    : [];
+  const headerButtons = useMemo<HeaderButton[]>(() => {
+    if (!canCreate) return [];
+    return [
+      {
+        id: 'create-order',
+        title: 'Novo Pedido',
+        icon: Plus,
+        onClick: () => setCreateModalOpen(true),
+      },
+    ];
+  }, [canCreate]);
 
   return (
     <CoreProvider>
@@ -392,6 +408,13 @@ export default function OrdersPage() {
             onSuccess={handleDeleteConfirm}
             title="Confirmar Exclusão"
             description="Digite seu PIN de ação para excluir este pedido."
+          />
+
+          <CreateOrderWizard
+            open={createModalOpen}
+            onOpenChange={setCreateModalOpen}
+            onSubmit={handleCreateOrder}
+            isSubmitting={createOrder.isPending}
           />
 
           {/* Infinite scroll sentinel */}

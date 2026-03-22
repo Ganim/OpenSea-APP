@@ -1,5 +1,5 @@
 // Bid (Licitacao) Types
-import type { PaginatedQuery, PaginatedMeta } from '../pagination';
+import type { PaginatedQuery, PaginationMeta } from '../pagination';
 
 export type BidModality = 'PREGAO_ELETRONICO' | 'PREGAO_PRESENCIAL' | 'CONCORRENCIA' | 'TOMADA_PRECOS' | 'CONVITE' | 'LEILAO' | 'DIALOGO_COMPETITIVO' | 'CONCURSO' | 'DISPENSA' | 'INEXIGIBILIDADE';
 export type BidCriterion = 'MENOR_PRECO' | 'MAIOR_DESCONTO' | 'MELHOR_TECNICA' | 'TECNICA_PRECO' | 'MAIOR_LANCE' | 'MAIOR_RETORNO';
@@ -234,11 +234,11 @@ export interface BidsQuery extends PaginatedQuery {
   sortBy?: 'createdAt' | 'openingDate' | 'estimatedValue' | 'editalNumber';
 }
 
-export interface PaginatedBidsResponse { bids: Bid[]; meta: PaginatedMeta; }
+export interface PaginatedBidsResponse { bids: Bid[]; meta: PaginationMeta; }
 export interface BidResponse { bid: Bid; }
-export interface PaginatedBidItemsResponse { items: BidItem[]; meta: PaginatedMeta; }
-export interface PaginatedBidDocumentsResponse { documents: BidDocument[]; meta: PaginatedMeta; }
-export interface PaginatedBidContractsResponse { contracts: BidContract[]; meta: PaginatedMeta; }
-export interface PaginatedBidHistoryResponse { history: BidHistory[]; meta: PaginatedMeta; }
+export interface PaginatedBidItemsResponse { items: BidItem[]; meta: PaginationMeta; }
+export interface PaginatedBidDocumentsResponse { documents: BidDocument[]; meta: PaginationMeta; }
+export interface PaginatedBidContractsResponse { contracts: BidContract[]; meta: PaginationMeta; }
+export interface PaginatedBidHistoryResponse { history: BidHistory[]; meta: PaginationMeta; }
 export interface BidDocumentResponse { document: BidDocument; }
 export interface BidContractResponse { contract: BidContract; }

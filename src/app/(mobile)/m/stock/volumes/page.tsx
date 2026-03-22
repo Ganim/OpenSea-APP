@@ -125,7 +125,7 @@ export default function VolumesListPage() {
   });
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-950">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar
         title="Volumes"
         showBack

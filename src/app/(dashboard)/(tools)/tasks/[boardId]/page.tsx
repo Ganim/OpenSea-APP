@@ -42,6 +42,8 @@ import {
   Archive,
   Search,
   KanbanSquare,
+  LayoutGrid,
+  LayoutList,
 } from 'lucide-react';
 import type { Card as TaskCard } from '@/types/tasks';
 import { useAuth } from '@/contexts/auth-context';
@@ -65,6 +67,11 @@ function BoardPageContent() {
   const [search, setSearch] = useState('');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [compactCards, setCompactCards] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(`board-compact-${boardId}`) === 'true';
+  });
 
   const { user } = useAuth();
   const board = boardData?.board;
@@ -77,9 +84,20 @@ function BoardPageContent() {
     return membership?.role === 'VIEWER';
   }, [board, user]);
 
+  useEffect(() => {
+    localStorage.setItem(`board-compact-${boardId}`, String(compactCards));
+  }, [compactCards, boardId]);
+
   // Filter + search cards
   const filteredCards = useMemo(() => {
     let result = allCards;
+
+    // Archive filter
+    if (showArchived) {
+      result = result.filter(c => c.archivedAt != null);
+    } else {
+      result = result.filter(c => c.archivedAt == null);
+    }
 
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -98,7 +116,7 @@ function BoardPageContent() {
     }
 
     return result;
-  }, [allCards, search, filters]);
+  }, [allCards, search, filters, showArchived]);
 
   const handleCardClick = (card: TaskCard) => {
     setSelectedCardId(card.id);
@@ -290,6 +308,26 @@ function BoardPageContent() {
                 />
               </div>
 
+              <Button
+                variant={showArchived ? 'default' : 'outline'}
+                size="sm"
+                className="h-9 gap-1.5 shrink-0"
+                onClick={() => setShowArchived(prev => !prev)}
+              >
+                <Archive className="h-4 w-4" />
+                <span className="hidden sm:inline">Arquivados</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5 shrink-0"
+                onClick={() => setCompactCards(prev => !prev)}
+                title={compactCards ? 'Visualização completa' : 'Visualização simplificada'}
+              >
+                {compactCards ? <LayoutGrid className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+              </Button>
+
               {/* Right: view modes */}
               <div className="shrink-0">
                 <ViewToggle currentView={currentView} />
@@ -312,6 +350,7 @@ function BoardPageContent() {
             cards={filteredCards}
             boardId={boardId}
             onCardClick={handleCardClick}
+            compact={compactCards}
           />
         )}
 
@@ -321,6 +360,7 @@ function BoardPageContent() {
             cards={filteredCards}
             boardId={boardId}
             onCardClick={handleCardClick}
+            compact={compactCards}
           />
         )}
 

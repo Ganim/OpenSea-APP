@@ -40,7 +40,7 @@ export default function EditCatalogPage() {
   const catalogId = params.id as string;
   const { hasPermission } = usePermissions();
 
-  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.REMOVE);
+  const canDelete = hasPermission(SALES_PERMISSIONS.CATALOGS.ADMIN);
 
   const { data, isLoading, error } = useCatalog(catalogId);
   const updateMutation = useUpdateCatalog();

@@ -29,6 +29,7 @@ import {
   MapPin,
   Package,
   ShoppingCart,
+  Smartphone,
   Upload,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -116,6 +117,17 @@ const actionButtons: (CardItem & {
   label: string;
   variant: 'default' | 'outline';
 })[] = [
+  {
+    id: 'mobile',
+    title: 'Gestão Mobile',
+    label: 'Gestão Mobile',
+    description: 'Scanner, inventário, recebimento e volumes',
+    icon: Smartphone,
+    href: '/m/stock',
+    variant: 'outline',
+    gradient: 'from-indigo-500 to-indigo-600',
+    hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
+  },
   {
     id: 'import',
     title: 'Importação',
