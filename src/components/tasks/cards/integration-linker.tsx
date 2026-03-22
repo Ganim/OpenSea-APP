@@ -165,16 +165,9 @@ export function IntegrationLinker({
     const config = INTEGRATION_CONFIG[type];
 
     if (config.interaction === 'modal') {
-      if (type === 'FINANCE_ENTRY') {
-        setOpen(false);
-        setTypeSearch('');
-        setModalType(type);
-        return;
-      }
-      // Other modal types not yet implemented
-      toast.info('Em breve');
       setOpen(false);
       setTypeSearch('');
+      setModalType(type);
       return;
     }
 

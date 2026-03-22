@@ -1,6 +1,44 @@
 // Customer Types
 
+import type { PaginatedQuery } from '../pagination';
+
 export type CustomerType = 'INDIVIDUAL' | 'BUSINESS';
+
+export type ContactSource =
+  | 'MANUAL'
+  | 'IMPORT'
+  | 'FORM'
+  | 'WHATSAPP'
+  | 'INSTAGRAM'
+  | 'TELEGRAM'
+  | 'SMS'
+  | 'WEBCHAT'
+  | 'EMAIL'
+  | 'PDV'
+  | 'MARKETPLACE'
+  | 'BID'
+  | 'API';
+
+export const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {
+  INDIVIDUAL: 'Pessoa Fisica',
+  BUSINESS: 'Pessoa Juridica',
+};
+
+export const CONTACT_SOURCE_LABELS: Record<ContactSource, string> = {
+  MANUAL: 'Manual',
+  IMPORT: 'Importacao',
+  FORM: 'Formulario',
+  WHATSAPP: 'WhatsApp',
+  INSTAGRAM: 'Instagram',
+  TELEGRAM: 'Telegram',
+  SMS: 'SMS',
+  WEBCHAT: 'Chat Web',
+  EMAIL: 'E-mail',
+  PDV: 'Ponto de Venda',
+  MARKETPLACE: 'Marketplace',
+  BID: 'Licitacao',
+  API: 'API',
+};
 
 export interface Customer {
   id: string;
@@ -14,11 +52,17 @@ export interface Customer {
   state?: string;
   zipCode?: string;
   country?: string;
+  tradeName?: string;
+  stateRegistration?: string;
+  website?: string;
   notes?: string;
+  tags: string[];
+  source: ContactSource;
+  assignedToUserId?: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date | null;
+  createdAt: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface CreateCustomerRequest {
@@ -32,11 +76,18 @@ export interface CreateCustomerRequest {
   state?: string;
   zipCode?: string;
   country?: string;
+  tradeName?: string;
+  stateRegistration?: string;
+  website?: string;
   notes?: string;
+  tags?: string[];
+  source?: ContactSource;
+  assignedToUserId?: string;
 }
 
 export interface UpdateCustomerRequest {
   name?: string;
+  type?: CustomerType;
   document?: string;
   email?: string;
   phone?: string;
@@ -45,7 +96,14 @@ export interface UpdateCustomerRequest {
   state?: string;
   zipCode?: string;
   country?: string;
+  tradeName?: string;
+  stateRegistration?: string;
+  website?: string;
   notes?: string;
+  tags?: string[];
+  source?: ContactSource;
+  assignedToUserId?: string;
+  isActive?: boolean;
 }
 
 export interface CustomersResponse {
@@ -54,4 +112,22 @@ export interface CustomersResponse {
 
 export interface CustomerResponse {
   customer: Customer;
+}
+
+export interface PaginatedCustomersResponse {
+  customers: Customer[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface CustomersQuery extends PaginatedQuery {
+  search?: string;
+  type?: CustomerType;
+  source?: ContactSource;
+  isActive?: boolean;
+  assignedToUserId?: string;
 }

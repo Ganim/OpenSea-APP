@@ -235,6 +235,19 @@ export const API_ENDPOINTS = {
     COUNT_SUBMIT: (countId: string) => `/v1/inventory-counts/${countId}/count`,
     COUNT_ADJUST: (countId: string) => `/v1/inventory-counts/${countId}/adjust`,
   },
+  // Stock - Inventory Sessions (mobile)
+  INVENTORY_SESSIONS: {
+    LIST: '/v1/stock/inventory-sessions',
+    CREATE: '/v1/stock/inventory-sessions',
+    GET: (id: string) => `/v1/stock/inventory-sessions/${id}`,
+    PAUSE: (id: string) => `/v1/stock/inventory-sessions/${id}/pause`,
+    RESUME: (id: string) => `/v1/stock/inventory-sessions/${id}/resume`,
+    COMPLETE: (id: string) => `/v1/stock/inventory-sessions/${id}/complete`,
+    CANCEL: (id: string) => `/v1/stock/inventory-sessions/${id}/cancel`,
+    SCAN: (id: string) => `/v1/stock/inventory-sessions/${id}/scan`,
+    RESOLVE_ITEM: (id: string, itemId: string) =>
+      `/v1/stock/inventory-sessions/${id}/items/${itemId}/resolve`,
+  },
   // Stock - Import
   IMPORT: {
     VALIDATE: '/v1/import/validate',
@@ -289,8 +302,10 @@ export const API_ENDPOINTS = {
     STAGES: {
       LIST: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
       CREATE: (pipelineId: string) => `/v1/pipelines/${pipelineId}/stages`,
-      UPDATE: (stageId: string) => `/v1/pipeline-stages/${stageId}`,
-      DELETE: (stageId: string) => `/v1/pipeline-stages/${stageId}`,
+      UPDATE: (pipelineId: string, stageId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/${stageId}`,
+      DELETE: (pipelineId: string, stageId: string) =>
+        `/v1/pipelines/${pipelineId}/stages/${stageId}`,
       REORDER: (pipelineId: string) =>
         `/v1/pipelines/${pipelineId}/stages/reorder`,
     },
@@ -335,6 +350,26 @@ export const API_ENDPOINTS = {
     GET: (id: string) => `/v1/combos/${id}`,
     CREATE: '/v1/combos',
     DELETE: (id: string) => `/v1/combos/${id}`,
+  },
+  // Sales - Deals
+  DEALS: {
+    LIST: '/v1/deals',
+    GET: (id: string) => `/v1/deals/${id}`,
+    CREATE: '/v1/deals',
+    UPDATE: (id: string) => `/v1/deals/${id}`,
+    DELETE: (id: string) => `/v1/deals/${id}`,
+    CHANGE_STAGE: (id: string) => `/v1/deals/${id}/stage`,
+  },
+  // Sales - Activities
+  ACTIVITIES: {
+    LIST: '/v1/activities',
+    CREATE: '/v1/activities',
+    UPDATE: (id: string) => `/v1/activities/${id}`,
+    DELETE: (id: string) => `/v1/activities/${id}`,
+  },
+  // Sales - Timeline
+  TIMELINE: {
+    GET: '/v1/timeline',
   },
   // Sales - Sales Orders
   SALES_ORDERS: {
@@ -397,6 +432,49 @@ export const API_ENDPOINTS = {
     GET: (id: string) => `/v1/item-reservations/${id}`,
     CREATE: '/v1/item-reservations',
     RELEASE: (id: string) => `/v1/item-reservations/${id}/release`,
+  },
+  // Sales - Price Tables
+  PRICE_TABLES: {
+    LIST: '/v1/price-tables',
+    GET: (id: string) => `/v1/price-tables/${id}`,
+    CREATE: '/v1/price-tables',
+    UPDATE: (id: string) => `/v1/price-tables/${id}`,
+    DELETE: (id: string) => `/v1/price-tables/${id}`,
+    ITEMS: {
+      LIST: (tableId: string) => `/v1/price-tables/${tableId}/items`,
+      UPSERT: (tableId: string) => `/v1/price-tables/${tableId}/items`,
+    },
+    RESOLVE: '/v1/price-resolver',
+  },
+  // Sales - Customer Prices
+  CUSTOMER_PRICES: {
+    LIST: '/v1/customer-prices',
+    CREATE: '/v1/customer-prices',
+    UPDATE: (id: string) => `/v1/customer-prices/${id}`,
+    DELETE: (id: string) => `/v1/customer-prices/${id}`,
+  },
+  // Sales - Campaigns
+  CAMPAIGNS: {
+    LIST: '/v1/campaigns',
+    GET: (id: string) => `/v1/campaigns/${id}`,
+    CREATE: '/v1/campaigns',
+    UPDATE: (id: string) => `/v1/campaigns/${id}`,
+    DELETE: (id: string) => `/v1/campaigns/${id}`,
+    ACTIVATE: (id: string) => `/v1/campaigns/${id}/activate`,
+  },
+  // Sales - Coupons
+  COUPONS: {
+    LIST: '/v1/coupons',
+    CREATE: '/v1/coupons',
+    DELETE: (id: string) => `/v1/coupons/${id}`,
+    VALIDATE: '/v1/coupons/validate',
+  },
+  // Sales - Combos
+  COMBOS: {
+    LIST: '/v1/combos',
+    GET: (id: string) => `/v1/combos/${id}`,
+    CREATE: '/v1/combos',
+    DELETE: (id: string) => `/v1/combos/${id}`,
   },
   // Sales - Notification Preferences
   NOTIFICATION_PREFERENCES: {
@@ -1084,6 +1162,73 @@ export const API_ENDPOINTS = {
     ACTIONS: {
       LIST: '/v1/ai/actions',
     },
+  },
+  // Marketplace Integration
+  MARKETPLACE_CONNECTIONS: {
+    LIST: '/v1/marketplace-connections',
+    CREATE: '/v1/marketplace-connections',
+    GET: (id: string) => `/v1/marketplace-connections/${id}`,
+    UPDATE: (id: string) => `/v1/marketplace-connections/${id}`,
+    DELETE: (id: string) => `/v1/marketplace-connections/${id}`,
+    RECONCILIATION: (id: string) =>
+      `/v1/marketplace-connections/${id}/reconciliation`,
+    LISTINGS: (connectionId: string) =>
+      `/v1/marketplace-connections/${connectionId}/listings`,
+  },
+  MARKETPLACE_ORDERS: {
+    LIST: '/v1/marketplace-orders',
+    ACKNOWLEDGE: (id: string) => `/v1/marketplace-orders/${id}/acknowledge`,
+  },
+  MARKETPLACE_LISTINGS: {
+    DEACTIVATE: (id: string) => `/v1/marketplace-listings/${id}/deactivate`,
+  },
+  MARKETPLACE_PAYMENTS: {
+    LIST: '/v1/marketplace-payments',
+  },
+  // POS (Point of Sale)
+  POS: {
+    TERMINALS: {
+      LIST: '/v1/pos/terminals',
+      CREATE: '/v1/pos/terminals',
+      UPDATE: (id: string) => `/v1/pos/terminals/${id}`,
+      DELETE: (id: string) => `/v1/pos/terminals/${id}`,
+    },
+    SESSIONS: {
+      LIST: '/v1/pos/sessions',
+      OPEN: '/v1/pos/sessions/open',
+      CLOSE: (id: string) => `/v1/pos/sessions/${id}/close`,
+      GET_ACTIVE: (terminalId: string) =>
+        `/v1/pos/terminals/${terminalId}/session`,
+    },
+    TRANSACTIONS: {
+      LIST: '/v1/pos/transactions',
+      CREATE: '/v1/pos/transactions',
+      CANCEL: (id: string) => `/v1/pos/transactions/${id}/cancel`,
+    },
+    CASH: {
+      MOVEMENT: '/v1/pos/cash/movement',
+    },
+  },
+  // Sales - Bids (Licitacoes)
+  BIDS: {
+    LIST: '/v1/bids',
+    GET: (id: string) => `/v1/bids/${id}`,
+    CREATE: '/v1/bids',
+    UPDATE: (id: string) => `/v1/bids/${id}`,
+    DELETE: (id: string) => `/v1/bids/${id}`,
+    ITEMS: (bidId: string) => `/v1/bids/${bidId}/items`,
+    HISTORY: (bidId: string) => `/v1/bids/${bidId}/history`,
+  },
+  BID_DOCUMENTS: {
+    LIST: '/v1/bid-documents',
+    CREATE: '/v1/bid-documents',
+  },
+  BID_CONTRACTS: {
+    LIST: '/v1/bid-contracts',
+    CREATE: '/v1/bid-contracts',
+  },
+  BID_EMPENHOS: {
+    CREATE: '/v1/bid-empenhos',
   },
   // Health
   HEALTH: '/health',

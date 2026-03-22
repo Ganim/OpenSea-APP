@@ -11,11 +11,16 @@ export interface PurchaseOrderItem {
   orderId: string;
   variantId: string;
   quantity: number;
+  receivedQuantity?: number;
   unitCost: number;
   totalCost: number;
   notes?: string | null;
   createdAt: string;
   updatedAt?: string | null;
+  // Denormalized fields (from API response)
+  productName?: string;
+  variantName?: string;
+  variantSku?: string;
 }
 
 export interface PurchaseOrder {
@@ -32,6 +37,8 @@ export interface PurchaseOrder {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
+  // Denormalized supplier info (from API response)
+  supplierName?: string;
 }
 
 export interface CreatePurchaseOrderRequest {
