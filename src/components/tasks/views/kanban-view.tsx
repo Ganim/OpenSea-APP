@@ -242,7 +242,7 @@ function KanbanColumn({
         <button
           type="button"
           className="cursor-grab active:cursor-grabbing opacity-0 group-hover/header:opacity-60 hover:!opacity-100 transition-opacity shrink-0 -ml-1 p-0.5 rounded"
-          aria-roledescription="Arrastar para reordenar"
+          aria-roledescription="item arrastável"
           aria-label={`Arrastar coluna ${column.title}`}
           {...provided.dragHandleProps}
         >

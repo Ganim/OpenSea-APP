@@ -55,7 +55,7 @@ export const CardItem = memo(function CardItem({
       role="button"
       tabIndex={0}
       aria-label={`Abrir cartão ${card.title}`}
-      aria-roledescription="Arrastar para reordenar"
+      aria-roledescription="item arrastável"
       className={cn(
         'group relative rounded-lg border bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/10 overflow-hidden cursor-grab active:cursor-grabbing',
         'transition-[box-shadow,opacity] duration-150',

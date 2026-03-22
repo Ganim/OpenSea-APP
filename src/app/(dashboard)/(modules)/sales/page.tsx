@@ -1,6 +1,6 @@
 /**
  * Sales Module Landing Page
- * Pagina inicial do modulo de vendas com KPIs reais e cards de navegacao
+ * Página inicial do módulo de vendas com KPIs reais e cards de navegação
  */
 
 'use client';
@@ -127,8 +127,8 @@ const sections: { title: string; cards: CardItem[] }[] = [
       },
       {
         id: 'catalogs',
-        title: 'Catalogos',
-        description: 'Catalogos de produtos para apresentacao',
+        title: 'Catálogos',
+        description: 'Catálogos de produtos para apresentação',
         icon: BookOpen,
         href: '/sales/catalogs',
         gradient: 'from-purple-500 to-purple-600',
@@ -162,12 +162,26 @@ const sections: { title: string; cards: CardItem[] }[] = [
       {
         id: 'campaigns',
         title: 'Campanhas',
-        description: 'Campanhas de marketing e comunicacao',
+        description: 'Campanhas de marketing e comunicação',
         icon: Megaphone,
         href: '/sales/campaigns',
         gradient: 'from-cyan-500 to-cyan-600',
         hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
         permission: SALES_PERMISSIONS.CAMPAIGNS.ACCESS,
+      },
+    ],
+  },
+  {
+    title: 'Inteligência',
+    cards: [
+      {
+        id: 'analytics',
+        title: 'Analytics',
+        description: 'Relatórios e indicadores de vendas',
+        icon: BarChart3,
+        href: '/sales/analytics',
+        gradient: 'from-indigo-500 to-indigo-600',
+        hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
       },
     ],
   },
@@ -253,7 +267,7 @@ export default function SalesLandingPage() {
 
       <PageHeroBanner
         title="Vendas"
-        description="Gerencie pedidos, clientes, catalogos e toda a operacao comercial do seu negocio."
+        description="Gerencie pedidos, clientes, catálogos e toda a operação comercial do seu negócio."
         icon={ShoppingCart}
         iconGradient="from-blue-500 to-blue-600"
         buttons={heroBannerButtons}
@@ -279,7 +293,7 @@ export default function SalesLandingPage() {
           iconBg="bg-emerald-500/10"
         />
         <KpiCard
-          label="Catalogos"
+          label="Catálogos"
           value={kpi.totalCatalogs}
           loading={loading}
           icon={BookOpen}
@@ -287,7 +301,7 @@ export default function SalesLandingPage() {
           iconBg="bg-purple-500/10"
         />
         <KpiCard
-          label="Meta do Mes"
+          label="Meta do Mês"
           value="--"
           loading={false}
           icon={Target}
