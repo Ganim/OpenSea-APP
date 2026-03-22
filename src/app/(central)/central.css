@@ -163,87 +163,155 @@
    =========================================== */
 
 :root[data-central-theme='light'] {
-  /* Background & Foreground */
+  /* Semantic tokens */
   --color-background: rgb(244 244 245);
+  --color-background-subtle: rgb(255 255 255);
+  --color-background-muted: rgb(241 245 249);
+  --color-background-elevated: rgb(255 255 255);
   --color-foreground: rgb(24 24 27);
   --color-foreground-muted: rgb(113 113 122);
+  --color-foreground-subtle: rgb(161 161 170);
 
   /* Primary (indigo) */
   --color-primary: rgb(99 102 241);
+  --color-primary-hover: rgb(79 70 229);
   --color-primary-foreground: rgb(255 255 255);
 
   /* Secondary */
   --color-secondary: rgb(244 244 245);
+  --color-secondary-hover: rgb(228 228 231);
   --color-secondary-foreground: rgb(24 24 27);
 
   /* Destructive */
   --color-destructive: rgb(244 63 94);
   --color-destructive-foreground: rgb(255 255 255);
 
-  /* Muted */
+  /* Muted / Accent / Card / Popover */
   --color-muted: rgb(244 244 245);
   --color-muted-foreground: rgb(113 113 122);
-
-  /* Accent */
   --color-accent: rgb(244 244 245);
   --color-accent-foreground: rgb(24 24 27);
-
-  /* Card */
   --color-card: rgb(255 255 255);
   --color-card-foreground: rgb(24 24 27);
-
-  /* Popover (dropdowns, dialogs) */
   --color-popover: rgb(255 255 255);
   --color-popover-foreground: rgb(24 24 27);
 
-  /* Input & Border */
-  --color-input: rgb(228 228 231);
+  /* Border & Input */
   --color-border: rgb(228 228 231);
   --color-border-input: rgb(228 228 231);
-
-  /* Ring */
+  --color-input: rgb(228 228 231);
   --color-ring: rgb(99 102 241);
+
+  /* Component tokens: Modal */
+  --modal-bg: rgb(255 255 255);
+  --modal-text: rgb(24 24 27);
+  --modal-border: rgb(228 228 231);
+  --modal-overlay: rgb(0 0 0 / 0.5);
+
+  /* Component tokens: Input */
+  --input-bg: rgb(255 255 255);
+  --input-text: rgb(24 24 27);
+  --input-placeholder: rgb(161 161 170);
+  --input-border: rgb(228 228 231);
+  --input-border-hover: rgb(161 161 170);
+  --input-border-focus: rgb(99 102 241);
+  --input-ring: rgb(99 102 241);
+
+  /* Component tokens: Buttons */
+  --btn-primary-bg: rgb(99 102 241);
+  --btn-primary-bg-hover: rgb(79 70 229);
+  --btn-primary-text: rgb(255 255 255);
+  --btn-secondary-bg: rgb(244 244 245);
+  --btn-secondary-bg-hover: rgb(228 228 231);
+  --btn-secondary-text: rgb(24 24 27);
+  --btn-secondary-border: rgb(228 228 231);
+  --btn-outline-bg: transparent;
+  --btn-outline-bg-hover: rgb(244 244 245);
+  --btn-outline-text: rgb(24 24 27);
+  --btn-outline-border: rgb(209 213 219);
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: rgb(244 244 245);
+  --btn-ghost-text: rgb(24 24 27);
+
+  /* Component tokens: Select / Dropdown */
+  --select-trigger-bg: rgb(255 255 255);
+  --select-trigger-text: rgb(24 24 27);
+  --select-trigger-border: rgb(228 228 231);
 }
 
 :root[data-central-theme='dark'] {
-  /* Background & Foreground */
+  /* Semantic tokens */
   --color-background: rgb(15 17 23);
+  --color-background-subtle: rgb(26 29 37);
+  --color-background-muted: rgb(30 32 40);
+  --color-background-elevated: rgb(26 29 37);
   --color-foreground: rgb(240 240 243);
   --color-foreground-muted: rgb(139 143 163);
+  --color-foreground-subtle: rgb(92 96 122);
 
   /* Primary (indigo) */
   --color-primary: rgb(129 140 248);
+  --color-primary-hover: rgb(165 180 252);
   --color-primary-foreground: rgb(15 17 23);
 
   /* Secondary */
   --color-secondary: rgb(30 32 40);
+  --color-secondary-hover: rgb(38 42 51);
   --color-secondary-foreground: rgb(240 240 243);
 
   /* Destructive */
   --color-destructive: rgb(244 63 94);
   --color-destructive-foreground: rgb(255 255 255);
 
-  /* Muted */
+  /* Muted / Accent / Card / Popover */
   --color-muted: rgb(30 32 40);
   --color-muted-foreground: rgb(139 143 163);
-
-  /* Accent */
   --color-accent: rgb(30 32 40);
   --color-accent-foreground: rgb(196 199 212);
-
-  /* Card */
   --color-card: rgb(26 29 37);
   --color-card-foreground: rgb(240 240 243);
-
-  /* Popover (dropdowns, dialogs) */
   --color-popover: rgb(26 29 37);
   --color-popover-foreground: rgb(240 240 243);
 
-  /* Input & Border */
-  --color-input: rgb(46 50 61);
+  /* Border & Input */
   --color-border: rgb(38 42 51);
   --color-border-input: rgb(38 42 51);
-
-  /* Ring */
+  --color-input: rgb(46 50 61);
   --color-ring: rgb(129 140 248);
+
+  /* Component tokens: Modal */
+  --modal-bg: rgb(26 29 37);
+  --modal-text: rgb(240 240 243);
+  --modal-border: rgb(38 42 51);
+  --modal-overlay: rgb(0 0 0 / 0.7);
+
+  /* Component tokens: Input */
+  --input-bg: rgb(30 32 40);
+  --input-text: rgb(240 240 243);
+  --input-placeholder: rgb(92 96 122);
+  --input-border: rgb(46 50 61);
+  --input-border-hover: rgb(92 96 122);
+  --input-border-focus: rgb(129 140 248);
+  --input-ring: rgb(129 140 248);
+
+  /* Component tokens: Buttons */
+  --btn-primary-bg: rgb(129 140 248);
+  --btn-primary-bg-hover: rgb(165 180 252);
+  --btn-primary-text: rgb(15 17 23);
+  --btn-secondary-bg: rgb(30 32 40);
+  --btn-secondary-bg-hover: rgb(38 42 51);
+  --btn-secondary-text: rgb(240 240 243);
+  --btn-secondary-border: rgb(38 42 51);
+  --btn-outline-bg: transparent;
+  --btn-outline-bg-hover: rgb(30 32 40);
+  --btn-outline-text: rgb(240 240 243);
+  --btn-outline-border: rgb(46 50 61);
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: rgb(30 32 40);
+  --btn-ghost-text: rgb(240 240 243);
+
+  /* Component tokens: Select / Dropdown */
+  --select-trigger-bg: rgb(30 32 40);
+  --select-trigger-text: rgb(240 240 243);
+  --select-trigger-border: rgb(46 50 61);
 }
