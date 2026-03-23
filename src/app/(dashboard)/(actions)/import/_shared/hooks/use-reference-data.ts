@@ -11,10 +11,6 @@ interface BaseEntity {
   [key: string]: unknown;
 }
 
-interface ListResponse<T> {
-  [key: string]: T[];
-}
-
 // Helper to fetch all pages from paginated endpoints
 interface PaginatedMeta {
   total: number;
@@ -54,9 +50,7 @@ async function fetchAllPages<T>(
 // ============================================
 
 async function fetchTemplates(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<ListResponse<BaseEntity>>('/v1/templates');
-  const templates = response.templates || [];
+  const templates = await fetchAllPages<BaseEntity>('/v1/templates', 'templates');
   return templates.map(t => ({
     value: t.id,
     label: t.name,
@@ -64,9 +58,7 @@ async function fetchTemplates(): Promise<FieldOption[]> {
 }
 
 async function fetchSuppliers(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<ListResponse<BaseEntity>>('/v1/suppliers');
-  const suppliers = response.suppliers || [];
+  const suppliers = await fetchAllPages<BaseEntity>('/v1/suppliers', 'suppliers');
   return suppliers.map(s => ({
     value: s.id,
     label: s.name,
@@ -74,9 +66,7 @@ async function fetchSuppliers(): Promise<FieldOption[]> {
 }
 
 async function fetchManufacturers(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<ListResponse<BaseEntity>>('/v1/manufacturers');
-  const manufacturers = response.manufacturers || [];
+  const manufacturers = await fetchAllPages<BaseEntity>('/v1/manufacturers', 'manufacturers');
   return manufacturers.map(m => ({
     value: m.id,
     label: m.name,
@@ -84,9 +74,7 @@ async function fetchManufacturers(): Promise<FieldOption[]> {
 }
 
 async function fetchCategories(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<ListResponse<BaseEntity>>('/v1/categories');
-  const categories = response.categories || [];
+  const categories = await fetchAllPages<BaseEntity>('/v1/categories', 'categories');
   return categories.map(c => ({
     value: c.id,
     label: c.name,
@@ -129,11 +117,7 @@ async function fetchVariants(): Promise<FieldOption[]> {
 }
 
 async function fetchLocations(): Promise<FieldOption[]> {
-  const response =
-    await apiClient.get<
-      ListResponse<{ id: string; code: string; name?: string }>
-    >('/v1/locations');
-  const locations = response.locations || [];
+  const locations = await fetchAllPages<{ id: string; code: string; name?: string }>('/v1/locations', 'locations');
   return locations.map(l => ({
     value: l.id,
     label: l.name ? `${l.code} - ${l.name}` : l.code,
@@ -141,16 +125,12 @@ async function fetchLocations(): Promise<FieldOption[]> {
 }
 
 async function fetchBins(): Promise<FieldOption[]> {
-  const response = await apiClient.get<{
-    bins: Array<{
-      id: string;
-      address: string;
-      isActive: boolean;
-      isBlocked: boolean;
-    }>;
-  }>('/v1/bins');
-  const bins = response.bins || [];
-  // Filter only active and non-blocked bins
+  const bins = await fetchAllPages<{
+    id: string;
+    address: string;
+    isActive: boolean;
+    isBlocked: boolean;
+  }>('/v1/bins', 'bins');
   return bins
     .filter(b => b.isActive && !b.isBlocked)
     .map(b => ({
@@ -347,10 +327,7 @@ export function useTemplateDetails(templateId: string | undefined) {
 async function fetchTemplatesWithAttributes(): Promise<
   TemplateWithAttributes[]
 > {
-  const response = await apiClient.get<{ templates: TemplateWithAttributes[] }>(
-    '/v1/templates'
-  );
-  return response.templates || [];
+  return fetchAllPages<TemplateWithAttributes>('/v1/templates', 'templates');
 }
 
 export function useTemplatesWithAttributes() {
