@@ -59,10 +59,8 @@ export function AiChatView({
     onSuccess: data => {
       setFailedMessageId(null);
       onConversationCreated(data.conversationId);
-      setLocalMessages(prev => [
-        ...prev.filter(m => m.contentType !== 'LOADING'),
-        data.assistantMessage,
-      ]);
+      // Clear ALL local messages — server query will bring the real ones
+      setLocalMessages([]);
       queryClient.invalidateQueries({ queryKey: ['ai', 'conversations'] });
       queryClient.invalidateQueries({
         queryKey: ['ai', 'conversation', data.conversationId],
