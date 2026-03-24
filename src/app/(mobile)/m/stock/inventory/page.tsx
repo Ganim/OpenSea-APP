@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
@@ -11,7 +11,8 @@ import {
   useCreateInventorySession,
   useResumeSession,
 } from '@/hooks/mobile/use-inventory-sessions';
-import type { InventorySession, InventorySessionMode } from '@/types/stock';
+import { useAllBins } from '@/app/(dashboard)/(modules)/stock/(entities)/locations/src/api/bins.queries';
+import type { InventorySession, InventorySessionMode, Bin } from '@/types/stock';
 import {
   MapPin,
   Map,
@@ -23,6 +24,10 @@ import {
   Loader2,
   ScanLine,
   AlertCircle,
+  Search,
+  List,
+  Camera,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -204,7 +209,7 @@ function SessionCard({
 }
 
 // ============================================
-// Scan Modal for BIN mode
+// Scan Modal for BIN mode (with list alternative)
 // ============================================
 
 function BinScanModal({
@@ -216,8 +221,20 @@ function BinScanModal({
   onClose: () => void;
   onScan: (code: string) => void;
 }) {
+  const [mode, setMode] = useState<'scan' | 'list'>('list');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [manualCode, setManualCode] = useState('');
+  const [search, setSearch] = useState('');
+
+  const { data: bins = [], isLoading: isLoadingBins } = useAllBins({
+    enabled: open,
+  });
+
+  const filteredBins = useMemo(() => {
+    if (!search.trim()) return bins;
+    const q = search.toLowerCase();
+    return bins.filter(b => b.address.toLowerCase().includes(q));
+  }, [bins, search]);
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,13 +244,17 @@ function BinScanModal({
     setManualCode('');
   };
 
+  const handleBinSelect = (bin: Bin) => {
+    onScan(bin.id);
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
       <MobileTopBar
-        title="Escanear Etiqueta do Nicho"
-        subtitle="Aponte para o QR Code do bin"
+        title="Selecionar Nicho"
+        subtitle={mode === 'scan' ? 'Aponte para o QR Code do bin' : 'Escolha um nicho da lista'}
         showBack
         rightContent={
           <button
@@ -244,45 +265,135 @@ function BinScanModal({
           </button>
         }
       />
-      <div className="relative flex-1 overflow-hidden bg-black">
-        {cameraError ? (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/10">
-              <AlertCircle className="h-7 w-7 text-rose-400" />
-            </div>
-            <p className="text-sm font-medium text-slate-300">
-              Câmera indisponível
-            </p>
-            <p className="text-xs text-slate-500">{cameraError}</p>
-          </div>
-        ) : (
-          <ScannerCamera
-            onScan={onScan}
-            onError={setCameraError}
-            enabled={open}
-            className="h-full"
-          />
-        )}
-      </div>
-      <form
-        onSubmit={handleManualSubmit}
-        className="flex items-center gap-2 border-t border-slate-800 bg-slate-900 px-4 py-3"
-      >
-        <input
-          type="text"
-          value={manualCode}
-          onChange={e => setManualCode(e.target.value)}
-          placeholder="Código do bin..."
-          className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        />
+
+      {/* Mode toggle chips */}
+      <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900/80 px-4 py-2">
         <button
-          type="submit"
-          disabled={!manualCode.trim()}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500 text-white disabled:opacity-40 active:bg-indigo-600"
+          onClick={() => setMode('list')}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+            mode === 'list'
+              ? 'bg-indigo-500 text-white'
+              : 'bg-slate-800 text-slate-400 active:bg-slate-700'
+          )}
         >
-          <ScanLine className="h-4 w-4" />
+          <List className="h-3.5 w-3.5" />
+          Lista
         </button>
-      </form>
+        <button
+          onClick={() => setMode('scan')}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+            mode === 'scan'
+              ? 'bg-indigo-500 text-white'
+              : 'bg-slate-800 text-slate-400 active:bg-slate-700'
+          )}
+        >
+          <Camera className="h-3.5 w-3.5" />
+          Scanner
+        </button>
+      </div>
+
+      {mode === 'scan' ? (
+        <>
+          <div className="relative flex-1 overflow-hidden bg-black">
+            {cameraError ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/10">
+                  <AlertCircle className="h-7 w-7 text-rose-400" />
+                </div>
+                <p className="text-sm font-medium text-slate-300">
+                  Câmera indisponível
+                </p>
+                <p className="text-xs text-slate-500">{cameraError}</p>
+              </div>
+            ) : (
+              <ScannerCamera
+                onScan={onScan}
+                onError={setCameraError}
+                enabled={open && mode === 'scan'}
+                className="h-full"
+              />
+            )}
+          </div>
+          <form
+            onSubmit={handleManualSubmit}
+            className="flex items-center gap-2 border-t border-slate-800 bg-slate-900 px-4 py-3"
+          >
+            <input
+              type="text"
+              value={manualCode}
+              onChange={e => setManualCode(e.target.value)}
+              placeholder="Código do bin..."
+              className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <button
+              type="submit"
+              disabled={!manualCode.trim()}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500 text-white disabled:opacity-40 active:bg-indigo-600"
+            >
+              <ScanLine className="h-4 w-4" />
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          {/* Search bar */}
+          <div className="border-b border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value.toUpperCase())}
+                placeholder="Buscar endereço..."
+                autoFocus
+                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-10 pr-4 font-mono text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Bin list */}
+          <div className="flex-1 overflow-y-auto px-4 py-2">
+            {isLoadingBins ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+              </div>
+            ) : filteredBins.length === 0 ? (
+              <div className="py-12 text-center text-sm text-slate-500">
+                Nenhum nicho encontrado
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {filteredBins.map(bin => {
+                  const isEmpty = bin.currentOccupancy === 0;
+                  return (
+                    <button
+                      key={bin.id}
+                      onClick={() => handleBinSelect(bin)}
+                      className="flex w-full items-center gap-3 rounded-xl bg-slate-800/40 p-3 text-left transition-colors active:bg-slate-700/60"
+                    >
+                      <div
+                        className={cn(
+                          'h-2.5 w-2.5 shrink-0 rounded-full',
+                          isEmpty ? 'bg-emerald-500' : 'bg-amber-500'
+                        )}
+                      />
+                      <span className="flex-1 truncate font-mono text-sm font-medium text-slate-200">
+                        {bin.address}
+                      </span>
+                      <span className="shrink-0 text-xs tabular-nums text-slate-500">
+                        {bin.currentOccupancy}
+                        {bin.capacity ? `/${bin.capacity}` : ''} itens
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

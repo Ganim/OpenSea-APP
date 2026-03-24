@@ -12,6 +12,7 @@ import {
   BoxSelect,
   ChevronRight,
   Monitor,
+  Zap,
 } from 'lucide-react';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 
@@ -23,6 +24,12 @@ const stats = [
 ] as const;
 
 const quickActions = [
+  {
+    label: 'Cadastro Rápido',
+    icon: Zap,
+    href: '/m/stock/quick-entry',
+    description: 'Cadastrar itens rapidamente',
+  },
   {
     label: 'Escanear Item',
     icon: Scan,
