@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   ArrowRightLeft,
   Lock,
@@ -10,6 +10,8 @@ import {
   MapPin,
   Calendar,
   Copy,
+  Printer,
+  Plus,
   X,
 } from 'lucide-react';
 import {
@@ -28,8 +30,12 @@ import { toast } from 'sonner';
 import { useBinDetail } from '../api/bins.queries';
 import { useBlockBin, useUnblockBin } from '../api/bins.queries';
 import { useTransferItem } from '../api/items.queries';
+import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
+import { usePrintQueue } from '@/core/print-queue';
 import { BlockBinModal } from './block-bin-modal';
 import { MoveItemModal } from './move-item-modal';
+import { AddItemToBinModal } from './add-item-to-bin-modal';
+import { AdjustCapacityModal } from './adjust-capacity-modal';
 import type { BinItem, Bin } from '@/types/stock';
 
 // ============================================
@@ -55,6 +61,47 @@ function formatDate(date: string | Date) {
   });
 }
 
+function getItemPreviewStyle(item: BinItem): React.CSSProperties | null {
+  const primary = item.colorHex;
+  if (!primary && !item.pattern) return null;
+
+  const color = primary || '#cbd5e1';
+  const secondary = item.secondaryColorHex || '';
+  const hasSecondary = !!secondary;
+  const sec = secondary || '#94a3b8';
+
+  switch (item.pattern) {
+    case 'SOLID':
+      if (hasSecondary) {
+        return {
+          background: `linear-gradient(135deg, ${color} 50%, ${sec} 50%)`,
+        };
+      }
+      return { background: color };
+    case 'STRIPED':
+      return {
+        background: `repeating-linear-gradient(45deg, ${color}, ${color} 4px, ${sec} 4px, ${sec} 8px)`,
+      };
+    case 'PLAID':
+      return {
+        background: `repeating-linear-gradient(0deg, ${sec}00 0px, ${sec}00 6px, ${sec}BB 6px, ${sec}BB 8px, ${sec}00 8px, ${sec}00 14px), repeating-linear-gradient(90deg, ${sec}00 0px, ${sec}00 6px, ${sec}BB 6px, ${sec}BB 8px, ${sec}00 8px, ${sec}00 14px), ${color}`,
+      };
+    case 'PRINTED':
+      return {
+        background: `radial-gradient(circle 2px at 25% 30%, ${sec} 99%, transparent), radial-gradient(circle 1.5px at 60% 20%, ${sec} 99%, transparent), radial-gradient(circle 2px at 80% 60%, ${sec} 99%, transparent), radial-gradient(circle 1.5px at 40% 75%, ${sec} 99%, transparent), ${color}`,
+      };
+    case 'GRADIENT':
+      return { background: `linear-gradient(135deg, ${color}, ${sec})` };
+    case 'JACQUARD':
+      return {
+        background: `repeating-conic-gradient(${color} 0% 25%, ${sec} 0% 50%) 0 0 / 8px 8px`,
+      };
+    default:
+      if (primary) return { background: color };
+      return null;
+  }
+}
+
 // ============================================
 // COMPONENT
 // ============================================
@@ -68,9 +115,12 @@ export function BinDetailSheet({
   const { data, isLoading } = useBinDetail(binId || '');
   const blockBin = useBlockBin();
   const unblockBin = useUnblockBin();
+  const { actions: printActions } = usePrintQueue();
 
   const [moveItem, setMoveItem] = useState<BinItem | null>(null);
   const [showBlockModal, setShowBlockModal] = useState(false);
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [showCapacityModal, setShowCapacityModal] = useState(false);
   const transferItem = useTransferItem();
 
   const bin = data?.bin;
@@ -116,6 +166,21 @@ export function BinDetailSheet({
       setMoveItem(null);
     },
     [transferItem]
+  );
+
+  const handlePrintItem = useCallback(
+    (item: BinItem) => {
+      printActions.addToQueue({
+        item: {
+          id: item.id,
+          fullCode: item.itemCode,
+          uniqueCode: item.itemCode,
+          currentQuantity: item.quantity,
+        } as never,
+      });
+      toast.success('Item adicionado à fila de impressão');
+    },
+    [printActions]
   );
 
   // Item highlight with 10s auto-fade
@@ -255,11 +320,21 @@ export function BinDetailSheet({
                   <span className="text-xs font-medium text-muted-foreground">
                     Ocupação
                   </span>
-                  <span className="text-xs font-medium text-foreground tabular-nums">
-                    {occupancyPercent !== null
-                      ? `${itemCount}/${bin.capacity} (${occupancyPercent}%)`
-                      : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-foreground tabular-nums">
+                      {occupancyPercent !== null
+                        ? `${itemCount}/${bin.capacity} (${occupancyPercent}%)`
+                        : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCapacityModal(true)}
+                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      title="Ajustar capacidade"
+                    >
+                      <HiOutlineAdjustmentsHorizontal className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
                 {occupancyPercent !== null && (
                   <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-800">
@@ -306,6 +381,7 @@ export function BinDetailSheet({
                   <div className="space-y-2">
                     {items.map(item => {
                       const isHighlighted = activeHighlightItemId === item.id;
+                      const previewStyle = getItemPreviewStyle(item);
                       return (
                         <div
                           key={item.id}
@@ -317,10 +393,17 @@ export function BinDetailSheet({
                               : 'bg-muted/40 border-border hover:border-blue-300 dark:hover:border-blue-500/40'
                           )}
                         >
-                          {/* Icon */}
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/15 mt-0.5">
-                            <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          </div>
+                          {/* Color/Pattern preview or fallback icon */}
+                          {previewStyle ? (
+                            <div
+                              className="h-9 w-9 shrink-0 rounded-lg mt-0.5 border border-black/10 dark:border-white/10"
+                              style={previewStyle}
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/15 mt-0.5">
+                              <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                          )}
 
                           {/* Info — 4 lines */}
                           <div className="flex-1 min-w-0 space-y-0.5">
@@ -374,7 +457,7 @@ export function BinDetailSheet({
                             )}
                           </div>
 
-                          {/* Quantity + Move */}
+                          {/* Quantity + Print + Move */}
                           <div className="flex flex-col items-end gap-1 shrink-0">
                             <Badge
                               variant="secondary"
@@ -383,22 +466,43 @@ export function BinDetailSheet({
                               {item.quantity}{' '}
                               {formatUnitAbbreviation(item.unitLabel)}
                             </Badge>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-blue-600"
-                              onClick={() => setMoveItem(item)}
-                              title="Mover item"
-                            >
-                              <ArrowRightLeft className="h-3.5 w-3.5" />
-                            </Button>
+                            <div className="flex items-center gap-0.5">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-violet-600"
+                                onClick={() => handlePrintItem(item)}
+                                title="Imprimir etiqueta"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-blue-600"
+                                onClick={() => setMoveItem(item)}
+                                title="Mover item"
+                              >
+                                <ArrowRightLeft className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 )}
+
+                {/* Add Item Button */}
+                <Button
+                  className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => setShowAddItemModal(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Item
+                </Button>
               </div>
             </div>
           ) : (
@@ -433,6 +537,27 @@ export function BinDetailSheet({
           currentBin={bin}
           warehouseId={warehouse?.id}
           onMove={handleMoveItem}
+        />
+      )}
+
+      {/* Add Item to Bin Modal */}
+      {bin && (
+        <AddItemToBinModal
+          open={showAddItemModal}
+          onOpenChange={setShowAddItemModal}
+          binId={bin.id}
+        />
+      )}
+
+      {/* Adjust Capacity Modal */}
+      {bin && zone && (
+        <AdjustCapacityModal
+          open={showCapacityModal}
+          onOpenChange={setShowCapacityModal}
+          binId={bin.id}
+          binAddress={bin.address}
+          currentCapacity={bin.capacity ?? null}
+          zoneId={zone.id}
         />
       )}
     </>

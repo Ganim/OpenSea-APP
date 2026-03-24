@@ -142,6 +142,9 @@ export interface BinItem {
   manufacturerName?: string | null;
   variantName?: string | null;
   variantReference?: string | null;
+  colorHex?: string | null;
+  secondaryColorHex?: string | null;
+  pattern?: string | null;
   quantity: number;
   unitLabel?: string | null;
   addedAt: string | Date;
