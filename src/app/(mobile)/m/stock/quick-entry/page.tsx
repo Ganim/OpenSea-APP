@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
+import {
+  MobileVariantSelector,
+  type VariantOption,
+} from '@/components/mobile/mobile-variant-selector';
 import { useAllBins } from '@/app/(dashboard)/(modules)/stock/(entities)/locations/src/api/bins.queries';
 import { useTemplate } from '@/hooks/stock/use-stock-other';
 import { itemsService } from '@/services/stock/items.service';
-import { apiClient } from '@/lib/api-client';
 import { scanSuccess, scanError } from '@/lib/scan-feedback';
 import {
   formatUnitAbbreviation,
@@ -16,10 +19,8 @@ import type {
   Bin,
   RegisterItemEntryRequest,
   TemplateAttribute,
-  Variant,
 } from '@/types/stock';
 import {
-  Package,
   MapPin,
   Search,
   Check,
@@ -28,7 +29,6 @@ import {
   ChevronDown,
   X,
   SlidersHorizontal,
-  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -36,18 +36,6 @@ import { toast } from 'sonner';
 // ============================================
 // Types
 // ============================================
-
-interface VariantOption {
-  id: string;
-  name: string;
-  productId: string;
-  productName: string;
-  templateId: string | null;
-  templateName: string | null;
-  colorHex: string | null;
-  sku: string | null;
-  fullLabel: string;
-}
 
 interface FormData {
   quantity: string;
@@ -58,230 +46,6 @@ const INITIAL_FORM: FormData = {
   quantity: '1',
   attributes: {},
 };
-
-// ============================================
-// Variant Search Dropdown (Mobile)
-// ============================================
-
-function MobileVariantSelector({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: VariantOption | null;
-  onChange: (v: VariantOption | null) => void;
-  disabled?: boolean;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const { data: options, isLoading } = useQuery({
-    queryKey: ['quick-entry', 'variant-options'],
-    queryFn: async (): Promise<VariantOption[]> => {
-      const [variantsRes, productsRes] = await Promise.all([
-        fetchAllPages<{
-          id: string;
-          name: string;
-          productId: string;
-          colorHex?: string;
-          sku?: string;
-        }>('/v1/variants', 'variants'),
-        fetchAllPages<{
-          id: string;
-          name: string;
-          templateId?: string;
-          template?: { id: string; name: string };
-        }>('/v1/products', 'products'),
-      ]);
-
-      const productMap = new Map(productsRes.map(p => [p.id, p]));
-
-      return variantsRes.map(v => {
-        const prod = productMap.get(v.productId);
-        const templateName = prod?.template?.name ?? null;
-        const templateId = prod?.templateId ?? prod?.template?.id ?? null;
-        const productName = prod?.name ?? '';
-        const fullLabel = [templateName, productName, v.name]
-          .filter(Boolean)
-          .join(' · ');
-        return {
-          id: v.id,
-          name: v.name,
-          productId: v.productId,
-          productName,
-          templateId,
-          templateName,
-          colorHex: v.colorHex || null,
-          sku: v.sku || null,
-          fullLabel,
-        };
-      });
-    },
-    staleTime: 2 * 60 * 1000,
-  });
-
-  const filtered = useMemo(() => {
-    if (!options) return [];
-    if (!search.trim()) return options;
-    const q = search.toLowerCase();
-    return options.filter(
-      o =>
-        o.fullLabel.toLowerCase().includes(q) ||
-        (o.sku && o.sku.toLowerCase().includes(q))
-    );
-  }, [options, search]);
-
-  if (!isOpen) {
-    return (
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(true)}
-        disabled={disabled}
-        className={cn(
-          'flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors',
-          value
-            ? 'border-indigo-500/30 bg-indigo-500/5'
-            : 'border-slate-700/50 bg-slate-800/60',
-          disabled && 'opacity-50'
-        )}
-      >
-        <div
-          className={cn(
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-            value ? 'bg-indigo-500/20' : 'bg-slate-700/60'
-          )}
-        >
-          {value?.colorHex ? (
-            <div
-              className="h-4 w-4 rounded-full border border-white/20"
-              style={{ backgroundColor: value.colorHex }}
-            />
-          ) : (
-            <Package
-              className={cn(
-                'h-4 w-4',
-                value ? 'text-indigo-400' : 'text-slate-400'
-              )}
-            />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          {value ? (
-            <>
-              <p className="truncate text-sm font-medium text-slate-100">
-                {value.productName} · {value.name}
-              </p>
-              <p className="truncate text-[11px] text-slate-500">
-                {[value.templateName, value.sku].filter(Boolean).join(' · ')}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-slate-400">Selecionar variante...</p>
-          )}
-        </div>
-        {value ? (
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              onChange(null);
-            }}
-            className="shrink-0 p-1 text-slate-500 active:text-slate-300"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        ) : (
-          <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" />
-        )}
-      </button>
-    );
-  }
-
-  // Open state — fullscreen search
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
-      <MobileTopBar
-        title="Selecionar Variante"
-        showBack
-        rightContent={
-          <button
-            onClick={() => setIsOpen(false)}
-            className="text-xs text-slate-400 active:text-slate-200"
-          >
-            Fechar
-          </button>
-        }
-      />
-      <div className="border-b border-slate-800 bg-slate-900 px-4 py-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nome, SKU, template..."
-            autoFocus
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          />
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto px-4 py-2">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-sm text-slate-500">
-            Nenhuma variante encontrada
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {filtered.map(opt => {
-              const isSelected = value?.id === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => {
-                    onChange(opt);
-                    setIsOpen(false);
-                    setSearch('');
-                  }}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors active:bg-slate-700/60',
-                    isSelected
-                      ? 'bg-indigo-500/10 border border-indigo-500/30'
-                      : 'bg-slate-800/40'
-                  )}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-700/60">
-                    {opt.colorHex ? (
-                      <div
-                        className="h-3.5 w-3.5 rounded-full border border-white/20"
-                        style={{ backgroundColor: opt.colorHex }}
-                      />
-                    ) : (
-                      <Package className="h-3.5 w-3.5 text-slate-400" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-200">
-                      {opt.productName} · {opt.name}
-                    </p>
-                    <p className="truncate text-[11px] text-slate-500">
-                      {[opt.templateName, opt.sku].filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <Check className="h-4 w-4 shrink-0 text-indigo-400" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ============================================
 // Mobile Bin Selector
@@ -578,30 +342,6 @@ function MobileAttributeFields({
       </div>
     </div>
   );
-}
-
-// ============================================
-// Helper
-// ============================================
-
-async function fetchAllPages<T>(
-  endpoint: string,
-  dataKey: string
-): Promise<T[]> {
-  const allItems: T[] = [];
-  let page = 1;
-  const limit = 100;
-  while (true) {
-    const response = await apiClient.get<Record<string, unknown>>(
-      `${endpoint}?page=${page}&limit=${limit}`
-    );
-    const items = response[dataKey] as T[] | undefined;
-    if (items && items.length > 0) allItems.push(...items);
-    const meta = response.meta as { pages: number } | undefined;
-    if (!meta || page >= meta.pages) break;
-    page++;
-  }
-  return allItems;
 }
 
 // ============================================
