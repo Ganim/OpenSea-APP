@@ -19,3 +19,5 @@ export {
 } from './mutations';
 
 export * from './time-control.api';
+
+export * from './punch-config.api';
