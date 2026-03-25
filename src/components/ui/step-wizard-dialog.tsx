@@ -32,6 +32,8 @@ interface StepWizardDialogProps {
   cancelLabel?: string;
   nextLabel?: string;
   backLabel?: string;
+  /** Custom height class (default: "h-[490px]") */
+  heightClass?: string;
 }
 
 export function StepWizardDialog({
@@ -44,6 +46,7 @@ export function StepWizardDialog({
   cancelLabel = 'Cancelar',
   nextLabel = 'Avançar',
   backLabel = 'Voltar',
+  heightClass = 'h-[490px]',
 }: StepWizardDialogProps) {
   const stepIndex = currentStep - 1;
   const step = steps[stepIndex];
@@ -62,7 +65,7 @@ export function StepWizardDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-[800px] max-w-[800px] h-[490px] p-0 gap-0 overflow-hidden flex flex-row"
+        className={`sm:max-w-[800px] max-w-[800px] ${heightClass} p-0 gap-0 overflow-hidden flex flex-row`}
         data-testid="email-account-wizard"
       >
         <VisuallyHidden>

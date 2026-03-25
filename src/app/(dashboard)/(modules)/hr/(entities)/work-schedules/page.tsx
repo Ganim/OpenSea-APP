@@ -11,6 +11,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   CoreProvider,
   EntityCard,
@@ -47,13 +48,6 @@ const EditModal = dynamic(
 );
 const ViewModal = dynamic(
   () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
-  { ssr: false }
-);
-const DeleteConfirmModal = dynamic(
-  () =>
-    import('./src/modals/delete-confirm-modal').then(m => ({
-      default: m.DeleteConfirmModal,
-    })),
   { ssr: false }
 );
 const DuplicateConfirmModal = dynamic(
@@ -442,12 +436,16 @@ function WorkSchedulesPageContent() {
           />
 
           {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          <VerifyActionPinModal
             isOpen={page.modals.isOpen('delete')}
             onClose={() => page.modals.close('delete')}
-            itemCount={page.modals.itemsToDelete.length}
-            onConfirm={page.handlers.handleDeleteConfirm}
-            isLoading={crud.isDeleting}
+            onSuccess={() => page.handlers.handleDeleteConfirm()}
+            title="Confirmar Exclusão"
+            description={
+              page.modals.itemsToDelete.length === 1
+                ? 'Digite seu PIN de ação para excluir esta escala de trabalho. Esta ação não pode ser desfeita.'
+                : `Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} escalas de trabalho. Esta ação não pode ser desfeita.`
+            }
           />
 
           {/* Duplicate Confirmation */}
