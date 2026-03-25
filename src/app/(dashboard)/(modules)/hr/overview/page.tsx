@@ -24,7 +24,9 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { Users, Clock, UserX, DollarSign } from 'lucide-react';
+import { Users, Clock, UserX, DollarSign, LayoutDashboard } from 'lucide-react';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { useRouter } from 'next/navigation';
 import { useHRAnalytics } from '../_shared/hooks/use-hr-analytics';
 import {
   CHART_COLORS,
@@ -169,7 +171,18 @@ function CustomTooltip({
 // ============================================================================
 
 export default function HROverviewPage() {
+  const router = useRouter();
   const { data, isLoading } = useHRAnalytics();
+
+  const headerButtons: HeaderButton[] = [
+    {
+      id: 'attendance-panel',
+      title: 'Painel de Presença',
+      icon: LayoutDashboard,
+      onClick: () => router.push('/hr/time-control/overview'),
+      variant: 'outline',
+    },
+  ];
 
   return (
     <PageLayout>
@@ -179,6 +192,7 @@ export default function HROverviewPage() {
             { label: 'RH', href: '/hr' },
             { label: 'Visão Geral', href: '/hr/overview' },
           ]}
+          buttons={headerButtons}
         />
         <Header
           title="Visão Geral"

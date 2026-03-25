@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { TimeEntry } from '@/types/hr';
-import { Calculator, LogIn, LogOut, Settings } from 'lucide-react';
+import { Calculator, LayoutDashboard, LogIn, LogOut, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import {
@@ -118,6 +118,13 @@ function TimeControlPageContent() {
         onClick: () => router.push('/hr/time-control/settings'),
         variant: 'ghost',
         tooltip: 'Configurações',
+      },
+      {
+        id: 'dashboard',
+        title: 'Painel',
+        icon: LayoutDashboard,
+        onClick: () => router.push('/hr/time-control/overview'),
+        variant: 'outline',
       },
       {
         id: 'calculate',
