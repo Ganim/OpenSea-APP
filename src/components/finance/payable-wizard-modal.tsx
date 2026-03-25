@@ -283,21 +283,21 @@ export function PayableWizardModal({
     {
       title: 'Entrada',
       description: 'Tipo e dados do pagamento',
-      icon: <Barcode className="h-16 w-16 text-primary/60" />,
+      icon: <Barcode className="h-16 w-16 text-violet-500" />,
       content: <PayableStepEntry data={wizardData} onChange={updateData} />,
       isValid: isStep1Valid,
     },
     {
       title: 'Detalhes',
       description: 'Categorização e valores',
-      icon: <FileText className="h-16 w-16 text-primary/60" />,
+      icon: <FileText className="h-16 w-16 text-sky-500" />,
       content: <PayableStepDetails data={wizardData} onChange={updateData} />,
       isValid: isStep2Valid,
     },
     {
       title: 'Confirmação',
       description: 'Revisão e envio',
-      icon: <CheckCircle className="h-16 w-16 text-primary/60" />,
+      icon: <CheckCircle className="h-16 w-16 text-emerald-500" />,
       content: (
         <PayableStepConfirmation
           data={wizardData}
