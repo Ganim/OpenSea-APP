@@ -10,6 +10,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { usePermissions } from '@/hooks/use-permissions';
+import { QuickEntryModal } from '@/components/finance/quick-entry-modal';
 import {
   Calendar,
   DollarSign,
@@ -22,6 +23,7 @@ import {
   ShoppingCart,
   UserRoundCog,
   Bot,
+  Zap,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -47,6 +49,7 @@ interface CommandBarGroup {
  */
 export function CommandBar() {
   const [open, setOpen] = useState(false);
+  const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const router = useRouter();
   const { hasPermission } = usePermissions();
 
@@ -160,6 +163,21 @@ export function CommandBar() {
 
   const quickActions: CommandBarItem[] = [
     {
+      id: 'action-quick-entry',
+      label: 'Lançamento Rápido',
+      icon: Zap,
+      action: () => setQuickEntryOpen(true),
+      keywords: [
+        'rapido',
+        'quick',
+        'lancamento',
+        'pagar',
+        'receber',
+        'novo',
+        'financeiro',
+      ],
+    },
+    {
       id: 'action-new-order',
       label: 'Novo Pedido',
       icon: Plus,
@@ -190,42 +208,49 @@ export function CommandBar() {
   }
 
   return (
-    <CommandDialog
-      open={open}
-      onOpenChange={setOpen}
-      title="Barra de Comando"
-      description="Busque por paginas, acoes ou comandos"
-      showCloseButton={false}
-    >
-      <CommandInput placeholder="Buscar ou digitar comando..." />
-      <CommandList>
-        <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-        {groups.map((group, groupIdx) => {
-          const visibleItems = group.items.filter(
-            item => !item.permission || hasPermission(item.permission)
-          );
+    <>
+      <CommandDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Barra de Comando"
+        description="Busque por paginas, acoes ou comandos"
+        showCloseButton={false}
+      >
+        <CommandInput placeholder="Buscar ou digitar comando..." />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+          {groups.map((group, groupIdx) => {
+            const visibleItems = group.items.filter(
+              item => !item.permission || hasPermission(item.permission)
+            );
 
-          if (visibleItems.length === 0) return null;
+            if (visibleItems.length === 0) return null;
 
-          return (
-            <div key={group.heading}>
-              {groupIdx > 0 && <CommandSeparator />}
-              <CommandGroup heading={group.heading}>
-                {visibleItems.map(item => (
-                  <CommandItem
-                    key={item.id}
-                    value={`${item.label} ${(item.keywords || []).join(' ')}`}
-                    onSelect={() => handleSelect(item)}
-                  >
-                    <item.icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </div>
-          );
-        })}
-      </CommandList>
-    </CommandDialog>
+            return (
+              <div key={group.heading}>
+                {groupIdx > 0 && <CommandSeparator />}
+                <CommandGroup heading={group.heading}>
+                  {visibleItems.map(item => (
+                    <CommandItem
+                      key={item.id}
+                      value={`${item.label} ${(item.keywords || []).join(' ')}`}
+                      onSelect={() => handleSelect(item)}
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      <span>{item.label}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </div>
+            );
+          })}
+        </CommandList>
+      </CommandDialog>
+
+      <QuickEntryModal
+        open={quickEntryOpen}
+        onOpenChange={setQuickEntryOpen}
+      />
+    </>
   );
 }

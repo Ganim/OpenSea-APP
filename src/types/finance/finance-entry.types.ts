@@ -332,3 +332,30 @@ export interface BatchCreateResponse {
   created: number;
   entries: FinanceEntry[];
 }
+
+export interface BulkResult {
+  success: number;
+  failed: number;
+  errors: { entryId: string; error: string }[];
+}
+
+export interface BulkPayData {
+  entryIds: string[];
+  bankAccountId: string;
+  method: PaymentMethod;
+  reference?: string;
+}
+
+export interface BulkCancelData {
+  entryIds: string[];
+  reason?: string;
+}
+
+export interface BulkDeleteData {
+  entryIds: string[];
+}
+
+export interface BulkCategorizeData {
+  entryIds: string[];
+  categoryId: string;
+}

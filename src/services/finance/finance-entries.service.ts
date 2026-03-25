@@ -15,6 +15,11 @@ import type {
   ParsePixResult,
   BatchCreateRequest,
   BatchCreateResponse,
+  BulkResult,
+  BulkPayData,
+  BulkCancelData,
+  BulkDeleteData,
+  BulkCategorizeData,
 } from '@/types/finance';
 export interface FinanceEntriesResponse {
   entries: FinanceEntry[];
@@ -142,6 +147,34 @@ export const financeEntriesService = {
   async createBatch(data: BatchCreateRequest): Promise<BatchCreateResponse> {
     return apiClient.post<BatchCreateResponse>(
       API_ENDPOINTS.FINANCE_ENTRIES.CREATE_BATCH,
+      data
+    );
+  },
+
+  async bulkPay(data: BulkPayData): Promise<BulkResult> {
+    return apiClient.post<BulkResult>(
+      API_ENDPOINTS.FINANCE_ENTRIES.BULK_PAY,
+      data
+    );
+  },
+
+  async bulkCancel(data: BulkCancelData): Promise<BulkResult> {
+    return apiClient.post<BulkResult>(
+      API_ENDPOINTS.FINANCE_ENTRIES.BULK_CANCEL,
+      data
+    );
+  },
+
+  async bulkDelete(data: BulkDeleteData): Promise<BulkResult> {
+    return apiClient.post<BulkResult>(
+      API_ENDPOINTS.FINANCE_ENTRIES.BULK_DELETE,
+      data
+    );
+  },
+
+  async bulkCategorize(data: BulkCategorizeData): Promise<BulkResult> {
+    return apiClient.post<BulkResult>(
+      API_ENDPOINTS.FINANCE_ENTRIES.BULK_CATEGORIZE,
       data
     );
   },

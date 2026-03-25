@@ -8,7 +8,10 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { BaixaModal } from '@/components/finance/baixa-modal';
+import { BulkPayModal } from '@/components/finance/bulk-pay-modal';
+import { BulkCategorizeModal } from '@/components/finance/bulk-categorize-modal';
 import { PayableWizardModal } from '@/components/finance/payable-wizard-modal';
+import { QuickEntryModal } from '@/components/finance/quick-entry-modal';
 import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -28,6 +31,11 @@ import {
   EntityContextMenu,
   EntityGrid,
 } from '@/core';
+import {
+  SelectionToolbar,
+  type SelectionAction,
+} from '@/core/components/selection-toolbar';
+import { useSelectionContext } from '@/core/selection/selection-context';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
@@ -35,6 +43,10 @@ import {
   useDeleteFinanceEntry,
   type FinanceEntriesFilters,
 } from '@/hooks/finance/use-finance-entries';
+import {
+  useBulkCancelEntries,
+  useBulkDeleteEntries,
+} from '@/hooks/finance/use-finance-bulk-actions';
 import { useFinanceCategories } from '@/hooks/finance/use-finance-categories';
 import { cn } from '@/lib/utils';
 import type { FinanceEntry, FinanceEntryStatus } from '@/types/finance';
@@ -43,10 +55,13 @@ import {
   ArrowDownCircle,
   CalendarDays,
   DollarSign,
+  FolderTree,
   Loader2,
   Plus,
   Tag,
   Trash2,
+  XCircle,
+  Zap,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -176,10 +191,18 @@ function PayablePageContent() {
   // ============================================================================
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
   const [baixaEntry, setBaixaEntry] = useState<FinanceEntry | null>(null);
   const [baixaOpen, setBaixaOpen] = useState(false);
+
+  // Bulk action modals
+  const [bulkPayOpen, setBulkPayOpen] = useState(false);
+  const [bulkCategorizeOpen, setBulkCategorizeOpen] = useState(false);
+  const [bulkCancelModalOpen, setBulkCancelModalOpen] = useState(false);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkSelectedIds, setBulkSelectedIds] = useState<string[]>([]);
 
   // ============================================================================
   // DATA: Infinite scroll entries + filter dropdown sources
@@ -222,6 +245,8 @@ function PayablePageContent() {
 
   // Mutations
   const deleteMutation = useDeleteFinanceEntry();
+  const bulkCancelMutation = useBulkCancelEntries();
+  const bulkDeleteMutation = useBulkDeleteEntries();
 
   // ============================================================================
   // INFINITE SCROLL SENTINEL
@@ -323,6 +348,80 @@ function PayablePageContent() {
         : `${itemsToDelete.length} contas a pagar excluídas!`
     );
   }, [itemsToDelete, deleteMutation]);
+
+  // ============================================================================
+  // BULK ACTION HANDLERS
+  // ============================================================================
+
+  const MAX_BULK = 50;
+
+  const handleBulkAction = useCallback(
+    (ids: string[], action: () => void) => {
+      if (ids.length > MAX_BULK) {
+        toast.warning(
+          `Selecione no máximo ${MAX_BULK} lançamentos por operação em lote.`
+        );
+        return;
+      }
+      setBulkSelectedIds(ids);
+      action();
+    },
+    []
+  );
+
+  const handleBulkCancelConfirm = useCallback(async () => {
+    try {
+      const result = await bulkCancelMutation.mutateAsync({
+        entryIds: bulkSelectedIds,
+      });
+      if (result.failed > 0) {
+        toast.warning(
+          `${result.success} de ${bulkSelectedIds.length} lançamentos cancelados.`,
+          {
+            description: result.errors
+              .map(e => e.error)
+              .slice(0, 3)
+              .join('; '),
+          }
+        );
+      } else {
+        toast.success(
+          `${result.success} ${result.success === 1 ? 'lançamento cancelado' : 'lançamentos cancelados'} com sucesso.`
+        );
+      }
+      setBulkCancelModalOpen(false);
+      setBulkSelectedIds([]);
+    } catch {
+      toast.error('Erro ao cancelar lançamentos em lote.');
+    }
+  }, [bulkSelectedIds, bulkCancelMutation]);
+
+  const handleBulkDeleteConfirm = useCallback(async () => {
+    try {
+      const result = await bulkDeleteMutation.mutateAsync({
+        entryIds: bulkSelectedIds,
+      });
+      if (result.failed > 0) {
+        toast.warning(
+          `${result.success} de ${bulkSelectedIds.length} lançamentos excluídos.`,
+          {
+            description: result.errors
+              .map(e => e.error)
+              .slice(0, 3)
+              .join('; '),
+          }
+        );
+      } else {
+        toast.success(
+          `${result.success} ${result.success === 1 ? 'lançamento excluído' : 'lançamentos excluídos'} com sucesso.`
+        );
+      }
+      setBulkDeleteModalOpen(false);
+      setBulkSelectedIds([]);
+    } catch {
+      toast.error('Erro ao excluir lançamentos em lote.');
+    }
+  }, [bulkSelectedIds, bulkDeleteMutation]);
 
   // Get category rates for the selected baixa entry
   const baixaCategoryRates = useMemo(() => {
@@ -585,8 +684,20 @@ function PayablePageContent() {
     setWizardOpen(true);
   }, []);
 
+  const handleQuickEntryClick = useCallback(() => {
+    setQuickEntryOpen(true);
+  }, []);
+
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
+      {
+        id: 'quick-entry-payable',
+        title: 'Rápido',
+        icon: Zap,
+        onClick: handleQuickEntryClick,
+        variant: 'outline',
+        permission: FINANCE_PERMISSIONS.ENTRIES.REGISTER,
+      },
       {
         id: 'create-payable',
         title: 'Nova Conta a Pagar',
@@ -596,7 +707,7 @@ function PayablePageContent() {
         permission: FINANCE_PERMISSIONS.ENTRIES.REGISTER,
       },
     ],
-    [handleCreateClick]
+    [handleCreateClick, handleQuickEntryClick]
   );
 
   const visibleActionButtons = useMemo<HeaderButton[]>(
@@ -741,6 +852,16 @@ function PayablePageContent() {
             }}
           />
 
+          {/* Quick Entry Modal */}
+          <QuickEntryModal
+            open={quickEntryOpen}
+            onOpenChange={setQuickEntryOpen}
+            defaultType="PAYABLE"
+            onCreated={() => {
+              refetch();
+            }}
+          />
+
           {/* Baixa (Payment Registration) Modal */}
           {baixaEntry && (
             <BaixaModal
@@ -770,8 +891,147 @@ function PayablePageContent() {
                 : `Digite seu PIN de Ação para excluir ${itemsToDelete.length} contas a pagar. Esta ação não pode ser desfeita.`
             }
           />
+
+          {/* Bulk Pay Modal */}
+          <BulkPayModal
+            open={bulkPayOpen}
+            onOpenChange={setBulkPayOpen}
+            selectedIds={bulkSelectedIds}
+            entries={entries}
+            onSuccess={() => setBulkSelectedIds([])}
+            actionLabel="Registrar Pagamento"
+          />
+
+          {/* Bulk Categorize Modal */}
+          <BulkCategorizeModal
+            open={bulkCategorizeOpen}
+            onOpenChange={setBulkCategorizeOpen}
+            selectedIds={bulkSelectedIds}
+            onSuccess={() => setBulkSelectedIds([])}
+            categoryType="EXPENSE"
+          />
+
+          {/* Bulk Cancel PIN Modal */}
+          <VerifyActionPinModal
+            isOpen={bulkCancelModalOpen}
+            onClose={() => {
+              setBulkCancelModalOpen(false);
+              setBulkSelectedIds([]);
+            }}
+            onSuccess={handleBulkCancelConfirm}
+            title="Confirmar Cancelamento em Lote"
+            description={`Digite seu PIN de Ação para cancelar ${bulkSelectedIds.length} contas a pagar. Esta ação não pode ser desfeita.`}
+          />
+
+          {/* Bulk Delete PIN Modal */}
+          <VerifyActionPinModal
+            isOpen={bulkDeleteModalOpen}
+            onClose={() => {
+              setBulkDeleteModalOpen(false);
+              setBulkSelectedIds([]);
+            }}
+            onSuccess={handleBulkDeleteConfirm}
+            title="Confirmar Exclusão em Lote"
+            description={`Digite seu PIN de Ação para excluir ${bulkSelectedIds.length} contas a pagar. Esta ação não pode ser desfeita.`}
+          />
+
+          {/* Selection Toolbar */}
+          <PayableSelectionToolbar
+            totalItems={total}
+            canEdit={canEdit}
+            canDelete={canDelete}
+            onBulkPay={ids =>
+              handleBulkAction(ids, () => setBulkPayOpen(true))
+            }
+            onBulkCategorize={ids =>
+              handleBulkAction(ids, () => setBulkCategorizeOpen(true))
+            }
+            onBulkCancel={ids =>
+              handleBulkAction(ids, () => setBulkCancelModalOpen(true))
+            }
+            onBulkDelete={ids =>
+              handleBulkAction(ids, () => setBulkDeleteModalOpen(true))
+            }
+          />
         </PageBody>
       </PageLayout>
     </CoreProvider>
+  );
+}
+
+// ============================================================================
+// SELECTION TOOLBAR SUB-COMPONENT
+// ============================================================================
+
+function PayableSelectionToolbar({
+  totalItems,
+  canEdit,
+  canDelete,
+  onBulkPay,
+  onBulkCategorize,
+  onBulkCancel,
+  onBulkDelete,
+}: {
+  totalItems: number;
+  canEdit: boolean;
+  canDelete: boolean;
+  onBulkPay: (ids: string[]) => void;
+  onBulkCategorize: (ids: string[]) => void;
+  onBulkCancel: (ids: string[]) => void;
+  onBulkDelete: (ids: string[]) => void;
+}) {
+  const { actions, getSelectedArray } = useSelectionContext();
+  const selectedIds = getSelectedArray();
+
+  const selectionActions = useMemo(() => {
+    const acts: SelectionAction[] = [];
+
+    if (canEdit) {
+      acts.push({
+        id: 'bulk-pay',
+        label: 'Registrar Pagamento',
+        icon: DollarSign,
+        onClick: onBulkPay,
+        variant: 'default',
+      });
+
+      acts.push({
+        id: 'bulk-categorize',
+        label: 'Alterar Categoria',
+        icon: FolderTree,
+        onClick: onBulkCategorize,
+        variant: 'outline',
+      });
+
+      acts.push({
+        id: 'bulk-cancel',
+        label: 'Cancelar',
+        icon: XCircle,
+        onClick: onBulkCancel,
+        variant: 'outline',
+      });
+    }
+
+    if (canDelete) {
+      acts.push({
+        id: 'bulk-delete',
+        label: 'Excluir',
+        icon: Trash2,
+        onClick: onBulkDelete,
+        variant: 'destructive',
+      });
+    }
+
+    return acts;
+  }, [canEdit, canDelete, onBulkPay, onBulkCategorize, onBulkCancel, onBulkDelete]);
+
+  return (
+    <SelectionToolbar
+      selectedIds={selectedIds}
+      totalItems={totalItems}
+      onClear={actions.clear}
+      onSelectAll={actions.selectAll}
+      actions={selectionActions}
+    />
   );
 }
