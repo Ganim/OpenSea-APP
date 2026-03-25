@@ -91,10 +91,7 @@ function MobileBinSelector({
           )}
         >
           <MapPin
-            className={cn(
-              'h-4 w-4',
-              value ? 'text-sky-400' : 'text-slate-400'
-            )}
+            className={cn('h-4 w-4', value ? 'text-sky-400' : 'text-slate-400')}
           />
         </div>
         <div className="min-w-0 flex-1">
@@ -242,8 +239,7 @@ function MobileAttributeFields({
           const rawValue = values[key];
           const currentValue = String(rawValue ?? config.defaultValue ?? '');
           const isBooleanType =
-            config.type === 'boolean' ||
-            (config.type as string) === 'sim/nao';
+            config.type === 'boolean' || (config.type as string) === 'sim/nao';
 
           if (isBooleanType) {
             const isChecked =
@@ -456,7 +452,14 @@ export default function QuickEntryPage() {
     };
 
     registerEntry.mutate(data);
-  }, [selectedVariant, selectedBin, parsedQuantity, formData.attributes, itemAttributes, registerEntry]);
+  }, [
+    selectedVariant,
+    selectedBin,
+    parsedQuantity,
+    formData.attributes,
+    itemAttributes,
+    registerEntry,
+  ]);
 
   const updateAttribute = useCallback((key: string, value: unknown) => {
     setFormData(prev => ({
@@ -473,7 +476,11 @@ export default function QuickEntryPage() {
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col bg-slate-950">
-      <MobileTopBar title="Cadastro Rápido" subtitle="Entrada de itens" showBack />
+      <MobileTopBar
+        title="Cadastro Rápido"
+        subtitle="Entrada de itens"
+        showBack
+      />
 
       <div className="flex-1 space-y-4 px-4 py-4">
         {/* Counter badge */}
@@ -484,7 +491,8 @@ export default function QuickEntryPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-green-400">
-                {addedCount} {addedCount === 1 ? 'item adicionado' : 'itens adicionados'}
+                {addedCount}{' '}
+                {addedCount === 1 ? 'item adicionado' : 'itens adicionados'}
               </p>
               {lastAdded && (
                 <p className="truncate text-[11px] text-green-500/70">

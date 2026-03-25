@@ -31,7 +31,12 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { deleteWorkSchedule, getDayLabel, WEEK_DAYS, workSchedulesApi } from '../../src';
+import {
+  deleteWorkSchedule,
+  getDayLabel,
+  WEEK_DAYS,
+  workSchedulesApi,
+} from '../../src';
 
 // =============================================================================
 // TYPES & HELPERS
@@ -45,7 +50,13 @@ interface DaySchedule {
   enabled: boolean;
 }
 
-const WEEKDAYS: DayKey[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+const WEEKDAYS: DayKey[] = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+];
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -125,7 +136,10 @@ export default function WorkScheduleEditPage() {
       setBreakDuration(schedule.breakDuration);
       setIsActive(schedule.isActive);
 
-      const newDays: Record<DayKey, DaySchedule> = {} as Record<DayKey, DaySchedule>;
+      const newDays: Record<DayKey, DaySchedule> = {} as Record<
+        DayKey,
+        DaySchedule
+      >;
       for (const day of WEEK_DAYS) {
         const startKey = `${day}Start` as keyof WorkSchedule;
         const endKey = `${day}End` as keyof WorkSchedule;
@@ -149,7 +163,11 @@ export default function WorkScheduleEditPage() {
         for (const d of WEEKDAYS) {
           if (d === 'monday') continue;
           if (prev[d]?.enabled) {
-            updated[d] = { ...prev[d], start: prev.monday.start, end: prev.monday.end };
+            updated[d] = {
+              ...prev[d],
+              start: prev.monday.start,
+              end: prev.monday.end,
+            };
           }
         }
         return updated;
@@ -162,8 +180,18 @@ export default function WorkScheduleEditPage() {
       if (field === 'enabled') {
         setDays(prev => {
           const updated = { ...prev, [day]: { ...prev[day], enabled: value } };
-          if (value && replicateMonday && day !== 'monday' && WEEKDAYS.includes(day) && prev.monday) {
-            updated[day] = { ...updated[day], start: prev.monday.start, end: prev.monday.end };
+          if (
+            value &&
+            replicateMonday &&
+            day !== 'monday' &&
+            WEEKDAYS.includes(day) &&
+            prev.monday
+          ) {
+            updated[day] = {
+              ...updated[day],
+              start: prev.monday.start,
+              end: prev.monday.end,
+            };
           }
           return updated;
         });
@@ -248,7 +276,10 @@ export default function WorkScheduleEditPage() {
       toast.success('Escala de trabalho atualizada com sucesso!');
       router.push(`/hr/work-schedules/${scheduleId}`);
     } catch (error) {
-      logger.error('Erro ao salvar escala de trabalho', error instanceof Error ? error : undefined);
+      logger.error(
+        'Erro ao salvar escala de trabalho',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao salvar escala de trabalho');
     } finally {
       setIsSaving(false);
@@ -263,7 +294,10 @@ export default function WorkScheduleEditPage() {
       toast.success('Escala de trabalho excluída com sucesso!');
       router.push('/hr/work-schedules');
     } catch (error) {
-      logger.error('Erro ao excluir escala de trabalho', error instanceof Error ? error : undefined);
+      logger.error(
+        'Erro ao excluir escala de trabalho',
+        error instanceof Error ? error : undefined
+      );
       toast.error('Erro ao excluir escala de trabalho');
     }
   };
@@ -453,21 +487,27 @@ export default function WorkScheduleEditPage() {
                         <CalendarDays className="h-5 w-5 text-foreground" />
                         <div>
                           <h3 className="text-base font-semibold">Horários</h3>
-                          <p className="text-sm text-muted-foreground">Defina os horários de entrada e saída de cada dia</p>
+                          <p className="text-sm text-muted-foreground">
+                            Defina os horários de entrada e saída de cada dia
+                          </p>
                         </div>
                       </div>
                       <div className="border-b border-border" />
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-3 h-[42px]">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none">Intervalo</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none">
+                          Intervalo
+                        </p>
                         <div className="relative">
                           <Input
                             type="number"
                             min={0}
                             max={480}
                             value={breakDuration}
-                            onChange={e => setBreakDuration(Number(e.target.value))}
+                            onChange={e =>
+                              setBreakDuration(Number(e.target.value))
+                            }
                             className="w-[4.5rem] h-7 text-xs px-2 pr-7 text-center"
                           />
                           <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
@@ -476,7 +516,9 @@ export default function WorkScheduleEditPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 rounded-lg bg-muted/60 px-3 h-[42px]">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none">Replicar Seg.</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none">
+                          Replicar Seg.
+                        </p>
                         <Switch
                           checked={replicateMonday}
                           onCheckedChange={handleReplicateMondayChange}
@@ -496,7 +538,9 @@ export default function WorkScheduleEditPage() {
                           Horas/Sem.
                         </p>
                         <p className="text-base font-semibold tabular-nums leading-none">
-                          {totalWeeklyMinutes > 0 ? formatHoursMinutes(totalWeeklyMinutes) : '0h'}
+                          {totalWeeklyMinutes > 0
+                            ? formatHoursMinutes(totalWeeklyMinutes)
+                            : '0h'}
                         </p>
                       </div>
                     </div>
@@ -526,11 +570,13 @@ export default function WorkScheduleEditPage() {
                               }
                               className="scale-90"
                             />
-                            <span className={`inline-flex items-center justify-center w-20 h-7 rounded-md text-xs font-semibold ${
-                              d.enabled
-                                ? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                                : 'bg-slate-100/60 text-slate-400 dark:bg-slate-800/40 dark:text-slate-500'
-                            }`}>
+                            <span
+                              className={`inline-flex items-center justify-center w-20 h-7 rounded-md text-xs font-semibold ${
+                                d.enabled
+                                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                                  : 'bg-slate-100/60 text-slate-400 dark:bg-slate-800/40 dark:text-slate-500'
+                              }`}
+                            >
                               {getDayLabel(day)}
                             </span>
                             {d.enabled ? (
@@ -538,16 +584,24 @@ export default function WorkScheduleEditPage() {
                                 <div className="flex items-center gap-1.5 flex-1">
                                   <TimePicker
                                     value={d.start}
-                                    onChange={v => handleUpdateDay(day, 'start', v)}
+                                    onChange={v =>
+                                      handleUpdateDay(day, 'start', v)
+                                    }
                                   />
-                                  <span className="text-muted-foreground text-xs">até</span>
+                                  <span className="text-muted-foreground text-xs">
+                                    até
+                                  </span>
                                   <TimePicker
                                     value={d.end}
-                                    onChange={v => handleUpdateDay(day, 'end', v)}
+                                    onChange={v =>
+                                      handleUpdateDay(day, 'end', v)
+                                    }
                                   />
                                 </div>
                                 <span className="text-xs tabular-nums text-muted-foreground w-10 text-right">
-                                  {dailyMin > 0 ? formatHoursMinutes(dailyMin) : '-'}
+                                  {dailyMin > 0
+                                    ? formatHoursMinutes(dailyMin)
+                                    : '-'}
                                 </span>
                               </>
                             ) : (
@@ -559,7 +613,6 @@ export default function WorkScheduleEditPage() {
                         );
                       })}
                     </div>
-
                   </div>
                 </div>
               </div>

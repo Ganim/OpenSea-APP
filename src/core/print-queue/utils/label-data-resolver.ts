@@ -103,7 +103,12 @@ function formatAttributesWithUnit(
   const formatted: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attributes)) {
     const config = templateAttributes[key] as TemplateAttribute | undefined;
-    if (config?.unitOfMeasure && value !== null && value !== undefined && value !== '') {
+    if (
+      config?.unitOfMeasure &&
+      value !== null &&
+      value !== undefined &&
+      value !== ''
+    ) {
       formatted[key] = `${formatValue(value)} ${config.unitOfMeasure}`;
     } else {
       formatted[key] = value;
@@ -299,8 +304,14 @@ export function resolveLabelDataFromPresenter(ld: ItemLabelData): LabelData {
       ? `${variantRef} - ${variantName}`
       : variantName,
     productAttributes: {},
-    variantAttributes: formatAttributesWithUnit(ld.variant.attributes as Record<string, unknown>, ld.template.variantAttributes),
-    itemAttributes: formatAttributesWithUnit(ld.item.attributes as Record<string, unknown>, ld.template.itemAttributes),
+    variantAttributes: formatAttributesWithUnit(
+      ld.variant.attributes as Record<string, unknown>,
+      ld.template.variantAttributes
+    ),
+    itemAttributes: formatAttributesWithUnit(
+      ld.item.attributes as Record<string, unknown>,
+      ld.template.itemAttributes
+    ),
     barcodeData: ld.variant.barcode || ld.item.barcode || ld.item.fullCode,
     qrCodeData: ld.item.id,
   };
@@ -447,7 +458,10 @@ export function itemLabelDataToPreviewData(
         name: ld.template.name,
         unitOfMeasure: ld.template.unitOfMeasure,
       },
-      attributes: formatAttributesWithUnit(ld.product.attributes as Record<string, unknown>, ld.template.productAttributes),
+      attributes: formatAttributesWithUnit(
+        ld.product.attributes as Record<string, unknown>,
+        ld.template.productAttributes
+      ),
     },
 
     // manufacturer.* paths (top-level alias)
@@ -472,7 +486,10 @@ export function itemLabelDataToPreviewData(
       costPrice: formatCurrency(ld.variant.costPrice),
       costPriceRaw: ld.variant.costPrice,
       colorHex: ld.variant.colorHex || '',
-      attributes: formatAttributesWithUnit(ld.variant.attributes as Record<string, unknown>, ld.template.variantAttributes),
+      attributes: formatAttributesWithUnit(
+        ld.variant.attributes as Record<string, unknown>,
+        ld.template.variantAttributes
+      ),
     },
 
     // item.* paths
@@ -499,7 +516,10 @@ export function itemLabelDataToPreviewData(
       lastKnownAddress: ld.item.lastKnownAddress || '',
       quantityWithUnit: `${ld.item.currentQuantity} ${unitAbrev}`,
       quantityWithUnitFull: `${ld.item.currentQuantity} ${unitFull}`,
-      attributes: formatAttributesWithUnit(ld.item.attributes as Record<string, unknown>, ld.template.itemAttributes),
+      attributes: formatAttributesWithUnit(
+        ld.item.attributes as Record<string, unknown>,
+        ld.template.itemAttributes
+      ),
       // Nested bin for deep paths like item.bin.zone.name
       bin: {
         zone: {

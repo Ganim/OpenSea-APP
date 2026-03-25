@@ -754,99 +754,99 @@ export function EntityGrid<T extends BaseEntity>({
 
       {/* Items Container */}
       {!isEmpty && (
-      <div
-        ref={containerRef}
-        data-entity-grid
-        onMouseDown={handleMouseDown}
-        onClick={handleContainerClick}
-        onDragStart={e => e.preventDefault()}
-        onKeyDown={handleKeyDown}
-        className={cn('relative', itemsClassName)}
-        style={{ userSelect: 'none' }}
-        tabIndex={0}
-        role="grid"
-        aria-label={`Grade de ${config.display.labels.plural}`}
-      >
-        {viewMode === 'grid' ? (
-          <div className={cn('grid gap-4', gridColumns)}>
-            {sortedItems.map((item, index) => {
-              const isSelected = selectedIds.has(item.id);
-              const isFocused = index === focusedIndex;
+        <div
+          ref={containerRef}
+          data-entity-grid
+          onMouseDown={handleMouseDown}
+          onClick={handleContainerClick}
+          onDragStart={e => e.preventDefault()}
+          onKeyDown={handleKeyDown}
+          className={cn('relative', itemsClassName)}
+          style={{ userSelect: 'none' }}
+          tabIndex={0}
+          role="grid"
+          aria-label={`Grade de ${config.display.labels.plural}`}
+        >
+          {viewMode === 'grid' ? (
+            <div className={cn('grid gap-4', gridColumns)}>
+              {sortedItems.map((item, index) => {
+                const isSelected = selectedIds.has(item.id);
+                const isFocused = index === focusedIndex;
 
-              return (
-                <div
-                  key={item.id}
-                  data-item-card
-                  ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
-                  onClick={(e: React.MouseEvent) => handleItemClick(item, e)}
-                  onDoubleClick={(e: React.MouseEvent) =>
-                    handleItemDoubleClick(item, e)
-                  }
-                  {...(onContextMenu
-                    ? {
-                        onContextMenu: (e: React.MouseEvent) =>
-                          handleContextMenu(item, e),
-                      }
-                    : {})}
-                  tabIndex={isFocused ? 0 : -1}
-                  role="gridcell"
-                  aria-selected={isSelected}
-                >
-                  {renderGridItem(item, isSelected)}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedItems.map((item, index) => {
-              const isSelected = selectedIds.has(item.id);
-              const isFocused = index === focusedIndex;
+                return (
+                  <div
+                    key={item.id}
+                    data-item-card
+                    ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
+                    onClick={(e: React.MouseEvent) => handleItemClick(item, e)}
+                    onDoubleClick={(e: React.MouseEvent) =>
+                      handleItemDoubleClick(item, e)
+                    }
+                    {...(onContextMenu
+                      ? {
+                          onContextMenu: (e: React.MouseEvent) =>
+                            handleContextMenu(item, e),
+                        }
+                      : {})}
+                    tabIndex={isFocused ? 0 : -1}
+                    role="gridcell"
+                    aria-selected={isSelected}
+                  >
+                    {renderGridItem(item, isSelected)}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sortedItems.map((item, index) => {
+                const isSelected = selectedIds.has(item.id);
+                const isFocused = index === focusedIndex;
 
-              return (
-                <div
-                  key={item.id}
-                  data-item-card
-                  ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
-                  onClick={(e: React.MouseEvent) => handleItemClick(item, e)}
-                  onDoubleClick={(e: React.MouseEvent) =>
-                    handleItemDoubleClick(item, e)
-                  }
-                  {...(onContextMenu
-                    ? {
-                        onContextMenu: (e: React.MouseEvent) =>
-                          handleContextMenu(item, e),
-                      }
-                    : {})}
-                  tabIndex={isFocused ? 0 : -1}
-                  role="gridcell"
-                  aria-selected={isSelected}
-                >
-                  {renderListItem(item, isSelected)}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Drag Selection Rectangle */}
-        {isDragging &&
-          isDragStarted &&
-          selectionBox &&
-          selectionBox.width > 0 &&
-          selectionBox.height > 0 && (
-            <div
-              className="fixed pointer-events-none border-2 border-blue-500 bg-blue-500/10 z-50 transition-none"
-              style={{
-                left: selectionBox.x,
-                top: selectionBox.y,
-                width: selectionBox.width,
-                height: selectionBox.height,
-                willChange: 'transform',
-              }}
-            />
+                return (
+                  <div
+                    key={item.id}
+                    data-item-card
+                    ref={(el: HTMLDivElement | null) => setItemRef(item.id, el)}
+                    onClick={(e: React.MouseEvent) => handleItemClick(item, e)}
+                    onDoubleClick={(e: React.MouseEvent) =>
+                      handleItemDoubleClick(item, e)
+                    }
+                    {...(onContextMenu
+                      ? {
+                          onContextMenu: (e: React.MouseEvent) =>
+                            handleContextMenu(item, e),
+                        }
+                      : {})}
+                    tabIndex={isFocused ? 0 : -1}
+                    role="gridcell"
+                    aria-selected={isSelected}
+                  >
+                    {renderListItem(item, isSelected)}
+                  </div>
+                );
+              })}
+            </div>
           )}
-      </div>
+
+          {/* Drag Selection Rectangle */}
+          {isDragging &&
+            isDragStarted &&
+            selectionBox &&
+            selectionBox.width > 0 &&
+            selectionBox.height > 0 && (
+              <div
+                className="fixed pointer-events-none border-2 border-blue-500 bg-blue-500/10 z-50 transition-none"
+                style={{
+                  left: selectionBox.x,
+                  top: selectionBox.y,
+                  width: selectionBox.width,
+                  height: selectionBox.height,
+                  willChange: 'transform',
+                }}
+              />
+            )}
+        </div>
       )}
     </div>
   );

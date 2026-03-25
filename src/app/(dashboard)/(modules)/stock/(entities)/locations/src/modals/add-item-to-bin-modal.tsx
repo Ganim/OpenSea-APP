@@ -24,11 +24,7 @@ export function AddItemToBinModal({
       product={null}
       variant={null}
       initialBinId={binId}
-      extraInvalidateKeys={[
-        ['bin-detail'],
-        ['zone-items'],
-        ['warehouse'],
-      ]}
+      extraInvalidateKeys={[['bin-detail'], ['zone-items'], ['warehouse']]}
     />
   );
 }

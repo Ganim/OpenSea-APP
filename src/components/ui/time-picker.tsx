@@ -28,16 +28,25 @@ function generatePresets(interval: number): string[] {
   for (let m = 0; m < 24 * 60; m += interval) {
     const h = Math.floor(m / 60);
     const min = m % 60;
-    presets.push(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+    presets.push(
+      `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+    );
   }
   return presets;
 }
 
 // Common work start/end times highlighted
 const POPULAR_TIMES = new Set([
-  '06:00', '07:00', '08:00', '09:00',
-  '12:00', '13:00',
-  '17:00', '18:00', '19:00', '22:00',
+  '06:00',
+  '07:00',
+  '08:00',
+  '09:00',
+  '12:00',
+  '13:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '22:00',
 ]);
 
 function formatTimeInput(raw: string): string {
@@ -162,7 +171,7 @@ export function TimePicker({
               maxLength={5}
               className={cn(
                 'w-full rounded-md border border-input bg-background px-3 py-2 text-center text-lg tabular-nums font-medium',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
               )}
             />
           </div>
@@ -189,9 +198,10 @@ export function TimePicker({
                     'rounded-md px-1 py-1.5 text-xs tabular-nums transition-colors',
                     'hover:bg-accent hover:text-accent-foreground',
                     'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                    isSelected && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                    isSelected &&
+                      'bg-primary text-primary-foreground hover:bg-primary/90',
                     !isSelected && isPopular && isFullHour && 'font-medium',
-                    !isSelected && !isFullHour && 'text-muted-foreground',
+                    !isSelected && !isFullHour && 'text-muted-foreground'
                   )}
                 >
                   {time}

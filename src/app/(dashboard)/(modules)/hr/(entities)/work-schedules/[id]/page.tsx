@@ -82,8 +82,6 @@ export default function WorkScheduleDetailPage() {
     router.push(`/hr/work-schedules/${scheduleId}/edit`);
   };
 
-
-
   // Loading
   if (isLoading) {
     return (
@@ -244,22 +242,34 @@ export default function WorkScheduleDetailPage() {
                   <CalendarDays className="h-5 w-5 text-foreground" />
                   <div>
                     <h3 className="text-base font-semibold">Jornada Semanal</h3>
-                    <p className="text-sm text-muted-foreground">Horários de trabalho por dia da semana</p>
+                    <p className="text-sm text-muted-foreground">
+                      Horários de trabalho por dia da semana
+                    </p>
                   </div>
                 </div>
                 <div className="border-b border-border" />
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <div className="rounded-lg bg-muted/60 px-3 h-[42px] flex flex-col items-center justify-center">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">Intervalo</p>
-                  <p className="text-base font-semibold tabular-nums leading-none">{schedule.breakDuration}min</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">
+                    Intervalo
+                  </p>
+                  <p className="text-base font-semibold tabular-nums leading-none">
+                    {schedule.breakDuration}min
+                  </p>
                 </div>
                 <div className="rounded-lg bg-muted/60 px-3 h-[42px] flex flex-col items-center justify-center">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">Dias</p>
-                  <p className="text-base font-semibold tabular-nums leading-none">{workDaysCount}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">
+                    Dias
+                  </p>
+                  <p className="text-base font-semibold tabular-nums leading-none">
+                    {workDaysCount}
+                  </p>
                 </div>
                 <div className="rounded-lg bg-muted/60 px-3 h-[42px] flex flex-col items-center justify-center">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">Horas/Sem.</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-1">
+                    Horas/Sem.
+                  </p>
                   <p className="text-base font-semibold tabular-nums leading-none">
                     {formatWeeklyHours(schedule.weeklyHours)}
                   </p>
@@ -302,7 +312,6 @@ export default function WorkScheduleDetailPage() {
           </div>
         </Card>
       </PageBody>
-
     </PageLayout>
   );
 }

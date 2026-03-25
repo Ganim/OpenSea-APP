@@ -680,9 +680,7 @@ function EntrySection({
           <div className="border-t border-border pt-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                Atributos do Template
-              </span>
+              <span className="text-sm font-medium">Atributos do Template</span>
             </div>
           </div>
           <AttributeFields
@@ -1252,9 +1250,7 @@ function VariantSearchSection({
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2 py-4">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">
-                        Carregando variantes...
-                      </span>
+                      <span className="text-sm">Carregando variantes...</span>
                     </div>
                   ) : (
                     'Nenhuma variante encontrada.'

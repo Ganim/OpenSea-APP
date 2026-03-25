@@ -194,7 +194,9 @@ export function BinDetailSheet({
       } as never,
     }));
     printActions.addToQueue(inputs);
-    toast.success(`${items.length} ${items.length === 1 ? 'item adicionado' : 'itens adicionados'} à fila de impressão`);
+    toast.success(
+      `${items.length} ${items.length === 1 ? 'item adicionado' : 'itens adicionados'} à fila de impressão`
+    );
   }, [items, printActions]);
 
   // Item highlight with 10s auto-fade

@@ -53,9 +53,7 @@ export function ValidationErrorsDialog({
         </DialogHeader>
 
         <div className="flex items-center gap-3 text-sm text-muted-foreground border-b pb-3">
-          <span>
-            {validationResult.totalRows} linha(s) analisada(s)
-          </span>
+          <span>{validationResult.totalRows} linha(s) analisada(s)</span>
           <Badge variant="destructive" className="gap-1">
             <AlertTriangle className="w-3 h-3" />
             {validationResult.invalidRows} com erro

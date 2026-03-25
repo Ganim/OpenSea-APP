@@ -1,103 +1,108 @@
-export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP'
+export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP';
 
 export interface PixParseResult {
-  type: 'COPIA_COLA' | 'CHAVE'
-  pixKey: string
-  pixKeyType: PixKeyType
-  merchantName?: string
-  merchantCity?: string
-  amount?: number
-  success: boolean
+  type: 'COPIA_COLA' | 'CHAVE';
+  pixKey: string;
+  pixKeyType: PixKeyType;
+  merchantName?: string;
+  merchantCity?: string;
+  amount?: number;
+  success: boolean;
 }
 
 const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function parseTLV(data: string): Map<string, string> | null {
-  const result = new Map<string, string>()
-  let pos = 0
+  const result = new Map<string, string>();
+  let pos = 0;
 
   try {
     while (pos < data.length) {
-      if (pos + 4 > data.length) break
+      if (pos + 4 > data.length) break;
 
-      const tag = data.substring(pos, pos + 2)
-      const length = parseInt(data.substring(pos + 2, pos + 4), 10)
+      const tag = data.substring(pos, pos + 2);
+      const length = parseInt(data.substring(pos + 2, pos + 4), 10);
 
-      if (isNaN(length) || length < 0) return null
-      if (pos + 4 + length > data.length) break
+      if (isNaN(length) || length < 0) return null;
+      if (pos + 4 + length > data.length) break;
 
-      const value = data.substring(pos + 4, pos + 4 + length)
-      result.set(tag, value)
+      const value = data.substring(pos + 4, pos + 4 + length);
+      result.set(tag, value);
 
-      pos += 4 + length
+      pos += 4 + length;
     }
   } catch {
-    return null
+    return null;
   }
 
-  return result.size > 0 ? result : null
+  return result.size > 0 ? result : null;
 }
 
 function detectKeyType(key: string): PixKeyType {
-  const cleaned = key.replace(/[.\-/]/g, '')
+  const cleaned = key.replace(/[.\-/]/g, '');
 
   // CPF: 11 digits
-  if (/^\d{11}$/.test(cleaned)) return 'CPF'
+  if (/^\d{11}$/.test(cleaned)) return 'CPF';
 
   // CNPJ: 14 digits
-  if (/^\d{14}$/.test(cleaned)) return 'CNPJ'
+  if (/^\d{14}$/.test(cleaned)) return 'CNPJ';
 
   // Email
-  if (EMAIL_REGEX.test(key)) return 'EMAIL'
+  if (EMAIL_REGEX.test(key)) return 'EMAIL';
 
   // Phone: starts with +55 or 10-13 digits
-  if (key.startsWith('+55') || /^\d{10,13}$/.test(cleaned)) return 'PHONE'
+  if (key.startsWith('+55') || /^\d{10,13}$/.test(cleaned)) return 'PHONE';
 
   // EVP (UUID)
-  if (UUID_REGEX.test(key)) return 'EVP'
+  if (UUID_REGEX.test(key)) return 'EVP';
 
   // Fallback
-  return 'EVP'
+  return 'EVP';
 }
 
 function parseCopiaECola(payload: string): PixParseResult {
-  const tlv = parseTLV(payload)
+  const tlv = parseTLV(payload);
   if (!tlv) {
-    return { type: 'COPIA_COLA', pixKey: '', pixKeyType: 'EVP', success: false }
+    return {
+      type: 'COPIA_COLA',
+      pixKey: '',
+      pixKeyType: 'EVP',
+      success: false,
+    };
   }
 
   // Tag 26: Merchant Account Information
-  let pixKey = ''
-  let pixKeyType: PixKeyType = 'EVP'
-  const tag26 = tlv.get('26')
+  let pixKey = '';
+  let pixKeyType: PixKeyType = 'EVP';
+  const tag26 = tlv.get('26');
   if (tag26) {
-    const subTlv = parseTLV(tag26)
+    const subTlv = parseTLV(tag26);
     if (subTlv) {
       // Sub-tag 01: Pix key
-      const key = subTlv.get('01')
+      const key = subTlv.get('01');
       if (key) {
-        pixKey = key
-        pixKeyType = detectKeyType(key)
+        pixKey = key;
+        pixKeyType = detectKeyType(key);
       }
     }
   }
 
   // Tag 59: Merchant Name
-  const merchantName = tlv.get('59')
+  const merchantName = tlv.get('59');
 
   // Tag 60: Merchant City
-  const merchantCity = tlv.get('60')
+  const merchantCity = tlv.get('60');
 
   // Tag 54: Transaction Amount
-  let amount: number | undefined
-  const tag54 = tlv.get('54')
+  let amount: number | undefined;
+  const tag54 = tlv.get('54');
   if (tag54) {
-    const parsed = parseFloat(tag54)
+    const parsed = parseFloat(tag54);
     if (!isNaN(parsed)) {
-      amount = parsed
+      amount = parsed;
     }
   }
 
@@ -109,25 +114,25 @@ function parseCopiaECola(payload: string): PixParseResult {
     merchantCity,
     amount,
     success: true,
-  }
+  };
 }
 
 export function parsePix(input: string): PixParseResult {
-  const trimmed = input.trim()
+  const trimmed = input.trim();
   if (!trimmed) {
-    return { type: 'CHAVE', pixKey: '', pixKeyType: 'EVP', success: false }
+    return { type: 'CHAVE', pixKey: '', pixKeyType: 'EVP', success: false };
   }
 
   if (trimmed.startsWith('000201')) {
-    return parseCopiaECola(trimmed)
+    return parseCopiaECola(trimmed);
   }
 
-  const pixKeyType = detectKeyType(trimmed)
+  const pixKeyType = detectKeyType(trimmed);
 
   return {
     type: 'CHAVE',
     pixKey: trimmed,
     pixKeyType,
     success: true,
-  }
+  };
 }

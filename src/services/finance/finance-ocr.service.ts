@@ -49,7 +49,7 @@ export const financeOcrService = {
 
   async ocrUploadBatch(files: File[]): Promise<OcrBatchResult> {
     const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
+    files.forEach(file => formData.append('files', file));
     return apiClient.post<OcrBatchResult>(
       API_ENDPOINTS.FINANCE_ENTRIES.OCR_UPLOAD_BATCH,
       formData

@@ -80,10 +80,9 @@ function buildPaginatedUrl(base: string, query?: PaginatedListQuery): string {
 // Manufacturers Service
 export const manufacturersService = {
   async listManufacturers(): Promise<ManufacturersResponse> {
-    const manufacturers = await fetchAllPagesFor<ManufacturersResponse['manufacturers'][number]>(
-      API_ENDPOINTS.MANUFACTURERS.LIST,
-      'manufacturers'
-    );
+    const manufacturers = await fetchAllPagesFor<
+      ManufacturersResponse['manufacturers'][number]
+    >(API_ENDPOINTS.MANUFACTURERS.LIST, 'manufacturers');
     return { manufacturers } as ManufacturersResponse;
   },
 
@@ -127,10 +126,9 @@ export const manufacturersService = {
 // Suppliers Service
 export const suppliersService = {
   async listSuppliers(): Promise<SuppliersResponse> {
-    const suppliers = await fetchAllPagesFor<SuppliersResponse['suppliers'][number]>(
-      API_ENDPOINTS.SUPPLIERS.LIST,
-      'suppliers'
-    );
+    const suppliers = await fetchAllPagesFor<
+      SuppliersResponse['suppliers'][number]
+    >(API_ENDPOINTS.SUPPLIERS.LIST, 'suppliers');
     return { suppliers } as SuppliersResponse;
   },
 
@@ -197,10 +195,9 @@ export const tagsService = {
 // Templates Service
 export const templatesService = {
   async listTemplates(): Promise<TemplatesResponse> {
-    const templates = await fetchAllPagesFor<TemplatesResponse['templates'][number]>(
-      API_ENDPOINTS.TEMPLATES.LIST,
-      'templates'
-    );
+    const templates = await fetchAllPagesFor<
+      TemplatesResponse['templates'][number]
+    >(API_ENDPOINTS.TEMPLATES.LIST, 'templates');
     return { templates } as TemplatesResponse;
   },
 

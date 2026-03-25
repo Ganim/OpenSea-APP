@@ -12,7 +12,11 @@ import {
   useResumeSession,
 } from '@/hooks/mobile/use-inventory-sessions';
 import { useAllBins } from '@/app/(dashboard)/(modules)/stock/(entities)/locations/src/api/bins.queries';
-import type { InventorySession, InventorySessionMode, Bin } from '@/types/stock';
+import type {
+  InventorySession,
+  InventorySessionMode,
+  Bin,
+} from '@/types/stock';
 import {
   MapPin,
   Map,
@@ -254,7 +258,11 @@ function BinScanModal({
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
       <MobileTopBar
         title="Selecionar Nicho"
-        subtitle={mode === 'scan' ? 'Aponte para o QR Code do bin' : 'Escolha um nicho da lista'}
+        subtitle={
+          mode === 'scan'
+            ? 'Aponte para o QR Code do bin'
+            : 'Escolha um nicho da lista'
+        }
         showBack
         rightContent={
           <button

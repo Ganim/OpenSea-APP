@@ -100,8 +100,7 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
             dueDate: result.dueDate ?? '',
             bankCode: result.bankCode ?? '',
             bankName: result.bankName ?? '',
-            boletoBarcode:
-              result.inputType === 'codigo_barras' ? digits : '',
+            boletoBarcode: result.inputType === 'codigo_barras' ? digits : '',
             boletoDigitLine:
               result.inputType === 'linha_digitavel' ? digits : '',
           });
@@ -158,10 +157,12 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
       try {
         const ocrResult = await financeOcrService.ocrUploadBatch(acceptedFiles);
 
-        const batchEntries = ocrResult.results.map((r) => {
+        const batchEntries = ocrResult.results.map(r => {
           const extracted = r.extractedData;
           const hasMissingFields =
-            !extracted.valor || !extracted.vencimento || !extracted.beneficiario;
+            !extracted.valor ||
+            !extracted.vencimento ||
+            !extracted.beneficiario;
           const lowConfidence = r.confidence < 0.5;
 
           return {
@@ -333,9 +334,7 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
           >
             <input {...getInputProps()} />
             <Upload className="size-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm font-medium">
-              Arraste PDFs de boletos aqui
-            </p>
+            <p className="text-sm font-medium">Arraste PDFs de boletos aqui</p>
             <p className="text-xs text-muted-foreground mt-1">
               ou clique para selecionar · aceita múltiplos arquivos para criação
               em lote
@@ -359,7 +358,7 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
                   </div>
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleRemoveFile(index);
                     }}
@@ -396,7 +395,9 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
               {pixParsed.merchantName && (
                 <div>
                   <p className="text-xs text-muted-foreground">Destinatário</p>
-                  <p className="text-sm font-medium">{pixParsed.merchantName}</p>
+                  <p className="text-sm font-medium">
+                    {pixParsed.merchantName}
+                  </p>
                 </div>
               )}
               {pixParsed.amount != null && pixParsed.amount > 0 && (

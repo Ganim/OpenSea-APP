@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import {
-  ArrowLeft,
-  PackageMinus,
-  Loader2,
-  Check,
-} from 'lucide-react';
+import { ArrowLeft, PackageMinus, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRegisterItemExit } from '@/hooks/stock/use-items';
 import { scanSuccess, scanError } from '@/lib/scan-feedback';
@@ -64,9 +59,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
   }, [quantity]);
 
   const canSubmit =
-    parsedQuantity > 0 &&
-    parsedQuantity <= currentQuantity &&
-    !exit.isPending;
+    parsedQuantity > 0 && parsedQuantity <= currentQuantity && !exit.isPending;
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
@@ -151,9 +144,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    exitType === opt.type
-                      ? 'text-rose-400'
-                      : 'text-slate-300'
+                    exitType === opt.type ? 'text-rose-400' : 'text-slate-300'
                   )}
                 >
                   {opt.label}
@@ -186,7 +177,9 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
                 type="text"
                 inputMode="decimal"
                 value={quantity}
-                onChange={e => setQuantity(sanitizeQuantityInput(e.target.value))}
+                onChange={e =>
+                  setQuantity(sanitizeQuantityInput(e.target.value))
+                }
                 disabled={exit.isPending}
                 className="w-full rounded-xl border border-slate-700/50 bg-slate-800/60 px-4 py-3 text-center text-lg font-bold tabular-nums text-slate-100 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />

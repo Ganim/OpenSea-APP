@@ -141,7 +141,12 @@ export function CreateModal({
       if (field === 'enabled') {
         setDays(prev => {
           const updated = { ...prev, [day]: { ...prev[day], enabled: value } };
-          if (value && replicateMonday && day !== 'monday' && WEEKDAYS.includes(day)) {
+          if (
+            value &&
+            replicateMonday &&
+            day !== 'monday' &&
+            WEEKDAYS.includes(day)
+          ) {
             updated[day] = {
               ...updated[day],
               start: prev.monday.start,
@@ -271,7 +276,10 @@ export function CreateModal({
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4" onWheel={e => e.stopPropagation()}>
+          <div
+            className="flex-1 overflow-y-auto px-6 py-2 space-y-4"
+            onWheel={e => e.stopPropagation()}
+          >
             {/* Name + Break + Replicate row */}
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-1.5">
@@ -346,11 +354,13 @@ export function CreateModal({
                       className="scale-90"
                     />
 
-                    <span className={`inline-flex items-center justify-center w-16 h-7 rounded-md text-xs font-semibold ${
-                      d.enabled
-                        ? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                        : 'bg-slate-100/60 text-slate-400 dark:bg-slate-800/40 dark:text-slate-500'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center justify-center w-16 h-7 rounded-md text-xs font-semibold ${
+                        d.enabled
+                          ? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          : 'bg-slate-100/60 text-slate-400 dark:bg-slate-800/40 dark:text-slate-500'
+                      }`}
+                    >
                       {getDayLabel(day)}
                     </span>
 
@@ -361,7 +371,9 @@ export function CreateModal({
                             value={d.start}
                             onChange={v => handleUpdateDay(day, 'start', v)}
                           />
-                          <span className="text-muted-foreground text-xs">até</span>
+                          <span className="text-muted-foreground text-xs">
+                            até
+                          </span>
                           <TimePicker
                             value={d.end}
                             onChange={v => handleUpdateDay(day, 'end', v)}
@@ -400,7 +412,9 @@ export function CreateModal({
                   Horas Semanais
                 </p>
                 <p className="text-base font-semibold tabular-nums leading-none">
-                  {totalWeeklyMinutes > 0 ? formatHoursMinutes(totalWeeklyMinutes) : '0h'}
+                  {totalWeeklyMinutes > 0
+                    ? formatHoursMinutes(totalWeeklyMinutes)
+                    : '0h'}
                 </p>
               </div>
             </div>

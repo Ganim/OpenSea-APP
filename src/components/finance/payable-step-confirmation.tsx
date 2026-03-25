@@ -147,10 +147,7 @@ function SingleSummary({ data }: { data: PayableWizardData }) {
 // =============================================================================
 
 function BatchSummary({ data }: { data: PayableWizardData }) {
-  const total = data.batchEntries.reduce(
-    (sum, e) => sum + e.expectedAmount,
-    0
-  );
+  const total = data.batchEntries.reduce((sum, e) => sum + e.expectedAmount, 0);
 
   return (
     <div className="space-y-4">
@@ -187,9 +184,7 @@ function BatchSummary({ data }: { data: PayableWizardData }) {
             {data.batchEntries.map((entry, i) => (
               <tr key={entry.id}>
                 <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                <td className="px-3 py-2">
-                  {entry.beneficiaryName || '—'}
-                </td>
+                <td className="px-3 py-2">{entry.beneficiaryName || '—'}</td>
                 <td className="px-3 py-2 text-right tabular-nums">
                   {formatCurrency(entry.expectedAmount)}
                 </td>
@@ -228,11 +223,7 @@ export function PayableStepConfirmation({
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto pr-1">
-        {isBatch ? (
-          <BatchSummary data={data} />
-        ) : (
-          <SingleSummary data={data} />
-        )}
+        {isBatch ? <BatchSummary data={data} /> : <SingleSummary data={data} />}
       </div>
     </div>
   );

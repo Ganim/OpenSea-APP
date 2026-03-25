@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-} from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer';
 import {
   ArrowRightLeft,
   PackageMinus,
@@ -166,9 +162,7 @@ function DetailRow({
             {value}
           </span>
         ) : (
-          <p className="truncate text-sm font-medium text-slate-200">
-            {value}
-          </p>
+          <p className="truncate text-sm font-medium text-slate-200">{value}</p>
         )}
       </div>
     </div>

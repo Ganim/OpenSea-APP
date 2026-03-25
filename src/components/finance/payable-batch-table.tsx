@@ -55,7 +55,8 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
   const bankAccounts = bankAccountsData?.bankAccounts ?? [];
 
   const total = useMemo(
-    () => data.batchEntries.reduce((sum, e) => sum + (e.expectedAmount || 0), 0),
+    () =>
+      data.batchEntries.reduce((sum, e) => sum + (e.expectedAmount || 0), 0),
     [data.batchEntries]
   );
 
@@ -97,14 +98,30 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur-sm">
               <tr>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-8">#</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[140px]">Beneficiário</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[130px]">Fornecedor</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[100px]">Valor</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[120px]">Vencimento</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">Juros</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">Multa</th>
-                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">Desconto</th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-8">
+                  #
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[140px]">
+                  Beneficiário
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[130px]">
+                  Fornecedor
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[100px]">
+                  Valor
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[120px]">
+                  Vencimento
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">
+                  Juros
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">
+                  Multa
+                </th>
+                <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground min-w-[70px]">
+                  Desconto
+                </th>
                 <th className="px-2 py-2 w-8" />
               </tr>
             </thead>
@@ -129,7 +146,13 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                       <input
                         type="text"
                         value={entry.beneficiaryName}
-                        onChange={(e) => updateBatchEntry(index, 'beneficiaryName', e.target.value)}
+                        onChange={e =>
+                          updateBatchEntry(
+                            index,
+                            'beneficiaryName',
+                            e.target.value
+                          )
+                        }
                         className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30"
                       />
                     ) : (
@@ -138,7 +161,13 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                           type="text"
                           value=""
                           placeholder="Nome do beneficiário"
-                          onChange={(e) => updateBatchEntry(index, 'beneficiaryName', e.target.value)}
+                          onChange={e =>
+                            updateBatchEntry(
+                              index,
+                              'beneficiaryName',
+                              e.target.value
+                            )
+                          }
                           className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30 placeholder:text-muted-foreground/50"
                         />
                         {entry.hasWarning && (
@@ -153,18 +182,26 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                   <td className="px-2 py-1.5">
                     <select
                       value={entry.supplierId}
-                      onChange={(e) => {
-                        const supplier = suppliers.find((s) => s.id === e.target.value);
+                      onChange={e => {
+                        const supplier = suppliers.find(
+                          s => s.id === e.target.value
+                        );
                         updateBatchEntry(index, 'supplierId', e.target.value);
                         if (supplier) {
-                          updateBatchEntry(index, 'supplierName', supplier.name);
+                          updateBatchEntry(
+                            index,
+                            'supplierName',
+                            supplier.name
+                          );
                         }
                       }}
                       className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded cursor-pointer focus:bg-muted/50 focus:ring-1 focus:ring-ring/30 text-foreground"
                     >
                       <option value="">Selecionar...</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
                       ))}
                     </select>
                   </td>
@@ -174,10 +211,17 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                       step="0.01"
                       min="0"
                       value={entry.expectedAmount || ''}
-                      onChange={(e) => updateBatchEntry(index, 'expectedAmount', parseFloat(e.target.value) || 0)}
+                      onChange={e =>
+                        updateBatchEntry(
+                          index,
+                          'expectedAmount',
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       className={cn(
                         'w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30',
-                        entry.expectedAmount > 0 && 'text-violet-600 dark:text-violet-400 font-medium'
+                        entry.expectedAmount > 0 &&
+                          'text-violet-600 dark:text-violet-400 font-medium'
                       )}
                       placeholder="0,00"
                     />
@@ -186,33 +230,59 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                     <input
                       type="date"
                       value={entry.dueDate}
-                      onChange={(e) => updateBatchEntry(index, 'dueDate', e.target.value)}
+                      onChange={e =>
+                        updateBatchEntry(index, 'dueDate', e.target.value)
+                      }
                       className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30"
                     />
                   </td>
                   <td className="px-2 py-1.5">
                     <input
-                      type="number" step="0.01" min="0"
+                      type="number"
+                      step="0.01"
+                      min="0"
                       value={entry.interest || ''}
-                      onChange={(e) => updateBatchEntry(index, 'interest', parseFloat(e.target.value) || 0)}
+                      onChange={e =>
+                        updateBatchEntry(
+                          index,
+                          'interest',
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30"
                       placeholder="0"
                     />
                   </td>
                   <td className="px-2 py-1.5">
                     <input
-                      type="number" step="0.01" min="0"
+                      type="number"
+                      step="0.01"
+                      min="0"
                       value={entry.penalty || ''}
-                      onChange={(e) => updateBatchEntry(index, 'penalty', parseFloat(e.target.value) || 0)}
+                      onChange={e =>
+                        updateBatchEntry(
+                          index,
+                          'penalty',
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30"
                       placeholder="0"
                     />
                   </td>
                   <td className="px-2 py-1.5">
                     <input
-                      type="number" step="0.01" min="0"
+                      type="number"
+                      step="0.01"
+                      min="0"
                       value={entry.discount || ''}
-                      onChange={(e) => updateBatchEntry(index, 'discount', parseFloat(e.target.value) || 0)}
+                      onChange={e =>
+                        updateBatchEntry(
+                          index,
+                          'discount',
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       className="w-full bg-transparent border-0 outline-none text-sm px-1 py-0.5 rounded focus:bg-muted/50 focus:ring-1 focus:ring-ring/30"
                       placeholder="0"
                     />
@@ -247,8 +317,8 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
             </label>
             <Select
               value={data.categoryId}
-              onValueChange={(value) => {
-                const cat = categories.find((c) => c.id === value);
+              onValueChange={value => {
+                const cat = categories.find(c => c.id === value);
                 onChange({ categoryId: value, categoryName: cat?.name ?? '' });
               }}
             >
@@ -256,7 +326,7 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                 <SelectValue placeholder="Selecionar categoria" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <SelectItem key={cat.id} value={cat.id} className="text-xs">
                     {cat.name}
                   </SelectItem>
@@ -271,8 +341,8 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
             </label>
             <Select
               value={data.costCenterId || '__none__'}
-              onValueChange={(value) => {
-                const cc = costCenters.find((c) => c.id === value);
+              onValueChange={value => {
+                const cc = costCenters.find(c => c.id === value);
                 onChange({
                   costCenterId: value === '__none__' ? '' : value,
                   costCenterName: cc?.name ?? '',
@@ -283,8 +353,10 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                 <SelectValue placeholder="Nenhum" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__" className="text-xs">Nenhum</SelectItem>
-                {costCenters.map((cc) => (
+                <SelectItem value="__none__" className="text-xs">
+                  Nenhum
+                </SelectItem>
+                {costCenters.map(cc => (
                   <SelectItem key={cc.id} value={cc.id} className="text-xs">
                     {cc.name}
                   </SelectItem>
@@ -299,8 +371,8 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
             </label>
             <Select
               value={data.bankAccountId || '__none__'}
-              onValueChange={(value) => {
-                const ba = bankAccounts.find((a) => a.id === value);
+              onValueChange={value => {
+                const ba = bankAccounts.find(a => a.id === value);
                 onChange({
                   bankAccountId: value === '__none__' ? '' : value,
                   bankAccountName: ba?.name ?? '',
@@ -311,8 +383,10 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
                 <SelectValue placeholder="Nenhuma" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__" className="text-xs">Nenhuma</SelectItem>
-                {bankAccounts.map((ba) => (
+                <SelectItem value="__none__" className="text-xs">
+                  Nenhuma
+                </SelectItem>
+                {bankAccounts.map(ba => (
                   <SelectItem key={ba.id} value={ba.id} className="text-xs">
                     {ba.name}
                   </SelectItem>
@@ -324,11 +398,16 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
 
         <div className="grid grid-cols-2 gap-3 mt-3">
           <div className="space-y-1">
-            <label className="text-[11px] font-medium text-muted-foreground">Tags</label>
+            <label className="text-[11px] font-medium text-muted-foreground">
+              Tags
+            </label>
             <Input
               value={data.tags.join(', ')}
-              onChange={(e) => {
-                const tags = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
+              onChange={e => {
+                const tags = e.target.value
+                  .split(',')
+                  .map(t => t.trim())
+                  .filter(Boolean);
                 onChange({ tags });
               }}
               placeholder="Separar por vírgula"
@@ -342,7 +421,7 @@ export function PayableBatchTable({ data, onChange }: PayableBatchTableProps) {
             </label>
             <Textarea
               value={data.notes}
-              onChange={(e) => onChange({ notes: e.target.value })}
+              onChange={e => onChange({ notes: e.target.value })}
               placeholder="Observações gerais..."
               className="h-8 min-h-8 text-xs resize-none"
               rows={1}

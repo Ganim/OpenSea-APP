@@ -136,9 +136,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
   const bothCategories = bothCategoriesData?.categories ?? [];
   const categories = [
     ...expenseCategories,
-    ...bothCategories.filter(
-      (b) => !expenseCategories.some((e) => e.id === b.id),
-    ),
+    ...bothCategories.filter(b => !expenseCategories.some(e => e.id === b.id)),
   ];
 
   const { data: costCentersData } = useCostCenters();
@@ -166,7 +164,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
 
       if (supplierSuggestion.categoryId) {
         const cat = categories.find(
-          (c) => c.id === supplierSuggestion.categoryId,
+          c => c.id === supplierSuggestion.categoryId
         );
         if (cat) {
           updates.categoryId = cat.id;
@@ -177,7 +175,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
       if (supplierSuggestion.costCenterId) {
         updates.costCenterId = supplierSuggestion.costCenterId;
         const cc = costCenters.find(
-          (c) => c.id === supplierSuggestion.costCenterId,
+          c => c.id === supplierSuggestion.costCenterId
         );
         if (cc) updates.costCenterName = cc.name;
       }
@@ -212,8 +210,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
   }, [tagInput, data.tags, onChange]);
 
   const removeTag = useCallback(
-    (tag: string) => onChange({ tags: data.tags.filter((t) => t !== tag) }),
-    [data.tags, onChange],
+    (tag: string) => onChange({ tags: data.tags.filter(t => t !== tag) }),
+    [data.tags, onChange]
   );
 
   // ---------------------------------------------------------------------------
@@ -238,7 +236,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <Row label="Descrição" required>
           <Input
             value={data.description}
-            onChange={(e) => onChange({ description: e.target.value })}
+            onChange={e => onChange({ description: e.target.value })}
             placeholder="Descrição do lançamento"
             className="h-8"
           />
@@ -247,7 +245,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <Row label="Beneficiário">
           <Input
             value={data.beneficiaryName}
-            onChange={(e) => onChange({ beneficiaryName: e.target.value })}
+            onChange={e => onChange({ beneficiaryName: e.target.value })}
             placeholder="Nome do beneficiário"
             className={cn('h-8', pf('beneficiaryName'))}
           />
@@ -267,8 +265,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
           <div className="flex items-center gap-1.5">
             <Select
               value={data.supplierId}
-              onValueChange={(val) => {
-                const s = suppliers.find((s) => s.id === val);
+              onValueChange={val => {
+                const s = suppliers.find(s => s.id === val);
                 onChange({ supplierId: val, supplierName: s?.name ?? '' });
               }}
             >
@@ -276,7 +274,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
                 <SelectValue placeholder="Selecionar..." />
               </SelectTrigger>
               <SelectContent>
-                {suppliers.map((s) => (
+                {suppliers.map(s => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
                   </SelectItem>
@@ -299,8 +297,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
           <div className="flex items-center gap-1.5">
             <Select
               value={data.categoryId}
-              onValueChange={(val) => {
-                const c = categories.find((c) => c.id === val);
+              onValueChange={val => {
+                const c = categories.find(c => c.id === val);
                 onChange({ categoryId: val, categoryName: c?.name ?? '' });
               }}
             >
@@ -308,7 +306,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
                 <SelectValue placeholder="Selecionar..." />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((c) => (
+                {categories.map(c => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>
@@ -331,8 +329,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
           <div className="flex items-center gap-1.5">
             <Select
               value={data.costCenterId}
-              onValueChange={(val) => {
-                const cc = costCenters.find((c) => c.id === val);
+              onValueChange={val => {
+                const cc = costCenters.find(c => c.id === val);
                 onChange({ costCenterId: val, costCenterName: cc?.name ?? '' });
               }}
             >
@@ -340,7 +338,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
                 <SelectValue placeholder="Opcional" />
               </SelectTrigger>
               <SelectContent>
-                {costCenters.map((cc) => (
+                {costCenters.map(cc => (
                   <SelectItem key={cc.id} value={cc.id}>
                     {cc.name}
                   </SelectItem>
@@ -370,7 +368,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             step="0.01"
             min="0"
             value={data.expectedAmount || ''}
-            onChange={(e) =>
+            onChange={e =>
               onChange({ expectedAmount: parseFloat(e.target.value) || 0 })
             }
             placeholder="0,00"
@@ -384,7 +382,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             step="0.01"
             min="0"
             value={data.interest || ''}
-            onChange={(e) =>
+            onChange={e =>
               onChange({ interest: parseFloat(e.target.value) || 0 })
             }
             placeholder="0,00"
@@ -398,7 +396,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             step="0.01"
             min="0"
             value={data.penalty || ''}
-            onChange={(e) =>
+            onChange={e =>
               onChange({ penalty: parseFloat(e.target.value) || 0 })
             }
             placeholder="0,00"
@@ -412,7 +410,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             step="0.01"
             min="0"
             value={data.discount || ''}
-            onChange={(e) =>
+            onChange={e =>
               onChange({ discount: parseFloat(e.target.value) || 0 })
             }
             placeholder="0,00"
@@ -428,7 +426,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <Row label="Vencimento" required>
           <InlineDatePicker
             value={data.dueDate}
-            onChange={(d) => onChange({ dueDate: d })}
+            onChange={d => onChange({ dueDate: d })}
             className={pf('dueDate')}
           />
         </Row>
@@ -436,14 +434,14 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <Row label="Emissão">
           <InlineDatePicker
             value={data.issueDate}
-            onChange={(d) => onChange({ issueDate: d })}
+            onChange={d => onChange({ issueDate: d })}
           />
         </Row>
 
         <Row label="Competência">
           <InlineDatePicker
             value={data.competenceDate}
-            onChange={(d) => onChange({ competenceDate: d })}
+            onChange={d => onChange({ competenceDate: d })}
           />
         </Row>
 
@@ -456,8 +454,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
           <div className="flex items-center gap-1.5">
             <Select
               value={data.bankAccountId}
-              onValueChange={(val) => {
-                const ba = bankAccounts.find((b) => b.id === val);
+              onValueChange={val => {
+                const ba = bankAccounts.find(b => b.id === val);
                 onChange({
                   bankAccountId: val,
                   bankAccountName: ba?.name ?? '',
@@ -468,7 +466,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
                 <SelectValue placeholder="Opcional" />
               </SelectTrigger>
               <SelectContent>
-                {bankAccounts.map((ba) => (
+                {bankAccounts.map(ba => (
                   <SelectItem key={ba.id} value={ba.id}>
                     {ba.name}
                   </SelectItem>
@@ -497,8 +495,8 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             <div className="flex items-center gap-1.5">
               <Input
                 value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     addTag();
@@ -519,7 +517,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
             </div>
             {data.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {data.tags.map((tag) => (
+                {data.tags.map(tag => (
                   <span
                     key={tag}
                     className="inline-flex items-center gap-1 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded text-[11px] font-medium"
@@ -542,7 +540,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <Row label="Observações">
           <Textarea
             value={data.notes}
-            onChange={(e) => onChange({ notes: e.target.value })}
+            onChange={e => onChange({ notes: e.target.value })}
             placeholder="Opcional"
             rows={2}
             className="text-sm"
@@ -557,7 +555,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         title="Novo Fornecedor"
       >
         <InlineSupplierForm
-          onCreated={(supplier) => {
+          onCreated={supplier => {
             setShowSupplierCreate(false);
             onChange({ supplierId: supplier.id, supplierName: supplier.name });
           }}
@@ -571,7 +569,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         title="Nova Categoria"
       >
         <InlineCategoryForm
-          onCreated={(category) => {
+          onCreated={category => {
             setShowCategoryCreate(false);
             onChange({
               categoryId: category.id,
@@ -588,7 +586,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         title="Novo Centro de Custo"
       >
         <InlineCostCenterForm
-          onCreated={(costCenter) => {
+          onCreated={costCenter => {
             setShowCostCenterCreate(false);
             onChange({
               costCenterId: costCenter.id,
@@ -605,7 +603,7 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         title="Nova Conta Bancária"
       >
         <InlineBankAccountForm
-          onCreated={(bankAccount) => {
+          onCreated={bankAccount => {
             setShowBankAccountCreate(false);
             onChange({
               bankAccountId: bankAccount.id,
@@ -642,7 +640,7 @@ function InlineDatePicker({
           className={cn(
             'w-full justify-start text-left font-normal h-8',
             !dateValue && 'text-muted-foreground',
-            className,
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-3.5 w-3.5" />
@@ -655,7 +653,7 @@ function InlineDatePicker({
         <Calendar
           mode="single"
           selected={dateValue}
-          onSelect={(date) => {
+          onSelect={date => {
             if (date) onChange(format(date, 'yyyy-MM-dd'));
           }}
           locale={ptBR}

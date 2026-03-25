@@ -210,9 +210,7 @@ export function PayableWizardModal({
         );
 
         await financeEntriesService.createBatch({ entries });
-        toast.success(
-          `${entries.length} contas a pagar criadas com sucesso!`
-        );
+        toast.success(`${entries.length} contas a pagar criadas com sucesso!`);
       } else {
         // Single entry
         const payload: CreateFinanceEntryData = {
@@ -267,13 +265,7 @@ export function PayableWizardModal({
         err instanceof Error ? err.message : 'Erro ao criar conta a pagar.';
       toast.error(message);
     }
-  }, [
-    wizardData,
-    isBatchMode,
-    createMutation,
-    handleClose,
-    onCreated,
-  ]);
+  }, [wizardData, isBatchMode, createMutation, handleClose, onCreated]);
 
   // --------------------------------------------------------------------------
   // Steps

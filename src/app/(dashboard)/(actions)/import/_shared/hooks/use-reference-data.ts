@@ -50,7 +50,10 @@ async function fetchAllPages<T>(
 // ============================================
 
 async function fetchTemplates(): Promise<FieldOption[]> {
-  const templates = await fetchAllPages<BaseEntity>('/v1/templates', 'templates');
+  const templates = await fetchAllPages<BaseEntity>(
+    '/v1/templates',
+    'templates'
+  );
   return templates.map(t => ({
     value: t.id,
     label: t.name,
@@ -58,7 +61,10 @@ async function fetchTemplates(): Promise<FieldOption[]> {
 }
 
 async function fetchSuppliers(): Promise<FieldOption[]> {
-  const suppliers = await fetchAllPages<BaseEntity>('/v1/suppliers', 'suppliers');
+  const suppliers = await fetchAllPages<BaseEntity>(
+    '/v1/suppliers',
+    'suppliers'
+  );
   return suppliers.map(s => ({
     value: s.id,
     label: s.name,
@@ -66,7 +72,10 @@ async function fetchSuppliers(): Promise<FieldOption[]> {
 }
 
 async function fetchManufacturers(): Promise<FieldOption[]> {
-  const manufacturers = await fetchAllPages<BaseEntity>('/v1/manufacturers', 'manufacturers');
+  const manufacturers = await fetchAllPages<BaseEntity>(
+    '/v1/manufacturers',
+    'manufacturers'
+  );
   return manufacturers.map(m => ({
     value: m.id,
     label: m.name,
@@ -74,7 +83,10 @@ async function fetchManufacturers(): Promise<FieldOption[]> {
 }
 
 async function fetchCategories(): Promise<FieldOption[]> {
-  const categories = await fetchAllPages<BaseEntity>('/v1/categories', 'categories');
+  const categories = await fetchAllPages<BaseEntity>(
+    '/v1/categories',
+    'categories'
+  );
   return categories.map(c => ({
     value: c.id,
     label: c.name,
@@ -117,7 +129,11 @@ async function fetchVariants(): Promise<FieldOption[]> {
 }
 
 async function fetchLocations(): Promise<FieldOption[]> {
-  const locations = await fetchAllPages<{ id: string; code: string; name?: string }>('/v1/locations', 'locations');
+  const locations = await fetchAllPages<{
+    id: string;
+    code: string;
+    name?: string;
+  }>('/v1/locations', 'locations');
   return locations.map(l => ({
     value: l.id,
     label: l.name ? `${l.code} - ${l.name}` : l.code,

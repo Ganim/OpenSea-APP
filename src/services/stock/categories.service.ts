@@ -19,7 +19,9 @@ export const categoriesService = {
         `${API_ENDPOINTS.CATEGORIES.LIST}?page=${page}&limit=${limit}`
       );
 
-      const items = response.categories as CategoriesResponse['categories'] | undefined;
+      const items = response.categories as
+        | CategoriesResponse['categories']
+        | undefined;
       if (items && items.length > 0) {
         allCategories.push(...items);
       }
