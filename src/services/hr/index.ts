@@ -10,3 +10,6 @@ export * from './time-bank.service';
 export * from './time-control.service';
 export * from './vacations.service';
 export * from './work-schedules.service';
+export * from './dependants.service';
+export * from './medical-exams.service';
+export * from './terminations.service';

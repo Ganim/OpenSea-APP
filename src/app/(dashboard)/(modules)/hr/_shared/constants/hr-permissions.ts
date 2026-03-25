@@ -209,6 +209,45 @@ export const HR_PERMISSIONS = {
     DELETE: HR_CODES.EMPLOYEES.REMOVE,
     MANAGE: HR_CODES.EMPLOYEES.ADMIN,
   },
+
+  /**
+   * Permissões de Dependentes (Dependants)
+   * Mapped to employees since nested under employee
+   */
+  DEPENDANTS: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
+
+  /**
+   * Permissões de Exames Médicos (Medical Exams)
+   * Mapped to employees since no dedicated resource in new codes
+   */
+  MEDICAL_EXAMS: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
+
+  /**
+   * Permissões de Rescisões (Terminations)
+   * Mapped to employees since no dedicated resource in new codes
+   */
+  TERMINATIONS: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
 } as const;
 
 /* ===========================================
@@ -254,6 +293,15 @@ export type TimeBankPermission =
 export type PayrollPermission =
   (typeof HR_PERMISSIONS.PAYROLL)[keyof typeof HR_PERMISSIONS.PAYROLL];
 
+export type DependantPermission =
+  (typeof HR_PERMISSIONS.DEPENDANTS)[keyof typeof HR_PERMISSIONS.DEPENDANTS];
+
+export type MedicalExamPermission =
+  (typeof HR_PERMISSIONS.MEDICAL_EXAMS)[keyof typeof HR_PERMISSIONS.MEDICAL_EXAMS];
+
+export type TerminationPermission =
+  (typeof HR_PERMISSIONS.TERMINATIONS)[keyof typeof HR_PERMISSIONS.TERMINATIONS];
+
 export type HRPermission =
   | CompanyPermission
   | DepartmentPermission
@@ -267,7 +315,10 @@ export type HRPermission =
   | PayrollPermission
   | WorkSchedulePermission
   | BonusPermission
-  | DeductionPermission;
+  | DeductionPermission
+  | DependantPermission
+  | MedicalExamPermission
+  | TerminationPermission;
 
 /* ===========================================
    HELPER FUNCTIONS
