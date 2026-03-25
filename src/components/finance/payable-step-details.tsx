@@ -132,7 +132,12 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
   const expenseCategories = categoriesData?.categories ?? [];
   const { data: bothCategoriesData } = useFinanceCategories({ type: 'BOTH' });
   const bothCategories = bothCategoriesData?.categories ?? [];
-  const categories = [...expenseCategories, ...bothCategories];
+  const categories = [
+    ...expenseCategories,
+    ...bothCategories.filter(
+      (b) => !expenseCategories.some((e) => e.id === b.id),
+    ),
+  ];
 
   const { data: costCentersData } = useCostCenters();
   const costCenters = costCentersData?.costCenters ?? [];
