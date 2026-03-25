@@ -11,7 +11,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { InfoField } from '@/components/shared/info-field';
 import dynamic from 'next/dynamic';
 
@@ -87,6 +87,7 @@ import {
   getStatusLabel,
   getWorkRegimeLabel,
 } from '../src';
+import { DependantsSection } from '../src/components/dependants-section';
 
 export default function EmployeeDetailPage() {
   const params = useParams();
@@ -491,10 +492,14 @@ export default function EmployeeDetailPage() {
 
       <PageBody>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 p-2 h-12">
+          <TabsList className="grid w-full grid-cols-3 mb-4 p-2 h-12">
             <TabsTrigger value="details" className="gap-2">
               <Users className="h-4 w-4 hidden sm:inline" />
               <span>Detalhes</span>
+            </TabsTrigger>
+            <TabsTrigger value="dependants" className="gap-2">
+              <Users className="h-4 w-4 hidden sm:inline" />
+              <span>Dependentes</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FolderOpen className="h-4 w-4 hidden sm:inline" />
@@ -717,6 +722,11 @@ export default function EmployeeDetailPage() {
             </Card>
           </TabsContent>
 
+          {/* Aba Dependentes */}
+          <TabsContent value="dependants" className="flex flex-col gap-6">
+            <DependantsSection employeeId={employeeId} />
+          </TabsContent>
+
           {/* Aba Documentos */}
           <TabsContent value="documents" className="flex flex-col gap-6">
             <FileManager
@@ -901,15 +911,12 @@ export default function EmployeeDetailPage() {
       />
 
       {/* Modal de confirmação de exclusão */}
-      <ConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+      <VerifyActionPinModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onSuccess={() => deleteMutation.mutate()}
         title="Excluir Funcionário"
-        description={`Tem certeza que deseja excluir o funcionário "${employee?.fullName}"? Esta ação não pode ser desfeita.`}
-        confirmLabel="Excluir"
-        onConfirm={() => deleteMutation.mutate()}
-        variant="destructive"
-        icon={<Trash className="h-5 w-5" />}
+        description={`Digite seu PIN de ação para excluir o funcionário "${employee?.fullName}". Esta ação não pode ser desfeita.`}
       />
     </PageLayout>
   );
