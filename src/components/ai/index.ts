@@ -1,3 +1,4 @@
+export { AiActionCard } from './action-card';
 export { AiHeroBanner } from './ai-hero-banner';
 export { AiChatView } from './chat-view';
 export { AiEmptyState } from './empty-state';

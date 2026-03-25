@@ -112,6 +112,20 @@ export function AiChatView({
     [inputValue, selectedConversationId, sendMessage]
   );
 
+  const handleActionConfirm = useCallback(
+    (actionId: string) => {
+      handleSend(`Confirmar ação: ${actionId}`);
+    },
+    [handleSend]
+  );
+
+  const handleActionCancel = useCallback(
+    (actionId: string) => {
+      handleSend(`Cancelar ação: ${actionId}`);
+    },
+    [handleSend]
+  );
+
   useEffect(() => {
     setLocalMessages([]);
     setFailedMessageId(null);
@@ -141,6 +155,8 @@ export function AiChatView({
                     ? () => handleSend(msg.content ?? '')
                     : undefined
                 }
+                onActionConfirm={handleActionConfirm}
+                onActionCancel={handleActionCancel}
               />
             ))}
             <div ref={messagesEndRef} />

@@ -1,16 +1,19 @@
 'use client';
 
 import { AiMarkdownRenderer } from './markdown-renderer';
+import { AiActionCard } from './action-card';
 import { cn } from '@/lib/utils';
 import { Loader2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { AiMessage } from '@/types/ai';
+import type { AiMessage, ActionCardRenderData } from '@/types/ai';
 
 interface AiMessageBubbleProps {
   message: AiMessage;
   userInitial?: string;
   onRetry?: () => void;
   hasError?: boolean;
+  onActionConfirm?: (actionId: string) => void;
+  onActionCancel?: (actionId: string) => void;
 }
 
 export function AiMessageBubble({
@@ -18,11 +21,17 @@ export function AiMessageBubble({
   userInitial = 'U',
   onRetry,
   hasError,
+  onActionConfirm,
+  onActionCancel,
 }: AiMessageBubbleProps) {
   const isUser = message.role === 'USER';
   const isLoading = message.contentType === 'LOADING';
   const isToolCall =
     message.role === 'TOOL_CALL' || message.role === 'TOOL_RESULT';
+  const isActionCard =
+    message.contentType === 'ACTION_CARD' ||
+    (message.renderData as ActionCardRenderData | null | undefined)?.type ===
+      'ACTION_CARD';
 
   if (message.role === 'SYSTEM' || isToolCall) return null;
 
@@ -103,10 +112,28 @@ export function AiMessageBubble({
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Pensando...</span>
           </div>
+        ) : isActionCard ? (
+          <div className="text-sm">
+            {message.content && (
+              <div className="mb-3 text-foreground">
+                <AiMarkdownRenderer content={message.content} />
+              </div>
+            )}
+            <AiActionCard
+              data={message.renderData as unknown as ActionCardRenderData}
+              onConfirm={onActionConfirm ?? (() => {})}
+              onCancel={onActionCancel ?? (() => {})}
+            />
+            {message.aiModel && message.aiModel !== 'placeholder' && (
+              <div className="mt-2 text-muted-foreground text-[9px] flex items-center gap-2">
+                <span>{message.aiModel}</span>
+                {message.aiLatencyMs && <span>· {message.aiLatencyMs}ms</span>}
+              </div>
+            )}
+          </div>
         ) : (
           <div className="text-sm text-foreground">
             <AiMarkdownRenderer content={message.content ?? ''} />
-            {/* Action chips — deferred until function calling engine is implemented */}
             {message.aiModel && message.aiModel !== 'placeholder' && (
               <div className="mt-2 text-muted-foreground text-[9px] flex items-center gap-2">
                 <span>{message.aiModel}</span>

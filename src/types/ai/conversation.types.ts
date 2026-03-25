@@ -53,6 +53,40 @@ export interface AiMessage {
   createdAt: string;
 }
 
+// ── Action Card render data ──────────────────────────────────────────
+export type ActionCardStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'EXECUTED'
+  | 'FAILED'
+  | 'CANCELLED';
+
+export type ActionCardModule = 'stock' | 'finance' | 'hr' | 'sales';
+
+export interface ActionCardField {
+  label: string;
+  value: string;
+  type?: 'text' | 'number' | 'currency' | 'date' | 'badge';
+}
+
+export interface ActionCardResult {
+  success: boolean;
+  message: string;
+  entityId?: string;
+  entityUrl?: string;
+}
+
+export interface ActionCardRenderData {
+  type: 'ACTION_CARD';
+  actionId: string;
+  toolName: string;
+  displayName: string;
+  module: ActionCardModule;
+  status: ActionCardStatus;
+  fields: ActionCardField[];
+  result?: ActionCardResult;
+}
+
 export interface SendMessageRequest {
   conversationId?: string;
   content: string;
