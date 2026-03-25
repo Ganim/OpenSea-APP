@@ -22,6 +22,7 @@ import {
   Layers,
   AlertTriangle,
 } from 'lucide-react';
+import { CreatePipelineWizard } from './src/components/create-pipeline-wizard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,7 @@ export default function PipelinesListPage() {
 
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Pipeline | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const { data, isLoading, isError } = usePipelines({
     search: search || undefined,
@@ -98,10 +100,7 @@ export default function PipelinesListPage() {
                   title: 'Novo Pipeline',
                   icon: Plus,
                   variant: 'default' as const,
-                  onClick: () => {
-                    // Future: open create modal or navigate to create page
-                    toast.info('Funcionalidade de criacao em breve.');
-                  },
+                  onClick: () => setWizardOpen(true),
                 },
               ]
             : undefined
@@ -279,6 +278,12 @@ export default function PipelinesListPage() {
         onSuccess={handleDelete}
         title="Confirmar Exclusao"
         description={`Digite seu PIN de acao para excluir o pipeline "${deleteTarget?.name}".`}
+      />
+
+      {/* Create Pipeline Wizard */}
+      <CreatePipelineWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
       />
     </div>
   );

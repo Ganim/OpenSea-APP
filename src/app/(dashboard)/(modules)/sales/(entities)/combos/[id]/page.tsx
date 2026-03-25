@@ -331,15 +331,36 @@ export default function ComboDetailPage() {
               <div className="border-b border-border" />
             </div>
 
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-base font-semibold text-muted-foreground">
-                Itens do Combo
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                A gestao de itens vinculados ao combo estara disponivel em
-                breve.
-              </p>
+            <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-sky-500 mt-0.5 shrink-0" />
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    Itens configurados via edicao
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Os itens vinculados a este combo podem ser gerenciados na pagina de edicao.
+                    Acesse o botao &quot;Editar Combo&quot; acima para adicionar, remover ou
+                    alterar os produtos e categorias do combo.
+                  </p>
+                  {(combo.minItems != null || combo.maxItems != null) && (
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      {combo.minItems != null && (
+                        <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300">
+                          <Hash className="h-3 w-3" />
+                          Minimo: {combo.minItems} {combo.minItems === 1 ? 'item' : 'itens'}
+                        </div>
+                      )}
+                      {combo.maxItems != null && (
+                        <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300">
+                          <Hash className="h-3 w-3" />
+                          Maximo: {combo.maxItems} {combo.maxItems === 1 ? 'item' : 'itens'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </Card>

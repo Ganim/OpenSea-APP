@@ -9,6 +9,7 @@ import type {
   AnalyticsDashboardResponse,
   AnalyticsDashboardsResponse,
   CreateDashboardRequest,
+  UpdateDashboardRequest,
   AnalyticsReportResponse,
   AnalyticsReportsResponse,
   CreateReportRequest,
@@ -65,12 +66,34 @@ export const analyticsService = {
     );
   },
 
+  async getDashboard(id: string): Promise<AnalyticsDashboardResponse> {
+    return apiClient.get<AnalyticsDashboardResponse>(
+      API_ENDPOINTS.ANALYTICS.DASHBOARDS.GET(id)
+    );
+  },
+
   async createDashboard(
     data: CreateDashboardRequest
   ): Promise<AnalyticsDashboardResponse> {
     return apiClient.post<AnalyticsDashboardResponse>(
       API_ENDPOINTS.ANALYTICS.DASHBOARDS.CREATE,
       data
+    );
+  },
+
+  async updateDashboard(
+    id: string,
+    data: UpdateDashboardRequest
+  ): Promise<AnalyticsDashboardResponse> {
+    return apiClient.patch<AnalyticsDashboardResponse>(
+      API_ENDPOINTS.ANALYTICS.DASHBOARDS.UPDATE(id),
+      data
+    );
+  },
+
+  async deleteDashboard(id: string): Promise<void> {
+    return apiClient.delete<void>(
+      API_ENDPOINTS.ANALYTICS.DASHBOARDS.DELETE(id)
     );
   },
 

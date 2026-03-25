@@ -128,6 +128,14 @@ export interface CreateDashboardRequest {
   layout?: Record<string, unknown>;
 }
 
+export interface UpdateDashboardRequest {
+  name?: string;
+  description?: string;
+  role?: DashboardRole;
+  visibility?: DashboardVisibility;
+  layout?: Record<string, unknown>;
+}
+
 // Analytics Report
 export type ReportType =
   | 'SALES_SUMMARY'

@@ -23,8 +23,11 @@ import {
   COUPON_APPLICABLE_LABELS,
 } from '@/types/sales/coupon.types';
 import type { Coupon } from '@/types/sales';
+import { Progress } from '@/components/ui/progress';
 import {
+  BarChart3,
   Calendar,
+  Clock,
   Edit,
   Hash,
   Percent,
@@ -33,6 +36,7 @@ import {
   Tag,
   Target,
   Ticket,
+  TrendingUp,
   Users,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -350,6 +354,160 @@ export default function CouponDetailPage() {
                   value={String(coupon.maxUsagePerCustomer)}
                 />
               </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Section: Historico de Uso */}
+        <Card className="bg-white/5 py-2 overflow-hidden">
+          <div className="px-6 py-4 space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="h-5 w-5 text-foreground" />
+                <div>
+                  <h3 className="text-base font-semibold">
+                    Historico de Uso
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Resumo de utilizacao e progresso do cupom
+                  </p>
+                </div>
+              </div>
+              <div className="border-b border-border" />
+            </div>
+
+            {/* Usage Progress Card */}
+            <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-6">
+              {/* Progress Bar */}
+              {coupon.maxUsageTotal != null ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-violet-500" />
+                      <span className="text-sm font-medium">
+                        Progresso de Utilizacao
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {coupon.usageCount} / {coupon.maxUsageTotal}
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Progress
+                      value={Math.min(
+                        (coupon.usageCount / coupon.maxUsageTotal) * 100,
+                        100
+                      )}
+                      className="h-3 [--progress-bg:theme(colors.violet.100)] dark:[--progress-bg:theme(colors.violet.500/0.15)] [--progress-fill:theme(colors.violet.500)]"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {Math.round(
+                        (coupon.usageCount / coupon.maxUsageTotal) * 100
+                      )}
+                      % utilizado
+                    </span>
+                    <span>
+                      {Math.max(
+                        coupon.maxUsageTotal - coupon.usageCount,
+                        0
+                      )}{' '}
+                      {coupon.maxUsageTotal - coupon.usageCount === 1
+                        ? 'uso restante'
+                        : 'usos restantes'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-violet-500" />
+                      <span className="text-sm font-medium">
+                        Total de Utilizacoes
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {coupon.usageCount}
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Progress
+                      value={coupon.usageCount > 0 ? 100 : 0}
+                      className="h-3 [--progress-bg:theme(colors.violet.100)] dark:[--progress-bg:theme(colors.violet.500/0.15)] [--progress-fill:theme(colors.violet.500)]"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Este cupom nao possui limite de utilizacao
+                  </p>
+                </div>
+              )}
+
+              {/* Stats Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                {/* Usage count stat */}
+                <div className="rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Hash className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium uppercase tracking-wider">
+                      Usos Totais
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">{coupon.usageCount}</p>
+                </div>
+
+                {/* Remaining days stat */}
+                <div className="rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium uppercase tracking-wider">
+                      {expired ? 'Expirado ha' : 'Expira em'}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">
+                    {(() => {
+                      const now = new Date();
+                      const until = new Date(coupon.validUntil);
+                      const diffMs = Math.abs(until.getTime() - now.getTime());
+                      const diffDays = Math.ceil(
+                        diffMs / (1000 * 60 * 60 * 24)
+                      );
+                      return `${diffDays} ${diffDays === 1 ? 'dia' : 'dias'}`;
+                    })()}
+                  </p>
+                </div>
+
+                {/* Per-customer limit stat */}
+                <div className="rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium uppercase tracking-wider">
+                      Limite / Cliente
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">
+                    {coupon.maxUsagePerCustomer}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status indicator */}
+              {coupon.maxUsageTotal != null &&
+                coupon.usageCount >= coupon.maxUsageTotal && (
+                  <div className="flex items-center gap-3 rounded-lg border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 px-4 py-3">
+                    <ShieldCheck className="h-5 w-5 text-rose-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
+                        Limite de uso atingido
+                      </p>
+                      <p className="text-xs text-rose-600 dark:text-rose-400">
+                        Este cupom atingiu o numero maximo de utilizacoes
+                        permitidas e nao pode mais ser utilizado.
+                      </p>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </Card>

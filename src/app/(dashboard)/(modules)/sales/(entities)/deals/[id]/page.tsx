@@ -40,6 +40,7 @@ import {
   Mail,
   MessageSquare,
   FileText,
+  Pencil,
   Plus,
   Send,
   Trophy,
@@ -247,6 +248,17 @@ function DealDetailContent() {
                   icon: Trash2,
                   variant: 'destructive' as const,
                   onClick: () => setShowDeleteModal(true),
+                },
+              ]
+            : []),
+          ...(canModify
+            ? [
+                {
+                  id: 'edit',
+                  title: 'Editar',
+                  icon: Pencil,
+                  variant: 'default' as const,
+                  onClick: () => router.push(`/sales/deals/${dealId}/edit`),
                 },
               ]
             : []),

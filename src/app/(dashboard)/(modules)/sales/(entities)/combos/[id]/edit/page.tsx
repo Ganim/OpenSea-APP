@@ -37,18 +37,37 @@ import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { logger } from '@/lib/logger';
 import type { Combo, ComboDiscountType, ComboType } from '@/types/sales';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { useVariantsPaginated } from '@/hooks/stock/use-variants';
 import {
   Calendar,
   DollarSign,
+  GripVertical,
   Info,
   Loader2,
   Package,
+  Plus,
   Save,
+  Search,
   Trash2,
+  X,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+// =============================================================================
+// COMBO ITEM ROW TYPE
+// =============================================================================
+
+interface ComboItemRow {
+  localId: string;
+  variantId: string;
+  variantName: string;
+  quantity: number;
+  isRequired: boolean;
+  position: number;
+}
 
 // =============================================================================
 // SECTION HEADER
@@ -125,6 +144,78 @@ export default function EditComboPage() {
   const [validFrom, setValidFrom] = useState('');
   const [validUntil, setValidUntil] = useState('');
 
+  // Items state
+  const [items, setItems] = useState<ComboItemRow[]>([]);
+  const [variantSearchQuery, setVariantSearchQuery] = useState('');
+  const [showVariantSearch, setShowVariantSearch] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
+
+  // Variant search
+  const variantSearchParams = useMemo(
+    () => ({
+      search: variantSearchQuery || undefined,
+      limit: 10,
+      page: 1,
+    }),
+    [variantSearchQuery]
+  );
+
+  const { data: variantsData } = useVariantsPaginated(
+    variantSearchQuery.length >= 2 ? variantSearchParams : undefined
+  );
+
+  const searchResults = useMemo(() => {
+    if (!variantsData) return [];
+    return variantsData.variants ?? [];
+  }, [variantsData]);
+
+  // Item management callbacks
+  const addItem = useCallback(() => {
+    setItems((prev) => [
+      ...prev,
+      {
+        localId: crypto.randomUUID(),
+        variantId: '',
+        variantName: '',
+        quantity: 1,
+        isRequired: true,
+        position: prev.length,
+      },
+    ]);
+  }, []);
+
+  const removeItem = useCallback((localId: string) => {
+    setItems((prev) =>
+      prev
+        .filter((item) => item.localId !== localId)
+        .map((item, idx) => ({ ...item, position: idx }))
+    );
+  }, []);
+
+  const updateItem = useCallback(
+    (localId: string, updates: Partial<ComboItemRow>) => {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.localId === localId ? { ...item, ...updates } : item
+        )
+      );
+    },
+    []
+  );
+
+  const selectVariant = useCallback(
+    (localId: string, variant: { id: string; name: string; sku?: string }) => {
+      updateItem(localId, {
+        variantId: variant.id,
+        variantName: variant.sku ? `${variant.name} (${variant.sku})` : variant.name,
+      });
+      setShowVariantSearch(false);
+      setVariantSearchQuery('');
+      setActiveSearchIndex(null);
+    },
+    [updateItem]
+  );
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -163,6 +254,17 @@ export default function EditComboPage() {
 
     try {
       setIsSaving(true);
+
+      // Build items payload (only items with a variant selected)
+      const validItems = items
+        .filter((item) => item.variantId)
+        .map((item, idx) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+          isRequired: item.isRequired,
+          position: idx,
+        }));
+
       await updateMutation.mutateAsync({
         comboId,
         data: {
@@ -177,6 +279,7 @@ export default function EditComboPage() {
           isActive,
           validFrom: validFrom || null,
           validUntil: validUntil || null,
+          items: validItems,
         },
       });
 
@@ -528,33 +631,190 @@ export default function EditComboPage() {
           </div>
         </Card>
 
-        {/* Itens do Combo (placeholder) */}
+        {/* Itens do Combo */}
         <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Package className="h-5 w-5 text-foreground" />
-                <div>
-                  <h3 className="text-base font-semibold">
-                    Itens do Combo
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Produtos e categorias incluidos neste combo
-                  </p>
-                </div>
-              </div>
-              <div className="border-b border-border" />
-            </div>
+          <div className="px-6 py-4 space-y-8">
+            <div className="space-y-5">
+              <SectionHeader
+                icon={Package}
+                title="Itens do Combo"
+                subtitle="Produtos incluidos neste combo"
+              />
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                {items.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Package className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum item adicionado ao combo.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Clique no botao abaixo para adicionar produtos.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Table Header */}
+                    <div className="hidden sm:grid sm:grid-cols-[1fr_100px_80px_40px] gap-3 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <span>Produto / Variante</span>
+                      <span className="text-center">Quantidade</span>
+                      <span className="text-center">Obrigatorio</span>
+                      <span />
+                    </div>
 
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-base font-semibold text-muted-foreground">
-                Itens do Combo
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                A edicao de itens vinculados ao combo estara disponivel em
-                breve.
-              </p>
+                    {/* Item Rows */}
+                    {items.map((item, index) => (
+                      <div
+                        key={item.localId}
+                        className="grid grid-cols-1 sm:grid-cols-[1fr_100px_80px_40px] gap-3 items-center rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 px-3 py-3"
+                      >
+                        {/* Variant selector */}
+                        <div className="relative">
+                          {item.variantId ? (
+                            <div className="flex items-center gap-2">
+                              <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {item.variantName}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateItem(item.localId, {
+                                    variantId: '',
+                                    variantName: '',
+                                  })
+                                }
+                                className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600 text-muted-foreground"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Buscar variante por nome ou SKU..."
+                                  className="pl-9"
+                                  value={activeSearchIndex === index ? variantSearchQuery : ''}
+                                  onChange={(e) => {
+                                    setVariantSearchQuery(e.target.value);
+                                    setShowVariantSearch(true);
+                                    setActiveSearchIndex(index);
+                                  }}
+                                  onFocus={() => {
+                                    setShowVariantSearch(true);
+                                    setActiveSearchIndex(index);
+                                  }}
+                                  onBlur={() => {
+                                    // Delay to allow click on search results
+                                    setTimeout(() => {
+                                      if (activeSearchIndex === index) {
+                                        setShowVariantSearch(false);
+                                        setActiveSearchIndex(null);
+                                      }
+                                    }, 200);
+                                  }}
+                                />
+                              </div>
+                              {showVariantSearch &&
+                                activeSearchIndex === index &&
+                                variantSearchQuery.length >= 2 && (
+                                  <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-white dark:bg-slate-800 shadow-lg">
+                                    {searchResults.length === 0 ? (
+                                      <div className="px-4 py-3 text-sm text-muted-foreground">
+                                        Nenhuma variante encontrada
+                                      </div>
+                                    ) : (
+                                      searchResults.map((variant) => (
+                                        <button
+                                          key={variant.id}
+                                          type="button"
+                                          className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                                          onMouseDown={(e) => e.preventDefault()}
+                                          onClick={() =>
+                                            selectVariant(item.localId, variant)
+                                          }
+                                        >
+                                          <p className="text-sm font-medium truncate">
+                                            {variant.name}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {variant.sku ? `SKU: ${variant.sku}` : ''}{' '}
+                                            {variant.price != null
+                                              ? `| R$ ${Number(variant.price).toFixed(2)}`
+                                              : ''}
+                                          </p>
+                                        </button>
+                                      ))
+                                    )}
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Quantity */}
+                        <div>
+                          <Label className="sm:hidden text-xs text-muted-foreground mb-1">
+                            Quantidade
+                          </Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateItem(item.localId, {
+                                quantity: Math.max(1, Number(e.target.value) || 1),
+                              })
+                            }
+                            className="text-center"
+                          />
+                        </div>
+
+                        {/* Required toggle */}
+                        <div className="flex items-center justify-center gap-2">
+                          <Label className="sm:hidden text-xs text-muted-foreground">
+                            Obrigatorio
+                          </Label>
+                          <Switch
+                            checked={item.isRequired}
+                            onCheckedChange={(checked) =>
+                              updateItem(item.localId, { isRequired: checked })
+                            }
+                          />
+                        </div>
+
+                        {/* Remove button */}
+                        <div className="flex justify-center">
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.localId)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                            title="Remover item"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add item button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addItem}
+                  className="w-full mt-2 border-dashed"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Item
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

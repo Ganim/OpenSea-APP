@@ -52,6 +52,15 @@ export interface CreateComboRequest {
   }>;
 }
 
+export interface ComboItem {
+  id?: string;
+  variantId?: string;
+  categoryId?: string;
+  quantity: number;
+  isRequired: boolean;
+  position: number;
+}
+
 export interface UpdateComboRequest {
   name?: string;
   description?: string | null;
@@ -65,6 +74,13 @@ export interface UpdateComboRequest {
   validFrom?: string | null;
   validUntil?: string | null;
   imageUrl?: string | null;
+  items?: Array<{
+    variantId?: string;
+    categoryId?: string;
+    quantity?: number;
+    isRequired?: boolean;
+    position?: number;
+  }>;
 }
 
 export interface ComboResponse {

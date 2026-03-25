@@ -12,10 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useDashboardsInfinite } from '@/hooks/sales/use-analytics';
+import { CreateDashboardWizard } from './src/components/create-dashboard-wizard';
 import type { AnalyticsDashboard } from '@/types/sales';
 import { LayoutDashboard, Plus, Eye, Lock, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 const ROLE_LABELS: Record<string, string> = {
   SELLER: 'Vendedor',
@@ -37,6 +38,7 @@ const VISIBILITY_CONFIG: Record<
 
 export default function DashboardsPage() {
   const router = useRouter();
+  const [wizardOpen, setWizardOpen] = useState(false);
   const { data, isLoading, error } = useDashboardsInfinite();
 
   const dashboards = useMemo(
@@ -54,7 +56,11 @@ export default function DashboardsPage() {
             { label: 'Dashboards' },
           ]}
         >
-          <Button size="sm" className="h-9 px-2.5">
+          <Button
+            size="sm"
+            className="h-9 px-2.5"
+            onClick={() => setWizardOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-1" />
             Novo Dashboard
           </Button>
@@ -142,6 +148,7 @@ export default function DashboardsPage() {
             })}
           </div>
         )}
+        <CreateDashboardWizard open={wizardOpen} onOpenChange={setWizardOpen} />
       </PageBody>
     </PageLayout>
   );

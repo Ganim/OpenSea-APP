@@ -20,11 +20,13 @@ import {
   Box,
   DollarSign,
   ListOrdered,
+  Pencil,
   ShoppingBag,
   Wifi,
   WifiOff,
   AlertTriangle,
   Pause,
+  RefreshCw,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 
@@ -125,15 +127,27 @@ export default function ConnectionDetailPage() {
             { label: connection.name },
           ]}
         >
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 px-2.5"
-            onClick={() => router.push('/sales/marketplaces')}
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Voltar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-2.5"
+              onClick={() => router.push('/sales/marketplaces')}
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Voltar
+            </Button>
+            <Button
+              size="sm"
+              className="h-9 px-2.5"
+              onClick={() =>
+                router.push(`/sales/marketplaces/${connectionId}/edit`)
+              }
+            >
+              <Pencil className="mr-1 h-4 w-4" />
+              Editar
+            </Button>
+          </div>
         </PageActionBar>
       </PageHeader>
       <PageBody>
@@ -270,12 +284,32 @@ export default function ConnectionDetailPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Intervalo de sincronizacao: {connection.syncIntervalMin} min
-              {connection.commissionPercent !== undefined &&
-                ` | Comissao: ${connection.commissionPercent}%`}
-              {connection.autoCalcPrice && ' | Calculo automatico de preco'}
-            </p>
+            <div className="mt-3 space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Intervalo de sincronizacao: {connection.syncIntervalMin} min
+                {connection.commissionPercent !== undefined &&
+                  ` | Comissao: ${connection.commissionPercent}%`}
+                {connection.autoCalcPrice && ' | Calculo automatico de preco'}
+              </p>
+              {connection.lastSyncAt && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3" />
+                  Ultima sincronizacao:{' '}
+                  {new Date(connection.lastSyncAt).toLocaleString('pt-BR')}
+                </p>
+              )}
+              {connection.lastSyncError && (
+                <p className="text-xs text-rose-500 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  Erro: {connection.lastSyncError}
+                </p>
+              )}
+              {connection.webhookUrl && (
+                <p className="text-xs text-muted-foreground">
+                  Webhook: {connection.webhookUrl}
+                </p>
+              )}
+            </div>
           </Card>
         </div>
       </PageBody>

@@ -3,6 +3,7 @@ import type {
   CreateGoalRequest,
   UpdateGoalRequest,
   CreateDashboardRequest,
+  UpdateDashboardRequest,
   CreateReportRequest,
   CreatePortalAccessRequest,
 } from '@/types/sales';
@@ -26,6 +27,7 @@ const ANALYTICS_KEYS = {
     all: ['analytics-dashboards'] as const,
     list: (filters?: Record<string, string>) =>
       ['analytics-dashboards', 'list', filters] as const,
+    detail: (id: string) => ['analytics-dashboards', 'detail', id] as const,
   },
   reports: {
     all: ['analytics-reports'] as const,
@@ -134,12 +136,50 @@ export function useDashboardsInfinite(
   });
 }
 
+export function useDashboard(id: string) {
+  return useQuery({
+    queryKey: ANALYTICS_KEYS.dashboards.detail(id),
+    queryFn: async () => {
+      const response = await analyticsService.getDashboard(id);
+      return response.dashboard;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateDashboard() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: CreateDashboardRequest) =>
       analyticsService.createDashboard(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ANALYTICS_KEYS.dashboards.all,
+      });
+    },
+  });
+}
+
+export function useUpdateDashboard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateDashboardRequest }) =>
+      analyticsService.updateDashboard(id, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ANALYTICS_KEYS.dashboards.all,
+      });
+    },
+  });
+}
+
+export function useDeleteDashboard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => analyticsService.deleteDashboard(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ANALYTICS_KEYS.dashboards.all,
