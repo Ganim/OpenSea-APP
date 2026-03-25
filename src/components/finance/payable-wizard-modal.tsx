@@ -10,7 +10,10 @@ import type { CreateFinanceEntryData } from '@/types/finance';
 import { Barcode, CheckCircle, FileText } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { PayableStepConfirmation } from './payable-step-confirmation';
+import {
+  PayableConfirmationFooter,
+  PayableStepConfirmation,
+} from './payable-step-confirmation';
 import { PayableStepDetails } from './payable-step-details';
 import { PayableStepEntry } from './payable-step-entry';
 
@@ -301,6 +304,15 @@ export function PayableWizardModal({
           isBatch={isBatchMode}
           onSubmit={handleSubmit}
           isPending={createMutation.isPending}
+        />
+      ),
+      footer: (
+        <PayableConfirmationFooter
+          isBatch={isBatchMode}
+          entryCount={wizardData.batchEntries.length}
+          onSubmit={handleSubmit}
+          isPending={createMutation.isPending}
+          onBack={() => setCurrentStep(2)}
         />
       ),
       isValid: true,
