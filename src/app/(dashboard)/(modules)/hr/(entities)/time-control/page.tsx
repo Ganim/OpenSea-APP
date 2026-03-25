@@ -17,7 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { TimeEntry } from '@/types/hr';
-import { Calculator, LogIn, LogOut } from 'lucide-react';
+import { Calculator, LogIn, LogOut, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 import {
   CalculateHoursModal,
@@ -46,6 +47,7 @@ export default function TimeControlPage() {
 }
 
 function TimeControlPageContent() {
+  const router = useRouter();
   const { hasPermission } = usePermissions();
 
   // Filters
@@ -111,6 +113,13 @@ function TimeControlPageContent() {
   const actionButtons = useMemo<HeaderButton[]>(
     () => [
       {
+        id: 'settings',
+        icon: Settings,
+        onClick: () => router.push('/hr/time-control/settings'),
+        variant: 'ghost',
+        tooltip: 'Configurações',
+      },
+      {
         id: 'calculate',
         title: 'Calcular Horas',
         icon: Calculator,
@@ -132,7 +141,7 @@ function TimeControlPageContent() {
         variant: 'default',
       },
     ],
-    []
+    [router]
   );
 
   return (
