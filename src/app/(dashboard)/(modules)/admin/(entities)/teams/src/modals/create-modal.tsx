@@ -14,12 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { logger } from '@/lib/logger';
-import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
+import { useFormErrorHandler } from '@/hooks/use-form-error-handler';
+import { showSuccessToast } from '@/lib/toast-utils';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import type { CreateModalProps, NewTeamData } from '../types';
 import { createTeam } from '../utils/teams.crud';
 
@@ -48,32 +50,37 @@ export function CreateModal({
   onSuccess,
 }: CreateModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<NewTeamData>({ ...initialFormData });
+  const [selectedColor, setSelectedColor] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<{ name: string; description: string }>({
+    defaultValues: { name: '', description: '' },
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+  });
+
+  const { handleError } = useFormErrorHandler({
+    form,
+    fieldMap: {
+      'name already exists': 'name',
+      'already exists': 'name',
+    },
+  });
+
+  const handleSubmit = async (data: { name: string; description: string }) => {
     setIsLoading(true);
-
     try {
       await createTeam({
-        name: formData.name,
-        description: formData.description || null,
-        color: formData.color || null,
+        name: data.name,
+        description: data.description || null,
+        color: selectedColor || null,
       });
       showSuccessToast('Equipe criada com sucesso');
       onSuccess();
       onOpenChange(false);
-      setFormData({ ...initialFormData });
+      form.reset();
+      setSelectedColor('');
     } catch (error) {
-      logger.error(
-        'Erro ao criar equipe',
-        error instanceof Error ? error : undefined
-      );
-      showErrorToast({
-        title: 'Erro ao criar equipe',
-        description:
-          error instanceof Error ? error.message : 'Erro desconhecido',
-      });
+      handleError(error);
     } finally {
       setIsLoading(false);
     }
@@ -89,20 +96,26 @@ export function CreateModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="space-y-4 py-4">
             {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="team-name">Nome *</Label>
-              <Input
-                id="team-name"
-                placeholder="Ex: Equipe de Vendas"
-                value={formData.name}
-                onChange={e =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="team-name"
+                  placeholder="Ex: Equipe de Vendas"
+                  aria-invalid={!!form.formState.errors.name}
+                  {...form.register('name', {
+                    required: 'Nome é obrigatório',
+                  })}
+                />
+                {form.formState.errors.name && (
+                  <FormErrorIcon
+                    message={form.formState.errors.name.message ?? ''}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Descrição */}
@@ -111,11 +124,8 @@ export function CreateModal({
               <Textarea
                 id="team-description"
                 placeholder="Descreva a equipe..."
-                value={formData.description}
-                onChange={e =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
                 rows={3}
+                {...form.register('description')}
               />
             </div>
 
@@ -131,24 +141,23 @@ export function CreateModal({
                     style={{
                       backgroundColor: color,
                       borderColor:
-                        formData.color === color ? 'white' : 'transparent',
+                        selectedColor === color ? 'white' : 'transparent',
                       boxShadow:
-                        formData.color === color
+                        selectedColor === color
                           ? `0 0 0 2px ${color}`
                           : 'none',
                     }}
                     onClick={() =>
-                      setFormData({
-                        ...formData,
-                        color: formData.color === color ? '' : color,
-                      })
+                      setSelectedColor(
+                        selectedColor === color ? '' : color,
+                      )
                     }
                   />
                 ))}
               </div>
-              {formData.color && (
+              {selectedColor && (
                 <p className="text-xs text-muted-foreground">
-                  Cor selecionada: {formData.color}
+                  Cor selecionada: {selectedColor}
                 </p>
               )}
             </div>
@@ -163,7 +172,7 @@ export function CreateModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || !formData.name.trim()}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Criando...' : 'Criar Equipe'}
             </Button>
           </DialogFooter>

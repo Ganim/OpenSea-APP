@@ -1776,3 +1776,27 @@ body {
   color: rgb(var(--color-primary-foreground)) !important;
   font-weight: 700 !important;
 }
+
+/* ===========================================
+   ERROR HIGHLIGHT ANIMATION
+   Used by useGoToField() to pulse a field after
+   navigating from the error report modal.
+   =========================================== */
+@keyframes error-highlight-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--color-destructive) / 0);
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 0 3px rgb(var(--color-destructive) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgb(var(--color-destructive) / 0.4);
+  }
+}
+
+.animate-error-highlight {
+  animation: error-highlight-pulse 2s ease-in-out;
+  border-radius: var(--input-radius, 0.5rem);
+}

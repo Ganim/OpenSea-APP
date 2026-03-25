@@ -13,14 +13,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
+import { useFormErrorHandler } from '@/hooks/use-form-error-handler';
+import { showSuccessToast } from '@/lib/toast-utils';
 import { usersService } from '@/services/auth/users.service';
 import type { User } from '@/types/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Pencil, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 interface ChangeUsernameModalProps {
   isOpen: boolean;
@@ -34,35 +37,45 @@ export function ChangeUsernameModal({
   user,
 }: ChangeUsernameModalProps) {
   const queryClient = useQueryClient();
-  const [username, setUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<{ username: string }>({
+    defaultValues: { username: '' },
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+  });
+
+  const { handleError } = useFormErrorHandler({
+    form,
+    fieldMap: {
+      'Username already exists': 'username',
+      'username already': 'username',
+    },
+  });
 
   useEffect(() => {
     if (user) {
-      setUsername(user.username || '');
+      form.reset({ username: user.username || '' });
     }
-  }, [user]);
+  }, [user, form]);
 
   if (!user) return null;
 
+  const username = form.watch('username');
   const trimmed = username.trim();
   const hasChanged = trimmed !== (user.username || '') && trimmed.length > 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!hasChanged) return;
+  const handleSubmit = async (data: { username: string }) => {
+    const value = data.username.trim();
+    if (!value || value === (user.username || '')) return;
     setIsSubmitting(true);
     try {
-      await usersService.updateUserUsername(user.id, { username: trimmed });
+      await usersService.updateUserUsername(user.id, { username: value });
       await queryClient.invalidateQueries({ queryKey: ['users'] });
       showSuccessToast('Username alterado com sucesso');
       onClose();
     } catch (error) {
-      showErrorToast({
-        title: 'Erro ao alterar username',
-        description:
-          error instanceof Error ? error.message : 'Erro desconhecido',
-      });
+      handleError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -85,17 +98,27 @@ export function ChangeUsernameModal({
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="new-username">Novo Username</Label>
-            <Input
-              id="new-username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="Digite o novo username"
-              autoFocus
-              maxLength={255}
-            />
+            <div className="relative">
+              <Input
+                id="new-username"
+                placeholder="Digite o novo username"
+                autoFocus
+                maxLength={255}
+                aria-invalid={!!form.formState.errors.username}
+                {...form.register('username', {
+                  required: 'Username é obrigatório',
+                  minLength: { value: 3, message: 'Mínimo 3 caracteres' },
+                })}
+              />
+              {form.formState.errors.username && (
+                <FormErrorIcon
+                  message={form.formState.errors.username.message ?? ''}
+                />
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               Username atual: <strong>{user.username}</strong>
             </p>

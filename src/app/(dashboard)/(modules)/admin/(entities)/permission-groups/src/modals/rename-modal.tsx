@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -38,12 +39,28 @@ export function RenameModal({
 
   if (!group) return null;
 
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed) return;
-    await onSubmit(group.id, { name: trimmed });
-    onClose();
+    if (!trimmed) {
+      setError('Nome é obrigatório');
+      return;
+    }
+    setError('');
+    try {
+      await onSubmit(group.id, { name: trimmed });
+      onClose();
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao renomear grupo';
+      if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('já existe')) {
+        setError('Este nome já está em uso');
+      } else {
+        setError(msg);
+      }
+    }
   };
 
   return (
@@ -78,14 +95,21 @@ export function RenameModal({
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="group-name">Nome do Grupo</Label>
-            <Input
-              id="group-name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Digite o nome do grupo"
-              autoFocus
-              maxLength={255}
-            />
+            <div className="relative">
+              <Input
+                id="group-name"
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (error) setError('');
+                }}
+                placeholder="Digite o nome do grupo"
+                autoFocus
+                maxLength={255}
+                aria-invalid={!!error}
+              />
+              {error && <FormErrorIcon message={error} />}
+            </div>
           </div>
 
           <DialogFooter className="gap-2">

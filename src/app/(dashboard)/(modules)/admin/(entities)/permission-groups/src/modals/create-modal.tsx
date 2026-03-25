@@ -14,12 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { logger } from '@/lib/logger';
-import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
+import { useFormErrorHandler } from '@/hooks/use-form-error-handler';
+import { showSuccessToast } from '@/lib/toast-utils';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import type { CreateModalProps } from '../types';
 import { createPermissionGroup } from '../utils/permission-groups.utils';
 
@@ -29,41 +31,44 @@ export function CreateModal({
   onSuccess,
 }: CreateModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    priority: 0,
-    isActive: true,
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      slug: '',
+      description: '',
+      priority: 0,
+      isActive: true,
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const { handleError } = useFormErrorHandler({
+    form,
+    fieldMap: {
+      'name already exists': 'name',
+      'slug already exists': 'slug',
+      'already exists': 'name',
+    },
+  });
 
+  const handleSubmit = async (formData: {
+    name: string;
+    slug: string;
+    description: string;
+    priority: number;
+    isActive: boolean;
+  }) => {
+    setIsLoading(true);
     try {
       await createPermissionGroup(formData);
       showSuccessToast('Grupo criado com sucesso');
       onSuccess();
       onOpenChange(false);
-      // Reset form
-      setFormData({
-        name: '',
-        slug: '',
-        description: '',
-        priority: 0,
-        isActive: true,
-      });
+      form.reset();
     } catch (error) {
-      logger.error(
-        'Erro ao criar grupo',
-        error instanceof Error ? error : undefined
-      );
-      showErrorToast({
-        title: 'Erro ao criar grupo',
-        description:
-          error instanceof Error ? error.message : 'Erro desconhecido',
-      });
+      handleError(error);
     } finally {
       setIsLoading(false);
     }
@@ -79,33 +84,44 @@ export function CreateModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="space-y-4 py-4">
             {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="name">Nome *</Label>
-              <Input
-                id="name"
-                placeholder="Ex: Gerentes"
-                value={formData.name}
-                onChange={e =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="name"
+                  placeholder="Ex: Gerentes"
+                  aria-invalid={!!form.formState.errors.name}
+                  {...form.register('name', {
+                    required: 'Nome é obrigatório',
+                  })}
+                />
+                {form.formState.errors.name && (
+                  <FormErrorIcon
+                    message={form.formState.errors.name.message ?? ''}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Slug */}
             <div className="space-y-2">
               <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                placeholder="Ex: managers"
-                value={formData.slug}
-                onChange={e =>
-                  setFormData({ ...formData, slug: e.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  id="slug"
+                  placeholder="Ex: managers"
+                  aria-invalid={!!form.formState.errors.slug}
+                  {...form.register('slug')}
+                />
+                {form.formState.errors.slug && (
+                  <FormErrorIcon
+                    message={form.formState.errors.slug.message ?? ''}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Descrição */}
@@ -114,11 +130,8 @@ export function CreateModal({
               <Textarea
                 id="description"
                 placeholder="Descreva o grupo..."
-                value={formData.description}
-                onChange={e =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
                 rows={3}
+                {...form.register('description')}
               />
             </div>
 
@@ -129,13 +142,7 @@ export function CreateModal({
                 id="priority"
                 type="number"
                 placeholder="0"
-                value={formData.priority}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    priority: parseInt(e.target.value) || 0,
-                  })
-                }
+                {...form.register('priority', { valueAsNumber: true })}
               />
             </div>
           </div>

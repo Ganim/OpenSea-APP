@@ -99,15 +99,7 @@ export default function UsersPage() {
   const [userForAssign, setUserForAssign] = useState<User | null>(null);
   const [changeUsernameOpen, setChangeUsernameOpen] = useState(false);
   const [userForUsername, setUserForUsername] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState<{
-    username: string;
-    email: string;
-    password: string;
-  }>({
-    username: '',
-    email: '',
-    password: '',
-  });
+  // newUser state removed — CreateModal now manages its own form state
 
   // ============================================================================
   // CRUD SETUP
@@ -435,24 +427,14 @@ export default function UsersPage() {
     }
   };
 
-  const handleCreateUser = async () => {
-    try {
-      await crud.create(newUser);
-      // Reset form
-      setNewUser({
-        username: '',
-        email: '',
-        password: '',
-      });
-      page.modals.close('create');
-      // Invalidar cache do mapa de grupos para exibir o chip do novo usuário
-      queryClient.invalidateQueries({ queryKey: ['all-user-groups-map'] });
-    } catch (error) {
-      logger.error(
-        'Erro ao criar usuário',
-        error instanceof Error ? error : undefined
-      );
-    }
+  const handleCreateUser = async (data: {
+    username: string;
+    email: string;
+    password: string;
+  }) => {
+    await crud.create(data);
+    page.modals.close('create');
+    queryClient.invalidateQueries({ queryKey: ['all-user-groups-map'] });
   };
 
   const forceAccessPinReset = useForceAccessPinReset();
@@ -1010,18 +992,9 @@ export default function UsersPage() {
           <CreateModal
             isOpen={page.modals.isOpen('create')}
             onOpenChange={open => {
-              if (!open) {
-                page.modals.close('create');
-                setNewUser({
-                  username: '',
-                  email: '',
-                  password: '',
-                });
-              }
+              if (!open) page.modals.close('create');
             }}
             onCreateUser={handleCreateUser}
-            newUser={newUser}
-            setNewUser={setNewUser}
           />
 
           {/* Edit Modal */}

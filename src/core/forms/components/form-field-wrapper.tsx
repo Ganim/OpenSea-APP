@@ -1,14 +1,17 @@
 /**
  * OpenSea OS - Form Field Wrapper
  * Wrapper comum para todos os campos de formulário
+ *
+ * Erros são exibidos via ícone + tooltip (sem empurrar layout).
+ * O campo recebe data-error para estilização via CSS (borda rose).
  */
 
 'use client';
 
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
-import { AlertCircle } from 'lucide-react';
 import React, { ReactNode } from 'react';
 
 export interface FormFieldWrapperProps {
@@ -56,16 +59,16 @@ export function FormFieldWrapper({
   children,
 }: FormFieldWrapperProps) {
   const descriptionId = `${id}-description`;
-  const errorId = `${id}-error`;
   return (
     <div
       className={cn(
         'form-field-wrapper',
         colSpanClasses[colSpan],
         disabled && 'opacity-60 pointer-events-none',
-        className
+        className,
       )}
       data-disabled={disabled || undefined}
+      data-field-id={id}
     >
       <div className="space-y-2">
         {/* Label */}
@@ -79,29 +82,20 @@ export function FormFieldWrapper({
           )}
         </Label>
 
-        {/* Campo */}
-        <div className="relative">{children}</div>
+        {/* Campo + ícone de erro (sem empurrar layout) */}
+        <div className="relative">
+          {children}
+          {error && <FormErrorIcon message={error} />}
+        </div>
 
-        {/* Descrição */}
+        {/* Descrição (visível apenas quando não há erro) */}
         {description && !error && (
           <p
             id={descriptionId}
-            className="text-xs text-[rgb(var(--color-foreground-subtle))] px-2 "
+            className="text-xs text-[rgb(var(--color-foreground-subtle))] px-2"
           >
             {description}
           </p>
-        )}
-
-        {/* Erro */}
-        {error && (
-          <div
-            id={errorId}
-            role="alert"
-            className="flex items-start gap-2 text-xs text-[rgb(var(--color-destructive))]"
-          >
-            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span>{error}</span>
-          </div>
         )}
       </div>
     </div>

@@ -30,12 +30,11 @@ export interface DetailModalProps {
   onManageGroups: (user: User) => void;
 }
 
+/** @deprecated CreateModal now defines its own props internally */
 export interface CreateModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateUser: () => Promise<void>;
-  newUser: NewUserData;
-  setNewUser: (user: NewUserData) => void;
+  onCreateUser: (data: NewUserData) => Promise<void>;
 }
 
 export interface ManageGroupsModalProps {
