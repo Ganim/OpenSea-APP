@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { aiInsightsService } from '@/services/ai';
+import { aiInsightsService, aiCampaignsService } from '@/services/ai';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -23,8 +23,17 @@ import {
   X,
   ExternalLink,
   Loader2,
+  Rocket,
+  DollarSign,
+  ShoppingCart,
 } from 'lucide-react';
-import type { AiInsight, AiInsightType, AiInsightPriority } from '@/types/ai';
+import { toast } from 'sonner';
+import type {
+  AiInsight,
+  AiInsightType,
+  AiInsightPriority,
+  CampaignSuggestion,
+} from '@/types/ai';
 
 const INSIGHT_TYPE_CONFIG: Record<
   AiInsightType,
@@ -65,6 +74,81 @@ const PRIORITY_CONFIG: Record<
   URGENT: { label: 'Urgente', variant: 'destructive' },
 };
 
+function CampaignCard({
+  insight,
+  onApply,
+  isApplying,
+}: {
+  insight: AiInsight;
+  onApply: (insightId: string) => void;
+  isApplying: boolean;
+}) {
+  const campaignData =
+    insight.renderData as unknown as CampaignSuggestion | null;
+  if (!campaignData) return null;
+
+  return (
+    <div className="mt-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 space-y-2">
+      {/* Target products */}
+      {campaignData.targetProducts &&
+        campaignData.targetProducts.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1 mb-1">
+              <ShoppingCart className="h-3 w-3" />
+              Produtos Alvo
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {campaignData.targetProducts.map(p => (
+                <Badge key={p.id} variant="outline" className="text-[10px]">
+                  {p.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+      {/* Discount & Impact */}
+      <div className="flex items-center gap-4 text-xs">
+        {campaignData.suggestedDiscount != null && (
+          <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+            <DollarSign className="h-3 w-3" />
+            <span className="font-medium">
+              {campaignData.suggestedDiscount}% desconto
+            </span>
+          </div>
+        )}
+        {campaignData.estimatedImpact && (
+          <div className="flex items-center gap-1 text-sky-600 dark:text-sky-400">
+            <TrendingUp className="h-3 w-3" />
+            <span className="font-medium">
+              +
+              {campaignData.estimatedImpact.revenueIncrease.toLocaleString(
+                'pt-BR',
+                { style: 'currency', currency: 'BRL' }
+              )}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Apply button */}
+      <Button
+        size="sm"
+        onClick={() => onApply(insight.id)}
+        disabled={isApplying}
+        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
+      >
+        {isApplying ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+        ) : (
+          <Rocket className="h-3.5 w-3.5 mr-1" />
+        )}
+        Aplicar Campanha
+      </Button>
+    </div>
+  );
+}
+
 export function AiInsightsView() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('NEW');
@@ -91,6 +175,17 @@ export function AiInsightsView() {
     mutationFn: aiInsightsService.dismiss,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai', 'insights'] });
+    },
+  });
+
+  const applyCampaignMutation = useMutation({
+    mutationFn: aiCampaignsService.applyCampaign,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai', 'insights'] });
+      toast.success('Campanha aplicada com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao aplicar campanha.');
     },
   });
 
@@ -168,6 +263,16 @@ export function AiInsightsView() {
                     Sugestao: {insight.suggestedAction}
                   </div>
                 )}
+
+                {(insight.type === 'OPPORTUNITY' ||
+                  insight.type === 'RECOMMENDATION') &&
+                  insight.renderData && (
+                    <CampaignCard
+                      insight={insight}
+                      onApply={id => applyCampaignMutation.mutate(id)}
+                      isApplying={applyCampaignMutation.isPending}
+                    />
+                  )}
 
                 <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
                   <span className="text-xs text-muted-foreground">

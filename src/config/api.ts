@@ -361,13 +361,19 @@ export const API_ENDPOINTS = {
   // Sales - Order Returns
   RETURNS: {
     LIST: '/v1/returns',
+    GET: (id: string) => `/v1/returns/${id}`,
     CREATE: '/v1/returns',
+    UPDATE: (id: string) => `/v1/returns/${id}`,
+    DELETE: (id: string) => `/v1/returns/${id}`,
     APPROVE: (id: string) => `/v1/returns/${id}/approve`,
   },
   // Sales - Store Credits
   STORE_CREDITS: {
+    LIST: '/v1/store-credits',
+    GET: (id: string) => `/v1/store-credits/${id}`,
     BALANCE: '/v1/store-credits/balance',
     CREATE: '/v1/store-credits',
+    DELETE: (id: string) => `/v1/store-credits/${id}`,
   },
   // Sales - Comments
   COMMENTS: {
@@ -424,7 +430,9 @@ export const API_ENDPOINTS = {
   // Sales - Coupons
   COUPONS: {
     LIST: '/v1/coupons',
+    GET: (id: string) => `/v1/coupons/${id}`,
     CREATE: '/v1/coupons',
+    UPDATE: (id: string) => `/v1/coupons/${id}`,
     DELETE: (id: string) => `/v1/coupons/${id}`,
     VALIDATE: '/v1/coupons/validate',
   },
@@ -433,6 +441,7 @@ export const API_ENDPOINTS = {
     LIST: '/v1/combos',
     GET: (id: string) => `/v1/combos/${id}`,
     CREATE: '/v1/combos',
+    UPDATE: (id: string) => `/v1/combos/${id}`,
     DELETE: (id: string) => `/v1/combos/${id}`,
   },
   // Sales - Notification Preferences
@@ -620,6 +629,7 @@ export const API_ENDPOINTS = {
       SYSTEM_HEALTH: '/v1/admin/monitoring/health',
       INTEGRATION_STATUS: '/v1/admin/monitoring/integrations',
       AI_USAGE: '/v1/admin/monitoring/ai-usage',
+      API_USAGE: '/v1/admin/monitoring/api-usage',
       REVENUE: '/v1/admin/monitoring/revenue',
     },
     // Central Team
@@ -678,6 +688,10 @@ export const API_ENDPOINTS = {
     OCR_UPLOAD_BATCH: '/v1/finance/entries/ocr/upload-batch',
     LAST_SUPPLIER: '/v1/finance/entries/last-supplier',
     CREATE_BATCH: '/v1/finance/entries/batch',
+    BULK_PAY: '/v1/finance/entries/bulk/pay',
+    BULK_CANCEL: '/v1/finance/entries/bulk/cancel',
+    BULK_DELETE: '/v1/finance/entries/bulk/delete',
+    BULK_CATEGORIZE: '/v1/finance/entries/bulk/categorize',
   },
   // Finance - Dashboard & Reports
   FINANCE_DASHBOARD: {
@@ -1125,6 +1139,28 @@ export const API_ENDPOINTS = {
     },
     ACTIONS: {
       LIST: '/v1/ai/actions',
+    },
+    WORKFLOWS: {
+      LIST: '/v1/ai/workflows',
+      CREATE: '/v1/ai/workflows',
+      GET: (id: string) => `/v1/ai/workflows/${id}`,
+      UPDATE: (id: string) => `/v1/ai/workflows/${id}`,
+      DELETE: (id: string) => `/v1/ai/workflows/${id}`,
+      RUN: (id: string) => `/v1/ai/workflows/${id}/run`,
+      EXECUTIONS: (id: string) => `/v1/ai/workflows/${id}/executions`,
+    },
+    CAMPAIGNS: {
+      GENERATE: '/v1/ai/campaigns/generate',
+      APPLY: (id: string) => `/v1/ai/campaigns/${id}/apply`,
+    },
+    DOCUMENTS: {
+      ANALYZE: '/v1/ai/documents/analyze',
+    },
+    CONTENT: {
+      GENERATE: '/v1/ai/content/generate',
+    },
+    SETUP_WIZARD: {
+      RUN: '/v1/ai/setup-wizard',
     },
   },
   // Marketplace Integration

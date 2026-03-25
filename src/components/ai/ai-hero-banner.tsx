@@ -9,9 +9,20 @@ import {
   Star,
   Activity,
   Settings,
+  Workflow,
+  FileText,
+  Sparkles,
 } from 'lucide-react';
 
-export type AiView = 'chat' | 'insights' | 'favorites' | 'actions' | 'settings';
+export type AiView =
+  | 'chat'
+  | 'insights'
+  | 'favorites'
+  | 'actions'
+  | 'workflows'
+  | 'documents'
+  | 'content'
+  | 'settings';
 
 interface AiHeroBannerProps {
   activeView: AiView;
@@ -25,9 +36,12 @@ const VIEW_TABS: {
 }[] = [
   { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'insights', label: 'Insights', icon: Lightbulb },
+  { id: 'workflows', label: 'Workflows', icon: Workflow },
+  { id: 'documents', label: 'Documentos', icon: FileText },
+  { id: 'content', label: 'Conteudo', icon: Sparkles },
   { id: 'favorites', label: 'Favoritos', icon: Star },
-  { id: 'actions', label: 'Ações', icon: Activity },
-  { id: 'settings', label: 'Configurações', icon: Settings },
+  { id: 'actions', label: 'Acoes', icon: Activity },
+  { id: 'settings', label: 'Configuracoes', icon: Settings },
 ];
 
 export function AiHeroBanner({ activeView, onViewChange }: AiHeroBannerProps) {

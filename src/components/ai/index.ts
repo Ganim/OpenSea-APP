@@ -10,5 +10,11 @@ export { AiInsightsView } from './insights-view';
 export { AiFavoritesView } from './favorites-view';
 export { AiActionsView } from './actions-view';
 export { AiSettingsView } from './settings-view';
+export { VoiceInput } from './voice-input';
+export { SetupWizardModal } from './setup-wizard-modal';
+export { AiWorkflowsView } from './workflows-view';
+export { CreateWorkflowModal } from './create-workflow-modal';
+export { AiDocumentAnalyzer } from './document-analyzer';
+export { AiContentGenerator } from './content-generator';
 
 export type { AiView } from './ai-hero-banner';

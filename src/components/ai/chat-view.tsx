@@ -169,6 +169,7 @@ export function AiChatView({
           value={inputValue}
           onChange={setInputValue}
           onSend={() => handleSend()}
+          onSendText={text => handleSend(text)}
           isPending={sendMessage.isPending}
         />
       </div>

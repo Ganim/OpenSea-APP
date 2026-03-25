@@ -10,6 +10,9 @@ import {
   AiActionsView,
   AiSettingsView,
   AiConversationsDrawer,
+  AiWorkflowsView,
+  AiDocumentAnalyzer,
+  AiContentGenerator,
 } from '@/components/ai';
 import type { AiView } from '@/components/ai';
 import { MessageSquarePlus, History } from 'lucide-react';
@@ -74,6 +77,9 @@ export default function AiPage() {
           />
         )}
         {activeView === 'insights' && <AiInsightsView />}
+        {activeView === 'workflows' && <AiWorkflowsView />}
+        {activeView === 'documents' && <AiDocumentAnalyzer />}
+        {activeView === 'content' && <AiContentGenerator />}
         {activeView === 'favorites' && <AiFavoritesView />}
         {activeView === 'actions' && <AiActionsView />}
         {activeView === 'settings' && <AiSettingsView />}

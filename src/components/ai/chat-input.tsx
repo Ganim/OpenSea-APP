@@ -4,11 +4,13 @@
 import { useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Loader2, Paperclip } from 'lucide-react';
+import { VoiceInput } from './voice-input';
 
 interface AiChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onSendText?: (text: string) => void;
   isPending: boolean;
 }
 
@@ -16,6 +18,7 @@ export function AiChatInput({
   value,
   onChange,
   onSend,
+  onSendText,
   isPending,
 }: AiChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -63,6 +66,18 @@ export function AiChatInput({
             disabled={isPending}
             rows={1}
             className="flex-1 bg-transparent border-0 outline-none resize-none text-sm text-foreground placeholder:text-muted-foreground py-1.5 max-h-40"
+          />
+
+          <VoiceInput
+            onTranscription={text => {
+              if (onSendText) {
+                onSendText(text);
+              } else {
+                onChange(text);
+                onSend();
+              }
+            }}
+            disabled={isPending}
           />
 
           <Button

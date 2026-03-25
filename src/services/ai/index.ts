@@ -3,3 +3,8 @@ export { aiInsightsService } from './insights-service';
 export { aiConfigService } from './config-service';
 export { aiFavoritesService } from './favorites-service';
 export { aiActionsService } from './actions-service';
+export { aiWorkflowsService } from './workflows-service';
+export { aiCampaignsService } from './campaigns-service';
+export { aiDocumentsService } from './documents-service';
+export { aiContentService } from './content-service';
+export { aiSetupWizardService } from './setup-wizard-service';
