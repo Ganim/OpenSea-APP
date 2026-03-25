@@ -8,6 +8,7 @@ import type {
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
 
@@ -22,6 +23,7 @@ export interface CouponsFilters {
 
 const QUERY_KEYS = {
   COUPONS: ['coupons'],
+  COUPON: (id: string) => ['coupons', id],
   COUPONS_INFINITE: (filters?: CouponsFilters) => [
     'coupons',
     'infinite',
@@ -62,10 +64,38 @@ export function useCouponsInfinite(filters?: CouponsFilters) {
   return { ...result, coupons, total };
 }
 
+// GET /v1/coupons/:id - Busca um cupom especifico
+export function useCoupon(couponId: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.COUPON(couponId),
+    queryFn: () => couponsService.get(couponId),
+    enabled: !!couponId,
+    staleTime: 30_000,
+  });
+}
+
 export function useCreateCoupon() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateCouponRequest) => couponsService.create(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['coupons'] });
+    },
+  });
+}
+
+// PUT /v1/coupons/:id - Atualiza um cupom
+export function useUpdateCoupon() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      couponId,
+      data,
+    }: {
+      couponId: string;
+      data: Partial<CreateCouponRequest>;
+    }) => couponsService.update(couponId, data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['coupons'] });
     },

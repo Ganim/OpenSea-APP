@@ -21,3 +21,4 @@ export * from './combo.types';
 export * from './marketplace.types';
 export * from './pos.types';
 export * from './bid.types';
+export * from './customer-price.types';

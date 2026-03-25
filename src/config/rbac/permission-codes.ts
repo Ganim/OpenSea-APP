@@ -438,6 +438,13 @@ export const SALES_PERMISSIONS = {
     'activate'
   ),
   COMBOS: salesPerm('combos', 'access', 'register', 'remove', 'admin'),
+  STORE_CREDITS: salesPerm(
+    'store-credits',
+    'access',
+    'register',
+    'remove',
+    'admin'
+  ),
 
   // --- Promoções (existente) ---
   PROMOTIONS: perm(

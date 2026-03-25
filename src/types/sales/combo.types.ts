@@ -52,6 +52,21 @@ export interface CreateComboRequest {
   }>;
 }
 
+export interface UpdateComboRequest {
+  name?: string;
+  description?: string | null;
+  type?: ComboType;
+  fixedPrice?: number | null;
+  discountType?: ComboDiscountType | null;
+  discountValue?: number | null;
+  minItems?: number | null;
+  maxItems?: number | null;
+  isActive?: boolean;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  imageUrl?: string | null;
+}
+
 export interface ComboResponse {
   combo: Combo;
 }

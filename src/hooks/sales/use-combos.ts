@@ -1,5 +1,5 @@
 import { combosService } from '@/services/sales';
-import type { CombosQuery, ComboType, CreateComboRequest } from '@/types/sales';
+import type { CombosQuery, ComboType, CreateComboRequest, UpdateComboRequest } from '@/types/sales';
 import {
   useInfiniteQuery,
   useMutation,
@@ -65,6 +65,17 @@ export function useCreateCombo() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateComboRequest) => combosService.create(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['combos'] });
+    },
+  });
+}
+
+export function useUpdateCombo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ comboId, data }: { comboId: string; data: UpdateComboRequest }) =>
+      combosService.update(comboId, data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['combos'] });
     },

@@ -1,34 +1,46 @@
 // Variant Promotion Types
 
+export type DiscountType = 'PERCENTAGE' | 'FIXED';
+
+export const DISCOUNT_TYPE_LABELS: Record<DiscountType, string> = {
+  PERCENTAGE: 'Percentual',
+  FIXED: 'Valor Fixo',
+};
+
 export interface VariantPromotion {
   id: string;
   variantId: string;
-  discountType: string;
+  name: string;
+  discountType: DiscountType;
   discountValue: number;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   isActive: boolean;
+  isCurrentlyValid: boolean;
+  isExpired: boolean;
+  isUpcoming: boolean;
   notes?: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date | null;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateVariantPromotionRequest {
   variantId: string;
-  discountType: string;
+  name: string;
+  discountType: DiscountType;
   discountValue: number;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   isActive?: boolean;
   notes?: string;
 }
 
 export interface UpdateVariantPromotionRequest {
-  discountType?: string;
+  name?: string;
+  discountType?: DiscountType;
   discountValue?: number;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   isActive?: boolean;
   notes?: string;
 }

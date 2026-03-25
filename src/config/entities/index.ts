@@ -18,3 +18,8 @@ export * from './items.config';
 export * from './finance-entry.config';
 export * from './loan.config';
 export * from './contract.config';
+
+// Sales Entities
+export * from './customers.config';
+export * from './contacts.config';
+export * from './deals.config';

@@ -4,6 +4,7 @@ import type {
   CreateReturnRequest,
   OrderReturnDTO,
   OrderReturnsResponse,
+  UpdateReturnRequest,
 } from '@/types/sales';
 
 export const returnsService = {
@@ -28,6 +29,12 @@ export const returnsService = {
     return apiClient.get<OrderReturnsResponse>(url);
   },
 
+  async get(id: string): Promise<{ orderReturn: OrderReturnDTO }> {
+    return apiClient.get<{ orderReturn: OrderReturnDTO }>(
+      API_ENDPOINTS.RETURNS.GET(id)
+    );
+  },
+
   async create(
     data: CreateReturnRequest
   ): Promise<{ orderReturn: OrderReturnDTO }> {
@@ -35,6 +42,20 @@ export const returnsService = {
       API_ENDPOINTS.RETURNS.CREATE,
       data
     );
+  },
+
+  async update(
+    id: string,
+    data: UpdateReturnRequest
+  ): Promise<{ orderReturn: OrderReturnDTO }> {
+    return apiClient.patch<{ orderReturn: OrderReturnDTO }>(
+      API_ENDPOINTS.RETURNS.UPDATE(id),
+      data
+    );
+  },
+
+  async delete(id: string): Promise<void> {
+    return apiClient.delete<void>(API_ENDPOINTS.RETURNS.DELETE(id));
   },
 
   async approve(id: string): Promise<{ orderReturn: OrderReturnDTO }> {

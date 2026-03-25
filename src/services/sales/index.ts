@@ -19,3 +19,4 @@ export * from './combos.service';
 export * from './pos.service';
 export * from './bids.service';
 export * from './marketplaces.service';
+export * from './customer-prices.service';

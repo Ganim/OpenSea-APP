@@ -28,8 +28,19 @@ export const couponsService = {
     return apiClient.get<PaginatedCouponsResponse>(url);
   },
 
+  async get(id: string): Promise<CouponResponse> {
+    return apiClient.get<CouponResponse>(API_ENDPOINTS.COUPONS.GET(id));
+  },
+
   async create(data: CreateCouponRequest): Promise<CouponResponse> {
     return apiClient.post<CouponResponse>(API_ENDPOINTS.COUPONS.CREATE, data);
+  },
+
+  async update(
+    id: string,
+    data: Partial<CreateCouponRequest>
+  ): Promise<CouponResponse> {
+    return apiClient.put<CouponResponse>(API_ENDPOINTS.COUPONS.UPDATE(id), data);
   },
 
   async validate(data: ValidateCouponRequest): Promise<ValidateCouponResponse> {

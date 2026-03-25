@@ -55,6 +55,14 @@ export interface CreateReturnRequest {
   notes?: string;
 }
 
+export interface UpdateReturnRequest {
+  reason?: ReturnReason;
+  reasonDetails?: string;
+  refundMethod?: RefundMethod;
+  refundAmount?: number;
+  notes?: string;
+}
+
 export interface OrderReturnsResponse {
   data: OrderReturnDTO[];
   meta: {

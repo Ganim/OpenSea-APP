@@ -5,6 +5,7 @@ import type {
   CombosQuery,
   CreateComboRequest,
   PaginatedCombosResponse,
+  UpdateComboRequest,
 } from '@/types/sales';
 
 export const combosService = {
@@ -31,6 +32,10 @@ export const combosService = {
 
   async create(data: CreateComboRequest): Promise<ComboResponse> {
     return apiClient.post<ComboResponse>(API_ENDPOINTS.COMBOS.CREATE, data);
+  },
+
+  async update(id: string, data: UpdateComboRequest): Promise<ComboResponse> {
+    return apiClient.put<ComboResponse>(API_ENDPOINTS.COMBOS.UPDATE(id), data);
   },
 
   async delete(id: string): Promise<void> {
