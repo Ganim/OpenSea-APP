@@ -7,15 +7,18 @@
 
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useCategories } from '@/hooks/stock/use-categories';
 import { useManufacturers } from '@/hooks/stock/use-stock-other';
+import { translateError } from '@/lib/error-messages';
 import type { Category, Product, UpdateProductRequest } from '@/types/stock';
 import { Loader2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 export interface EditProductFormProps {
   product: Product;
@@ -35,6 +38,7 @@ export function EditProductForm({
   // ============================================================================
 
   const [name, setName] = useState(product.name);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [description, setDescription] = useState(product.description || '');
   const [manufacturerId, setManufacturerId] = useState(
     product.manufacturerId || ''
@@ -77,13 +81,25 @@ export function EditProductForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({
-      name: name.trim(),
-      description: description.trim() || undefined,
-      manufacturerId: manufacturerId || undefined,
-      categoryIds: categoryId ? [categoryId] : [],
-      outOfLine,
-    });
+    setFieldErrors({});
+    try {
+      await onSubmit({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        manufacturerId: manufacturerId || undefined,
+        categoryIds: categoryId ? [categoryId] : [],
+        outOfLine,
+      });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('name already exists') || msg.includes('Product with this name')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else if (msg.includes('Name must be at most')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   // ============================================================================
@@ -95,17 +111,24 @@ export function EditProductForm({
       {/* Nome */}
       <div className="space-y-2">
         <Label htmlFor="name">
-          Nome do Produto <span className="text-red-500">*</span>
+          Nome do Produto <span className="text-[rgb(var(--color-destructive))]">*</span>
         </Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Ex: Tecido Denim Santista"
-          required
-          disabled={isSubmitting}
-          autoFocus
-        />
+        <div className="relative">
+          <Input
+            id="name"
+            value={name}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
+            placeholder="Ex: Tecido Denim Santista"
+            required
+            disabled={isSubmitting}
+            autoFocus
+            aria-invalid={!!fieldErrors.name}
+          />
+          {fieldErrors.name && <FormErrorIcon message={fieldErrors.name} />}
+        </div>
       </div>
 
       {/* Fabricante */}
