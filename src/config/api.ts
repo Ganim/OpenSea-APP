@@ -355,6 +355,7 @@ export const API_ENDPOINTS = {
   PAYMENT_CONDITIONS: {
     LIST: '/v1/payment-conditions',
     CREATE: '/v1/payment-conditions',
+    GET_BY_ID: (id: string) => `/v1/payment-conditions/${id}`,
     UPDATE: (id: string) => `/v1/payment-conditions/${id}`,
     DELETE: (id: string) => `/v1/payment-conditions/${id}`,
   },
@@ -692,9 +693,15 @@ export const API_ENDPOINTS = {
     BULK_CANCEL: '/v1/finance/entries/bulk/cancel',
     BULK_DELETE: '/v1/finance/entries/bulk/delete',
     BULK_CATEGORIZE: '/v1/finance/entries/bulk/categorize',
+    EMIT_NFE: (id: string) => `/v1/finance/entries/${id}/emit-nfe`,
     CREATE_BOLETO: (id: string) => `/v1/finance/entries/${id}/boleto`,
     CREATE_PIX_CHARGE: (id: string) => `/v1/finance/entries/${id}/pix-charge`,
     PAY_VIA_PIX: (id: string) => `/v1/finance/entries/${id}/pay-via-pix`,
+  },
+  // Finance - Email to Entry
+  EMAIL_TO_ENTRY: {
+    CONFIG: '/v1/finance/email-to-entry/config',
+    PROCESS: '/v1/finance/email-to-entry/process',
   },
   // Finance - Dashboard & Reports
   FINANCE_DASHBOARD: {

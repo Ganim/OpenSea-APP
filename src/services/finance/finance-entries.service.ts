@@ -26,6 +26,8 @@ import type {
   CreatePixChargeResponse,
   PayViaPixData,
   PayViaPixResponse,
+  EmitNfeFromEntryData,
+  EmitNfeFromEntryResponse,
 } from '@/types/finance';
 export interface FinanceEntriesResponse {
   entries: FinanceEntry[];
@@ -226,6 +228,16 @@ export const financeEntriesService = {
     return apiClient.post<PayViaPixResponse>(
       API_ENDPOINTS.FINANCE_ENTRIES.PAY_VIA_PIX(entryId),
       data || {}
+    );
+  },
+
+  async emitNfeFromEntry(
+    entryId: string,
+    data: EmitNfeFromEntryData
+  ): Promise<EmitNfeFromEntryResponse> {
+    return apiClient.post<EmitNfeFromEntryResponse>(
+      API_ENDPOINTS.FINANCE_ENTRIES.EMIT_NFE(entryId),
+      data
     );
   },
 };

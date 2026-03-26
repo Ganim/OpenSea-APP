@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   PieChart,
   RefreshCw,
+  Settings,
   Target,
   TrendingUp,
   Users,
@@ -156,6 +157,13 @@ const navItems: NavItem[] = [
     icon: AlertTriangle,
     href: '/finance/escalations',
     iconColor: 'text-rose-500',
+  },
+  {
+    id: 'settings',
+    label: 'Configurações',
+    icon: Settings,
+    href: '/finance/settings',
+    iconColor: 'text-slate-500',
   },
 ];
 

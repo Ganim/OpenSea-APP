@@ -23,3 +23,5 @@ export * from './use-customer-score';
 export * from './use-fiscal';
 export * from './use-boleto';
 export * from './use-pix-operations';
+export * from './use-emit-nfe-from-entry';
+export * from './use-tax-retentions';

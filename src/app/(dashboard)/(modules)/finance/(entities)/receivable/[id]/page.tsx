@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/table';
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { BoletoModal } from '@/components/finance/boleto-modal';
+import { EmitNfeModal } from '@/components/finance/emit-nfe-modal';
+import { TaxRetentionPanel } from '@/components/finance/tax-retention-panel';
 import { PixChargeModal } from '@/components/finance/pix-charge-modal';
 import { CustomerScoreBadge } from '@/components/finance/customer-score-badge';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
@@ -63,6 +65,7 @@ import {
   CreditCard,
   DollarSign,
   Download,
+  FileCheck,
   FileText,
   Info,
   Layers,
@@ -171,6 +174,9 @@ export default function ReceivableDetailPage({
   const [pixChargeModalOpen, setPixChargeModalOpen] = useState(false);
   const [pixChargeResult, setPixChargeResult] = useState<CreatePixChargeResponse | null>(null);
   const createPixChargeMutation = useCreatePixCharge();
+
+  // NF-e emission state
+  const [nfeModalOpen, setNfeModalOpen] = useState(false);
 
   // Delete state
   const [pinModalOpen, setPinModalOpen] = useState(false);
@@ -416,6 +422,30 @@ export default function ReceivableDetailPage({
                 <QrCode className="h-4 w-4" />
               )}
               Gerar Cobrança PIX
+            </Button>
+          )}
+          {/* NF-e Button */}
+          {!entry.fiscalDocumentId ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 dark:text-teal-400 dark:border-teal-800 dark:hover:bg-teal-500/10"
+              onClick={() => setNfeModalOpen(true)}
+            >
+              <FileCheck className="h-4 w-4" />
+              Emitir NF-e
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 dark:text-teal-400 dark:border-teal-800 dark:hover:bg-teal-500/10"
+              onClick={() => {
+                /* TODO: navigate to fiscal document detail */
+              }}
+            >
+              <FileCheck className="h-4 w-4" />
+              Ver NF-e
             </Button>
           )}
           <Link href={`/finance/receivable/${id}/edit`}>
@@ -690,6 +720,12 @@ export default function ReceivableDetailPage({
         </Card>
       )}
 
+      {/* Tax Retentions */}
+      <TaxRetentionPanel
+        entryId={id}
+        grossAmount={entry.expectedAmount}
+      />
+
       {/* Payment History */}
       <Card>
         <CardHeader className="pb-3">
@@ -909,6 +945,16 @@ export default function ReceivableDetailPage({
           entry={entry}
           categoryInterestRate={categoryRates.interestRate}
           categoryPenaltyRate={categoryRates.penaltyRate}
+        />
+      )}
+
+      {/* Emit NF-e Modal */}
+      {!entry.fiscalDocumentId && (
+        <EmitNfeModal
+          open={nfeModalOpen}
+          onOpenChange={setNfeModalOpen}
+          entry={entry}
+          onSuccess={() => refetch()}
         />
       )}
 

@@ -86,6 +86,7 @@ export interface FinanceEntry {
   pixKey?: string | null;
   pixKeyType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP' | null;
   pixChargeId?: string | null;
+  fiscalDocumentId?: string | null;
   isOverdue: boolean;
   tags: string[];
   payments?: FinanceEntryPayment[];
@@ -376,6 +377,38 @@ export interface ParsePixResult {
   merchantName?: string;
   merchantCity?: string;
   amount?: number;
+}
+
+// NF-e emission from entry
+export type FiscalDocumentEmissionType = 'NFE' | 'NFSE';
+
+export interface EmitNfeFromEntryItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  ncm?: string;
+  cfop?: string;
+  issRate?: number;
+}
+
+export interface EmitNfeFromEntryData {
+  documentType: FiscalDocumentEmissionType;
+  items: EmitNfeFromEntryItem[];
+  notes?: string;
+}
+
+export interface EmitNfeFromEntryResponse {
+  fiscalDocument: {
+    id: string;
+    type: string;
+    series: number;
+    number: number;
+    accessKey?: string;
+    status: string;
+    danfePdfUrl?: string;
+    protocolNumber?: string;
+    totalValue: number;
+  };
 }
 
 export interface OcrBatchResult {

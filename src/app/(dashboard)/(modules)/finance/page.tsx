@@ -45,7 +45,7 @@ export default function FinanceCommandCenter() {
             icon: Settings,
             variant: 'outline',
             tooltip: 'Configurações',
-            onClick: () => router.push('/finance/dashboard'),
+            onClick: () => router.push('/finance/settings'),
           },
         ]}
       />

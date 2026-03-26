@@ -14,3 +14,5 @@ export * from './reconciliation.service';
 export * from './budget.service';
 export * from './escalation.service';
 export * from './fiscal.service';
+export * from './email-to-entry.service';
+export * from './tax-retention.service';

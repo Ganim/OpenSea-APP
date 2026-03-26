@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/table';
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { PixPayConfirmModal } from '@/components/finance/pix-pay-modal';
+import { TaxRetentionPanel } from '@/components/finance/tax-retention-panel';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { useDeleteFinanceEntry, useFinanceEntry } from '@/hooks/finance';
 import { useFinanceCategories } from '@/hooks/finance/use-finance-categories';
@@ -588,6 +589,12 @@ export default function PayableDetailPage({
           </CardContent>
         </Card>
       )}
+
+      {/* Tax Retentions */}
+      <TaxRetentionPanel
+        entryId={id}
+        grossAmount={entry.expectedAmount}
+      />
 
       {/* Payment History */}
       <Card>
