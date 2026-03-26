@@ -30,6 +30,9 @@ import {
   MinusCircle,
   PalmtreeIcon,
   PlusCircle,
+  Settings,
+  Shield,
+  ShieldCheck,
   SquareUserRound,
   Stethoscope,
   Timer,
@@ -224,7 +227,7 @@ const sections: {
     ],
   },
   {
-    title: 'Saúde e Desligamento',
+    title: 'Saúde e Segurança',
     cards: [
       {
         id: 'medical-exams',
@@ -237,6 +240,31 @@ const sections: {
         permission: HR_PERMISSIONS.MEDICAL_EXAMS.LIST,
       },
       {
+        id: 'safety-programs',
+        title: 'Programas (PCMSO/PGR)',
+        description: 'Programas de segurança e saúde ocupacional',
+        icon: ShieldCheck,
+        href: '/hr/safety-programs',
+        gradient: 'from-emerald-500 to-emerald-600',
+        hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
+        permission: HR_PERMISSIONS.SAFETY_PROGRAMS.LIST,
+      },
+      {
+        id: 'cipa',
+        title: 'CIPA',
+        description: 'Comissão Interna de Prevenção de Acidentes',
+        icon: Shield,
+        href: '/hr/cipa',
+        gradient: 'from-amber-500 to-amber-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+        permission: HR_PERMISSIONS.CIPA.LIST,
+      },
+    ],
+  },
+  {
+    title: 'Desligamento',
+    cards: [
+      {
         id: 'terminations',
         title: 'Rescisões',
         description: 'Rescisões de contrato e cálculos de verbas',
@@ -245,6 +273,21 @@ const sections: {
         gradient: 'from-rose-500 to-rose-600',
         hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
         permission: HR_PERMISSIONS.TERMINATIONS.LIST,
+      },
+    ],
+  },
+  {
+    title: 'Configurações',
+    cards: [
+      {
+        id: 'settings',
+        title: 'Configurações Gerais',
+        description: 'Empresa Cidadã, contribuições, PAT e banco de horas',
+        icon: Settings,
+        href: '/hr/settings',
+        gradient: 'from-slate-500 to-slate-600',
+        hoverBg: 'hover:bg-slate-50 dark:hover:bg-slate-500/10',
+        permission: HR_PERMISSIONS.CONFIG.VIEW,
       },
     ],
   },
