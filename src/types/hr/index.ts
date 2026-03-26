@@ -17,3 +17,4 @@ export * from './termination.types';
 export * from './safety-program.types';
 export * from './cipa.types';
 export * from './hr-config.types';
+export * from './geofence-zone.types';
