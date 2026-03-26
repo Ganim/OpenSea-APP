@@ -263,6 +263,19 @@ export const HR_PERMISSIONS = {
   },
 
   /**
+   * Permissões de Riscos Ocupacionais (Workplace Risks)
+   * Mapped to safety programs since nested under safety program
+   */
+  WORKPLACE_RISKS: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
+
+  /**
    * Permissões de CIPA
    * Mapped to employees since no dedicated resource in new codes
    */
@@ -352,6 +365,9 @@ export type TerminationPermission =
 export type SafetyProgramPermission =
   (typeof HR_PERMISSIONS.SAFETY_PROGRAMS)[keyof typeof HR_PERMISSIONS.SAFETY_PROGRAMS];
 
+export type WorkplaceRiskPermission =
+  (typeof HR_PERMISSIONS.WORKPLACE_RISKS)[keyof typeof HR_PERMISSIONS.WORKPLACE_RISKS];
+
 export type CipaPermission =
   (typeof HR_PERMISSIONS.CIPA)[keyof typeof HR_PERMISSIONS.CIPA];
 
@@ -376,6 +392,7 @@ export type HRPermission =
   | MedicalExamPermission
   | TerminationPermission
   | SafetyProgramPermission
+  | WorkplaceRiskPermission
   | CipaPermission
   | HrConfigPermission;
 
