@@ -14,3 +14,6 @@ export * from './punch-config.types';
 export * from './dependant.types';
 export * from './medical-exam.types';
 export * from './termination.types';
+export * from './safety-program.types';
+export * from './cipa.types';
+export * from './hr-config.types';

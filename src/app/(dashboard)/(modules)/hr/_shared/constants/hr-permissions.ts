@@ -248,6 +248,41 @@ export const HR_PERMISSIONS = {
     DELETE: HR_CODES.EMPLOYEES.REMOVE,
     MANAGE: HR_CODES.EMPLOYEES.ADMIN,
   },
+
+  /**
+   * Permissões de Programas de Segurança (Safety Programs)
+   * Mapped to employees since no dedicated resource in new codes
+   */
+  SAFETY_PROGRAMS: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
+
+  /**
+   * Permissões de CIPA
+   * Mapped to employees since no dedicated resource in new codes
+   */
+  CIPA: {
+    LIST: HR_CODES.EMPLOYEES.ACCESS,
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    CREATE: HR_CODES.EMPLOYEES.REGISTER,
+    UPDATE: HR_CODES.EMPLOYEES.MODIFY,
+    DELETE: HR_CODES.EMPLOYEES.REMOVE,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
+
+  /**
+   * Permissões de Configurações do RH
+   */
+  CONFIG: {
+    VIEW: HR_CODES.EMPLOYEES.ACCESS,
+    UPDATE: HR_CODES.EMPLOYEES.ADMIN,
+    MANAGE: HR_CODES.EMPLOYEES.ADMIN,
+  },
 } as const;
 
 /* ===========================================
@@ -302,6 +337,15 @@ export type MedicalExamPermission =
 export type TerminationPermission =
   (typeof HR_PERMISSIONS.TERMINATIONS)[keyof typeof HR_PERMISSIONS.TERMINATIONS];
 
+export type SafetyProgramPermission =
+  (typeof HR_PERMISSIONS.SAFETY_PROGRAMS)[keyof typeof HR_PERMISSIONS.SAFETY_PROGRAMS];
+
+export type CipaPermission =
+  (typeof HR_PERMISSIONS.CIPA)[keyof typeof HR_PERMISSIONS.CIPA];
+
+export type HrConfigPermission =
+  (typeof HR_PERMISSIONS.CONFIG)[keyof typeof HR_PERMISSIONS.CONFIG];
+
 export type HRPermission =
   | CompanyPermission
   | DepartmentPermission
@@ -318,7 +362,10 @@ export type HRPermission =
   | DeductionPermission
   | DependantPermission
   | MedicalExamPermission
-  | TerminationPermission;
+  | TerminationPermission
+  | SafetyProgramPermission
+  | CipaPermission
+  | HrConfigPermission;
 
 /* ===========================================
    HELPER FUNCTIONS

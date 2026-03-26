@@ -13,3 +13,6 @@ export * from './work-schedules.service';
 export * from './dependants.service';
 export * from './medical-exams.service';
 export * from './terminations.service';
+export * from './safety-programs.service';
+export * from './cipa.service';
+export * from './hr-config.service';
