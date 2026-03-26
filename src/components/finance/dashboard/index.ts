@@ -5,3 +5,4 @@ export { OverdueHeatmap } from './overdue-heatmap';
 export { RecentActivityFeed } from './recent-activity-feed';
 export { QuickNavGrid } from './quick-nav-grid';
 export { AnomalyAlerts } from './anomaly-alerts';
+export { PaymentTimingWidget } from './payment-timing-widget';

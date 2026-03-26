@@ -87,6 +87,10 @@ export interface FinanceEntry {
   pixKeyType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP' | null;
   pixChargeId?: string | null;
   fiscalDocumentId?: string | null;
+  // Multi-currency
+  currency?: string;
+  exchangeRate?: number | null;
+  originalAmount?: number | null;
   isOverdue: boolean;
   tags: string[];
   payments?: FinanceEntryPayment[];
@@ -135,6 +139,8 @@ export interface CreateFinanceEntryData {
   pixKeyType?: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'EVP';
   notes?: string;
   tags?: string[];
+  // Multi-currency
+  currency?: string;
 }
 
 export type UpdateFinanceEntryData = Partial<CreateFinanceEntryData>;

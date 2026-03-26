@@ -5,6 +5,9 @@ import type {
   CashflowResponse,
   ForecastResponse,
   AnomalyReport,
+  PaymentTimingResponse,
+  ExchangeRateResponse,
+  ThreeWayMatchResponse,
 } from '@/types/finance';
 
 export const financeAnalyticsService = {
@@ -55,6 +58,28 @@ export const financeAnalyticsService = {
     const query = new URLSearchParams({ months: String(months) });
     return apiClient.get<AnomalyReport>(
       `${API_ENDPOINTS.FINANCE_DASHBOARD.ANOMALIES}?${query.toString()}`
+    );
+  },
+
+  async getPaymentTiming(daysAhead = 30): Promise<PaymentTimingResponse> {
+    const query = new URLSearchParams({ daysAhead: String(daysAhead) });
+    return apiClient.get<PaymentTimingResponse>(
+      `${API_ENDPOINTS.FINANCE_DASHBOARD.PAYMENT_TIMING}?${query.toString()}`
+    );
+  },
+
+  async getExchangeRate(currency: string, date?: string): Promise<ExchangeRateResponse> {
+    const query = new URLSearchParams({ currency });
+    if (date) query.append('date', date);
+    return apiClient.get<ExchangeRateResponse>(
+      `${API_ENDPOINTS.EXCHANGE_RATES.GET}?${query.toString()}`
+    );
+  },
+
+  async threeWayMatch(entryId: string): Promise<ThreeWayMatchResponse> {
+    return apiClient.post<ThreeWayMatchResponse>(
+      API_ENDPOINTS.FINANCE_ENTRIES.THREE_WAY_MATCH(entryId),
+      {}
     );
   },
 };

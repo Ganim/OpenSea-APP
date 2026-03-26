@@ -17,3 +17,6 @@ export * from './fiscal.service';
 export * from './email-to-entry.service';
 export * from './tax-retention.service';
 export * from './approval-rules.service';
+export * from './bank-connections.service';
+export * from './payment-links.service';
+export * from './accountant.service';

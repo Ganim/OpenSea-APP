@@ -559,6 +559,20 @@ export default function ReceivableDetailPage({
               label="Valor Esperado"
               value={formatCurrency(entry.expectedAmount)}
             />
+            {entry.currency && entry.currency !== 'BRL' && (
+              <>
+                <InfoRow
+                  label="Moeda Original"
+                  value={`${entry.currency} ${entry.originalAmount != null ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(entry.originalAmount) : '-'}`}
+                />
+                {entry.exchangeRate != null && (
+                  <InfoRow
+                    label="Taxa de Cambio"
+                    value={`1 ${entry.currency} = R$ ${Number(entry.exchangeRate).toFixed(4)}`}
+                  />
+                )}
+              </>
+            )}
             {entry.discount > 0 && (
               <InfoRow
                 label="Desconto"

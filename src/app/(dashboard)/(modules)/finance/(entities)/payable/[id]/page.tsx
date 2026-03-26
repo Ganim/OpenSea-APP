@@ -26,6 +26,7 @@ import {
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { PixPayConfirmModal } from '@/components/finance/pix-pay-modal';
 import { TaxRetentionPanel } from '@/components/finance/tax-retention-panel';
+import { ThreeWayMatchPanel } from '@/components/finance/three-way-match-panel';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { useDeleteFinanceEntry, useFinanceEntry } from '@/hooks/finance';
 import { useFinanceCategories } from '@/hooks/finance/use-finance-categories';
@@ -431,6 +432,20 @@ export default function PayableDetailPage({
               label="Valor Esperado"
               value={formatCurrency(entry.expectedAmount)}
             />
+            {entry.currency && entry.currency !== 'BRL' && (
+              <>
+                <InfoRow
+                  label="Moeda Original"
+                  value={`${entry.currency} ${entry.originalAmount != null ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(entry.originalAmount) : '-'}`}
+                />
+                {entry.exchangeRate != null && (
+                  <InfoRow
+                    label="Taxa de Cambio"
+                    value={`1 ${entry.currency} = R$ ${Number(entry.exchangeRate).toFixed(4)}`}
+                  />
+                )}
+              </>
+            )}
             {entry.discount > 0 && (
               <InfoRow
                 label="Desconto"
@@ -589,6 +604,9 @@ export default function PayableDetailPage({
           </CardContent>
         </Card>
       )}
+
+      {/* Three-Way Matching */}
+      <ThreeWayMatchPanel entryId={id} />
 
       {/* Tax Retentions */}
       <TaxRetentionPanel

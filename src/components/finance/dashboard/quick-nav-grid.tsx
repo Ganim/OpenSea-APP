@@ -7,12 +7,14 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Building2,
+  Calculator,
   FileSpreadsheet,
   FileText,
   FolderTree,
   Grid3X3,
   Landmark,
   LayoutDashboard,
+  Link2,
   PieChart,
   RefreshCw,
   Settings,
@@ -20,6 +22,7 @@ import {
   Target,
   TrendingUp,
   Users,
+  Wifi,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -104,6 +107,20 @@ const navItems: NavItem[] = [
     iconColor: 'text-teal-500',
   },
   {
+    id: 'bank-connections',
+    label: 'Conexões Bancárias',
+    icon: Wifi,
+    href: '/finance/bank-connections',
+    iconColor: 'text-sky-500',
+  },
+  {
+    id: 'payment-links',
+    label: 'Links de Pagamento',
+    icon: Link2,
+    href: '/finance/payment-links',
+    iconColor: 'text-violet-500',
+  },
+  {
     id: 'contracts',
     label: 'Contratos',
     icon: FileText,
@@ -158,6 +175,13 @@ const navItems: NavItem[] = [
     icon: PieChart,
     href: '/finance/reports/budget',
     iconColor: 'text-violet-500',
+  },
+  {
+    id: 'accountant',
+    label: 'Portal do Contador',
+    icon: Calculator,
+    href: '/finance/accountant',
+    iconColor: 'text-teal-500',
   },
   {
     id: 'escalations',

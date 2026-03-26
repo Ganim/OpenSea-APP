@@ -697,6 +697,11 @@ export const API_ENDPOINTS = {
     CREATE_BOLETO: (id: string) => `/v1/finance/entries/${id}/boleto`,
     CREATE_PIX_CHARGE: (id: string) => `/v1/finance/entries/${id}/pix-charge`,
     PAY_VIA_PIX: (id: string) => `/v1/finance/entries/${id}/pay-via-pix`,
+    THREE_WAY_MATCH: (id: string) => `/v1/finance/entries/${id}/three-way-match`,
+  },
+  // Finance - Exchange Rates
+  EXCHANGE_RATES: {
+    GET: '/v1/finance/exchange-rates',
   },
   // Finance - Email to Entry
   EMAIL_TO_ENTRY: {
@@ -713,6 +718,7 @@ export const API_ENDPOINTS = {
     PARSE_BOLETO: '/v1/finance/parse-boleto',
     PARSE_PIX: '/v1/finance/parse-pix',
     ANOMALIES: '/v1/finance/analytics/anomalies',
+    PAYMENT_TIMING: '/v1/finance/analytics/payment-timing',
     PREDICTIVE_CASHFLOW: '/v1/finance/analytics/predictive-cashflow',
     EXPORT_ACCOUNTING: '/v1/finance/export/accounting',
     IMPORT_PAYROLL: (payrollId: string) =>
@@ -803,6 +809,19 @@ export const API_ENDPOINTS = {
     EMIT_NFE: '/v1/fiscal/nfe',
     EMIT_NFCE: '/v1/fiscal/nfce',
   },
+  // Finance - Bank Connections (Open Finance)
+  BANK_CONNECTIONS: {
+    CONNECT_TOKEN: '/v1/finance/bank-connections/connect-token',
+    CREATE: '/v1/finance/bank-connections',
+    SYNC: (id: string) => `/v1/finance/bank-connections/${id}/sync`,
+    DELETE: (id: string) => `/v1/finance/bank-connections/${id}`,
+  },
+  // Finance - Payment Links
+  PAYMENT_LINKS: {
+    CREATE: '/v1/finance/payment-links',
+    LIST: '/v1/finance/payment-links',
+    PUBLIC: (slug: string) => `/v1/pay/${slug}`,
+  },
   // Finance - Reconciliation (OFX)
   RECONCILIATION: {
     LIST: '/v1/finance/reconciliation',
@@ -818,6 +837,19 @@ export const API_ENDPOINTS = {
       `/v1/finance/reconciliation/${id}/items/${itemId}/suggestions`,
     COMPLETE: (id: string) => `/v1/finance/reconciliation/${id}/complete`,
     CANCEL: (id: string) => `/v1/finance/reconciliation/${id}/cancel`,
+  },
+  // Finance - Accountant Portal (admin endpoints)
+  ACCOUNTANT: {
+    LIST: '/v1/finance/accountant',
+    INVITE: '/v1/finance/accountant/invite',
+    REVOKE: (id: string) => `/v1/finance/accountant/${id}`,
+  },
+  // Accountant Portal (token-based public endpoints)
+  ACCOUNTANT_PORTAL: {
+    DATA: '/v1/accountant/data',
+    CATEGORIES: '/v1/accountant/categories',
+    EXPORT_SPED: '/v1/accountant/export/sped',
+    DRE: '/v1/accountant/reports/dre',
   },
   // Storage - Folders
   STORAGE: {

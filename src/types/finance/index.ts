@@ -14,3 +14,7 @@ export * from './escalation.types';
 export * from './tax-retention.types';
 export * from './predictive-cashflow.types';
 export * from './approval-rule.types';
+export * from './bank-connection.types';
+export * from './payment-link.types';
+export * from './payment-timing.types';
+export * from './accountant.types';

@@ -44,6 +44,7 @@ export interface ReceivableWizardData {
   competenceDate: string;
   tags: string[];
   notes: string;
+  currency: string;
 }
 
 const INITIAL_DATA: ReceivableWizardData = {
@@ -68,6 +69,7 @@ const INITIAL_DATA: ReceivableWizardData = {
   competenceDate: '',
   tags: [],
   notes: '',
+  currency: 'BRL',
 };
 
 // ============================================================================
@@ -154,6 +156,7 @@ export function ReceivableWizardModal({
         discount: wizardData.discount || undefined,
         notes: wizardData.notes || undefined,
         tags: wizardData.tags.length > 0 ? wizardData.tags : undefined,
+        currency: wizardData.currency !== 'BRL' ? wizardData.currency : undefined,
       };
 
       await createMutation.mutateAsync(payload);

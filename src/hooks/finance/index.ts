@@ -27,3 +27,4 @@ export * from './use-emit-nfe-from-entry';
 export * from './use-tax-retentions';
 export * from './use-anomalies';
 export * from './use-approval-rules';
+export * from './use-accountant';

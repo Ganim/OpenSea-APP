@@ -12,6 +12,7 @@ import {
   CashPositionBanner,
   FinanceKPICards,
   OverdueHeatmap,
+  PaymentTimingWidget,
   QuickNavGrid,
   RecentActivityFeed,
   WeeklyObligations,
@@ -70,12 +71,15 @@ export default function FinanceCommandCenter() {
         </div>
       </div>
 
-      {/* Row 4: Activity Feed + Quick Navigation */}
+      {/* Row 4: Payment Timing + Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <PaymentTimingWidget />
+        </div>
         <div className="lg:col-span-1">
           <RecentActivityFeed />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-1">
           <QuickNavGrid />
         </div>
       </div>
