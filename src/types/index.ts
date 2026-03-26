@@ -10,6 +10,7 @@ export * from './finance';
 export * from './messaging';
 export * from './fiscal';
 export * from './hr';
+export * from './esocial';
 export * from './sales';
 export * from './stock';
 export * from './storage';

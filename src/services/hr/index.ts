@@ -16,3 +16,4 @@ export * from './terminations.service';
 export * from './safety-programs.service';
 export * from './cipa.service';
 export * from './hr-config.service';
+export * from './esocial.service';
