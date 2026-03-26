@@ -23,3 +23,6 @@ export * from './contract.config';
 export * from './customers.config';
 export * from './contacts.config';
 export * from './deals.config';
+export * from './quotes.config';
+export * from './proposals.config';
+export * from './discount-rules.config';

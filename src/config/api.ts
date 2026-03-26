@@ -697,7 +697,8 @@ export const API_ENDPOINTS = {
     CREATE_BOLETO: (id: string) => `/v1/finance/entries/${id}/boleto`,
     CREATE_PIX_CHARGE: (id: string) => `/v1/finance/entries/${id}/pix-charge`,
     PAY_VIA_PIX: (id: string) => `/v1/finance/entries/${id}/pay-via-pix`,
-    THREE_WAY_MATCH: (id: string) => `/v1/finance/entries/${id}/three-way-match`,
+    THREE_WAY_MATCH: (id: string) =>
+      `/v1/finance/entries/${id}/three-way-match`,
   },
   // Finance - Exchange Rates
   EXCHANGE_RATES: {
@@ -1354,6 +1355,101 @@ export const API_ENDPOINTS = {
   // Cashier / PIX
   CASHIER: {
     PIX: '/v1/cashier/pix',
+  },
+  // Sales - Quotes (Orçamentos)
+  QUOTES: {
+    LIST: '/v1/sales/quotes',
+    GET: (id: string) => `/v1/sales/quotes/${id}`,
+    CREATE: '/v1/sales/quotes',
+    UPDATE: (id: string) => `/v1/sales/quotes/${id}`,
+    DELETE: (id: string) => `/v1/sales/quotes/${id}`,
+    SEND: (id: string) => `/v1/sales/quotes/${id}/send`,
+    CONVERT_TO_ORDER: (id: string) => `/v1/sales/quotes/${id}/convert`,
+    DUPLICATE: (id: string) => `/v1/sales/quotes/${id}/duplicate`,
+  },
+  // Sales - Proposals (Propostas)
+  PROPOSALS: {
+    LIST: '/v1/sales/proposals',
+    GET: (id: string) => `/v1/sales/proposals/${id}`,
+    CREATE: '/v1/sales/proposals',
+    UPDATE: (id: string) => `/v1/sales/proposals/${id}`,
+    DELETE: (id: string) => `/v1/sales/proposals/${id}`,
+    SEND: (id: string) => `/v1/sales/proposals/${id}/send`,
+    APPROVE: (id: string) => `/v1/sales/proposals/${id}/approve`,
+    REJECT: (id: string) => `/v1/sales/proposals/${id}/reject`,
+    DUPLICATE: (id: string) => `/v1/sales/proposals/${id}/duplicate`,
+  },
+  // Sales - Discount Rules (Regras de Desconto)
+  DISCOUNT_RULES: {
+    LIST: '/v1/sales/discount-rules',
+    GET: (id: string) => `/v1/sales/discount-rules/${id}`,
+    CREATE: '/v1/sales/discount-rules',
+    UPDATE: (id: string) => `/v1/sales/discount-rules/${id}`,
+    DELETE: (id: string) => `/v1/sales/discount-rules/${id}`,
+  },
+  // Sales - Workflows (Automações)
+  WORKFLOWS: {
+    LIST: '/v1/sales/workflows',
+    GET: (id: string) => `/v1/sales/workflows/${id}`,
+    CREATE: '/v1/sales/workflows',
+    UPDATE: (id: string) => `/v1/sales/workflows/${id}`,
+    DELETE: (id: string) => `/v1/sales/workflows/${id}`,
+    ACTIVATE: (id: string) => `/v1/sales/workflows/${id}/activate`,
+    DEACTIVATE: (id: string) => `/v1/sales/workflows/${id}/deactivate`,
+    EXECUTE: (id: string) => `/v1/sales/workflows/${id}/execute`,
+  },
+  // Sales - Conversations (Conversas)
+  CONVERSATIONS: {
+    LIST: '/v1/sales/conversations',
+    GET: (id: string) => `/v1/sales/conversations/${id}`,
+    CREATE: '/v1/sales/conversations',
+    UPDATE: (id: string) => `/v1/sales/conversations/${id}`,
+    DELETE: (id: string) => `/v1/sales/conversations/${id}`,
+    SEND_MESSAGE: (id: string) => `/v1/sales/conversations/${id}/messages`,
+    MARK_AS_READ: (id: string) => `/v1/sales/conversations/${id}/read`,
+    CLOSE: (id: string) => `/v1/sales/conversations/${id}/close`,
+    ARCHIVE: (id: string) => `/v1/sales/conversations/${id}/archive`,
+  },
+  // Sales - Forms (Formulários)
+  FORMS: {
+    LIST: '/v1/sales/forms',
+    GET: (id: string) => `/v1/sales/forms/${id}`,
+    CREATE: '/v1/sales/forms',
+    UPDATE: (id: string) => `/v1/sales/forms/${id}`,
+    DELETE: (id: string) => `/v1/sales/forms/${id}`,
+    PUBLISH: (id: string) => `/v1/sales/forms/${id}/publish`,
+    UNPUBLISH: (id: string) => `/v1/sales/forms/${id}/unpublish`,
+    DUPLICATE: (id: string) => `/v1/sales/forms/${id}/duplicate`,
+    SUBMISSIONS: (formId: string) => `/v1/sales/forms/${formId}/submissions`,
+    SUBMIT: (formId: string) => `/v1/sales/forms/${formId}/submit`,
+  },
+  // Sales - Message Templates (Modelos de Mensagem)
+  MESSAGE_TEMPLATES: {
+    LIST: '/v1/sales/msg-templates',
+    GET: (id: string) => `/v1/sales/msg-templates/${id}`,
+    CREATE: '/v1/sales/msg-templates',
+    UPDATE: (id: string) => `/v1/sales/msg-templates/${id}`,
+    DELETE: (id: string) => `/v1/sales/msg-templates/${id}`,
+    PREVIEW: (id: string) => `/v1/sales/msg-templates/${id}/preview`,
+    DUPLICATE: (id: string) => `/v1/sales/msg-templates/${id}/duplicate`,
+  },
+  // Sales - Cashier (Caixa)
+  SALES_CASHIER: {
+    SESSIONS: {
+      LIST: '/v1/sales/cashier/sessions',
+      GET: (id: string) => `/v1/sales/cashier/sessions/${id}`,
+      OPEN: '/v1/sales/cashier/sessions/open',
+      CLOSE: (id: string) => `/v1/sales/cashier/sessions/${id}/close`,
+      GET_ACTIVE: '/v1/sales/cashier/sessions/active',
+      RECONCILE: (id: string) => `/v1/sales/cashier/sessions/${id}/reconcile`,
+    },
+    TRANSACTIONS: {
+      LIST: '/v1/sales/cashier/transactions',
+      CREATE: '/v1/sales/cashier/transactions',
+    },
+    CASH: {
+      MOVEMENT: '/v1/sales/cashier/cash/movement',
+    },
   },
   // Health
   HEALTH: '/health',
