@@ -4,7 +4,7 @@
 
 'use client';
 
-import { logger } from '@/lib/logger';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,8 +17,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { translateError } from '@/lib/error-messages';
 import type { Tag } from '@/types/stock';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -33,6 +35,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
     color: '#3b82f6',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,15 +47,17 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         description: '',
         color: '#3b82f6',
       });
+      setFieldErrors({});
       onClose();
     } catch (error) {
-      logger.error(
-        'Failed to create tag',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          context: 'create-tag',
-        }
-      );
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('name already exists') || msg.includes('tag with this name')) {
+        setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
+      } else if (msg.includes('Color must be')) {
+        setFieldErrors(prev => ({ ...prev, color: translateError(msg) }));
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -72,17 +77,22 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
-                Nome <span className="text-red-500">*</span>
+                Nome <span className="text-[rgb(var(--color-destructive))]">*</span>
               </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={e =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="Ex: Novo, Em Promoção, Destaque"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={e => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                  }}
+                  placeholder="Ex: Novo, Em Promoção, Destaque"
+                  required
+                  aria-invalid={!!fieldErrors.name}
+                />
+                <FormErrorIcon message={fieldErrors.name} />
+              </div>
             </div>
 
             <div className="grid gap-2">
@@ -110,15 +120,19 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   }
                   className="w-20 h-10 cursor-pointer"
                 />
-                <Input
-                  type="text"
-                  value={formData.color}
-                  onChange={e =>
-                    setFormData({ ...formData, color: e.target.value })
-                  }
-                  placeholder="#3b82f6"
-                  className="flex-1 font-mono"
-                />
+                <div className="relative flex-1">
+                  <Input
+                    type="text"
+                    value={formData.color}
+                    onChange={e =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    placeholder="#3b82f6"
+                    className="font-mono"
+                    aria-invalid={!!fieldErrors.color}
+                  />
+                  {fieldErrors.color && <FormErrorIcon message={fieldErrors.color} />}
+                </div>
               </div>
             </div>
           </div>
