@@ -3,7 +3,9 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
+import { SearchBar } from '@/components/layout/search-bar';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -124,6 +126,7 @@ export default function AbsencesPage() {
   // FILTERS
   // ============================================================================
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterType, setFilterType] = useState<AbsenceType | ''>('');
   const [filterStatus, setFilterStatus] = useState<AbsenceStatus | ''>('');
@@ -171,6 +174,8 @@ export default function AbsencesPage() {
   const [rejectAbsenceId, setRejectAbsenceId] = useState<string | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
+  const [showCancelPin, setShowCancelPin] = useState(false);
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
   // ============================================================================
   // COMPUTED
@@ -260,12 +265,18 @@ export default function AbsencesPage() {
     setShowRejectModal(true);
   }, []);
 
-  const handleCancel = useCallback(
-    (id: string) => {
-      cancelAbsence.mutate(id);
-    },
-    [cancelAbsence]
-  );
+  const handleCancel = useCallback((id: string) => {
+    setCancelTargetId(id);
+    setShowCancelPin(true);
+  }, []);
+
+  const handleCancelConfirm = useCallback(() => {
+    if (cancelTargetId) {
+      cancelAbsence.mutate(cancelTargetId);
+    }
+    setShowCancelPin(false);
+    setCancelTargetId(null);
+  }, [cancelTargetId, cancelAbsence]);
 
   // ============================================================================
   // CONTEXT MENU
@@ -294,6 +305,7 @@ export default function AbsencesPage() {
         id: 'approve',
         label: 'Aprovar',
         icon: Check,
+        separator: 'before',
         onClick: (ids: string[]) => {
           if (ids.length > 0) handleApprove(ids[0]);
         },
@@ -302,6 +314,7 @@ export default function AbsencesPage() {
         id: 'reject',
         label: 'Rejeitar',
         icon: XCircle,
+        separator: 'before',
         onClick: (ids: string[]) => {
           if (ids.length > 0) handleReject(ids[0]);
         },
@@ -391,7 +404,7 @@ export default function AbsencesPage() {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 text-xs text-destructive hover:bg-destructive/10"
+              className="flex-1 text-xs text-rose-600 hover:bg-rose-50"
               onClick={() => handleReject(item.id)}
             >
               <XCircle className="h-3.5 w-3.5 mr-1" />
@@ -552,6 +565,15 @@ export default function AbsencesPage() {
         </PageHeader>
 
         <PageBody>
+          <SearchBar
+            value={searchQuery}
+            placeholder="Buscar ausências..."
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
           <div className="flex flex-wrap items-center gap-3">
             <div className="w-full sm:w-64">
               <EmployeeSelector
@@ -672,6 +694,17 @@ export default function AbsencesPage() {
               setSelectedAbsence(null);
             }}
             absence={selectedAbsence}
+          />
+
+          <VerifyActionPinModal
+            isOpen={showCancelPin}
+            onClose={() => {
+              setShowCancelPin(false);
+              setCancelTargetId(null);
+            }}
+            onSuccess={handleCancelConfirm}
+            title="Confirmar Cancelamento"
+            description="Digite seu PIN de ação para cancelar esta ausência."
           />
 
           <HRSelectionToolbar

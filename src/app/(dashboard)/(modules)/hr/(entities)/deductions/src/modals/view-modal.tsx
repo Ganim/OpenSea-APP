@@ -52,7 +52,7 @@ export function ViewModal({ isOpen, onClose, deduction }: ViewModalProps) {
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
           <DialogTitle className="text-lg font-semibold">
             <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-red-500 to-red-600 p-2 rounded-lg">
+              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
                 <MinusCircle className="h-5 w-5" />
               </div>
               <div className="flex-col flex">
@@ -172,7 +172,7 @@ export function ViewModal({ isOpen, onClose, deduction }: ViewModalProps) {
                     </p>
                     <div className="w-full bg-muted rounded-full h-2.5">
                       <div
-                        className="bg-red-500 h-2.5 rounded-full transition-all"
+                        className="bg-rose-500 h-2.5 rounded-full transition-all"
                         style={{
                           width: `${(deduction.currentInstallment / deduction.installments) * 100}%`,
                         }}

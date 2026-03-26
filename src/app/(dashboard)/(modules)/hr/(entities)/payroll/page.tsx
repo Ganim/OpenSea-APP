@@ -30,6 +30,7 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { usePermissions } from '@/hooks/use-permissions';
 import { exportToCSV } from '@/lib/csv-export';
 import type { Payroll, PayrollStatus } from '@/types/hr';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   Ban,
   Calculator,
@@ -143,6 +144,7 @@ export default function PayrollPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<Payroll | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
 
   // ============================================================================
   // COMPUTED
@@ -267,9 +269,21 @@ export default function PayrollPage() {
         onClick: handleViewItem,
       });
     }
+    if (canProcess) {
+      actions.push({
+        id: 'cancel',
+        label: 'Cancelar Folha',
+        icon: Ban,
+        variant: 'destructive',
+        separator: 'before',
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) setCancelTarget(ids[0]);
+        },
+      });
+    }
     return actions;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canView]);
+  }, [canView, canProcess]);
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -371,8 +385,8 @@ export default function PayrollPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-1 text-slate-500 hover:text-destructive"
-                  onClick={() => handleCancel(item.id)}
+                  className="gap-1 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                  onClick={() => setCancelTarget(item.id)}
                   disabled={cancelMutation.isPending}
                 >
                   <Ban className="h-3.5 w-3.5" />
@@ -610,6 +624,19 @@ export default function PayrollPage() {
             handlers={{
               onExport: handleExport,
             }}
+          />
+
+          <VerifyActionPinModal
+            isOpen={!!cancelTarget}
+            onClose={() => setCancelTarget(null)}
+            onSuccess={() => {
+              if (cancelTarget) {
+                handleCancel(cancelTarget);
+                setCancelTarget(null);
+              }
+            }}
+            title="Confirmar Cancelamento"
+            description="Digite seu PIN de ação para cancelar esta folha de pagamento."
           />
         </PageBody>
       </PageLayout>

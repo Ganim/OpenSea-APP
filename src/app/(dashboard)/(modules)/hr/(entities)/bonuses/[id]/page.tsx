@@ -25,6 +25,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   bonusesApi,
   bonusKeys,
@@ -33,7 +34,6 @@ import {
   getPaidLabel,
   getPaidColor,
   useDeleteBonus,
-  DeleteConfirmModal,
 } from '../src';
 
 export default function BonusDetailPage() {
@@ -245,11 +245,12 @@ export default function BonusDetailPage() {
       </PageBody>
 
       {/* Delete Confirm Modal */}
-      <DeleteConfirmModal
+      <VerifyActionPinModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        isLoading={deleteMutation.isPending}
+        onSuccess={handleDelete}
+        title="Excluir Bonificação"
+        description="Digite seu PIN de ação para excluir esta bonificação. Esta ação não pode ser desfeita."
       />
     </PageLayout>
   );

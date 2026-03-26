@@ -268,6 +268,7 @@ export default function OvertimePage() {
         id: 'approve',
         label: 'Aprovar',
         icon: Check,
+        separator: 'before',
         onClick: handleApproveClick,
       });
     }

@@ -3,7 +3,9 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
+import { SearchBar } from '@/components/layout/search-bar';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -107,6 +109,7 @@ export default function VacationsPage() {
   // FILTERS
   // ============================================================================
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterStatus, setFilterStatus] = useState<VacationStatus | ''>('');
   const [filterYear, setFilterYear] = useState('');
@@ -160,6 +163,8 @@ export default function VacationsPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedVacation, setSelectedVacation] =
     useState<VacationPeriod | null>(null);
+  const [showCancelPin, setShowCancelPin] = useState(false);
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
   // ============================================================================
   // COMPUTED
@@ -194,12 +199,18 @@ export default function VacationsPage() {
     setShowSellModal(true);
   }, []);
 
-  const handleCancelSchedule = useCallback(
-    (id: string) => {
-      cancelSchedule.mutate(id);
-    },
-    [cancelSchedule]
-  );
+  const handleCancelSchedule = useCallback((id: string) => {
+    setCancelTargetId(id);
+    setShowCancelPin(true);
+  }, []);
+
+  const handleCancelScheduleConfirm = useCallback(() => {
+    if (cancelTargetId) {
+      cancelSchedule.mutate(cancelTargetId);
+    }
+    setShowCancelPin(false);
+    setCancelTargetId(null);
+  }, [cancelTargetId, cancelSchedule]);
 
   const handleExport = useCallback(
     (ids: string[]) => {
@@ -257,9 +268,38 @@ export default function VacationsPage() {
         onClick: handleViewItem,
       });
     }
+    if (canManage) {
+      actions.push({
+        id: 'schedule',
+        label: 'Agendar Férias',
+        icon: CalendarDays,
+        separator: 'before',
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) handleSchedule(ids[0]);
+        },
+      });
+      actions.push({
+        id: 'sell',
+        label: 'Vender Dias',
+        icon: DollarSign,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) handleSellDays(ids[0]);
+        },
+      });
+      actions.push({
+        id: 'cancel-schedule',
+        label: 'Cancelar Agendamento',
+        icon: Ban,
+        separator: 'before',
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) handleCancelSchedule(ids[0]);
+        },
+        variant: 'destructive',
+      });
+    }
     return actions;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canView]);
+  }, [canView, canManage]);
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -340,7 +380,7 @@ export default function VacationsPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 text-xs text-green-600 hover:bg-green-50"
+                className="flex-1 text-xs text-emerald-600 hover:bg-emerald-50"
                 onClick={() => handleSchedule(item.id)}
               >
                 <CalendarDays className="h-3.5 w-3.5 mr-1" />
@@ -365,7 +405,7 @@ export default function VacationsPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 text-xs text-destructive hover:bg-destructive/10"
+                className="flex-1 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
                 onClick={() => handleCancelSchedule(item.id)}
                 disabled={cancelSchedule.isPending}
               >
@@ -507,6 +547,15 @@ export default function VacationsPage() {
         </PageHeader>
 
         <PageBody>
+          <SearchBar
+            value={searchQuery}
+            placeholder="Buscar férias..."
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
           <div className="flex flex-wrap items-center gap-3">
             <div className="w-full sm:w-64">
               <EmployeeSelector
@@ -624,6 +673,17 @@ export default function VacationsPage() {
               setSelectedVacation(null);
             }}
             vacation={selectedVacation}
+          />
+
+          <VerifyActionPinModal
+            isOpen={showCancelPin}
+            onClose={() => {
+              setShowCancelPin(false);
+              setCancelTargetId(null);
+            }}
+            onSuccess={handleCancelScheduleConfirm}
+            title="Confirmar Cancelamento"
+            description="Digite seu PIN de ação para cancelar o agendamento de férias."
           />
 
           <HRSelectionToolbar

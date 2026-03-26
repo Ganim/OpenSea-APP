@@ -12,6 +12,7 @@ import {
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TrendingDown } from 'lucide-react';
 
 interface DebitModalProps {
   isOpen: boolean;
@@ -50,7 +51,12 @@ export function DebitModal({
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Debitar Horas</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
+              <TrendingDown className="h-5 w-5" />
+            </div>
+            Debitar Horas
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">

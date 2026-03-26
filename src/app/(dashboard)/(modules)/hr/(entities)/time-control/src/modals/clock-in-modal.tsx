@@ -55,7 +55,7 @@ export function ClockInModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-green-500 to-green-600 p-2 rounded-lg">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-emerald-500 to-emerald-600 p-2 rounded-lg">
               <LogIn className="h-5 w-5" />
             </div>
             Registrar Entrada
@@ -65,7 +65,7 @@ export function ClockInModal({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>
-              Funcionário <span className="text-red-500">*</span>
+              Funcionário <span className="text-rose-500">*</span>
             </Label>
             <EmployeeSelector
               value={employee}
@@ -93,7 +93,7 @@ export function ClockInModal({
           <Button
             onClick={handleSubmit}
             disabled={!canSubmit || isLoading}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Registrar Entrada

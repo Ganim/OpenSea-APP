@@ -12,7 +12,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -441,15 +441,12 @@ export default function DepartmentDetailPage() {
         </Card>
       </PageBody>
 
-      <ConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        title="Excluir departamento"
-        description={`Tem certeza que deseja excluir o departamento "${department.name}"? Esta ação não pode ser desfeita.`}
-        confirmLabel="Excluir"
-        cancelLabel="Cancelar"
-        variant="destructive"
-        onConfirm={confirmDelete}
+      <VerifyActionPinModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onSuccess={confirmDelete}
+        title="Excluir Departamento"
+        description={`Digite seu PIN de ação para excluir o departamento "${department.name}". Esta ação não pode ser desfeita.`}
       />
     </PageLayout>
   );

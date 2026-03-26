@@ -13,7 +13,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { Overtime, ApproveOvertimeData } from '@/types/hr';
-import { Coffee, Loader2 } from 'lucide-react';
+import { Check, Coffee, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { formatDate, formatHours } from '../utils';
 
@@ -62,8 +62,8 @@ export function ApproveModal({
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
-              <Coffee className="h-5 w-5" />
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-emerald-500 to-emerald-600 p-2 rounded-lg">
+              <Check className="h-5 w-5" />
             </div>
             Aprovar Hora Extra
           </DialogTitle>

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { XCircle } from 'lucide-react';
 import { useRejectAbsence } from '../api';
 
 interface RejectModalProps {
@@ -57,7 +58,12 @@ export function RejectModal({ isOpen, onClose, absenceId }: RejectModalProps) {
     >
       <DialogContent className="max-w-md [&>button]:hidden">
         <DialogHeader>
-          <DialogTitle>Rejeitar Ausência</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
+              <XCircle className="h-5 w-5" />
+            </div>
+            Rejeitar Ausência
+          </DialogTitle>
           <DialogDescription>
             Informe o motivo da rejeição. Mínimo de 10 caracteres.
           </DialogDescription>

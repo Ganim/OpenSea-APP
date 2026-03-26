@@ -43,8 +43,7 @@ export function SelfieCapture({
         setIsStreaming(true);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro desconhecido';
+      const message = err instanceof Error ? err.message : 'Erro desconhecido';
       if (
         message.includes('NotAllowedError') ||
         message.includes('Permission')

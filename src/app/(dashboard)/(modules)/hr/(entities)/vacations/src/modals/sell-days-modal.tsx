@@ -64,13 +64,11 @@ export function SellDaysModal({
     >
       <DialogContent className="max-w-sm [&>button]:hidden">
         <DialogHeader>
-          <DialogTitle>
-            <div className="flex gap-3 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-amber-500 to-amber-600 p-2 rounded-lg">
-                <DollarSign className="h-5 w-5" />
-              </div>
-              Vender Dias de Férias
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-amber-500 to-amber-600 p-2 rounded-lg">
+              <DollarSign className="h-5 w-5" />
             </div>
+            Vender Dias de Férias
           </DialogTitle>
         </DialogHeader>
 
@@ -107,8 +105,8 @@ export function SellDaysModal({
             <Button
               type="submit"
               disabled={!isValid || isSubmitting}
-              className="bg-linear-to-r from-amber-500 to-amber-600 text-white"
             >
+              <DollarSign className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Vendendo...' : 'Vender Dias'}
             </Button>
           </DialogFooter>

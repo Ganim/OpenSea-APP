@@ -55,7 +55,7 @@ export function ClockOutModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-red-500 to-red-600 p-2 rounded-lg">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-rose-500 to-rose-600 p-2 rounded-lg">
               <LogOut className="h-5 w-5" />
             </div>
             Registrar Saída
@@ -65,7 +65,7 @@ export function ClockOutModal({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>
-              Funcionário <span className="text-red-500">*</span>
+              Funcionário <span className="text-rose-500">*</span>
             </Label>
             <EmployeeSelector
               value={employee}

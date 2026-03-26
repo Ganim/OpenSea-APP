@@ -1,13 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,7 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { CreatePayrollData } from '@/types/hr';
-import { CalendarDays, Loader2 } from 'lucide-react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Check, Loader2, Receipt, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const MONTHS = [
@@ -66,8 +61,7 @@ export function CreateModal({
     !isNaN(parsedYear) && parsedYear >= 2000 && parsedYear <= 2100;
   const canSubmit = referenceMonth && isYearValid;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!canSubmit) return;
 
     const data: CreatePayrollData = {
@@ -87,72 +81,100 @@ export function CreateModal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={open => {
-        if (!open) handleClose();
+      onOpenChange={val => {
+        if (!val) handleClose();
       }}
     >
-      <DialogContent className="sm:max-w-[460px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-sky-500 to-sky-600 p-2 rounded-lg">
-              <CalendarDays className="h-5 w-5" />
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-[800px] max-w-[800px] h-[490px] p-0 gap-0 overflow-hidden flex flex-row"
+      >
+        <VisuallyHidden>
+          <DialogTitle>Nova Folha de Pagamento</DialogTitle>
+        </VisuallyHidden>
+
+        {/* Left icon column */}
+        <div className="w-[200px] shrink-0 bg-slate-50 dark:bg-white/5 flex items-center justify-center border-r border-border/50">
+          <Receipt className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
+        </div>
+
+        {/* Right content column */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-5 pb-3">
+            <div>
+              <h2 className="text-lg font-semibold leading-none">
+                Nova Folha de Pagamento
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Crie uma folha de pagamento para o período desejado.
+              </p>
             </div>
-            Nova Folha de Pagamento
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {/* Mês de referência */}
-          <div className="space-y-2">
-            <Label htmlFor="payroll-month">Mês de Referência *</Label>
-            <Select value={referenceMonth} onValueChange={setReferenceMonth}>
-              <SelectTrigger id="payroll-month">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTHS.map(m => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Ano de referência */}
-          <div className="space-y-2">
-            <Label htmlFor="payroll-year">Ano de Referência *</Label>
-            <Input
-              id="payroll-year"
-              type="number"
-              min={2000}
-              max={2100}
-              value={referenceYear}
-              onChange={e => setReferenceYear(e.target.value)}
-              placeholder="Ex.: 2026"
-              required
-            />
-          </div>
-
-          <DialogFooter className="gap-2 pt-2">
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={handleClose}
-              disabled={isSubmitting}
+              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
-              Cancelar
-            </Button>
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Mês de referência */}
+              <div className="space-y-2">
+                <Label htmlFor="payroll-month">Mês de Referência *</Label>
+                <Select
+                  value={referenceMonth}
+                  onValueChange={setReferenceMonth}
+                >
+                  <SelectTrigger id="payroll-month">
+                    <SelectValue placeholder="Selecione o mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MONTHS.map(m => (
+                      <SelectItem key={m.value} value={m.value}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Ano de referência */}
+              <div className="space-y-2">
+                <Label htmlFor="payroll-year">Ano de Referência *</Label>
+                <Input
+                  id="payroll-year"
+                  type="number"
+                  min={2000}
+                  max={2100}
+                  value={referenceYear}
+                  onChange={e => setReferenceYear(e.target.value)}
+                  placeholder="Ex.: 2026"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border/50">
             <Button
-              type="submit"
-              disabled={isSubmitting || !canSubmit}
-              className="gap-2"
+              onClick={handleSubmit}
+              disabled={!canSubmit || isSubmitting}
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Criar
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              Criar Folha
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

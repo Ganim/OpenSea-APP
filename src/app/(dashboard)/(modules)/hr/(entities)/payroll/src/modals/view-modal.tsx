@@ -170,7 +170,9 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.processedBy && (
                   <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-sky-500" />
-                    <span className="text-gray-500">Processado por:</span>
+                    <span className="text-muted-foreground">
+                      Processado por:
+                    </span>
                     <span className="font-medium font-mono text-xs">
                       {payroll.processedBy}
                     </span>
@@ -179,7 +181,9 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.processedAt && (
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-sky-500" />
-                    <span className="text-gray-500">Processado em:</span>
+                    <span className="text-muted-foreground">
+                      Processado em:
+                    </span>
                     <span className="font-medium">
                       {formatDate(payroll.processedAt)}
                     </span>
@@ -188,7 +192,7 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.approvedBy && (
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-gray-500">Aprovado por:</span>
+                    <span className="text-muted-foreground">Aprovado por:</span>
                     <span className="font-medium font-mono text-xs">
                       {payroll.approvedBy}
                     </span>
@@ -197,7 +201,7 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.approvedAt && (
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-green-500" />
-                    <span className="text-gray-500">Aprovado em:</span>
+                    <span className="text-muted-foreground">Aprovado em:</span>
                     <span className="font-medium">
                       {formatDate(payroll.approvedAt)}
                     </span>
@@ -206,7 +210,7 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.paidBy && (
                   <div className="flex items-center gap-2 text-sm">
                     <DollarSign className="h-4 w-4 text-emerald-500" />
-                    <span className="text-gray-500">Pago por:</span>
+                    <span className="text-muted-foreground">Pago por:</span>
                     <span className="font-medium font-mono text-xs">
                       {payroll.paidBy}
                     </span>
@@ -215,7 +219,7 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
                 {payroll.paidAt && (
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-emerald-500" />
-                    <span className="text-gray-500">Pago em:</span>
+                    <span className="text-muted-foreground">Pago em:</span>
                     <span className="font-medium">
                       {formatDate(payroll.paidAt)}
                     </span>
@@ -232,7 +236,7 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
               {payroll.createdAt && (
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-blue-500" />
-                  <span className="text-gray-500">Criado em:</span>
+                  <span className="text-muted-foreground">Criado em:</span>
                   <span className="font-medium">
                     {formatDate(payroll.createdAt)}
                   </span>
@@ -240,8 +244,8 @@ export function ViewModal({ isOpen, onClose, payroll }: ViewModalProps) {
               )}
               {payroll.updatedAt && payroll.updatedAt !== payroll.createdAt && (
                 <div className="flex items-center gap-2 text-sm">
-                  <RefreshCcwDot className="h-4 w-4 text-yellow-500" />
-                  <span className="text-gray-500">Atualizado em:</span>
+                  <RefreshCcwDot className="h-4 w-4 text-teal-500" />
+                  <span className="text-muted-foreground">Atualizado em:</span>
                   <span className="font-medium">
                     {formatDate(payroll.updatedAt)}
                   </span>

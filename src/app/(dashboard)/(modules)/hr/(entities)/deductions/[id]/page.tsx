@@ -26,6 +26,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   deductionKeys,
   formatCurrency,
@@ -33,7 +34,6 @@ import {
   getAppliedLabel,
   getAppliedColor,
   formatInstallments,
-  DeleteConfirmModal,
   useDeleteDeduction,
 } from '../src';
 
@@ -120,7 +120,7 @@ export default function DeductionDetailPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl mx-auto mb-4 bg-linear-to-br from-red-500 to-red-600">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl mx-auto mb-4 bg-linear-to-br from-rose-500 to-rose-600">
               <MinusCircle className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-2xl font-semibold mb-2">
@@ -183,7 +183,7 @@ export default function DeductionDetailPage() {
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
           <div className="flex flex-col sm:flex-row items-start gap-5">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-red-500 to-red-600">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-rose-500 to-rose-600">
               <MinusCircle className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -209,7 +209,7 @@ export default function DeductionDetailPage() {
             <div className="flex flex-col gap-2 shrink-0 text-sm">
               {deduction.createdAt && (
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="h-4 w-4 text-red-500" />
+                  <Calendar className="h-4 w-4 text-rose-500" />
                   <span>{formatDate(deduction.createdAt)}</span>
                 </div>
               )}
@@ -297,7 +297,7 @@ export default function DeductionDetailPage() {
                 </div>
                 <div className="w-full bg-muted rounded-full h-2.5">
                   <div
-                    className="bg-linear-to-r from-red-500 to-red-600 h-2.5 rounded-full transition-all duration-300"
+                    className="bg-linear-to-r from-rose-500 to-rose-600 h-2.5 rounded-full transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -342,11 +342,12 @@ export default function DeductionDetailPage() {
       </PageBody>
 
       {/* Delete Confirm Modal */}
-      <DeleteConfirmModal
+      <VerifyActionPinModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDelete}
-        isLoading={deleteMutation.isPending}
+        onSuccess={handleDelete}
+        title="Excluir Dedução"
+        description="Digite seu PIN de ação para excluir esta dedução. Esta ação não pode ser desfeita."
       />
     </PageLayout>
   );

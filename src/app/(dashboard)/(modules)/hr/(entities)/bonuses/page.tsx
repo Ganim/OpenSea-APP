@@ -58,6 +58,8 @@ import {
   type BonusFilters,
 } from './src';
 
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+
 const CreateModal = dynamic(
   () =>
     import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
@@ -65,13 +67,6 @@ const CreateModal = dynamic(
 );
 const ViewModal = dynamic(
   () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
-  { ssr: false }
-);
-const DeleteConfirmModal = dynamic(
-  () =>
-    import('./src/modals/delete-confirm-modal').then(m => ({
-      default: m.DeleteConfirmModal,
-    })),
   { ssr: false }
 );
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
@@ -569,14 +564,15 @@ export default function BonusesPage() {
           />
 
           {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          <VerifyActionPinModal
             isOpen={isDeleteOpen}
             onClose={() => {
               setIsDeleteOpen(false);
               setDeleteTarget(null);
             }}
-            onConfirm={handleDeleteConfirm}
-            isLoading={deleteMutation.isPending}
+            onSuccess={handleDeleteConfirm}
+            title="Excluir Bonificação"
+            description="Digite seu PIN de ação para excluir esta bonificação. Esta ação não pode ser desfeita."
           />
 
           <HRSelectionToolbar

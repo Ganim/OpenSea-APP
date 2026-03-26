@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -374,15 +374,12 @@ export default function AbsenceDetailPage() {
         absenceId={absenceId}
       />
 
-      <ConfirmDialog
-        open={isCancelDialogOpen}
-        onOpenChange={setIsCancelDialogOpen}
-        title="Cancelar afastamento"
-        description="Tem certeza que deseja cancelar este afastamento? Esta ação não pode ser desfeita."
-        confirmLabel="Cancelar afastamento"
-        cancelLabel="Voltar"
-        variant="warning"
-        onConfirm={() => cancelAbsence.mutate(absenceId)}
+      <VerifyActionPinModal
+        isOpen={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onSuccess={() => cancelAbsence.mutate(absenceId)}
+        title="Cancelar Afastamento"
+        description="Digite seu PIN de ação para cancelar este afastamento. Esta ação não pode ser desfeita."
       />
     </PageLayout>
   );

@@ -64,13 +64,7 @@ const ViewModal = dynamic(
   () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
   { ssr: false }
 );
-const DeleteConfirmModal = dynamic(
-  () =>
-    import('./src/modals/delete-confirm-modal').then(m => ({
-      default: m.DeleteConfirmModal,
-    })),
-  { ssr: false }
-);
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 const DuplicateConfirmModal = dynamic(
   () =>
     import('./src/modals/duplicate-confirm-modal').then(m => ({
@@ -700,12 +694,12 @@ function PositionsPageContent() {
           />
 
           {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          <VerifyActionPinModal
             isOpen={page.modals.isOpen('delete')}
             onClose={() => page.modals.close('delete')}
-            itemCount={page.modals.itemsToDelete.length}
-            onConfirm={page.handlers.handleDeleteConfirm}
-            isLoading={crud.isDeleting}
+            onSuccess={page.handlers.handleDeleteConfirm}
+            title="Excluir Cargo"
+            description={`Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} cargo(s). Esta ação não pode ser desfeita.`}
           />
 
           {/* Duplicate Confirmation */}

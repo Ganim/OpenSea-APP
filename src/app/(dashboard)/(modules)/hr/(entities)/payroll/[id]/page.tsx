@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -375,15 +375,12 @@ export default function PayrollDetailPage() {
         </Card>
       </PageBody>
 
-      <ConfirmDialog
-        open={isCancelDialogOpen}
-        onOpenChange={setIsCancelDialogOpen}
-        title="Cancelar folha de pagamento"
-        description="Tem certeza que deseja cancelar esta folha de pagamento? Esta ação não pode ser desfeita."
-        confirmLabel="Cancelar folha"
-        cancelLabel="Voltar"
-        variant="warning"
-        onConfirm={() => cancelMutation.mutate(payrollId)}
+      <VerifyActionPinModal
+        isOpen={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onSuccess={() => cancelMutation.mutate(payrollId)}
+        title="Cancelar Folha de Pagamento"
+        description="Digite seu PIN de ação para cancelar esta folha de pagamento. Esta ação não pode ser desfeita."
       />
     </PageLayout>
   );

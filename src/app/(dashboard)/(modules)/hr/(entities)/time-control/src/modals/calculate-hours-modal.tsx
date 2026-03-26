@@ -73,7 +73,7 @@ export function CalculateHoursModal({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-violet-500 to-violet-600 p-2 rounded-lg">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-sky-500 to-sky-600 p-2 rounded-lg">
               <Calculator className="h-5 w-5" />
             </div>
             Calcular Horas Trabalhadas
@@ -83,7 +83,7 @@ export function CalculateHoursModal({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>
-              Funcionário <span className="text-red-500">*</span>
+              Funcionário <span className="text-rose-500">*</span>
             </Label>
             <EmployeeSelector
               value={employee}

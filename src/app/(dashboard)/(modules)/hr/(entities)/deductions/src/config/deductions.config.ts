@@ -44,8 +44,8 @@ export const deductionsConfig = defineEntityConfig<Deduction>()({
   // ======================== DISPLAY ========================
   display: {
     icon: MinusCircle,
-    color: 'red',
-    gradient: 'from-red-500 to-red-600',
+    color: 'rose',
+    gradient: 'from-rose-500 to-rose-600',
     titleField: 'name',
     subtitleField: 'reason',
     imageField: undefined,

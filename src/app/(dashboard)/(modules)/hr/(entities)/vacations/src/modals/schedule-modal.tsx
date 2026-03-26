@@ -68,13 +68,11 @@ export function ScheduleModal({
     >
       <DialogContent className="max-w-md [&>button]:hidden">
         <DialogHeader>
-          <DialogTitle>
-            <div className="flex gap-3 items-center">
-              <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-green-500 to-green-600 p-2 rounded-lg">
-                <CalendarDays className="h-5 w-5" />
-              </div>
-              Agendar Férias
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-emerald-500 to-emerald-600 p-2 rounded-lg">
+              <CalendarDays className="h-5 w-5" />
             </div>
+            Agendar Férias
           </DialogTitle>
         </DialogHeader>
 
@@ -129,8 +127,8 @@ export function ScheduleModal({
             <Button
               type="submit"
               disabled={!isValid || isSubmitting}
-              className="bg-linear-to-r from-green-500 to-green-600 text-white"
             >
+              <CalendarDays className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Agendando...' : 'Agendar'}
             </Button>
           </DialogFooter>

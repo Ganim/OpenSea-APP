@@ -12,6 +12,7 @@ import {
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TrendingUp } from 'lucide-react';
 
 interface CreditModalProps {
   isOpen: boolean;
@@ -50,7 +51,12 @@ export function CreditModal({
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Creditar Horas</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-emerald-500 to-emerald-600 p-2 rounded-lg">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+            Creditar Horas
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">

@@ -59,6 +59,8 @@ import {
   type DeductionFilters,
 } from './src';
 
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+
 const CreateModal = dynamic(
   () =>
     import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
@@ -66,13 +68,6 @@ const CreateModal = dynamic(
 );
 const ViewModal = dynamic(
   () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
-  { ssr: false }
-);
-const DeleteConfirmModal = dynamic(
-  () =>
-    import('./src/modals/delete-confirm-modal').then(m => ({
-      default: m.DeleteConfirmModal,
-    })),
   { ssr: false }
 );
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
@@ -312,7 +307,7 @@ export default function DeductionsPage() {
           title={item.name}
           subtitle={formatCurrency(item.amount)}
           icon={MinusCircle}
-          iconBgColor="bg-linear-to-br from-red-500 to-red-600"
+          iconBgColor="bg-linear-to-br from-rose-500 to-rose-600"
           badges={[
             {
               label: getAppliedLabel(item),
@@ -366,7 +361,7 @@ export default function DeductionsPage() {
           title={item.name}
           subtitle={formatCurrency(item.amount)}
           icon={MinusCircle}
-          iconBgColor="bg-linear-to-br from-red-500 to-red-600"
+          iconBgColor="bg-linear-to-br from-rose-500 to-rose-600"
           badges={[
             {
               label: getAppliedLabel(item),
@@ -629,14 +624,15 @@ export default function DeductionsPage() {
           />
 
           {/* Delete Confirmation */}
-          <DeleteConfirmModal
+          <VerifyActionPinModal
             isOpen={isDeleteOpen}
             onClose={() => {
               setIsDeleteOpen(false);
               setDeleteTarget(null);
             }}
-            onConfirm={handleDeleteConfirm}
-            isLoading={deleteMutation.isPending}
+            onSuccess={handleDeleteConfirm}
+            title="Excluir Dedução"
+            description="Digite seu PIN de ação para excluir esta dedução. Esta ação não pode ser desfeita."
           />
 
           <HRSelectionToolbar

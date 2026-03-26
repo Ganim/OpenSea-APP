@@ -5,6 +5,7 @@ import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { PageActionBar } from '@/components/layout/page-action-bar';
+import { SearchBar } from '@/components/layout/search-bar';
 import {
   PageBody,
   PageHeader,
@@ -84,6 +85,7 @@ function TimeBankPageContent() {
   // FILTERS
   // ============================================================================
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterYear, setFilterYear] = useState('');
 
@@ -126,7 +128,16 @@ function TimeBankPageContent() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(() => timeBanks.map(i => i.id), [timeBanks]);
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return timeBanks;
+    const q = searchQuery.toLowerCase();
+    return timeBanks.filter(tb => {
+      const name = getName(tb.employeeId).toLowerCase();
+      return name.includes(q);
+    });
+  }, [timeBanks, searchQuery, getName]);
+
+  const initialIds = useMemo(() => filteredItems.map(i => i.id), [filteredItems]);
 
   // ============================================================================
   // HANDLERS
@@ -319,7 +330,7 @@ function TimeBankPageContent() {
         onClick: () => setDebitOpen(true),
         variant: 'outline',
         className:
-          'border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950',
+          'border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-400 dark:hover:bg-rose-950',
       },
       {
         id: 'credit',
@@ -371,6 +382,15 @@ function TimeBankPageContent() {
         </PageHeader>
 
         <PageBody>
+          <SearchBar
+            value={searchQuery}
+            placeholder="Buscar por funcionário..."
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
           <div className="flex flex-wrap items-center gap-3">
             <div className="w-full sm:w-64">
               <EmployeeSelector
@@ -418,11 +438,11 @@ function TimeBankPageContent() {
           ) : (
             <EntityGrid
               config={timeBankConfig}
-              items={timeBanks}
+              items={filteredItems}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={isLoading}
-              isSearching={false}
+              isSearching={!!searchQuery}
               onItemDoubleClick={item => {
                 setViewTarget(item);
                 setIsViewOpen(true);
@@ -464,7 +484,7 @@ function TimeBankPageContent() {
           />
 
           <HRSelectionToolbar
-            totalItems={timeBanks.length}
+            totalItems={filteredItems.length}
             defaultActions={{
               export: true,
             }}
