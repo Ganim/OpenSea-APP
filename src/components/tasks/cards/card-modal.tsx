@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-  lazy,
-  Suspense,
-} from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -18,20 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  AlertCircle,
-  Copy,
-  Archive,
-  Trash2,
-  Loader2,
-  FileText,
-  MessageSquare,
-  ListChecks,
-  CheckSquare,
-  Activity,
-  X,
-} from 'lucide-react';
+import { AlertCircle, Copy, Archive, Trash2, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   useCard,
@@ -85,82 +65,12 @@ import type {
   CustomField,
 } from '@/types/tasks';
 
-// Lazy-loaded tab components
-const CardCommentsTab = lazy(() =>
-  import('../tabs/card-comments-tab').then(m => ({
-    default: m.CardCommentsTab,
-  }))
-);
-const CardSubtasksTab = lazy(() =>
-  import('../tabs/card-subtasks-tab').then(m => ({
-    default: m.CardSubtasksTab,
-  }))
-);
-const CardChecklistTab = lazy(() =>
-  import('../tabs/card-checklist-tab').then(m => ({
-    default: m.CardChecklistTab,
-  }))
-);
-const CardActivityTab = lazy(() =>
-  import('../tabs/card-activity-tab').then(m => ({
-    default: m.CardActivityTab,
-  }))
-);
-
 interface CardModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   boardId: string;
   cardId?: string;
   defaultColumnId?: string;
-}
-
-type ModalTab =
-  | 'geral'
-  | 'comentarios'
-  | 'subtarefas'
-  | 'checklist'
-  | 'atividade';
-
-const TABS: {
-  key: ModalTab;
-  label: string;
-  icon: React.ElementType;
-  color: string;
-}[] = [
-  { key: 'geral', label: 'Geral', icon: FileText, color: 'text-blue-500' },
-  {
-    key: 'comentarios',
-    label: 'Comentários',
-    icon: MessageSquare,
-    color: 'text-emerald-500',
-  },
-  {
-    key: 'subtarefas',
-    label: 'Subtarefas',
-    icon: ListChecks,
-    color: 'text-violet-500',
-  },
-  {
-    key: 'checklist',
-    label: 'Checklist',
-    icon: CheckSquare,
-    color: 'text-teal-500',
-  },
-  {
-    key: 'atividade',
-    label: 'Atividade',
-    icon: Activity,
-    color: 'text-orange-500',
-  },
-];
-
-function TabSkeleton() {
-  return (
-    <div className="flex items-center justify-center py-12">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-    </div>
-  );
 }
 
 export function CardModal({
@@ -250,7 +160,6 @@ export function CardModal({
   const createComment = useCreateComment(boardId, cardId ?? '');
 
   // ── Local state ──
-  const [activeTab, setActiveTab] = useState<ModalTab>('geral');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Form state
@@ -313,7 +222,6 @@ export function CardModal({
   // Auto-focus title in edit mode after card data loads
   useEffect(() => {
     if (isEditMode && card && initializedRef.current) {
-      // Small delay to ensure DOM is ready
       requestAnimationFrame(() => titleRef.current?.focus());
     }
   }, [isEditMode, card]);
@@ -343,7 +251,6 @@ export function CardModal({
       setCustomFieldValues({});
       setMemberIds([]);
       setPendingFiles([]);
-      setActiveTab('geral');
       setDeleteModalOpen(false);
     }
   }, [open, defaultColumnId]);
@@ -568,20 +475,17 @@ export function CardModal({
   const handleUploadAttachment = useCallback(
     async (file: File) => {
       if (!isEditMode || !cardId) {
-        // Buffer files for upload after card creation
         setPendingFiles(prev => [...prev, file]);
         toast.info('Arquivo será enviado ao salvar o cartão');
         return;
       }
 
       try {
-        // 1. Upload file to storage
         const storageResult = await storageFilesService.uploadFile(null, file, {
           entityType: 'task-attachment',
           entityId: cardId,
         });
 
-        // 2. Link to card as attachment
         await uploadAttachment.mutateAsync({
           fileId: storageResult.file.id,
           fileName: file.name,
@@ -649,7 +553,6 @@ export function CardModal({
           }
         );
       } else {
-        // Create mode — buffer locally
         setPendingIntegrations(prev => [
           ...prev,
           { type, entityId, entityLabel },
@@ -923,12 +826,12 @@ export function CardModal({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="h-[100dvh] w-full max-w-full md:h-auto md:max-w-[800px] md:max-h-[90vh] overflow-hidden p-0 gap-0 rounded-none md:rounded-lg"
+          className="h-[100dvh] w-full max-w-full md:h-auto md:max-w-[960px] lg:max-w-[1060px] md:max-h-[90vh] overflow-hidden p-0 gap-0 rounded-none md:rounded-xl"
           showCloseButton={false}
         >
           {/* Board color header strip */}
           <div
-            className="h-2.5 w-full shrink-0 rounded-t-lg"
+            className="h-1.5 w-full shrink-0 md:rounded-t-xl"
             style={{
               background: `linear-gradient(to right, ${gradient.from}, ${gradient.to})`,
             }}
@@ -965,9 +868,9 @@ export function CardModal({
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             </div>
           ) : (
-            <div className="flex flex-col h-full md:max-h-[90vh]">
-              {/* ── Fixed area: Title + Description ── */}
-              <div className="shrink-0 px-5 pt-4 pb-3 border-b border-border">
+            <div className="flex flex-col h-full md:max-h-[calc(90vh-6px)]">
+              {/* ── Header: Title + Members + Close ── */}
+              <div className="shrink-0 px-6 pt-4 pb-3 border-b border-border/60">
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     {/* Title row + Members */}
@@ -997,10 +900,8 @@ export function CardModal({
                       />
                     </div>
                     {isEditMode && card?.parentCardId && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1">
-                        <span className="shrink-0">
-                          Este cartão é uma subtarefa de
-                        </span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1.5">
+                        <span className="shrink-0">Subtarefa de</span>
                         <button
                           type="button"
                           className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium text-white hover:opacity-80 transition-opacity max-w-[220px] shadow-sm cursor-pointer"
@@ -1051,143 +952,41 @@ export function CardModal({
                 </div>
               </div>
 
-              {/* ── Two-panel area ── */}
+              {/* ── Two-panel content area ── */}
               <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
-                {/* Left panel */}
-                <div className="flex-1 flex flex-col min-w-0">
-                  {/* Tab bar */}
-                  <div className="shrink-0 flex items-center gap-0.5 px-4 border-b border-border bg-muted/50 dark:bg-white/[0.03] overflow-x-auto scrollbar-none">
-                    {TABS.map(tab => {
-                      const Icon = tab.icon;
-                      const isActive = activeTab === tab.key;
-                      return (
-                        <button
-                          key={tab.key}
-                          type="button"
-                          className={cn(
-                            'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors whitespace-nowrap',
-                            isActive
-                              ? 'text-foreground'
-                              : 'text-muted-foreground hover:text-foreground'
-                          )}
-                          onClick={() => setActiveTab(tab.key)}
-                        >
-                          <Icon
-                            className={cn(
-                              'h-3.5 w-3.5',
-                              isActive ? tab.color : ''
-                            )}
-                          />
-                          {tab.label}
-                          {isActive && (
-                            <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Tab content */}
-                  <div
-                    className={cn(
-                      'flex-1 min-h-0 px-5 py-4',
-                      activeTab === 'geral'
-                        ? 'flex flex-col overflow-hidden'
-                        : 'overflow-y-auto'
-                    )}
-                  >
-                    {activeTab === 'geral' && (
-                      <CardModalGeneralTab
-                        description={description}
-                        onDescriptionChange={setDescription}
-                        onDescriptionBlur={handleDescriptionBlur}
-                        attachments={isEditMode ? attachments : []}
-                        onUploadAttachment={handleUploadAttachment}
-                        onRemoveAttachment={handleRemoveAttachment}
-                        onLinkStorageFile={
-                          isEditMode ? handleLinkStorageFile : undefined
-                        }
-                        boardId={boardId}
-                        customFields={customFields}
-                        customFieldValues={customFieldValues}
-                        onCustomFieldChange={handleCustomFieldChange}
-                        recentComments={isEditMode ? recentComments : []}
-                        totalComments={commentsData?.meta?.total}
-                        onAddComment={
-                          isEditMode && cardId ? handleAddComment : undefined
-                        }
-                        onViewAllComments={
-                          isEditMode
-                            ? () => setActiveTab('comentarios')
-                            : undefined
-                        }
-                        currentUserName={currentUserName}
-                        currentUserAvatarUrl={currentUserAvatarUrl}
-                        isCreateMode={!isEditMode}
-                      />
-                    )}
-
-                    {activeTab === 'comentarios' && isEditMode && cardId && (
-                      <Suspense fallback={<TabSkeleton />}>
-                        <CardCommentsTab boardId={boardId} cardId={cardId} />
-                      </Suspense>
-                    )}
-                    {activeTab === 'comentarios' && !isEditMode && (
-                      <p className="text-sm text-muted-foreground py-8 text-center">
-                        Comentários estarão disponíveis após criar o cartão
-                      </p>
-                    )}
-
-                    {activeTab === 'subtarefas' && isEditMode && cardId && (
-                      <Suspense fallback={<TabSkeleton />}>
-                        <CardSubtasksTab
-                          boardId={boardId}
-                          cardId={cardId}
-                          onOpenSubtask={subtaskId => {
-                            onOpenChange(false);
-                            setTimeout(() => {
-                              window.dispatchEvent(
-                                new CustomEvent('open-card', {
-                                  detail: { cardId: subtaskId, boardId },
-                                })
-                              );
-                            }, 300);
-                          }}
-                        />
-                      </Suspense>
-                    )}
-                    {activeTab === 'subtarefas' && !isEditMode && (
-                      <p className="text-sm text-muted-foreground py-8 text-center">
-                        Subtarefas estarão disponíveis após criar o cartão
-                      </p>
-                    )}
-
-                    {activeTab === 'checklist' && isEditMode && cardId && (
-                      <Suspense fallback={<TabSkeleton />}>
-                        <CardChecklistTab boardId={boardId} cardId={cardId} />
-                      </Suspense>
-                    )}
-                    {activeTab === 'checklist' && !isEditMode && (
-                      <p className="text-sm text-muted-foreground py-8 text-center">
-                        Checklists estarão disponíveis após criar o cartão
-                      </p>
-                    )}
-
-                    {activeTab === 'atividade' && isEditMode && cardId && (
-                      <Suspense fallback={<TabSkeleton />}>
-                        <CardActivityTab boardId={boardId} cardId={cardId} />
-                      </Suspense>
-                    )}
-                    {activeTab === 'atividade' && !isEditMode && (
-                      <p className="text-sm text-muted-foreground py-8 text-center">
-                        O histórico de atividades aparecerá após a criação do
-                        cartão
-                      </p>
-                    )}
-                  </div>
+                {/* Left panel (~65%) — Main content */}
+                <div className="flex-1 min-w-0 px-6 py-4 overflow-hidden flex flex-col">
+                  <CardModalGeneralTab
+                    description={description}
+                    onDescriptionChange={setDescription}
+                    onDescriptionBlur={handleDescriptionBlur}
+                    boardId={boardId}
+                    customFields={customFields}
+                    customFieldValues={customFieldValues}
+                    onCustomFieldChange={handleCustomFieldChange}
+                    recentComments={isEditMode ? recentComments : []}
+                    totalComments={commentsData?.meta?.total}
+                    onAddComment={
+                      isEditMode && cardId ? handleAddComment : undefined
+                    }
+                    currentUserName={currentUserName}
+                    currentUserAvatarUrl={currentUserAvatarUrl}
+                    isCreateMode={!isEditMode}
+                    cardId={cardId}
+                    onOpenSubtask={subtaskId => {
+                      onOpenChange(false);
+                      setTimeout(() => {
+                        window.dispatchEvent(
+                          new CustomEvent('open-card', {
+                            detail: { cardId: subtaskId, boardId },
+                          })
+                        );
+                      }, 300);
+                    }}
+                  />
                 </div>
 
-                {/* Right sidebar */}
+                {/* Right panel (~35%) — Metadata sidebar */}
                 <CardModalSidebar
                   columns={columns}
                   columnId={columnId}
@@ -1221,6 +1020,13 @@ export function CardModal({
                   onParentCardChange={setParentCardId}
                   estimatedHours={estimatedHours}
                   onEstimatedHoursChange={handleEstimatedHoursChange}
+                  onEstimatedHoursBlur={handleEstimatedHoursBlur}
+                  attachments={isEditMode ? attachments : []}
+                  onUploadAttachment={handleUploadAttachment}
+                  onRemoveAttachment={handleRemoveAttachment}
+                  onLinkStorageFile={
+                    isEditMode ? handleLinkStorageFile : undefined
+                  }
                   integrations={
                     isEditMode
                       ? integrations
@@ -1236,11 +1042,13 @@ export function CardModal({
                   }
                   onAddIntegration={handleAddIntegration}
                   onRemoveIntegration={handleRemoveIntegration}
+                  createdAt={isEditMode ? card?.createdAt : null}
+                  reporterName={isEditMode ? card?.reporterName : null}
                 />
               </div>
 
               {/* ── Footer ── */}
-              <div className="shrink-0 border-t border-border bg-muted/30 dark:bg-white/[0.02] px-5 py-3 flex items-center justify-between">
+              <div className="shrink-0 border-t border-border/60 bg-muted/20 dark:bg-white/[0.015] px-6 py-3 flex items-center justify-between">
                 {/* Left: Actions (edit mode) */}
                 <div className="flex items-center gap-1">
                   {isEditMode && (
