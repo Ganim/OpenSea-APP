@@ -2,6 +2,7 @@
 
 import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -32,6 +33,7 @@ export function InlineBankAccountForm({
   const [agency, setAgency] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountType, setAccountType] = useState<BankAccountType>('CHECKING');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateBankAccount();
 
@@ -53,7 +55,17 @@ export function InlineBankAccountForm({
         onCreated({ id: bankAccount.id, name: bankAccount.name });
         toast.success('Conta bancária criada com sucesso!');
       } catch (err) {
-        toast.error(translateError(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('name already') || msg.includes('already exists')) {
+          setFieldErrors({ name: translateError(msg) });
+        } else if (
+          msg.includes('bank code') ||
+          msg.includes('Invalid bank code')
+        ) {
+          setFieldErrors({ bankCode: translateError(msg) });
+        } else {
+          toast.error(translateError(msg));
+        }
       }
     },
     [
@@ -71,13 +83,21 @@ export function InlineBankAccountForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="ba-name">Nome *</Label>
-        <Input
-          id="ba-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Nome da conta"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="ba-name"
+            value={name}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
+            placeholder="Nome da conta"
+            required
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

@@ -17,6 +17,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -137,6 +138,7 @@ export default function EditLoanPage({
 
   const [isSaving, setIsSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Section 1: Identificacao
   const [name, setName] = useState('');
@@ -233,7 +235,18 @@ export default function EditLoanPage({
         'Erro ao atualizar empréstimo',
         err instanceof Error ? err : undefined
       );
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('name') ||
+        msg.includes('Name') ||
+        msg.includes('already exists')
+      ) {
+        setFieldErrors({ name: translateError(msg) });
+      } else if (msg.includes('amount') || msg.includes('Amount')) {
+        setFieldErrors({ principalAmount: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSaving(false);
     }

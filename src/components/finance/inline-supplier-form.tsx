@@ -2,6 +2,7 @@
 
 import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateFinanceSupplier } from '@/hooks/finance';
@@ -22,6 +23,7 @@ export function InlineSupplierForm({
   const [name, setName] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateFinanceSupplier();
 
@@ -68,7 +70,14 @@ export function InlineSupplierForm({
         onCreated({ id: supplier.id, name: supplier.name });
         toast.success('Fornecedor criado com sucesso!');
       } catch (err) {
-        toast.error(translateError(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('already exists') || msg.includes('name already')) {
+          setFieldErrors({ name: translateError(msg) });
+        } else if (msg.includes('CNPJ') || msg.includes('cnpj')) {
+          setFieldErrors({ cnpj: translateError(msg) });
+        } else {
+          toast.error(translateError(msg));
+        }
       }
     },
     [name, cnpj, createMutation, onCreated]
@@ -82,25 +91,40 @@ export function InlineSupplierForm({
           <Input
             id="supplier-name"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
             placeholder="Nome do fornecedor"
             required
+            aria-invalid={!!fieldErrors.name}
           />
-          {isLookingUp && (
+          {fieldErrors.name ? (
+            <FormErrorIcon message={fieldErrors.name} />
+          ) : isLookingUp ? (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-          )}
+          ) : null}
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="supplier-cnpj">CNPJ</Label>
-        <Input
-          id="supplier-cnpj"
-          value={cnpj}
-          onChange={e => handleCnpjChange(e.target.value)}
-          placeholder="00000000000000"
-          maxLength={14}
-        />
+        <div className="relative">
+          <Input
+            id="supplier-cnpj"
+            value={cnpj}
+            onChange={e => {
+              handleCnpjChange(e.target.value);
+              if (fieldErrors.cnpj)
+                setFieldErrors(prev => ({ ...prev, cnpj: '' }));
+            }}
+            placeholder="00000000000000"
+            maxLength={14}
+            aria-invalid={!!fieldErrors.cnpj}
+          />
+          <FormErrorIcon message={fieldErrors.cnpj} />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

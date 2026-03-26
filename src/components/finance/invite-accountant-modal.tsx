@@ -13,6 +13,7 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useInviteAccountant } from '@/hooks/finance/use-accountant';
 import { translateError } from '@/lib/error-messages';
 import {
@@ -49,31 +50,41 @@ interface FormData {
 function StepForm({
   form,
   onChange,
+  fieldErrors = {},
 }: {
   form: FormData;
   onChange: (field: keyof FormData, value: string) => void;
+  fieldErrors?: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="acc-name">Nome do Contador *</Label>
-        <Input
-          id="acc-name"
-          placeholder="Nome completo"
-          value={form.name}
-          onChange={(e) => onChange('name', e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            id="acc-name"
+            placeholder="Nome completo"
+            value={form.name}
+            onChange={e => onChange('name', e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="acc-email">E-mail *</Label>
-        <Input
-          id="acc-email"
-          type="email"
-          placeholder="contador@exemplo.com"
-          value={form.email}
-          onChange={(e) => onChange('email', e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            id="acc-email"
+            type="email"
+            placeholder="contador@exemplo.com"
+            value={form.email}
+            onChange={e => onChange('email', e.target.value)}
+            aria-invalid={!!fieldErrors.email}
+          />
+          <FormErrorIcon message={fieldErrors.email} />
+        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -82,7 +93,7 @@ function StepForm({
           id="acc-cpf"
           placeholder="000.000.000-00"
           value={form.cpfCnpj}
-          onChange={(e) => onChange('cpfCnpj', e.target.value)}
+          onChange={e => onChange('cpfCnpj', e.target.value)}
         />
       </div>
 
@@ -92,7 +103,7 @@ function StepForm({
           id="acc-crc"
           placeholder="CRC-UF-000000"
           value={form.crc}
-          onChange={(e) => onChange('crc', e.target.value)}
+          onChange={e => onChange('crc', e.target.value)}
         />
       </div>
     </div>
@@ -162,8 +173,8 @@ function StepConfirmation({
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Compartilhe este link com o contador. Ele terá acesso de leitura
-          aos dados financeiros da empresa.
+          Compartilhe este link com o contador. Ele terá acesso de leitura aos
+          dados financeiros da empresa.
         </p>
       </div>
     );
@@ -198,11 +209,7 @@ function StepConfirmation({
         )}
       </div>
 
-      <Button
-        onClick={onSubmit}
-        disabled={isLoading}
-        className="w-full"
-      >
+      <Button onClick={onSubmit} disabled={isLoading} className="w-full">
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -235,11 +242,13 @@ export function InviteAccountantModal({
     crc: '',
   });
   const [portalUrl, setPortalUrl] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const inviteMutation = useInviteAccountant();
 
   const handleChange = (field: keyof FormData, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) setFieldErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   const handleSubmit = async () => {
@@ -254,7 +263,16 @@ export function InviteAccountantModal({
       setPortalUrl(result.portalUrl);
       toast.success('Convite de contador criado com sucesso');
     } catch (error) {
-      toast.error(translateError(error));
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('email') || msg.includes('Email')) {
+        setFieldErrors({ email: translateError(msg) });
+        setStep(1);
+      } else if (msg.includes('name') || msg.includes('Name')) {
+        setFieldErrors({ name: translateError(msg) });
+        setStep(1);
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   };
 
@@ -279,15 +297,19 @@ export function InviteAccountantModal({
         icon: (
           <Calculator className="h-12 w-12 text-teal-500 dark:text-teal-400" />
         ),
-        content: <StepForm form={form} onChange={handleChange} />,
+        content: (
+          <StepForm
+            form={form}
+            onChange={handleChange}
+            fieldErrors={fieldErrors}
+          />
+        ),
         isValid: step1Valid,
       },
       {
         title: 'Confirmação',
         description: 'Revise e confirme o convite',
-        icon: (
-          <Link2 className="h-12 w-12 text-teal-500 dark:text-teal-400" />
-        ),
+        icon: <Link2 className="h-12 w-12 text-teal-500 dark:text-teal-400" />,
         content: (
           <StepConfirmation
             form={form}
@@ -309,7 +331,14 @@ export function InviteAccountantModal({
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form, step1Valid, portalUrl, inviteMutation.isPending, inviteMutation.isSuccess],
+    [
+      form,
+      step1Valid,
+      portalUrl,
+      inviteMutation.isPending,
+      inviteMutation.isSuccess,
+      fieldErrors,
+    ]
   );
 
   return (

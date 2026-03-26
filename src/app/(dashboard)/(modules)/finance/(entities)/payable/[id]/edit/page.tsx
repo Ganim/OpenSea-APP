@@ -17,6 +17,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -141,6 +142,7 @@ export default function EditPayablePage({
 
   const [isSaving, setIsSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Section 1: Identificacao
   const [description, setDescription] = useState('');
@@ -325,7 +327,18 @@ export default function EditPayablePage({
         'Erro ao atualizar lançamento',
         err instanceof Error ? err : undefined
       );
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('description') || msg.includes('Description')) {
+        setFieldErrors({ description: translateError(msg) });
+      } else if (msg.includes('amount') || msg.includes('Amount')) {
+        setFieldErrors({ expectedAmount: translateError(msg) });
+      } else if (msg.includes('category') || msg.includes('Category')) {
+        setFieldErrors({ categoryId: translateError(msg) });
+      } else if (msg.includes('due date') || msg.includes('Due date')) {
+        setFieldErrors({ dueDate: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -481,13 +494,24 @@ export default function EditPayablePage({
                     <Label htmlFor="description">
                       Descrição <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
-                      id="description"
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Descrição do lançamento"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="description"
+                        value={description}
+                        onChange={e => {
+                          setDescription(e.target.value);
+                          if (fieldErrors.description)
+                            setFieldErrors(prev => ({
+                              ...prev,
+                              description: '',
+                            }));
+                        }}
+                        placeholder="Descrição do lançamento"
+                        required
+                        aria-invalid={!!fieldErrors.description}
+                      />
+                      <FormErrorIcon message={fieldErrors.description} />
+                    </div>
                   </div>
 
                   <div className="grid gap-2">

@@ -2,6 +2,7 @@
 
 import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateFinanceCustomer } from '@/hooks/finance';
@@ -22,6 +23,7 @@ export function InlineCustomerForm({
   const [name, setName] = useState('');
   const [document, setDocument] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateFinanceCustomer();
 
@@ -71,7 +73,18 @@ export function InlineCustomerForm({
         onCreated({ id: customer.id, name: customer.name });
         toast.success('Cliente criado com sucesso!');
       } catch (err) {
-        toast.error(translateError(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('already exists') || msg.includes('name already')) {
+          setFieldErrors({ name: translateError(msg) });
+        } else if (
+          msg.includes('document') ||
+          msg.includes('CPF') ||
+          msg.includes('CNPJ')
+        ) {
+          setFieldErrors({ document: translateError(msg) });
+        } else {
+          toast.error(translateError(msg));
+        }
       }
     },
     [name, document, createMutation, onCreated]
@@ -85,25 +98,40 @@ export function InlineCustomerForm({
           <Input
             id="customer-name"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
             placeholder="Nome do cliente"
             required
+            aria-invalid={!!fieldErrors.name}
           />
-          {isLookingUp && (
+          {fieldErrors.name ? (
+            <FormErrorIcon message={fieldErrors.name} />
+          ) : isLookingUp ? (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-          )}
+          ) : null}
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="customer-document">CPF/CNPJ</Label>
-        <Input
-          id="customer-document"
-          value={document}
-          onChange={e => handleDocumentChange(e.target.value)}
-          placeholder="CPF (11 digitos) ou CNPJ (14 digitos)"
-          maxLength={14}
-        />
+        <div className="relative">
+          <Input
+            id="customer-document"
+            value={document}
+            onChange={e => {
+              handleDocumentChange(e.target.value);
+              if (fieldErrors.document)
+                setFieldErrors(prev => ({ ...prev, document: '' }));
+            }}
+            placeholder="CPF (11 digitos) ou CNPJ (14 digitos)"
+            maxLength={14}
+            aria-invalid={!!fieldErrors.document}
+          />
+          <FormErrorIcon message={fieldErrors.document} />
+        </div>
         <p className="text-xs text-muted-foreground">
           {document.length === 11
             ? 'CPF detectado'

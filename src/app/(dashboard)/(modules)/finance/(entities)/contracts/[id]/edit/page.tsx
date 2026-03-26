@@ -18,6 +18,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -121,6 +122,7 @@ export default function EditContractPage({
 
   const [isSaving, setIsSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Section 1: Dados Básicos
   const [title, setTitle] = useState('');
@@ -220,7 +222,22 @@ export default function EditContractPage({
         'Erro ao atualizar contrato',
         err instanceof Error ? err : undefined
       );
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('title') ||
+        msg.includes('Title') ||
+        msg.includes('already exists')
+      ) {
+        setFieldErrors({ title: translateError(msg) });
+      } else if (
+        msg.includes('value') ||
+        msg.includes('Value') ||
+        msg.includes('amount')
+      ) {
+        setFieldErrors({ totalValue: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSaving(false);
     }

@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Filter, Loader2, Settings2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -92,6 +93,7 @@ export function ApprovalRuleModal({
   const isEditing = !!ruleId;
   const [form, setForm] = useState<FormState>(defaultForm);
   const [supplierInput, setSupplierInput] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { data: ruleData, isLoading: loadingRule } = useApprovalRule(
     ruleId ?? ''
@@ -123,6 +125,7 @@ export function ApprovalRuleModal({
     } else if (!isEditing && open) {
       setForm(defaultForm);
       setSupplierInput('');
+      setFieldErrors({});
     }
   }, [isEditing, ruleData, open]);
 
@@ -146,9 +149,10 @@ export function ApprovalRuleModal({
 
   const handleSave = async () => {
     if (!form.name.trim()) {
-      toast.error('Nome da regra é obrigatório.');
+      setFieldErrors({ name: 'Nome da regra é obrigatório.' });
       return;
     }
+    setFieldErrors({});
 
     const conditions: ApprovalRuleConditions = {};
     if (form.categoryIds.length > 0) conditions.categoryIds = form.categoryIds;
@@ -179,7 +183,12 @@ export function ApprovalRuleModal({
       onSaved?.();
       onOpenChange(false);
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('name') || msg.includes('already exists')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   };
 
@@ -209,13 +218,21 @@ export function ApprovalRuleModal({
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="rule-name">Nome da Regra</Label>
-            <Input
-              id="rule-name"
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              placeholder="Ex: Pagamentos pequenos até R$ 500"
-              maxLength={128}
-            />
+            <div className="relative">
+              <Input
+                id="rule-name"
+                value={form.name}
+                onChange={e => {
+                  setForm(f => ({ ...f, name: e.target.value }));
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
+                }}
+                placeholder="Ex: Pagamentos pequenos até R$ 500"
+                maxLength={128}
+                aria-invalid={!!fieldErrors.name}
+              />
+              <FormErrorIcon message={fieldErrors.name} />
+            </div>
           </div>
 
           {/* Action */}

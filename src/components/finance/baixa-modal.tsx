@@ -34,6 +34,7 @@ import type { FinanceEntry, PaymentMethod } from '@/types/finance';
 import { PAYMENT_METHOD_LABELS } from '@/types/finance';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { AlertTriangle, CalendarIcon, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -94,6 +95,7 @@ export function BaixaModal({
   // Form state
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [bankAccountId, setBankAccountId] = useState('');
   const [method, setMethod] = useState<PaymentMethod | ''>('');
   const [reference, setReference] = useState('');
@@ -112,6 +114,7 @@ export function BaixaModal({
       setNotes('');
       setInterestOverride('');
       setPenaltyOverride('');
+      setFieldErrors({});
     }
   }, [open, entry]);
 
@@ -169,9 +172,10 @@ export function BaixaModal({
   const handleSubmit = useCallback(async () => {
     const parsedAmount = parseCurrencyInput(amount);
     if (parsedAmount <= 0) {
-      toast.error('Informe um valor de pagamento válido.');
+      setFieldErrors({ amount: 'Informe um valor de pagamento válido.' });
       return;
     }
+    setFieldErrors({});
 
     try {
       await registerPayment.mutateAsync({
@@ -190,7 +194,16 @@ export function BaixaModal({
       toast.success('Pagamento registrado com sucesso!');
       onOpenChange(false);
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('amount') ||
+        msg.includes('Amount') ||
+        msg.includes('valor')
+      ) {
+        setFieldErrors({ amount: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   }, [
     amount,
@@ -222,12 +235,20 @@ export function BaixaModal({
           {/* Valor Pago */}
           <div className="space-y-1.5">
             <Label htmlFor="baixa-amount">Valor Pago (R$)</Label>
-            <Input
-              id="baixa-amount"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              placeholder="0,00"
-            />
+            <div className="relative">
+              <Input
+                id="baixa-amount"
+                value={amount}
+                onChange={e => {
+                  setAmount(e.target.value);
+                  if (fieldErrors.amount)
+                    setFieldErrors(prev => ({ ...prev, amount: '' }));
+                }}
+                placeholder="0,00"
+                aria-invalid={!!fieldErrors.amount}
+              />
+              <FormErrorIcon message={fieldErrors.amount} />
+            </div>
             <p className="text-xs text-muted-foreground">
               Saldo restante: {formatCurrency(entry.remainingBalance)}
             </p>

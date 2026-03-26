@@ -133,6 +133,7 @@ export function PayableWizardModal({
   const [wizardData, setWizardData] = useState<PayableWizardData>({
     ...INITIAL_DATA,
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateFinanceEntry();
 
@@ -172,6 +173,7 @@ export function PayableWizardModal({
       ...INITIAL_DATA,
       issueDate: new Date().toISOString().split('T')[0],
     });
+    setFieldErrors({});
   }, []);
 
   const handleClose = useCallback(() => {
@@ -262,7 +264,25 @@ export function PayableWizardModal({
       handleClose();
       onCreated?.();
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('description') || msg.includes('Description')) {
+        setFieldErrors({ description: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('category') || msg.includes('Category')) {
+        setFieldErrors({ categoryId: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('amount') || msg.includes('Amount')) {
+        setFieldErrors({ expectedAmount: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('due date') || msg.includes('Due date')) {
+        setFieldErrors({ dueDate: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('PIX') || msg.includes('pix')) {
+        setFieldErrors({ pixKey: translateError(msg) });
+        setCurrentStep(1);
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   }, [wizardData, isBatchMode, createMutation, handleClose, onCreated]);
 
@@ -282,7 +302,25 @@ export function PayableWizardModal({
       title: 'Detalhes',
       description: 'Categorização e valores',
       icon: <FileText className="h-16 w-16 text-sky-500" />,
-      content: <PayableStepDetails data={wizardData} onChange={updateData} />,
+      content: (
+        <PayableStepDetails
+          data={wizardData}
+          onChange={partial => {
+            updateData(partial);
+            const keys = Object.keys(partial);
+            if (keys.some(k => fieldErrors[k])) {
+              setFieldErrors(prev => {
+                const next = { ...prev };
+                keys.forEach(k => {
+                  if (next[k]) delete next[k];
+                });
+                return next;
+              });
+            }
+          }}
+          fieldErrors={fieldErrors}
+        />
+      ),
       isValid: isStep2Valid,
     },
     {

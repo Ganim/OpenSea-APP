@@ -2,6 +2,7 @@
 
 import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateCostCenter } from '@/hooks/finance';
@@ -21,6 +22,7 @@ export function InlineCostCenterForm({
 }: InlineCostCenterFormProps) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateCostCenter();
 
@@ -38,7 +40,14 @@ export function InlineCostCenterForm({
         onCreated({ id: costCenter.id, name: costCenter.name });
         toast.success('Centro de custo criado com sucesso!');
       } catch (err) {
-        toast.error(translateError(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('name already') || msg.includes('already exists')) {
+          setFieldErrors({ name: translateError(msg) });
+        } else if (msg.includes('code already') || msg.includes('code')) {
+          setFieldErrors({ code: translateError(msg) });
+        } else {
+          toast.error(translateError(msg));
+        }
       }
     },
     [name, code, createMutation, onCreated]
@@ -48,24 +57,40 @@ export function InlineCostCenterForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="cc-name">Nome *</Label>
-        <Input
-          id="cc-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Nome do centro de custo"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="cc-name"
+            value={name}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
+            placeholder="Nome do centro de custo"
+            required
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cc-code">Código *</Label>
-        <Input
-          id="cc-code"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          placeholder="Ex: CC-001"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="cc-code"
+            value={code}
+            onChange={e => {
+              setCode(e.target.value);
+              if (fieldErrors.code)
+                setFieldErrors(prev => ({ ...prev, code: '' }));
+            }}
+            placeholder="Ex: CC-001"
+            required
+            aria-invalid={!!fieldErrors.code}
+          />
+          <FormErrorIcon message={fieldErrors.code} />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

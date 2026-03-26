@@ -2,6 +2,7 @@
 
 import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -33,6 +34,7 @@ export function InlineCategoryForm({
   const [name, setName] = useState('');
   const [type, setType] = useState<FinanceCategoryType>('EXPENSE');
   const [parentId, setParentId] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateFinanceCategory();
   const { data: categoriesData } = useFinanceCategories();
@@ -53,7 +55,12 @@ export function InlineCategoryForm({
         onCreated({ id: category.id, name: category.name });
         toast.success('Categoria criada com sucesso!');
       } catch (err) {
-        toast.error(translateError(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('name already') || msg.includes('already exists')) {
+          setFieldErrors({ name: translateError(msg) });
+        } else {
+          toast.error(translateError(msg));
+        }
       }
     },
     [name, type, parentId, createMutation, onCreated]
@@ -63,13 +70,21 @@ export function InlineCategoryForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="category-name">Nome *</Label>
-        <Input
-          id="category-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Nome da categoria"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="category-name"
+            value={name}
+            onChange={e => {
+              setName(e.target.value);
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
+            }}
+            placeholder="Nome da categoria"
+            required
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">

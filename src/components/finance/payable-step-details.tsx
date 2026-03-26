@@ -23,6 +23,7 @@ import {
   useFinanceSuppliers,
 } from '@/hooks/finance';
 import { useLastSupplierEntry } from '@/hooks/finance/use-ocr';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -43,6 +44,7 @@ import type { PayableWizardData } from './payable-wizard-modal';
 interface PayableStepDetailsProps {
   data: PayableWizardData;
   onChange: (partial: Partial<PayableWizardData>) => void;
+  fieldErrors?: Record<string, string>;
 }
 
 // =============================================================================
@@ -96,18 +98,29 @@ function SectionDivider({ label }: { label: string }) {
 export function PayableStepDetails({
   data,
   onChange,
+  fieldErrors,
 }: PayableStepDetailsProps) {
   if (data.batchEntries.length >= 2) {
     return <PayableBatchTable data={data} onChange={onChange} />;
   }
-  return <SingleEntryForm data={data} onChange={onChange} />;
+  return (
+    <SingleEntryForm
+      data={data}
+      onChange={onChange}
+      fieldErrors={fieldErrors}
+    />
+  );
 }
 
 // =============================================================================
 // SINGLE ENTRY FORM — table-style property rows
 // =============================================================================
 
-function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
+function SingleEntryForm({
+  data,
+  onChange,
+  fieldErrors = {},
+}: PayableStepDetailsProps) {
   const [showSupplierCreate, setShowSupplierCreate] = useState(false);
   const [showCategoryCreate, setShowCategoryCreate] = useState(false);
   const [showCostCenterCreate, setShowCostCenterCreate] = useState(false);
@@ -234,12 +247,16 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <SectionDivider label="Identificação" />
 
         <Row label="Descrição" required>
-          <Input
-            value={data.description}
-            onChange={e => onChange({ description: e.target.value })}
-            placeholder="Descrição do lançamento"
-            className="h-8"
-          />
+          <div className="relative">
+            <Input
+              value={data.description}
+              onChange={e => onChange({ description: e.target.value })}
+              placeholder="Descrição do lançamento"
+              className="h-8"
+              aria-invalid={!!fieldErrors.description}
+            />
+            <FormErrorIcon message={fieldErrors.description} />
+          </div>
         </Row>
 
         <Row label="Beneficiário">
@@ -363,17 +380,21 @@ function SingleEntryForm({ data, onChange }: PayableStepDetailsProps) {
         <SectionDivider label="Valores" />
 
         <Row label="Valor (R$)" required>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            value={data.expectedAmount || ''}
-            onChange={e =>
-              onChange({ expectedAmount: parseFloat(e.target.value) || 0 })
-            }
-            placeholder="0,00"
-            className={cn('h-8', pf('expectedAmount'))}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={data.expectedAmount || ''}
+              onChange={e =>
+                onChange({ expectedAmount: parseFloat(e.target.value) || 0 })
+              }
+              placeholder="0,00"
+              className={cn('h-8', pf('expectedAmount'))}
+              aria-invalid={!!fieldErrors.expectedAmount}
+            />
+            <FormErrorIcon message={fieldErrors.expectedAmount} />
+          </div>
         </Row>
 
         <Row label="Juros (R$)">

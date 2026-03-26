@@ -50,6 +50,7 @@ import {
   ESCALATION_CHANNEL_LABELS,
   ESCALATION_TEMPLATE_LABELS,
 } from '@/types/finance';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { cn } from '@/lib/utils';
 import { MessagePreview } from './message-preview';
 
@@ -112,6 +113,7 @@ export function EscalationConfigModal({
   const [sectionErrors, setSectionErrors] = useState<Record<string, boolean>>(
     {}
   );
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Preview state — tracks which step tempId has preview open
   const [previewStepId, setPreviewStepId] = useState<string | null>(null);
@@ -157,6 +159,7 @@ export function EscalationConfigModal({
       setIsActive(true);
       setSteps([DEFAULT_STEP()]);
       setSectionErrors({});
+      setFieldErrors({});
       setPreviewStepId(null);
     }
   }, [open, isEditing]);
@@ -239,7 +242,13 @@ export function EscalationConfigModal({
       onSaved?.();
       onOpenChange(false);
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('name') || msg.includes('already exists')) {
+        setFieldErrors({ name: translateError(msg) });
+        setActiveSection('basic');
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   }, [
     name,
@@ -326,13 +335,21 @@ export function EscalationConfigModal({
             <Label htmlFor="esc-name">
               Nome <span className="text-rose-500">*</span>
             </Label>
-            <Input
-              id="esc-name"
-              placeholder="Ex: Régua Padrão, Cobrança Agressiva..."
-              value={name}
-              onChange={e => setName(e.target.value)}
-              disabled={isPending}
-            />
+            <div className="relative">
+              <Input
+                id="esc-name"
+                placeholder="Ex: Régua Padrão, Cobrança Agressiva..."
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
+                }}
+                disabled={isPending}
+                aria-invalid={!!fieldErrors.name}
+              />
+              <FormErrorIcon message={fieldErrors.name} />
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Switch

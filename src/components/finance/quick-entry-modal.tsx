@@ -34,6 +34,7 @@ import {
   useFinanceSuppliers,
 } from '@/hooks/finance';
 import { useSmartDefaults } from '@/hooks/finance/use-smart-defaults';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { cn } from '@/lib/utils';
 import type { CreateFinanceEntryData, FinanceEntryType } from '@/types/finance';
 import { addDays, format, parseISO } from 'date-fns';
@@ -99,6 +100,7 @@ export function QuickEntryModal({
   const [continueAfterCreate, setContinueAfterCreate] = useState(false);
   const [justCreated, setJustCreated] = useState(false);
   const [showSupplierCreate, setShowSupplierCreate] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // ---------------------------------------------------------------------------
   // Smart defaults
@@ -184,6 +186,7 @@ export function QuickEntryModal({
       setTags([]);
       setTagInput('');
       setNotes('');
+      setFieldErrors({});
     },
     [defaultType]
   );
@@ -253,7 +256,22 @@ export function QuickEntryModal({
         }, 600);
       }
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('amount') ||
+        msg.includes('Amount') ||
+        msg.includes('valor')
+      ) {
+        setFieldErrors({ amount: translateError(msg) });
+      } else if (msg.includes('category') || msg.includes('Category')) {
+        setFieldErrors({ category: translateError(msg) });
+        setExpanded(true);
+      } else if (msg.includes('description') || msg.includes('Description')) {
+        setFieldErrors({ description: translateError(msg) });
+        setExpanded(true);
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   }, [
     isValid,
@@ -446,10 +464,15 @@ export function QuickEntryModal({
               <div className="relative">
                 <Input
                   value={amount}
-                  onChange={e => handleAmountChange(e.target.value)}
+                  onChange={e => {
+                    handleAmountChange(e.target.value);
+                    if (fieldErrors.amount)
+                      setFieldErrors(prev => ({ ...prev, amount: '' }));
+                  }}
                   placeholder="0,00"
                   className="h-10 text-lg font-semibold pl-10"
                   inputMode="decimal"
+                  aria-invalid={!!fieldErrors.amount}
                   onKeyDown={e => {
                     if (e.key === 'Enter' && isValid) {
                       e.preventDefault();
@@ -460,6 +483,10 @@ export function QuickEntryModal({
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">
                   R$
                 </span>
+                <FormErrorIcon
+                  message={fieldErrors.amount}
+                  className="right-3"
+                />
               </div>
             </div>
 

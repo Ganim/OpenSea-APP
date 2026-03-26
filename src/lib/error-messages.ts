@@ -148,6 +148,55 @@ export const errorMessages: Record<string, string> = {
   'Invalid bank code': 'Código do banco inválido',
   'Allocation percentages must total 100':
     'Os percentuais de rateio devem totalizar 100%',
+
+  // ============= SALES =============
+  'Customer not found': 'Cliente não encontrado',
+  'Customer already exists': 'Este cliente já está cadastrado',
+  'Customer name already exists': 'Já existe um cliente com este nome',
+  'Document already exists': 'Este documento já está cadastrado',
+  'CPF already exists': 'Este CPF já está cadastrado',
+  'CNPJ already exists': 'Este CNPJ já está cadastrado',
+  'Email already in use': 'Este e-mail já está em uso',
+  'Contact not found': 'Contato não encontrado',
+  'Contact email already exists': 'Já existe um contato com este e-mail',
+  'Deal not found': 'Negócio não encontrado',
+  'Pipeline not found': 'Pipeline não encontrado',
+  'Pipeline name already exists': 'Já existe um pipeline com este nome',
+  'Stage not found': 'Etapa não encontrada',
+  'Order not found': 'Pedido não encontrado',
+  'Order number already exists': 'Este número de pedido já existe',
+  'Coupon not found': 'Cupom não encontrado',
+  'Coupon code already exists': 'Este código de cupom já está em uso',
+  'Coupon expired': 'Este cupom está expirado',
+  'Coupon usage limit reached': 'Limite de uso do cupom atingido',
+  'Campaign not found': 'Campanha não encontrada',
+  'Campaign name already exists': 'Já existe uma campanha com este nome',
+  'Combo not found': 'Combo não encontrado',
+  'Combo name already exists': 'Já existe um combo com este nome',
+  'Price table not found': 'Tabela de preço não encontrada',
+  'Price table name already exists': 'Já existe uma tabela com este nome',
+  'Payment condition not found': 'Condição de pagamento não encontrada',
+  'Payment condition name already exists':
+    'Já existe uma condição de pagamento com este nome',
+  'Customer price already exists':
+    'Já existe um preço negociado para este cliente e variante',
+  'Bid not found': 'Licitação não encontrada',
+  'Edital number already exists': 'Este número de edital já está cadastrado',
+  'Return not found': 'Devolução não encontrada',
+  'Item reservation not found': 'Reserva não encontrada',
+  'Insufficient stock for reservation':
+    'Estoque insuficiente para esta reserva',
+  'Store credit not found': 'Crédito de loja não encontrado',
+  'Catalog not found': 'Catálogo não encontrado',
+  'Catalog name already exists': 'Já existe um catálogo com este nome',
+  'Dashboard not found': 'Dashboard não encontrado',
+  'Dashboard name already exists': 'Já existe um dashboard com este nome',
+  'Goal not found': 'Meta não encontrada',
+  'Goal name already exists': 'Já existe uma meta com este nome',
+  'Invalid date range': 'Intervalo de datas inválido',
+  'End date must be after start date':
+    'Data final deve ser posterior à data inicial',
+  'Quantity must be greater than zero': 'A quantidade deve ser maior que zero',
 };
 
 /**

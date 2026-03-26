@@ -9,6 +9,7 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { paymentLinksService } from '@/services/finance';
 import type { PaymentLinkDetail } from '@/types/finance';
 import {
@@ -39,6 +40,7 @@ export function CreatePaymentLinkModal({
   // Form state
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [customerName, setCustomerName] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [enablePix, setEnablePix] = useState(true);
@@ -67,7 +69,14 @@ export function CreatePaymentLinkModal({
       queryClient.invalidateQueries({ queryKey: ['payment-links'] });
     },
     onError: (err: unknown) => {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('amount') || msg.includes('Amount')) {
+        setFieldErrors({ amount: translateError(msg) });
+      } else if (msg.includes('description') || msg.includes('Description')) {
+        setFieldErrors({ description: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     },
   });
 
@@ -105,26 +114,42 @@ export function CreatePaymentLinkModal({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="amount">Valor *</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0,00"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0,00"
+                value={amount}
+                onChange={e => {
+                  setAmount(e.target.value);
+                  if (fieldErrors.amount)
+                    setFieldErrors(prev => ({ ...prev, amount: '' }));
+                }}
+                aria-invalid={!!fieldErrors.amount}
+              />
+              <FormErrorIcon message={fieldErrors.amount} />
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição *</Label>
-            <Input
-              id="description"
-              placeholder="Ex: Consultoria março/2026"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              maxLength={500}
-            />
+            <div className="relative">
+              <Input
+                id="description"
+                placeholder="Ex: Consultoria março/2026"
+                value={description}
+                onChange={e => {
+                  setDescription(e.target.value);
+                  if (fieldErrors.description)
+                    setFieldErrors(prev => ({ ...prev, description: '' }));
+                }}
+                maxLength={500}
+                aria-invalid={!!fieldErrors.description}
+              />
+              <FormErrorIcon message={fieldErrors.description} />
+            </div>
           </div>
 
           <div className="space-y-2">

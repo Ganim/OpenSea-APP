@@ -23,6 +23,7 @@ import {
   useFinanceCategories,
   useFinanceCustomers,
 } from '@/hooks/finance';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -42,6 +43,7 @@ import type { ReceivableWizardData } from './receivable-wizard-modal';
 interface ReceivableStepDetailsProps {
   data: ReceivableWizardData;
   onChange: (partial: Partial<ReceivableWizardData>) => void;
+  fieldErrors?: Record<string, string>;
 }
 
 // =============================================================================
@@ -95,6 +97,7 @@ function SectionDivider({ label }: { label: string }) {
 export function ReceivableStepDetails({
   data,
   onChange,
+  fieldErrors = {},
 }: ReceivableStepDetailsProps) {
   const [showCustomerCreate, setShowCustomerCreate] = useState(false);
   const [showCategoryCreate, setShowCategoryCreate] = useState(false);
@@ -196,12 +199,16 @@ export function ReceivableStepDetails({
         <SectionDivider label="Identificação" />
 
         <Row label="Descrição" required>
-          <Input
-            value={data.description}
-            onChange={e => onChange({ description: e.target.value })}
-            placeholder="Descrição do lançamento"
-            className="h-8"
-          />
+          <div className="relative">
+            <Input
+              value={data.description}
+              onChange={e => onChange({ description: e.target.value })}
+              placeholder="Descrição do lançamento"
+              className="h-8"
+              aria-invalid={!!fieldErrors.description}
+            />
+            <FormErrorIcon message={fieldErrors.description} />
+          </div>
         </Row>
 
         <Row label="Cliente">
@@ -277,17 +284,21 @@ export function ReceivableStepDetails({
         <SectionDivider label="Valores" />
 
         <Row label="Valor (R$)" required>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            value={data.expectedAmount || ''}
-            onChange={e =>
-              onChange({ expectedAmount: parseFloat(e.target.value) || 0 })
-            }
-            placeholder="0,00"
-            className={cn('h-8', pf('expectedAmount'))}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              value={data.expectedAmount || ''}
+              onChange={e =>
+                onChange({ expectedAmount: parseFloat(e.target.value) || 0 })
+              }
+              placeholder="0,00"
+              className={cn('h-8', pf('expectedAmount'))}
+              aria-invalid={!!fieldErrors.expectedAmount}
+            />
+            <FormErrorIcon message={fieldErrors.expectedAmount} />
+          </div>
         </Row>
 
         <Row label="Juros (R$)">

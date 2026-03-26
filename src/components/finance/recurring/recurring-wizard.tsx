@@ -110,6 +110,7 @@ export function RecurringWizard({
   const [wizardData, setWizardData] = useState<RecurringWizardData>({
     ...INITIAL_DATA,
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateRecurringConfig();
 
@@ -142,6 +143,7 @@ export function RecurringWizard({
       ...INITIAL_DATA,
       startDate: new Date().toISOString().split('T')[0],
     });
+    setFieldErrors({});
   }, []);
 
   const handleClose = useCallback(() => {
@@ -202,7 +204,22 @@ export function RecurringWizard({
       handleClose();
       onCreated?.();
     } catch (err) {
-      toast.error(translateError(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('description') || msg.includes('Description')) {
+        setFieldErrors({ description: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('category') || msg.includes('Category')) {
+        setFieldErrors({ categoryId: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('amount') || msg.includes('Amount')) {
+        setFieldErrors({ expectedAmount: translateError(msg) });
+        setCurrentStep(2);
+      } else if (msg.includes('start date') || msg.includes('Start date')) {
+        setFieldErrors({ startDate: translateError(msg) });
+        setCurrentStep(1);
+      } else {
+        toast.error(translateError(msg));
+      }
     }
   }, [wizardData, createMutation, handleClose, onCreated]);
 
