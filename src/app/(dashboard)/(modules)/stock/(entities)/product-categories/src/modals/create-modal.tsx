@@ -7,17 +7,19 @@
 
 import { Button } from '@/components/ui/button';
 import { CategoryCombobox } from '@/components/ui/category-combobox';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { translateError } from '@/lib/error-messages';
 import { categoriesService } from '@/services/stock';
 import type { Category } from '@/types/stock';
-import { logger } from '@/lib/logger';
 import { Loader2, TextCursorInput } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
   const [parentId, setParentId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,6 +46,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
     if (!isOpen) {
       setName('');
       setParentId('');
+      setFieldErrors({});
     }
   }, [isOpen]);
 
@@ -58,10 +62,23 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       setName('');
       setParentId('');
     } catch (error) {
-      logger.error(
-        'Erro ao criar categoria',
-        error instanceof Error ? error : undefined
-      );
+      const msg = error instanceof Error ? error.message : String(error);
+      if (
+        msg.includes('name already exists') ||
+        msg.includes('category with this name')
+      ) {
+        setFieldErrors(prev => ({
+          ...prev,
+          name: translateError(msg),
+        }));
+      } else if (
+        msg.includes('cannot be its own parent') ||
+        msg.includes('circular')
+      ) {
+        toast.error(translateError(msg));
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -80,22 +97,31 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
           <div className="space-y-5 py-2">
             <div className="space-y-2">
               <Label htmlFor="wizard-name">
-                Nome da Categoria <span className="text-red-500">*</span>
+                Nome da Categoria{' '}
+                <span className="text-[rgb(var(--color-destructive))]">*</span>
               </Label>
-              <Input
-                id="wizard-name"
-                placeholder="Ex: Eletrônicos, Roupas, Alimentos..."
-                value={name}
-                onChange={e => setName(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && name.trim()) {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-                autoFocus
-                className="h-11"
-              />
+              <div className="relative">
+                <Input
+                  id="wizard-name"
+                  placeholder="Ex: Eletrônicos, Roupas, Alimentos..."
+                  value={name}
+                  aria-invalid={!!fieldErrors.name}
+                  onChange={e => {
+                    setName(e.target.value);
+                    if (fieldErrors.name)
+                      setFieldErrors(prev => ({ ...prev, name: '' }));
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && name.trim()) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  autoFocus
+                  className="h-11"
+                />
+                <FormErrorIcon message={fieldErrors.name} />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -135,7 +161,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         ),
       },
     ],
-    [name, parentId, isSubmitting, categories, onClose]
+    [name, parentId, isSubmitting, categories, onClose, fieldErrors]
   );
 
   return (
