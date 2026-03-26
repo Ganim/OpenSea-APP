@@ -12,9 +12,11 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { translateError } from '@/lib/error-messages';
 import type { Overtime, ApproveOvertimeData } from '@/types/hr';
-import { Check, Coffee, Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { formatDate, formatHours } from '../utils';
 
 interface ApproveModalProps {
@@ -42,8 +44,13 @@ export function ApproveModal({
 
   if (!overtime) return null;
 
-  const handleApprove = () => {
-    onApprove(overtime.id, { addToTimeBank });
+  const handleApprove = async () => {
+    try {
+      await onApprove(overtime.id, { addToTimeBank });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast.error(translateError(msg));
+    }
   };
 
   const handleClose = () => {

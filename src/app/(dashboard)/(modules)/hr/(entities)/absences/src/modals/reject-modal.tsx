@@ -18,7 +18,9 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { translateError } from '@/lib/error-messages';
 import { XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { useRejectAbsence } from '../api';
 
 interface RejectModalProps {
@@ -34,6 +36,9 @@ export function RejectModal({ isOpen, onClose, absenceId }: RejectModalProps) {
     onSuccess: () => {
       setReason('');
       onClose();
+    },
+    onError: (error: Error) => {
+      toast.error(translateError(error.message));
     },
   });
 

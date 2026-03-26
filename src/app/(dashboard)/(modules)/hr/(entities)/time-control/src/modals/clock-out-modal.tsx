@@ -11,9 +11,11 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { translateError } from '@/lib/error-messages';
 import type { ClockInOutRequest } from '@/services/hr/time-control.service';
 import { Loader2, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ClockOutModalProps {
   isOpen: boolean;
@@ -42,10 +44,15 @@ export function ClockOutModal({
 
   async function handleSubmit() {
     if (!employee) return;
-    await onSubmit({
-      employeeId: employee,
-      notes: notes || undefined,
-    });
+    try {
+      await onSubmit({
+        employeeId: employee,
+        notes: notes || undefined,
+      });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast.error(translateError(msg));
+    }
   }
 
   const canSubmit = employee.trim().length > 0;

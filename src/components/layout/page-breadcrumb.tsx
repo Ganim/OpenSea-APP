@@ -1,7 +1,8 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
+import { ChevronRightIcon } from '@radix-ui/react-icons';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +11,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 /** Converte qualquer texto para Title Case (primeira letra de cada palavra maiúscula, compatível com acentos) */
 function toTitleCase(text: string): string {
@@ -30,16 +41,25 @@ interface PageBreadcrumbProps {
 }
 
 export function PageBreadcrumb({ items }: PageBreadcrumbProps) {
+  const isMobile = useIsMobile();
   const allItems: BreadcrumbItemData[] = [
     { label: 'Início', href: '/' },
     ...items,
   ];
 
+  if (isMobile) {
+    return <MobileBreadcrumb items={allItems} />;
+  }
+
+  return <DesktopBreadcrumb items={allItems} />;
+}
+
+function DesktopBreadcrumb({ items }: { items: BreadcrumbItemData[] }) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {allItems.map((item, index) => {
-          const isLast = index === allItems.length - 1;
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
 
           if (isLast) {
             return (
@@ -62,5 +82,62 @@ export function PageBreadcrumb({ items }: PageBreadcrumbProps) {
         })}
       </BreadcrumbList>
     </Breadcrumb>
+  );
+}
+
+function MobileBreadcrumb({ items }: { items: BreadcrumbItemData[] }) {
+  const [open, setOpen] = useState(false);
+  const currentPage = items[items.length - 1];
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <button
+          type="button"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        >
+          <span className="text-muted-foreground">...</span>
+          <ChevronRightIcon className="size-3.5" />
+          <span className="text-foreground font-semibold">
+            {toTitleCase(currentPage.label)}
+          </span>
+        </button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader className="text-left">
+          <DrawerTitle>Navegação</DrawerTitle>
+          <DrawerDescription>Caminho até a página atual</DrawerDescription>
+        </DrawerHeader>
+        <nav className="flex flex-col gap-1 px-4 pb-6">
+          {items.map((item, index) => {
+            const isLast = index === items.length - 1;
+
+            return (
+              <div key={item.href + item.label} className="flex flex-col">
+                {isLast ? (
+                  <span
+                    className="text-foreground bg-accent rounded-md px-3 py-2.5 text-sm font-semibold"
+                    style={{ paddingLeft: `${index * 16 + 12}px` }}
+                  >
+                    {toTitleCase(item.label)}
+                  </span>
+                ) : (
+                  <DrawerClose asChild>
+                    <Link
+                      href={item.href ?? '#'}
+                      className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-md px-3 py-2.5 text-sm transition-colors"
+                      style={{ paddingLeft: `${index * 16 + 12}px` }}
+                      onClick={() => setOpen(false)}
+                    >
+                      {toTitleCase(item.label)}
+                    </Link>
+                  </DrawerClose>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </DrawerContent>
+    </Drawer>
   );
 }

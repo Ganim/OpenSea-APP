@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { translateError } from '@/lib/error-messages';
 import type {
   CreateDependantData,
   EmployeeDependant,
@@ -20,6 +22,7 @@ import type {
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Check, Loader2, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface DependantModalProps {
   isOpen: boolean;
@@ -53,6 +56,7 @@ export function DependantModal({
   const [isIrrfDependant, setIsIrrfDependant] = useState(false);
   const [isSalarioFamilia, setIsSalarioFamilia] = useState(false);
   const [hasDisability, setHasDisability] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -72,13 +76,14 @@ export function DependantModal({
         setIsIrrfDependant(false);
         setIsSalarioFamilia(false);
         setHasDisability(false);
+        setFieldErrors({});
       }
     }
   }, [isOpen, dependant]);
 
   const canSubmit = name.trim() && birthDate && relationship;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
 
@@ -92,7 +97,18 @@ export function DependantModal({
       hasDisability,
     };
 
-    onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('CPF') || msg.includes('cpf')) {
+        setFieldErrors(prev => ({ ...prev, cpf: translateError(msg) }));
+      } else if (msg.includes('name') || msg.includes('nome')) {
+        setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   const handleClose = () => {
@@ -160,25 +176,39 @@ export function DependantModal({
                   <Label htmlFor="dep-name" className="text-xs">
                     Nome Completo <span className="text-rose-500">*</span>
                   </Label>
-                  <Input
-                    id="dep-name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Nome completo do dependente"
-                    className="h-9"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="dep-name"
+                      value={name}
+                      onChange={e => {
+                        setName(e.target.value);
+                        if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                      }}
+                      placeholder="Nome completo do dependente"
+                      className="h-9"
+                      aria-invalid={!!fieldErrors.name}
+                    />
+                    <FormErrorIcon message={fieldErrors.name} />
+                  </div>
                 </div>
                 <div className="w-40 space-y-1.5">
                   <Label htmlFor="dep-cpf" className="text-xs">
                     CPF
                   </Label>
-                  <Input
-                    id="dep-cpf"
-                    value={cpf}
-                    onChange={e => setCpf(e.target.value)}
-                    placeholder="000.000.000-00"
-                    className="h-9"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="dep-cpf"
+                      value={cpf}
+                      onChange={e => {
+                        setCpf(e.target.value);
+                        if (fieldErrors.cpf) setFieldErrors(prev => ({ ...prev, cpf: '' }));
+                      }}
+                      placeholder="000.000.000-00"
+                      className="h-9"
+                      aria-invalid={!!fieldErrors.cpf}
+                    />
+                    <FormErrorIcon message={fieldErrors.cpf} />
+                  </div>
                 </div>
               </div>
 

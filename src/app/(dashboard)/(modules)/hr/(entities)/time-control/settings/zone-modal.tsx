@@ -8,15 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { translateError } from '@/lib/error-messages';
 import type {
   CreateGeofenceZoneData,
   GeofenceZone,
 } from '../src/api/punch-config.api';
 import { Loader2, MapPinned } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 // =============================================================================
 // TYPES
@@ -51,6 +54,7 @@ export function GeofenceZoneModal({
   const [longitude, setLongitude] = useState('');
   const [radiusMeters, setRadiusMeters] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Reset form when modal opens
   useEffect(() => {
@@ -82,14 +86,24 @@ export function GeofenceZoneModal({
 
   async function handleSubmit() {
     if (!canSubmit) return;
-    await onSubmit({
-      name: name.trim(),
-      address: address.trim() || null,
-      latitude: Number(latitude),
-      longitude: Number(longitude),
-      radiusMeters: Number(radiusMeters),
-      isActive,
-    });
+    try {
+      await onSubmit({
+        name: name.trim(),
+        address: address.trim() || null,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        radiusMeters: Number(radiusMeters),
+        isActive,
+      });
+      setFieldErrors({});
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+        setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   }
 
   return (
@@ -112,12 +126,19 @@ export function GeofenceZoneModal({
             <Label htmlFor="zone-name">
               Nome <span className="text-rose-500">*</span>
             </Label>
-            <Input
-              id="zone-name"
-              placeholder="Ex: Sede, Filial Centro, Escritório SP"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                id="zone-name"
+                placeholder="Ex: Sede, Filial Centro, Escritório SP"
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                }}
+                aria-invalid={!!fieldErrors.name}
+              />
+              <FormErrorIcon message={fieldErrors.name} />
+            </div>
           </div>
 
           {/* Address */}

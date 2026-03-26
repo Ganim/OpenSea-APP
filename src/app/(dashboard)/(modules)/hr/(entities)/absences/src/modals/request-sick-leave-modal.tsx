@@ -10,12 +10,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { translateError } from '@/lib/error-messages';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { FileHeart, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { useRequestSickLeave } from '../api';
 
 interface RequestSickLeaveModalProps {
@@ -35,11 +38,22 @@ export function RequestSickLeaveModal({
   const [cid, setCid] = useState('');
   const [documentUrl, setDocumentUrl] = useState('');
   const [reason, setReason] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const requestSickLeave = useRequestSickLeave({
     onSuccess: () => {
       resetForm();
       onClose();
+    },
+    onError: (error: Error) => {
+      const msg = error.message;
+      if (msg.includes('date') || msg.includes('data') || msg.includes('overlap')) {
+        setFieldErrors(prev => ({ ...prev, startDate: translateError(msg) }));
+      } else if (msg.includes('CID') || msg.includes('cid')) {
+        setFieldErrors(prev => ({ ...prev, cid: translateError(msg) }));
+      } else {
+        toast.error(translateError(msg));
+      }
     },
   });
 
@@ -50,6 +64,7 @@ export function RequestSickLeaveModal({
     setCid('');
     setDocumentUrl('');
     setReason('');
+    setFieldErrors({});
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -137,13 +152,20 @@ export function RequestSickLeaveModal({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="sick-start-date">Data Início *</Label>
-                  <Input
-                    id="sick-start-date"
-                    type="date"
-                    value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="sick-start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={e => {
+                        setStartDate(e.target.value);
+                        if (fieldErrors.startDate) setFieldErrors(prev => ({ ...prev, startDate: '' }));
+                      }}
+                      required
+                      aria-invalid={!!fieldErrors.startDate}
+                    />
+                    <FormErrorIcon message={fieldErrors.startDate} />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sick-end-date">Data Fim *</Label>
@@ -160,13 +182,20 @@ export function RequestSickLeaveModal({
               <div className="flex gap-4">
                 <div className="space-y-2 w-40">
                   <Label htmlFor="sick-cid">CID (Código) *</Label>
-                  <Input
-                    id="sick-cid"
-                    value={cid}
-                    onChange={e => setCid(e.target.value)}
-                    placeholder="Ex.: J11, A09"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="sick-cid"
+                      value={cid}
+                      onChange={e => {
+                        setCid(e.target.value);
+                        if (fieldErrors.cid) setFieldErrors(prev => ({ ...prev, cid: '' }));
+                      }}
+                      placeholder="Ex.: J11, A09"
+                      required
+                      aria-invalid={!!fieldErrors.cid}
+                    />
+                    <FormErrorIcon message={fieldErrors.cid} />
+                  </div>
                 </div>
                 <div className="space-y-2 flex-1">
                   <Label htmlFor="sick-document-url">

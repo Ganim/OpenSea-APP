@@ -84,16 +84,23 @@ export function PageActionBar({
           ? actionButtons
               .filter(btn => !btn.permission || hasPermission(btn.permission))
               .map(btn => (
-                <Link key={btn.id} href={btn.href}>
-                  <Button
-                    size="sm"
-                    variant={btn.variant || 'default'}
-                    className="gap-2 min-h-0"
-                  >
-                    <btn.icon className="h-4 w-4" />
+                <Tooltip key={btn.id}>
+                  <TooltipTrigger asChild>
+                    <Link href={btn.href}>
+                      <Button
+                        size="sm"
+                        variant={btn.variant || 'default'}
+                        className="gap-2 min-h-0"
+                      >
+                        <btn.icon className="h-4 w-4" />
+                        <span className="hidden md:inline">{btn.label}</span>
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="md:hidden">
                     {btn.label}
-                  </Button>
-                </Link>
+                  </TooltipContent>
+                </Tooltip>
               ))
           : null}
 

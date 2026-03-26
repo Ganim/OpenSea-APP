@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { translateError } from '@/lib/error-messages';
 import type {
   CreateWorkplaceRiskData,
   WorkplaceRisk,
@@ -22,6 +24,7 @@ import type {
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { AlertTriangle, Check, Loader2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface RiskModalProps {
   isOpen: boolean;
@@ -63,6 +66,7 @@ export function RiskModal({
   const [controlMeasures, setControlMeasures] = useState('');
   const [epiRequired, setEpiRequired] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -84,13 +88,14 @@ export function RiskModal({
         setControlMeasures('');
         setEpiRequired('');
         setIsActive(true);
+        setFieldErrors({});
       }
     }
   }, [isOpen, risk]);
 
   const canSubmit = name.trim() && category && severity;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
 
@@ -105,7 +110,16 @@ export function RiskModal({
       isActive,
     };
 
-    onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+        setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   const handleClose = () => {
@@ -175,13 +189,20 @@ export function RiskModal({
                 <Label htmlFor="risk-name" className="text-xs">
                   Nome do Risco <span className="text-rose-500">*</span>
                 </Label>
-                <Input
-                  id="risk-name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Ex: Ruído contínuo acima de 85 dB"
-                  className="h-9"
-                />
+                <div className="relative">
+                  <Input
+                    id="risk-name"
+                    value={name}
+                    onChange={e => {
+                      setName(e.target.value);
+                      if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    placeholder="Ex: Ruído contínuo acima de 85 dB"
+                    className="h-9"
+                    aria-invalid={!!fieldErrors.name}
+                  />
+                  <FormErrorIcon message={fieldErrors.name} />
+                </div>
               </div>
 
               {/* Categoria + Severidade */}
