@@ -19,6 +19,15 @@ export interface CreateDeductionRequest {
   installments?: number;
 }
 
+export interface UpdateDeductionRequest {
+  name?: string;
+  amount?: number;
+  reason?: string;
+  date?: string;
+  isRecurring?: boolean;
+  installments?: number | null;
+}
+
 export interface ListDeductionsParams {
   employeeId?: string;
   isApplied?: boolean;
@@ -52,6 +61,16 @@ export const deductionsService = {
     const qs = query.toString();
     return apiClient.get<DeductionsResponse>(
       `/v1/hr/deductions${qs ? `?${qs}` : ''}`
+    );
+  },
+
+  async update(
+    deductionId: string,
+    data: UpdateDeductionRequest
+  ): Promise<DeductionResponse> {
+    return apiClient.put<DeductionResponse>(
+      `/v1/hr/deductions/${deductionId}`,
+      data
     );
   },
 

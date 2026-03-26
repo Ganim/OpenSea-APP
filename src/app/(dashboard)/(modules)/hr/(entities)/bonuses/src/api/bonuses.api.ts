@@ -1,6 +1,7 @@
 import { bonusesService } from '@/services/hr';
 import type {
   CreateBonusRequest,
+  UpdateBonusRequest,
   BonusResponse,
   BonusesResponse,
   ListBonusesParams,
@@ -19,6 +20,11 @@ export const bonusesApi = {
 
   async create(data: CreateBonusRequest): Promise<Bonus> {
     const { bonus } = await bonusesService.create(data);
+    return bonus;
+  },
+
+  async update(id: string, data: UpdateBonusRequest): Promise<Bonus> {
+    const { bonus } = await bonusesService.update(id, data);
     return bonus;
   },
 

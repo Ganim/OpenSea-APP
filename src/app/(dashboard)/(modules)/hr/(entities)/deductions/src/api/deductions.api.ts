@@ -1,6 +1,7 @@
 import { deductionsService } from '@/services/hr';
 import type {
   CreateDeductionRequest,
+  UpdateDeductionRequest,
   DeductionResponse,
   DeductionsResponse,
   ListDeductionsParams,
@@ -19,6 +20,14 @@ export const deductionsApi = {
 
   async create(data: CreateDeductionRequest): Promise<Deduction> {
     const { deduction } = await deductionsService.create(data);
+    return deduction;
+  },
+
+  async update(
+    id: string,
+    data: UpdateDeductionRequest
+  ): Promise<Deduction> {
+    const { deduction } = await deductionsService.update(id, data);
     return deduction;
   },
 

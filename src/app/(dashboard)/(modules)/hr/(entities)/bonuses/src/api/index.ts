@@ -16,8 +16,10 @@ export {
 // Mutations
 export {
   useCreateBonus,
+  useUpdateBonus,
   useDeleteBonus,
   type CreateBonusOptions,
+  type UpdateBonusOptions,
   type DeleteBonusOptions,
 } from './mutations';
 

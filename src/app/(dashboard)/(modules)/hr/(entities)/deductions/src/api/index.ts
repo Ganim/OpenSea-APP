@@ -20,8 +20,10 @@ export {
 // Mutations
 export {
   useCreateDeduction,
+  useUpdateDeduction,
   useDeleteDeduction,
   type CreateDeductionOptions,
+  type UpdateDeductionOptions,
   type DeleteDeductionOptions,
 } from './mutations';
 

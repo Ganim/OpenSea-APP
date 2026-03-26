@@ -2,6 +2,7 @@ import { terminationsService } from '@/services/hr/terminations.service';
 import type {
   Termination,
   CreateTerminationData,
+  UpdateTerminationData,
 } from '@/types/hr';
 import type { ListTerminationsParams } from '@/services/hr/terminations.service';
 
@@ -35,6 +36,11 @@ export const terminationsApi = {
 
   async create(data: CreateTerminationData): Promise<Termination> {
     const { termination } = await terminationsService.create(data);
+    return termination;
+  },
+
+  async update(id: string, data: UpdateTerminationData): Promise<Termination> {
+    const { termination } = await terminationsService.update(id, data);
     return termination;
   },
 

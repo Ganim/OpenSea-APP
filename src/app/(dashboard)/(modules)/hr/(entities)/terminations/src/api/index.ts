@@ -15,10 +15,12 @@ export {
 // Mutations
 export {
   useCreateTermination,
+  useUpdateTermination,
   useDeleteTermination,
   useCalculateTermination,
   useMarkTerminationAsPaid,
   type CreateTerminationOptions,
+  type UpdateTerminationOptions,
   type DeleteTerminationOptions,
   type CalculateTerminationOptions,
   type MarkAsPaidOptions,

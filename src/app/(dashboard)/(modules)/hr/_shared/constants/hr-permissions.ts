@@ -289,6 +289,19 @@ export const HR_PERMISSIONS = {
   },
 
   /**
+   * Permissões de Zonas de Geofencing (Geofence Zones)
+   * Mapped to time_control since it's part of time tracking
+   */
+  GEOFENCE_ZONES: {
+    LIST: HR_CODES.TIME_CONTROL.ACCESS,
+    VIEW: HR_CODES.TIME_CONTROL.ACCESS,
+    CREATE: HR_CODES.TIME_CONTROL.REGISTER,
+    UPDATE: HR_CODES.TIME_CONTROL.REGISTER,
+    DELETE: HR_CODES.TIME_CONTROL.REGISTER,
+    MANAGE: HR_CODES.TIME_CONTROL.ADMIN,
+  },
+
+  /**
    * Permissões de Configurações do RH
    */
   CONFIG: {
@@ -371,6 +384,9 @@ export type WorkplaceRiskPermission =
 export type CipaPermission =
   (typeof HR_PERMISSIONS.CIPA)[keyof typeof HR_PERMISSIONS.CIPA];
 
+export type GeofenceZonePermission =
+  (typeof HR_PERMISSIONS.GEOFENCE_ZONES)[keyof typeof HR_PERMISSIONS.GEOFENCE_ZONES];
+
 export type HrConfigPermission =
   (typeof HR_PERMISSIONS.CONFIG)[keyof typeof HR_PERMISSIONS.CONFIG];
 
@@ -394,6 +410,7 @@ export type HRPermission =
   | SafetyProgramPermission
   | WorkplaceRiskPermission
   | CipaPermission
+  | GeofenceZonePermission
   | HrConfigPermission;
 
 /* ===========================================

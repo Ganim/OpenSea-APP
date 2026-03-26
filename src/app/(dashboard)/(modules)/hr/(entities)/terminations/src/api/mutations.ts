@@ -4,7 +4,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { terminationsService } from '@/services/hr/terminations.service';
-import type { Termination, CreateTerminationData } from '@/types/hr';
+import type { Termination, CreateTerminationData, UpdateTerminationData } from '@/types/hr';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 import { terminationKeys } from './keys';
@@ -38,6 +38,54 @@ export function useCreateTermination(options: CreateTerminationOptions = {}) {
       queryClient.invalidateQueries({ queryKey: terminationKeys.lists() });
       if (showSuccessToast) {
         toast.success('Rescisão registrada com sucesso!');
+      }
+      onSuccess?.(termination);
+    },
+    onError: (error: Error) => {
+      if (showErrorToast) toast.error(translateError(error));
+      onError?.(error);
+    },
+  });
+}
+
+/* ===========================================
+   UPDATE
+   =========================================== */
+
+export interface UpdateTerminationOptions {
+  onSuccess?: (termination: Termination) => void;
+  onError?: (error: Error) => void;
+  showSuccessToast?: boolean;
+  showErrorToast?: boolean;
+}
+
+export function useUpdateTermination(options: UpdateTerminationOptions = {}) {
+  const queryClient = useQueryClient();
+  const {
+    onSuccess,
+    onError,
+    showSuccessToast = true,
+    showErrorToast = true,
+  } = options;
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateTerminationData;
+    }): Promise<Termination> => {
+      const response = await terminationsService.update(id, data);
+      return response.termination;
+    },
+    onSuccess: termination => {
+      queryClient.invalidateQueries({ queryKey: terminationKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: terminationKeys.detail(termination.id),
+      });
+      if (showSuccessToast) {
+        toast.success('Rescisão atualizada com sucesso!');
       }
       onSuccess?.(termination);
     },

@@ -17,6 +17,13 @@ export interface CreateBonusRequest {
   date: string;
 }
 
+export interface UpdateBonusRequest {
+  name?: string;
+  amount?: number;
+  reason?: string;
+  date?: string;
+}
+
 export interface ListBonusesParams {
   employeeId?: string;
   isPaid?: boolean;
@@ -48,6 +55,13 @@ export const bonusesService = {
     return apiClient.get<BonusesResponse>(
       `/v1/hr/bonuses${qs ? `?${qs}` : ''}`
     );
+  },
+
+  async update(
+    bonusId: string,
+    data: UpdateBonusRequest
+  ): Promise<BonusResponse> {
+    return apiClient.put<BonusResponse>(`/v1/hr/bonuses/${bonusId}`, data);
   },
 
   async delete(bonusId: string): Promise<void> {
