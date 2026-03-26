@@ -11,6 +11,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useCustomersInfinite } from '@/hooks/sales/use-customers';
 import { usePaymentConditionsInfinite } from '@/hooks/sales/use-payment-conditions';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { Customer, CreateOrderRequest } from '@/types/sales';
 import {
   Check,
@@ -24,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Local Types ───────────────────────────────────────────────
 
@@ -426,6 +429,7 @@ export function CreateOrderWizard({
   const [paymentConditionId, setPaymentConditionId] = useState('');
   const [notes, setNotes] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -435,6 +439,7 @@ export function CreateOrderWizard({
     setPaymentConditionId('');
     setNotes('');
     setExpiresAt('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -475,8 +480,13 @@ export function CreateOrderWizard({
       })),
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      toast.error(translateError(apiError.message));
+    }
   }
 
   const steps: WizardStep[] = [

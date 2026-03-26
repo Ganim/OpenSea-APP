@@ -7,10 +7,14 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { usePipelines } from '@/hooks/sales/use-pipelines';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateDealRequest } from '@/types/sales';
 import { Check, DollarSign, Handshake, Loader2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -31,6 +35,7 @@ function StepBasicInfo({
   stageId,
   onStageChange,
   pipelines,
+  fieldErrors,
 }: {
   title: string;
   onTitleChange: (v: string) => void;
@@ -39,6 +44,7 @@ function StepBasicInfo({
   stageId: string;
   onStageChange: (v: string) => void;
   pipelines: { id: string; name: string; stages: { id: string; name: string }[] }[];
+  fieldErrors: Record<string, string>;
 }) {
   const selectedPipeline = pipelines.find(p => p.id === pipelineId);
   const stages = selectedPipeline?.stages ?? [];
@@ -47,11 +53,15 @@ function StepBasicInfo({
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Titulo *</Label>
-        <Input
-          placeholder="Ex: Proposta comercial - Empresa X"
-          value={title}
-          onChange={e => onTitleChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Ex: Proposta comercial - Empresa X"
+            value={title}
+            onChange={e => onTitleChange(e.target.value)}
+            aria-invalid={!!fieldErrors.title}
+          />
+          <FormErrorIcon message={fieldErrors.title} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -163,6 +173,7 @@ export function CreateDealWizard({
   const [value, setValue] = useState('');
   const [expectedCloseDate, setExpectedCloseDate] = useState('');
   const [probability, setProbability] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { data: pipelinesData } = usePipelines({ isActive: true });
   const pipelines = useMemo(
@@ -178,6 +189,7 @@ export function CreateDealWizard({
     setValue('');
     setExpectedCloseDate('');
     setProbability('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -191,8 +203,38 @@ export function CreateDealWizard({
       probability: probability ? parseInt(probability, 10) : undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'title already': 'title',
+        'Deal not found': 'title',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [title, pipelineId, stageId, value, expectedCloseDate, probability, onSubmit, handleClose]);
 
   const steps: WizardStep[] = [
@@ -203,12 +245,13 @@ export function CreateDealWizard({
       content: (
         <StepBasicInfo
           title={title}
-          onTitleChange={setTitle}
+          onTitleChange={(v) => { setTitle(v); setFieldErrors(prev => { const { title: _, ...rest } = prev; return rest; }); }}
           pipelineId={pipelineId}
           onPipelineChange={setPipelineId}
           stageId={stageId}
           onStageChange={setStageId}
           pipelines={pipelines}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: title.trim().length > 0 && !!pipelineId && !!stageId,

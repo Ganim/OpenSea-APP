@@ -10,9 +10,12 @@ import {
 } from '@/components/ui/step-wizard-dialog';
 import { useCustomersInfinite } from '@/hooks/sales/use-customers';
 import { useVariants } from '@/hooks/stock/use-variants';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateCustomerPriceRequest } from '@/types/sales';
 import { BadgeDollarSign, Check, DollarSign, Loader2, User } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -178,6 +181,8 @@ export function CreateCustomerPriceWizard({
     [variantsData]
   );
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const handleClose = useCallback(() => {
     setCurrentStep(1);
     setCustomerId('');
@@ -186,6 +191,7 @@ export function CreateCustomerPriceWizard({
     setValidFrom('');
     setValidUntil('');
     setNotes('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -199,8 +205,38 @@ export function CreateCustomerPriceWizard({
       notes: notes.trim() || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'Customer price already': 'price',
+        'already exists': 'price',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(2); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(2);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [customerId, variantId, price, validFrom, validUntil, notes, onSubmit, handleClose]);
 
   const steps: WizardStep[] = [

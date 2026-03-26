@@ -9,6 +9,8 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { useOrdersInfinite } from '@/hooks/sales/use-orders';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   CreateReturnRequest,
   ReturnReason,
@@ -17,6 +19,7 @@ import type {
 } from '@/types/sales';
 import { Check, Loader2, Package, RotateCcw } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Labels ───────────────────────────────────────────────────
 
@@ -248,8 +251,13 @@ export function CreateReturnWizard({
       notes: notes.trim() || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      toast.error(translateError(apiError.message));
+    }
   }, [orderId, type, reason, refundMethod, refundAmount, reasonDetails, notes, onSubmit, handleClose]);
 
   const steps: WizardStep[] = [

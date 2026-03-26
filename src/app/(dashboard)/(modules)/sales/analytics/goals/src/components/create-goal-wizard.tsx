@@ -7,7 +7,10 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreateGoal } from '@/hooks/sales/use-analytics';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   GoalType,
   GoalPeriod,
@@ -65,6 +68,7 @@ function StepGoalInfo({
   onUnitChange,
   scope,
   onScopeChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
@@ -76,16 +80,21 @@ function StepGoalInfo({
   onUnitChange: (v: string) => void;
   scope: GoalScope;
   onScopeChange: (v: GoalScope) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome da Meta *</Label>
-        <Input
-          placeholder="Ex: Receita Mensal Q1"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Ex: Receita Mensal Q1"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -232,6 +241,7 @@ export function CreateGoalWizard({
 
   const createGoal = useCreateGoal();
   const isSubmitting = createGoal.isPending;
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -243,6 +253,7 @@ export function CreateGoalWizard({
     setPeriod('MONTHLY');
     setStartDate('');
     setEndDate('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -262,8 +273,36 @@ export function CreateGoalWizard({
       await createGoal.mutateAsync(payload);
       toast.success('Meta criada com sucesso.');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar meta.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Goal name already': 'name',
+        'date': 'startDate',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            if (field === 'name') setCurrentStep(1);
+            else setCurrentStep(2);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -280,7 +319,7 @@ export function CreateGoalWizard({
       content: (
         <StepGoalInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           type={type}
           onTypeChange={setType}
           targetValue={targetValue}
@@ -289,6 +328,7 @@ export function CreateGoalWizard({
           onUnitChange={setUnit}
           scope={scope}
           onScopeChange={setScope}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: step1Valid,

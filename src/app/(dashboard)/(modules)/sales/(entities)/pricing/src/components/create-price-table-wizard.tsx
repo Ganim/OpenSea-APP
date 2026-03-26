@@ -8,7 +8,10 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreatePriceTable } from '@/hooks/sales/use-price-tables';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { PriceTableType, CreatePriceTableRequest } from '@/types/sales';
 import { PRICE_TABLE_TYPE_LABELS } from '@/types/sales';
 import { CalendarDays, Check, DollarSign, Loader2 } from 'lucide-react';
@@ -33,6 +36,7 @@ function StepBasicInfo({
   onTypeChange,
   priority,
   onPriorityChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
@@ -42,16 +46,21 @@ function StepBasicInfo({
   onTypeChange: (v: PriceTableType) => void;
   priority: string;
   onPriorityChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome *</Label>
-        <Input
-          placeholder="Ex: Tabela Varejo 2026"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Ex: Tabela Varejo 2026"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -191,6 +200,7 @@ export function CreatePriceTableWizard({
 
   const createPriceTable = useCreatePriceTable();
   const isSubmitting = createPriceTable.isPending;
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -201,6 +211,7 @@ export function CreatePriceTableWizard({
     setIsActive(true);
     setValidFrom('');
     setValidUntil('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -219,8 +230,34 @@ export function CreatePriceTableWizard({
       await createPriceTable.mutateAsync(payload);
       toast.success('Tabela de preço criada com sucesso.');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar tabela de preço.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Price table name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -236,13 +273,14 @@ export function CreatePriceTableWizard({
       content: (
         <StepBasicInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           description={description}
           onDescriptionChange={setDescription}
           type={type}
           onTypeChange={setType}
           priority={priority}
           onPriorityChange={setPriority}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: step1Valid,

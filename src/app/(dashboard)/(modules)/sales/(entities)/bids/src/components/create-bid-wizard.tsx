@@ -8,7 +8,10 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreateBid } from '@/hooks/sales/use-bids';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   BidModality,
   BidCriterion,
@@ -44,6 +47,7 @@ function StepBasicInfo({
   onOrganNameChange,
   portalName,
   onPortalNameChange,
+  fieldErrors,
 }: {
   editalNumber: string;
   onEditalNumberChange: (v: string) => void;
@@ -59,17 +63,22 @@ function StepBasicInfo({
   onOrganNameChange: (v: string) => void;
   portalName: string;
   onPortalNameChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Número do Edital *</Label>
-          <Input
-            placeholder="Ex: PE 001/2026"
-            value={editalNumber}
-            onChange={e => onEditalNumberChange(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              placeholder="Ex: PE 001/2026"
+              value={editalNumber}
+              onChange={e => onEditalNumberChange(e.target.value)}
+              aria-invalid={!!fieldErrors.editalNumber}
+            />
+            <FormErrorIcon message={fieldErrors.editalNumber} />
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Portal *</Label>
@@ -275,6 +284,7 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
 
   const createBid = useCreateBid();
   const isSubmitting = createBid.isPending;
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -291,6 +301,7 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
     setOrganState('');
     setOrganCity('');
     setNotes('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -317,8 +328,34 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
       await createBid.mutateAsync(payload);
       toast.success('Licitação criada com sucesso.');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar licitação.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'edital': 'editalNumber',
+        'Edital number already': 'editalNumber',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -340,7 +377,7 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
       content: (
         <StepBasicInfo
           editalNumber={editalNumber}
-          onEditalNumberChange={setEditalNumber}
+          onEditalNumberChange={(v) => { setEditalNumber(v); setFieldErrors(prev => { const { editalNumber: _, ...rest } = prev; return rest; }); }}
           modality={modality}
           onModalityChange={setModality}
           criterionType={criterionType}
@@ -353,6 +390,7 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
           onOrganNameChange={setOrganName}
           portalName={portalName}
           onPortalNameChange={setPortalName}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: step1Valid,

@@ -8,7 +8,10 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreateCoupon } from '@/hooks/sales/use-coupons';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CouponType, CreateCouponRequest } from '@/types/sales';
 import { COUPON_TYPE_LABELS } from '@/types/sales';
 import { Check, Loader2, ShieldCheck, Ticket } from 'lucide-react';
@@ -41,6 +44,7 @@ export function CreateCouponWizard({
   const [isActive, setIsActive] = useState(true);
 
   const createMutation = useCreateCoupon();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -54,6 +58,7 @@ export function CreateCouponWizard({
     setStartDate('');
     setEndDate('');
     setIsActive(true);
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -76,8 +81,34 @@ export function CreateCouponWizard({
       await createMutation.mutateAsync(payload);
       toast.success('Cupom criado com sucesso!');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar cupom. Tente novamente.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'code already': 'code',
+        'Coupon code already': 'code',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -93,12 +124,16 @@ export function CreateCouponWizard({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Código do Cupom *</Label>
-            <Input
-              placeholder="Ex: DESCONTO10"
-              value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
-              className="font-mono"
-            />
+            <div className="relative">
+              <Input
+                placeholder="Ex: DESCONTO10"
+                value={code}
+                onChange={e => { setCode(e.target.value.toUpperCase()); setFieldErrors(prev => { const { code: _, ...rest } = prev; return rest; }); }}
+                className="font-mono"
+                aria-invalid={!!fieldErrors.code}
+              />
+              <FormErrorIcon message={fieldErrors.code} />
+            </div>
             <p className="text-xs text-muted-foreground">
               O código será convertido automaticamente para maiúsculas.
             </p>

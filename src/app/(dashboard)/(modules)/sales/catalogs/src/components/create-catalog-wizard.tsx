@@ -8,6 +8,9 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   CatalogLayout,
   CatalogType,
@@ -15,6 +18,7 @@ import type {
 } from '@/types/sales';
 import { BookOpen, Check, Loader2, Settings } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -34,6 +38,7 @@ function StepBasicInfo({
   onDescriptionChange,
   type,
   onTypeChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
@@ -41,16 +46,21 @@ function StepBasicInfo({
   onDescriptionChange: (v: string) => void;
   type: CatalogType;
   onTypeChange: (v: CatalogType) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome *</Label>
-        <Input
-          placeholder="Nome do catálogo"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Nome do catálogo"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -170,6 +180,7 @@ export function CreateCatalogWizard({
   const [showPrices, setShowPrices] = useState(true);
   const [showStock, setShowStock] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -180,6 +191,7 @@ export function CreateCatalogWizard({
     setShowPrices(true);
     setShowStock(false);
     setIsPublic(false);
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -194,8 +206,38 @@ export function CreateCatalogWizard({
       isPublic,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Catalog name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [
     name,
     description,
@@ -218,11 +260,12 @@ export function CreateCatalogWizard({
       content: (
         <StepBasicInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           description={description}
           onDescriptionChange={setDescription}
           type={type}
           onTypeChange={setType}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: name.trim().length > 0,

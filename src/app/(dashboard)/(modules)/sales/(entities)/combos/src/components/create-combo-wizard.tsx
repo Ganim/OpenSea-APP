@@ -8,7 +8,10 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreateCombo } from '@/hooks/sales/use-combos';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { ComboDiscountType, CreateComboRequest } from '@/types/sales';
 import { CalendarDays, Check, Loader2, Package } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -38,6 +41,7 @@ export function CreateComboWizard({
   const [isActive, setIsActive] = useState(true);
 
   const createMutation = useCreateCombo();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -48,6 +52,7 @@ export function CreateComboWizard({
     setStartDate('');
     setEndDate('');
     setIsActive(true);
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -66,8 +71,34 @@ export function CreateComboWizard({
       await createMutation.mutateAsync(payload);
       toast.success('Combo criado com sucesso!');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar combo. Tente novamente.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Combo name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -82,11 +113,15 @@ export function CreateComboWizard({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Nome *</Label>
-            <Input
-              placeholder="Ex: Combo Verão"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                placeholder="Ex: Combo Verão"
+                value={name}
+                onChange={e => { setName(e.target.value); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+                aria-invalid={!!fieldErrors.name}
+              />
+              <FormErrorIcon message={fieldErrors.name} />
+            </div>
           </div>
 
           <div className="space-y-2">

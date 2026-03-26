@@ -8,7 +8,10 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreateDashboard } from '@/hooks/sales/use-analytics';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   DashboardRole,
   DashboardVisibility,
@@ -48,21 +51,27 @@ function StepDashboardInfo({
   onNameChange,
   description,
   onDescriptionChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
   description: string;
   onDescriptionChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome do Dashboard *</Label>
-        <Input
-          placeholder="Ex: Painel de Vendas Mensal"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Ex: Painel de Vendas Mensal"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -156,6 +165,7 @@ export function CreateDashboardWizard({
 
   const createDashboard = useCreateDashboard();
   const isSubmitting = createDashboard.isPending;
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -163,6 +173,7 @@ export function CreateDashboardWizard({
     setDescription('');
     setRole('');
     setVisibility('PRIVATE');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -178,8 +189,34 @@ export function CreateDashboardWizard({
       await createDashboard.mutateAsync(payload);
       toast.success('Dashboard criado com sucesso.');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar dashboard.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Dashboard name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -198,9 +235,10 @@ export function CreateDashboardWizard({
       content: (
         <StepDashboardInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           description={description}
           onDescriptionChange={setDescription}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: step1Valid,

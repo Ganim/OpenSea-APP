@@ -13,7 +13,10 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreatePaymentCondition } from '@/hooks/sales/use-payment-conditions';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type {
   PaymentConditionType,
   CreatePaymentConditionRequest,
@@ -53,6 +56,7 @@ export function CreatePaymentConditionWizard({
   const [maxOrderValue, setMaxOrderValue] = useState('');
 
   const createMutation = useCreatePaymentCondition();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -68,6 +72,7 @@ export function CreatePaymentConditionWizard({
     setDiscountCash('');
     setMinOrderValue('');
     setMaxOrderValue('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -91,10 +96,36 @@ export function CreatePaymentConditionWizard({
 
     try {
       await createMutation.mutateAsync(payload);
-      toast.success('Condicao de pagamento criada com sucesso!');
+      toast.success('Condição de pagamento criada com sucesso!');
       handleClose();
-    } catch {
-      toast.error('Erro ao criar condicao de pagamento. Tente novamente.');
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Payment condition name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     }
   }
 
@@ -112,11 +143,15 @@ export function CreatePaymentConditionWizard({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Nome *</Label>
-            <Input
-              placeholder="Ex: 30/60/90 dias"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                placeholder="Ex: 30/60/90 dias"
+                value={name}
+                onChange={e => { setName(e.target.value); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+                aria-invalid={!!fieldErrors.name}
+              />
+              <FormErrorIcon message={fieldErrors.name} />
+            </div>
           </div>
 
           <div className="space-y-2">

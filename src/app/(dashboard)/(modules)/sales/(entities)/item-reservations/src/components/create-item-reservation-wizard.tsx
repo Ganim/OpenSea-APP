@@ -8,9 +8,12 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { useVariants } from '@/hooks/stock/use-variants';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateItemReservationRequest } from '@/types/sales';
 import { Calendar, Check, Hash, Loader2, Package } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -137,12 +140,15 @@ export function CreateItemReservationWizard({
     [variantsData]
   );
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const handleClose = useCallback(() => {
     setCurrentStep(1);
     setItemId('');
     setQuantity('');
     setExpiresAt('');
     setSalesOrderId('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -154,8 +160,17 @@ export function CreateItemReservationWizard({
       salesOrderId: salesOrderId.trim() || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      if (apiError.message.includes('Insufficient stock')) {
+        toast.error(translateError(apiError.message));
+      } else {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [itemId, quantity, expiresAt, salesOrderId, onSubmit, handleClose]);
 
   const steps: WizardStep[] = [

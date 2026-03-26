@@ -9,9 +9,12 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { useCustomersInfinite } from '@/hooks/sales/use-customers';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateStoreCreditRequest } from '@/types/sales';
 import { Calendar, Check, Loader2, User, Wallet } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -131,8 +134,13 @@ export function CreateStoreCreditWizard({
       expiresAt: expiresAt || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      toast.error(translateError(apiError.message));
+    }
   }, [customerId, amount, expiresAt, onSubmit, handleClose]);
 
   const steps: WizardStep[] = [

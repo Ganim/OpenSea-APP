@@ -8,10 +8,14 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateContactRequest, ContactRole } from '@/types/sales';
 import { CONTACT_ROLE_LABELS } from '@/types/sales';
 import { Briefcase, Check, Loader2, UserCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -37,6 +41,7 @@ function StepBasicInfo({
   onRoleChange,
   customerId,
   onCustomerIdChange,
+  fieldErrors,
 }: {
   firstName: string;
   onFirstNameChange: (v: string) => void;
@@ -50,17 +55,22 @@ function StepBasicInfo({
   onRoleChange: (v: string) => void;
   customerId: string;
   onCustomerIdChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label>Nome *</Label>
-          <Input
-            placeholder="Nome"
-            value={firstName}
-            onChange={e => onFirstNameChange(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              placeholder="Nome"
+              value={firstName}
+              onChange={e => onFirstNameChange(e.target.value)}
+              aria-invalid={!!fieldErrors.firstName}
+            />
+            <FormErrorIcon message={fieldErrors.firstName} />
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Sobrenome</Label>
@@ -74,12 +84,16 @@ function StepBasicInfo({
 
       <div className="space-y-2">
         <Label>E-mail</Label>
-        <Input
-          type="email"
-          placeholder="contato@exemplo.com"
-          value={email}
-          onChange={e => onEmailChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            type="email"
+            placeholder="contato@exemplo.com"
+            value={email}
+            onChange={e => onEmailChange(e.target.value)}
+            aria-invalid={!!fieldErrors.email}
+          />
+          <FormErrorIcon message={fieldErrors.email} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -201,6 +215,7 @@ export function CreateContactWizard({
   const [department, setDepartment] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [notes, setNotes] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -214,6 +229,7 @@ export function CreateContactWizard({
     setDepartment('');
     setWhatsapp('');
     setNotes('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -230,8 +246,38 @@ export function CreateContactWizard({
       whatsapp: whatsapp.trim() || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'email already': 'email',
+        'Contact email already': 'email',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [
     firstName,
     lastName,
@@ -256,17 +302,18 @@ export function CreateContactWizard({
       content: (
         <StepBasicInfo
           firstName={firstName}
-          onFirstNameChange={setFirstName}
+          onFirstNameChange={(v) => { setFirstName(v); setFieldErrors(prev => { const { firstName: _, ...rest } = prev; return rest; }); }}
           lastName={lastName}
           onLastNameChange={setLastName}
           email={email}
-          onEmailChange={setEmail}
+          onEmailChange={(v) => { setEmail(v); setFieldErrors(prev => { const { email: _, ...rest } = prev; return rest; }); }}
           phone={phone}
           onPhoneChange={setPhone}
           role={role}
           onRoleChange={setRole}
           customerId={customerId}
           onCustomerIdChange={setCustomerId}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: firstName.trim().length > 0,

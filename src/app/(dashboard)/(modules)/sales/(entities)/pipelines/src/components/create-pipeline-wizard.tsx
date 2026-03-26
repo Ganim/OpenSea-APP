@@ -8,7 +8,10 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { useCreatePipeline, useCreatePipelineStage } from '@/hooks/sales/use-pipelines';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import { Check, GitBranch, Layers, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -39,22 +42,28 @@ function StepPipelineInfo({
   onNameChange,
   description,
   onDescriptionChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
   description: string;
   onDescriptionChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome do Pipeline *</Label>
-        <Input
-          placeholder="Ex: Pipeline de Vendas"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-          autoFocus
-        />
+        <div className="relative">
+          <Input
+            placeholder="Ex: Pipeline de Vendas"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            autoFocus
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -151,6 +160,7 @@ export function CreatePipelineWizard({
     { id: nextStageId(), name: '' },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -158,6 +168,7 @@ export function CreatePipelineWizard({
     setDescription('');
     setStages([{ id: nextStageId(), name: '' }]);
     setIsSubmitting(false);
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -205,9 +216,36 @@ export function CreatePipelineWizard({
       handleClose();
       router.push(`/sales/pipelines/${pipelineId}`);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao criar pipeline', { description: message });
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Pipeline name already': 'name',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -235,9 +273,10 @@ export function CreatePipelineWizard({
       content: (
         <StepPipelineInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           description={description}
           onDescriptionChange={setDescription}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: name.trim().length > 0,

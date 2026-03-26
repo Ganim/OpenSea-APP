@@ -8,9 +8,13 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { ApiError } from '@/lib/errors/api-error';
+import { translateError } from '@/lib/error-messages';
 import type { CreateCustomerRequest, CustomerType } from '@/types/sales';
 import { Check, Loader2, MapPin, User } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -32,6 +36,7 @@ function StepBasicInfo({
   onDocumentChange,
   email,
   onEmailChange,
+  fieldErrors,
 }: {
   name: string;
   onNameChange: (v: string) => void;
@@ -41,16 +46,21 @@ function StepBasicInfo({
   onDocumentChange: (v: string) => void;
   email: string;
   onEmailChange: (v: string) => void;
+  fieldErrors: Record<string, string>;
 }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Nome *</Label>
-        <Input
-          placeholder="Nome completo ou razão social"
-          value={name}
-          onChange={e => onNameChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder="Nome completo ou razão social"
+            value={name}
+            onChange={e => onNameChange(e.target.value)}
+            aria-invalid={!!fieldErrors.name}
+          />
+          <FormErrorIcon message={fieldErrors.name} />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -67,23 +77,31 @@ function StepBasicInfo({
 
       <div className="space-y-2">
         <Label>{type === 'INDIVIDUAL' ? 'CPF' : 'CNPJ'}</Label>
-        <Input
-          placeholder={
-            type === 'INDIVIDUAL' ? '000.000.000-00' : '00.000.000/0000-00'
-          }
-          value={document}
-          onChange={e => onDocumentChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            placeholder={
+              type === 'INDIVIDUAL' ? '000.000.000-00' : '00.000.000/0000-00'
+            }
+            value={document}
+            onChange={e => onDocumentChange(e.target.value)}
+            aria-invalid={!!fieldErrors.document}
+          />
+          <FormErrorIcon message={fieldErrors.document} />
+        </div>
       </div>
 
       <div className="space-y-2">
         <Label>E-mail</Label>
-        <Input
-          type="email"
-          placeholder="cliente@exemplo.com"
-          value={email}
-          onChange={e => onEmailChange(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            type="email"
+            placeholder="cliente@exemplo.com"
+            value={email}
+            onChange={e => onEmailChange(e.target.value)}
+            aria-invalid={!!fieldErrors.email}
+          />
+          <FormErrorIcon message={fieldErrors.email} />
+        </div>
       </div>
     </div>
   );
@@ -213,6 +231,7 @@ export function CreateCustomerWizard({
   const [zipCode, setZipCode] = useState('');
   const [country, setCountry] = useState('');
   const [notes, setNotes] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleClose = useCallback(() => {
     setCurrentStep(1);
@@ -227,6 +246,7 @@ export function CreateCustomerWizard({
     setZipCode('');
     setCountry('');
     setNotes('');
+    setFieldErrors({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -245,8 +265,43 @@ export function CreateCustomerWizard({
       notes: notes.trim() || undefined,
     };
 
-    await onSubmit(payload);
-    handleClose();
+    try {
+      await onSubmit(payload);
+      handleClose();
+    } catch (err) {
+      const apiError = ApiError.from(err);
+      const fieldMap: Record<string, string> = {
+        'name already': 'name',
+        'Customer name already': 'name',
+        'Document already': 'document',
+        'CPF already': 'document',
+        'CNPJ already': 'document',
+        'Email already': 'email',
+        'email already': 'email',
+      };
+      let mapped = false;
+      if (apiError.fieldErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const fe of apiError.fieldErrors) {
+          errors[fe.field] = translateError(fe.message);
+          mapped = true;
+        }
+        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+      }
+      if (!mapped) {
+        for (const [pattern, field] of Object.entries(fieldMap)) {
+          if (apiError.message.includes(pattern)) {
+            setFieldErrors({ [field]: translateError(apiError.message) });
+            setCurrentStep(1);
+            mapped = true;
+            break;
+          }
+        }
+      }
+      if (!mapped) {
+        toast.error(translateError(apiError.message));
+      }
+    }
   }, [
     name,
     type,
@@ -271,13 +326,14 @@ export function CreateCustomerWizard({
       content: (
         <StepBasicInfo
           name={name}
-          onNameChange={setName}
+          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
           type={type}
           onTypeChange={setType}
           document={document}
-          onDocumentChange={setDocument}
+          onDocumentChange={(v) => { setDocument(v); setFieldErrors(prev => { const { document: _, ...rest } = prev; return rest; }); }}
           email={email}
-          onEmailChange={setEmail}
+          onEmailChange={(v) => { setEmail(v); setFieldErrors(prev => { const { email: _, ...rest } = prev; return rest; }); }}
+          fieldErrors={fieldErrors}
         />
       ),
       isValid: name.trim().length > 0,
