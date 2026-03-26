@@ -46,6 +46,8 @@ import {
   useCorrectionLetter,
   type FiscalDocumentsFilters,
 } from '@/hooks/finance/use-fiscal';
+import { EmitNfceWizard } from '@/components/finance/emit-nfce-wizard';
+import { EmitNfeWizard } from '@/components/finance/emit-nfe-wizard';
 import { cn } from '@/lib/utils';
 import type {
   FiscalDocumentDTO,
@@ -213,6 +215,8 @@ function FiscalPageContent() {
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
   const [correctionTarget, setCorrectionTarget] = useState<string | null>(null);
   const [correctionText, setCorrectionText] = useState('');
+  const [nfeWizardOpen, setNfeWizardOpen] = useState(false);
+  const [nfceWizardOpen, setNfceWizardOpen] = useState(false);
 
   // ============================================================================
   // DATA: Infinite scroll documents + filter dropdown sources
@@ -623,10 +627,7 @@ function FiscalPageContent() {
         id: 'emit-nfce',
         title: 'Emitir NFC-e',
         icon: Receipt,
-        onClick: () => {
-          // TODO: Open NFC-e emit wizard
-          toast.info('Emissao de NFC-e em desenvolvimento.');
-        },
+        onClick: () => setNfceWizardOpen(true),
         variant: 'outline',
         permission: FINANCE_PERMISSIONS.FISCAL.REGISTER,
       },
@@ -634,10 +635,7 @@ function FiscalPageContent() {
         id: 'emit-nfe',
         title: 'Emitir NF-e',
         icon: Plus,
-        onClick: () => {
-          // TODO: Open NF-e emit wizard
-          toast.info('Emissao de NF-e em desenvolvimento.');
-        },
+        onClick: () => setNfeWizardOpen(true),
         variant: 'default',
         permission: FINANCE_PERMISSIONS.FISCAL.REGISTER,
       },
@@ -933,6 +931,19 @@ function FiscalPageContent() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          {/* NF-e Emission Wizard */}
+          <EmitNfeWizard
+            open={nfeWizardOpen}
+            onOpenChange={setNfeWizardOpen}
+            onSuccess={() => setNfeWizardOpen(false)}
+          />
+
+          {/* NFC-e Emission Wizard */}
+          <EmitNfceWizard
+            open={nfceWizardOpen}
+            onOpenChange={setNfceWizardOpen}
+            onSuccess={() => setNfceWizardOpen(false)}
+          />
         </PageBody>
       </PageLayout>
     </CoreProvider>
