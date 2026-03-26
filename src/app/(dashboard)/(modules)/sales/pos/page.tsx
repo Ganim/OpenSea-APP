@@ -16,6 +16,9 @@ import {
   Globe,
   Plus,
   Settings,
+  UserCheck,
+  Zap,
+  ArrowRight,
 } from 'lucide-react';
 
 const MODE_CONFIG = {
@@ -74,7 +77,62 @@ export default function PosTerminalSelectorPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Ponto de Venda</h1>
           <p className="text-muted-foreground mt-1">
-            Selecione um terminal para iniciar as vendas
+            Escolha o modo de atendimento ou selecione um terminal
+          </p>
+        </div>
+
+        {/* Mode Selector Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card
+            className="group relative cursor-pointer overflow-hidden border border-border bg-white dark:bg-slate-800/60 p-0 transition-all hover:shadow-lg hover:border-violet-400/50 dark:hover:border-violet-500/40"
+            onClick={() => router.push('/sales/pos/atendimento')}
+          >
+            <div className="relative p-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/5 dark:to-purple-500/5" />
+              <div className="relative flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20">
+                  <UserCheck className="h-7 w-7 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold mb-1">
+                    Atendimento Assistido
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Acompanhe o cliente na loja com venda consultiva
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
+              </div>
+            </div>
+          </Card>
+
+          <Card
+            className="group relative cursor-pointer overflow-hidden border border-border bg-white dark:bg-slate-800/60 p-0 transition-all hover:shadow-lg hover:border-sky-400/50 dark:hover:border-sky-500/40"
+            onClick={() => router.push('/sales/pos/balcao')}
+          >
+            <div className="relative p-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-blue-500/10 dark:from-sky-500/5 dark:to-blue-500/5" />
+              <div className="relative flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/20">
+                  <Zap className="h-7 w-7 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold mb-1">Balcão Rápido</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Venda rápida direto no balcão
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Terminal List */}
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold">Terminais</h2>
+          <p className="text-sm text-muted-foreground">
+            Acesse um terminal específico para operar
           </p>
         </div>
 
