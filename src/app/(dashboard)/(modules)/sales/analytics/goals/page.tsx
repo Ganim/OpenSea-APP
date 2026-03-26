@@ -165,7 +165,10 @@ export default function GoalsPage() {
               {goals.map((goal: AnalyticsGoal) => (
                 <Card
                   key={goal.id}
-                  className="bg-white dark:bg-slate-800/60 border border-border hover:border-primary/20 transition-colors"
+                  className="bg-white dark:bg-slate-800/60 border border-border hover:border-primary/20 transition-colors cursor-pointer"
+                  onClick={() =>
+                    router.push(`/sales/analytics/goals/${goal.id}`)
+                  }
                 >
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
@@ -184,7 +187,10 @@ export default function GoalsPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => setDeleteGoalId(goal.id)}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setDeleteGoalId(goal.id);
+                        }}
                         className="text-muted-foreground hover:text-rose-500 transition-colors p-1"
                       >
                         <Trash2 className="h-4 w-4" />
