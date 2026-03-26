@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ import {
   useClosePosSession,
 } from '@/hooks/sales';
 import {
-  Search,
   ShoppingCart,
   Trash2,
   Plus,
@@ -22,6 +21,7 @@ import {
   LogOut,
   ArrowLeft,
 } from 'lucide-react';
+import { ProductSearch } from '../src/components/product-search';
 
 interface CartItem {
   id: string;
@@ -42,24 +42,11 @@ export default function PosCheckoutPage() {
   const closeSession = useClosePosSession();
 
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [openingBalance, setOpeningBalance] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  // Auto-focus search input
-  useEffect(() => {
-    if (session && searchRef.current) {
-      searchRef.current.focus();
-    }
-  }, [session]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F2') {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
       if (e.key === 'F5') {
         e.preventDefault();
         // Remove last item
@@ -93,8 +80,6 @@ export default function PosCheckoutPage() {
           },
         ];
       });
-      setSearchQuery('');
-      searchRef.current?.focus();
     },
     []
   );
@@ -229,29 +214,6 @@ export default function PosCheckoutPage() {
           </Button>
         </div>
 
-        {/* Search bar */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            ref={searchRef}
-            placeholder="Buscar produto (F2) — codigo de barras, SKU ou nome..."
-            className="pl-10 h-12 text-lg"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && searchQuery.trim()) {
-                // Demo: add a mock product for testing
-                handleAddToCart({
-                  id: `demo-${Date.now()}`,
-                  name: searchQuery,
-                  sku: `SKU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-                  price: Math.round(Math.random() * 100 * 100) / 100,
-                });
-              }
-            }}
-          />
-        </div>
-
         {/* Keyboard shortcuts hint */}
         <div className="flex gap-2 mb-4 flex-wrap">
           {[
@@ -266,14 +228,9 @@ export default function PosCheckoutPage() {
           ))}
         </div>
 
-        {/* Recent / catalog area (placeholder) */}
-        <div className="flex-1 rounded-lg border border-dashed border-border flex items-center justify-center text-muted-foreground">
-          <div className="text-center">
-            <ShoppingCart className="mx-auto h-10 w-10 mb-2 opacity-30" />
-            <p className="text-sm">
-              Escaneie ou busque um produto para adicionar
-            </p>
-          </div>
+        {/* Product Search */}
+        <div className="flex-1 overflow-y-auto">
+          <ProductSearch onAddToCart={handleAddToCart} />
         </div>
       </div>
 

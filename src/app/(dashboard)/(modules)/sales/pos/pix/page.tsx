@@ -33,6 +33,7 @@ import {
   Ban,
   CircleDollarSign,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
 // ---------------------------------------------------------------------------
@@ -114,7 +115,7 @@ function useCountdown(targetDate: string | undefined) {
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       setRemaining(
-        h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`,
+        h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`
       );
     }
 
@@ -133,7 +134,7 @@ export default function PixChargesPage() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [statusFilter, setStatusFilter] = useState<PixChargeStatus | undefined>(
-    undefined,
+    undefined
   );
 
   // Wizard form state
@@ -145,8 +146,15 @@ export default function PixChargesPage() {
   const [createdCharge, setCreatedCharge] = useState<PixChargeDTO | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const { charges, total, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    usePixCharges(statusFilter ? { status: statusFilter } : undefined);
+  const {
+    charges,
+    total,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePixCharges(statusFilter ? { status: statusFilter } : undefined);
 
   const createPixCharge = useCreatePixCharge();
 
@@ -155,12 +163,12 @@ export default function PixChargesPage() {
   useEffect(() => {
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
@@ -244,7 +252,7 @@ export default function PixChargesPage() {
               inputMode="decimal"
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
               className="text-lg font-semibold"
               autoFocus
             />
@@ -252,14 +260,15 @@ export default function PixChargesPage() {
 
           <div className="space-y-2">
             <Label htmlFor="pix-description">
-              Descricao <span className="text-muted-foreground">(opcional)</span>
+              Descricao{' '}
+              <span className="text-muted-foreground">(opcional)</span>
             </Label>
             <Input
               id="pix-description"
               type="text"
               placeholder="Ex: Venda #1234"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
             />
           </div>
 
@@ -270,7 +279,7 @@ export default function PixChargesPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {EXPIRATION_OPTIONS.map((opt) => (
+                {EXPIRATION_OPTIONS.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>
@@ -310,14 +319,14 @@ export default function PixChargesPage() {
             </p>
           </div>
 
-          {/* QR Code placeholder */}
-          <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-8">
-            <div className="text-center space-y-2">
-              <QrCode className="mx-auto h-20 w-20 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                QR Code sera gerado pelo provedor PIX
-              </p>
-            </div>
+          {/* QR Code */}
+          <div className="flex items-center justify-center rounded-xl border-2 border-border bg-white dark:bg-slate-800/60 p-8">
+            <QRCodeSVG
+              value={createdCharge?.pixCopiaECola || 'opensea-pix-placeholder'}
+              size={200}
+              level="M"
+              includeMargin
+            />
           </div>
 
           {/* Copia e Cola */}
