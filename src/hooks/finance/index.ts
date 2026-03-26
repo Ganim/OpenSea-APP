@@ -28,3 +28,4 @@ export * from './use-tax-retentions';
 export * from './use-anomalies';
 export * from './use-approval-rules';
 export * from './use-accountant';
+export * from './use-exchange-rates';
