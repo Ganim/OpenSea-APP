@@ -37,6 +37,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { translateError } from '@/lib/error-messages';
 import { toast } from 'sonner';
 
 // ---------------------------------------------------------------------------
@@ -277,9 +278,7 @@ export function CreateLoanWizard({
       onOpenChange(false);
       onCreated?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar empréstimo';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [formData, validate, createMutation, onOpenChange, onCreated]);
 

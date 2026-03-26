@@ -5,6 +5,7 @@
 
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { useCallback, useEffect, useState } from 'react';
 import {
   NavigationWizardDialog,
@@ -128,7 +129,7 @@ export function ApprovalRuleModal({
   const handleAddSupplier = useCallback(() => {
     const trimmed = supplierInput.trim();
     if (trimmed && !form.supplierNames.includes(trimmed)) {
-      setForm((f) => ({
+      setForm(f => ({
         ...f,
         supplierNames: [...f.supplierNames, trimmed],
       }));
@@ -137,9 +138,9 @@ export function ApprovalRuleModal({
   }, [supplierInput, form.supplierNames]);
 
   const handleRemoveSupplier = useCallback((name: string) => {
-    setForm((f) => ({
+    setForm(f => ({
       ...f,
-      supplierNames: f.supplierNames.filter((n) => n !== name),
+      supplierNames: f.supplierNames.filter(n => n !== name),
     }));
   }, []);
 
@@ -153,7 +154,8 @@ export function ApprovalRuleModal({
     if (form.categoryIds.length > 0) conditions.categoryIds = form.categoryIds;
     if (form.supplierNames.length > 0)
       conditions.supplierNames = form.supplierNames;
-    if (form.entryType) conditions.entryType = form.entryType as 'PAYABLE' | 'RECEIVABLE';
+    if (form.entryType)
+      conditions.entryType = form.entryType as 'PAYABLE' | 'RECEIVABLE';
     if (form.minRecurrence && Number(form.minRecurrence) > 0)
       conditions.minRecurrence = Number(form.minRecurrence);
 
@@ -176,12 +178,8 @@ export function ApprovalRuleModal({
       }
       onSaved?.();
       onOpenChange(false);
-    } catch {
-      toast.error(
-        isEditing
-          ? 'Erro ao atualizar regra de aprovação.'
-          : 'Erro ao criar regra de aprovação.'
-      );
+    } catch (err) {
+      toast.error(translateError(err));
     }
   };
 
@@ -189,10 +187,10 @@ export function ApprovalRuleModal({
   const categories = categoriesData?.categories ?? [];
 
   const handleToggleCategory = (catId: string) => {
-    setForm((f) => ({
+    setForm(f => ({
       ...f,
       categoryIds: f.categoryIds.includes(catId)
-        ? f.categoryIds.filter((id) => id !== catId)
+        ? f.categoryIds.filter(id => id !== catId)
         : [...f.categoryIds, catId],
     }));
   };
@@ -214,7 +212,7 @@ export function ApprovalRuleModal({
             <Input
               id="rule-name"
               value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               placeholder="Ex: Pagamentos pequenos até R$ 500"
               maxLength={128}
             />
@@ -225,8 +223,8 @@ export function ApprovalRuleModal({
             <Label>Ação</Label>
             <Select
               value={form.action}
-              onValueChange={(v) =>
-                setForm((f) => ({
+              onValueChange={v =>
+                setForm(f => ({
                   ...f,
                   action: v as FinanceApprovalAction,
                 }))
@@ -236,18 +234,18 @@ export function ApprovalRuleModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(
-                  ['AUTO_PAY', 'AUTO_APPROVE', 'FLAG_REVIEW'] as const
-                ).map((action) => {
-                  const colors = APPROVAL_ACTION_COLORS[action];
-                  return (
-                    <SelectItem key={action} value={action}>
-                      <span className={cn(colors.text)}>
-                        {APPROVAL_ACTION_LABELS[action]}
-                      </span>
-                    </SelectItem>
-                  );
-                })}
+                {(['AUTO_PAY', 'AUTO_APPROVE', 'FLAG_REVIEW'] as const).map(
+                  action => {
+                    const colors = APPROVAL_ACTION_COLORS[action];
+                    return (
+                      <SelectItem key={action} value={action}>
+                        <span className={cn(colors.text)}>
+                          {APPROVAL_ACTION_LABELS[action]}
+                        </span>
+                      </SelectItem>
+                    );
+                  }
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -260,8 +258,8 @@ export function ApprovalRuleModal({
               type="number"
               min={0}
               value={form.priority}
-              onChange={(e) =>
-                setForm((f) => ({
+              onChange={e =>
+                setForm(f => ({
                   ...f,
                   priority: parseInt(e.target.value) || 0,
                 }))
@@ -282,8 +280,8 @@ export function ApprovalRuleModal({
               min={0}
               step="0.01"
               value={form.maxAmount}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, maxAmount: e.target.value }))
+              onChange={e =>
+                setForm(f => ({ ...f, maxAmount: e.target.value }))
               }
               placeholder="Sem limite"
             />
@@ -298,8 +296,8 @@ export function ApprovalRuleModal({
             <Switch
               id="rule-active"
               checked={form.isActive}
-              onCheckedChange={(checked) =>
-                setForm((f) => ({ ...f, isActive: checked }))
+              onCheckedChange={checked =>
+                setForm(f => ({ ...f, isActive: checked }))
               }
             />
           </div>
@@ -317,10 +315,11 @@ export function ApprovalRuleModal({
             <Label>Tipo de Lançamento</Label>
             <Select
               value={form.entryType || '_all'}
-              onValueChange={(v) =>
-                setForm((f) => ({
+              onValueChange={v =>
+                setForm(f => ({
                   ...f,
-                  entryType: v === '_all' ? '' : (v as 'PAYABLE' | 'RECEIVABLE'),
+                  entryType:
+                    v === '_all' ? '' : (v as 'PAYABLE' | 'RECEIVABLE'),
                 }))
               }
             >
@@ -344,7 +343,7 @@ export function ApprovalRuleModal({
                   Nenhuma categoria encontrada
                 </p>
               ) : (
-                categories.map((cat) => (
+                categories.map(cat => (
                   <button
                     key={cat.id}
                     type="button"
@@ -374,8 +373,8 @@ export function ApprovalRuleModal({
             <div className="flex gap-2">
               <Input
                 value={supplierInput}
-                onChange={(e) => setSupplierInput(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setSupplierInput(e.target.value)}
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     handleAddSupplier();
@@ -386,7 +385,7 @@ export function ApprovalRuleModal({
             </div>
             {form.supplierNames.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {form.supplierNames.map((name) => (
+                {form.supplierNames.map(name => (
                   <Badge
                     key={name}
                     variant="outline"
@@ -416,8 +415,8 @@ export function ApprovalRuleModal({
               type="number"
               min={0}
               value={form.minRecurrence}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, minRecurrence: e.target.value }))
+              onChange={e =>
+                setForm(f => ({ ...f, minRecurrence: e.target.value }))
               }
               placeholder="Sem mínimo"
             />
@@ -458,7 +457,9 @@ export function ApprovalRuleModal({
     <NavigationWizardDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? 'Editar Regra de Aprovação' : 'Nova Regra de Aprovação'}
+      title={
+        isEditing ? 'Editar Regra de Aprovação' : 'Nova Regra de Aprovação'
+      }
       sections={sections}
       onSave={handleSave}
       isSaving={isSubmitting}

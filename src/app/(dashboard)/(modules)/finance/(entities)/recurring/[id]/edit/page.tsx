@@ -32,6 +32,7 @@ import {
   useUpdateRecurringConfig,
   useCancelRecurring,
 } from '@/hooks/finance';
+import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { RecurrenceUnit } from '@/types/finance';
 import {
@@ -197,8 +198,7 @@ export default function EditRecurringPage({
         'Erro ao atualizar recorrência',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar recorrência', { description: message });
+      toast.error(translateError(err));
     } finally {
       setIsSaving(false);
     }
@@ -214,8 +214,7 @@ export default function EditRecurringPage({
         'Erro ao excluir recorrência',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir recorrência', { description: message });
+      toast.error(translateError(err));
     }
   };
 

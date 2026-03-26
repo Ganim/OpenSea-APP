@@ -34,6 +34,7 @@ import {
   useDeleteConsortium,
   useUpdateConsortium,
 } from '@/hooks/finance';
+import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import { CONSORTIUM_STATUS_LABELS } from '@/types/finance';
 import {
@@ -200,8 +201,7 @@ export default function EditConsortiumPage({
         'Erro ao atualizar consórcio',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar consórcio', { description: message });
+      toast.error(translateError(err));
     } finally {
       setIsSaving(false);
     }
@@ -217,8 +217,7 @@ export default function EditConsortiumPage({
         'Erro ao excluir consórcio',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir consórcio', { description: message });
+      toast.error(translateError(err));
     }
   };
 

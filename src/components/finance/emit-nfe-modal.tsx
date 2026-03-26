@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import {
   NavigationWizardDialog,
   type NavigationSection,
@@ -107,19 +108,19 @@ export function EmitNfeModal({
   // Computed
   const totalValue = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
-    [items],
+    [items]
   );
 
   const hasValidItems = useMemo(
     () =>
       items.length > 0 &&
       items.every(
-        (item) =>
+        item =>
           item.description.trim().length > 0 &&
           item.quantity > 0 &&
-          item.unitPrice > 0,
+          item.unitPrice > 0
       ),
-    [items],
+    [items]
   );
 
   // Sections
@@ -144,13 +145,13 @@ export function EmitNfeModal({
         description: 'Revisão e emissão',
       },
     ],
-    [],
+    []
   );
 
   // Handlers
   const handleAddItem = useCallback(() => {
     itemIdCounter += 1;
-    setItems((prev) => [
+    setItems(prev => [
       ...prev,
       {
         id: `item-${itemIdCounter}`,
@@ -165,18 +166,18 @@ export function EmitNfeModal({
   }, []);
 
   const handleRemoveItem = useCallback((itemId: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== itemId));
+    setItems(prev => prev.filter(i => i.id !== itemId));
   }, []);
 
   const handleUpdateItem = useCallback(
     (itemId: string, field: keyof NfeItem, value: string | number) => {
-      setItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, [field]: value } : item,
-        ),
+      setItems(prev =>
+        prev.map(item =>
+          item.id === itemId ? { ...item, [field]: value } : item
+        )
       );
     },
-    [],
+    []
   );
 
   const handleEmit = useCallback(async () => {
@@ -186,7 +187,7 @@ export function EmitNfeModal({
     }
 
     try {
-      const emitItems: EmitNfeFromEntryItem[] = items.map((item) => ({
+      const emitItems: EmitNfeFromEntryItem[] = items.map(item => ({
         description: item.description.trim(),
         quantity: item.quantity,
         unitPrice: item.unitPrice,
@@ -210,11 +211,7 @@ export function EmitNfeModal({
       toast.success('Documento fiscal emitido com sucesso!');
       onSuccess?.();
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Erro ao emitir documento fiscal.';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [
     hasValidItems,
@@ -266,7 +263,7 @@ export function EmitNfeModal({
           <Button
             onClick={() => {
               const currentIdx = sections.findIndex(
-                (s) => s.id === activeSection,
+                s => s.id === activeSection
               );
               if (currentIdx < sections.length - 1) {
                 setActiveSection(sections[currentIdx + 1].id);
@@ -334,9 +331,7 @@ export function EmitNfeModal({
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                Valor Total
-              </span>
+              <span className="text-sm text-muted-foreground">Valor Total</span>
               <span className="text-sm font-mono font-medium">
                 {formatCurrency(emissionResult.totalValue)}
               </span>
@@ -389,7 +384,7 @@ export function EmitNfeModal({
                     'flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-all',
                     documentType === 'NFE'
                       ? 'border-teal-500 bg-teal-50 dark:bg-teal-500/8 ring-1 ring-teal-500'
-                      : 'border-border hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-500/5',
+                      : 'border-border hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-500/5'
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -398,7 +393,7 @@ export function EmitNfeModal({
                         'h-5 w-5',
                         documentType === 'NFE'
                           ? 'text-teal-600 dark:text-teal-400'
-                          : 'text-muted-foreground',
+                          : 'text-muted-foreground'
                       )}
                     />
                     <span
@@ -406,15 +401,15 @@ export function EmitNfeModal({
                         'font-semibold',
                         documentType === 'NFE'
                           ? 'text-teal-700 dark:text-teal-300'
-                          : '',
+                          : ''
                       )}
                     >
                       NF-e
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Nota Fiscal Eletrônica para venda de produtos ou mercadorias.
-                    Requer NCM e CFOP.
+                    Nota Fiscal Eletrônica para venda de produtos ou
+                    mercadorias. Requer NCM e CFOP.
                   </p>
                 </button>
 
@@ -426,7 +421,7 @@ export function EmitNfeModal({
                     'flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-all',
                     documentType === 'NFSE'
                       ? 'border-teal-500 bg-teal-50 dark:bg-teal-500/8 ring-1 ring-teal-500'
-                      : 'border-border hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-500/5',
+                      : 'border-border hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-500/5'
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -435,7 +430,7 @@ export function EmitNfeModal({
                         'h-5 w-5',
                         documentType === 'NFSE'
                           ? 'text-teal-600 dark:text-teal-400'
-                          : 'text-muted-foreground',
+                          : 'text-muted-foreground'
                       )}
                     />
                     <span
@@ -443,15 +438,15 @@ export function EmitNfeModal({
                         'font-semibold',
                         documentType === 'NFSE'
                           ? 'text-teal-700 dark:text-teal-300'
-                          : '',
+                          : ''
                       )}
                     >
                       NFS-e
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Nota Fiscal de Serviço Eletrônica para prestação de serviços.
-                    Requer alíquota de ISS.
+                    Nota Fiscal de Serviço Eletrônica para prestação de
+                    serviços. Requer alíquota de ISS.
                   </p>
                 </button>
               </div>
@@ -507,11 +502,11 @@ export function EmitNfeModal({
                       <Label className="text-xs">Descrição *</Label>
                       <Input
                         value={item.description}
-                        onChange={(e) =>
+                        onChange={e =>
                           handleUpdateItem(
                             item.id,
                             'description',
-                            e.target.value,
+                            e.target.value
                           )
                         }
                         placeholder="Nome do produto ou serviço"
@@ -526,11 +521,11 @@ export function EmitNfeModal({
                           min={1}
                           step={1}
                           value={item.quantity}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleUpdateItem(
                               item.id,
                               'quantity',
-                              Number(e.target.value),
+                              Number(e.target.value)
                             )
                           }
                         />
@@ -542,11 +537,11 @@ export function EmitNfeModal({
                           min={0.01}
                           step={0.01}
                           value={item.unitPrice}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleUpdateItem(
                               item.id,
                               'unitPrice',
-                              Number(e.target.value),
+                              Number(e.target.value)
                             )
                           }
                         />
@@ -560,7 +555,7 @@ export function EmitNfeModal({
                           <Label className="text-xs">NCM</Label>
                           <Input
                             value={item.ncm}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateItem(item.id, 'ncm', e.target.value)
                             }
                             placeholder="Ex: 84714900"
@@ -571,7 +566,7 @@ export function EmitNfeModal({
                           <Label className="text-xs">CFOP</Label>
                           <Input
                             value={item.cfop}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateItem(item.id, 'cfop', e.target.value)
                             }
                             placeholder="Ex: 5102"
@@ -591,11 +586,11 @@ export function EmitNfeModal({
                           max={100}
                           step={0.01}
                           value={item.issRate}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleUpdateItem(
                               item.id,
                               'issRate',
-                              Number(e.target.value),
+                              Number(e.target.value)
                             )
                           }
                           placeholder="Ex: 5.00"
@@ -620,7 +615,7 @@ export function EmitNfeModal({
                 </Label>
                 <Textarea
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   placeholder="Observações que aparecerão no documento fiscal..."
                   rows={2}
                   maxLength={2000}
@@ -648,7 +643,7 @@ export function EmitNfeModal({
                   </span>
                   <Badge
                     className={cn(
-                      'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300',
+                      'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300'
                     )}
                   >
                     {documentType === 'NFE'
@@ -704,8 +699,7 @@ export function EmitNfeModal({
                       <div>
                         <span className="text-sm">{item.description}</span>
                         <span className="text-xs text-muted-foreground ml-2">
-                          ({item.quantity} x{' '}
-                          {formatCurrency(item.unitPrice)})
+                          ({item.quantity} x {formatCurrency(item.unitPrice)})
                         </span>
                       </div>
                       <span className="text-sm font-mono">
@@ -728,8 +722,8 @@ export function EmitNfeModal({
               {!hasValidItems && (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 dark:border-rose-800 dark:bg-rose-500/10 p-3">
                   <p className="text-sm text-rose-600 dark:text-rose-400">
-                    Existem itens com campos obrigatórios não preenchidos.
-                    Volte à seção de itens para corrigir.
+                    Existem itens com campos obrigatórios não preenchidos. Volte
+                    à seção de itens para corrigir.
                   </p>
                 </div>
               )}

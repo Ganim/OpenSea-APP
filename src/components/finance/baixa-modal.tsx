@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -189,9 +190,7 @@ export function BaixaModal({
       toast.success('Pagamento registrado com sucesso!');
       onOpenChange(false);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao registrar pagamento.';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [
     amount,

@@ -32,6 +32,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { translateError } from '@/lib/error-messages';
 import { toast } from 'sonner';
 
 export default function NewConsortiumPage() {
@@ -90,10 +91,8 @@ export default function NewConsortiumPage() {
       });
       toast.success('Consórcio criado com sucesso.');
       router.push('/finance/consortia');
-    } catch {
-      toast.error(
-        'Erro ao criar consórcio. Verifique os dados e tente novamente.'
-      );
+    } catch (err) {
+      toast.error(translateError(err));
     }
   };
 

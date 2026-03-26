@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -123,8 +124,8 @@ export function BulkPayModal({
       setReference('');
       onOpenChange(false);
       onSuccess();
-    } catch {
-      toast.error('Erro ao processar pagamentos em lote.');
+    } catch (err) {
+      toast.error(translateError(err));
     }
   }, [
     bankAccountId,

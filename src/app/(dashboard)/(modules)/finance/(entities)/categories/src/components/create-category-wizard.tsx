@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/step-wizard-dialog';
 import type { FinanceCategory, FinanceCategoryType } from '@/types/finance';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
+import { translateError } from '@/lib/error-messages';
+import { toast } from 'sonner';
 import { Check, FolderTree, Loader2, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -285,15 +287,19 @@ export function CreateCategoryWizard({
     const interest = parseFloat(interestRate);
     const penalty = parseFloat(penaltyRate);
 
-    await onSubmit({
-      name: name.trim(),
-      type,
-      parentId: parentId !== 'none' ? parentId : undefined,
-      iconUrl: iconUrl.trim() || undefined,
-      displayOrder,
-      interestRate: !isNaN(interest) && interest > 0 ? interest : undefined,
-      penaltyRate: !isNaN(penalty) && penalty > 0 ? penalty : undefined,
-    });
+    try {
+      await onSubmit({
+        name: name.trim(),
+        type,
+        parentId: parentId !== 'none' ? parentId : undefined,
+        iconUrl: iconUrl.trim() || undefined,
+        displayOrder,
+        interestRate: !isNaN(interest) && interest > 0 ? interest : undefined,
+        penaltyRate: !isNaN(penalty) && penalty > 0 ? penalty : undefined,
+      });
+    } catch (err) {
+      toast.error(translateError(err));
+    }
   };
 
   const handleClose = () => {

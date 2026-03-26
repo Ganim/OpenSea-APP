@@ -29,6 +29,7 @@ import {
 import type { CreateConsortiumData } from '@/types/finance';
 import { Calendar, FileText, Link, Loader2, Plus, Users } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { translateError } from '@/lib/error-messages';
 import { toast } from 'sonner';
 
 // ---------------------------------------------------------------------------
@@ -255,9 +256,7 @@ export function CreateConsortiumWizard({
       onOpenChange(false);
       onCreated?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar consórcio';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [formData, validate, createMutation, onOpenChange, onCreated]);
 

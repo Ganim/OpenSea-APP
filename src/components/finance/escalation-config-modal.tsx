@@ -5,6 +5,7 @@
 
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   NavigationWizardDialog,
@@ -120,9 +121,9 @@ export function EscalationConfigModal({
   const whatsAppAccounts = useMemo(
     () =>
       (messagingAccountsData?.accounts ?? []).filter(
-        (a) => a.channel === 'WHATSAPP',
+        a => a.channel === 'WHATSAPP'
       ),
-    [messagingAccountsData],
+    [messagingAccountsData]
   );
 
   // Fetch existing data for edit
@@ -135,7 +136,7 @@ export function EscalationConfigModal({
       setIsDefault(esc.isDefault);
       setIsActive(esc.isActive);
       setSteps(
-        esc.steps.map((s) => ({
+        esc.steps.map(s => ({
           tempId: s.id ?? generateTempId(),
           daysOverdue: s.daysOverdue,
           channel: s.channel,
@@ -162,26 +163,26 @@ export function EscalationConfigModal({
 
   // Step management
   const addStep = useCallback(() => {
-    setSteps((prev) => [...prev, DEFAULT_STEP()]);
+    setSteps(prev => [...prev, DEFAULT_STEP()]);
   }, []);
 
   const removeStep = useCallback((tempId: string) => {
-    setSteps((prev) => prev.filter((s) => s.tempId !== tempId));
-    setPreviewStepId((prev) => (prev === tempId ? null : prev));
+    setSteps(prev => prev.filter(s => s.tempId !== tempId));
+    setPreviewStepId(prev => (prev === tempId ? null : prev));
   }, []);
 
   const updateStep = useCallback(
     (tempId: string, field: keyof StepFormData, value: unknown) => {
-      setSteps((prev) =>
-        prev.map((s) => (s.tempId === tempId ? { ...s, [field]: value } : s))
+      setSteps(prev =>
+        prev.map(s => (s.tempId === tempId ? { ...s, [field]: value } : s))
       );
     },
     []
   );
 
   const moveStep = useCallback((tempId: string, direction: 'up' | 'down') => {
-    setSteps((prev) => {
-      const idx = prev.findIndex((s) => s.tempId === tempId);
+    setSteps(prev => {
+      const idx = prev.findIndex(s => s.tempId === tempId);
       if (idx < 0) return prev;
       const newIdx = direction === 'up' ? idx - 1 : idx + 1;
       if (newIdx < 0 || newIdx >= prev.length) return prev;
@@ -192,7 +193,7 @@ export function EscalationConfigModal({
   }, []);
 
   const togglePreview = useCallback((tempId: string) => {
-    setPreviewStepId((prev) => (prev === tempId ? null : tempId));
+    setPreviewStepId(prev => (prev === tempId ? null : tempId));
   }, []);
 
   // Mutations
@@ -237,12 +238,8 @@ export function EscalationConfigModal({
       }
       onSaved?.();
       onOpenChange(false);
-    } catch {
-      toast.error(
-        isEditing
-          ? 'Erro ao atualizar régua de cobrança.'
-          : 'Erro ao criar régua de cobrança.'
-      );
+    } catch (err) {
+      toast.error(translateError(err));
     }
   }, [
     name,
@@ -292,7 +289,7 @@ export function EscalationConfigModal({
       subtitle="Configure as etapas de cobrança automática"
       sections={sections}
       activeSection={activeSection}
-      onSectionChange={(id) => setActiveSection(id as SectionId)}
+      onSectionChange={id => setActiveSection(id as SectionId)}
       sectionErrors={sectionErrors}
       isPending={isPending}
       footer={
@@ -333,7 +330,7 @@ export function EscalationConfigModal({
               id="esc-name"
               placeholder="Ex: Régua Padrão, Cobrança Agressiva..."
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               disabled={isPending}
             />
           </div>
@@ -414,7 +411,7 @@ export function EscalationConfigModal({
                     type="number"
                     min={1}
                     value={step.daysOverdue}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateStep(
                         step.tempId,
                         'daysOverdue',
@@ -429,9 +426,7 @@ export function EscalationConfigModal({
                   <Label className="text-xs">Canal</Label>
                   <Select
                     value={step.channel}
-                    onValueChange={(v) =>
-                      updateStep(step.tempId, 'channel', v)
-                    }
+                    onValueChange={v => updateStep(step.tempId, 'channel', v)}
                     disabled={isPending}
                   >
                     <SelectTrigger className="h-8">
@@ -452,7 +447,7 @@ export function EscalationConfigModal({
                   <Label className="text-xs">Tipo</Label>
                   <Select
                     value={step.templateType}
-                    onValueChange={(v) =>
+                    onValueChange={v =>
                       updateStep(step.tempId, 'templateType', v)
                     }
                     disabled={isPending}
@@ -482,12 +477,10 @@ export function EscalationConfigModal({
                       <SelectValue placeholder="Conta padrão" />
                     </SelectTrigger>
                     <SelectContent>
-                      {whatsAppAccounts.map((acc) => (
+                      {whatsAppAccounts.map(acc => (
                         <SelectItem key={acc.id} value={acc.id}>
                           {acc.name}
-                          {acc.phoneNumber
-                            ? ` (${acc.phoneNumber})`
-                            : ''}
+                          {acc.phoneNumber ? ` (${acc.phoneNumber})` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -506,12 +499,13 @@ export function EscalationConfigModal({
               )}
 
               {/* Subject line for EMAIL and SYSTEM_ALERT */}
-              {(step.channel === 'EMAIL' || step.channel === 'SYSTEM_ALERT') && (
+              {(step.channel === 'EMAIL' ||
+                step.channel === 'SYSTEM_ALERT') && (
                 <div className="space-y-1.5">
                   <Label className="text-xs">Assunto</Label>
                   <Input
                     value={step.subject}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateStep(step.tempId, 'subject', e.target.value)
                     }
                     placeholder="Ex: Cobrança: {entryCode}"
@@ -525,7 +519,7 @@ export function EscalationConfigModal({
                 <Label className="text-xs">Mensagem</Label>
                 <Textarea
                   value={step.message}
-                  onChange={(e) =>
+                  onChange={e =>
                     updateStep(step.tempId, 'message', e.target.value)
                   }
                   placeholder={PLACEHOLDER_HINTS}
@@ -543,7 +537,7 @@ export function EscalationConfigModal({
                     size="sm"
                     className={cn(
                       'h-7 text-xs gap-1.5',
-                      previewStepId === step.tempId && 'text-primary',
+                      previewStepId === step.tempId && 'text-primary'
                     )}
                     onClick={() => togglePreview(step.tempId)}
                     disabled={!step.message.trim()}

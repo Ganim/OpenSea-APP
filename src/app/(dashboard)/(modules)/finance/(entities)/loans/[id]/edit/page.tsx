@@ -34,12 +34,10 @@ import {
   useLoan,
   useUpdateLoan,
 } from '@/hooks/finance';
+import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { LoanStatus, LoanType } from '@/types/finance';
-import {
-  LOAN_STATUS_LABELS,
-  LOAN_TYPE_LABELS,
-} from '@/types/finance';
+import { LOAN_STATUS_LABELS, LOAN_TYPE_LABELS } from '@/types/finance';
 import {
   Building2,
   Calendar,
@@ -87,11 +85,14 @@ function SectionHeader({
 // =============================================================================
 
 const STATUS_COLORS: Record<LoanStatus, string> = {
-  ACTIVE: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+  ACTIVE:
+    'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   PAID_OFF: 'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
   DEFAULTED: 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
-  RENEGOTIATED: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
-  CANCELLED: 'bg-slate-50 text-slate-700 dark:bg-slate-500/8 dark:text-slate-300',
+  RENEGOTIATED:
+    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  CANCELLED:
+    'bg-slate-50 text-slate-700 dark:bg-slate-500/8 dark:text-slate-300',
 };
 
 function getStatusLabel(status: LoanStatus): string {
@@ -232,8 +233,7 @@ export default function EditLoanPage({
         'Erro ao atualizar empréstimo',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar empréstimo', { description: message });
+      toast.error(translateError(err));
     } finally {
       setIsSaving(false);
     }
@@ -249,8 +249,7 @@ export default function EditLoanPage({
         'Erro ao excluir empréstimo',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir empréstimo', { description: message });
+      toast.error(translateError(err));
     }
   };
 
@@ -373,7 +372,9 @@ export default function EditLoanPage({
               </h1>
             </div>
             <div className="hidden sm:flex items-center gap-3 shrink-0">
-              <div className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${STATUS_COLORS[loan.status]}`}>
+              <div
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${STATUS_COLORS[loan.status]}`}
+              >
                 {getStatusLabel(loan.status)}
               </div>
               <div className="rounded-lg bg-white/5 px-4 py-2">
@@ -416,16 +417,21 @@ export default function EditLoanPage({
                     <Label htmlFor="type">
                       Tipo <span className="text-rose-500">*</span>
                     </Label>
-                    <Select value={type} onValueChange={(v: string) => setType(v as LoanType)}>
+                    <Select
+                      value={type}
+                      onValueChange={(v: string) => setType(v as LoanType)}
+                    >
                       <SelectTrigger id="type">
                         <SelectValue placeholder="Selecione o tipo..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(LOAN_TYPE_LABELS).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(LOAN_TYPE_LABELS).map(
+                          ([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -469,7 +475,9 @@ export default function EditLoanPage({
                   <div className="grid gap-2">
                     <Label>Valor Principal (R$)</Label>
                     <Input
-                      value={principalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      value={principalAmount.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                      })}
                       disabled
                       className="bg-muted"
                     />
@@ -512,7 +520,9 @@ export default function EditLoanPage({
                   <div className="grid gap-2">
                     <Label>Saldo Devedor (R$)</Label>
                     <Input
-                      value={outstandingBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      value={outstandingBalance.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                      })}
                       disabled
                       className="bg-muted"
                     />
@@ -648,7 +658,8 @@ export default function EditLoanPage({
                       <SelectContent>
                         {costCenters.map(cc => (
                           <SelectItem key={cc.id} value={cc.id}>
-                            {cc.code ? `${cc.code} - ` : ''}{cc.name}
+                            {cc.code ? `${cc.code} - ` : ''}
+                            {cc.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

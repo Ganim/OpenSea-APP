@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import {
   StepWizardDialog,
   type WizardStep,
@@ -261,9 +262,7 @@ export function PayableWizardModal({
       handleClose();
       onCreated?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar conta a pagar.';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [wizardData, isBatchMode, createMutation, handleClose, onCreated]);
 

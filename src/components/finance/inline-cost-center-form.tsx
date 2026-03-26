@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,9 +38,7 @@ export function InlineCostCenterForm({
         onCreated({ id: costCenter.id, name: costCenter.name });
         toast.success('Centro de custo criado com sucesso!');
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Erro ao criar centro de custo.';
-        toast.error(msg);
+        toast.error(translateError(err));
       }
     },
     [name, code, createMutation, onCreated]

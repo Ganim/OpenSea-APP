@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,9 +71,7 @@ export function InlineCustomerForm({
         onCreated({ id: customer.id, name: customer.name });
         toast.success('Cliente criado com sucesso!');
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Erro ao criar cliente.';
-        toast.error(msg);
+        toast.error(translateError(err));
       }
     },
     [name, document, createMutation, onCreated]

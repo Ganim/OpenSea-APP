@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import {
   Dialog,
   DialogContent,
@@ -63,17 +64,14 @@ export function PixPayConfirmModal({
       onOpenChange(false);
       onSuccess?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao registrar pagamento PIX.';
-      toast.error(message);
+      toast.error(translateError(err));
     } finally {
       setIsSubmitting(false);
     }
   }, [entry.id, payViaPix, onOpenChange, onSuccess]);
 
-  const paymentAmount = entry.remainingBalance > 0
-    ? entry.remainingBalance
-    : entry.totalDue;
+  const paymentAmount =
+    entry.remainingBalance > 0 ? entry.remainingBalance : entry.totalDue;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,7 +121,8 @@ export function PixPayConfirmModal({
                 <div className="flex items-center gap-2">
                   {entry.pixKeyType && (
                     <Badge variant="outline" className="text-xs">
-                      {PIX_KEY_TYPE_LABELS[entry.pixKeyType] || entry.pixKeyType}
+                      {PIX_KEY_TYPE_LABELS[entry.pixKeyType] ||
+                        entry.pixKeyType}
                     </Badge>
                   )}
                   <span className="font-mono text-xs">{entry.pixKey}</span>

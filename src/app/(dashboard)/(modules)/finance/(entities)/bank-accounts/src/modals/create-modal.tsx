@@ -24,6 +24,9 @@ import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
 import { useQuery } from '@tanstack/react-query';
 import { Landmark, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { translateError } from '@/lib/error-messages';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { toast } from 'sonner';
 
 import { BankSelect } from '../components/bank-select';
 
@@ -56,6 +59,7 @@ export function CreateBankAccountModal({
   isSubmitting = false,
 }: CreateBankAccountModalProps) {
   const [form, setForm] = useState(INITIAL_FORM);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies-for-bank-account'],
@@ -89,8 +93,18 @@ export function CreateBankAccountModal({
       isDefault: false,
     };
 
-    await onSubmit(data);
-    setForm(INITIAL_FORM);
+    try {
+      await onSubmit(data);
+      setForm(INITIAL_FORM);
+      setFieldErrors({});
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('already exists') || msg.includes('name already')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   const canSubmit =
@@ -123,13 +137,23 @@ export function CreateBankAccountModal({
           <div className="grid grid-cols-[1fr_80px] gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="create-name">Nome *</Label>
-              <Input
-                id="create-name"
-                placeholder="Ex: Conta Principal"
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="create-name"
+                  placeholder="Ex: Conta Principal"
+                  value={form.name}
+                  onChange={e => {
+                    setForm({ ...form, name: e.target.value });
+                    if (fieldErrors.name)
+                      setFieldErrors(prev => ({ ...prev, name: '' }));
+                  }}
+                  required
+                  aria-invalid={!!fieldErrors.name}
+                />
+                {fieldErrors.name && (
+                  <FormErrorIcon message={fieldErrors.name} />
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="create-color">Cor</Label>

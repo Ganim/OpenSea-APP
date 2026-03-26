@@ -21,6 +21,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import type { FinanceCategory, FinanceCategoryType } from '@/types/finance';
+import { translateError } from '@/lib/error-messages';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -53,6 +56,7 @@ export function CreateCategoryModal({
   const [type, setType] = useState<FinanceCategoryType>(defaultType);
   const [description, setDescription] = useState('');
   const [parentId, setParentId] = useState<string>('none');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Sync type when modal opens with a new defaultType
   useEffect(() => {
@@ -61,6 +65,7 @@ export function CreateCategoryModal({
       setParentId('none');
       setName('');
       setDescription('');
+      setFieldErrors({});
     }
   }, [isOpen, defaultType]);
 
@@ -104,16 +109,26 @@ export function CreateCategoryModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    await onSubmit({
-      name: name.trim(),
-      type,
-      description: description.trim() || undefined,
-      displayOrder: nextDisplayOrder,
-      parentId: parentId !== 'none' ? parentId : undefined,
-    });
-    setName('');
-    setDescription('');
-    setParentId('none');
+    try {
+      await onSubmit({
+        name: name.trim(),
+        type,
+        description: description.trim() || undefined,
+        displayOrder: nextDisplayOrder,
+        parentId: parentId !== 'none' ? parentId : undefined,
+      });
+      setName('');
+      setDescription('');
+      setParentId('none');
+      setFieldErrors({});
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('already exists') || msg.includes('name already')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   const handleClose = () => {
@@ -145,14 +160,24 @@ export function CreateCategoryModal({
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="cat-name">Nome *</Label>
-              <Input
-                id="cat-name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder={`Nome da categoria de ${typeLabel.toLowerCase()}`}
-                required
-                autoFocus
-              />
+              <div className="relative">
+                <Input
+                  id="cat-name"
+                  value={name}
+                  onChange={e => {
+                    setName(e.target.value);
+                    if (fieldErrors.name)
+                      setFieldErrors(prev => ({ ...prev, name: '' }));
+                  }}
+                  placeholder={`Nome da categoria de ${typeLabel.toLowerCase()}`}
+                  required
+                  autoFocus
+                  aria-invalid={!!fieldErrors.name}
+                />
+                {fieldErrors.name && (
+                  <FormErrorIcon message={fieldErrors.name} />
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

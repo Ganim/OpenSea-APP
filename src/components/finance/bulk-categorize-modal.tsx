@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -53,8 +54,7 @@ export function BulkCategorizeModal({
   const categories = categoriesData?.categories ?? [];
 
   const filteredCategories = useMemo(
-    () =>
-      categories.filter(c => c.type === categoryType || c.type === 'BOTH'),
+    () => categories.filter(c => c.type === categoryType || c.type === 'BOTH'),
     [categories, categoryType]
   );
 
@@ -91,10 +91,16 @@ export function BulkCategorizeModal({
       setCategoryId('');
       onOpenChange(false);
       onSuccess();
-    } catch {
-      toast.error('Erro ao alterar categorias em lote.');
+    } catch (err) {
+      toast.error(translateError(err));
     }
-  }, [categoryId, selectedIds, bulkCategorizeMutation, onOpenChange, onSuccess]);
+  }, [
+    categoryId,
+    selectedIds,
+    bulkCategorizeMutation,
+    onOpenChange,
+    onSuccess,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

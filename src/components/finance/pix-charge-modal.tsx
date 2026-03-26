@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Copy, QrCode, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { CreatePixChargeResponse } from '@/types/finance';
 
 interface PixChargeModalProps {
@@ -155,14 +156,25 @@ export function PixChargeModal({
           </div>
 
           {/* QR Code */}
-          {pixCharge.qrCodeUrl && (
+          {(pixCharge.pixCopiaECola || pixCharge.qrCodeUrl) && (
             <div className="flex justify-center">
-              <div className="bg-white p-4 rounded-xl border">
-                <img
-                  src={pixCharge.qrCodeUrl}
-                  alt="QR Code PIX"
-                  className="w-48 h-48 object-contain"
-                />
+              <div className="bg-white p-4 rounded-xl border flex justify-center">
+                {pixCharge.pixCopiaECola ? (
+                  <QRCodeSVG
+                    value={pixCharge.pixCopiaECola}
+                    size={192}
+                    bgColor="#ffffff"
+                    fgColor="#0f172a"
+                    level="M"
+                    includeMargin={false}
+                  />
+                ) : (
+                  <img
+                    src={pixCharge.qrCodeUrl}
+                    alt="QR Code PIX"
+                    className="w-48 h-48 object-contain"
+                  />
+                )}
               </div>
             </div>
           )}

@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,14 +60,14 @@ export function CreatePaymentLinkModal({
         enablePix,
         enableBoleto,
       }),
-    onSuccess: (result) => {
+    onSuccess: result => {
       setGeneratedLink(result.paymentLink);
       setGeneratedUrl(result.url);
       setStep(2);
       queryClient.invalidateQueries({ queryKey: ['payment-links'] });
     },
-    onError: () => {
-      toast.error('Erro ao criar link de pagamento');
+    onError: (err: unknown) => {
+      toast.error(translateError(err));
     },
   });
 
@@ -74,20 +75,14 @@ export function CreatePaymentLinkModal({
     createMutation.mutate();
   }, [createMutation]);
 
-  const copyToClipboard = useCallback(
-    (text: string) => {
-      navigator.clipboard.writeText(text);
-      toast.success('Copiado para a área de transferência');
-    },
-    []
-  );
+  const copyToClipboard = useCallback((text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copiado para a área de transferência');
+  }, []);
 
   const shareViaWhatsApp = useCallback(() => {
     const text = `Olá${customerName ? ` ${customerName}` : ''}! Segue o link para pagamento: ${generatedUrl}`;
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(text)}`,
-      '_blank'
-    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   }, [customerName, generatedUrl]);
 
   const shareViaEmail = useCallback(() => {
@@ -98,8 +93,7 @@ export function CreatePaymentLinkModal({
     window.open(`mailto:?subject=${subject}&body=${body}`);
   }, [customerName, description, amount, generatedUrl]);
 
-  const isStep1Valid =
-    parseFloat(amount) > 0 && description.trim().length > 0;
+  const isStep1Valid = parseFloat(amount) > 0 && description.trim().length > 0;
 
   const steps: WizardStep[] = [
     {
@@ -118,7 +112,7 @@ export function CreatePaymentLinkModal({
               min="0.01"
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={e => setAmount(e.target.value)}
             />
           </div>
 
@@ -128,7 +122,7 @@ export function CreatePaymentLinkModal({
               id="description"
               placeholder="Ex: Consultoria março/2026"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               maxLength={500}
             />
           </div>
@@ -139,7 +133,7 @@ export function CreatePaymentLinkModal({
               id="customerName"
               placeholder="Ex: João Silva"
               value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              onChange={e => setCustomerName(e.target.value)}
               maxLength={128}
             />
           </div>
@@ -150,7 +144,7 @@ export function CreatePaymentLinkModal({
               id="expiresAt"
               type="datetime-local"
               value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
+              onChange={e => setExpiresAt(e.target.value)}
             />
           </div>
 
@@ -235,11 +229,7 @@ export function CreatePaymentLinkModal({
               <MessageCircle className="h-4 w-4 text-emerald-600" />
               WhatsApp
             </Button>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={shareViaEmail}
-            >
+            <Button variant="outline" className="gap-2" onClick={shareViaEmail}>
               <Mail className="h-4 w-4 text-sky-600" />
               E-mail
             </Button>
@@ -271,7 +261,7 @@ export function CreatePaymentLinkModal({
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(open) => {
+      onOpenChange={open => {
         if (!open) onClose();
       }}
       steps={steps}

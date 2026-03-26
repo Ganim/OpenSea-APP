@@ -55,6 +55,8 @@ import { use, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { GridError } from '@/components/handlers/grid-error';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { translateError } from '@/lib/error-messages';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -113,6 +115,7 @@ export default function EditBankAccountPage({
 
   const [isSaving, setIsSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -204,8 +207,12 @@ export default function EditBankAccountPage({
         'Erro ao atualizar conta bancária',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar conta bancária', { description: message });
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('already exists') || msg.includes('name already')) {
+        setFieldErrors({ name: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -221,8 +228,7 @@ export default function EditBankAccountPage({
         'Erro ao excluir conta bancária',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir conta bancária', { description: message });
+      toast.error(translateError(err));
     }
   };
 
@@ -371,14 +377,22 @@ export default function EditBankAccountPage({
                     <Label htmlFor="name">
                       Nome <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={e =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Nome da conta bancária"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={e => {
+                          setFormData({ ...formData, name: e.target.value });
+                          if (fieldErrors.name)
+                            setFieldErrors(prev => ({ ...prev, name: '' }));
+                        }}
+                        placeholder="Nome da conta bancária"
+                        aria-invalid={!!fieldErrors.name}
+                      />
+                      {fieldErrors.name && (
+                        <FormErrorIcon message={fieldErrors.name} />
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid gap-2">

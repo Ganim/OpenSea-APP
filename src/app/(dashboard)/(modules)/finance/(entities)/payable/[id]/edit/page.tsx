@@ -44,6 +44,7 @@ import {
   useFinanceEntry,
   useUpdateFinanceEntry,
 } from '@/hooks/finance';
+import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { CostCenterAllocation, FinanceEntryStatus } from '@/types/finance';
 import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
@@ -324,8 +325,7 @@ export default function EditPayablePage({
         'Erro ao atualizar lançamento',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar lançamento', { description: message });
+      toast.error(translateError(err));
     } finally {
       setIsSaving(false);
     }
@@ -341,8 +341,7 @@ export default function EditPayablePage({
         'Erro ao excluir conta a pagar',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir conta a pagar', { description: message });
+      toast.error(translateError(err));
     }
   };
 

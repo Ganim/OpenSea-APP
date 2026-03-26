@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -125,10 +126,7 @@ export function QuickEntryModal({
   const categories = useMemo(() => {
     const primary = categoriesData?.categories ?? [];
     const both = bothCategoriesData?.categories ?? [];
-    return [
-      ...primary,
-      ...both.filter(b => !primary.some(p => p.id === b.id)),
-    ];
+    return [...primary, ...both.filter(b => !primary.some(p => p.id === b.id))];
   }, [categoriesData, bothCategoriesData]);
 
   // Cost centers for override
@@ -143,26 +141,23 @@ export function QuickEntryModal({
   // Resolved values (user override > smart default)
   // ---------------------------------------------------------------------------
 
-  const resolvedCategoryId =
-    categoryOverride || smartDefaults.categoryId;
+  const resolvedCategoryId = categoryOverride || smartDefaults.categoryId;
   const resolvedCategoryName = categoryOverride
-    ? categories.find(c => c.id === categoryOverride)?.name ?? ''
+    ? (categories.find(c => c.id === categoryOverride)?.name ?? '')
     : smartDefaults.categoryName;
 
-  const resolvedCostCenterId =
-    costCenterOverride || smartDefaults.costCenterId;
+  const resolvedCostCenterId = costCenterOverride || smartDefaults.costCenterId;
   const resolvedCostCenterName = costCenterOverride
-    ? costCenters.find(c => c.id === costCenterOverride)?.name ?? ''
+    ? (costCenters.find(c => c.id === costCenterOverride)?.name ?? '')
     : smartDefaults.costCenterName;
 
   const resolvedBankAccountId =
     bankAccountOverride || smartDefaults.bankAccountId;
   const resolvedBankAccountName = bankAccountOverride
-    ? bankAccounts.find(b => b.id === bankAccountOverride)?.name ?? ''
+    ? (bankAccounts.find(b => b.id === bankAccountOverride)?.name ?? '')
     : smartDefaults.bankAccountName;
 
-  const resolvedDescription =
-    descriptionOverride || smartDefaults.description;
+  const resolvedDescription = descriptionOverride || smartDefaults.description;
 
   // ---------------------------------------------------------------------------
   // Mutation
@@ -208,7 +203,8 @@ export function QuickEntryModal({
   // ---------------------------------------------------------------------------
 
   const parsedAmount = parseFloat(amount.replace(',', '.')) || 0;
-  const isValid = parsedAmount > 0 && dueDate !== '' && resolvedCategoryId !== '';
+  const isValid =
+    parsedAmount > 0 && dueDate !== '' && resolvedCategoryId !== '';
 
   // ---------------------------------------------------------------------------
   // Submit
@@ -230,8 +226,7 @@ export function QuickEntryModal({
         costCenterId: resolvedCostCenterId || undefined,
         bankAccountId: resolvedBankAccountId || undefined,
         supplierId: type === 'PAYABLE' && entityId ? entityId : undefined,
-        supplierName:
-          type === 'PAYABLE' && entityName ? entityName : undefined,
+        supplierName: type === 'PAYABLE' && entityName ? entityName : undefined,
         customerId: type === 'RECEIVABLE' && entityId ? entityId : undefined,
         customerName:
           type === 'RECEIVABLE' && entityName ? entityName : undefined,
@@ -258,9 +253,7 @@ export function QuickEntryModal({
         }, 600);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar lançamento.';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [
     isValid,
@@ -309,12 +302,13 @@ export function QuickEntryModal({
     setAmount(cleaned);
   };
 
-  const formattedAmount = parsedAmount > 0
-    ? new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(parsedAmount)
-    : '';
+  const formattedAmount =
+    parsedAmount > 0
+      ? new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(parsedAmount)
+      : '';
 
   // ---------------------------------------------------------------------------
   // Date display
@@ -575,7 +569,9 @@ export function QuickEntryModal({
               <div
                 className={cn(
                   'overflow-hidden transition-all duration-300 ease-in-out',
-                  expanded ? 'max-h-[600px] opacity-100 mt-3' : 'max-h-0 opacity-0'
+                  expanded
+                    ? 'max-h-[600px] opacity-100 mt-3'
+                    : 'max-h-0 opacity-0'
                 )}
               >
                 <div className="space-y-3 border-t border-border/40 pt-3">

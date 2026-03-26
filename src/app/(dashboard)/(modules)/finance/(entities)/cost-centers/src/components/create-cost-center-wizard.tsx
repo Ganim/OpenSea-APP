@@ -21,6 +21,8 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import type { CostCenter, CreateCostCenterData } from '@/types/finance';
+import { translateError } from '@/lib/error-messages';
+import { toast } from 'sonner';
 import { Check, DollarSign, Loader2, Target } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -240,7 +242,7 @@ export function CreateCostCenterWizard({
       }));
   }, [costCenters]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) return;
 
     const data: CreateCostCenterData = {
@@ -264,7 +266,11 @@ export function CreateCostCenterWizard({
       data.annualBudget = annual;
     }
 
-    onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (err) {
+      toast.error(translateError(err));
+    }
   };
 
   const handleClose = () => {

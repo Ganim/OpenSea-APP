@@ -36,6 +36,7 @@ import {
   useFinanceCategories,
   useUpdateContract,
 } from '@/hooks/finance';
+import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { PaymentFrequency } from '@/types/finance';
 import {
@@ -219,8 +220,7 @@ export default function EditContractPage({
         'Erro ao atualizar contrato',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar contrato', { description: message });
+      toast.error(translateError(err));
     } finally {
       setIsSaving(false);
     }
@@ -236,8 +236,7 @@ export default function EditContractPage({
         'Erro ao excluir contrato',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir contrato', { description: message });
+      toast.error(translateError(err));
     }
   };
 

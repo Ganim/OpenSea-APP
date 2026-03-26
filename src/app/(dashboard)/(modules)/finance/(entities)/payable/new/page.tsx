@@ -24,6 +24,8 @@ import {
   useFinanceCategories,
 } from '@/hooks/finance';
 import { RECURRENCE_TYPE_LABELS } from '@/types/finance';
+import { translateError } from '@/lib/error-messages';
+import { toast } from 'sonner';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -87,8 +89,8 @@ export default function NewPayablePage() {
         currency: formData.currency !== 'BRL' ? formData.currency : undefined,
       });
       router.push('/finance/payable');
-    } catch {
-      alert('Erro ao criar conta a pagar');
+    } catch (err) {
+      toast.error(translateError(err));
     }
   };
 
@@ -234,7 +236,7 @@ export default function NewPayablePage() {
               <Label>Moeda</Label>
               <CurrencyInput
                 value={formData.currency}
-                onChange={(currency) => setFormData({ ...formData, currency })}
+                onChange={currency => setFormData({ ...formData, currency })}
                 amount={formData.expectedAmount}
               />
             </div>

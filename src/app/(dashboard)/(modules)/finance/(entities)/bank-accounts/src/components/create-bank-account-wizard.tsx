@@ -26,6 +26,8 @@ import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Landmark, Loader2, QrCode } from 'lucide-react';
 import { useState } from 'react';
+import { translateError } from '@/lib/error-messages';
+import { toast } from 'sonner';
 
 import { BankSelect } from './bank-select';
 
@@ -328,7 +330,11 @@ export function CreateBankAccountWizard({
       isDefault: form.isDefault,
     };
 
-    await onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (err) {
+      toast.error(translateError(err));
+    }
   };
 
   const handleClose = () => {

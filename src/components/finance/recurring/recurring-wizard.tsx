@@ -1,5 +1,6 @@
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import {
   StepWizardDialog,
   type WizardStep,
@@ -167,8 +168,7 @@ export function RecurringWizard({
 
     if (wizardData.bankAccountId)
       payload.bankAccountId = wizardData.bankAccountId;
-    if (wizardData.costCenterId)
-      payload.costCenterId = wizardData.costCenterId;
+    if (wizardData.costCenterId) payload.costCenterId = wizardData.costCenterId;
     if (wizardData.type === 'PAYABLE' && wizardData.supplierName)
       payload.supplierName = wizardData.supplierName;
     if (wizardData.type === 'PAYABLE' && wizardData.supplierId)
@@ -187,7 +187,10 @@ export function RecurringWizard({
     if (wizardData.notes) payload.notes = wizardData.notes;
     if (wizardData.indexationType !== 'NONE')
       payload.indexationType = wizardData.indexationType;
-    if (wizardData.indexationType === 'FIXED_RATE' && wizardData.fixedAdjustmentRate > 0)
+    if (
+      wizardData.indexationType === 'FIXED_RATE' &&
+      wizardData.fixedAdjustmentRate > 0
+    )
       payload.fixedAdjustmentRate = wizardData.fixedAdjustmentRate;
     if (wizardData.indexationType !== 'NONE' && wizardData.adjustmentMonth > 0)
       payload.adjustmentMonth = wizardData.adjustmentMonth;
@@ -199,9 +202,7 @@ export function RecurringWizard({
       handleClose();
       onCreated?.();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar recorrência.';
-      toast.error(message);
+      toast.error(translateError(err));
     }
   }, [wizardData, createMutation, handleClose, onCreated]);
 
@@ -214,18 +215,14 @@ export function RecurringWizard({
       title: 'Configuração',
       description: 'Tipo e frequência da recorrência',
       icon: <Repeat className="h-16 w-16 text-violet-500" />,
-      content: (
-        <RecurringStepConfig data={wizardData} onChange={updateData} />
-      ),
+      content: <RecurringStepConfig data={wizardData} onChange={updateData} />,
       isValid: isStep1Valid,
     },
     {
       title: 'Detalhes',
       description: 'Categorização, valores e pagamento',
       icon: <FileText className="h-16 w-16 text-sky-500" />,
-      content: (
-        <RecurringStepDetails data={wizardData} onChange={updateData} />
-      ),
+      content: <RecurringStepDetails data={wizardData} onChange={updateData} />,
       isValid: isStep2Valid,
     },
     {

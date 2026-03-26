@@ -33,6 +33,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { translateError } from '@/lib/error-messages';
 import { toast } from 'sonner';
 
 export default function NewLoanPage() {
@@ -91,10 +92,8 @@ export default function NewLoanPage() {
       });
       toast.success('Empréstimo criado com sucesso.');
       router.push('/finance/loans');
-    } catch {
-      toast.error(
-        'Erro ao criar empréstimo. Verifique os dados e tente novamente.'
-      );
+    } catch (err) {
+      toast.error(translateError(err));
     }
   };
 

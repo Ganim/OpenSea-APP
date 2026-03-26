@@ -111,6 +111,43 @@ export const errorMessages: Record<string, string> = {
   'Bad request error': 'Erro de requisição inválida',
   'Internal Server Error': 'Erro interno do servidor',
   'Service Unavailable': 'Serviço indisponível',
+
+  // ============= FINANCE =============
+  'Bank account not found': 'Conta bancária não encontrada',
+  'Bank account already exists': 'Esta conta bancária já está cadastrada',
+  'Bank account name already exists':
+    'Já existe uma conta bancária com este nome',
+  'Category not found': 'Categoria não encontrada',
+  'Category already exists': 'Esta categoria já está cadastrada',
+  'Category name already exists': 'Já existe uma categoria com este nome',
+  'Cost center not found': 'Centro de custo não encontrado',
+  'Cost center already exists': 'Este centro de custo já está cadastrado',
+  'Cost center name already exists':
+    'Já existe um centro de custo com este nome',
+  'Cost center code already exists':
+    'Já existe um centro de custo com este código',
+  'Consortium not found': 'Consórcio não encontrado',
+  'Contract not found': 'Contrato não encontrado',
+  'Loan not found': 'Empréstimo não encontrado',
+  'Finance entry not found': 'Lançamento financeiro não encontrado',
+  'Recurring config not found': 'Configuração recorrente não encontrada',
+  'Cannot delete bank account with transactions':
+    'Não é possível excluir conta bancária com transações vinculadas',
+  'Cannot delete category with entries':
+    'Não é possível excluir categoria com lançamentos vinculados',
+  'Cannot delete cost center with entries':
+    'Não é possível excluir centro de custo com lançamentos vinculados',
+  'Invalid amount': 'Valor inválido',
+  'Amount must be greater than zero': 'O valor deve ser maior que zero',
+  'Due date must be in the future': 'A data de vencimento deve ser futura',
+  'Start date must be before end date':
+    'Data inicial deve ser anterior à data final',
+  'End date must be after start date':
+    'Data final deve ser posterior à data inicial',
+  'Invalid PIX key': 'Chave PIX inválida',
+  'Invalid bank code': 'Código do banco inválido',
+  'Allocation percentages must total 100':
+    'Os percentuais de rateio devem totalizar 100%',
 };
 
 /**

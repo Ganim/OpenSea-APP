@@ -13,6 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { CreateCostCenterData } from '@/types/finance';
+import { translateError } from '@/lib/error-messages';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { toast } from 'sonner';
 import { Landmark, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -36,6 +39,7 @@ export function CreateCostCenterModal({
   const [isActive, setIsActive] = useState(true);
   const [monthlyBudget, setMonthlyBudget] = useState('');
   const [annualBudget, setAnnualBudget] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Reset form when modal opens
   useEffect(() => {
@@ -45,10 +49,11 @@ export function CreateCostCenterModal({
       setIsActive(true);
       setMonthlyBudget('');
       setAnnualBudget('');
+      setFieldErrors({});
     }
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -72,7 +77,22 @@ export function CreateCostCenterModal({
       data.annualBudget = annual;
     }
 
-    onSubmit(data);
+    try {
+      await onSubmit(data);
+      setFieldErrors({});
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('already exists') ||
+        msg.includes('name already') ||
+        msg.includes('code already')
+      ) {
+        const field = msg.includes('code') ? 'code' : 'name';
+        setFieldErrors({ [field]: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
+    }
   };
 
   const handleClose = () => {
@@ -114,14 +134,22 @@ export function CreateCostCenterModal({
           {/* Nome */}
           <div className="space-y-2">
             <Label htmlFor="cc-name">Nome *</Label>
-            <Input
-              id="cc-name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Ex.: Departamento Comercial"
-              required
-              autoFocus
-            />
+            <div className="relative">
+              <Input
+                id="cc-name"
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
+                }}
+                placeholder="Ex.: Departamento Comercial"
+                required
+                autoFocus
+                aria-invalid={!!fieldErrors.name}
+              />
+              {fieldErrors.name && <FormErrorIcon message={fieldErrors.name} />}
+            </div>
           </div>
 
           {/* Description */}

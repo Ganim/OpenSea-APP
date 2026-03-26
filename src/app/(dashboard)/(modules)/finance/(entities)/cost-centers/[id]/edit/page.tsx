@@ -33,6 +33,8 @@ import {
   useUpdateCostCenter,
 } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
+import { translateError } from '@/lib/error-messages';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { logger } from '@/lib/logger';
 import {
   DollarSign,
@@ -102,6 +104,7 @@ export default function EditCostCenterPage({
 
   const [isSaving, setIsSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -173,10 +176,17 @@ export default function EditCostCenterPage({
         'Erro ao atualizar centro de custo',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar centro de custo', {
-        description: message,
-      });
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('already exists') ||
+        msg.includes('name already') ||
+        msg.includes('code already')
+      ) {
+        const field = msg.includes('code') ? 'code' : 'name';
+        setFieldErrors({ [field]: translateError(msg) });
+      } else {
+        toast.error(translateError(msg));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -192,8 +202,7 @@ export default function EditCostCenterPage({
         'Erro ao excluir centro de custo',
         err instanceof Error ? err : undefined
       );
-      const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir centro de custo', { description: message });
+      toast.error(translateError(err));
     }
   };
 
@@ -339,28 +348,44 @@ export default function EditCostCenterPage({
                     <Label htmlFor="name">
                       Nome <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={e =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Nome do centro de custo"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={e => {
+                          setFormData({ ...formData, name: e.target.value });
+                          if (fieldErrors.name)
+                            setFieldErrors(prev => ({ ...prev, name: '' }));
+                        }}
+                        placeholder="Nome do centro de custo"
+                        aria-invalid={!!fieldErrors.name}
+                      />
+                      {fieldErrors.name && (
+                        <FormErrorIcon message={fieldErrors.name} />
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="code">
                       Código <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
-                      id="code"
-                      value={formData.code}
-                      onChange={e =>
-                        setFormData({ ...formData, code: e.target.value })
-                      }
-                      placeholder="Código do centro de custo"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="code"
+                        value={formData.code}
+                        onChange={e => {
+                          setFormData({ ...formData, code: e.target.value });
+                          if (fieldErrors.code)
+                            setFieldErrors(prev => ({ ...prev, code: '' }));
+                        }}
+                        placeholder="Código do centro de custo"
+                        aria-invalid={!!fieldErrors.code}
+                      />
+                      {fieldErrors.code && (
+                        <FormErrorIcon message={fieldErrors.code} />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

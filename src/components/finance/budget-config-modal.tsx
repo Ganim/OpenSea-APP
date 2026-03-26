@@ -5,6 +5,7 @@
 
 'use client';
 
+import { translateError } from '@/lib/error-messages';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   NavigationWizardDialog,
@@ -40,8 +41,18 @@ interface BudgetConfigModalProps {
 type SectionId = 'period' | 'budgets';
 
 const MONTH_SHORT = [
-  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
 ];
 
 const currentYear = new Date().getFullYear();
@@ -82,7 +93,7 @@ export function BudgetConfigModal({
       newData[cat.id] = {};
       for (let m = 1; m <= 12; m++) {
         const item = configData.items.find(
-          (i) => i.categoryId === cat.id && i.month === m
+          i => i.categoryId === cat.id && i.month === m
         );
         newData[cat.id][m] = item?.amount ?? 0;
       }
@@ -101,7 +112,7 @@ export function BudgetConfigModal({
   // Update cell
   const updateCell = useCallback(
     (categoryId: string, month: number, value: number) => {
-      setBudgetData((prev) => ({
+      setBudgetData(prev => ({
         ...prev,
         [categoryId]: {
           ...(prev[categoryId] ?? {}),
@@ -115,7 +126,7 @@ export function BudgetConfigModal({
   // Copy previous month
   const copyPreviousMonth = useCallback((month: number) => {
     if (month <= 1) return;
-    setBudgetData((prev) => {
+    setBudgetData(prev => {
       const next = { ...prev };
       for (const catId of Object.keys(next)) {
         next[catId] = {
@@ -142,7 +153,7 @@ export function BudgetConfigModal({
         return;
       }
       const monthly = Math.round((total / 12) * 100) / 100;
-      setBudgetData((prev) => {
+      setBudgetData(prev => {
         const months: Record<number, number> = {};
         for (let m = 1; m <= 12; m++) months[m] = monthly;
         return { ...prev, [categoryId]: months };
@@ -180,8 +191,8 @@ export function BudgetConfigModal({
       await saveMutation.mutateAsync({ year: selectedYear, items });
       toast.success('Orçamentos salvos com sucesso!');
       onOpenChange(false);
-    } catch {
-      toast.error('Erro ao salvar orçamentos.');
+    } catch (err) {
+      toast.error(translateError(err));
     }
   }, [budgetData, selectedYear, saveMutation, onOpenChange]);
 
@@ -220,7 +231,7 @@ export function BudgetConfigModal({
       subtitle={`Definir orçamento mensal por categoria — ${selectedYear}`}
       sections={sections}
       activeSection={activeSection}
-      onSectionChange={(id) => setActiveSection(id as SectionId)}
+      onSectionChange={id => setActiveSection(id as SectionId)}
       isPending={isPending}
       footer={
         <>
@@ -251,13 +262,13 @@ export function BudgetConfigModal({
             <Label>Ano</Label>
             <Select
               value={String(selectedYear)}
-              onValueChange={(v) => setSelectedYear(Number(v))}
+              onValueChange={v => setSelectedYear(Number(v))}
             >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {YEARS.map((y) => (
+                {YEARS.map(y => (
                   <SelectItem key={y} value={String(y)}>
                     {y}
                   </SelectItem>
@@ -283,7 +294,7 @@ export function BudgetConfigModal({
                 min={0}
                 step={100}
                 value={fillAllAmount || ''}
-                onChange={(e) =>
+                onChange={e =>
                   setFillAllAmount(parseFloat(e.target.value) || 0)
                 }
                 placeholder="Ex: 12000"
@@ -342,32 +353,30 @@ export function BudgetConfigModal({
                 </tr>
               </thead>
               <tbody>
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <tr key={cat.id} className="border-b border-border/30">
                     <td className="py-1.5 px-2 text-sm font-medium sticky left-0 bg-background truncate max-w-[140px]">
                       {cat.name}
                     </td>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(
-                      (month) => (
-                        <td key={month} className="py-1 px-1">
-                          <Input
-                            type="number"
-                            min={0}
-                            step={50}
-                            value={budgetData[cat.id]?.[month] || ''}
-                            onChange={(e) =>
-                              updateCell(
-                                cat.id,
-                                month,
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className="h-7 w-full text-xs text-center px-1"
-                            placeholder="0"
-                          />
-                        </td>
-                      )
-                    )}
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                      <td key={month} className="py-1 px-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          step={50}
+                          value={budgetData[cat.id]?.[month] || ''}
+                          onChange={e =>
+                            updateCell(
+                              cat.id,
+                              month,
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="h-7 w-full text-xs text-center px-1"
+                          placeholder="0"
+                        />
+                      </td>
+                    ))}
                     <td className="py-1 px-1 text-center">
                       <button
                         type="button"
