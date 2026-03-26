@@ -18,6 +18,7 @@ import {
 } from '@/services/hr';
 
 import {
+  AlertTriangle,
   BookUser,
   BarChart3,
   CalendarDays,
@@ -27,7 +28,9 @@ import {
   FileUser,
   FileX2,
   GitBranchPlus,
+  Heart,
   Hourglass,
+  MapPin,
   MinusCircle,
   PalmtreeIcon,
   PlusCircle,
@@ -111,6 +114,16 @@ const sections: {
         countKey: 'employees',
       },
       {
+        id: 'dependants',
+        title: 'Dependentes',
+        description: 'Gerencie dependentes dos funcionários',
+        icon: Heart,
+        href: '/hr/dependants',
+        gradient: 'from-pink-500 to-pink-600',
+        hoverBg: 'hover:bg-pink-50 dark:hover:bg-pink-500/10',
+        permission: HR_PERMISSIONS.DEPENDANTS.LIST,
+      },
+      {
         id: 'org-chart',
         title: 'Organograma',
         description: 'Estrutura hierárquica visual da organização',
@@ -154,6 +167,16 @@ const sections: {
         gradient: 'from-teal-500 to-teal-600',
         hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'geofence-zones',
+        title: 'Zonas de Geofencing',
+        description: 'Configure zonas de geolocalização para ponto',
+        icon: MapPin,
+        href: '/hr/geofence-zones',
+        gradient: 'from-teal-500 to-teal-600',
+        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
+        permission: HR_PERMISSIONS.GEOFENCE_ZONES.LIST,
       },
       {
         id: 'overtime',
@@ -249,6 +272,16 @@ const sections: {
         gradient: 'from-emerald-500 to-emerald-600',
         hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
         permission: HR_PERMISSIONS.SAFETY_PROGRAMS.LIST,
+      },
+      {
+        id: 'workplace-risks',
+        title: 'Riscos Ocupacionais',
+        description: 'Gerencie riscos e segurança do trabalho',
+        icon: AlertTriangle,
+        href: '/hr/workplace-risks',
+        gradient: 'from-amber-500 to-amber-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+        permission: HR_PERMISSIONS.WORKPLACE_RISKS.LIST,
       },
       {
         id: 'cipa',
