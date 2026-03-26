@@ -245,6 +245,16 @@ export const FINANCE_PERMISSIONS = {
     'admin',
     'onlyself'
   ),
+  FISCAL: perm(
+    'finance',
+    'fiscal',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'export',
+    'admin'
+  ),
 } as const;
 
 // =============================================================================

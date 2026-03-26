@@ -13,3 +13,4 @@ export * from './finance-reports.service';
 export * from './reconciliation.service';
 export * from './budget.service';
 export * from './escalation.service';
+export * from './fiscal.service';

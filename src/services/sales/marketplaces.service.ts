@@ -72,6 +72,43 @@ export const marketplacesService = {
     );
   },
 
+  // === Sync & Connect ===
+  async connectMarketplace(
+    connectionId: string,
+    body: { code: string; redirectUri: string }
+  ): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_ENDPOINTS.MARKETPLACE_CONNECTIONS.CONNECT(connectionId),
+      body
+    );
+  },
+
+  async syncProducts(
+    connectionId: string,
+    body: { productIds: string[] }
+  ): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_ENDPOINTS.MARKETPLACE_CONNECTIONS.SYNC_PRODUCTS(connectionId),
+      body
+    );
+  },
+
+  async syncInventory(connectionId: string): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_ENDPOINTS.MARKETPLACE_CONNECTIONS.SYNC_INVENTORY(connectionId)
+    );
+  },
+
+  async importOrders(
+    connectionId: string,
+    body?: { since?: string }
+  ): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_ENDPOINTS.MARKETPLACE_CONNECTIONS.IMPORT_ORDERS(connectionId),
+      body
+    );
+  },
+
   // === Listings ===
   async listListings(
     connectionId: string,

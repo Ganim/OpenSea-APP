@@ -768,6 +768,19 @@ export const API_ENDPOINTS = {
   FINANCE_CUSTOMER_SCORE: {
     GET: '/v1/finance/customer-score',
   },
+  // Finance - Fiscal (NF-e / NFC-e)
+  FISCAL: {
+    CONFIG: '/v1/fiscal/config',
+    CERTIFICATES: '/v1/fiscal/certificates',
+    DOCUMENTS: {
+      LIST: '/v1/fiscal/documents',
+      GET: (id: string) => `/v1/fiscal/documents/${id}`,
+      CANCEL: (id: string) => `/v1/fiscal/documents/${id}/cancel`,
+      CORRECTION: (id: string) => `/v1/fiscal/documents/${id}/correction`,
+    },
+    EMIT_NFE: '/v1/fiscal/nfe',
+    EMIT_NFCE: '/v1/fiscal/nfce',
+  },
   // Finance - Reconciliation (OFX)
   RECONCILIATION: {
     LIST: '/v1/finance/reconciliation',
@@ -1210,6 +1223,14 @@ export const API_ENDPOINTS = {
     GET: (id: string) => `/v1/marketplace-connections/${id}`,
     UPDATE: (id: string) => `/v1/marketplace-connections/${id}`,
     DELETE: (id: string) => `/v1/marketplace-connections/${id}`,
+    CONNECT: (connectionId: string) =>
+      `/v1/marketplace-connections/${connectionId}/connect`,
+    SYNC_PRODUCTS: (connectionId: string) =>
+      `/v1/marketplace-connections/${connectionId}/sync/products`,
+    SYNC_INVENTORY: (connectionId: string) =>
+      `/v1/marketplace-connections/${connectionId}/sync/inventory`,
+    IMPORT_ORDERS: (connectionId: string) =>
+      `/v1/marketplace-connections/${connectionId}/import/orders`,
     RECONCILIATION: (id: string) =>
       `/v1/marketplace-connections/${id}/reconciliation`,
     LISTINGS: (connectionId: string) =>
@@ -1269,6 +1290,16 @@ export const API_ENDPOINTS = {
   },
   BID_EMPENHOS: {
     CREATE: '/v1/bid-empenhos',
+  },
+  // Messaging
+  MESSAGING: {
+    ACCOUNTS: '/v1/messaging/accounts',
+    CONTACTS: '/v1/messaging/contacts',
+    MESSAGES: '/v1/messaging/messages',
+  },
+  // Cashier / PIX
+  CASHIER: {
+    PIX: '/v1/cashier/pix',
   },
   // Health
   HEALTH: '/health',

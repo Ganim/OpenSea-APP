@@ -120,6 +120,83 @@ export function useDeleteMarketplaceConnection() {
   });
 }
 
+// === Sync & Connect ===
+export function useConnectMarketplace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      connectionId,
+      data,
+    }: {
+      connectionId: string;
+      data: { code: string; redirectUri: string };
+    }) => marketplacesService.connectMarketplace(connectionId, data),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.CONNECTION(variables.connectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.CONNECTIONS,
+      });
+    },
+  });
+}
+
+export function useSyncProducts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      connectionId,
+      productIds,
+    }: {
+      connectionId: string;
+      productIds: string[];
+    }) => marketplacesService.syncProducts(connectionId, { productIds }),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.LISTINGS(variables.connectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.CONNECTION(variables.connectionId),
+      });
+    },
+  });
+}
+
+export function useSyncInventory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (connectionId: string) =>
+      marketplacesService.syncInventory(connectionId),
+    onSuccess: (_result, connectionId) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.CONNECTION(connectionId),
+      });
+    },
+  });
+}
+
+export function useImportOrders() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      connectionId,
+      since,
+    }: {
+      connectionId: string;
+      since?: string;
+    }) => marketplacesService.importOrders(connectionId, { since }),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ORDERS(variables.connectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.CONNECTION(variables.connectionId),
+      });
+    },
+  });
+}
+
 // === Listings ===
 export function useMarketplaceListingsInfinite(connectionId: string) {
   return useInfiniteQuery({
