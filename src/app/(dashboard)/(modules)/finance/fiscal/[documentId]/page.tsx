@@ -231,7 +231,7 @@ export default function FiscalDocumentDetailPage({
       setCorrectionText('');
       toast.success('Carta de correção emitida com sucesso.');
     } catch {
-      toast.error('Erro ao emitir carta de correcao.');
+      toast.error('Erro ao emitir carta de correção.');
     }
   }, [document, correctionText, correctionMutation]);
 
@@ -251,7 +251,7 @@ export default function FiscalDocumentDetailPage({
         <PageBody>
           <Card className="p-12 text-center">
             <p className="text-destructive text-lg">
-              Documento fiscal nao encontrado.
+              Documento fiscal não encontrado.
             </p>
             <Link href="/finance/fiscal">
               <Button variant="outline" className="mt-4">
@@ -762,7 +762,7 @@ export default function FiscalDocumentDetailPage({
         onClose={() => setCancelPinOpen(false)}
         onSuccess={handleCancelPinSuccess}
         title="Cancelar Documento Fiscal"
-        description="Digite seu PIN de Acao para confirmar o cancelamento deste documento fiscal."
+        description="Digite seu PIN de Ação para confirmar o cancelamento deste documento fiscal."
       />
 
       {/* Cancel Reason Dialog */}
@@ -780,7 +780,7 @@ export default function FiscalDocumentDetailPage({
             <DialogTitle>Motivo do Cancelamento</DialogTitle>
             <DialogDescription>
               Informe o motivo do cancelamento do documento fiscal. Este motivo
-              sera enviado a SEFAZ.
+              será enviado à SEFAZ.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -832,7 +832,7 @@ export default function FiscalDocumentDetailPage({
           <DialogHeader>
             <DialogTitle>Carta de Correção</DialogTitle>
             <DialogDescription>
-              Informe o texto de correção. Esta carta sera enviada a SEFAZ.
+              Informe o texto de correção. Esta carta será enviada à SEFAZ.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

@@ -338,7 +338,7 @@ function FiscalPageContent() {
         if (doc?.danfePdfUrl) {
           window.open(doc.danfePdfUrl, '_blank');
         } else {
-          toast.error('DANFE nao disponivel para este documento.');
+          toast.error('DANFE não disponível para este documento.');
         }
       }
     },
@@ -389,7 +389,7 @@ function FiscalPageContent() {
       setCorrectionText('');
       toast.success('Carta de correção emitida com sucesso.');
     } catch {
-      toast.error('Erro ao emitir carta de correcao.');
+      toast.error('Erro ao emitir carta de correção.');
     }
   }, [correctionTarget, correctionText, correctionMutation]);
 
@@ -824,7 +824,7 @@ function FiscalPageContent() {
             }}
             onSuccess={handleCancelConfirm}
             title="Cancelar Documento Fiscal"
-            description="Digite seu PIN de Acao para confirmar o cancelamento deste documento fiscal. Esta acao nao pode ser desfeita."
+            description="Digite seu PIN de Ação para confirmar o cancelamento deste documento fiscal. Esta ação não pode ser desfeita."
           />
 
           {/* Cancel Reason Dialog (shown after PIN) */}
