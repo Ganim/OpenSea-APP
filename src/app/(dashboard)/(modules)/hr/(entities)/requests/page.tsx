@@ -1,31 +1,24 @@
 /**
- * HR Requests Management Page
- * Gestao de solicitacoes pendentes (acesso de gestores/RH)
+ * HR Requests Management Page (Manager View)
+ * Gestão de solicitações dos colaboradores
  */
 
 'use client';
 
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { GridError } from '@/components/handlers/grid-error';
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { Badge } from '@/components/ui/badge';
+import { SearchBar } from '@/components/layout/search-bar';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -34,23 +27,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  CoreProvider,
+  EntityCard,
+  EntityContextMenu,
+  EntityGrid,
+} from '@/core';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import { portalService } from '@/services/hr';
-import type {
-  EmployeeRequest,
-  RequestType,
-  RequestStatus,
-} from '@/types/hr';
+import type { EmployeeRequest, RequestType, RequestStatus } from '@/types/hr';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { LucideIcon } from 'lucide-react';
 import {
   Calendar,
   Check,
   CheckCircle2,
-  Clock,
+  ClipboardList,
   FileText,
-  Filter,
-  Inbox,
   Loader2,
   PalmtreeIcon,
   Send,
@@ -58,7 +52,8 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 // ============================================================================
@@ -66,74 +61,161 @@ import { toast } from 'sonner';
 // ============================================================================
 
 const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
-  VACATION: 'Ferias',
-  ABSENCE: 'Ausencia',
+  VACATION: 'Férias',
+  ABSENCE: 'Ausência',
   ADVANCE: 'Adiantamento',
-  DATA_CHANGE: 'Alteracao de Dados',
+  DATA_CHANGE: 'Alteração de Dados',
   SUPPORT: 'Suporte',
 };
 
-const REQUEST_TYPE_ICONS: Record<RequestType, React.ReactNode> = {
-  VACATION: <PalmtreeIcon className="h-4 w-4" />,
-  ABSENCE: <Calendar className="h-4 w-4" />,
-  ADVANCE: <FileText className="h-4 w-4" />,
-  DATA_CHANGE: <UserCog className="h-4 w-4" />,
-  SUPPORT: <Send className="h-4 w-4" />,
+const REQUEST_TYPE_ICONS: Record<RequestType, LucideIcon> = {
+  VACATION: PalmtreeIcon,
+  ABSENCE: Calendar,
+  ADVANCE: FileText,
+  DATA_CHANGE: UserCog,
+  SUPPORT: Send,
 };
 
-const STATUS_CONFIG: Record<RequestStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const REQUEST_TYPE_GRADIENTS: Record<RequestType, string> = {
+  VACATION: 'from-green-500 to-green-600',
+  ABSENCE: 'from-rose-500 to-rose-600',
+  ADVANCE: 'from-amber-500 to-amber-600',
+  DATA_CHANGE: 'from-blue-500 to-blue-600',
+  SUPPORT: 'from-violet-500 to-violet-600',
+};
+
+const STATUS_CONFIG: Record<
+  RequestStatus,
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  }
+> = {
   PENDING: { label: 'Pendente', variant: 'outline' },
   APPROVED: { label: 'Aprovada', variant: 'default' },
   REJECTED: { label: 'Rejeitada', variant: 'destructive' },
   CANCELLED: { label: 'Cancelada', variant: 'secondary' },
 };
 
-// ============================================================================
-// PAGE
-// ============================================================================
+const TYPE_FILTER_OPTIONS = [
+  { id: 'VACATION', label: 'Férias' },
+  { id: 'ABSENCE', label: 'Ausência' },
+  { id: 'ADVANCE', label: 'Adiantamento' },
+  { id: 'DATA_CHANGE', label: 'Alteração de Dados' },
+  { id: 'SUPPORT', label: 'Suporte' },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  { id: 'PENDING', label: 'Pendente' },
+  { id: 'APPROVED', label: 'Aprovada' },
+  { id: 'REJECTED', label: 'Rejeitada' },
+  { id: 'CANCELLED', label: 'Cancelada' },
+];
 
 export default function RequestsPage() {
-  const { hasPermission } = usePermissions();
+  return (
+    <Suspense
+      fallback={<GridLoading count={6} layout="grid" size="md" gap="gap-4" />}
+    >
+      <RequestsPageContent />
+    </Suspense>
+  );
+}
+
+function RequestsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
 
   const canApprove = hasPermission(HR_PERMISSIONS.EMPLOYEES.MANAGE);
 
-  // Filters
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  // ============================================================================
+  // STATE
+  // ============================================================================
 
-  // Action state
+  const [searchQuery, setSearchQuery] = useState('');
   const [actionTarget, setActionTarget] = useState<{
     request: EmployeeRequest;
     action: 'approve' | 'reject';
   } | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  // Query
+  // ============================================================================
+  // URL-BASED FILTERS
+  // ============================================================================
+
+  const typeFilter = useMemo(() => {
+    const raw = searchParams.get('type');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  const statusFilter = useMemo(() => {
+    const raw = searchParams.get('status');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  const buildFilterUrl = useCallback(
+    (params: { type?: string[]; status?: string[] }) => {
+      const types = params.type !== undefined ? params.type : typeFilter;
+      const statuses =
+        params.status !== undefined ? params.status : statusFilter;
+      const parts: string[] = [];
+      if (types.length > 0) parts.push(`type=${types.join(',')}`);
+      if (statuses.length > 0) parts.push(`status=${statuses.join(',')}`);
+      return parts.length > 0
+        ? `/hr/requests?${parts.join('&')}`
+        : '/hr/requests';
+    },
+    [typeFilter, statusFilter]
+  );
+
+  const setTypeFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ type: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  const setStatusFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ status: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
   const {
     data: requestsData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
-    queryKey: ['hr-pending-requests', typeFilter],
+    queryKey: ['hr-pending-requests'],
     queryFn: async () => {
       const response = await portalService.listPendingApprovals({
-        type: typeFilter || undefined,
         perPage: 100,
       });
       return response.requests;
     },
   });
 
-  // Mutations
+  // ============================================================================
+  // MUTATIONS
+  // ============================================================================
+
   const approveMutation = useMutation({
     mutationFn: (id: string) => portalService.approveRequest(id),
     onSuccess: () => {
-      toast.success('Solicitacao aprovada');
+      toast.success('Solicitação aprovada com sucesso');
       queryClient.invalidateQueries({ queryKey: ['hr-pending-requests'] });
       setActionTarget(null);
     },
     onError: () => {
-      toast.error('Erro ao aprovar solicitacao');
+      toast.error('Erro ao aprovar solicitação');
     },
   });
 
@@ -141,15 +223,50 @@ export default function RequestsPage() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       portalService.rejectRequest(id, reason),
     onSuccess: () => {
-      toast.success('Solicitacao rejeitada');
+      toast.success('Solicitação rejeitada');
       queryClient.invalidateQueries({ queryKey: ['hr-pending-requests'] });
       setActionTarget(null);
       setRejectionReason('');
     },
     onError: () => {
-      toast.error('Erro ao rejeitar solicitacao');
+      toast.error('Erro ao rejeitar solicitação');
     },
   });
+
+  // ============================================================================
+  // FILTERED ITEMS
+  // ============================================================================
+
+  const filteredItems = useMemo(() => {
+    let items = requestsData || [];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          (item.employee?.fullName &&
+            item.employee.fullName.toLowerCase().includes(q)) ||
+          REQUEST_TYPE_LABELS[item.type]?.toLowerCase().includes(q) ||
+          STATUS_CONFIG[item.status]?.label.toLowerCase().includes(q)
+      );
+    }
+
+    if (typeFilter.length > 0) {
+      const set = new Set(typeFilter);
+      items = items.filter(item => set.has(item.type));
+    }
+
+    if (statusFilter.length > 0) {
+      const set = new Set(statusFilter);
+      items = items.filter(item => set.has(item.status));
+    }
+
+    return items;
+  }, [requestsData, searchQuery, typeFilter, statusFilter]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
   const handleAction = useCallback(() => {
     if (!actionTarget) return;
@@ -158,7 +275,7 @@ export default function RequestsPage() {
       approveMutation.mutate(actionTarget.request.id);
     } else {
       if (!rejectionReason.trim()) {
-        toast.error('Informe o motivo da rejeicao');
+        toast.error('Informe o motivo da rejeição');
         return;
       }
       rejectMutation.mutate({
@@ -168,242 +285,387 @@ export default function RequestsPage() {
     }
   }, [actionTarget, rejectionReason, approveMutation, rejectMutation]);
 
-  const renderRequestDetails = (request: EmployeeRequest) => {
-    const data = request.data || {};
-    const entries = Object.entries(data).filter(
-      ([, v]) => v !== null && v !== undefined && v !== ''
-    );
-    if (entries.length === 0) return null;
+  const handleView = (ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/hr/requests/${ids[0]}`);
+    }
+  };
+
+  // ============================================================================
+  // RENDER CARDS
+  // ============================================================================
+
+  const renderGridCard = (item: EmployeeRequest, isSelected: boolean) => {
+    const typeLabel = REQUEST_TYPE_LABELS[item.type];
+    const TypeIcon = REQUEST_TYPE_ICONS[item.type];
+    const gradient = REQUEST_TYPE_GRADIENTS[item.type];
+    const statusConfig = STATUS_CONFIG[item.status];
 
     return (
-      <div className="mt-2 p-3 rounded-lg bg-muted/30 text-xs space-y-1">
-        {entries.map(([key, value]) => (
-          <div key={key} className="flex gap-2">
-            <span className="font-medium text-muted-foreground capitalize">
-              {key.replace(/([A-Z])/g, ' $1').trim()}:
-            </span>
-            <span>{String(value)}</span>
-          </div>
-        ))}
-      </div>
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleView}
+        actions={[
+          ...(canApprove && item.status === 'PENDING'
+            ? [
+                {
+                  id: 'approve',
+                  label: 'Aprovar',
+                  icon: Check,
+                  onClick: () =>
+                    setActionTarget({ request: item, action: 'approve' }),
+                },
+                {
+                  id: 'reject',
+                  label: 'Rejeitar',
+                  icon: X,
+                  separator: 'before' as const,
+                  onClick: () =>
+                    setActionTarget({ request: item, action: 'reject' }),
+                },
+              ]
+            : []),
+        ]}
+      >
+        <EntityCard
+          id={item.id}
+          variant="grid"
+          title={item.employee?.fullName || 'Colaborador'}
+          subtitle={
+            item.employee?.department
+              ? `${typeLabel} - ${item.employee.department.name}`
+              : typeLabel
+          }
+          icon={TypeIcon}
+          iconBgColor={`bg-linear-to-br ${gradient}`}
+          badges={[
+            {
+              label: typeLabel,
+              variant: 'outline',
+            },
+            {
+              label: statusConfig.label,
+              variant: statusConfig.variant,
+            },
+          ]}
+          footer={{
+            type: 'single',
+            button: {
+              icon: Calendar,
+              label: new Date(item.createdAt).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+              }),
+              color: 'blue',
+            },
+          }}
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          showStatusBadges={false}
+        />
+      </EntityContextMenu>
     );
   };
 
-  return (
-    <PageLayout>
-      <PageHeader>
-        <PageActionBar
-          breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
-            { label: 'Solicitacoes' },
+  const renderListCard = (item: EmployeeRequest, isSelected: boolean) => {
+    const typeLabel = REQUEST_TYPE_LABELS[item.type];
+    const TypeIcon = REQUEST_TYPE_ICONS[item.type];
+    const gradient = REQUEST_TYPE_GRADIENTS[item.type];
+    const statusConfig = STATUS_CONFIG[item.status];
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleView}
+        actions={[
+          ...(canApprove && item.status === 'PENDING'
+            ? [
+                {
+                  id: 'approve',
+                  label: 'Aprovar',
+                  icon: Check,
+                  onClick: () =>
+                    setActionTarget({ request: item, action: 'approve' }),
+                },
+                {
+                  id: 'reject',
+                  label: 'Rejeitar',
+                  icon: X,
+                  separator: 'before' as const,
+                  onClick: () =>
+                    setActionTarget({ request: item, action: 'reject' }),
+                },
+              ]
+            : []),
+        ]}
+      >
+        <EntityCard
+          id={item.id}
+          variant="list"
+          title={item.employee?.fullName || 'Colaborador'}
+          subtitle={
+            item.employee?.department
+              ? `${typeLabel} - ${item.employee.department.name}`
+              : typeLabel
+          }
+          icon={TypeIcon}
+          iconBgColor={`bg-linear-to-br ${gradient}`}
+          badges={[
+            {
+              label: typeLabel,
+              variant: 'outline',
+            },
+            {
+              label: statusConfig.label,
+              variant: statusConfig.variant,
+            },
           ]}
-        />
-      </PageHeader>
-
-      <PageBody>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-bold">Solicitacoes</h2>
-            <p className="text-sm text-muted-foreground">
-              Gerencie solicitacoes dos colaboradores
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[180px] h-9">
-                <SelectValue placeholder="Todos os tipos" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos os Tipos</SelectItem>
-                <SelectItem value="VACATION">Ferias</SelectItem>
-                <SelectItem value="ABSENCE">Ausencia</SelectItem>
-                <SelectItem value="ADVANCE">Adiantamento</SelectItem>
-                <SelectItem value="DATA_CHANGE">Alteracao de Dados</SelectItem>
-                <SelectItem value="SUPPORT">Suporte</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Content */}
-        {isLoading ? (
-          <GridLoading count={5} layout="list" size="md" />
-        ) : error ? (
-          <GridError message="Erro ao carregar solicitacoes" />
-        ) : !requestsData || requestsData.length === 0 ? (
-          <Card className="p-12 text-center bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <Inbox className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-            <p className="text-lg font-medium mb-1">Nenhuma solicitacao pendente</p>
-            <p className="text-sm text-muted-foreground">
-              Todas as solicitacoes foram processadas
-            </p>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {requestsData.map((request: EmployeeRequest) => {
-              const typeLabel = REQUEST_TYPE_LABELS[request.type];
-              const typeIcon = REQUEST_TYPE_ICONS[request.type];
-              const statusConfig = STATUS_CONFIG[request.status];
-
-              return (
-                <Card
-                  key={request.id}
-                  className="p-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 shrink-0">
-                      {typeIcon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-sm">{typeLabel}</p>
-                        <Badge
-                          variant={statusConfig.variant}
-                          className="text-xs"
-                        >
-                          {statusConfig.label}
-                        </Badge>
-                      </div>
-                      {request.employee && (
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {request.employee.fullName}
-                          {request.employee.department
-                            ? ` - ${request.employee.department.name}`
-                            : ''}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Criada em{' '}
-                        {new Date(request.createdAt).toLocaleDateString(
-                          'pt-BR',
-                          {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                          }
-                        )}
-                      </p>
-                      {renderRequestDetails(request)}
-                    </div>
-
-                    {/* Actions */}
-                    {canApprove && request.status === 'PENDING' && (
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 gap-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
-                          onClick={() =>
-                            setActionTarget({
-                              request,
-                              action: 'approve',
-                            })
-                          }
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Aprovar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 gap-1 text-rose-600 border-rose-200 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-                          onClick={() =>
-                            setActionTarget({
-                              request,
-                              action: 'reject',
-                            })
-                          }
-                        >
-                          <X className="h-3.5 w-3.5" />
-                          Rejeitar
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Approve/Reject Dialog */}
-        <Dialog
-          open={!!actionTarget}
-          onOpenChange={v => {
-            if (!v) {
-              setActionTarget(null);
-              setRejectionReason('');
-            }
+          footer={{
+            type: 'single',
+            button: {
+              icon: Calendar,
+              label: new Date(item.createdAt).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+              }),
+              color: 'blue',
+            },
           }}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {actionTarget?.action === 'approve'
-                  ? 'Aprovar Solicitacao'
-                  : 'Rejeitar Solicitacao'}
-              </DialogTitle>
-              <DialogDescription>
-                {actionTarget?.action === 'approve'
-                  ? `Confirma a aprovacao da solicitacao de ${REQUEST_TYPE_LABELS[actionTarget?.request.type || 'SUPPORT']}?`
-                  : 'Informe o motivo da rejeicao.'}
-              </DialogDescription>
-            </DialogHeader>
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          showStatusBadges={false}
+        />
+      </EntityContextMenu>
+    );
+  };
 
-            {actionTarget?.action === 'reject' && (
-              <div className="space-y-2 py-2">
-                <Label>Motivo da Rejeicao</Label>
-                <Textarea
-                  value={rejectionReason}
-                  onChange={e => setRejectionReason(e.target.value)}
-                  placeholder="Descreva o motivo da rejeicao..."
-                  rows={3}
-                />
-              </div>
-            )}
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
 
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setActionTarget(null);
-                  setRejectionReason('');
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant={
-                  actionTarget?.action === 'approve'
-                    ? 'default'
-                    : 'destructive'
-                }
-                onClick={handleAction}
-                disabled={
-                  approveMutation.isPending || rejectMutation.isPending
-                }
-              >
-                {(approveMutation.isPending || rejectMutation.isPending) && (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                )}
-                {actionTarget?.action === 'approve' ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                    Confirmar Aprovacao
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="h-4 w-4 mr-1.5" />
-                    Confirmar Rejeicao
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </PageBody>
-    </PageLayout>
+  const initialIds = useMemo(
+    () => filteredItems.map(i => i.id),
+    [filteredItems]
+  );
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  return (
+    <CoreProvider
+      selection={{
+        namespace: 'requests',
+        initialIds,
+      }}
+    >
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Solicitações', href: '/hr/requests' },
+            ]}
+          />
+
+          <Header
+            title="Solicitações"
+            description="Gerencie solicitações dos colaboradores"
+          />
+        </PageHeader>
+
+        <PageBody>
+          <SearchBar
+            placeholder="Buscar solicitações..."
+            value={searchQuery}
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
+          {isLoading ? (
+            <GridLoading count={6} layout="grid" size="md" gap="gap-4" />
+          ) : error ? (
+            <GridError
+              type="server"
+              title="Erro ao carregar solicitações"
+              message="Ocorreu um erro ao tentar carregar as solicitações. Por favor, tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => {
+                  refetch();
+                },
+              }}
+            />
+          ) : (
+            <EntityGrid
+              config={{
+                name: 'Request',
+                namePlural: 'Requests',
+                slug: 'requests',
+                icon: ClipboardList,
+                api: {
+                  baseUrl: '/api/v1/hr/approvals',
+                  queryKey: 'hr-pending-requests',
+                  queryKeys: {
+                    list: ['hr-pending-requests'],
+                    detail: (id: string) => ['hr-pending-requests', id],
+                  },
+                  endpoints: {
+                    list: '/v1/hr/approvals/pending',
+                    get: '/v1/hr/approvals/:id',
+                  },
+                },
+                routes: {
+                  list: '/hr/requests',
+                  detail: '/hr/requests/:id',
+                },
+                permissions: {
+                  view: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                  create: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                  delete: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                },
+                display: {
+                  icon: ClipboardList,
+                  color: 'blue',
+                  gradient: 'from-blue-500 to-blue-600',
+                  titleField: 'type',
+                  labels: {
+                    singular: 'Solicitação',
+                    plural: 'Solicitações',
+                    emptyState: 'Nenhuma solicitação encontrada',
+                    searchPlaceholder: 'Buscar solicitações...',
+                  },
+                },
+                grid: {
+                  defaultView: 'grid',
+                  columns: { sm: 1, md: 2, lg: 3, xl: 4 },
+                  showViewToggle: true,
+                  enableDragSelection: false,
+                  selectable: false,
+                  searchableFields: ['type'],
+                  defaultSort: { field: 'createdAt', direction: 'desc' },
+                  pageSize: 20,
+                },
+              }}
+              items={filteredItems}
+              toolbarStart={
+                <>
+                  <FilterDropdown
+                    label="Tipo"
+                    icon={ClipboardList}
+                    options={TYPE_FILTER_OPTIONS}
+                    selected={typeFilter}
+                    onSelectionChange={setTypeFilter}
+                    activeColor="blue"
+                    searchPlaceholder="Buscar tipo..."
+                    emptyText="Nenhum tipo encontrado."
+                  />
+                  <FilterDropdown
+                    label="Status"
+                    options={STATUS_FILTER_OPTIONS}
+                    selected={statusFilter}
+                    onSelectionChange={setStatusFilter}
+                    activeColor="emerald"
+                  />
+                </>
+              }
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={isLoading}
+              isSearching={!!searchQuery}
+              onItemClick={item => handleView([item.id])}
+              onItemDoubleClick={item => handleView([item.id])}
+              showSorting={true}
+              defaultSortField="createdAt"
+              defaultSortDirection="desc"
+            />
+          )}
+
+          {/* Approve/Reject Dialog */}
+          <Dialog
+            open={!!actionTarget}
+            onOpenChange={v => {
+              if (!v) {
+                setActionTarget(null);
+                setRejectionReason('');
+              }
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {actionTarget?.action === 'approve'
+                    ? 'Aprovar Solicitação'
+                    : 'Rejeitar Solicitação'}
+                </DialogTitle>
+                <DialogDescription>
+                  {actionTarget?.action === 'approve'
+                    ? `Confirma a aprovação da solicitação de ${REQUEST_TYPE_LABELS[actionTarget?.request.type || 'SUPPORT']}?`
+                    : 'Informe o motivo da rejeição.'}
+                </DialogDescription>
+              </DialogHeader>
+
+              {actionTarget?.action === 'reject' && (
+                <div className="space-y-2 py-2">
+                  <Label>Motivo da Rejeição</Label>
+                  <Textarea
+                    value={rejectionReason}
+                    onChange={e => setRejectionReason(e.target.value)}
+                    placeholder="Descreva o motivo da rejeição..."
+                    rows={3}
+                  />
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActionTarget(null);
+                    setRejectionReason('');
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant={
+                    actionTarget?.action === 'approve'
+                      ? 'default'
+                      : 'destructive'
+                  }
+                  onClick={handleAction}
+                  disabled={
+                    approveMutation.isPending || rejectMutation.isPending
+                  }
+                >
+                  {(approveMutation.isPending || rejectMutation.isPending) && (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  )}
+                  {actionTarget?.action === 'approve' ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                      Confirmar Aprovação
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 mr-1.5" />
+                      Confirmar Rejeição
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </PageBody>
+      </PageLayout>
+    </CoreProvider>
   );
 }

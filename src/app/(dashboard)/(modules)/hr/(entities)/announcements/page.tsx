@@ -1,40 +1,29 @@
 /**
  * HR Announcements Management Page
- * Gestao de comunicados da empresa (acesso de RH)
+ * Gestão de comunicados da empresa
  */
 
 'use client';
 
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { GridError } from '@/components/handlers/grid-error';
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { SearchBar } from '@/components/layout/search-bar';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  CoreProvider,
+  EntityCard,
+  EntityContextMenu,
+  EntityGrid,
+} from '@/core';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import { portalService } from '@/services/hr';
@@ -42,21 +31,22 @@ import type {
   CompanyAnnouncement,
   AnnouncementPriority,
   CreateAnnouncementData,
-  UpdateAnnouncementData,
 } from '@/types/hr';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertTriangle,
-  Bell,
-  Edit2,
-  Info,
-  Loader2,
-  Megaphone,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { useCallback, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { AlertTriangle, Bell, Info, Megaphone, Plus } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+const CreateAnnouncementModal = dynamic(
+  () =>
+    import('./src/modals/create-announcement-modal').then(m => ({
+      default: m.CreateAnnouncementModal,
+    })),
+  { ssr: false }
+);
 
 // ============================================================================
 // CONSTANTS
@@ -64,52 +54,109 @@ import { toast } from 'sonner';
 
 const PRIORITY_CONFIG: Record<
   AnnouncementPriority,
-  { label: string; icon: React.ReactNode; badgeClass: string }
+  {
+    label: string;
+    icon: LucideIcon;
+    badgeClass: string;
+    gradient: string;
+  }
 > = {
   URGENT: {
     label: 'Urgente',
-    icon: <AlertTriangle className="h-3 w-3" />,
-    badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
+    icon: AlertTriangle,
+    badgeClass:
+      'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
+    gradient: 'from-rose-500 to-rose-600',
   },
   IMPORTANT: {
     label: 'Importante',
-    icon: <Info className="h-3 w-3" />,
-    badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+    icon: Info,
+    badgeClass:
+      'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+    gradient: 'from-amber-500 to-amber-600',
   },
   NORMAL: {
     label: 'Normal',
-    icon: <Bell className="h-3 w-3" />,
-    badgeClass: 'bg-gray-50 text-gray-700 dark:bg-white/8 dark:text-gray-300',
+    icon: Bell,
+    badgeClass:
+      'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
+    gradient: 'from-blue-500 to-blue-600',
   },
 };
 
-// ============================================================================
-// PAGE
-// ============================================================================
+const PRIORITY_FILTER_OPTIONS = [
+  { id: 'NORMAL', label: 'Normal' },
+  { id: 'IMPORTANT', label: 'Importante' },
+  { id: 'URGENT', label: 'Urgente' },
+];
 
 export default function AnnouncementsPage() {
-  const { hasPermission } = usePermissions();
+  return (
+    <Suspense
+      fallback={<GridLoading count={6} layout="grid" size="md" gap="gap-4" />}
+    >
+      <AnnouncementsPageContent />
+    </Suspense>
+  );
+}
+
+function AnnouncementsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
 
   const canCreate = hasPermission(HR_PERMISSIONS.EMPLOYEES.MANAGE);
+  const canEdit = hasPermission(HR_PERMISSIONS.EMPLOYEES.MANAGE);
   const canDelete = hasPermission(HR_PERMISSIONS.EMPLOYEES.MANAGE);
 
-  // Modal state
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<CompanyAnnouncement | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<CompanyAnnouncement | null>(null);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Form state
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [priority, setPriority] = useState<AnnouncementPriority>('NORMAL');
-  const [expiresAt, setExpiresAt] = useState('');
+  // ============================================================================
+  // URL-BASED FILTERS
+  // ============================================================================
 
-  // Query
+  const priorityFilter = useMemo(() => {
+    const raw = searchParams.get('priority');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  }, [searchParams]);
+
+  const buildFilterUrl = useCallback(
+    (params: { priority?: string[] }) => {
+      const priorities =
+        params.priority !== undefined ? params.priority : priorityFilter;
+      const parts: string[] = [];
+      if (priorities.length > 0) parts.push(`priority=${priorities.join(',')}`);
+      return parts.length > 0
+        ? `/hr/announcements?${parts.join('&')}`
+        : '/hr/announcements';
+    },
+    [priorityFilter]
+  );
+
+  const setPriorityFilter = useCallback(
+    (ids: string[]) => {
+      router.push(buildFilterUrl({ priority: ids }));
+    },
+    [router, buildFilterUrl]
+  );
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
   const {
     data: announcementsData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['hr-announcements'],
     queryFn: async () => {
@@ -118,330 +165,380 @@ export default function AnnouncementsPage() {
     },
   });
 
-  // Mutations
+  // ============================================================================
+  // MUTATIONS
+  // ============================================================================
+
   const createMutation = useMutation({
     mutationFn: (data: CreateAnnouncementData) =>
       portalService.createAnnouncement(data),
     onSuccess: () => {
       toast.success('Comunicado criado com sucesso');
       queryClient.invalidateQueries({ queryKey: ['hr-announcements'] });
-      handleCloseForm();
     },
     onError: () => {
       toast.error('Erro ao criar comunicado');
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateAnnouncementData;
-    }) => portalService.updateAnnouncement(id, data),
-    onSuccess: () => {
-      toast.success('Comunicado atualizado');
-      queryClient.invalidateQueries({ queryKey: ['hr-announcements'] });
-      handleCloseForm();
-    },
-    onError: () => {
-      toast.error('Erro ao atualizar comunicado');
-    },
-  });
-
   const deleteMutation = useMutation({
     mutationFn: (id: string) => portalService.deleteAnnouncement(id),
     onSuccess: () => {
-      toast.success('Comunicado removido');
+      toast.success('Comunicado excluído com sucesso');
       queryClient.invalidateQueries({ queryKey: ['hr-announcements'] });
-      setDeleteTarget(null);
     },
     onError: () => {
-      toast.error('Erro ao remover comunicado');
+      toast.error('Erro ao excluir comunicado');
     },
   });
 
-  const handleCloseForm = useCallback(() => {
-    setIsCreateOpen(false);
-    setEditingAnnouncement(null);
-    setTitle('');
-    setContent('');
-    setPriority('NORMAL');
-    setExpiresAt('');
-  }, []);
+  // ============================================================================
+  // FILTERED ITEMS
+  // ============================================================================
 
-  const handleEdit = useCallback((announcement: CompanyAnnouncement) => {
-    setEditingAnnouncement(announcement);
-    setTitle(announcement.title);
-    setContent(announcement.content);
-    setPriority(announcement.priority);
-    setExpiresAt(announcement.expiresAt ? announcement.expiresAt.split('T')[0] : '');
-    setIsCreateOpen(true);
-  }, []);
+  const filteredItems = useMemo(() => {
+    let items = announcementsData || [];
 
-  const handleSubmit = useCallback(() => {
-    if (!title.trim() || !content.trim()) {
-      toast.error('Titulo e conteudo sao obrigatorios');
-      return;
+    // Search filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          item.title.toLowerCase().includes(q) ||
+          item.content.toLowerCase().includes(q) ||
+          (item.authorEmployee?.fullName &&
+            item.authorEmployee.fullName.toLowerCase().includes(q))
+      );
     }
 
-    if (editingAnnouncement) {
-      updateMutation.mutate({
-        id: editingAnnouncement.id,
-        data: {
-          title: title.trim(),
-          content: content.trim(),
-          priority,
-          expiresAt: expiresAt || null,
-        },
-      });
-    } else {
-      createMutation.mutate({
-        title: title.trim(),
-        content: content.trim(),
-        priority,
-        expiresAt: expiresAt || undefined,
+    // Priority filter
+    if (priorityFilter.length > 0) {
+      const set = new Set(priorityFilter);
+      items = items.filter(item => set.has(item.priority));
+    }
+
+    return items;
+  }, [announcementsData, searchQuery, priorityFilter]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleView = (ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/hr/announcements/${ids[0]}`);
+    }
+  };
+
+  const handleEdit = (ids: string[]) => {
+    if (ids.length === 1) {
+      router.push(`/hr/announcements/${ids[0]}/edit`);
+    }
+  };
+
+  const handleDelete = (ids: string[]) => {
+    setDeleteTargetIds(ids);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    for (const id of deleteTargetIds) {
+      await deleteMutation.mutateAsync(id);
+    }
+    setIsDeleteOpen(false);
+    setDeleteTargetIds([]);
+  };
+
+  // ============================================================================
+  // RENDER CARDS
+  // ============================================================================
+
+  const renderGridCard = (item: CompanyAnnouncement, isSelected: boolean) => {
+    const config = PRIORITY_CONFIG[item.priority];
+    const PriorityIcon = config.icon;
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleView}
+        onEdit={canEdit ? handleEdit : undefined}
+        onDelete={canDelete ? handleDelete : undefined}
+      >
+        <EntityCard
+          id={item.id}
+          variant="grid"
+          title={item.title}
+          subtitle={
+            item.content.length > 80
+              ? `${item.content.substring(0, 80)}...`
+              : item.content
+          }
+          icon={Megaphone}
+          iconBgColor={`bg-linear-to-br ${config.gradient}`}
+          badges={[
+            {
+              label: config.label,
+              variant: 'outline',
+            },
+            ...(item.isActive
+              ? []
+              : [
+                  {
+                    label: 'Inativo' as string,
+                    variant: 'secondary' as const,
+                  },
+                ]),
+          ]}
+          footer={{
+            type: 'single' as const,
+            button: {
+              icon: Megaphone,
+              label: `Publicado em ${new Date(item.publishedAt).toLocaleDateString('pt-BR')}`,
+              color: 'violet',
+            },
+          }}
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          showStatusBadges={false}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  const renderListCard = (item: CompanyAnnouncement, isSelected: boolean) => {
+    const config = PRIORITY_CONFIG[item.priority];
+    const PriorityIcon = config.icon;
+
+    return (
+      <EntityContextMenu
+        itemId={item.id}
+        onView={handleView}
+        onEdit={canEdit ? handleEdit : undefined}
+        onDelete={canDelete ? handleDelete : undefined}
+      >
+        <EntityCard
+          id={item.id}
+          variant="list"
+          title={item.title}
+          subtitle={
+            item.content.length > 120
+              ? `${item.content.substring(0, 120)}...`
+              : item.content
+          }
+          icon={Megaphone}
+          iconBgColor={`bg-linear-to-br ${config.gradient}`}
+          badges={[
+            {
+              label: config.label,
+              variant: 'outline',
+            },
+            ...(item.isActive
+              ? []
+              : [
+                  {
+                    label: 'Inativo' as string,
+                    variant: 'secondary' as const,
+                  },
+                ]),
+          ]}
+          footer={{
+            type: 'single' as const,
+            button: {
+              icon: Megaphone,
+              label: `Publicado em ${new Date(item.publishedAt).toLocaleDateString('pt-BR')}`,
+              color: 'violet',
+            },
+          }}
+          isSelected={isSelected}
+          showSelection={false}
+          clickable={false}
+          createdAt={item.createdAt}
+          showStatusBadges={false}
+        />
+      </EntityContextMenu>
+    );
+  };
+
+  // ============================================================================
+  // HEADER BUTTONS
+  // ============================================================================
+
+  const initialIds = useMemo(
+    () => filteredItems.map(i => i.id),
+    [filteredItems]
+  );
+
+  const actionButtons = useMemo<HeaderButton[]>(() => {
+    const buttons: HeaderButton[] = [];
+    if (canCreate) {
+      buttons.push({
+        id: 'create-announcement',
+        title: 'Novo Comunicado',
+        icon: Plus,
+        onClick: () => setIsCreateOpen(true),
+        variant: 'default',
       });
     }
-  }, [title, content, priority, expiresAt, editingAnnouncement, createMutation, updateMutation]);
+    return buttons;
+  }, [canCreate]);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <PageLayout>
-      <PageHeader>
-        <PageActionBar
-          breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
-            { label: 'Comunicados' },
-          ]}
-        />
-      </PageHeader>
+    <CoreProvider
+      selection={{
+        namespace: 'announcements',
+        initialIds,
+      }}
+    >
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'RH', href: '/hr' },
+              { label: 'Comunicados', href: '/hr/announcements' },
+            ]}
+            buttons={actionButtons}
+          />
 
-      <PageBody>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-bold">Comunicados</h2>
-            <p className="text-sm text-muted-foreground">
-              Gerencie comunicados e avisos para os colaboradores
-            </p>
-          </div>
-          {canCreate && (
-            <Button
-              size="sm"
-              className="h-9 px-2.5"
-              onClick={() => setIsCreateOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Novo Comunicado
-            </Button>
+          <Header
+            title="Comunicados"
+            description="Gerencie comunicados e avisos para os colaboradores"
+          />
+        </PageHeader>
+
+        <PageBody>
+          <SearchBar
+            placeholder="Buscar comunicados..."
+            value={searchQuery}
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
+          {isLoading ? (
+            <GridLoading count={6} layout="grid" size="md" gap="gap-4" />
+          ) : error ? (
+            <GridError
+              type="server"
+              title="Erro ao carregar comunicados"
+              message="Ocorreu um erro ao tentar carregar os comunicados. Por favor, tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => {
+                  refetch();
+                },
+              }}
+            />
+          ) : (
+            <EntityGrid
+              config={{
+                name: 'Announcement',
+                namePlural: 'Announcements',
+                slug: 'announcements',
+                icon: Megaphone,
+                api: {
+                  baseUrl: '/api/v1/hr/announcements',
+                  queryKey: 'hr-announcements',
+                  queryKeys: {
+                    list: ['hr-announcements'],
+                    detail: (id: string) => ['hr-announcements', id],
+                  },
+                  endpoints: {
+                    list: '/v1/hr/announcements',
+                    get: '/v1/hr/announcements/:id',
+                    create: '/v1/hr/announcements',
+                    update: '/v1/hr/announcements/:id',
+                    delete: '/v1/hr/announcements/:id',
+                  },
+                },
+                routes: {
+                  list: '/hr/announcements',
+                  detail: '/hr/announcements/:id',
+                  edit: '/hr/announcements/:id/edit',
+                },
+                permissions: {
+                  view: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                  create: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                  update: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                  delete: HR_PERMISSIONS.EMPLOYEES.MANAGE,
+                },
+                display: {
+                  icon: Megaphone,
+                  color: 'violet',
+                  gradient: 'from-violet-500 to-violet-600',
+                  titleField: 'title',
+                  labels: {
+                    singular: 'Comunicado',
+                    plural: 'Comunicados',
+                    emptyState: 'Nenhum comunicado encontrado',
+                    searchPlaceholder: 'Buscar comunicados...',
+                  },
+                },
+                grid: {
+                  defaultView: 'grid',
+                  columns: { sm: 1, md: 2, lg: 3, xl: 4 },
+                  showViewToggle: true,
+                  enableDragSelection: true,
+                  selectable: true,
+                  searchableFields: ['title', 'content'],
+                  defaultSort: { field: 'createdAt', direction: 'desc' },
+                  pageSize: 20,
+                },
+              }}
+              items={filteredItems}
+              toolbarStart={
+                <FilterDropdown
+                  label="Prioridade"
+                  icon={AlertTriangle}
+                  options={PRIORITY_FILTER_OPTIONS}
+                  selected={priorityFilter}
+                  onSelectionChange={setPriorityFilter}
+                  activeColor="violet"
+                  searchPlaceholder="Buscar prioridade..."
+                  emptyText="Nenhuma prioridade encontrada."
+                />
+              }
+              renderGridItem={renderGridCard}
+              renderListItem={renderListCard}
+              isLoading={isLoading}
+              isSearching={!!searchQuery}
+              onItemClick={item => handleView([item.id])}
+              onItemDoubleClick={item => handleView([item.id])}
+              showSorting={true}
+              defaultSortField="createdAt"
+              defaultSortDirection="desc"
+            />
           )}
-        </div>
 
-        {/* Content */}
-        {isLoading ? (
-          <GridLoading count={4} layout="list" size="md" />
-        ) : error ? (
-          <GridError message="Erro ao carregar comunicados" />
-        ) : !announcementsData || announcementsData.length === 0 ? (
-          <Card className="p-12 text-center bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <Megaphone className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-            <p className="text-lg font-medium mb-1">Nenhum comunicado</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Crie o primeiro comunicado para os colaboradores
-            </p>
-            {canCreate && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsCreateOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Criar Comunicado
-              </Button>
-            )}
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {announcementsData.map((announcement: CompanyAnnouncement) => {
-              const config = PRIORITY_CONFIG[announcement.priority];
-              return (
-                <Card
-                  key={announcement.id}
-                  className="p-4 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h4 className="font-semibold text-sm">
-                          {announcement.title}
-                        </h4>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs border-0 gap-1 ${config.badgeClass}`}
-                        >
-                          {config.icon}
-                          {config.label}
-                        </Badge>
-                        {!announcement.isActive && (
-                          <Badge variant="secondary" className="text-xs">
-                            Inativo
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                        {announcement.content}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span>
-                          Publicado em{' '}
-                          {new Date(announcement.publishedAt).toLocaleDateString(
-                            'pt-BR'
-                          )}
-                        </span>
-                        {announcement.expiresAt && (
-                          <span>
-                            Expira em{' '}
-                            {new Date(
-                              announcement.expiresAt
-                            ).toLocaleDateString('pt-BR')}
-                          </span>
-                        )}
-                        {announcement.authorEmployee && (
-                          <span>
-                            por {announcement.authorEmployee.fullName}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      {canCreate && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleEdit(announcement)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {canDelete && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-                          onClick={() => setDeleteTarget(announcement)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+          {/* Create Modal */}
+          <CreateAnnouncementModal
+            isOpen={isCreateOpen}
+            onClose={() => setIsCreateOpen(false)}
+            isSubmitting={createMutation.isPending}
+            onSubmit={async data => {
+              await createMutation.mutateAsync(data);
+            }}
+          />
 
-        {/* Create/Edit Dialog */}
-        <Dialog open={isCreateOpen} onOpenChange={v => !v && handleCloseForm()}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>
-                {editingAnnouncement
-                  ? 'Editar Comunicado'
-                  : 'Novo Comunicado'}
-              </DialogTitle>
-              <DialogDescription>
-                {editingAnnouncement
-                  ? 'Atualize as informacoes do comunicado'
-                  : 'Crie um comunicado para os colaboradores'}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label>Titulo</Label>
-                <Input
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  placeholder="Titulo do comunicado"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Conteudo</Label>
-                <Textarea
-                  value={content}
-                  onChange={e => setContent(e.target.value)}
-                  placeholder="Conteudo do comunicado..."
-                  rows={5}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Prioridade</Label>
-                  <Select
-                    value={priority}
-                    onValueChange={v =>
-                      setPriority(v as AnnouncementPriority)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NORMAL">Normal</SelectItem>
-                      <SelectItem value="IMPORTANT">Importante</SelectItem>
-                      <SelectItem value="URGENT">Urgente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Data de Expiracao</Label>
-                  <Input
-                    type="date"
-                    value={expiresAt}
-                    onChange={e => setExpiresAt(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={handleCloseForm}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  createMutation.isPending || updateMutation.isPending
-                }
-              >
-                {(createMutation.isPending || updateMutation.isPending) && (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                )}
-                {editingAnnouncement ? 'Salvar' : 'Publicar'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Confirmation */}
-        <VerifyActionPinModal
-          isOpen={!!deleteTarget}
-          onClose={() => setDeleteTarget(null)}
-          onSuccess={() => {
-            if (deleteTarget) {
-              deleteMutation.mutate(deleteTarget.id);
-            }
-          }}
-          title="Confirmar Exclusao"
-          description={`Digite seu PIN de acao para excluir o comunicado "${deleteTarget?.title}".`}
-        />
-      </PageBody>
-    </PageLayout>
+          {/* Delete Confirmation */}
+          <VerifyActionPinModal
+            isOpen={isDeleteOpen}
+            onClose={() => {
+              setIsDeleteOpen(false);
+              setDeleteTargetIds([]);
+            }}
+            onSuccess={handleDeleteConfirm}
+            title="Excluir Comunicado"
+            description={`Digite seu PIN de ação para excluir ${deleteTargetIds.length} comunicado(s). Esta ação não pode ser desfeita.`}
+          />
+        </PageBody>
+      </PageLayout>
+    </CoreProvider>
   );
 }
