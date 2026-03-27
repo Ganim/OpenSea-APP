@@ -48,6 +48,7 @@ import {
   Fingerprint,
   Key,
   KeyRound,
+  Link2,
   Lock,
   Plus,
   Search,
@@ -60,6 +61,7 @@ import { PiUserDuotone } from 'react-icons/pi';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { AuthLinksTab } from './_components/auth-links-tab';
 
 export default function UserDetailPage() {
   const params = useParams();
@@ -387,7 +389,7 @@ export default function UserDetailPage() {
       <PageBody>
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-10 mb-4">
+          <TabsList className="grid w-full grid-cols-4 h-10 mb-4">
             <TabsTrigger value="info" className="flex items-center gap-2">
               <PiUserDuotone className="h-4 w-4" />
               Informações
@@ -395,6 +397,10 @@ export default function UserDetailPage() {
             <TabsTrigger value="groups" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Grupos ({userGroups.length})
+            </TabsTrigger>
+            <TabsTrigger value="auth-links" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Métodos de Login
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Lock className="h-4 w-4" />
@@ -547,6 +553,11 @@ export default function UserDetailPage() {
                 </div>
               )}
             </Card>
+          </TabsContent>
+
+          {/* Auth Links Tab */}
+          <TabsContent value="auth-links" className="flex flex-col space-y-4">
+            <AuthLinksTab userId={userId} username={user.username} />
           </TabsContent>
 
           {/* Security Tab */}
