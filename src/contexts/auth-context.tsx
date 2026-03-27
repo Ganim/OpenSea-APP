@@ -125,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/register',
     '/reset-password',
     '/setup-pins',
+    '/magic-link',
     '/',
     '/select-tenant',
   ];
@@ -229,8 +230,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<LoginResult> => {
+      const loginIdentifier = credentials.identifier || credentials.email;
       try {
-        logger.debug('🔐 Iniciando login...', { email: credentials.email });
+        logger.debug('🔐 Iniciando login...', { identifier: loginIdentifier });
         const response = await loginMutation.mutateAsync(credentials);
         logger.info('✅ Login bem-sucedido', { userId: response.user?.id });
 
@@ -268,7 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const u = userResult.data.user;
           saveAccount({
             id: u.id,
-            identifier: credentials.email, // Salva o que o usuário digitou (email ou username)
+            identifier: loginIdentifier, // Salva o que o usuário digitou (email, CPF, matrícula, etc.)
             displayName: u.profile?.name
               ? `${u.profile.name}${u.profile.surname ? ` ${u.profile.surname}` : ''}`
               : u.username,
@@ -322,7 +324,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         logger.error('Erro no login', error as Error, {
           action: 'login',
-          email: credentials.email,
+          identifier: loginIdentifier,
         });
         throw error;
       }
