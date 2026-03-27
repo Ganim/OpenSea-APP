@@ -16,6 +16,20 @@ const FORM_KEYS = {
   submissions: (formId: string) => ['forms', 'submissions', formId] as const,
 } as const;
 
+/** Simple paginated list (page 1, large limit) for dropdowns */
+export function useForms(filters?: FormsFilters) {
+  return useQuery({
+    queryKey: [...FORM_KEYS.all, 'simple', filters],
+    queryFn: () =>
+      formsService.list({
+        ...filters,
+        page: 1,
+        limit: 100,
+      }),
+    staleTime: 60_000,
+  });
+}
+
 export function useFormsInfinite(filters?: FormsFilters, limit = 20) {
   return useInfiniteQuery({
     queryKey: FORM_KEYS.list(filters),

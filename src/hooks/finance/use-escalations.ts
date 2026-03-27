@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 const QUERY_KEYS = {
   ESCALATIONS: ['escalations'],
   ESCALATION: (id: string) => ['escalations', id],
+  ESCALATION_TIMELINE: (entryId: string) => ['escalation-timeline', entryId],
 } as const;
 
 export { QUERY_KEYS as escalationKeys };
@@ -51,13 +52,8 @@ export function useCreateEscalation() {
 export function useUpdateEscalation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateEscalationRequest;
-    }) => escalationService.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateEscalationRequest }) =>
+      escalationService.update(id, data),
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.ESCALATIONS,
@@ -102,5 +98,17 @@ export function useToggleEscalationActive() {
         queryKey: QUERY_KEYS.ESCALATIONS,
       });
     },
+  });
+}
+
+// =============================================================================
+// TIMELINE HOOK
+// =============================================================================
+
+export function useEscalationTimeline(entryId: string, enabled = true) {
+  return useQuery({
+    queryKey: QUERY_KEYS.ESCALATION_TIMELINE(entryId),
+    queryFn: () => escalationService.getTimeline(entryId),
+    enabled: !!entryId && enabled,
   });
 }

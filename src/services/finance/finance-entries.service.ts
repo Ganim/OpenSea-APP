@@ -32,6 +32,8 @@ import type {
   CheckDuplicateResponse,
   SupplierSummaryParams,
   SupplierSummaryResponse,
+  SplitPaymentData,
+  SplitPaymentResponse,
 } from '@/types/finance';
 export interface FinanceEntriesResponse {
   entries: FinanceEntry[];
@@ -159,6 +161,13 @@ export const financeEntriesService = {
   async createBatch(data: BatchCreateRequest): Promise<BatchCreateResponse> {
     return apiClient.post<BatchCreateResponse>(
       API_ENDPOINTS.FINANCE_ENTRIES.CREATE_BATCH,
+      data
+    );
+  },
+
+  async splitPayment(data: SplitPaymentData): Promise<SplitPaymentResponse> {
+    return apiClient.post<SplitPaymentResponse>(
+      API_ENDPOINTS.FINANCE_ENTRIES.SPLIT_PAYMENT,
       data
     );
   },

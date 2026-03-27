@@ -26,6 +26,7 @@ import {
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { BoletoModal } from '@/components/finance/boleto-modal';
 import { EmitNfeModal } from '@/components/finance/emit-nfe-modal';
+import { EscalationTimeline } from '@/components/finance/escalation-timeline';
 import { TaxRetentionPanel } from '@/components/finance/tax-retention-panel';
 import { PixChargeModal } from '@/components/finance/pix-charge-modal';
 import { CustomerScoreBadge } from '@/components/finance/customer-score-badge';
@@ -756,6 +757,9 @@ export default function ReceivableDetailPage({
 
       {/* Tax Retentions */}
       <TaxRetentionPanel entryId={id} grossAmount={entry.expectedAmount} />
+
+      {/* Escalation Timeline (only when overdue) */}
+      <EscalationTimeline entryId={id} isOverdue={entry.status === 'OVERDUE'} />
 
       {/* Payment History */}
       <Card>

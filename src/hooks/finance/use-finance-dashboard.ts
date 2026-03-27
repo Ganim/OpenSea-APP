@@ -7,6 +7,7 @@ const QUERY_KEYS = {
   FORECAST: ['finance-forecast'],
   CASHFLOW: ['finance-cashflow'],
   PREDICTIVE_CASHFLOW: ['finance-predictive-cashflow'],
+  CASHFLOW_ACCURACY: ['finance-cashflow-accuracy'],
 } as const;
 
 export function useFinanceDashboard() {
@@ -42,6 +43,23 @@ export function usePredictiveCashflow(months: number = 3) {
     queryKey: [...QUERY_KEYS.PREDICTIVE_CASHFLOW, months],
     queryFn: () => financeDashboardService.getPredictiveCashflow(months),
     staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+export function useCashflowAccuracy(params: {
+  startDate: string;
+  endDate: string;
+  enabled?: boolean;
+}) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.CASHFLOW_ACCURACY, params.startDate, params.endDate],
+    queryFn: () =>
+      financeDashboardService.getCashflowAccuracy({
+        startDate: params.startDate,
+        endDate: params.endDate,
+      }),
+    enabled: (params.enabled ?? true) && !!params.startDate && !!params.endDate,
+    staleTime: 60 * 1000,
   });
 }
 

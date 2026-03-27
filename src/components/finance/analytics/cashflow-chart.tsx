@@ -1,7 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,22 +23,30 @@ import {
 } from '@/components/ui/chart';
 import {
   ComposedChart,
+  Bar,
   Line,
   CartesianGrid,
   XAxis,
   YAxis,
   ReferenceLine,
 } from 'recharts';
+import type { CashflowAccuracyDataPoint } from '@/types/finance';
 
 interface CashflowChartProps {
   realizedData?: { date: string; cumulativeBalance: number }[];
   projectedData?: { date: string; cumulativeNet: number }[];
+  accuracyData?: {
+    accuracy: number;
+    dataPoints: CashflowAccuracyDataPoint[];
+    periodCount: number;
+  };
   isLoading: boolean;
+  isAccuracyLoading?: boolean;
   groupBy: 'day' | 'week' | 'month';
   onGroupByChange: (value: 'day' | 'week' | 'month') => void;
 }
 
-const chartConfig: ChartConfig = {
+const BASE_CHART_CONFIG: ChartConfig = {
   realized: {
     label: 'Realizado',
     color: 'hsl(217, 91%, 60%)',
@@ -45,6 +57,26 @@ const chartConfig: ChartConfig = {
   },
 };
 
+const EXTENDED_CHART_CONFIG: ChartConfig = {
+  ...BASE_CHART_CONFIG,
+  predictedInflow: {
+    label: 'Entrada Projetada',
+    color: 'hsl(152, 69%, 55%)',
+  },
+  predictedOutflow: {
+    label: 'Saída Projetada',
+    color: 'hsl(350, 80%, 65%)',
+  },
+  actualInflow: {
+    label: 'Entrada Realizada',
+    color: 'hsl(152, 69%, 40%)',
+  },
+  actualOutflow: {
+    label: 'Saída Realizada',
+    color: 'hsl(350, 80%, 50%)',
+  },
+};
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -52,13 +84,33 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function getAccuracyVariant(
+  accuracy: number,
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  if (accuracy >= 80) return 'default';
+  if (accuracy >= 50) return 'secondary';
+  return 'destructive';
+}
+
+function getAccuracyColorClass(accuracy: number): string {
+  if (accuracy >= 80)
+    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20';
+  if (accuracy >= 50)
+    return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-200 dark:border-amber-500/20';
+  return 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-200 dark:border-rose-500/20';
+}
+
 export function CashflowChart({
   realizedData,
   projectedData,
+  accuracyData,
   isLoading,
+  isAccuracyLoading,
   groupBy,
   onGroupByChange,
 }: CashflowChartProps) {
+  const [showProjectedComparison, setShowProjectedComparison] = useState(false);
+
   if (isLoading) {
     return (
       <Card>
@@ -72,12 +124,17 @@ export function CashflowChart({
     );
   }
 
+  const showComparisonBars =
+    showProjectedComparison &&
+    accuracyData &&
+    accuracyData.dataPoints.length > 0;
+
+  const chartConfig = showComparisonBars
+    ? EXTENDED_CHART_CONFIG
+    : BASE_CHART_CONFIG;
+
   // Merge realized and projected data into a combined dataset
-  const combinedData: {
-    date: string;
-    realized?: number;
-    projected?: number;
-  }[] = [];
+  const combinedData: Record<string, unknown>[] = [];
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -92,7 +149,9 @@ export function CashflowChart({
 
   if (projectedData) {
     for (const point of projectedData) {
-      const existing = combinedData.find(d => d.date === point.date);
+      const existing = combinedData.find(
+        (dataPoint) => dataPoint.date === point.date,
+      );
       if (existing) {
         existing.projected = point.cumulativeNet;
       } else {
@@ -104,7 +163,32 @@ export function CashflowChart({
     }
   }
 
-  combinedData.sort((a, b) => a.date.localeCompare(b.date));
+  // Merge accuracy data (predicted bars) if toggle is on
+  if (showComparisonBars) {
+    for (const accuracyPoint of accuracyData.dataPoints) {
+      const existing = combinedData.find(
+        (dataPoint) => dataPoint.date === accuracyPoint.date,
+      );
+      if (existing) {
+        existing.predictedInflow = accuracyPoint.predictedInflow;
+        existing.predictedOutflow = accuracyPoint.predictedOutflow;
+        existing.actualInflow = accuracyPoint.actualInflow;
+        existing.actualOutflow = accuracyPoint.actualOutflow;
+      } else {
+        combinedData.push({
+          date: accuracyPoint.date,
+          predictedInflow: accuracyPoint.predictedInflow,
+          predictedOutflow: accuracyPoint.predictedOutflow,
+          actualInflow: accuracyPoint.actualInflow,
+          actualOutflow: accuracyPoint.actualOutflow,
+        });
+      }
+    }
+  }
+
+  combinedData.sort((a, b) =>
+    String(a.date).localeCompare(String(b.date)),
+  );
 
   if (combinedData.length === 0) {
     return (
@@ -115,7 +199,7 @@ export function CashflowChart({
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">
-            Nenhum dado disponivel para o periodo
+            Nenhum dado disponível para o período
           </p>
         </CardContent>
       </Card>
@@ -124,12 +208,40 @@ export function CashflowChart({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Fluxo de Caixa</CardTitle>
-        <GroupBySelector value={groupBy} onChange={onGroupByChange} />
+      <CardHeader className="flex flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <CardTitle>Fluxo de Caixa</CardTitle>
+          {showProjectedComparison && accuracyData && !isAccuracyLoading && (
+            <Badge
+              variant={getAccuracyVariant(accuracyData.accuracy)}
+              className={getAccuracyColorClass(accuracyData.accuracy)}
+            >
+              Precisão: {accuracyData.accuracy.toFixed(0)}%
+            </Badge>
+          )}
+          {showProjectedComparison && isAccuracyLoading && (
+            <Skeleton className="h-5 w-24" />
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-projected"
+              checked={showProjectedComparison}
+              onCheckedChange={setShowProjectedComparison}
+            />
+            <Label htmlFor="show-projected" className="text-sm whitespace-nowrap">
+              Mostrar Projetado
+            </Label>
+          </div>
+          <GroupBySelector value={groupBy} onChange={onGroupByChange} />
+        </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="h-[300px] w-full"
+        >
           <ComposedChart data={combinedData} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -162,6 +274,41 @@ export function CashflowChart({
               strokeDasharray="3 3"
               label="Hoje"
             />
+
+            {/* Predicted bars (semi-transparent, behind actual) */}
+            {showComparisonBars && (
+              <>
+                <Bar
+                  dataKey="predictedInflow"
+                  fill="var(--color-predictedInflow)"
+                  opacity={0.35}
+                  radius={[4, 4, 0, 0]}
+                  barSize={12}
+                />
+                <Bar
+                  dataKey="predictedOutflow"
+                  fill="var(--color-predictedOutflow)"
+                  opacity={0.35}
+                  radius={[4, 4, 0, 0]}
+                  barSize={12}
+                />
+                <Bar
+                  dataKey="actualInflow"
+                  fill="var(--color-actualInflow)"
+                  opacity={0.85}
+                  radius={[4, 4, 0, 0]}
+                  barSize={8}
+                />
+                <Bar
+                  dataKey="actualOutflow"
+                  fill="var(--color-actualOutflow)"
+                  opacity={0.85}
+                  radius={[4, 4, 0, 0]}
+                  barSize={8}
+                />
+              </>
+            )}
+
             <Line
               type="monotone"
               dataKey="realized"
@@ -204,7 +351,7 @@ function GroupBySelector({
       <SelectContent>
         <SelectItem value="day">Dia</SelectItem>
         <SelectItem value="week">Semana</SelectItem>
-        <SelectItem value="month">Mes</SelectItem>
+        <SelectItem value="month">Mês</SelectItem>
       </SelectContent>
     </Select>
   );

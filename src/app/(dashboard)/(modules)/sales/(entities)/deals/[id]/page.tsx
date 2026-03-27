@@ -47,7 +47,12 @@ import {
   Trophy,
   XCircle,
   Target,
+  Brain,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
+import { useDealPrediction } from '@/hooks/sales/use-predictions';
 import type {
   Deal,
   DealStatus,
@@ -56,6 +61,7 @@ import type {
   Activity,
 } from '@/types/sales';
 import { DEAL_STATUS_LABELS, ACTIVITY_TYPE_LABELS } from '@/types/sales';
+import type { DealPrediction } from '@/services/sales/predictions.service';
 
 /* ──────────────────────────────────────────────────────────
    Status styles
@@ -121,6 +127,11 @@ function DealDetailContent() {
   });
 
   const createActivity = useCreateActivity();
+
+  // AI Prediction
+  const { data: predictionData, isLoading: predictionLoading } =
+    useDealPrediction(dealId);
+  const prediction = predictionData?.prediction;
 
   // Pipeline stages sorted
   const stages = useMemo(
@@ -359,6 +370,131 @@ function DealDetailContent() {
               );
             })}
           </div>
+        </Card>
+      )}
+
+      {/* AI Prediction Section */}
+      {(prediction || predictionLoading) && (
+        <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="h-5 w-5 text-violet-500" />
+            <h2 className="text-base font-semibold">Previsão IA</h2>
+          </div>
+
+          {predictionLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Skeleton className="h-20 rounded-lg" />
+              <Skeleton className="h-20 rounded-lg" />
+              <Skeleton className="h-20 rounded-lg" />
+            </div>
+          ) : prediction ? (
+            <div className="space-y-4">
+              {/* Prediction metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Probability */}
+                <div className="border border-border rounded-lg p-4 text-center">
+                  <div
+                    className={cn(
+                      'text-3xl font-bold',
+                      prediction.probability >= 70
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : prediction.probability >= 40
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {prediction.probability}%
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Probabilidade de Fechamento
+                  </div>
+                </div>
+
+                {/* Estimated Close Date */}
+                <div className="border border-border rounded-lg p-4 text-center">
+                  <div className="text-lg font-bold">
+                    {new Date(
+                      prediction.estimatedCloseDate
+                    ).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Previsão de Fechamento
+                  </div>
+                </div>
+
+                {/* Confidence */}
+                <div className="border border-border rounded-lg p-4 text-center">
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      'text-sm px-3 py-1',
+                      prediction.confidence === 'HIGH'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300'
+                        : prediction.confidence === 'MEDIUM'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300'
+                          : 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300'
+                    )}
+                  >
+                    {prediction.confidence === 'HIGH'
+                      ? 'Alta'
+                      : prediction.confidence === 'MEDIUM'
+                        ? 'Média'
+                        : 'Baixa'}
+                  </Badge>
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Confiança da Previsão
+                  </div>
+                </div>
+              </div>
+
+              {/* Factors */}
+              {prediction.factors && prediction.factors.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground">
+                    Fatores de Influência
+                  </h3>
+                  <div className="space-y-1.5">
+                    {prediction.factors.map((factor, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        {factor.impact === 'POSITIVE' ? (
+                          <TrendingUp className="h-4 w-4 text-emerald-500 shrink-0" />
+                        ) : factor.impact === 'NEGATIVE' ? (
+                          <TrendingDown className="h-4 w-4 text-rose-500 shrink-0" />
+                        ) : (
+                          <Minus className="h-4 w-4 text-slate-400 shrink-0" />
+                        )}
+                        <span className="font-medium">{factor.name}:</span>
+                        <span className="text-muted-foreground">
+                          {factor.description}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-[10px] text-muted-foreground">
+                Gerado em{' '}
+                {new Date(prediction.generatedAt).toLocaleDateString(
+                  'pt-BR',
+                  {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }
+                )}
+              </p>
+            </div>
+          ) : null}
         </Card>
       )}
 

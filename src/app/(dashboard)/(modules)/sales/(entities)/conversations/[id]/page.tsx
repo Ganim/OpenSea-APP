@@ -24,8 +24,15 @@ import {
 } from '@/hooks/sales/use-conversations';
 import { usePermissions } from '@/hooks/use-permissions';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
-import type { Conversation, ConversationMessage } from '@/types/sales';
-import { CONVERSATION_STATUS_LABELS } from '@/types/sales';
+import type {
+  Conversation,
+  ConversationMessage,
+  MessageSentiment,
+} from '@/types/sales';
+import {
+  CONVERSATION_STATUS_LABELS,
+  MESSAGE_SENTIMENT_LABELS,
+} from '@/types/sales';
 import {
   Archive,
   Calendar,
@@ -245,6 +252,29 @@ export default function ConversationDetailPage() {
                   </h1>
                 </div>
                 <div className="hidden sm:flex items-center gap-3 shrink-0">
+                  {/* Overall Sentiment Badge */}
+                  {conversation.overallSentiment && (
+                    <div
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${
+                        conversation.overallSentiment === 'POSITIVE'
+                          ? 'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300'
+                          : conversation.overallSentiment === 'NEGATIVE'
+                            ? 'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300'
+                            : 'border-gray-300 dark:border-white/[0.1] bg-gray-100 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400'
+                      }`}
+                    >
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          conversation.overallSentiment === 'POSITIVE'
+                            ? 'bg-emerald-500'
+                            : conversation.overallSentiment === 'NEGATIVE'
+                              ? 'bg-rose-500'
+                              : 'bg-gray-400'
+                        }`}
+                      />
+                      {MESSAGE_SENTIMENT_LABELS[conversation.overallSentiment]}
+                    </div>
+                  )}
                   <div
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border ${getStatusColor()}`}
                   >
@@ -282,29 +312,56 @@ export default function ConversationDetailPage() {
                       }
                     );
 
+                    const sentimentColor =
+                      msg.sentiment === 'POSITIVE'
+                        ? 'bg-emerald-500'
+                        : msg.sentiment === 'NEGATIVE'
+                          ? 'bg-rose-500'
+                          : 'bg-gray-400';
+
                     return (
                       <div
                         key={msg.id}
                         className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div
-                          className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                            isAgent
-                              ? 'bg-sky-500 text-white rounded-br-md'
-                              : 'bg-gray-100 dark:bg-slate-800 text-foreground rounded-bl-md'
-                          }`}
-                        >
-                          <p className="text-xs font-medium opacity-70 mb-0.5">
-                            {msg.senderName}
-                          </p>
-                          <p className="text-sm whitespace-pre-wrap">
-                            {msg.content}
-                          </p>
-                          <p
-                            className={`text-[10px] mt-1 ${isAgent ? 'text-white/60' : 'text-muted-foreground'}`}
+                        <div className="flex items-start gap-1.5">
+                          {/* Sentiment dot (left side for non-agent) */}
+                          {!isAgent && msg.sentiment && (
+                            <div
+                              className={`h-2.5 w-2.5 rounded-full mt-3 shrink-0 ${sentimentColor}`}
+                              title={
+                                MESSAGE_SENTIMENT_LABELS[msg.sentiment]
+                              }
+                            />
+                          )}
+                          <div
+                            className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                              isAgent
+                                ? 'bg-sky-500 text-white rounded-br-md'
+                                : 'bg-gray-100 dark:bg-slate-800 text-foreground rounded-bl-md'
+                            }`}
                           >
-                            {msgDate} {msgTime}
-                          </p>
+                            <p className="text-xs font-medium opacity-70 mb-0.5">
+                              {msg.senderName}
+                            </p>
+                            <p className="text-sm whitespace-pre-wrap">
+                              {msg.content}
+                            </p>
+                            <p
+                              className={`text-[10px] mt-1 ${isAgent ? 'text-white/60' : 'text-muted-foreground'}`}
+                            >
+                              {msgDate} {msgTime}
+                            </p>
+                          </div>
+                          {/* Sentiment dot (right side for agent) */}
+                          {isAgent && msg.sentiment && (
+                            <div
+                              className={`h-2.5 w-2.5 rounded-full mt-3 shrink-0 ${sentimentColor}`}
+                              title={
+                                MESSAGE_SENTIMENT_LABELS[msg.sentiment]
+                              }
+                            />
+                          )}
                         </div>
                       </div>
                     );

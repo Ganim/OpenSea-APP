@@ -10,6 +10,7 @@ import { GridLoading } from '@/components/handlers/grid-loading';
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { BulkPayModal } from '@/components/finance/bulk-pay-modal';
 import { BulkCategorizeModal } from '@/components/finance/bulk-categorize-modal';
+import { SplitPaymentModal } from '@/components/finance/split-payment-modal';
 import { PayableWizardModal } from '@/components/finance/payable-wizard-modal';
 import { QuickEntryModal } from '@/components/finance/quick-entry-modal';
 import { Header } from '@/components/layout/header';
@@ -58,6 +59,7 @@ import {
   FolderTree,
   Loader2,
   Plus,
+  SplitSquareHorizontal,
   Tag,
   Trash2,
   XCircle,
@@ -192,6 +194,7 @@ function PayablePageContent() {
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
+  const [splitPaymentOpen, setSplitPaymentOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
   const [baixaEntry, setBaixaEntry] = useState<FinanceEntry | null>(null);
@@ -355,19 +358,16 @@ function PayablePageContent() {
 
   const MAX_BULK = 50;
 
-  const handleBulkAction = useCallback(
-    (ids: string[], action: () => void) => {
-      if (ids.length > MAX_BULK) {
-        toast.warning(
-          `Selecione no máximo ${MAX_BULK} lançamentos por operação em lote.`
-        );
-        return;
-      }
-      setBulkSelectedIds(ids);
-      action();
-    },
-    []
-  );
+  const handleBulkAction = useCallback((ids: string[], action: () => void) => {
+    if (ids.length > MAX_BULK) {
+      toast.warning(
+        `Selecione no máximo ${MAX_BULK} lançamentos por operação em lote.`
+      );
+      return;
+    }
+    setBulkSelectedIds(ids);
+    action();
+  }, []);
 
   const handleBulkCancelConfirm = useCallback(async () => {
     try {
@@ -688,8 +688,20 @@ function PayablePageContent() {
     setQuickEntryOpen(true);
   }, []);
 
+  const handleSplitPaymentClick = useCallback(() => {
+    setSplitPaymentOpen(true);
+  }, []);
+
   const actionButtons = useMemo<ActionButtonWithPermission[]>(
     () => [
+      {
+        id: 'split-payment',
+        title: 'Pagamento em Lote',
+        icon: SplitSquareHorizontal,
+        onClick: handleSplitPaymentClick,
+        variant: 'outline',
+        permission: FINANCE_PERMISSIONS.ENTRIES.MODIFY,
+      },
       {
         id: 'quick-entry-payable',
         title: 'Rápido',
@@ -707,7 +719,7 @@ function PayablePageContent() {
         permission: FINANCE_PERMISSIONS.ENTRIES.REGISTER,
       },
     ],
-    [handleCreateClick, handleQuickEntryClick]
+    [handleCreateClick, handleQuickEntryClick, handleSplitPaymentClick]
   );
 
   const visibleActionButtons = useMemo<HeaderButton[]>(
@@ -892,6 +904,13 @@ function PayablePageContent() {
             }
           />
 
+          {/* Split Payment Modal */}
+          <SplitPaymentModal
+            open={splitPaymentOpen}
+            onOpenChange={setSplitPaymentOpen}
+            onSuccess={() => refetch()}
+          />
+
           {/* Bulk Pay Modal */}
           <BulkPayModal
             open={bulkPayOpen}
@@ -940,9 +959,7 @@ function PayablePageContent() {
             totalItems={total}
             canEdit={canEdit}
             canDelete={canDelete}
-            onBulkPay={ids =>
-              handleBulkAction(ids, () => setBulkPayOpen(true))
-            }
+            onBulkPay={ids => handleBulkAction(ids, () => setBulkPayOpen(true))}
             onBulkCategorize={ids =>
               handleBulkAction(ids, () => setBulkCategorizeOpen(true))
             }
@@ -1023,7 +1040,14 @@ function PayableSelectionToolbar({
     }
 
     return acts;
-  }, [canEdit, canDelete, onBulkPay, onBulkCategorize, onBulkCancel, onBulkDelete]);
+  }, [
+    canEdit,
+    canDelete,
+    onBulkPay,
+    onBulkCategorize,
+    onBulkCancel,
+    onBulkDelete,
+  ]);
 
   return (
     <SelectionToolbar

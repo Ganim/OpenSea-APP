@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/table';
 import { BaixaModal } from '@/components/finance/baixa-modal';
 import { PixPayConfirmModal } from '@/components/finance/pix-pay-modal';
+import { EscalationTimeline } from '@/components/finance/escalation-timeline';
 import { TaxRetentionPanel } from '@/components/finance/tax-retention-panel';
 import { ThreeWayMatchPanel } from '@/components/finance/three-way-match-panel';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
@@ -629,6 +630,9 @@ export default function PayableDetailPage({
 
       {/* Tax Retentions */}
       <TaxRetentionPanel entryId={id} grossAmount={entry.expectedAmount} />
+
+      {/* Escalation Timeline (only when overdue) */}
+      <EscalationTimeline entryId={id} isOverdue={entry.status === 'OVERDUE'} />
 
       {/* Payment History */}
       <Card>

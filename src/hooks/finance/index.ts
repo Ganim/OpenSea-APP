@@ -31,3 +31,4 @@ export * from './use-accountant';
 export * from './use-exchange-rates';
 export * from './use-check-duplicate';
 export * from './use-supplier-summary';
+export * from './use-finance-query';

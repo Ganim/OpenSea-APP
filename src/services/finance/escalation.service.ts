@@ -63,6 +63,13 @@ export const escalationService = {
       {}
     );
   },
+
+  async getTimeline(entryId: string): Promise<EscalationTimelineResponse> {
+    const query = new URLSearchParams({ entryId });
+    return apiClient.get<EscalationTimelineResponse>(
+      `${API_ENDPOINTS.FINANCE_ESCALATION.TIMELINE}?${query.toString()}`
+    );
+  },
 };
 
 export const customerScoreService = {

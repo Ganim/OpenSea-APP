@@ -6,6 +6,7 @@
 
 'use client';
 
+import { FinanceChatWidget } from '@/components/finance/finance-chat-widget';
 import { QuickEntryModal } from '@/components/finance/quick-entry-modal';
 import {
   AnomalyAlerts,
@@ -85,10 +86,10 @@ export default function FinanceCommandCenter() {
       </div>
 
       {/* Quick Entry Modal */}
-      <QuickEntryModal
-        open={quickEntryOpen}
-        onOpenChange={setQuickEntryOpen}
-      />
+      <QuickEntryModal open={quickEntryOpen} onOpenChange={setQuickEntryOpen} />
+
+      {/* Atlas Conversational Finance Widget */}
+      <FinanceChatWidget />
     </div>
   );
 }

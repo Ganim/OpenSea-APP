@@ -527,3 +527,24 @@ export interface SupplierSummaryResponse {
     recentEntries: RecentEntrySummary[];
   };
 }
+
+// Split Payment (pagamento distribuído)
+export interface SplitPaymentAllocation {
+  entryId: string;
+  amount: number;
+}
+
+export interface SplitPaymentData {
+  paymentAmount: number;
+  paymentDate: string;
+  bankAccountId?: string;
+  paymentMethod?: string;
+  notes?: string;
+  allocations: SplitPaymentAllocation[];
+}
+
+export interface SplitPaymentResponse {
+  payments: FinanceEntryPayment[];
+  fullyPaidEntryIds: string[];
+  partialEntryIds: string[];
+}

@@ -26,3 +26,4 @@ export * from './deals.config';
 export * from './quotes.config';
 export * from './proposals.config';
 export * from './discount-rules.config';
+export * from './cadences.config';

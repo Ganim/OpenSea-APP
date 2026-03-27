@@ -80,6 +80,22 @@ export interface AnomalyReport {
   categoriesAnalyzed: number;
 }
 
+// ─── Cashflow Accuracy (Realized vs Projected) ──────────────────────
+
+export interface CashflowAccuracyDataPoint {
+  date: string;
+  predictedInflow: number;
+  predictedOutflow: number;
+  actualInflow: number | null;
+  actualOutflow: number | null;
+}
+
+export interface CashflowAccuracyResponse {
+  accuracy: number;
+  dataPoints: CashflowAccuracyDataPoint[];
+  periodCount: number;
+}
+
 // ─── Cashflow ────────────────────────────────────────────────────────
 
 export interface CashflowData {

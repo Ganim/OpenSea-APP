@@ -10,6 +10,14 @@ export const CONVERSATION_STATUS_LABELS: Record<ConversationStatus, string> = {
   ARCHIVED: 'Arquivada',
 };
 
+export type MessageSentiment = 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+
+export const MESSAGE_SENTIMENT_LABELS: Record<MessageSentiment, string> = {
+  POSITIVE: 'Positivo',
+  NEUTRAL: 'Neutro',
+  NEGATIVE: 'Negativo',
+};
+
 export interface ConversationMessage {
   id: string;
   conversationId: string;
@@ -18,6 +26,7 @@ export interface ConversationMessage {
   senderType: 'AGENT' | 'SYSTEM';
   content: string;
   readAt?: string;
+  sentiment?: MessageSentiment;
   createdAt: string;
 }
 
@@ -31,6 +40,7 @@ export interface Conversation {
   lastMessageAt?: string;
   createdBy: string;
   isActive: boolean;
+  overallSentiment?: MessageSentiment;
   createdAt: string;
   updatedAt?: string;
   messages?: ConversationMessage[];

@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -14,10 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useFinanceCashflow } from '@/hooks/finance';
+import { CashflowChart } from '@/components/finance/analytics/cashflow-chart';
+import { useFinanceCashflow, useCashflowAccuracy } from '@/hooks/finance';
+
 type CashflowGroupBy = 'day' | 'week' | 'month';
 
-// Helper to get start/end of current month
 function getMonthRange() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -35,6 +38,28 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function getAccuracyColorClass(accuracy: number): string {
+  if (accuracy >= 80)
+    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20';
+  if (accuracy >= 50)
+    return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-200 dark:border-amber-500/20';
+  return 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-200 dark:border-rose-500/20';
+}
+
+function getAccuracyBgClass(accuracy: number): string {
+  if (accuracy >= 80)
+    return 'bg-emerald-100 dark:bg-emerald-900/30';
+  if (accuracy >= 50)
+    return 'bg-amber-100 dark:bg-amber-900/30';
+  return 'bg-rose-100 dark:bg-rose-900/30';
+}
+
+function getAccuracyIconClass(accuracy: number): string {
+  if (accuracy >= 80) return 'text-emerald-600';
+  if (accuracy >= 50) return 'text-amber-600';
+  return 'text-rose-600';
+}
+
 export default function CashflowPage() {
   const router = useRouter();
   const defaultRange = getMonthRange();
@@ -46,6 +71,14 @@ export default function CashflowPage() {
     startDate,
     endDate,
     groupBy,
+  });
+
+  const {
+    data: accuracyData,
+    isLoading: isAccuracyLoading,
+  } = useCashflowAccuracy({
+    startDate,
+    endDate,
   });
 
   return (
@@ -110,6 +143,66 @@ export default function CashflowPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Accuracy KPI Card */}
+      {isAccuracyLoading ? (
+        <Card>
+          <CardContent className="p-6">
+            <Skeleton className="h-16 w-full" />
+          </CardContent>
+        </Card>
+      ) : accuracyData && accuracyData.periodCount > 0 ? (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Precisão das Projeções
+                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-2xl font-bold">
+                    {accuracyData.accuracy.toFixed(1)}%
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className={getAccuracyColorClass(accuracyData.accuracy)}
+                  >
+                    {accuracyData.accuracy >= 80
+                      ? 'Excelente'
+                      : accuracyData.accuracy >= 50
+                        ? 'Moderada'
+                        : 'Baixa'}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Baseado em {accuracyData.periodCount} dia(s) com dados
+                  comparáveis
+                </p>
+              </div>
+              <div
+                className={`p-3 rounded-full ${getAccuracyBgClass(accuracyData.accuracy)}`}
+              >
+                <Target
+                  className={`h-5 w-5 ${getAccuracyIconClass(accuracyData.accuracy)}`}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {/* Chart with projected overlay */}
+      <CashflowChart
+        realizedData={data?.data.map(entry => ({
+          date: entry.period,
+          cumulativeBalance: entry.cumulativeBalance,
+        }))}
+        accuracyData={accuracyData ?? undefined}
+        isLoading={isLoading}
+        isAccuracyLoading={isAccuracyLoading}
+        groupBy={groupBy}
+        onGroupByChange={setGroupBy}
+      />
 
       {isLoading ? (
         <Card>

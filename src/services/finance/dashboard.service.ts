@@ -4,6 +4,7 @@ import type {
   FinanceDashboard,
   FinanceOverview,
   CashflowResponse,
+  CashflowAccuracyResponse,
   ForecastQuery,
   ForecastResponse,
   PredictiveCashflowReport,
@@ -64,6 +65,20 @@ export const financeDashboardService = {
     const query = new URLSearchParams({ months: String(months) });
     return apiClient.get<PredictiveCashflowReport>(
       `${API_ENDPOINTS.FINANCE_DASHBOARD.PREDICTIVE_CASHFLOW}?${query.toString()}`,
+    );
+  },
+
+  async getCashflowAccuracy(params: {
+    startDate: string;
+    endDate: string;
+  }): Promise<CashflowAccuracyResponse> {
+    const query = new URLSearchParams({
+      startDate: params.startDate,
+      endDate: params.endDate,
+    });
+
+    return apiClient.get<CashflowAccuracyResponse>(
+      `${API_ENDPOINTS.FINANCE_DASHBOARD.CASHFLOW_ACCURACY}?${query.toString()}`,
     );
   },
 

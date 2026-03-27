@@ -4,6 +4,7 @@ import type {
   BulkCancelData,
   BulkDeleteData,
   BulkCategorizeData,
+  SplitPaymentData,
 } from '@/types/finance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -72,6 +73,23 @@ export function useBulkCategorizeEntries() {
   return useMutation({
     mutationFn: (data: BulkCategorizeData) =>
       financeEntriesService.bulkCategorize(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: FINANCE_ENTRIES_KEY,
+      });
+    },
+  });
+}
+
+// ============================================================================
+// SPLIT PAYMENT
+// ============================================================================
+
+export function useSplitPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: SplitPaymentData) =>
+      financeEntriesService.splitPayment(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: FINANCE_ENTRIES_KEY,

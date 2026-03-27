@@ -727,6 +727,7 @@ export const API_ENDPOINTS = {
       `/v1/finance/entries/${id}/three-way-match`,
     CHECK_DUPLICATE: '/v1/finance/entries/check-duplicate',
     SUPPLIER_SUMMARY: '/v1/finance/entries/supplier-summary',
+    SPLIT_PAYMENT: '/v1/finance/entries/split-payment',
   },
   // Finance - Exchange Rates
   EXCHANGE_RATES: {
@@ -749,6 +750,7 @@ export const API_ENDPOINTS = {
     ANOMALIES: '/v1/finance/analytics/anomalies',
     PAYMENT_TIMING: '/v1/finance/analytics/payment-timing',
     PREDICTIVE_CASHFLOW: '/v1/finance/analytics/predictive-cashflow',
+    CASHFLOW_ACCURACY: '/v1/finance/dashboard/cashflow-accuracy',
     EXPORT_ACCOUNTING: '/v1/finance/export/accounting',
     IMPORT_PAYROLL: (payrollId: string) =>
       `/v1/finance/import/payroll/${payrollId}`,
@@ -1299,6 +1301,7 @@ export const API_ENDPOINTS = {
     SETUP_WIZARD: {
       RUN: '/v1/ai/setup-wizard',
     },
+    FINANCE_QUERY: '/v1/ai/finance-query',
   },
   // Marketplace Integration
   MARKETPLACE_CONNECTIONS: {
