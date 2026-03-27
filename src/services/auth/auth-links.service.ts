@@ -85,4 +85,11 @@ export const authLinksService = {
   ): Promise<TenantAuthConfigDTO> {
     return apiClient.put('/v1/tenant-auth-config', data);
   },
+
+  // Super admin — tenant auth config by tenant ID
+  async getAdminTenantAuthConfig(
+    tenantId: string
+  ): Promise<{ config: TenantAuthConfigDTO }> {
+    return apiClient.get(`/v1/admin/tenants/${tenantId}/auth-config`);
+  },
 };

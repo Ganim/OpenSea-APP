@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { authLinksService } from '@/services/auth/auth-links.service';
 import {
   useAdminTenantDetails,
   useAdminTenantUsers,
@@ -55,13 +56,17 @@ import {
   Activity,
   AlertCircle,
   ArrowLeft,
+  BadgeCheck,
   Bot,
   Cable,
   Calendar,
   CheckCircle2,
   ClipboardList,
+  CreditCard,
   DollarSign,
+  Globe,
   KeyRound,
+  Lock,
   Mail,
   Palette,
   Package,
@@ -74,10 +79,12 @@ import {
   ShoppingCart,
   Trash2,
   Users,
+  Wand2,
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -118,6 +125,16 @@ export default function TenantDetailPage() {
     useTenantConsumption(id);
   const { data: integrations, isLoading: integrationsLoading } =
     useTenantIntegrations(id);
+
+  // Auth config
+  const { data: authConfigData, isLoading: authConfigLoading } = useQuery({
+    queryKey: ['admin-tenant-auth-config', id],
+    queryFn: async () => {
+      const response = await authLinksService.getAdminTenantAuthConfig(id);
+      return response.config;
+    },
+    enabled: !!id,
+  });
 
   // Mutations
   const changeStatus = useChangeTenantStatus();
@@ -934,6 +951,180 @@ export default function TenantDetailPage() {
             >
               Edição disponível na Fase 3
             </p>
+          </CentralCard>
+
+          {/* Autenticação */}
+          <CentralCard className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Lock
+                className="h-4 w-4"
+                style={{ color: 'var(--central-text-muted)' }}
+              />
+              <h3
+                className="text-sm font-semibold"
+                style={{ color: 'var(--central-text-primary)' }}
+              >
+                Autenticação
+              </h3>
+            </div>
+            {authConfigLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : authConfigData ? (
+              <div className="space-y-4">
+                {/* Allowed Methods */}
+                <div>
+                  <Label
+                    className="text-xs mb-2 block"
+                    style={{ color: 'var(--central-text-muted)' }}
+                  >
+                    Métodos de Login Habilitados
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      const methodIcons: Record<
+                        string,
+                        { icon: typeof Mail; label: string; color: string }
+                      > = {
+                        EMAIL: {
+                          icon: Mail,
+                          label: 'Email',
+                          color: 'text-blue-500',
+                        },
+                        CPF: {
+                          icon: CreditCard,
+                          label: 'CPF',
+                          color: 'text-emerald-500',
+                        },
+                        ENROLLMENT: {
+                          icon: BadgeCheck,
+                          label: 'Matrícula',
+                          color: 'text-violet-500',
+                        },
+                        GOOGLE: {
+                          icon: Globe,
+                          label: 'Google',
+                          color: 'text-sky-500',
+                        },
+                        MICROSOFT: {
+                          icon: Shield,
+                          label: 'Microsoft',
+                          color: 'text-blue-500',
+                        },
+                      };
+
+                      const allMethods = [
+                        'EMAIL',
+                        'CPF',
+                        'ENROLLMENT',
+                        'GOOGLE',
+                        'MICROSOFT',
+                      ];
+
+                      return allMethods.map(method => {
+                        const info = methodIcons[method];
+                        if (!info) return null;
+                        const Icon = info.icon;
+                        const isEnabled =
+                          authConfigData.allowedMethods.includes(method);
+                        return (
+                          <div
+                            key={method}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md border"
+                            style={{
+                              borderColor: 'var(--central-separator)',
+                              opacity: isEnabled ? 1 : 0.4,
+                            }}
+                          >
+                            <Icon className={`h-3.5 w-3.5 ${info.color}`} />
+                            <span
+                              className="text-xs font-medium"
+                              style={{
+                                color: 'var(--central-text-primary)',
+                              }}
+                            >
+                              {info.label}
+                            </span>
+                            {isEnabled ? (
+                              <CentralBadge variant="emerald">
+                                Ativo
+                              </CentralBadge>
+                            ) : (
+                              <CentralBadge variant="default">
+                                Inativo
+                              </CentralBadge>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+
+                {/* Magic Link + Default Method */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label
+                      className="text-xs"
+                      style={{ color: 'var(--central-text-muted)' }}
+                    >
+                      Magic Link
+                    </Label>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <Wand2
+                        className={`h-3.5 w-3.5 ${authConfigData.magicLinkEnabled ? 'text-violet-500' : 'text-muted-foreground'}`}
+                      />
+                      <CentralBadge
+                        variant={
+                          authConfigData.magicLinkEnabled ? 'emerald' : 'rose'
+                        }
+                      >
+                        {authConfigData.magicLinkEnabled
+                          ? 'Habilitado'
+                          : 'Desabilitado'}
+                      </CentralBadge>
+                    </div>
+                  </div>
+                  <div>
+                    <Label
+                      className="text-xs"
+                      style={{ color: 'var(--central-text-muted)' }}
+                    >
+                      Expiração Magic Link
+                    </Label>
+                    <p
+                      className="text-sm mt-1.5 font-medium"
+                      style={{ color: 'var(--central-text-primary)' }}
+                    >
+                      {authConfigData.magicLinkExpiresIn} minutos
+                    </p>
+                  </div>
+                  <div>
+                    <Label
+                      className="text-xs"
+                      style={{ color: 'var(--central-text-muted)' }}
+                    >
+                      Método Padrão
+                    </Label>
+                    <p
+                      className="text-sm mt-1.5 font-medium"
+                      style={{ color: 'var(--central-text-primary)' }}
+                    >
+                      {authConfigData.defaultMethod ?? 'Automático'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p
+                className="text-xs"
+                style={{ color: 'var(--central-text-muted)' }}
+              >
+                Configuração não disponível
+              </p>
+            )}
           </CentralCard>
 
           {/* Branding */}
