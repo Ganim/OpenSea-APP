@@ -34,6 +34,7 @@ import type {
   ProposalStatus,
 } from '@/types/sales';
 import { PROPOSAL_STATUS_LABELS } from '@/types/sales';
+import { SignatureStatusSection } from '../../src/components/signature-status-section';
 import {
   Calendar,
   Check,
@@ -60,8 +61,7 @@ import { cn } from '@/lib/utils';
 const STATUS_COLORS: Record<ProposalStatus, string> = {
   DRAFT:
     'border-gray-300 dark:border-white/[0.1] bg-gray-100 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400',
-  SENT:
-    'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+  SENT: 'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
   UNDER_REVIEW:
     'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
   APPROVED:
@@ -177,8 +177,7 @@ export default function ProposalDetailPage() {
             id: 'edit',
             title: 'Editar',
             icon: Edit,
-            onClick: () =>
-              router.push(`/sales/proposals/${proposalId}/edit`),
+            onClick: () => router.push(`/sales/proposals/${proposalId}/edit`),
             variant: 'default' as const,
           },
         ]
@@ -347,14 +346,13 @@ export default function ProposalDetailPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
+          <TabsList className="grid w-full grid-cols-4 h-12 mb-4">
             <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="items">
-              Itens ({items.length})
-            </TabsTrigger>
+            <TabsTrigger value="items">Itens ({items.length})</TabsTrigger>
             <TabsTrigger value="attachments">
               Anexos ({attachments.length})
             </TabsTrigger>
+            <TabsTrigger value="signature">Assinatura</TabsTrigger>
           </TabsList>
 
           {/* TAB: Informações */}
@@ -570,6 +568,25 @@ export default function ProposalDetailPage() {
                 )}
               </div>
             </Card>
+          </TabsContent>
+
+          {/* TAB: Assinatura Digital */}
+          <TabsContent value="signature" className="space-y-6">
+            <SignatureStatusSection
+              entityId={proposalId}
+              entityType="proposal"
+              signatureEnvelopeId={
+                (proposal as Record<string, unknown>).signatureEnvelopeId as
+                  | string
+                  | undefined
+              }
+              canRequestSignature={
+                proposal.status === 'SENT' &&
+                hasPermission(SALES_PERMISSIONS.PROPOSALS.SEND)
+              }
+              defaultSignerName={proposal.customerName || ''}
+              defaultSignerEmail=""
+            />
           </TabsContent>
         </Tabs>
       </PageBody>

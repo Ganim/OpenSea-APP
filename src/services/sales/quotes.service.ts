@@ -74,4 +74,20 @@ export const quotesService = {
       {}
     );
   },
+
+  async requestSignature(
+    id: string,
+    data?: { signerEmail?: string; signerName?: string }
+  ): Promise<Record<string, unknown>> {
+    return apiClient.post<Record<string, unknown>>(
+      API_ENDPOINTS.QUOTES.REQUEST_SIGNATURE(id),
+      data ?? {}
+    );
+  },
+
+  async getSignatureStatus(id: string): Promise<Record<string, unknown>> {
+    return apiClient.get<Record<string, unknown>>(
+      API_ENDPOINTS.QUOTES.SIGNATURE_STATUS(id)
+    );
+  },
 };

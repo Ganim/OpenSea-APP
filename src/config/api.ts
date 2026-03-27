@@ -753,6 +753,8 @@ export const API_ENDPOINTS = {
     CASHFLOW_ACCURACY: '/v1/finance/dashboard/cashflow-accuracy',
     HEALTH_SCORE: '/v1/finance/dashboard/health-score',
     EXPORT_ACCOUNTING: '/v1/finance/export/accounting',
+    EXPORT_SPED_EFD: '/v1/finance/export/sped-efd',
+    DRE_CONSOLIDATED: '/v1/finance/dashboard/dre-consolidated',
     IMPORT_PAYROLL: (payrollId: string) =>
       `/v1/finance/import/payroll/${payrollId}`,
   },
@@ -870,6 +872,11 @@ export const API_ENDPOINTS = {
       `/v1/finance/reconciliation/${id}/items/${itemId}/suggestions`,
     COMPLETE: (id: string) => `/v1/finance/reconciliation/${id}/complete`,
     CANCEL: (id: string) => `/v1/finance/reconciliation/${id}/cancel`,
+    AUTO_SUGGESTIONS: '/v1/finance/reconciliation/suggestions',
+    ACCEPT_SUGGESTION: (id: string) =>
+      `/v1/finance/reconciliation/suggestions/${id}/accept`,
+    REJECT_SUGGESTION: (id: string) =>
+      `/v1/finance/reconciliation/suggestions/${id}/reject`,
   },
   // Finance - Accountant Portal (admin endpoints)
   ACCOUNTANT: {
@@ -883,6 +890,21 @@ export const API_ENDPOINTS = {
     CATEGORIES: '/v1/accountant/categories',
     EXPORT_SPED: '/v1/accountant/export/sped',
     DRE: '/v1/accountant/reports/dre',
+  },
+  // Finance - Customer Portal (admin endpoints)
+  CUSTOMER_PORTAL: {
+    INVITE: '/v1/finance/customer-portal/invite',
+    LIST_ACCESSES: '/v1/finance/customer-portal/accesses',
+    REVOKE: (id: string) => `/v1/finance/customer-portal/accesses/${id}`,
+  },
+  // Customer Portal (token-based public endpoints)
+  CUSTOMER_PORTAL_PUBLIC: {
+    VALIDATE: (token: string) => `/v1/public/customer-portal/${token}/validate`,
+    INVOICES: (token: string) => `/v1/public/customer-portal/${token}/invoices`,
+    INVOICE: (token: string, id: string) =>
+      `/v1/public/customer-portal/${token}/invoices/${id}`,
+    PAY: (token: string, id: string) =>
+      `/v1/public/customer-portal/${token}/invoices/${id}/pay`,
   },
   // Storage - Folders
   STORAGE: {
@@ -1399,6 +1421,9 @@ export const API_ENDPOINTS = {
     SEND: (id: string) => `/v1/sales/quotes/${id}/send`,
     CONVERT_TO_ORDER: (id: string) => `/v1/sales/quotes/${id}/convert`,
     DUPLICATE: (id: string) => `/v1/sales/quotes/${id}/duplicate`,
+    REQUEST_SIGNATURE: (id: string) =>
+      `/v1/sales/quotes/${id}/request-signature`,
+    SIGNATURE_STATUS: (id: string) => `/v1/sales/quotes/${id}/signature-status`,
   },
   // Sales - Proposals (Propostas)
   PROPOSALS: {
@@ -1411,6 +1436,10 @@ export const API_ENDPOINTS = {
     APPROVE: (id: string) => `/v1/sales/proposals/${id}/approve`,
     REJECT: (id: string) => `/v1/sales/proposals/${id}/reject`,
     DUPLICATE: (id: string) => `/v1/sales/proposals/${id}/duplicate`,
+    REQUEST_SIGNATURE: (id: string) =>
+      `/v1/sales/proposals/${id}/request-signature`,
+    SIGNATURE_STATUS: (id: string) =>
+      `/v1/sales/proposals/${id}/signature-status`,
   },
   // Sales - Discount Rules (Regras de Desconto)
   DISCOUNT_RULES: {

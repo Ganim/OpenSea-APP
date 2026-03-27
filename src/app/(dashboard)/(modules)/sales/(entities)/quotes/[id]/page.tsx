@@ -27,6 +27,7 @@ import { quotesConfig } from '@/config/entities/quotes.config';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { Quote, QuoteItem, QuoteStatus } from '@/types/sales';
 import { QUOTE_STATUS_LABELS } from '@/types/sales';
+import { SignatureStatusSection } from '../../src/components/signature-status-section';
 import {
   Calendar,
   Clock,
@@ -51,8 +52,7 @@ import { Button } from '@/components/ui/button';
 const STATUS_COLORS: Record<QuoteStatus, string> = {
   DRAFT:
     'border-gray-300 dark:border-white/[0.1] bg-gray-100 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400',
-  SENT:
-    'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+  SENT: 'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
   ACCEPTED:
     'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
   REJECTED:
@@ -312,11 +312,10 @@ export default function QuoteDetailPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
+          <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
             <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="items">
-              Itens ({items.length})
-            </TabsTrigger>
+            <TabsTrigger value="items">Itens ({items.length})</TabsTrigger>
+            <TabsTrigger value="signature">Assinatura</TabsTrigger>
           </TabsList>
 
           {/* TAB: Informações */}
@@ -488,6 +487,25 @@ export default function QuoteDetailPage() {
                 )}
               </div>
             </Card>
+          </TabsContent>
+
+          {/* TAB: Assinatura Digital */}
+          <TabsContent value="signature" className="space-y-6">
+            <SignatureStatusSection
+              entityId={quoteId}
+              entityType="quote"
+              signatureEnvelopeId={
+                (quote as Record<string, unknown>).signatureEnvelopeId as
+                  | string
+                  | undefined
+              }
+              canRequestSignature={
+                quote.status === 'SENT' &&
+                hasPermission(SALES_PERMISSIONS.QUOTES.SEND)
+              }
+              defaultSignerName={quote.customerName || ''}
+              defaultSignerEmail=""
+            />
           </TabsContent>
         </Tabs>
       </PageBody>

@@ -13,6 +13,7 @@ const QUOTE_KEYS = {
   all: ['quotes'] as const,
   list: (filters?: QuotesFilters) => ['quotes', 'list', filters] as const,
   detail: (id: string) => ['quotes', 'detail', id] as const,
+  signatureStatus: (id: string) => ['quotes', 'signature-status', id] as const,
 } as const;
 
 export function useQuotesInfinite(filters?: QuotesFilters, limit = 20) {
@@ -108,5 +109,35 @@ export function useDuplicateQuote() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: QUOTE_KEYS.all });
     },
+  });
+}
+
+export function useRequestQuoteSignature() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data?: { signerEmail?: string; signerName?: string };
+    }) => quotesService.requestSignature(id, data),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: QUOTE_KEYS.detail(variables.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: QUOTE_KEYS.signatureStatus(variables.id),
+      });
+    },
+  });
+}
+
+export function useQuoteSignatureStatus(quoteId: string) {
+  return useQuery({
+    queryKey: QUOTE_KEYS.signatureStatus(quoteId),
+    queryFn: () => quotesService.getSignatureStatus(quoteId),
+    enabled: !!quoteId,
   });
 }

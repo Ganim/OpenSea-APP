@@ -13,6 +13,8 @@ const PROPOSAL_KEYS = {
   all: ['proposals'] as const,
   list: (filters?: ProposalsFilters) => ['proposals', 'list', filters] as const,
   detail: (id: string) => ['proposals', 'detail', id] as const,
+  signatureStatus: (id: string) =>
+    ['proposals', 'signature-status', id] as const,
 } as const;
 
 export function useProposalsInfinite(filters?: ProposalsFilters, limit = 20) {
@@ -126,5 +128,35 @@ export function useDuplicateProposal() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: PROPOSAL_KEYS.all });
     },
+  });
+}
+
+export function useRequestProposalSignature() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data?: { signerEmail?: string; signerName?: string };
+    }) => proposalsService.requestSignature(id, data),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: PROPOSAL_KEYS.detail(variables.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: PROPOSAL_KEYS.signatureStatus(variables.id),
+      });
+    },
+  });
+}
+
+export function useProposalSignatureStatus(proposalId: string) {
+  return useQuery({
+    queryKey: PROPOSAL_KEYS.signatureStatus(proposalId),
+    queryFn: () => proposalsService.getSignatureStatus(proposalId),
+    enabled: !!proposalId,
   });
 }
