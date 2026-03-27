@@ -1,6 +1,7 @@
 import { reconciliationService } from '@/services/finance';
 import type {
   ReconciliationStatus,
+  ReconciliationSuggestionStatus,
 } from '@/types/finance';
 import {
   useInfiniteQuery,
@@ -38,6 +39,10 @@ const QUERY_KEYS = {
     'suggestions',
     itemId,
   ],
+  AUTO_SUGGESTIONS: (
+    status?: ReconciliationSuggestionStatus,
+    reconciliationId?: string
+  ) => ['reconciliation-suggestions', 'infinite', status, reconciliationId],
 } as const;
 
 // ============================================================================
@@ -217,6 +222,79 @@ export function useCancelReconciliation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.RECONCILIATIONS,
+      });
+    },
+  });
+}
+
+// ============================================================================
+// AUTO-RECONCILIATION SUGGESTIONS (infinite scroll)
+// ============================================================================
+
+export interface AutoSuggestionFilters {
+  status?: ReconciliationSuggestionStatus;
+  reconciliationId?: string;
+}
+
+export function useAutoSuggestionsInfinite(filters?: AutoSuggestionFilters) {
+  const result = useInfiniteQuery({
+    queryKey: QUERY_KEYS.AUTO_SUGGESTIONS(
+      filters?.status,
+      filters?.reconciliationId
+    ),
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await reconciliationService.listAutoSuggestions({
+        page: pageParam,
+        limit: PAGE_SIZE,
+        status: filters?.status || undefined,
+        reconciliationId: filters?.reconciliationId || undefined,
+      });
+      return response;
+    },
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      if (lastPage.meta.page < lastPage.meta.totalPages) {
+        return lastPage.meta.page + 1;
+      }
+      return undefined;
+    },
+    staleTime: 30_000,
+  });
+
+  const suggestions = result.data?.pages.flatMap(p => p.suggestions) ?? [];
+  const total = result.data?.pages[0]?.meta.total ?? 0;
+
+  return {
+    ...result,
+    suggestions,
+    total,
+  };
+}
+
+export function useAcceptSuggestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (suggestionId: string) =>
+      reconciliationService.acceptSuggestion(suggestionId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['reconciliation-suggestions'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.RECONCILIATIONS,
+      });
+    },
+  });
+}
+
+export function useRejectSuggestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (suggestionId: string) =>
+      reconciliationService.rejectSuggestion(suggestionId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['reconciliation-suggestions'],
       });
     },
   });

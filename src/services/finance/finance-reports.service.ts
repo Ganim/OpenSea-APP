@@ -21,6 +21,36 @@ export interface InteractiveDREResponse {
   previousPeriod: { start: string; end: string };
 }
 
+export interface ConsolidatedDRENode {
+  categoryId: string;
+  categoryName: string;
+  level: number;
+  amount: number;
+  children: ConsolidatedDRENode[];
+}
+
+export interface CompanyDRESummary {
+  companyId: string;
+  companyName: string;
+  revenue: number;
+  expenses: number;
+  netResult: number;
+  revenueTree: ConsolidatedDRENode;
+  expenseTree: ConsolidatedDRENode;
+}
+
+export interface ConsolidatedDREResponse {
+  companies: CompanyDRESummary[];
+  consolidated: {
+    revenue: number;
+    expenses: number;
+    netResult: number;
+    revenueTree: ConsolidatedDRENode;
+    expenseTree: ConsolidatedDRENode;
+  };
+  period: { start: string; end: string };
+}
+
 export type ExportFormat = 'CSV' | 'PDF' | 'XLSX' | 'DOCX';
 export type ReportType = 'ENTRIES' | 'DRE' | 'BALANCE' | 'CASHFLOW';
 
@@ -76,6 +106,60 @@ export const financeReportsService = {
 
     if (!response.ok) {
       throw new Error(`Erro ao exportar relatorio: ${response.statusText}`);
+    }
+
+    return response.blob();
+  },
+
+  async getConsolidatedDRE(params: {
+    startDate: string;
+    endDate: string;
+    companyIds?: string[];
+  }): Promise<ConsolidatedDREResponse> {
+    const query = new URLSearchParams({
+      startDate: params.startDate,
+      endDate: params.endDate,
+    });
+    if (params.companyIds && params.companyIds.length > 0) {
+      query.append('companyIds', params.companyIds.join(','));
+    }
+
+    return apiClient.get<ConsolidatedDREResponse>(
+      `${API_ENDPOINTS.FINANCE_DASHBOARD.DRE_CONSOLIDATED}?${query.toString()}`
+    );
+  },
+
+  async exportSpedEfd(params: {
+    year: number;
+    month: number;
+    companyId?: string;
+  }): Promise<Blob> {
+    const baseUrl =
+      typeof window !== 'undefined'
+        ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:3333'
+        : 'http://127.0.0.1:3333';
+
+    const token =
+      typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
+    const query = new URLSearchParams({
+      year: String(params.year),
+      month: String(params.month),
+    });
+    if (params.companyId) query.append('companyId', params.companyId);
+
+    const response = await fetch(
+      `${baseUrl}${API_ENDPOINTS.FINANCE_DASHBOARD.EXPORT_SPED_EFD}?${query.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Erro ao exportar SPED EFD: ${response.statusText}`);
     }
 
     return response.blob();

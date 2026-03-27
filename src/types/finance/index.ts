@@ -18,3 +18,4 @@ export * from './bank-connection.types';
 export * from './payment-link.types';
 export * from './payment-timing.types';
 export * from './accountant.types';
+export * from './customer-portal.types';

@@ -113,3 +113,60 @@ export const RECONCILIATION_ITEM_STATUS_LABELS: Record<
   IGNORED: 'Ignorado',
   CREATED: 'Lançamento Criado',
 };
+
+// ============================================================================
+// Auto-Reconciliation Suggestions
+// ============================================================================
+
+export type ReconciliationSuggestionStatus =
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'REJECTED';
+
+export interface ReconciliationAutoSuggestion {
+  id: string;
+  tenantId: string;
+  transactionId: string;
+  entryId: string;
+  score: number;
+  matchReasons: string[];
+  status: ReconciliationSuggestionStatus;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+  createdAt: string;
+  transactionDescription?: string;
+  transactionAmount?: number;
+  transactionDate?: string;
+  transactionType?: string;
+  entryDescription?: string;
+  entryAmount?: number;
+  entryDueDate?: string;
+  entryType?: string;
+  supplierName?: string | null;
+  customerName?: string | null;
+}
+
+export interface ReconciliationSuggestionsQuery {
+  page?: number;
+  limit?: number;
+  status?: ReconciliationSuggestionStatus;
+  reconciliationId?: string;
+}
+
+export const SUGGESTION_STATUS_LABELS: Record<
+  ReconciliationSuggestionStatus,
+  string
+> = {
+  PENDING: 'Pendente',
+  ACCEPTED: 'Aceita',
+  REJECTED: 'Rejeitada',
+};
+
+export const MATCH_REASON_LABELS: Record<string, string> = {
+  AMOUNT_EXACT: 'Valor exato',
+  DATE_WITHIN_1_DAY: 'Data ±1 dia',
+  DATE_WITHIN_3_DAYS: 'Data ±3 dias',
+  NAME_MATCH: 'Nome encontrado',
+  DESCRIPTION_MATCH: 'Descrição similar',
+  TYPE_MATCH: 'Tipo compatível',
+};

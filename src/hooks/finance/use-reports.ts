@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 const QUERY_KEYS = {
   DRE: ['finance-dre-interactive'],
+  DRE_CONSOLIDATED: ['finance-dre-consolidated'],
 } as const;
 
 export function useInteractiveDRE(params: {
@@ -18,6 +19,18 @@ export function useInteractiveDRE(params: {
   return useQuery({
     queryKey: [...QUERY_KEYS.DRE, params],
     queryFn: () => financeReportsService.getInteractiveDRE(params),
+    enabled: !!params.startDate && !!params.endDate,
+  });
+}
+
+export function useConsolidatedDRE(params: {
+  startDate: string;
+  endDate: string;
+  companyIds?: string[];
+}) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.DRE_CONSOLIDATED, params],
+    queryFn: () => financeReportsService.getConsolidatedDRE(params),
     enabled: !!params.startDate && !!params.endDate,
   });
 }
@@ -44,10 +57,38 @@ export function useExportReport() {
       window.URL.revokeObjectURL(url);
     },
     onSuccess: () => {
-      toast.success('Relatorio exportado com sucesso');
+      toast.success('Relatório exportado com sucesso');
     },
     onError: () => {
-      toast.error('Erro ao exportar relatorio');
+      toast.error('Erro ao exportar relatório');
+    },
+  });
+}
+
+export function useExportSpedEfd() {
+  return useMutation({
+    mutationFn: async (params: {
+      year: number;
+      month: number;
+      companyId?: string;
+    }) => {
+      const blob = await financeReportsService.exportSpedEfd(params);
+      const fileName = `SPED_EFD_${params.year}_${String(params.month).padStart(2, '0')}.txt`;
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      toast.success('SPED EFD-Contribuições exportado com sucesso');
+    },
+    onError: () => {
+      toast.error('Erro ao exportar SPED EFD-Contribuições');
     },
   });
 }

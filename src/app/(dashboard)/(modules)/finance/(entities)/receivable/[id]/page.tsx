@@ -32,6 +32,7 @@ import { PixChargeModal } from '@/components/finance/pix-charge-modal';
 import { CustomerScoreBadge } from '@/components/finance/customer-score-badge';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { SupplierSummaryDrawer } from '@/components/finance/supplier-summary-drawer';
+import { InviteCustomerPortalModal } from '@/components/finance/invite-customer-portal-modal';
 import {
   useDeleteFinanceEntry,
   useFinanceEntry,
@@ -74,6 +75,7 @@ import {
   Loader2,
   Paperclip,
   QrCode,
+  Link2,
   Trash2,
   Upload,
 } from 'lucide-react';
@@ -186,6 +188,9 @@ export default function ReceivableDetailPage({
 
   // Customer summary drawer state
   const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
+
+  // Customer portal invite state
+  const [portalInviteOpen, setPortalInviteOpen] = useState(false);
 
   // Attachment upload
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -454,6 +459,15 @@ export default function ReceivableDetailPage({
               Ver NF-e
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-500/10"
+            onClick={() => setPortalInviteOpen(true)}
+          >
+            <Link2 className="h-4 w-4" />
+            Compartilhar Portal
+          </Button>
           <Link href={`/finance/receivable/${id}/edit`}>
             <Button variant="outline" size="sm" className="gap-2">
               Editar
@@ -1084,6 +1098,14 @@ export default function ReceivableDetailPage({
           entityType="customer"
         />
       )}
+
+      {/* Customer Portal Invite Modal */}
+      <InviteCustomerPortalModal
+        isOpen={portalInviteOpen}
+        onClose={() => setPortalInviteOpen(false)}
+        prefillCustomerId={entry.customerId ?? undefined}
+        prefillCustomerName={entry.customerName ?? undefined}
+      />
     </div>
   );
 }

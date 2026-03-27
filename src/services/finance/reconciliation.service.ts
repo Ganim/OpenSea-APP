@@ -2,10 +2,12 @@ import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
   Reconciliation,
+  ReconciliationAutoSuggestion,
   ReconciliationDetail,
   ReconciliationImportPreview,
   ReconciliationMatchSuggestion,
   ReconciliationsQuery,
+  ReconciliationSuggestionsQuery,
 } from '@/types/finance';
 import type { PaginationMeta } from '@/types/pagination';
 
@@ -25,6 +27,15 @@ export interface ReconciliationImportResponse {
 
 export interface ReconciliationSuggestionsResponse {
   suggestions: ReconciliationMatchSuggestion[];
+}
+
+export interface ReconciliationAutoSuggestionsResponse {
+  suggestions: ReconciliationAutoSuggestion[];
+  meta: PaginationMeta;
+}
+
+export interface ReconciliationSuggestionActionResponse {
+  suggestion: ReconciliationAutoSuggestion;
 }
 
 export const reconciliationService = {
@@ -115,5 +126,40 @@ export const reconciliationService = {
 
   async cancel(id: string): Promise<void> {
     await apiClient.post<void>(API_ENDPOINTS.RECONCILIATION.CANCEL(id), {});
+  },
+
+  async listAutoSuggestions(
+    params?: ReconciliationSuggestionsQuery
+  ): Promise<ReconciliationAutoSuggestionsResponse> {
+    const query = new URLSearchParams({
+      page: String(params?.page ?? 1),
+      limit: String(params?.limit ?? 20),
+    });
+
+    if (params?.status) query.append('status', params.status);
+    if (params?.reconciliationId)
+      query.append('reconciliationId', params.reconciliationId);
+
+    return apiClient.get<ReconciliationAutoSuggestionsResponse>(
+      `${API_ENDPOINTS.RECONCILIATION.AUTO_SUGGESTIONS}?${query.toString()}`
+    );
+  },
+
+  async acceptSuggestion(
+    suggestionId: string
+  ): Promise<ReconciliationSuggestionActionResponse> {
+    return apiClient.post<ReconciliationSuggestionActionResponse>(
+      API_ENDPOINTS.RECONCILIATION.ACCEPT_SUGGESTION(suggestionId),
+      {}
+    );
+  },
+
+  async rejectSuggestion(
+    suggestionId: string
+  ): Promise<ReconciliationSuggestionActionResponse> {
+    return apiClient.post<ReconciliationSuggestionActionResponse>(
+      API_ENDPOINTS.RECONCILIATION.REJECT_SUGGESTION(suggestionId),
+      {}
+    );
   },
 };

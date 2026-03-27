@@ -22,3 +22,4 @@ export * from './payment-links.service';
 export * from './accountant.service';
 export * from './exchange-rates.service';
 export * from './finance-query.service';
+export * from './customer-portal.service';

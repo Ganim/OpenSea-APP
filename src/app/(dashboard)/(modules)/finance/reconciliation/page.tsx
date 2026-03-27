@@ -8,6 +8,7 @@
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { OfxImportModal } from '@/components/finance/reconciliation/ofx-import-modal';
+import { ReconciliationSuggestionsPanel } from '@/components/finance/reconciliation/reconciliation-suggestions-panel';
 import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -26,13 +27,8 @@ import {
 } from '@/hooks/finance/use-reconciliation';
 import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
-import type {
-  Reconciliation,
-  ReconciliationStatus,
-} from '@/types/finance';
-import {
-  RECONCILIATION_STATUS_LABELS,
-} from '@/types/finance';
+import type { Reconciliation, ReconciliationStatus } from '@/types/finance';
+import { RECONCILIATION_STATUS_LABELS } from '@/types/finance';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -266,6 +262,9 @@ function ReconciliationPageContent() {
       </PageHeader>
 
       <PageBody>
+        {/* Auto-Reconciliation Suggestions */}
+        <ReconciliationSuggestionsPanel />
+
         {/* Filters */}
         <div className="flex items-center gap-2 flex-wrap">
           <FilterDropdown
@@ -289,8 +288,7 @@ function ReconciliationPageContent() {
             emptyText="Nenhuma conta encontrada."
           />
           <p className="text-sm text-muted-foreground whitespace-nowrap">
-            {total}{' '}
-            {total === 1 ? 'conciliação' : 'conciliações'}
+            {total} {total === 1 ? 'conciliação' : 'conciliações'}
             {reconciliations.length < total &&
               ` (${reconciliations.length} carregadas)`}
           </p>
@@ -306,7 +304,9 @@ function ReconciliationPageContent() {
             message="Ocorreu um erro ao tentar carregar as conciliações. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => { refetch(); },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : reconciliations.length === 0 ? (

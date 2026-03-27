@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
+  Building2,
   FileBarChart,
   FileText,
   TrendingUp,
@@ -18,8 +19,12 @@ import {
 import { DREInteractiveTable } from '@/components/finance/reports/dre-interactive-table';
 import { DreEntryDrawer } from '@/components/finance/reports/dre-entry-drawer';
 import { BalanceSheet } from '@/components/finance/reports/balance-sheet';
+import { ConsolidatedDRETable } from '@/components/finance/reports/consolidated-dre-table';
 import { ExportMenu } from '@/components/finance/reports/export-menu';
-import { useInteractiveDRE } from '@/hooks/finance/use-reports';
+import {
+  useInteractiveDRE,
+  useConsolidatedDRE,
+} from '@/hooks/finance/use-reports';
 import { useAnalyticsDashboard } from '@/hooks/finance/use-analytics';
 import type { ReportType } from '@/services/finance/finance-reports.service';
 
@@ -33,7 +38,13 @@ function getDefaultRange(): DateRange {
   };
 }
 
-type ActiveReport = 'dre' | 'balance' | 'cashflow' | 'entries' | null;
+type ActiveReport =
+  | 'dre'
+  | 'dre-consolidated'
+  | 'balance'
+  | 'cashflow'
+  | 'entries'
+  | null;
 
 const REPORT_TYPE_MAP: Record<string, ReportType> = {
   dre: 'DRE',
@@ -51,6 +62,15 @@ const reportCards = [
     icon: FileBarChart,
     color: 'text-blue-600',
     bg: 'bg-blue-100 dark:bg-blue-900/30',
+  },
+  {
+    id: 'dre-consolidated' as const,
+    title: 'DRE Consolidado',
+    description:
+      'Visão consolidada do resultado por empresa com detalhamento hierárquico',
+    icon: Building2,
+    color: 'text-violet-600',
+    bg: 'bg-violet-100 dark:bg-violet-900/30',
   },
   {
     id: 'balance' as const,
@@ -106,6 +126,12 @@ export default function FinanceReportsPage() {
     endDate: dateRange.endDate,
   });
 
+  const { data: consolidatedData, isLoading: consolidatedLoading } =
+    useConsolidatedDRE({
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    });
+
   const { data: dashboardData, isLoading: dashLoading } =
     useAnalyticsDashboard();
 
@@ -135,7 +161,7 @@ export default function FinanceReportsPage() {
 
       <PeriodSelector value={dateRange} onChange={setDateRange} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {reportCards.map(card => (
           <Card
             key={card.id}
@@ -170,11 +196,13 @@ export default function FinanceReportsPage() {
                 >
                   {activeReport === card.id ? 'Ocultar' : 'Visualizar'}
                 </Button>
-                <ExportMenu
-                  reportType={REPORT_TYPE_MAP[card.id]}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                />
+                {REPORT_TYPE_MAP[card.id] && (
+                  <ExportMenu
+                    reportType={REPORT_TYPE_MAP[card.id]}
+                    startDate={dateRange.startDate}
+                    endDate={dateRange.endDate}
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
@@ -190,6 +218,13 @@ export default function FinanceReportsPage() {
           variationPercent={dreData?.variationPercent}
           isLoading={dreLoading}
           onDrillDown={handleDrillDown}
+        />
+      )}
+
+      {activeReport === 'dre-consolidated' && (
+        <ConsolidatedDRETable
+          data={consolidatedData}
+          isLoading={consolidatedLoading}
         />
       )}
 
