@@ -155,7 +155,7 @@ export default function MedicalExamsPage() {
   // Employees for filter dropdown
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'filter-list'],
-    queryFn: () => employeesService.listEmployees({ perPage: 200 }),
+    queryFn: () => employeesService.listEmployees({ perPage: 100 }),
   });
 
   const employeeOptions = useMemo(

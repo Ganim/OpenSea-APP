@@ -84,7 +84,7 @@ export function CreateModal({
   const { data: departmentsData } = useQuery({
     queryKey: ['departments', 'all'],
     queryFn: async () => {
-      const res = await departmentsService.listDepartments({ perPage: 200 });
+      const res = await departmentsService.listDepartments({ perPage: 100 });
       return (res as { departments?: { id: string; name: string }[] }).departments ?? [];
     },
     staleTime: 10 * 60 * 1000,
@@ -93,7 +93,7 @@ export function CreateModal({
   const { data: positionsData } = useQuery({
     queryKey: ['positions', 'all'],
     queryFn: async () => {
-      const res = await positionsService.listPositions({ perPage: 200 });
+      const res = await positionsService.listPositions({ perPage: 100 });
       return (res as { positions?: { id: string; name: string }[] }).positions ?? [];
     },
     staleTime: 10 * 60 * 1000,

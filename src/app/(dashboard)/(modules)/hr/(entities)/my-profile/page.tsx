@@ -302,7 +302,7 @@ export default function MyProfilePage() {
         employeeId: employee!.id,
         startDate: thirtyDaysAgo,
         endDate: today,
-        perPage: 200,
+        perPage: 100,
       });
       return response.timeEntries;
     },

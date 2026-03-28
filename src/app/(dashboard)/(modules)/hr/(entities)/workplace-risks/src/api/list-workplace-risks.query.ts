@@ -39,14 +39,14 @@ export function useListWorkplaceRisks(params?: WorkplaceRiskFilters) {
             category: params?.category,
             severity: params?.severity,
             isActive: params?.isActive,
-            perPage: 200,
+            perPage: 100,
           });
 
           allRisks = response.workplaceRisks ?? [];
         } else {
           // Otherwise, fetch all safety programs, then fetch risks from each
           const programsResponse = await safetyProgramsService.list({
-            perPage: 200,
+            perPage: 100,
           });
           const programs = programsResponse.safetyPrograms ?? [];
 
@@ -56,7 +56,7 @@ export function useListWorkplaceRisks(params?: WorkplaceRiskFilters) {
               category: params?.category,
               severity: params?.severity,
               isActive: params?.isActive,
-              perPage: 200,
+              perPage: 100,
             });
             const risks = risksResponse.workplaceRisks ?? [];
             allRisks.push(...risks);

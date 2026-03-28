@@ -58,7 +58,7 @@ export default function DependantDetailPage() {
     queryFn: async () => {
       // Fetch all employees, then search for the dependant in each
       const employeesResponse = await employeesService.listEmployees({
-        perPage: 200,
+        perPage: 100,
         status: 'ACTIVE',
       });
       const employees = employeesResponse.employees ?? [];

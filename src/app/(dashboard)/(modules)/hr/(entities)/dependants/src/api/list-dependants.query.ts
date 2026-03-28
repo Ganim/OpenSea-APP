@@ -42,7 +42,7 @@ export function useListDependants(params?: ListDependantsParams) {
       } else {
         // Otherwise, fetch all active employees, then aggregate dependants from each
         const employeesResponse = await employeesService.listEmployees({
-          perPage: 200,
+          perPage: 100,
           status: 'ACTIVE',
         });
         const employees = employeesResponse.employees ?? [];

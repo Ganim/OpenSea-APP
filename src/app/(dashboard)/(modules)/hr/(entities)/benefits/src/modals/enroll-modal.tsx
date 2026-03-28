@@ -56,7 +56,7 @@ export function EnrollModal({
   const { data: employeesData, isLoading: isLoadingEmployees } = useQuery({
     queryKey: ['employees', 'for-enrollment', planId],
     queryFn: async () => {
-      const response = await employeesService.listEmployees({ perPage: 200 });
+      const response = await employeesService.listEmployees({ perPage: 100 });
       return response.employees;
     },
     enabled: isOpen,

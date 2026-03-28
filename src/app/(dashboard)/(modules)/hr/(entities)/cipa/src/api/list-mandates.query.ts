@@ -33,7 +33,7 @@ export function useListCipaMandates(params?: CipaMandateFilters) {
       } else {
         const response = await cipaService.listMandates({
           status: params?.status,
-          perPage: 200,
+          perPage: 100,
         });
 
         allMandates =

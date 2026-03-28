@@ -150,7 +150,7 @@ export default function OvertimePage() {
   // Employee options for filter dropdown
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'filter-options'],
-    queryFn: () => employeesService.listEmployees({ perPage: 200, status: 'ACTIVE' }),
+    queryFn: () => employeesService.listEmployees({ perPage: 100, status: 'ACTIVE' }),
     staleTime: 60_000,
   });
 

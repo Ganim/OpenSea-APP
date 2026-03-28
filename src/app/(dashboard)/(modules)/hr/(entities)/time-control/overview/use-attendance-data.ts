@@ -258,15 +258,15 @@ async function fetchAttendanceData(): Promise<AttendanceData> {
     absencesResult,
     vacationsResult,
   ] = await Promise.allSettled([
-    employeesService.listEmployees({ page: 1, perPage: 200 }),
+    employeesService.listEmployees({ page: 1, perPage: 100 }),
     timeControlService.listTimeEntries({
       startDate: today,
       endDate: today,
-      perPage: 500,
+      perPage: 100,
     }),
     timeBankService.list({ year: currentYear }),
     overtimeService.list({ perPage: 100 }),
-    absencesService.list({ perPage: 200 }),
+    absencesService.list({ perPage: 100 }),
     vacationsService.list({ status: 'SCHEDULED', perPage: 100 }),
   ]);
 

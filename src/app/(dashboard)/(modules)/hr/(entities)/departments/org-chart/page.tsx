@@ -66,7 +66,7 @@ export default function OrgChartPage() {
     queryKey: ['org-chart-departments'],
     queryFn: async () => {
       const response = await departmentsService.listDepartments({
-        perPage: 500,
+        perPage: 100,
       });
       return response.departments;
     },
@@ -77,7 +77,7 @@ export default function OrgChartPage() {
     queryKey: ['org-chart-employees'],
     queryFn: async () => {
       const response = await employeesService.listEmployees({
-        perPage: 500,
+        perPage: 100,
         status: 'ACTIVE',
       });
       return response.employees;
