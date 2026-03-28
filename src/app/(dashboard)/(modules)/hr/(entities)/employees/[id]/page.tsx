@@ -761,7 +761,7 @@ export default function EmployeeDetailPage() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="userEmail">
-                Email <span className="text-red-500">*</span>
+                Email <span className="text-rose-500">*</span>
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -773,7 +773,7 @@ export default function EmployeeDetailPage() {
                   placeholder="email@exemplo.com"
                   className={`pl-10 ${
                     emailError
-                      ? 'border-red-500 focus-visible:ring-red-500'
+                      ? 'border-rose-500 focus-visible:ring-rose-500'
                       : ''
                   }`}
                 />
@@ -790,7 +790,7 @@ export default function EmployeeDetailPage() {
 
             <div className="space-y-2">
               <Label htmlFor="userPassword">
-                Senha <span className="text-red-500">*</span>
+                Senha <span className="text-rose-500">*</span>
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -802,7 +802,7 @@ export default function EmployeeDetailPage() {
                   placeholder="Mínimo 6 caracteres"
                   className={`pl-10 pr-10 ${
                     passwordError
-                      ? 'border-red-500 focus-visible:ring-red-500'
+                      ? 'border-rose-500 focus-visible:ring-rose-500'
                       : ''
                   }`}
                 />
@@ -833,7 +833,7 @@ export default function EmployeeDetailPage() {
 
             <div className="space-y-2">
               <Label htmlFor="permissionGroup">
-                Grupo de Permissão <span className="text-red-500">*</span>
+                Grupo de Permissão <span className="text-rose-500">*</span>
               </Label>
               <Select
                 value={permissionGroupId}

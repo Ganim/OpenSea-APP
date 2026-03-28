@@ -648,13 +648,13 @@ export default function EmployeeEditPage() {
                       onBlur={() => handleBlur('fullName', fullName)}
                       className={
                         errors.fullName
-                          ? 'border-red-500 focus-visible:ring-red-500'
+                          ? 'border-rose-500 focus-visible:ring-rose-500'
                           : ''
                       }
                       required
                     />
                     {errors.fullName && (
-                      <p className="text-xs text-red-500">{errors.fullName}</p>
+                      <p className="text-xs text-rose-500">{errors.fullName}</p>
                     )}
                   </div>
 
@@ -677,13 +677,13 @@ export default function EmployeeEditPage() {
                       }
                       className={
                         errors.registrationNumber
-                          ? 'border-red-500 focus-visible:ring-red-500'
+                          ? 'border-rose-500 focus-visible:ring-rose-500'
                           : ''
                       }
                       required
                     />
                     {errors.registrationNumber && (
-                      <p className="text-xs text-red-500">
+                      <p className="text-xs text-rose-500">
                         {errors.registrationNumber}
                       </p>
                     )}
@@ -705,13 +705,13 @@ export default function EmployeeEditPage() {
                       onBlur={() => handleBlur('cpf', cpf)}
                       className={
                         errors.cpf
-                          ? 'border-red-500 focus-visible:ring-red-500'
+                          ? 'border-rose-500 focus-visible:ring-rose-500'
                           : ''
                       }
                       required
                     />
                     {errors.cpf && (
-                      <p className="text-xs text-red-500">{errors.cpf}</p>
+                      <p className="text-xs text-rose-500">{errors.cpf}</p>
                     )}
                   </div>
 

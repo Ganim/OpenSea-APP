@@ -255,7 +255,7 @@ export function ViewModal({ isOpen, onClose, absence }: ViewModalProps) {
                     <p className="text-sm text-muted-foreground">
                       Motivo da Rejeição
                     </p>
-                    <p className="text-sm mt-1 text-red-600">
+                    <p className="text-sm mt-1 text-rose-600">
                       {absence.rejectionReason}
                     </p>
                   </div>

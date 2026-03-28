@@ -350,7 +350,7 @@ export default function AbsenceDetailPage() {
         {isRejected && (
           <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
             <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <ShieldX className="h-5 w-5 text-red-500" />
+              <ShieldX className="h-5 w-5 text-rose-500" />
               Rejeição
             </h3>
             {absence.rejectionReason && (
