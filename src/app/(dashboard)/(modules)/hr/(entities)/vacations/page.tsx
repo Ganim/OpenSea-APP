@@ -36,6 +36,7 @@ import {
   Download,
   ExternalLink,
   Eye,
+  Loader2,
   Palmtree,
   Plus,
   User,
@@ -43,7 +44,7 @@ import {
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   vacationsConfig,
   useListVacations,
@@ -115,7 +116,7 @@ export default function VacationsPage() {
   const [filterYear, setFilterYear] = useState('');
 
   const queryParams = useMemo(() => {
-    const params: Record<string, unknown> = { perPage: 50 };
+    const params: Record<string, unknown> = { perPage: 20 };
     if (filterEmployeeId) params.employeeId = filterEmployeeId;
     if (filterStatus) params.status = filterStatus;
     if (filterYear) params.year = Number(filterYear);
@@ -126,7 +127,15 @@ export default function VacationsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListVacations(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListVacations(queryParams);
   const scheduleVacation = useScheduleVacation({
     onSuccess: () => {
       setShowScheduleModal(false);
@@ -141,7 +150,27 @@ export default function VacationsPage() {
   });
   const cancelSchedule = useCancelVacationSchedule();
 
-  const vacations = data?.vacationPeriods ?? [];
+  const vacations = data?.pages.flatMap(p => p.vacationPeriods ?? []) ?? [];
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => vacations.map(v => v.employeeId),
@@ -623,6 +652,13 @@ export default function VacationsPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           <CreateModal

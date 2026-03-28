@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  Loader2,
   MinusCircle,
   Plus,
   Trash2,
@@ -38,7 +39,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import {
@@ -102,11 +103,39 @@ export default function DeductionsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListDeductions(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListDeductions(queryParams);
   const createMutation = useCreateDeduction();
   const deleteMutation = useDeleteDeduction();
 
-  const deductions = data?.deductions ?? [];
+  const deductions = data?.pages.flatMap(p => p.deductions ?? []) ?? [];
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => deductions.map(d => d.employeeId),
@@ -579,6 +608,13 @@ export default function DeductionsPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}

@@ -10,7 +10,6 @@ export {
   useListPayrolls,
   type ListPayrollsParams,
   type ListPayrollsResponse,
-  type ListPayrollsOptions,
 } from './list-payrolls.query';
 
 // Mutations

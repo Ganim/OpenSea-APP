@@ -9,7 +9,6 @@ export { terminationKeys, type TerminationFilters } from './keys';
 export {
   useListTerminations,
   type ListTerminationsResponse,
-  type ListTerminationsOptions,
 } from './list-terminations.query';
 
 // Mutations

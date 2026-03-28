@@ -28,6 +28,7 @@ import {
   ExternalLink,
   Eye,
   Hourglass,
+  Loader2,
   Minus,
   Plus,
   SlidersHorizontal,
@@ -35,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   formatBalance,
   getBalanceColor,
@@ -101,12 +102,32 @@ function TimeBankPageContent() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListTimeBanks(queryParams);
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTimeBanks(queryParams);
   const credit = useCreditTimeBank({ onSuccess: () => setCreditOpen(false) });
   const debit = useDebitTimeBank({ onSuccess: () => setDebitOpen(false) });
   const adjust = useAdjustTimeBank({ onSuccess: () => setAdjustOpen(false) });
 
-  const timeBanks = data?.timeBanks ?? [];
+  const timeBanks = useMemo(
+    () => data?.pages.flatMap(p => p.timeBanks ?? []) ?? [],
+    [data]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => timeBanks.map(tb => tb.employeeId),
@@ -421,45 +442,53 @@ function TimeBankPageContent() {
               }}
             />
           ) : (
-            <EntityGrid
-              config={timeBankConfig}
-              items={filteredItems}
-              toolbarStart={
-                <>
-                  <FilterDropdown
-                    label="Funcionário"
-                    icon={User}
-                    options={employeeOptions}
-                    value={filterEmployeeId}
-                    onChange={v => setFilterEmployeeId(v)}
-                    activeColor="violet"
-                    searchPlaceholder="Buscar funcionário..."
-                    emptyText="Nenhum funcionário encontrado."
-                  />
-                  <FilterDropdown
-                    label="Ano"
-                    icon={Calendar}
-                    options={yearOptions}
-                    value={filterYear}
-                    onChange={v => setFilterYear(v)}
-                    activeColor="cyan"
-                    searchPlaceholder="Buscar ano..."
-                    emptyText="Nenhum ano encontrado."
-                  />
-                </>
-              }
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={isLoading}
-              isSearching={!!searchQuery}
-              onItemDoubleClick={item => {
-                setViewTarget(item);
-                setIsViewOpen(true);
-              }}
-              showSorting={true}
-              defaultSortField="createdAt"
-              defaultSortDirection="desc"
-            />
+            <>
+              <EntityGrid
+                config={timeBankConfig}
+                items={filteredItems}
+                toolbarStart={
+                  <>
+                    <FilterDropdown
+                      label="Funcionário"
+                      icon={User}
+                      options={employeeOptions}
+                      value={filterEmployeeId}
+                      onChange={v => setFilterEmployeeId(v)}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar funcionário..."
+                      emptyText="Nenhum funcionário encontrado."
+                    />
+                    <FilterDropdown
+                      label="Ano"
+                      icon={Calendar}
+                      options={yearOptions}
+                      value={filterYear}
+                      onChange={v => setFilterYear(v)}
+                      activeColor="cyan"
+                      searchPlaceholder="Buscar ano..."
+                      emptyText="Nenhum ano encontrado."
+                    />
+                  </>
+                }
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!searchQuery}
+                onItemDoubleClick={item => {
+                  setViewTarget(item);
+                  setIsViewOpen(true);
+                }}
+                showSorting={true}
+                defaultSortField="createdAt"
+                defaultSortDirection="desc"
+              />
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
           <CreditModal

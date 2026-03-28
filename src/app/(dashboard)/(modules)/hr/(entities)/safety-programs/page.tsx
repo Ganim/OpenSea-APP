@@ -32,6 +32,7 @@ import {
   Calendar,
   ExternalLink,
   Eye,
+  Loader2,
   Plus,
   ShieldCheck,
   Trash2,
@@ -39,7 +40,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   safetyProgramsConfig,
   useListSafetyPrograms,
@@ -103,12 +104,32 @@ export default function SafetyProgramsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } =
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useListSafetyPrograms(queryParams);
   const createMutation = useCreateSafetyProgram();
   const deleteMutation = useDeleteSafetyProgram();
 
-  const programs = data?.safetyPrograms ?? [];
+  const programs = useMemo(
+    () => data?.pages.flatMap(p => p.safetyPrograms ?? []) ?? [],
+    [data]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================================================
   // STATE
@@ -450,22 +471,30 @@ export default function SafetyProgramsPage() {
               }}
             />
           ) : (
-            <EntityGrid
-              config={safetyProgramsConfig}
-              items={filteredItems}
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={isLoading}
-              isSearching={!!searchQuery}
-              onItemDoubleClick={item => {
-                if (canView) {
-                  router.push(`/hr/safety-programs/${item.id}`);
-                }
-              }}
-              showSorting={true}
-              defaultSortField="createdAt"
-              defaultSortDirection="desc"
-            />
+            <>
+              <EntityGrid
+                config={safetyProgramsConfig}
+                items={filteredItems}
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!searchQuery}
+                onItemDoubleClick={item => {
+                  if (canView) {
+                    router.push(`/hr/safety-programs/${item.id}`);
+                  }
+                }}
+                showSorting={true}
+                defaultSortField="createdAt"
+                defaultSortDirection="desc"
+              />
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
           {/* Create Modal */}

@@ -32,12 +32,30 @@ import type {
   AnnouncementPriority,
   CreateAnnouncementData,
 } from '@/types/hr';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle, Bell, Info, Megaphone, Plus } from 'lucide-react';
+import {
+  AlertTriangle,
+  Bell,
+  Info,
+  Loader2,
+  Megaphone,
+  Plus,
+} from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 
 const CreateAnnouncementModal = dynamic(
@@ -152,18 +170,61 @@ function AnnouncementsPageContent() {
   // DATA FETCHING
   // ============================================================================
 
+  const PAGE_SIZE = 20;
+
   const {
-    data: announcementsData,
+    data: infiniteData,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['hr-announcements'],
-    queryFn: async () => {
-      const response = await portalService.listAnnouncements({ perPage: 100 });
-      return response.announcements;
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await portalService.listAnnouncements({
+        page: pageParam,
+        perPage: PAGE_SIZE,
+      });
+      return response;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.meta?.page ?? 1;
+      const totalPages = lastPage.meta?.totalPages ?? 1;
+      if (currentPage < totalPages) {
+        return currentPage + 1;
+      }
+      return undefined;
     },
   });
+
+  const announcementsData =
+    infiniteData?.pages.flatMap(p => p.announcements) ?? [];
+
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================================================
   // MUTATIONS
@@ -197,7 +258,7 @@ function AnnouncementsPageContent() {
   // ============================================================================
 
   const filteredItems = useMemo(() => {
-    let items = announcementsData || [];
+    let items = announcementsData;
 
     // Search filter
     if (searchQuery) {
@@ -514,6 +575,14 @@ function AnnouncementsPageContent() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}

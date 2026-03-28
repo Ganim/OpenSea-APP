@@ -1,10 +1,10 @@
 /**
  * OpenSea OS - List Absences Query (HR)
  *
- * Hook para listar ausências com suporte a filtros, paginação e cache.
+ * Hook para listar ausências com suporte a filtros, scroll infinito e cache.
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import type { Absence } from '@/types/hr';
 import { absencesApi } from './absences.api';
 import { absenceKeys, type AbsenceFilters } from './keys';
@@ -23,37 +23,38 @@ export interface ListAbsencesResponse {
   totalPages: number;
 }
 
-export type ListAbsencesOptions = Omit<
-  UseQueryOptions<ListAbsencesResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
 /* ===========================================
    QUERY HOOK
    =========================================== */
 
-export function useListAbsences(
-  params?: ListAbsencesParams,
-  options?: ListAbsencesOptions
-) {
-  return useQuery({
+export function useListAbsences(params?: ListAbsencesParams) {
+  return useInfiniteQuery<ListAbsencesResponse>({
     queryKey: absenceKeys.list(params),
 
-    queryFn: async (): Promise<ListAbsencesResponse> => {
-      const response = await absencesApi.list(params);
+    queryFn: async ({ pageParam }): Promise<ListAbsencesResponse> => {
+      const page = pageParam as number;
+      const response = await absencesApi.list({
+        ...params,
+        page,
+        perPage: PAGE_SIZE,
+      });
 
       return {
         absences: response.absences ?? [],
         total: response.meta?.total ?? 0,
-        page: response.meta?.page ?? 1,
-        perPage: response.meta?.perPage ?? 20,
+        page: response.meta?.page ?? page,
+        perPage: response.meta?.perPage ?? PAGE_SIZE,
         totalPages: response.meta?.totalPages ?? 1,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+
     staleTime: 2 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

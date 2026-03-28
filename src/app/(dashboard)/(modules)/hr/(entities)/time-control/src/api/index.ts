@@ -8,7 +8,6 @@ export {
   useListTimeEntries,
   type ListTimeEntriesParams,
   type ListTimeEntriesResponse,
-  type ListTimeEntriesOptions,
 } from './list-time-entries.query';
 
 export {

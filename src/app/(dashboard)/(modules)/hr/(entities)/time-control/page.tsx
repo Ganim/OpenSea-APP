@@ -17,9 +17,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { TimeEntry } from '@/types/hr';
-import { Calculator, LayoutDashboard, LogIn, LogOut, Settings } from 'lucide-react';
+import { Calculator, LayoutDashboard, Loader2, LogIn, LogOut, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalculateHoursModal,
   ClockInModal,
@@ -67,16 +67,35 @@ function TimeControlPageContent() {
       employeeId: employeeFilter || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
-      perPage: 100,
     }),
     [employeeFilter, startDate, endDate]
   );
 
-  const { data, isLoading, error, refetch } = useListTimeEntries(params);
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTimeEntries(params);
   const clockIn = useClockIn();
   const clockOut = useClockOut();
 
-  const entries = data?.timeEntries ?? [];
+  const entries = useMemo(
+    () => data?.pages.flatMap(p => p.timeEntries ?? []) ?? [],
+    [data]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
   const groupedEntries = useMemo(() => groupEntriesByDate(entries), [entries]);
   const sortedDates = useMemo(
     () => Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a)),
@@ -270,6 +289,12 @@ function TimeControlPageContent() {
                 </div>
               </div>
             ))}
+            <div ref={sentinelRef} className="h-1" />
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </div>
         )}
 

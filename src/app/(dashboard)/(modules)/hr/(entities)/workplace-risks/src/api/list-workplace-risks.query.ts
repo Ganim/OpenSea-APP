@@ -1,71 +1,94 @@
 /**
- * OpenSea OS - List Workplace Risks Query
+ * OpenSea OS - List Workplace Risks Query (Infinite Scroll)
  * Fetches risks from all safety programs or a specific one
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { workplaceRisksService } from '@/services/hr/workplace-risks.service';
 import { safetyProgramsService } from '@/services/hr/safety-programs.service';
 import type { WorkplaceRisk } from '@/types/hr';
 import { workplaceRiskKeys, type WorkplaceRiskFilters } from './keys';
 
-export interface ListWorkplaceRisksResponse {
+const PAGE_SIZE = 20;
+
+export interface ListWorkplaceRisksPage {
   risks: WorkplaceRisk[];
   total: number;
+  page: number;
+  totalPages: number;
 }
 
-export type ListWorkplaceRisksOptions = Omit<
-  UseQueryOptions<ListWorkplaceRisksResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+// Cache for the full dataset so subsequent pages don't re-fetch
+let _cachedKey: string | null = null;
+let _cachedRisks: WorkplaceRisk[] | null = null;
 
-export function useListWorkplaceRisks(
-  params?: WorkplaceRiskFilters,
-  options?: ListWorkplaceRisksOptions
-) {
-  return useQuery({
+export function useListWorkplaceRisks(params?: WorkplaceRiskFilters) {
+  return useInfiniteQuery({
     queryKey: workplaceRiskKeys.list(params),
 
-    queryFn: async (): Promise<ListWorkplaceRisksResponse> => {
-      // If a specific program is selected, fetch risks for that program
-      if (params?.programId) {
-        const response = await workplaceRisksService.list(params.programId, {
-          category: params?.category,
-          severity: params?.severity,
-          isActive: params?.isActive,
-          perPage: 100,
-        });
+    queryFn: async ({ pageParam = 1 }): Promise<ListWorkplaceRisksPage> => {
+      const cacheKey = JSON.stringify(params ?? {});
+      let allRisks: WorkplaceRisk[];
 
-        const risks = response.workplaceRisks ?? [];
-        return { risks, total: risks.length };
+      if (_cachedKey === cacheKey && _cachedRisks && pageParam > 1) {
+        allRisks = _cachedRisks;
+      } else {
+        // If a specific program is selected, fetch risks for that program
+        if (params?.programId) {
+          const response = await workplaceRisksService.list(params.programId, {
+            category: params?.category,
+            severity: params?.severity,
+            isActive: params?.isActive,
+            perPage: 200,
+          });
+
+          allRisks = response.workplaceRisks ?? [];
+        } else {
+          // Otherwise, fetch all safety programs, then fetch risks from each
+          const programsResponse = await safetyProgramsService.list({
+            perPage: 200,
+          });
+          const programs = programsResponse.safetyPrograms ?? [];
+
+          allRisks = [];
+          for (const program of programs) {
+            const risksResponse = await workplaceRisksService.list(program.id, {
+              category: params?.category,
+              severity: params?.severity,
+              isActive: params?.isActive,
+              perPage: 200,
+            });
+            const risks = risksResponse.workplaceRisks ?? [];
+            allRisks.push(...risks);
+          }
+        }
+
+        _cachedKey = cacheKey;
+        _cachedRisks = allRisks;
       }
 
-      // Otherwise, fetch all safety programs, then fetch risks from each
-      const programsResponse = await safetyProgramsService.list({ perPage: 100 });
-      const programs = programsResponse.safetyPrograms ?? [];
+      const total = allRisks.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const start = (pageParam - 1) * PAGE_SIZE;
+      const paginatedRisks = allRisks.slice(start, start + PAGE_SIZE);
 
-      if (programs.length === 0) {
-        return { risks: [], total: 0 };
+      return {
+        risks: paginatedRisks,
+        total,
+        page: pageParam,
+        totalPages,
+      };
+    },
+
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.totalPages) {
+        return lastPage.page + 1;
       }
-
-      const allRisks: WorkplaceRisk[] = [];
-      for (const program of programs) {
-        const risksResponse = await workplaceRisksService.list(program.id, {
-          category: params?.category,
-          severity: params?.severity,
-          isActive: params?.isActive,
-          perPage: 100,
-        });
-        const risks = risksResponse.workplaceRisks ?? [];
-        allRisks.push(...risks);
-      }
-
-      return { risks: allRisks, total: allRisks.length };
+      return undefined;
     },
 
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

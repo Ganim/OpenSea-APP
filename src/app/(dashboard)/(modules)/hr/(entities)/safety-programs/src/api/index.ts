@@ -9,7 +9,6 @@ export { safetyProgramKeys, type SafetyProgramFilters } from './keys';
 export {
   useListSafetyPrograms,
   type ListSafetyProgramsResponse,
-  type ListSafetyProgramsOptions,
 } from './list-safety-programs.query';
 
 // Mutations

@@ -23,9 +23,10 @@ import {
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { WorkSchedule } from '@/types/hr';
-import { Clock, Coffee, Pencil, Plus, Timer, Trash2 } from 'lucide-react';
+import { Clock, Coffee, Loader2, Pencil, Plus, Timer, Trash2 } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   createWorkSchedule,
   deleteWorkSchedule,
@@ -79,7 +80,58 @@ function WorkSchedulesPageContent() {
   const { hasPermission } = usePermissions();
 
   // ============================================================================
-  // CRUD SETUP
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['work-schedules', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return workSchedulesApi.list({ page: pageParam, perPage: PAGE_SIZE });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allWorkSchedulesInfinite = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.workSchedules ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<WorkSchedule>({
@@ -88,8 +140,7 @@ function WorkSchedulesPageContent() {
     queryKey: ['work-schedules'],
     baseUrl: '/api/v1/hr/work-schedules',
     listFn: async () => {
-      const response = await workSchedulesApi.list({ perPage: 100 });
-      return response.workSchedules;
+      return allWorkSchedulesInfinite;
     },
     getFn: (id: string) => workSchedulesApi.get(id),
     createFn: createWorkSchedule,
@@ -421,9 +472,9 @@ function WorkSchedulesPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar escalas"
@@ -439,7 +490,7 @@ function WorkSchedulesPageContent() {
               items={displayedItems}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item =>
@@ -449,6 +500,14 @@ function WorkSchedulesPageContent() {
               defaultSortField="name"
               defaultSortDirection="asc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

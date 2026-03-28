@@ -8,8 +8,7 @@ export { cipaKeys, type CipaMandateFilters } from './keys';
 // Queries
 export {
   useListCipaMandates,
-  type ListCipaMandatesResponse,
-  type ListCipaMandatesOptions,
+  type ListCipaMandatesPage,
 } from './list-mandates.query';
 
 // Mutations

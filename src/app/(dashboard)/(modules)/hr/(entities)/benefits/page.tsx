@@ -28,10 +28,11 @@ import {
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { BenefitPlan, BenefitType } from '@/types/hr';
-import { Heart, Plus, Users } from 'lucide-react';
+import { Heart, Loader2, Plus, Users } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   benefitPlansApi,
@@ -85,7 +86,58 @@ function BenefitsPageContent() {
   }, [searchParams]);
 
   // ============================================================================
-  // CRUD SETUP
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['benefit-plans', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return benefitPlansApi.list({ page: pageParam, perPage: PAGE_SIZE });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allBenefitPlansInfinite = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.benefitPlans ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<BenefitPlan>({
@@ -94,8 +146,7 @@ function BenefitsPageContent() {
     queryKey: ['benefit-plans'],
     baseUrl: '/api/v1/hr/benefit-plans',
     listFn: async () => {
-      const response = await benefitPlansApi.list({ perPage: 100 });
-      return response.benefitPlans;
+      return allBenefitPlansInfinite;
     },
     getFn: (id: string) => benefitPlansApi.get(id),
     createFn: createBenefitPlan,
@@ -398,9 +449,9 @@ function BenefitsPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar planos de benefícios"
@@ -443,7 +494,7 @@ function BenefitsPageContent() {
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item =>
@@ -453,6 +504,14 @@ function BenefitsPageContent() {
               defaultSortField="name"
               defaultSortDirection="asc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

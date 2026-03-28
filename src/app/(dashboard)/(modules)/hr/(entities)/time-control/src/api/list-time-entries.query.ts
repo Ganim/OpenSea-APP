@@ -1,24 +1,24 @@
 import type { TimeEntriesResponse } from '@/services/hr/time-control.service';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { timeControlApi } from './time-control.api';
 import { timeEntryKeys, type TimeEntryFilters } from './keys';
 
 export type ListTimeEntriesParams = TimeEntryFilters;
 export type ListTimeEntriesResponse = TimeEntriesResponse;
 
-export type ListTimeEntriesOptions = Omit<
-  UseQueryOptions<ListTimeEntriesResponse>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
-export function useListTimeEntries(
-  params?: ListTimeEntriesParams,
-  options?: ListTimeEntriesOptions
-) {
-  return useQuery<ListTimeEntriesResponse>({
+export function useListTimeEntries(params?: ListTimeEntriesParams) {
+  return useInfiniteQuery<ListTimeEntriesResponse>({
     queryKey: timeEntryKeys.list(params),
-    queryFn: () => timeControlApi.list(params),
+    queryFn: ({ pageParam }) =>
+      timeControlApi.list({ ...params, page: pageParam as number, perPage: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return page < totalPages ? page + 1 : undefined;
+    },
     staleTime: 1000 * 60 * 2,
-    ...options,
   });
 }

@@ -33,15 +33,17 @@ import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants
 import type { GeofenceZone } from '@/types/hr';
 import {
   ExternalLink,
+  Loader2,
   MapPin,
   Navigation,
   Plus,
   Radius,
   Trash2,
 } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   createGeofenceZone,
   deleteGeofenceZone,
@@ -97,7 +99,69 @@ function GeofenceZonesPageContent() {
   }, [searchParams]);
 
   // ============================================================================
-  // CRUD SETUP
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['geofence-zones', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      // Geofence zones API returns all zones at once (no server pagination)
+      const zones = await geofenceZonesApi.list();
+      const start = (pageParam - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageItems = zones.slice(start, end);
+      const totalPages = Math.ceil(zones.length / PAGE_SIZE);
+      return {
+        geofenceZones: pageItems,
+        total: zones.length,
+        page: pageParam,
+        totalPages,
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allGeofenceZonesInfinite = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.geofenceZones ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<GeofenceZone>({
@@ -106,8 +170,7 @@ function GeofenceZonesPageContent() {
     queryKey: ['geofence-zones'],
     baseUrl: '/api/v1/hr/geofence-zones',
     listFn: async () => {
-      const zones = await geofenceZonesApi.list();
-      return zones;
+      return allGeofenceZonesInfinite;
     },
     getFn: (id: string) => geofenceZonesApi.get(id),
     createFn: createGeofenceZone,
@@ -447,9 +510,9 @@ function GeofenceZonesPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar zonas de geofencing"
@@ -480,7 +543,7 @@ function GeofenceZonesPageContent() {
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item => {
@@ -492,6 +555,14 @@ function GeofenceZonesPageContent() {
               defaultSortField="name"
               defaultSortDirection="asc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

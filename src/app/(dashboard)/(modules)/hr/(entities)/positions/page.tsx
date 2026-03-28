@@ -33,13 +33,15 @@ import {
   Briefcase,
   Building2,
   ExternalLink,
+  Loader2,
   Plus,
   Upload,
   Users,
 } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useListCompanies } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
 import { useListDepartments } from '../departments/src';
 import {
@@ -149,7 +151,58 @@ function PositionsPageContent() {
   }, [departmentsData?.departments]);
 
   // ============================================================================
-  // CRUD SETUP (always fetches ALL positions - filtering is client-side)
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['positions', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return positionsApi.list({ page: pageParam, perPage: PAGE_SIZE });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allPositionsInfinite = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.positions ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<Position>({
@@ -158,8 +211,7 @@ function PositionsPageContent() {
     queryKey: ['positions'],
     baseUrl: '/api/v1/hr/positions',
     listFn: async () => {
-      const posResponse = await positionsApi.list({ perPage: 100 });
-      return posResponse.positions;
+      return allPositionsInfinite;
     },
     getFn: (id: string) => positionsApi.get(id),
     createFn: createPosition,
@@ -571,9 +623,9 @@ function PositionsPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar cargos"
@@ -631,7 +683,7 @@ function PositionsPageContent() {
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item =>
@@ -641,6 +693,14 @@ function PositionsPageContent() {
               customSortFn={customSortByCode}
               customSortLabel="Código"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

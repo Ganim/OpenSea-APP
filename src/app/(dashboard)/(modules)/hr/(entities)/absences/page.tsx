@@ -37,6 +37,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  Loader2,
   Plus,
   User,
   UserX,
@@ -45,7 +46,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   absencesConfig,
   useListAbsences,
@@ -129,7 +130,7 @@ export default function AbsencesPage() {
   const [filterEndDate, setFilterEndDate] = useState('');
 
   const queryParams = useMemo(() => {
-    const params: Record<string, unknown> = { perPage: 50 };
+    const params: Record<string, unknown> = { perPage: 20 };
     if (filterEmployeeId) params.employeeId = filterEmployeeId;
     if (filterType) params.type = filterType;
     if (filterStatus) params.status = filterStatus;
@@ -148,11 +149,39 @@ export default function AbsencesPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListAbsences(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListAbsences(queryParams);
   const approveAbsence = useApproveAbsence();
   const cancelAbsence = useCancelAbsence();
 
-  const absences = data?.absences ?? [];
+  const absences = data?.pages.flatMap(p => p.absences ?? []) ?? [];
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => absences.map(a => a.employeeId),
@@ -642,6 +671,13 @@ export default function AbsencesPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           <RequestSickLeaveModal

@@ -1,56 +1,70 @@
 /**
- * OpenSea OS - List CIPA Mandates Query
+ * OpenSea OS - List CIPA Mandates Query (Infinite Scroll)
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { cipaService } from '@/services/hr/cipa.service';
 import type { CipaMandate } from '@/types/hr';
 import { cipaKeys, type CipaMandateFilters } from './keys';
 
-export interface ListCipaMandatesResponse {
+const PAGE_SIZE = 20;
+
+export interface ListCipaMandatesPage {
   mandates: CipaMandate[];
   total: number;
   page: number;
-  perPage: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
-export type ListCipaMandatesOptions = Omit<
-  UseQueryOptions<ListCipaMandatesResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+// Cache for the full dataset so subsequent pages don't re-fetch
+let _cachedKey: string | null = null;
+let _cachedMandates: CipaMandate[] | null = null;
 
-export function useListCipaMandates(
-  params?: CipaMandateFilters,
-  options?: ListCipaMandatesOptions
-) {
-  return useQuery({
+export function useListCipaMandates(params?: CipaMandateFilters) {
+  return useInfiniteQuery({
     queryKey: cipaKeys.mandateList(params),
 
-    queryFn: async (): Promise<ListCipaMandatesResponse> => {
-      const response = await cipaService.listMandates({
-        status: params?.status,
-        page: params?.page,
-        perPage: params?.perPage ?? 100,
-      });
+    queryFn: async ({ pageParam = 1 }): Promise<ListCipaMandatesPage> => {
+      const cacheKey = JSON.stringify(params ?? {});
+      let allMandates: CipaMandate[];
 
-      const mandates =
-        (response as { mandates?: CipaMandate[] }).mandates ?? [];
-      const page = params?.page ?? 1;
-      const perPage = params?.perPage ?? 100;
+      if (_cachedKey === cacheKey && _cachedMandates && pageParam > 1) {
+        allMandates = _cachedMandates;
+      } else {
+        const response = await cipaService.listMandates({
+          status: params?.status,
+          perPage: 200,
+        });
+
+        allMandates =
+          (response as { mandates?: CipaMandate[] }).mandates ?? [];
+
+        _cachedKey = cacheKey;
+        _cachedMandates = allMandates;
+      }
+
+      const total = allMandates.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const start = (pageParam - 1) * PAGE_SIZE;
+      const paginatedMandates = allMandates.slice(start, start + PAGE_SIZE);
 
       return {
-        mandates,
-        total: mandates.length,
-        page,
-        perPage,
-        hasMore: mandates.length >= perPage,
+        mandates: paginatedMandates,
+        total,
+        page: pageParam,
+        totalPages,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.totalPages) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

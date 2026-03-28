@@ -35,13 +35,15 @@ import {
   Building2,
   ExternalLink,
   Factory,
+  Loader2,
   Plus,
   Upload,
   Users,
 } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { useListCompanies } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
 import { useListDepartments } from '../departments/src';
@@ -177,7 +179,63 @@ function EmployeesPageContent() {
   }, [positionsData?.positions]);
 
   // ============================================================================
-  // CRUD SETUP (always fetches ALL employees - filtering is client-side)
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['employees', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return employeesApi.list({
+        page: pageParam,
+        perPage: PAGE_SIZE,
+        includeDeleted: false,
+      });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allEmployees = useMemo(
+    () => (infiniteData?.pages.flatMap(p => p.employees ?? []) ?? []).filter(e => !e.deletedAt),
+    [infiniteData]
+  );
+  const totalEmployees = infiniteData?.pages[0]?.total ?? 0;
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<Employee>({
@@ -186,23 +244,8 @@ function EmployeesPageContent() {
     queryKey: ['employees'],
     baseUrl: '/api/v1/hr/employees',
     listFn: async () => {
-      const empResponse = await employeesApi.list({
-        includeDeleted: false,
-        perPage: 100,
-      });
-
-      // Normalize employees
-      const maybeEmployees = empResponse as {
-        employees?: Employee[];
-        data?: Employee[];
-      };
-      const items = (
-        Array.isArray(empResponse)
-          ? empResponse
-          : (maybeEmployees.employees ?? maybeEmployees.data ?? [])
-      ) as Employee[];
-
-      return items.filter(employee => !employee.deletedAt);
+      // Listing is handled by useInfiniteQuery — return accumulated items for handler lookups
+      return allEmployees;
     },
     getFn: (id: string) => employeesApi.get(id),
     createFn: createEmployee,
@@ -638,9 +681,9 @@ function EmployeesPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar funcionários"
@@ -717,7 +760,7 @@ function EmployeesPageContent() {
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item =>
@@ -727,6 +770,14 @@ function EmployeesPageContent() {
               customSortFn={customSortByRegistration}
               customSortLabel="Matrícula"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

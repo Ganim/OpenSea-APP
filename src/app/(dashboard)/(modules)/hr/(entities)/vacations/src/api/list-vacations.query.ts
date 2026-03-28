@@ -1,10 +1,10 @@
 /**
  * OpenSea OS - List Vacations Query (HR)
  *
- * Hook para listar períodos de férias com suporte a filtros, paginação e cache.
+ * Hook para listar períodos de férias com suporte a filtros, scroll infinito e cache.
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import type { VacationPeriod } from '@/types/hr';
 import { vacationsApi } from './vacations.api';
 import { vacationKeys, type VacationFilters } from './keys';
@@ -20,45 +20,44 @@ export interface ListVacationsResponse {
   total: number;
   page: number;
   perPage: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
-export type ListVacationsOptions = Omit<
-  UseQueryOptions<ListVacationsResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
 /* ===========================================
    QUERY HOOK
    =========================================== */
 
-export function useListVacations(
-  params?: ListVacationsParams,
-  options?: ListVacationsOptions
-) {
-  return useQuery({
+export function useListVacations(params?: ListVacationsParams) {
+  return useInfiniteQuery<ListVacationsResponse>({
     queryKey: vacationKeys.list(params),
 
-    queryFn: async (): Promise<ListVacationsResponse> => {
-      const response = await vacationsApi.list(params);
+    queryFn: async ({ pageParam }): Promise<ListVacationsResponse> => {
+      const page = pageParam as number;
+      const response = await vacationsApi.list({
+        ...params,
+        page,
+        perPage: PAGE_SIZE,
+      });
 
       const total = response.meta?.total ?? 0;
-      const page = response.meta?.page ?? 1;
-      const perPage = response.meta?.perPage ?? 20;
       const totalPages = response.meta?.totalPages ?? 1;
 
       return {
         vacationPeriods: response.vacationPeriods ?? [],
         total,
-        page,
-        perPage,
-        hasMore: page < totalPages,
+        page: response.meta?.page ?? page,
+        perPage: response.meta?.perPage ?? PAGE_SIZE,
+        totalPages,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+
     staleTime: 2 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

@@ -2,7 +2,7 @@
  * OpenSea OS - List Deductions Query
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { deductionsService } from '@/services/hr/deductions.service';
 import type { Deduction } from '@/types/hr';
 import { deductionKeys, type DeductionFilters } from './keys';
@@ -14,49 +14,47 @@ export interface ListDeductionsResponse {
   total: number;
   page: number;
   perPage: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
-export type ListDeductionsOptions = Omit<
-  UseQueryOptions<ListDeductionsResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
-export function useListDeductions(
-  params?: ListDeductionsParams,
-  options?: ListDeductionsOptions
-) {
-  return useQuery({
+export function useListDeductions(params?: ListDeductionsParams) {
+  return useInfiniteQuery<ListDeductionsResponse>({
     queryKey: deductionKeys.list(params),
 
-    queryFn: async (): Promise<ListDeductionsResponse> => {
+    queryFn: async ({ pageParam }): Promise<ListDeductionsResponse> => {
+      const page = pageParam as number;
       const response = await deductionsService.list({
         employeeId: params?.employeeId,
         isApplied: params?.isApplied,
         isRecurring: params?.isRecurring,
         startDate: params?.startDate,
         endDate: params?.endDate,
-        page: params?.page,
-        perPage: params?.perPage ?? 100,
+        page,
+        perPage: PAGE_SIZE,
       });
 
       const deductions =
         (response as { deductions?: Deduction[] }).deductions ?? [];
-      const page = params?.page ?? 1;
-      const perPage = params?.perPage ?? 100;
+      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const total = meta?.total ?? deductions.length;
+      const totalPages = meta?.totalPages ?? (deductions.length < PAGE_SIZE ? page : page + 1);
 
       return {
         deductions,
-        total: deductions.length,
+        total,
         page,
-        perPage,
-        hasMore: deductions.length >= perPage,
+        perPage: PAGE_SIZE,
+        totalPages,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

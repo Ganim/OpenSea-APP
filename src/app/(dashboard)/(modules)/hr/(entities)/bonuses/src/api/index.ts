@@ -10,7 +10,6 @@ export {
   useListBonuses,
   type ListBonusesParams,
   type ListBonusesResponse,
-  type ListBonusesOptions,
 } from './list-bonuses.query';
 
 // Mutations

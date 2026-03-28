@@ -33,6 +33,7 @@ import {
   Download,
   ExternalLink,
   Eye,
+  Loader2,
   Plus,
   User,
 } from 'lucide-react';
@@ -40,7 +41,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   overtimeConfig,
   useListOvertime,
@@ -88,7 +89,7 @@ export default function OvertimePage() {
   const [filterApproved, setFilterApproved] = useState('');
 
   const queryParams = useMemo(() => {
-    const params: Record<string, unknown> = { perPage: 100 };
+    const params: Record<string, unknown> = { perPage: 20 };
     if (filterEmployeeId) params.employeeId = filterEmployeeId;
     if (filterApproved === 'true') params.approved = true;
     else if (filterApproved === 'false') params.approved = false;
@@ -99,7 +100,15 @@ export default function OvertimePage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListOvertime(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListOvertime(queryParams);
   const createMutation = useCreateOvertime({
     onSuccess: () => setIsCreateOpen(false),
   });
@@ -110,7 +119,27 @@ export default function OvertimePage() {
     },
   });
 
-  const overtimeList = data?.overtime ?? [];
+  const overtimeList = data?.pages.flatMap(p => p.overtime ?? []) ?? [];
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => overtimeList.map(o => o.employeeId),
@@ -529,6 +558,13 @@ export default function OvertimePage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           <CreateModal

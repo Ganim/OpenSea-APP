@@ -34,13 +34,15 @@ import {
   Building2,
   ExternalLink,
   GitBranchPlus,
+  Loader2,
   Plus,
   Upload,
   Users,
 } from 'lucide-react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useListCompanies } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
 import {
   createDepartment,
@@ -126,7 +128,58 @@ function DepartmentsPageContent() {
   }, [companiesData?.companies]);
 
   // ============================================================================
-  // CRUD SETUP (always fetches ALL departments - filtering is client-side)
+  // INFINITE SCROLL DATA FETCHING
+  // ============================================================================
+
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteIsLoading,
+    error: infiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['departments', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return departmentsApi.list({ page: pageParam, perPage: PAGE_SIZE });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.page ?? 1;
+      const totalPages = lastPage.totalPages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+  });
+
+  const allDepartmentsInfinite = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.departments ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // CRUD SETUP (mutations only — listing comes from useInfiniteQuery above)
   // ============================================================================
 
   const crud = useEntityCrud<Department>({
@@ -135,8 +188,7 @@ function DepartmentsPageContent() {
     queryKey: ['departments'],
     baseUrl: '/api/v1/hr/departments',
     listFn: async () => {
-      const deptResponse = await departmentsApi.list({ perPage: 100 });
-      return deptResponse.departments;
+      return allDepartmentsInfinite;
     },
     getFn: (id: string) => departmentsApi.get(id),
     createFn: createDepartment,
@@ -459,9 +511,9 @@ function DepartmentsPageContent() {
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {infiniteIsLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : infiniteError ? (
             <GridError
               type="server"
               title="Erro ao carregar departamentos"
@@ -498,7 +550,7 @@ function DepartmentsPageContent() {
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
+              isLoading={infiniteIsLoading}
               isSearching={!!page.searchQuery}
               onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
               onItemDoubleClick={item =>
@@ -510,6 +562,14 @@ function DepartmentsPageContent() {
               customSortFn={customSortByCode}
               customSortLabel="Código"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Selection Toolbar */}

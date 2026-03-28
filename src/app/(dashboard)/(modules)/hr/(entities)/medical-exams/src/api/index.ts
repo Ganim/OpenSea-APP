@@ -9,7 +9,6 @@ export { medicalExamKeys, type MedicalExamFilters } from './keys';
 export {
   useListMedicalExams,
   type ListMedicalExamsResponse,
-  type ListMedicalExamsOptions,
 } from './list-medical-exams.query';
 
 // Mutations

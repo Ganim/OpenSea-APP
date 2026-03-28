@@ -20,7 +20,6 @@ export {
   useListVacations,
   type ListVacationsParams,
   type ListVacationsResponse,
-  type ListVacationsOptions,
 } from './list-vacations.query';
 
 /* ===========================================

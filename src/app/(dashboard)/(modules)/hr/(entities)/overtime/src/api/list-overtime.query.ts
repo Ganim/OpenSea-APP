@@ -2,7 +2,7 @@
  * OpenSea OS - List Overtime Query
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { overtimeService } from '@/services/hr/overtime.service';
 import type { Overtime } from '@/types/hr';
 import { overtimeKeys, type OvertimeFilters } from './keys';
@@ -14,44 +14,44 @@ export interface ListOvertimeResponse {
   total: number;
   page: number;
   perPage: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
-export type ListOvertimeOptions = Omit<
-  UseQueryOptions<ListOvertimeResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
-export function useListOvertime(
-  params?: ListOvertimeParams,
-  options?: ListOvertimeOptions
-) {
-  return useQuery({
+export function useListOvertime(params?: ListOvertimeParams) {
+  return useInfiniteQuery<ListOvertimeResponse>({
     queryKey: overtimeKeys.list(params),
-    queryFn: async (): Promise<ListOvertimeResponse> => {
+
+    queryFn: async ({ pageParam }): Promise<ListOvertimeResponse> => {
+      const page = pageParam as number;
       const response = await overtimeService.list({
         employeeId: params?.employeeId,
         startDate: params?.startDate,
         endDate: params?.endDate,
         approved: params?.approved,
-        page: params?.page,
-        perPage: params?.perPage ?? 100,
+        page,
+        perPage: PAGE_SIZE,
       });
 
       const overtime = (response as { overtime?: Overtime[] }).overtime ?? [];
-      const page = params?.page ?? 1;
-      const perPage = params?.perPage ?? 100;
+      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const total = meta?.total ?? overtime.length;
+      const totalPages = meta?.totalPages ?? (overtime.length < PAGE_SIZE ? page : page + 1);
 
       return {
         overtime,
-        total: overtime.length,
+        total,
         page,
-        perPage,
-        hasMore: overtime.length >= perPage,
+        perPage: PAGE_SIZE,
+        totalPages,
       };
     },
+
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }

@@ -8,8 +8,7 @@ export { workplaceRiskKeys, type WorkplaceRiskFilters } from './keys';
 // Queries
 export {
   useListWorkplaceRisks,
-  type ListWorkplaceRisksResponse,
-  type ListWorkplaceRisksOptions,
+  type ListWorkplaceRisksPage,
 } from './list-workplace-risks.query';
 
 // Mutations

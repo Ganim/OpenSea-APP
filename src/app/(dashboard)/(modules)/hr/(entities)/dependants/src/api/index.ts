@@ -13,8 +13,7 @@ export {
 export {
   useListDependants,
   type ListDependantsParams,
-  type ListDependantsResponse,
-  type ListDependantsOptions,
+  type ListDependantsPage,
 } from './list-dependants.query';
 
 // Mutations

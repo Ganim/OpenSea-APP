@@ -14,7 +14,6 @@ export {
   useListOvertime,
   type ListOvertimeParams,
   type ListOvertimeResponse,
-  type ListOvertimeOptions,
 } from './list-overtime.query';
 
 // Mutations

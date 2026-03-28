@@ -38,6 +38,7 @@ import {
   ExternalLink,
   Eye,
   FileX2,
+  Loader2,
   Plus,
   Trash2,
   User,
@@ -45,7 +46,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   terminationsConfig,
   useListTerminations,
@@ -112,11 +113,31 @@ export default function TerminationsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListTerminations(queryParams);
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTerminations(queryParams);
   const createMutation = useCreateTermination();
   const deleteMutation = useDeleteTermination();
 
-  const terminations = data?.terminations ?? [];
+  const terminations = useMemo(
+    () => data?.pages.flatMap(p => p.terminations ?? []) ?? [],
+    [data]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => terminations.map(t => t.employeeId),
@@ -553,22 +574,30 @@ export default function TerminationsPage() {
               }}
             />
           ) : (
-            <EntityGrid
-              config={terminationsConfig}
-              items={filteredItems}
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={isLoading}
-              isSearching={!!searchQuery}
-              onItemDoubleClick={item => {
-                if (canView) {
-                  router.push(`/hr/terminations/${item.id}`);
-                }
-              }}
-              showSorting={true}
-              defaultSortField="createdAt"
-              defaultSortDirection="desc"
-            />
+            <>
+              <EntityGrid
+                config={terminationsConfig}
+                items={filteredItems}
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!searchQuery}
+                onItemDoubleClick={item => {
+                  if (canView) {
+                    router.push(`/hr/terminations/${item.id}`);
+                  }
+                }}
+                showSorting={true}
+                defaultSortField="createdAt"
+                defaultSortDirection="desc"
+              />
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
           {/* Create Modal */}

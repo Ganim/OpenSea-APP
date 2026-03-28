@@ -29,13 +29,14 @@ import {
   Download,
   ExternalLink,
   Heart,
+  Loader2,
   Plus,
   Trash2,
   User,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import { dependantsService } from '@/services/hr/dependants.service';
@@ -97,10 +98,41 @@ export default function DependantsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListDependants(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListDependants(queryParams);
   const deleteMutation = useDeleteDependant();
 
-  const dependants = data?.dependants ?? [];
+  const dependants = data?.pages.flatMap(p => p.dependants) ?? [];
+
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(
     () => dependants.map(d => d.employeeId),
@@ -545,6 +577,14 @@ export default function DependantsPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}

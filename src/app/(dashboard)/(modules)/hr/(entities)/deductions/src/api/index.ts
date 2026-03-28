@@ -14,7 +14,6 @@ export {
   useListDeductions,
   type ListDeductionsParams,
   type ListDeductionsResponse,
-  type ListDeductionsOptions,
 } from './list-deductions.query';
 
 // Mutations

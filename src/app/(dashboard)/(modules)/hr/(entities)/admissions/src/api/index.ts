@@ -9,7 +9,6 @@ export { admissionKeys, type AdmissionFilters } from './keys';
 export {
   useListAdmissions,
   type ListAdmissionsResponse,
-  type ListAdmissionsOptions,
 } from './list-admissions.query';
 
 // Mutations

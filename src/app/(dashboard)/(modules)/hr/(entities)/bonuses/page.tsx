@@ -31,6 +31,7 @@ import {
   Download,
   ExternalLink,
   Eye,
+  Loader2,
   Plus,
   PlusCircle,
   Trash2,
@@ -39,7 +40,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   bonusesConfig,
   useListBonuses,
@@ -100,11 +101,39 @@ export default function BonusesPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListBonuses(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListBonuses(queryParams);
   const createMutation = useCreateBonus();
   const deleteMutation = useDeleteBonus();
 
-  const bonuses = data?.bonuses ?? [];
+  const bonuses = data?.pages.flatMap(p => p.bonuses ?? []) ?? [];
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(() => bonuses.map(b => b.employeeId), [bonuses]);
   const { getName } = useEmployeeMap(employeeIds);
@@ -524,6 +553,13 @@ export default function BonusesPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}

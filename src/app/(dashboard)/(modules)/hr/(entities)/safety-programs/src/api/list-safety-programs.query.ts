@@ -2,7 +2,7 @@
  * OpenSea OS - List Safety Programs Query
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { safetyProgramsService } from '@/services/hr/safety-programs.service';
 import type { SafetyProgram } from '@/types/hr';
 import { safetyProgramKeys, type SafetyProgramFilters } from './keys';
@@ -15,43 +15,38 @@ export interface ListSafetyProgramsResponse {
   hasMore: boolean;
 }
 
-export type ListSafetyProgramsOptions = Omit<
-  UseQueryOptions<ListSafetyProgramsResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
-export function useListSafetyPrograms(
-  params?: SafetyProgramFilters,
-  options?: ListSafetyProgramsOptions
-) {
-  return useQuery({
+export function useListSafetyPrograms(params?: SafetyProgramFilters) {
+  return useInfiniteQuery<ListSafetyProgramsResponse>({
     queryKey: safetyProgramKeys.list(params),
 
-    queryFn: async (): Promise<ListSafetyProgramsResponse> => {
+    queryFn: async ({ pageParam }): Promise<ListSafetyProgramsResponse> => {
+      const page = pageParam as number;
       const response = await safetyProgramsService.list({
         type: params?.type,
         status: params?.status,
-        page: params?.page,
-        perPage: params?.perPage ?? 100,
+        page,
+        perPage: PAGE_SIZE,
       });
 
       const programs =
         (response as { safetyPrograms?: SafetyProgram[] }).safetyPrograms ?? [];
-      const page = params?.page ?? 1;
-      const perPage = params?.perPage ?? 100;
 
       return {
         safetyPrograms: programs,
         total: programs.length,
         page,
-        perPage,
-        hasMore: programs.length >= perPage,
+        perPage: PAGE_SIZE,
+        hasMore: programs.length >= PAGE_SIZE,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore ? lastPage.page + 1 : undefined;
+    },
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

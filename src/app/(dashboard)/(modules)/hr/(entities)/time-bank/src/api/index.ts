@@ -11,7 +11,6 @@ export {
   useListTimeBanks,
   type ListTimeBanksParams,
   type ListTimeBanksResponse,
-  type ListTimeBanksOptions,
 } from './list-time-banks.query';
 export {
   useCreditTimeBank,

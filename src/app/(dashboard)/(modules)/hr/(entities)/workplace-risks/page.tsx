@@ -36,6 +36,7 @@ import { workplaceRisksService } from '@/services/hr/workplace-risks.service';
 import {
   AlertTriangle,
   ExternalLink,
+  Loader2,
   MapPin,
   Plus,
   ShieldCheck,
@@ -44,7 +45,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   workplaceRisksConfig,
   useListWorkplaceRisks,
@@ -107,12 +108,44 @@ export default function WorkplaceRisksPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListWorkplaceRisks(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListWorkplaceRisks(queryParams);
   const { data: programsData } = useListSafetyPrograms();
   const deleteMutation = useDeleteWorkplaceRiskDynamic();
 
-  const risks = data?.risks ?? [];
-  const programs: SafetyProgram[] = programsData?.safetyPrograms ?? [];
+  const risks = data?.pages.flatMap(p => p.risks) ?? [];
+
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const programs: SafetyProgram[] =
+    programsData?.pages.flatMap(p => p.safetyPrograms) ?? [];
 
   // ============================================================================
   // STATE
@@ -587,6 +620,14 @@ export default function WorkplaceRisksPage() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}

@@ -25,6 +25,7 @@ import {
   Calendar,
   CheckCircle,
   Eye,
+  Loader2,
   Mail,
   MailPlus,
   Plus,
@@ -35,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   admissionsConfig,
   useListAdmissions,
@@ -94,9 +95,32 @@ export default function AdmissionsPage() {
     data: admissionsData,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useListAdmissions(queryParams);
 
-  const admissions = admissionsData?.admissions ?? [];
+  const admissions = useMemo(
+    () => admissionsData?.pages.flatMap(p => p.admissions ?? []) ?? [],
+    [admissionsData]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================================================
   // MODALS
@@ -344,6 +368,12 @@ export default function AdmissionsPage() {
                   : undefined,
               }}
             />
+            <div ref={sentinelRef} className="h-1" />
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </CoreProvider>
         )}
       </PageBody>

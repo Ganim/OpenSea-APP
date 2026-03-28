@@ -2,7 +2,7 @@
  * OpenSea OS - List Bonuses Query
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { bonusesService } from '@/services/hr/bonuses.service';
 import type { Bonus } from '@/types/hr';
 import { bonusKeys, type BonusFilters } from './keys';
@@ -14,47 +14,45 @@ export interface ListBonusesResponse {
   total: number;
   page: number;
   perPage: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
-export type ListBonusesOptions = Omit<
-  UseQueryOptions<ListBonusesResponse, Error>,
-  'queryKey' | 'queryFn'
->;
+const PAGE_SIZE = 20;
 
-export function useListBonuses(
-  params?: ListBonusesParams,
-  options?: ListBonusesOptions
-) {
-  return useQuery({
+export function useListBonuses(params?: ListBonusesParams) {
+  return useInfiniteQuery<ListBonusesResponse>({
     queryKey: bonusKeys.list(params),
 
-    queryFn: async (): Promise<ListBonusesResponse> => {
+    queryFn: async ({ pageParam }): Promise<ListBonusesResponse> => {
+      const page = pageParam as number;
       const response = await bonusesService.list({
         employeeId: params?.employeeId,
         isPaid: params?.isPaid,
         startDate: params?.startDate,
         endDate: params?.endDate,
-        page: params?.page,
-        perPage: params?.perPage ?? 100,
+        page,
+        perPage: PAGE_SIZE,
       });
 
       const bonuses = (response as { bonuses?: Bonus[] }).bonuses ?? [];
-      const page = params?.page ?? 1;
-      const perPage = params?.perPage ?? 100;
+      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const total = meta?.total ?? bonuses.length;
+      const totalPages = meta?.totalPages ?? (bonuses.length < PAGE_SIZE ? page : page + 1);
 
       return {
         bonuses,
-        total: bonuses.length,
+        total,
         page,
-        perPage,
-        hasMore: bonuses.length >= perPage,
+        perPage: PAGE_SIZE,
+        totalPages,
       };
     },
 
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+
     staleTime: 5 * 60 * 1000,
-    placeholderData: previousData => previousData,
-    ...options,
   });
 }
 

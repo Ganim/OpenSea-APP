@@ -16,7 +16,6 @@ export {
   useListAbsences,
   type ListAbsencesParams,
   type ListAbsencesResponse,
-  type ListAbsencesOptions,
 } from './list-absences.query';
 
 /* ===========================================

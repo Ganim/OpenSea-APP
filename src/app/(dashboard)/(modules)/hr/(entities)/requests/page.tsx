@@ -37,7 +37,11 @@ import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants
 import { usePermissions } from '@/hooks/use-permissions';
 import { portalService } from '@/services/hr';
 import type { EmployeeRequest, RequestType, RequestStatus } from '@/types/hr';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   Calendar,
@@ -53,7 +57,14 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 
 // ============================================================================
@@ -188,20 +199,61 @@ function RequestsPageContent() {
   // DATA FETCHING
   // ============================================================================
 
+  const PAGE_SIZE = 20;
+
   const {
-    data: requestsData,
+    data: infiniteData,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['hr-pending-requests'],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 1 }) => {
       const response = await portalService.listPendingApprovals({
-        perPage: 100,
+        page: pageParam,
+        perPage: PAGE_SIZE,
       });
-      return response.requests;
+      return response;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.meta?.page ?? 1;
+      const totalPages = lastPage.meta?.totalPages ?? 1;
+      if (currentPage < totalPages) {
+        return currentPage + 1;
+      }
+      return undefined;
     },
   });
+
+  const requestsData =
+    infiniteData?.pages.flatMap(p => p.requests) ?? [];
+
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ============================================================================
   // MUTATIONS
@@ -238,7 +290,7 @@ function RequestsPageContent() {
   // ============================================================================
 
   const filteredItems = useMemo(() => {
-    let items = requestsData || [];
+    let items = requestsData;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -587,6 +639,14 @@ function RequestsPageContent() {
               defaultSortField="createdAt"
               defaultSortDirection="desc"
             />
+          )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Approve/Reject Dialog */}

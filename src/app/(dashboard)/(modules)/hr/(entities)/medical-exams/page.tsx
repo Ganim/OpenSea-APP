@@ -32,6 +32,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  Loader2,
   Plus,
   Stethoscope,
   Trash2,
@@ -41,7 +42,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   medicalExamsConfig,
   useListMedicalExams,
@@ -122,11 +123,31 @@ export default function MedicalExamsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch } = useListMedicalExams(queryParams);
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListMedicalExams(queryParams);
   const createMutation = useCreateMedicalExam();
   const deleteMutation = useDeleteMedicalExam();
 
-  const exams = data?.medicalExams ?? [];
+  const exams = useMemo(
+    () => data?.pages.flatMap(p => p.medicalExams ?? []) ?? [],
+    [data]
+  );
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const employeeIds = useMemo(() => exams.map(e => e.employeeId), [exams]);
   const { getName } = useEmployeeMap(employeeIds);
@@ -477,59 +498,67 @@ export default function MedicalExamsPage() {
               }}
             />
           ) : (
-            <EntityGrid
-              config={medicalExamsConfig}
-              items={filteredItems}
-              toolbarStart={
-                <>
-                  <FilterDropdown
-                    label="Funcionário"
-                    icon={User}
-                    options={employeeOptions}
-                    value={filterEmployeeId}
-                    onChange={v => setFilterEmployeeId(v)}
-                    activeColor="violet"
-                    searchPlaceholder="Buscar funcionário..."
-                    emptyText="Nenhum funcionário encontrado."
-                  />
-                  <FilterDropdown
-                    label="Tipo"
-                    icon={FileText}
-                    options={EXAM_TYPE_OPTIONS}
-                    value={filterType}
-                    onChange={v => setFilterType(v)}
-                    activeColor="cyan"
-                  />
-                  <FilterDropdown
-                    label="Resultado"
-                    icon={CircleCheck}
-                    options={EXAM_RESULT_OPTIONS}
-                    value={filterResult}
-                    onChange={v => setFilterResult(v)}
-                    activeColor="emerald"
-                  />
-                  <DateRangeFilter
-                    startDate={filterStartDate}
-                    endDate={filterEndDate}
-                    onStartDateChange={setFilterStartDate}
-                    onEndDateChange={setFilterEndDate}
-                  />
-                </>
-              }
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={isLoading}
-              isSearching={!!searchQuery}
-              onItemDoubleClick={item => {
-                if (canView) {
-                  setViewTarget(item);
-                  setIsViewOpen(true);
+            <>
+              <EntityGrid
+                config={medicalExamsConfig}
+                items={filteredItems}
+                toolbarStart={
+                  <>
+                    <FilterDropdown
+                      label="Funcionário"
+                      icon={User}
+                      options={employeeOptions}
+                      value={filterEmployeeId}
+                      onChange={v => setFilterEmployeeId(v)}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar funcionário..."
+                      emptyText="Nenhum funcionário encontrado."
+                    />
+                    <FilterDropdown
+                      label="Tipo"
+                      icon={FileText}
+                      options={EXAM_TYPE_OPTIONS}
+                      value={filterType}
+                      onChange={v => setFilterType(v)}
+                      activeColor="cyan"
+                    />
+                    <FilterDropdown
+                      label="Resultado"
+                      icon={CircleCheck}
+                      options={EXAM_RESULT_OPTIONS}
+                      value={filterResult}
+                      onChange={v => setFilterResult(v)}
+                      activeColor="emerald"
+                    />
+                    <DateRangeFilter
+                      startDate={filterStartDate}
+                      endDate={filterEndDate}
+                      onStartDateChange={setFilterStartDate}
+                      onEndDateChange={setFilterEndDate}
+                    />
+                  </>
                 }
-              }}
-              showSorting={true}
-              defaultSortField="createdAt"
-              defaultSortDirection="desc"
-            />
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!searchQuery}
+                onItemDoubleClick={item => {
+                  if (canView) {
+                    setViewTarget(item);
+                    setIsViewOpen(true);
+                  }
+                }}
+                showSorting={true}
+                defaultSortField="createdAt"
+                defaultSortDirection="desc"
+              />
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
           {/* Create Modal */}
