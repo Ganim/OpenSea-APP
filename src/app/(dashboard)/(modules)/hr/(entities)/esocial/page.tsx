@@ -15,6 +15,10 @@ import {
   CheckCheck,
   Clock,
   AlertTriangle,
+  Plus,
+  Loader2,
+  ListChecks,
+  UserSearch,
 } from 'lucide-react';
 
 import { PageActionBar } from '@/components/layout/page-action-bar';
@@ -23,6 +27,19 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { esocialService } from '@/services/hr/esocial.service';
 import { toast } from 'sonner';
@@ -187,6 +204,235 @@ function EventRow({
 }
 
 // ============================
+// Generate Event Constants
+// ============================
+
+const EVENT_TYPES = [
+  { value: 'S-1000', label: 'S-1000 - Informações do Empregador' },
+  { value: 'S-1005', label: 'S-1005 - Tabela de Estabelecimentos' },
+  { value: 'S-1010', label: 'S-1010 - Tabela de Rubricas' },
+  { value: 'S-1020', label: 'S-1020 - Tabela de Lotações Tributárias' },
+  { value: 'S-1070', label: 'S-1070 - Tabela de Processos' },
+  { value: 'S-1200', label: 'S-1200 - Remuneração do Trabalhador' },
+  { value: 'S-1210', label: 'S-1210 - Pagamentos de Rendimentos' },
+  { value: 'S-1298', label: 'S-1298 - Reabertura de Eventos Periódicos' },
+  { value: 'S-1299', label: 'S-1299 - Fechamento de Eventos Periódicos' },
+  { value: 'S-2190', label: 'S-2190 - Registro Preliminar de Trabalhador' },
+  { value: 'S-2200', label: 'S-2200 - Cadastramento Inicial / Admissão' },
+  { value: 'S-2205', label: 'S-2205 - Alteração de Dados Cadastrais' },
+  { value: 'S-2206', label: 'S-2206 - Alteração de Contrato de Trabalho' },
+  { value: 'S-2210', label: 'S-2210 - Comunicação de Acidente de Trabalho' },
+  { value: 'S-2220', label: 'S-2220 - Monitoramento da Saúde do Trabalhador' },
+  { value: 'S-2230', label: 'S-2230 - Afastamento Temporário' },
+  { value: 'S-2240', label: 'S-2240 - Condições Ambientais do Trabalho' },
+  { value: 'S-2298', label: 'S-2298 - Reintegração / Reversão' },
+  { value: 'S-2299', label: 'S-2299 - Desligamento' },
+  { value: 'S-2300', label: 'S-2300 - Trabalhador Sem Vínculo - Início' },
+  { value: 'S-2399', label: 'S-2399 - Trabalhador Sem Vínculo - Término' },
+  { value: 'S-3000', label: 'S-3000 - Exclusão de Eventos' },
+] as const;
+
+const REFERENCE_TYPES = [
+  { value: 'EMPLOYEE', label: 'Funcionário' },
+  { value: 'PAYROLL', label: 'Folha de Pagamento' },
+  { value: 'ABSENCE', label: 'Afastamento' },
+  { value: 'TERMINATION', label: 'Desligamento' },
+  { value: 'MEDICAL_EXAM', label: 'Exame Médico' },
+  { value: 'TENANT_CONFIG', label: 'Configuração da Empresa' },
+  { value: 'RUBRICA', label: 'Rubrica' },
+] as const;
+
+// ============================
+// Generate Event Modal
+// ============================
+
+interface GenerateEventModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function GenerateEventModal({ open, onClose }: GenerateEventModalProps) {
+  const queryClient = useQueryClient();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [eventType, setEventType] = useState('');
+  const [referenceType, setReferenceType] = useState('');
+  const [referenceId, setReferenceId] = useState('');
+
+  const resetForm = useCallback(() => {
+    setCurrentStep(1);
+    setEventType('');
+    setReferenceType('');
+    setReferenceId('');
+  }, []);
+
+  const handleClose = useCallback(() => {
+    resetForm();
+    onClose();
+  }, [resetForm, onClose]);
+
+  const generateMutation = useMutation({
+    mutationFn: () =>
+      esocialService.generateEvent({
+        eventType,
+        referenceType,
+        referenceId,
+      }),
+    onSuccess: () => {
+      toast.success('Evento gerado com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['esocial'] });
+      handleClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao gerar evento');
+    },
+  });
+
+  const referenceLabel = useMemo(() => {
+    const ref = REFERENCE_TYPES.find(r => r.value === referenceType);
+    return ref?.label || 'Referência';
+  }, [referenceType]);
+
+  const steps: WizardStep[] = [
+    {
+      title: 'Tipo do Evento',
+      description: 'Selecione o tipo de evento e a categoria de referência',
+      icon: (
+        <ListChecks className="h-16 w-16 text-violet-400 dark:text-violet-300" />
+      ),
+      content: (
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="eventType">Tipo do Evento</Label>
+            <Select value={eventType} onValueChange={setEventType}>
+              <SelectTrigger id="eventType">
+                <SelectValue placeholder="Selecione o tipo de evento" />
+              </SelectTrigger>
+              <SelectContent>
+                {EVENT_TYPES.map(et => (
+                  <SelectItem key={et.value} value={et.value}>
+                    {et.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="referenceType">Tipo de Referência</Label>
+            <Select value={referenceType} onValueChange={setReferenceType}>
+              <SelectTrigger id="referenceType">
+                <SelectValue placeholder="Selecione o tipo de referência" />
+              </SelectTrigger>
+              <SelectContent>
+                {REFERENCE_TYPES.map(rt => (
+                  <SelectItem key={rt.value} value={rt.value}>
+                    {rt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ),
+      isValid: eventType !== '' && referenceType !== '',
+    },
+    {
+      title: 'Selecionar Referência',
+      description: `Informe o identificador do(a) ${referenceLabel.toLowerCase()}`,
+      icon: (
+        <UserSearch className="h-16 w-16 text-violet-400 dark:text-violet-300" />
+      ),
+      content: (
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="referenceId">
+              ID do(a) {referenceLabel}
+            </Label>
+            <Input
+              id="referenceId"
+              value={referenceId}
+              onChange={e => setReferenceId(e.target.value)}
+              placeholder={`Informe o ID do(a) ${referenceLabel.toLowerCase()}`}
+            />
+            <p className="text-xs text-muted-foreground">
+              Insira o identificador único da entidade de referência para gerar o
+              evento eSocial.
+            </p>
+          </div>
+
+          {/* Summary */}
+          <Card className="bg-slate-50 dark:bg-slate-800/40 border border-border p-4 space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Resumo
+            </p>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Evento:</span>
+                <Badge variant="outline" className="font-mono text-xs">
+                  {eventType}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Referência:</span>
+                <span className="font-medium">{referenceLabel}</span>
+              </div>
+              {referenceId && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">ID:</span>
+                  <span className="font-mono text-xs">{referenceId}</span>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      ),
+      isValid: referenceId.trim() !== '',
+      footer: (
+        <div className="flex items-center gap-2 w-full justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCurrentStep(1)}
+          >
+            &larr; Voltar
+          </Button>
+          <Button
+            type="button"
+            disabled={
+              referenceId.trim() === '' || generateMutation.isPending
+            }
+            onClick={() => generateMutation.mutate()}
+          >
+            {generateMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                Gerando...
+              </>
+            ) : (
+              'Gerar Evento'
+            )}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <StepWizardDialog
+      open={open}
+      onOpenChange={val => {
+        if (!val) handleClose();
+      }}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+      heightClass="h-[460px]"
+    />
+  );
+}
+
+// ============================
 // Main Dashboard Page
 // ============================
 
@@ -196,6 +442,7 @@ export default function EsocialDashboardPage() {
   const { hasPermission } = usePermissions();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('pending');
+  const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
   // Fetch dashboard data
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({
@@ -319,6 +566,24 @@ export default function EsocialDashboardPage() {
             >
               <Settings className="h-4 w-4 mr-1.5" />
               Configurações
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-2.5"
+              onClick={() => router.push('/hr/esocial/batches')}
+            >
+              <FileText className="h-4 w-4 mr-1.5" />
+              Lotes
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-2.5"
+              onClick={() => setGenerateModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Gerar Evento
             </Button>
             <Button
               size="sm"
@@ -579,6 +844,12 @@ export default function EsocialDashboardPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Generate Event Modal */}
+      <GenerateEventModal
+        open={generateModalOpen}
+        onClose={() => setGenerateModalOpen(false)}
+      />
     </div>
   );
 }

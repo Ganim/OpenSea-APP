@@ -75,3 +75,7 @@ export interface BulkApproveResponse {
   skippedCount: number;
   errors: Array<{ id: string; reason: string }>;
 }
+
+export interface EsocialEventResponse {
+  event: EsocialEvent;
+}

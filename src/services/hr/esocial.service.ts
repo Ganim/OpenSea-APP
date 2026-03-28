@@ -6,6 +6,7 @@ import type {
   EsocialCertificateResponse,
   ListEsocialEventsResponse,
   EsocialEvent,
+  EsocialEventResponse,
   UpdateEventStatusResponse,
   EventStatusAction,
   BulkApproveResponse,
@@ -73,6 +74,18 @@ export const esocialService = {
     return apiClient.post<BulkApproveResponse>(
       '/v1/esocial/events/bulk-approve',
       { eventIds }
+    );
+  },
+
+  async generateEvent(data: {
+    eventType: string;
+    referenceType: string;
+    referenceId: string;
+    additionalData?: Record<string, unknown>;
+  }): Promise<EsocialEventResponse> {
+    return apiClient.post<EsocialEventResponse>(
+      '/v1/esocial/events/generate',
+      data
     );
   },
 
