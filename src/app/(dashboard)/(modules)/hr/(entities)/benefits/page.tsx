@@ -293,10 +293,10 @@ function BenefitsPageContent() {
           ]}
           footer={{
             type: 'single',
-            center: {
+            button: {
               icon: Users,
               label: `${enrolledCount} inscrito${enrolledCount !== 1 ? 's' : ''}`,
-              color: 'pink',
+              color: 'violet',
             },
           }}
           isSelected={isSelected}
@@ -342,10 +342,10 @@ function BenefitsPageContent() {
           ]}
           footer={{
             type: 'single',
-            center: {
+            button: {
               icon: Users,
               label: `${enrolledCount} inscrito${enrolledCount !== 1 ? 's' : ''}`,
-              color: 'pink',
+              color: 'violet',
             },
           }}
           isSelected={isSelected}
@@ -476,7 +476,7 @@ function BenefitsPageContent() {
                     }))}
                     selected={typeFilter}
                     onSelectionChange={setTypeFilter}
-                    activeColor="pink"
+                    activeColor="violet"
                     searchPlaceholder="Buscar tipo..."
                     emptyText="Nenhum tipo encontrado."
                   />

@@ -9,7 +9,6 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
-import { Badge } from '@/components/ui/badge';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
@@ -17,17 +16,12 @@ import {
   EntityContextMenu,
   EntityGrid,
 } from '@/core';
-import type { ContextMenuAction } from '@/core/components/entity-context-menu';
+import type { ContextMenuAction } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { AdmissionInvite } from '@/types/hr';
 import {
-  Briefcase,
-  Calendar,
   CheckCircle,
-  Eye,
   Loader2,
-  Mail,
-  MailPlus,
   Plus,
   Send,
   Trash2,
@@ -46,10 +40,6 @@ import {
   useRejectAdmission,
   useResendAdmission,
   getAdmissionStatusLabel,
-  getAdmissionStatusColor,
-  getContractTypeLabel,
-  getWorkRegimeLabel,
-  formatDate,
   ADMISSION_STATUS_LABELS,
   type AdmissionFilters,
 } from './src';
@@ -183,8 +173,8 @@ export default function AdmissionsPage() {
   // ============================================================================
 
   const getActions = useCallback(
-    (item: AdmissionInvite): ContextMenuAction<AdmissionInvite>[] => {
-      const actions: ContextMenuAction<AdmissionInvite>[] = [];
+    (item: AdmissionInvite): ContextMenuAction[] => {
+      const actions: ContextMenuAction[] = [];
 
       // Approve (only for COMPLETED status)
       if (canManage && item.status === 'COMPLETED') {
@@ -193,7 +183,7 @@ export default function AdmissionsPage() {
           label: 'Aprovar Admissão',
           icon: CheckCircle,
           separator: actions.length > 0 ? undefined : 'before',
-          onClick: (i: AdmissionInvite) => handleApprove(i),
+          onClick: () => handleApprove(item),
         });
       }
 
@@ -207,7 +197,7 @@ export default function AdmissionsPage() {
           label: 'Rejeitar',
           icon: XCircle,
           variant: 'destructive' as const,
-          onClick: (i: AdmissionInvite) => setRejectTarget(i),
+          onClick: () => setRejectTarget(item),
         });
       }
 
@@ -221,7 +211,7 @@ export default function AdmissionsPage() {
           label: 'Reenviar Convite',
           icon: Send,
           separator: 'before',
-          onClick: (i: AdmissionInvite) => handleResend(i),
+          onClick: () => handleResend(item),
         });
       }
 
@@ -237,7 +227,7 @@ export default function AdmissionsPage() {
           icon: Trash2,
           variant: 'destructive' as const,
           separator: 'before',
-          onClick: (i: AdmissionInvite) => setCancelTarget(i),
+          onClick: () => setCancelTarget(item),
         });
       }
 
@@ -286,87 +276,91 @@ export default function AdmissionsPage() {
       <PageBody>
         <SearchBar
           value={searchQuery}
-          onChange={setSearchQuery}
+          onSearch={setSearchQuery}
           placeholder="Buscar admissões por nome ou e-mail..."
         />
 
         {isLoading ? (
           <GridLoading />
         ) : error ? (
-          <GridError error={error} />
+          <GridError
+            type="server"
+            title="Erro ao carregar admissões"
+            message={error instanceof Error ? error.message : 'Erro desconhecido'}
+          />
         ) : (
-          <CoreProvider config={admissionsConfig}>
+          <CoreProvider>
             <EntityGrid<AdmissionInvite>
+              config={admissionsConfig}
               items={filteredAdmissions}
-              getItemId={item => item.id}
               toolbarStart={
                 <FilterDropdown
                   label="Status"
-                  options={STATUS_OPTIONS}
-                  value={filterStatus}
-                  onChange={v => setFilterStatus(v === filterStatus ? '' : v)}
+                  options={STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }))}
+                  selected={filterStatus ? [filterStatus] : []}
+                  onSelectionChange={ids => setFilterStatus(ids[0] ?? '')}
                   activeColor="blue"
                 />
               }
-              renderItem={item => (
+              renderGridItem={(item, isSelected) => (
                 <EntityContextMenu
-                  item={item}
-                  onView={canView ? () => handleView(item) : undefined}
+                  itemId={item.id}
+                  onView={canView ? (ids: string[]) => handleView({ id: ids[0] } as AdmissionInvite) : undefined}
                   actions={getActions(item)}
                 >
                   <EntityCard
-                    item={item}
-                    onClick={() => canView && handleView(item)}
+                    id={item.id}
+                    variant="grid"
                     title={item.fullName}
                     subtitle={item.email}
-                    icon={
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                        <UserPlus className="h-5 w-5" />
-                      </div>
-                    }
-                    badges={
-                      <>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getAdmissionStatusColor(item.status)}`}
-                        >
-                          {getAdmissionStatusLabel(item.status)}
-                        </span>
-                      </>
-                    }
-                    meta={
-                      <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Briefcase className="h-3 w-3" />
-                          <span>
-                            {item.position?.name ?? '-'} &middot;{' '}
-                            {getContractTypeLabel(item.contractType)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-3 w-3" />
-                          <span>
-                            Início: {formatDate(item.expectedStartDate)} &middot;
-                            Expira: {formatDate(item.expiresAt)}
-                          </span>
-                        </div>
-                      </div>
-                    }
+                    icon={UserPlus}
+                    iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
+                    badges={[
+                      {
+                        label: getAdmissionStatusLabel(item.status),
+                        variant: 'outline',
+                      },
+                    ]}
+                    isSelected={isSelected}
+                    showSelection={false}
+                    clickable={canView}
+                    createdAt={item.createdAt}
                   />
                 </EntityContextMenu>
               )}
-              emptyState={{
-                icon: UserPlus,
-                title: 'Nenhuma admissão encontrada',
-                description: canCreate
-                  ? 'Crie um novo convite de admissão digital.'
-                  : 'Nenhum convite de admissão no momento.',
-                action: canCreate
-                  ? {
-                      label: 'Nova Admissão',
-                      onClick: () => setIsCreateOpen(true),
-                    }
-                  : undefined,
-              }}
+              renderListItem={(item, isSelected) => (
+                <EntityContextMenu
+                  itemId={item.id}
+                  onView={canView ? (ids: string[]) => handleView({ id: ids[0] } as AdmissionInvite) : undefined}
+                  actions={getActions(item)}
+                >
+                  <EntityCard
+                    id={item.id}
+                    variant="list"
+                    title={item.fullName}
+                    subtitle={item.email}
+                    icon={UserPlus}
+                    iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
+                    badges={[
+                      {
+                        label: getAdmissionStatusLabel(item.status),
+                        variant: 'outline',
+                      },
+                    ]}
+                    isSelected={isSelected}
+                    showSelection={false}
+                    clickable={canView}
+                    createdAt={item.createdAt}
+                  />
+                </EntityContextMenu>
+              )}
+              onItemClick={(item) => canView && handleView(item)}
+              emptyMessage={
+                canCreate
+                  ? 'Nenhuma admissão encontrada. Crie um novo convite de admissão digital.'
+                  : 'Nenhum convite de admissão no momento.'
+              }
+              emptyIcon={<UserPlus className="h-12 w-12 text-muted-foreground" />}
             />
             <div ref={sentinelRef} className="h-1" />
             {isFetchingNextPage && (

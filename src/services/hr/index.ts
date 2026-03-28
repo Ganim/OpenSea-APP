@@ -23,5 +23,18 @@ export * from './hr-config.service';
 export * from './esocial.service';
 export * from './geofence-zones.service';
 export * from './admissions.service';
-export * from './benefits.service';
+export {
+  benefitsService,
+  type BenefitPlansResponse,
+  type BenefitPlanResponse,
+  type BenefitEnrollmentsResponse,
+  type BenefitEnrollmentResponse,
+  type BulkEnrollResponse,
+  type FlexAllocationResponse,
+  type FlexHistoryResponse,
+  type BenefitDeductionsResponse,
+  type CalculateDeductionsResponse,
+  type ListBenefitPlansParams,
+  type ListEnrollmentsParams,
+} from './benefits.service';
 export * from './portal.service';

@@ -13,8 +13,6 @@ export {
 export {
   useListEmployees,
   type ListEmployeesParams,
-  type ListEmployeesResponse,
-  type ListEmployeesOptions,
 } from './list-employees.query';
 
 export { useGetEmployee, type GetEmployeeOptions } from './get-employee.query';

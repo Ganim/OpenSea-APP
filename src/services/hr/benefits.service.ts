@@ -86,7 +86,7 @@ export interface ListEnrollmentsParams {
   status?: string;
 }
 
-export interface ListDeductionsParams {
+export interface ListBenefitDeductionsParams {
   referenceMonth?: number;
   referenceYear?: number;
   employeeId?: string;
@@ -212,7 +212,7 @@ export const benefitsService = {
   // ========== DEDUCTIONS ==========
 
   async listDeductions(
-    params?: ListDeductionsParams
+    params?: ListBenefitDeductionsParams
   ): Promise<BenefitDeductionsResponse> {
     const query = new URLSearchParams();
     if (params?.referenceMonth)

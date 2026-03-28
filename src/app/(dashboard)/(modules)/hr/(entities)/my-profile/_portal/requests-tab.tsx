@@ -136,16 +136,295 @@ export function RequestsTab() {
   // WIZARD STEPS
   // ============================================================================
 
+  const step1Content = (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">
+        Tipo de Solicitação
+      </Label>
+      <div className="grid gap-2">
+        {REQUEST_TYPE_OPTIONS.map(option => (
+          <button
+            key={option.value}
+            onClick={() => setSelectedType(option.value)}
+            className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+              selectedType === option.value
+                ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
+                : 'border-border hover:bg-muted/50'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-lg ${
+                selectedType === option.value
+                  ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {option.icon}
+            </div>
+            <div>
+              <p className="font-medium text-sm">{option.label}</p>
+              <p className="text-xs text-muted-foreground">
+                {option.description}
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const step2Content = (
+    <>
+      {selectedType === 'VACATION' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Data de Início</Label>
+            <Input
+              type="date"
+              value={formData.startDate || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, startDate: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Data de Término</Label>
+            <Input
+              type="date"
+              value={formData.endDate || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, endDate: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Observações</Label>
+            <Textarea
+              value={formData.notes || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, notes: e.target.value }))
+              }
+              placeholder="Observações adicionais (opcional)"
+              rows={3}
+            />
+          </div>
+        </div>
+      )}
+
+      {selectedType === 'ABSENCE' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Data de Início</Label>
+            <Input
+              type="date"
+              value={formData.startDate || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, startDate: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Data de Término</Label>
+            <Input
+              type="date"
+              value={formData.endDate || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, endDate: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Motivo</Label>
+            <Select
+              value={formData.reason || ''}
+              onValueChange={v =>
+                setFormData(prev => ({ ...prev, reason: v }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MEDICAL">Atestado Médico</SelectItem>
+                <SelectItem value="PERSONAL">Motivo Pessoal</SelectItem>
+                <SelectItem value="BEREAVEMENT">Falecimento</SelectItem>
+                <SelectItem value="WEDDING">Casamento</SelectItem>
+                <SelectItem value="BIRTH">Nascimento de Filho</SelectItem>
+                <SelectItem value="OTHER">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Detalhes</Label>
+            <Textarea
+              value={formData.details || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, details: e.target.value }))
+              }
+              placeholder="Descreva a situação"
+              rows={3}
+            />
+          </div>
+        </div>
+      )}
+
+      {selectedType === 'ADVANCE' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Valor do Adiantamento (R$)</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.amount || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, amount: e.target.value }))
+              }
+              placeholder="0,00"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Justificativa</Label>
+            <Textarea
+              value={formData.justification || ''}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  justification: e.target.value,
+                }))
+              }
+              placeholder="Descreva o motivo do adiantamento"
+              rows={3}
+            />
+          </div>
+        </div>
+      )}
+
+      {selectedType === 'DATA_CHANGE' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Campo a Alterar</Label>
+            <Select
+              value={formData.field || ''}
+              onValueChange={v =>
+                setFormData(prev => ({ ...prev, field: v }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o campo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADDRESS">Endereço</SelectItem>
+                <SelectItem value="PHONE">Telefone</SelectItem>
+                <SelectItem value="EMAIL">E-mail</SelectItem>
+                <SelectItem value="BANK_ACCOUNT">Dados Bancários</SelectItem>
+                <SelectItem value="EMERGENCY_CONTACT">Contato de Emergência</SelectItem>
+                <SelectItem value="OTHER">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Valor Atual</Label>
+            <Input
+              value={formData.currentValue || ''}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  currentValue: e.target.value,
+                }))
+              }
+              placeholder="Valor atual do campo"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Novo Valor</Label>
+            <Input
+              value={formData.newValue || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, newValue: e.target.value }))
+              }
+              placeholder="Novo valor desejado"
+            />
+          </div>
+        </div>
+      )}
+
+      {selectedType === 'SUPPORT' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Assunto</Label>
+            <Input
+              value={formData.subject || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, subject: e.target.value }))
+              }
+              placeholder="Assunto do chamado"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Categoria</Label>
+            <Select
+              value={formData.category || ''}
+              onValueChange={v =>
+                setFormData(prev => ({ ...prev, category: v }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PAYROLL">Folha de Pagamento</SelectItem>
+                <SelectItem value="BENEFITS">Benefícios</SelectItem>
+                <SelectItem value="DOCUMENTS">Documentos</SelectItem>
+                <SelectItem value="SYSTEMS">Sistemas / Acessos</SelectItem>
+                <SelectItem value="OTHER">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Descrição</Label>
+            <Textarea
+              value={formData.description || ''}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              placeholder="Descreva detalhadamente sua solicitação"
+              rows={4}
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   const steps: WizardStep[] = [
     {
-      id: 'type',
       title: 'Tipo de Solicitação',
+      description: 'Selecione o tipo de solicitação',
+      icon: <FileText className="h-16 w-16 text-violet-400" />,
+      content: step1Content,
       isValid: !!selectedType,
     },
     {
-      id: 'details',
       title: 'Detalhes',
+      description: 'Preencha os detalhes da solicitação',
+      icon: <Send className="h-16 w-16 text-violet-400" />,
+      content: step2Content,
       isValid: Object.keys(formData).length > 0,
+      footer: (
+        <Button
+          onClick={handleSubmit}
+          disabled={createMutation.isPending || Object.keys(formData).length === 0}
+        >
+          {createMutation.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+          ) : null}
+          Enviar Solicitação
+        </Button>
+      ),
     },
   ];
 
@@ -271,275 +550,11 @@ export function RequestsTab() {
       <StepWizardDialog
         open={isWizardOpen}
         onOpenChange={setIsWizardOpen}
-        title="Nova Solicitação"
-        description="Selecione o tipo de solicitação e preencha os detalhes"
+        onClose={handleCloseWizard}
         steps={steps}
         currentStep={currentStep}
         onStepChange={setCurrentStep}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending}
-        submitLabel="Enviar Solicitação"
-      >
-        {currentStep === 1 && (
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">
-              Tipo de Solicitação
-            </Label>
-            <div className="grid gap-2">
-              {REQUEST_TYPE_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => setSelectedType(option.value)}
-                  className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
-                    selectedType === option.value
-                      ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                >
-                  <div
-                    className={`p-2 rounded-lg ${
-                      selectedType === option.value
-                        ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {option.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{option.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {option.description}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && selectedType === 'VACATION' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Data de Início</Label>
-              <Input
-                type="date"
-                value={formData.startDate || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, startDate: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Data de Término</Label>
-              <Input
-                type="date"
-                value={formData.endDate || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, endDate: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Observações</Label>
-              <Textarea
-                value={formData.notes || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, notes: e.target.value }))
-                }
-                placeholder="Observações adicionais (opcional)"
-                rows={3}
-              />
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && selectedType === 'ABSENCE' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Data de Início</Label>
-              <Input
-                type="date"
-                value={formData.startDate || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, startDate: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Data de Término</Label>
-              <Input
-                type="date"
-                value={formData.endDate || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, endDate: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Motivo</Label>
-              <Select
-                value={formData.reason || ''}
-                onValueChange={v =>
-                  setFormData(prev => ({ ...prev, reason: v }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o motivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEDICAL">Atestado Médico</SelectItem>
-                  <SelectItem value="PERSONAL">Motivo Pessoal</SelectItem>
-                  <SelectItem value="BEREAVEMENT">Falecimento</SelectItem>
-                  <SelectItem value="WEDDING">Casamento</SelectItem>
-                  <SelectItem value="BIRTH">Nascimento de Filho</SelectItem>
-                  <SelectItem value="OTHER">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Detalhes</Label>
-              <Textarea
-                value={formData.details || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, details: e.target.value }))
-                }
-                placeholder="Descreva a situação"
-                rows={3}
-              />
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && selectedType === 'ADVANCE' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Valor do Adiantamento (R$)</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.amount || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, amount: e.target.value }))
-                }
-                placeholder="0,00"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Justificativa</Label>
-              <Textarea
-                value={formData.justification || ''}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    justification: e.target.value,
-                  }))
-                }
-                placeholder="Descreva o motivo do adiantamento"
-                rows={3}
-              />
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && selectedType === 'DATA_CHANGE' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Campo a Alterar</Label>
-              <Select
-                value={formData.field || ''}
-                onValueChange={v =>
-                  setFormData(prev => ({ ...prev, field: v }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o campo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ADDRESS">Endereço</SelectItem>
-                  <SelectItem value="PHONE">Telefone</SelectItem>
-                  <SelectItem value="EMAIL">E-mail</SelectItem>
-                  <SelectItem value="BANK_ACCOUNT">Dados Bancários</SelectItem>
-                  <SelectItem value="EMERGENCY_CONTACT">Contato de Emergência</SelectItem>
-                  <SelectItem value="OTHER">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Valor Atual</Label>
-              <Input
-                value={formData.currentValue || ''}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    currentValue: e.target.value,
-                  }))
-                }
-                placeholder="Valor atual do campo"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Novo Valor</Label>
-              <Input
-                value={formData.newValue || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, newValue: e.target.value }))
-                }
-                placeholder="Novo valor desejado"
-              />
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && selectedType === 'SUPPORT' && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Assunto</Label>
-              <Input
-                value={formData.subject || ''}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, subject: e.target.value }))
-                }
-                placeholder="Assunto do chamado"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select
-                value={formData.category || ''}
-                onValueChange={v =>
-                  setFormData(prev => ({ ...prev, category: v }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PAYROLL">Folha de Pagamento</SelectItem>
-                  <SelectItem value="BENEFITS">Benefícios</SelectItem>
-                  <SelectItem value="DOCUMENTS">Documentos</SelectItem>
-                  <SelectItem value="SYSTEMS">Sistemas / Acessos</SelectItem>
-                  <SelectItem value="OTHER">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Textarea
-                value={formData.description || ''}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                placeholder="Descreva detalhadamente sua solicitação"
-                rows={4}
-              />
-            </div>
-          </div>
-        )}
-      </StepWizardDialog>
+      />
     </div>
   );
 }

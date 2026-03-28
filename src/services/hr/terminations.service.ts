@@ -78,10 +78,9 @@ export const terminationsService = {
     );
   },
 
-  async downloadTrctPdf(terminationId: string): Promise<Blob> {
-    return apiClient.get<Blob>(
-      `/v1/hr/terminations/${terminationId}/trct`,
-      { responseType: 'blob' }
+  async downloadTrctPdf(terminationId: string): Promise<{ blob: Blob; filename: string; contentType: string }> {
+    return apiClient.getBlob(
+      `/v1/hr/terminations/${terminationId}/trct`
     );
   },
 };

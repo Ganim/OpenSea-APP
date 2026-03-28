@@ -119,7 +119,7 @@ export default function TerminationDetailPage() {
     if (!termination) return;
     setIsDownloadingPdf(true);
     try {
-      const blob = await terminationsService.downloadTrctPdf(termination.id);
+      const { blob } = await terminationsService.downloadTrctPdf(termination.id);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

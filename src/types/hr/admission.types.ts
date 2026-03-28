@@ -3,6 +3,11 @@
  * Tipos para admissão digital de funcionários
  */
 
+import type { ContractType, WorkRegime } from './employee.types';
+import type { DependantRelationship } from './dependant.types';
+
+export type { ContractType, WorkRegime, DependantRelationship };
+
 export type AdmissionStatus =
   | 'PENDING'
   | 'IN_PROGRESS'
@@ -31,20 +36,6 @@ export type DigitalSignatureType =
   | 'DOCUMENT_ACKNOWLEDGMENT'
   | 'POLICY_ACCEPTANCE';
 
-export type ContractType =
-  | 'CLT'
-  | 'PJ'
-  | 'TEMPORARY'
-  | 'INTERN'
-  | 'APPRENTICE';
-
-export type WorkRegime =
-  | 'FULL_TIME'
-  | 'PART_TIME'
-  | 'HOURLY'
-  | 'SHIFT'
-  | 'FLEXIBLE';
-
 export type MaritalStatus =
   | 'SINGLE'
   | 'MARRIED'
@@ -56,13 +47,6 @@ export type MaritalStatus =
 export type BankAccountType =
   | 'CHECKING'
   | 'SAVINGS';
-
-export type DependantRelationship =
-  | 'SPOUSE'
-  | 'CHILD'
-  | 'STEPCHILD'
-  | 'PARENT'
-  | 'OTHER';
 
 export interface AdmissionInvite {
   id: string;

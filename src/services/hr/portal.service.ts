@@ -46,10 +46,10 @@ export interface ListPendingApprovalsParams {
 // Helper: Build query string
 // ============================================================================
 
-function buildQuery(params?: Record<string, string | number | undefined>): string {
+function buildQuery(params?: object): string {
   if (!params) return '';
   const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
     if (value !== undefined && value !== null && value !== '') {
       query.append(key, String(value));
     }
