@@ -100,7 +100,7 @@ export function AnnouncementsTab() {
         <Megaphone className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
         <p className="text-lg font-medium mb-1">Nenhum comunicado</p>
         <p className="text-sm text-muted-foreground">
-          Nao ha comunicados ativos no momento
+          Não há comunicados ativos no momento
         </p>
       </Card>
     );

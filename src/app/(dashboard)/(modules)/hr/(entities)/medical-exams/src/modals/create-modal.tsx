@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Create Medical Exam Wizard
- * Modal de criacao rapida de exame medico
+ * Modal de criação rápida de exame médico
  */
 
 'use client';
@@ -36,8 +36,8 @@ interface CreateModalProps {
 
 const EXAM_TYPE_OPTIONS: { value: MedicalExamType; label: string }[] = [
   { value: 'ADMISSIONAL', label: 'Admissional' },
-  { value: 'PERIODICO', label: 'Periodico' },
-  { value: 'MUDANCA_FUNCAO', label: 'Mudanca de Funcao' },
+  { value: 'PERIODICO', label: 'Periódico' },
+  { value: 'MUDANCA_FUNCAO', label: 'Mudança de Função' },
   { value: 'RETORNO', label: 'Retorno ao Trabalho' },
   { value: 'DEMISSIONAL', label: 'Demissional' },
 ];
@@ -45,7 +45,7 @@ const EXAM_TYPE_OPTIONS: { value: MedicalExamType; label: string }[] = [
 const EXAM_RESULT_OPTIONS: { value: MedicalExamResult; label: string }[] = [
   { value: 'APTO', label: 'Apto' },
   { value: 'INAPTO', label: 'Inapto' },
-  { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restricoes' },
+  { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restrições' },
 ];
 
 export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
@@ -124,10 +124,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
-            {/* Funcionario */}
+            {/* Funcionário */}
             <div className="space-y-1.5">
               <Label className="text-xs">
-                Funcionario <span className="text-rose-500">*</span>
+                Funcionário <span className="text-rose-500">*</span>
               </Label>
               <div className="relative">
                 <EmployeeSelector
@@ -137,7 +137,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                     if (fieldErrors.employeeId)
                       setFieldErrors(prev => ({ ...prev, employeeId: '' }));
                   }}
-                  placeholder="Selecionar funcionario..."
+                  placeholder="Selecionar funcionário..."
                 />
                 <FormErrorIcon message={fieldErrors.employeeId} />
               </div>

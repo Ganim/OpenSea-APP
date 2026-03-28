@@ -47,18 +47,18 @@ import { toast } from 'sonner';
 // ============================================================================
 
 const REQUEST_TYPE_OPTIONS: { value: RequestType; label: string; icon: React.ReactNode; description: string }[] = [
-  { value: 'VACATION', label: 'Ferias', icon: <PalmtreeIcon className="h-5 w-5" />, description: 'Solicitar periodo de ferias' },
-  { value: 'ABSENCE', label: 'Ausencia', icon: <Calendar className="h-5 w-5" />, description: 'Registrar ausencia ou atestado medico' },
+  { value: 'VACATION', label: 'Férias', icon: <PalmtreeIcon className="h-5 w-5" />, description: 'Solicitar período de férias' },
+  { value: 'ABSENCE', label: 'Ausência', icon: <Calendar className="h-5 w-5" />, description: 'Registrar ausência ou atestado médico' },
   { value: 'ADVANCE', label: 'Adiantamento', icon: <FileText className="h-5 w-5" />, description: 'Solicitar adiantamento salarial' },
-  { value: 'DATA_CHANGE', label: 'Alteracao de Dados', icon: <UserCog className="h-5 w-5" />, description: 'Solicitar atualizacao de dados cadastrais' },
+  { value: 'DATA_CHANGE', label: 'Alteração de Dados', icon: <UserCog className="h-5 w-5" />, description: 'Solicitar atualização de dados cadastrais' },
   { value: 'SUPPORT', label: 'Suporte', icon: <Send className="h-5 w-5" />, description: 'Abrir chamado para o RH' },
 ];
 
 const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
-  VACATION: 'Ferias',
-  ABSENCE: 'Ausencia',
+  VACATION: 'Férias',
+  ABSENCE: 'Ausência',
   ADVANCE: 'Adiantamento',
-  DATA_CHANGE: 'Alteracao de Dados',
+  DATA_CHANGE: 'Alteração de Dados',
   SUPPORT: 'Suporte',
 };
 
@@ -96,12 +96,12 @@ export function RequestsTab() {
     mutationFn: (data: CreateEmployeeRequestData) =>
       portalService.createRequest(data),
     onSuccess: () => {
-      toast.success('Solicitacao criada com sucesso');
+      toast.success('Solicitação criada com sucesso');
       queryClient.invalidateQueries({ queryKey: ['my-requests'] });
       handleCloseWizard();
     },
     onError: () => {
-      toast.error('Erro ao criar solicitacao');
+      toast.error('Erro ao criar solicitação');
     },
   });
 
@@ -109,11 +109,11 @@ export function RequestsTab() {
   const cancelMutation = useMutation({
     mutationFn: (id: string) => portalService.cancelRequest(id),
     onSuccess: () => {
-      toast.success('Solicitacao cancelada');
+      toast.success('Solicitação cancelada');
       queryClient.invalidateQueries({ queryKey: ['my-requests'] });
     },
     onError: () => {
-      toast.error('Erro ao cancelar solicitacao');
+      toast.error('Erro ao cancelar solicitação');
     },
   });
 
@@ -139,7 +139,7 @@ export function RequestsTab() {
   const steps: WizardStep[] = [
     {
       id: 'type',
-      title: 'Tipo de Solicitacao',
+      title: 'Tipo de Solicitação',
       isValid: !!selectedType,
     },
     {
@@ -158,9 +158,9 @@ export function RequestsTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Minhas Solicitacoes</h3>
+          <h3 className="text-lg font-semibold">Minhas Solicitações</h3>
           <p className="text-sm text-muted-foreground">
-            Acompanhe suas solicitacoes ao departamento de RH
+            Acompanhe suas solicitações ao departamento de RH
           </p>
         </div>
         <Button
@@ -169,7 +169,7 @@ export function RequestsTab() {
           onClick={() => setIsWizardOpen(true)}
         >
           <Plus className="h-4 w-4 mr-1.5" />
-          Nova Solicitacao
+          Nova Solicitação
         </Button>
       </div>
 
@@ -192,9 +192,9 @@ export function RequestsTab() {
       ) : !requestsData || requestsData.length === 0 ? (
         <Card className="p-12 text-center bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-          <p className="text-lg font-medium mb-1">Nenhuma solicitacao</p>
+          <p className="text-lg font-medium mb-1">Nenhuma solicitação</p>
           <p className="text-sm text-muted-foreground mb-4">
-            Voce ainda nao fez nenhuma solicitacao ao RH
+            Você ainda não fez nenhuma solicitação ao RH
           </p>
           <Button
             size="sm"
@@ -202,7 +202,7 @@ export function RequestsTab() {
             onClick={() => setIsWizardOpen(true)}
           >
             <Plus className="h-4 w-4 mr-1.5" />
-            Criar Primeira Solicitacao
+            Criar Primeira Solicitação
           </Button>
         </Card>
       ) : (
@@ -240,7 +240,7 @@ export function RequestsTab() {
                     </p>
                     {request.rejectionReason && (
                       <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
-                        Motivo da rejeicao: {request.rejectionReason}
+                        Motivo da rejeição: {request.rejectionReason}
                       </p>
                     )}
                   </div>
@@ -271,19 +271,19 @@ export function RequestsTab() {
       <StepWizardDialog
         open={isWizardOpen}
         onOpenChange={setIsWizardOpen}
-        title="Nova Solicitacao"
-        description="Selecione o tipo de solicitacao e preencha os detalhes"
+        title="Nova Solicitação"
+        description="Selecione o tipo de solicitação e preencha os detalhes"
         steps={steps}
         currentStep={currentStep}
         onStepChange={setCurrentStep}
         onSubmit={handleSubmit}
         isSubmitting={createMutation.isPending}
-        submitLabel="Enviar Solicitacao"
+        submitLabel="Enviar Solicitação"
       >
         {currentStep === 1 && (
           <div className="space-y-3">
             <Label className="text-sm font-medium">
-              Tipo de Solicitacao
+              Tipo de Solicitação
             </Label>
             <div className="grid gap-2">
               {REQUEST_TYPE_OPTIONS.map(option => (
@@ -320,7 +320,7 @@ export function RequestsTab() {
         {currentStep === 2 && selectedType === 'VACATION' && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Data de Inicio</Label>
+              <Label>Data de Início</Label>
               <Input
                 type="date"
                 value={formData.startDate || ''}
@@ -330,7 +330,7 @@ export function RequestsTab() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Data de Termino</Label>
+              <Label>Data de Término</Label>
               <Input
                 type="date"
                 value={formData.endDate || ''}
@@ -340,13 +340,13 @@ export function RequestsTab() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Observacoes</Label>
+              <Label>Observações</Label>
               <Textarea
                 value={formData.notes || ''}
                 onChange={e =>
                   setFormData(prev => ({ ...prev, notes: e.target.value }))
                 }
-                placeholder="Observacoes adicionais (opcional)"
+                placeholder="Observações adicionais (opcional)"
                 rows={3}
               />
             </div>
@@ -356,7 +356,7 @@ export function RequestsTab() {
         {currentStep === 2 && selectedType === 'ABSENCE' && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Data de Inicio</Label>
+              <Label>Data de Início</Label>
               <Input
                 type="date"
                 value={formData.startDate || ''}
@@ -366,7 +366,7 @@ export function RequestsTab() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Data de Termino</Label>
+              <Label>Data de Término</Label>
               <Input
                 type="date"
                 value={formData.endDate || ''}
@@ -387,7 +387,7 @@ export function RequestsTab() {
                   <SelectValue placeholder="Selecione o motivo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MEDICAL">Atestado Medico</SelectItem>
+                  <SelectItem value="MEDICAL">Atestado Médico</SelectItem>
                   <SelectItem value="PERSONAL">Motivo Pessoal</SelectItem>
                   <SelectItem value="BEREAVEMENT">Falecimento</SelectItem>
                   <SelectItem value="WEDDING">Casamento</SelectItem>
@@ -403,7 +403,7 @@ export function RequestsTab() {
                 onChange={e =>
                   setFormData(prev => ({ ...prev, details: e.target.value }))
                 }
-                placeholder="Descreva a situacao"
+                placeholder="Descreva a situação"
                 rows={3}
               />
             </div>
@@ -456,11 +456,11 @@ export function RequestsTab() {
                   <SelectValue placeholder="Selecione o campo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ADDRESS">Endereco</SelectItem>
+                  <SelectItem value="ADDRESS">Endereço</SelectItem>
                   <SelectItem value="PHONE">Telefone</SelectItem>
                   <SelectItem value="EMAIL">E-mail</SelectItem>
-                  <SelectItem value="BANK_ACCOUNT">Dados Bancarios</SelectItem>
-                  <SelectItem value="EMERGENCY_CONTACT">Contato de Emergencia</SelectItem>
+                  <SelectItem value="BANK_ACCOUNT">Dados Bancários</SelectItem>
+                  <SelectItem value="EMERGENCY_CONTACT">Contato de Emergência</SelectItem>
                   <SelectItem value="OTHER">Outro</SelectItem>
                 </SelectContent>
               </Select>
@@ -516,7 +516,7 @@ export function RequestsTab() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PAYROLL">Folha de Pagamento</SelectItem>
-                  <SelectItem value="BENEFITS">Beneficios</SelectItem>
+                  <SelectItem value="BENEFITS">Benefícios</SelectItem>
                   <SelectItem value="DOCUMENTS">Documentos</SelectItem>
                   <SelectItem value="SYSTEMS">Sistemas / Acessos</SelectItem>
                   <SelectItem value="OTHER">Outro</SelectItem>
@@ -524,7 +524,7 @@ export function RequestsTab() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Descricao</Label>
+              <Label>Descrição</Label>
               <Textarea
                 value={formData.description || ''}
                 onChange={e =>
@@ -533,7 +533,7 @@ export function RequestsTab() {
                     description: e.target.value,
                   }))
                 }
-                placeholder="Descreva detalhadamente sua solicitacao"
+                placeholder="Descreva detalhadamente sua solicitação"
                 rows={4}
               />
             </div>

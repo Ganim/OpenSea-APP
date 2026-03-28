@@ -155,10 +155,10 @@ export function OnboardingTab() {
         <Card className="p-6 text-center border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-500/5">
           <PartyPopper className="h-12 w-12 mx-auto mb-3 text-emerald-500" />
           <h4 className="text-lg font-semibold text-emerald-700 dark:text-emerald-400">
-            Parabens! Onboarding Completo!
+            Parabéns! Onboarding Completo!
           </h4>
           <p className="text-sm text-emerald-600 dark:text-emerald-300 mt-1">
-            Voce completou todas as etapas de integracao. Bem-vindo a equipe!
+            Você completou todas as etapas de integração. Bem-vindo à equipe!
           </p>
         </Card>
       )}
@@ -218,7 +218,7 @@ export function OnboardingTab() {
                     )}
                     {item.completed && item.completedAt && (
                       <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                        Concluido em{' '}
+                        Concluído em{' '}
                         {new Date(item.completedAt).toLocaleDateString('pt-BR')}
                       </p>
                     )}

@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Create Dependant Wizard
- * Modal de criacao rapida de dependente
+ * Modal de criação rápida de dependente
  */
 
 'use client';
@@ -133,7 +133,7 @@ export function CreateModal({
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
-            {/* Funcionario */}
+            {/* Funcionário */}
             <div className="space-y-1.5">
               <Label className="text-xs">
                 Funcionário <span className="text-rose-500">*</span>

@@ -86,9 +86,8 @@ export const portalService = {
   },
 
   async cancelRequest(id: string): Promise<EmployeeRequestResponse> {
-    return apiClient.patch<EmployeeRequestResponse>(
-      `/v1/hr/my/requests/${id}/cancel`,
-      {}
+    return apiClient.delete<EmployeeRequestResponse>(
+      `/v1/hr/my/requests/${id}`
     );
   },
 
@@ -175,7 +174,7 @@ export const portalService = {
     params?: ListPendingApprovalsParams
   ): Promise<PendingApprovalsResponse> {
     return apiClient.get<PendingApprovalsResponse>(
-      `/v1/hr/approvals/pending${buildQuery(params)}`
+      `/v1/hr/requests/pending-approvals${buildQuery(params)}`
     );
   },
 
@@ -183,8 +182,8 @@ export const portalService = {
     id: string,
     reason?: string
   ): Promise<EmployeeRequestResponse> {
-    return apiClient.patch<EmployeeRequestResponse>(
-      `/v1/hr/approvals/${id}/approve`,
+    return apiClient.post<EmployeeRequestResponse>(
+      `/v1/hr/requests/${id}/approve`,
       { reason }
     );
   },
@@ -193,8 +192,8 @@ export const portalService = {
     id: string,
     reason: string
   ): Promise<EmployeeRequestResponse> {
-    return apiClient.patch<EmployeeRequestResponse>(
-      `/v1/hr/approvals/${id}/reject`,
+    return apiClient.post<EmployeeRequestResponse>(
+      `/v1/hr/requests/${id}/reject`,
       { reason }
     );
   },

@@ -39,9 +39,11 @@ export type ContractType =
   | 'APPRENTICE';
 
 export type WorkRegime =
-  | 'PRESENTIAL'
-  | 'REMOTE'
-  | 'HYBRID';
+  | 'FULL_TIME'
+  | 'PART_TIME'
+  | 'HOURLY'
+  | 'SHIFT'
+  | 'FLEXIBLE';
 
 export type MaritalStatus =
   | 'SINGLE'

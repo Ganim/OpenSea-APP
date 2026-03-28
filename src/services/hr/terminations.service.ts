@@ -61,15 +61,27 @@ export const terminationsService = {
     return apiClient.delete<void>(`/v1/hr/terminations/${id}`);
   },
 
-  async calculate(id: string): Promise<TerminationResponse> {
+  async calculate(
+    id: string,
+    totalFgtsBalance?: number
+  ): Promise<TerminationResponse> {
     return apiClient.post<TerminationResponse>(
-      `/v1/hr/terminations/${id}/calculate`
+      `/v1/hr/terminations/${id}/calculate`,
+      { totalFgtsBalance: totalFgtsBalance ?? 0 }
     );
   },
 
   async markAsPaid(id: string): Promise<TerminationResponse> {
-    return apiClient.post<TerminationResponse>(
-      `/v1/hr/terminations/${id}/mark-paid`
+    return apiClient.patch<TerminationResponse>(
+      `/v1/hr/terminations/${id}`,
+      { markAsPaid: true }
+    );
+  },
+
+  async downloadTrctPdf(terminationId: string): Promise<Blob> {
+    return apiClient.get<Blob>(
+      `/v1/hr/terminations/${terminationId}/trct`,
+      { responseType: 'blob' }
     );
   },
 };

@@ -87,9 +87,11 @@ export function getContractTypeLabel(type: string): string {
 // ============================================================================
 
 export const WORK_REGIME_LABELS: Record<string, string> = {
-  PRESENTIAL: 'Presencial',
-  REMOTE: 'Remoto',
-  HYBRID: 'Híbrido',
+  FULL_TIME: 'Tempo Integral',
+  PART_TIME: 'Meio Período',
+  HOURLY: 'Horista',
+  SHIFT: 'Turnos',
+  FLEXIBLE: 'Flexível',
 };
 
 export function getWorkRegimeLabel(regime: string): string {

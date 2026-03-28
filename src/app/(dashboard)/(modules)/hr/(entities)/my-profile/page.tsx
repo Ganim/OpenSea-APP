@@ -539,7 +539,7 @@ export default function MyProfilePage() {
             </TabsTrigger>
             <TabsTrigger value="vacations" className="gap-2 flex-1 min-w-[100px]">
               <PalmtreeIcon className="h-4 w-4 hidden sm:inline" />
-              <span>Ferias</span>
+              <span>Férias</span>
             </TabsTrigger>
             <TabsTrigger value="payslips" className="gap-2 flex-1 min-w-[100px]">
               <FileText className="h-4 w-4 hidden sm:inline" />
@@ -551,7 +551,7 @@ export default function MyProfilePage() {
             </TabsTrigger>
             <TabsTrigger value="requests" className="gap-2 flex-1 min-w-[100px]">
               <FileCheck className="h-4 w-4 hidden sm:inline" />
-              <span>Solicitacoes</span>
+              <span>Solicitações</span>
             </TabsTrigger>
             <TabsTrigger value="announcements" className="gap-2 flex-1 min-w-[100px]">
               <Megaphone className="h-4 w-4 hidden sm:inline" />

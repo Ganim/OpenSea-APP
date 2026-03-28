@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Create CIPA Mandate Wizard
- * Modal de criacao rapida de mandato CIPA
+ * Modal de criação rápida de mandato CIPA
  */
 
 'use client';
@@ -147,7 +147,7 @@ export function CreateMandateModal({
               </div>
             </div>
 
-            {/* Periodo */}
+            {/* Período */}
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="start-date" className="text-xs">

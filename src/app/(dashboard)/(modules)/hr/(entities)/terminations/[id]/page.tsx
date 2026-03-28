@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
+  Download,
   FileText,
   FileX2,
   NotebookText,
@@ -29,6 +30,8 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { terminationsService } from '@/services/hr/terminations.service';
+import { toast } from 'sonner';
 import {
   terminationsApi,
   terminationKeys,
@@ -50,6 +53,7 @@ export default function TerminationDetailPage() {
   const terminationId = params.id as string;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -109,6 +113,27 @@ export default function TerminationDetailPage() {
   const handleMarkAsPaid = async () => {
     if (!termination) return;
     await markAsPaidMutation.mutateAsync(termination.id);
+  };
+
+  const handleDownloadTrct = async () => {
+    if (!termination) return;
+    setIsDownloadingPdf(true);
+    try {
+      const blob = await terminationsService.downloadTrctPdf(termination.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TRCT-${getName(termination.employeeId)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('TRCT baixado com sucesso!');
+    } catch {
+      toast.error('Erro ao baixar TRCT');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   };
 
   // ============================================================================
@@ -211,6 +236,18 @@ export default function TerminationDetailPage() {
               variant: 'outline',
               disabled: deleteMutation.isPending,
             },
+            ...(hasVerbas
+              ? [
+                  {
+                    id: 'download-trct' as const,
+                    title: 'Baixar TRCT',
+                    icon: Download,
+                    onClick: handleDownloadTrct,
+                    variant: 'outline' as const,
+                    disabled: isDownloadingPdf,
+                  },
+                ]
+              : []),
             ...(termination.status === 'PENDING'
               ? [
                   {

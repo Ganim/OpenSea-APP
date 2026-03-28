@@ -132,7 +132,7 @@ export function ViewModal({ isOpen, onClose, overtime }: ViewModalProps) {
             </div>
           </Card>
 
-          {/* Aprovacao */}
+          {/* Aprovação */}
           {overtime.approved && overtime.approvedBy && (
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Aprovação</h3>

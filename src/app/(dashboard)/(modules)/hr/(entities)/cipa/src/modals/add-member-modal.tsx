@@ -106,17 +106,17 @@ export function AddMemberModal({
     () => [
       {
         title: 'Adicionar Membro',
-        description: 'Selecione o funcionario e defina seu cargo na CIPA.',
+        description: 'Selecione o funcionário e defina seu cargo na CIPA.',
         icon: (
           <UserPlus className="h-16 w-16 text-amber-400 opacity-50" />
         ),
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
-            {/* Funcionario */}
+            {/* Funcionário */}
             <div className="space-y-1.5">
               <Label className="text-xs">
-                Funcionario <span className="text-rose-500">*</span>
+                Funcionário <span className="text-rose-500">*</span>
               </Label>
               <div className="relative">
                 <EmployeeSelector
@@ -126,7 +126,7 @@ export function AddMemberModal({
                     if (fieldErrors.employeeId)
                       setFieldErrors(prev => ({ ...prev, employeeId: '' }));
                   }}
-                  placeholder="Selecionar funcionario..."
+                  placeholder="Selecionar funcionário..."
                 />
                 <FormErrorIcon message={fieldErrors.employeeId} />
               </div>

@@ -54,22 +54,22 @@ const KUDOS_CATEGORY_CONFIG: Record<
     color: 'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
   },
   INNOVATION: {
-    label: 'Inovacao',
+    label: 'Inovação',
     icon: <Lightbulb className="h-3.5 w-3.5" />,
     color: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
   },
   LEADERSHIP: {
-    label: 'Lideranca',
+    label: 'Liderança',
     icon: <Medal className="h-3.5 w-3.5" />,
     color: 'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
   },
   EXCELLENCE: {
-    label: 'Excelencia',
+    label: 'Excelência',
     icon: <Trophy className="h-3.5 w-3.5" />,
     color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   },
   HELPFULNESS: {
-    label: 'Colaboracao',
+    label: 'Colaboração',
     icon: <Heart className="h-3.5 w-3.5" />,
     color: 'bg-pink-50 text-pink-700 dark:bg-pink-500/8 dark:text-pink-300',
   },
@@ -183,7 +183,7 @@ export function KudosTab() {
           <KudosList
             kudos={kudosList || []}
             isLoading={isLoading}
-            emptyMessage="Voce ainda nao recebeu reconhecimentos"
+            emptyMessage="Você ainda não recebeu reconhecimentos"
             direction="received"
           />
         </TabsContent>
@@ -192,7 +192,7 @@ export function KudosTab() {
           <KudosList
             kudos={kudosList || []}
             isLoading={isLoading}
-            emptyMessage="Voce ainda nao enviou reconhecimentos"
+            emptyMessage="Você ainda não enviou reconhecimentos"
             direction="sent"
           />
         </TabsContent>
@@ -204,7 +204,7 @@ export function KudosTab() {
           <DialogHeader>
             <DialogTitle>Enviar Reconhecimento</DialogTitle>
             <DialogDescription>
-              Reconheca um colega de trabalho pelo seu otimo desempenho
+              Reconheça um colega de trabalho pelo seu ótimo desempenho
             </DialogDescription>
           </DialogHeader>
 
