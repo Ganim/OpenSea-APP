@@ -27,6 +27,8 @@ export function useListMedicalExams(params?: MedicalExamFilters) {
         employeeId: params?.employeeId,
         type: params?.type,
         result: params?.result,
+        aptitude: params?.aptitude,
+        status: params?.status,
         startDate: params?.startDate,
         endDate: params?.endDate,
         page,
@@ -46,7 +48,7 @@ export function useListMedicalExams(params?: MedicalExamFilters) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       return lastPage.hasMore ? lastPage.page + 1 : undefined;
     },
     staleTime: 5 * 60 * 1000,

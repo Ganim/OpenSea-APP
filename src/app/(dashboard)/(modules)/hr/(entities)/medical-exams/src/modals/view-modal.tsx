@@ -17,9 +17,13 @@ import {
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { MedicalExam } from '@/types/hr';
 import {
+  AlertTriangle,
   Calendar,
+  Clock,
   ExternalLink,
   RefreshCcwDot,
+  ShieldAlert,
+  ShieldCheck,
   Stethoscope,
   X,
 } from 'lucide-react';
@@ -29,6 +33,10 @@ import {
   getExamTypeLabel,
   getExamResultLabel,
   getExamResultVariant,
+  getExpirationStatus,
+  getExpirationStatusLabel,
+  getExpirationBadgeClasses,
+  getAptitudeLabel,
 } from '../utils';
 
 interface ViewModalProps {
@@ -42,6 +50,8 @@ export function ViewModal({ isOpen, onClose, exam }: ViewModalProps) {
   const { getName } = useEmployeeMap(exam ? [exam.employeeId] : []);
 
   if (!exam) return null;
+
+  const expirationStatus = getExpirationStatus(exam.expirationDate);
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
@@ -103,6 +113,27 @@ export function ViewModal({ isOpen, onClose, exam }: ViewModalProps) {
             <Badge variant={getExamResultVariant(exam.result)}>
               {getExamResultLabel(exam.result)}
             </Badge>
+            {exam.aptitude && (
+              <Badge variant={getExamResultVariant(exam.aptitude)}>
+                ASO: {getAptitudeLabel(exam.aptitude)}
+              </Badge>
+            )}
+            {exam.expirationDate && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${getExpirationBadgeClasses(expirationStatus)}`}
+              >
+                {expirationStatus === 'EXPIRED' && (
+                  <ShieldAlert className="h-3 w-3" />
+                )}
+                {expirationStatus === 'EXPIRING' && (
+                  <AlertTriangle className="h-3 w-3" />
+                )}
+                {expirationStatus === 'VALID' && (
+                  <ShieldCheck className="h-3 w-3" />
+                )}
+                {getExpirationStatusLabel(expirationStatus)}
+              </span>
+            )}
           </div>
 
           {/* Dados principais */}
@@ -130,13 +161,35 @@ export function ViewModal({ isOpen, onClose, exam }: ViewModalProps) {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Médico</p>
+                <p className="text-sm text-muted-foreground">
+                  Médico Examinador
+                </p>
                 <p className="text-base mt-1">{exam.doctorName}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">CRM</p>
                 <p className="text-base mt-1">{exam.doctorCrm}</p>
               </div>
+              {exam.clinicName && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Clínica</p>
+                  <p className="text-base mt-1">{exam.clinicName}</p>
+                </div>
+              )}
+              {exam.nextExamDate && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Próximo Exame</p>
+                  <p className="text-base mt-1">
+                    {formatDate(exam.nextExamDate)}
+                  </p>
+                </div>
+              )}
+              {exam.restrictions && (
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Restrições</p>
+                  <p className="text-base mt-1">{exam.restrictions}</p>
+                </div>
+              )}
               {exam.observations && (
                 <div className="col-span-2">
                   <p className="text-sm text-muted-foreground">Observações</p>

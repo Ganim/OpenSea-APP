@@ -197,6 +197,18 @@ export const HR_PERMISSIONS = {
   },
 
   /**
+   * Permissoes de Turnos (Shifts)
+   */
+  SHIFTS: {
+    LIST: HR_CODES.SHIFTS.ACCESS,
+    VIEW: HR_CODES.SHIFTS.ACCESS,
+    CREATE: HR_CODES.SHIFTS.REGISTER,
+    UPDATE: HR_CODES.SHIFTS.MODIFY,
+    DELETE: HR_CODES.SHIFTS.REMOVE,
+    MANAGE: HR_CODES.SHIFTS.ADMIN,
+  },
+
+  /**
    * Permissões de Bonificações (Bonuses)
    * Mapped to employees since no dedicated resource in new codes
    */
@@ -325,6 +337,18 @@ export const HR_PERMISSIONS = {
   },
 
   /**
+   * Permissões de EPI (PPE - Equipamentos de Proteção Individual)
+   */
+  PPE: {
+    LIST: HR_CODES.PPE.ACCESS,
+    VIEW: HR_CODES.PPE.ACCESS,
+    CREATE: HR_CODES.PPE.REGISTER,
+    UPDATE: HR_CODES.PPE.MODIFY,
+    DELETE: HR_CODES.PPE.REMOVE,
+    MANAGE: HR_CODES.PPE.ADMIN,
+  },
+
+  /**
    * Permissões de Zonas de Geofencing (Geofence Zones)
    * Mapped to time_control since it's part of time tracking
    */
@@ -346,6 +370,16 @@ export const HR_PERMISSIONS = {
     CREATE: HR_CODES.EMPLOYEE_REQUESTS.REGISTER,
     APPROVE: HR_CODES.EMPLOYEE_REQUESTS.ADMIN,
     MANAGE: HR_CODES.EMPLOYEE_REQUESTS.ADMIN,
+  },
+
+  /**
+   * Permissoes de Delegacao de Aprovacao (Approval Delegations)
+   */
+  DELEGATIONS: {
+    LIST: HR_CODES.DELEGATIONS.ACCESS,
+    VIEW: HR_CODES.DELEGATIONS.ACCESS,
+    CREATE: HR_CODES.DELEGATIONS.REGISTER,
+    DELETE: HR_CODES.DELEGATIONS.REMOVE,
   },
 
   /**
@@ -458,6 +492,9 @@ export type WorkplaceRiskPermission =
 
 export type CipaPermission =
   (typeof HR_PERMISSIONS.CIPA)[keyof typeof HR_PERMISSIONS.CIPA];
+
+export type PPEPermission =
+  (typeof HR_PERMISSIONS.PPE)[keyof typeof HR_PERMISSIONS.PPE];
 
 export type GeofenceZonePermission =
   (typeof HR_PERMISSIONS.GEOFENCE_ZONES)[keyof typeof HR_PERMISSIONS.GEOFENCE_ZONES];

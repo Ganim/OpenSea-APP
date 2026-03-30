@@ -290,6 +290,15 @@ export const HR_PERMISSIONS = {
     'modify',
     'remove'
   ),
+  SHIFTS: perm(
+    'hr',
+    'shifts',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
   EMPLOYEES: perm(
     'hr',
     'employees',
@@ -347,6 +356,13 @@ export const HR_PERMISSIONS = {
     'register',
     'admin'
   ),
+  DELEGATIONS: perm(
+    'hr',
+    'delegations',
+    'access',
+    'register',
+    'remove'
+  ),
   ONBOARDING: perm(
     'hr',
     'onboarding',
@@ -372,6 +388,24 @@ export const HR_PERMISSIONS = {
     'register',
     'export',
     'print'
+  ),
+  SAFETY: perm(
+    'hr',
+    'safety',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
+  PPE: perm(
+    'hr',
+    'ppe',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
   ),
 } as const;
 

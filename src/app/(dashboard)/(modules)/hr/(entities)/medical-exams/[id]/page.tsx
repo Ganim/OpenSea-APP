@@ -15,11 +15,16 @@ import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { MedicalExam } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
+  Building2,
   Calendar,
   Clock,
   ExternalLink,
   FileText,
+  MapPin,
   NotebookText,
+  ShieldAlert,
+  ShieldCheck,
   Stethoscope,
   Trash,
   User,
@@ -34,6 +39,11 @@ import {
   getExamTypeLabel,
   getExamResultLabel,
   getExamResultVariant,
+  getExpirationStatus,
+  getExpirationStatusLabel,
+  getExpirationBadgeClasses,
+  getAptitudeLabel,
+  getDaysUntilExpiry,
   useDeleteMedicalExam,
 } from '../src';
 
@@ -126,6 +136,13 @@ export default function MedicalExamDetailPage() {
   }
 
   // ============================================================================
+  // COMPUTED
+  // ============================================================================
+
+  const expirationStatus = getExpirationStatus(exam.expirationDate);
+  const daysUntilExpiry = getDaysUntilExpiry(exam.expirationDate);
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
@@ -157,13 +174,38 @@ export default function MedicalExamDetailPage() {
               <Stethoscope className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold tracking-tight">
                   {getExamTypeLabel(exam.type)}
                 </h1>
                 <Badge variant={getExamResultVariant(exam.result)}>
                   {getExamResultLabel(exam.result)}
                 </Badge>
+                {exam.expirationDate && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${getExpirationBadgeClasses(expirationStatus)}`}
+                  >
+                    {expirationStatus === 'EXPIRED' && (
+                      <ShieldAlert className="h-3 w-3" />
+                    )}
+                    {expirationStatus === 'EXPIRING' && (
+                      <AlertTriangle className="h-3 w-3" />
+                    )}
+                    {expirationStatus === 'VALID' && (
+                      <ShieldCheck className="h-3 w-3" />
+                    )}
+                    {getExpirationStatusLabel(expirationStatus)}
+                    {daysUntilExpiry !== null && (
+                      <span>
+                        (
+                        {daysUntilExpiry > 0
+                          ? `${daysUntilExpiry}d`
+                          : 'expirado'}
+                        )
+                      </span>
+                    )}
+                  </span>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
                 {getName(exam.employeeId)} · {exam.doctorName} ({exam.doctorCrm}
@@ -222,14 +264,14 @@ export default function MedicalExamDetailPage() {
               icon={<Calendar className="h-4 w-4" />}
             />
             <InfoField
-              label="Médico"
+              label="Médico Examinador"
               value={exam.doctorName}
               icon={<Stethoscope className="h-4 w-4" />}
               showCopyButton
               copyTooltip="Copiar nome do médico"
             />
             <InfoField
-              label="CRM"
+              label="CRM Examinador"
               value={exam.doctorCrm}
               showCopyButton
               copyTooltip="Copiar CRM"
@@ -243,11 +285,87 @@ export default function MedicalExamDetailPage() {
                 </Badge>
               }
             />
+            {exam.aptitude && (
+              <InfoField
+                label="Aptidão (ASO)"
+                value={getAptitudeLabel(exam.aptitude)}
+                badge={
+                  <Badge variant={getExamResultVariant(exam.aptitude)}>
+                    {getAptitudeLabel(exam.aptitude)}
+                  </Badge>
+                }
+              />
+            )}
+            {exam.validityMonths && (
+              <InfoField
+                label="Validade"
+                value={`${exam.validityMonths} meses`}
+              />
+            )}
+            {exam.nextExamDate && (
+              <InfoField
+                label="Próximo Exame Previsto"
+                value={formatDate(exam.nextExamDate)}
+                icon={<Calendar className="h-4 w-4" />}
+              />
+            )}
             {exam.documentUrl && (
-              <InfoField label="Documento" value={exam.documentUrl} />
+              <InfoField label="Documento (ASO)" value={exam.documentUrl} />
             )}
           </div>
         </Card>
+
+        {/* Médico Coordenador / Clínica (PCMSO) */}
+        {(exam.physicianName ||
+          exam.physicianCRM ||
+          exam.clinicName ||
+          exam.clinicAddress) && (
+          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
+              <Building2 className="h-5 w-5" />
+              Dados PCMSO
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {exam.physicianName && (
+                <InfoField
+                  label="Médico Coordenador"
+                  value={exam.physicianName}
+                  icon={<Stethoscope className="h-4 w-4" />}
+                />
+              )}
+              {exam.physicianCRM && (
+                <InfoField label="CRM Coordenador" value={exam.physicianCRM} />
+              )}
+              {exam.clinicName && (
+                <InfoField
+                  label="Clínica / Laboratório"
+                  value={exam.clinicName}
+                  icon={<Building2 className="h-4 w-4" />}
+                />
+              )}
+              {exam.clinicAddress && (
+                <InfoField
+                  label="Endereço da Clínica"
+                  value={exam.clinicAddress}
+                  icon={<MapPin className="h-4 w-4" />}
+                />
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Restrições */}
+        {exam.restrictions && (
+          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
+              <ShieldAlert className="h-5 w-5 text-amber-500" />
+              Restrições
+            </h3>
+            <p className="text-sm text-foreground whitespace-pre-wrap">
+              {exam.restrictions}
+            </p>
+          </Card>
+        )}
 
         {/* Observações */}
         {exam.observations && (

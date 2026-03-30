@@ -24,16 +24,21 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { DateRangeFilter } from '@/app/(dashboard)/(modules)/admin/overview/audit-logs/src/components/date-range-filter';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { employeesService } from '@/services/hr/employees.service';
-import type { MedicalExam } from '@/types/hr';
+import { medicalExamsService } from '@/services/hr/medical-exams.service';
+import type { MedicalExam, MedicalExamStatus } from '@/types/hr';
 import {
+  AlertTriangle,
   Calendar,
   CircleCheck,
+  Clock,
   Download,
   ExternalLink,
   Eye,
   FileText,
   Loader2,
   Plus,
+  ShieldAlert,
+  ShieldCheck,
   Stethoscope,
   Trash2,
   User,
@@ -52,10 +57,14 @@ import {
   getExamTypeLabel,
   getExamResultLabel,
   getExamResultVariant,
+  getExpirationStatus,
+  getExpirationStatusLabel,
+  getExpirationBadgeClasses,
   type MedicalExamFilters,
 } from './src';
 
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { Card } from '@/components/ui/card';
 
 const CreateModal = dynamic(
   () =>
@@ -83,6 +92,12 @@ const EXAM_RESULT_OPTIONS = [
   { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restrições' },
 ];
 
+const EXAM_STATUS_OPTIONS = [
+  { value: 'VALID', label: 'Válidos' },
+  { value: 'EXPIRING', label: 'Vencendo em 30 dias' },
+  { value: 'EXPIRED', label: 'Vencidos' },
+];
+
 export default function MedicalExamsPage() {
   const router = useRouter();
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
@@ -100,6 +115,7 @@ export default function MedicalExamsPage() {
   const [filterEmployeeId, setFilterEmployeeId] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterResult, setFilterResult] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
 
@@ -108,6 +124,7 @@ export default function MedicalExamsPage() {
     if (filterEmployeeId) params.employeeId = filterEmployeeId;
     if (filterType) params.type = filterType;
     if (filterResult) params.result = filterResult;
+    if (filterStatus) params.status = filterStatus as MedicalExamStatus;
     if (filterStartDate) params.startDate = filterStartDate;
     if (filterEndDate) params.endDate = filterEndDate;
     return params;
@@ -115,6 +132,7 @@ export default function MedicalExamsPage() {
     filterEmployeeId,
     filterType,
     filterResult,
+    filterStatus,
     filterStartDate,
     filterEndDate,
   ]);
@@ -123,7 +141,15 @@ export default function MedicalExamsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListMedicalExams(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListMedicalExams(queryParams);
   const createMutation = useCreateMedicalExam();
   const deleteMutation = useDeleteMedicalExam();
 
@@ -132,13 +158,29 @@ export default function MedicalExamsPage() {
     [data]
   );
 
+  // Compliance summary data
+  const { data: expiringData } = useQuery({
+    queryKey: ['medical-exams', 'expiring'],
+    queryFn: () => medicalExamsService.listExpiring(30),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: overdueData } = useQuery({
+    queryKey: ['medical-exams', 'overdue'],
+    queryFn: () => medicalExamsService.listOverdue(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const expiringCount = expiringData?.expiringExams?.length ?? 0;
+  const overdueCount = overdueData?.overdueExams?.length ?? 0;
+
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -267,6 +309,16 @@ export default function MedicalExamsPage() {
           { header: 'Médico', accessor: e => e.doctorName },
           { header: 'CRM', accessor: e => e.doctorCrm },
           { header: 'Resultado', accessor: e => getExamResultLabel(e.result) },
+          {
+            header: 'Aptidão',
+            accessor: e => (e.aptitude ? getExamResultLabel(e.aptitude) : '-'),
+          },
+          { header: 'Clínica', accessor: e => e.clinicName ?? '-' },
+          {
+            header: 'Status',
+            accessor: e =>
+              getExpirationStatusLabel(getExpirationStatus(e.expirationDate)),
+          },
         ],
         'exames-medicos'
       );
@@ -318,6 +370,8 @@ export default function MedicalExamsPage() {
   // ============================================================================
 
   const renderGridCard = (item: MedicalExam, isSelected: boolean) => {
+    const expirationStatus = getExpirationStatus(item.expirationDate);
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -338,7 +392,7 @@ export default function MedicalExamsPage() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {getName(item.employeeId)}
@@ -347,6 +401,27 @@ export default function MedicalExamsPage() {
                 <Calendar className="h-3 w-3" />
                 {formatDate(item.examDate)}
               </span>
+              {item.expirationDate && (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium w-fit ${getExpirationBadgeClasses(expirationStatus)}`}
+                >
+                  {expirationStatus === 'EXPIRED' && (
+                    <AlertTriangle className="h-2.5 w-2.5" />
+                  )}
+                  {expirationStatus === 'EXPIRING' && (
+                    <Clock className="h-2.5 w-2.5" />
+                  )}
+                  {expirationStatus === 'VALID' && (
+                    <ShieldCheck className="h-2.5 w-2.5" />
+                  )}
+                  {getExpirationStatusLabel(expirationStatus)}
+                  {item.expirationDate && (
+                    <span className="ml-0.5">
+                      ({formatDate(item.expirationDate)})
+                    </span>
+                  )}
+                </span>
+              )}
             </div>
           }
           isSelected={isSelected}
@@ -361,6 +436,8 @@ export default function MedicalExamsPage() {
   };
 
   const renderListCard = (item: MedicalExam, isSelected: boolean) => {
+    const expirationStatus = getExpirationStatus(item.expirationDate);
+
     return (
       <EntityContextMenu
         itemId={item.id}
@@ -390,6 +467,13 @@ export default function MedicalExamsPage() {
                 <Calendar className="h-3 w-3" />
                 {formatDate(item.examDate)}
               </span>
+              {item.expirationDate && (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${getExpirationBadgeClasses(expirationStatus)}`}
+                >
+                  {getExpirationStatusLabel(expirationStatus)}
+                </span>
+              )}
             </div>
           }
           isSelected={isSelected}
@@ -467,11 +551,57 @@ export default function MedicalExamsPage() {
 
           <Header
             title="Exames Médicos"
-            description="Gerencie os exames médicos ocupacionais dos funcionários"
+            description="Gerencie os exames médicos ocupacionais dos funcionários (PCMSO)"
           />
         </PageHeader>
 
         <PageBody>
+          {/* Compliance Summary */}
+          {(expiringCount > 0 || overdueCount > 0) && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {overdueCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setFilterStatus('EXPIRED')}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                    filterStatus === 'EXPIRED'
+                      ? 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300 ring-1 ring-rose-300 dark:ring-rose-500/30'
+                      : 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-500/15'
+                  }`}
+                >
+                  <ShieldAlert className="h-4 w-4" />
+                  <span>
+                    {overdueCount} exame{overdueCount !== 1 ? 's' : ''} vencido
+                    {overdueCount !== 1 ? 's' : ''}
+                  </span>
+                </button>
+              )}
+              {expiringCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setFilterStatus('EXPIRING')}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                    filterStatus === 'EXPIRING'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-500/30'
+                      : 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/15'
+                  }`}
+                >
+                  <Clock className="h-4 w-4" />
+                  <span>{expiringCount} vencendo em 30 dias</span>
+                </button>
+              )}
+              {filterStatus && (
+                <button
+                  type="button"
+                  onClick={() => setFilterStatus('')}
+                  className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Limpar filtro
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Search Bar */}
           <SearchBar
             value={searchQuery}
@@ -529,6 +659,14 @@ export default function MedicalExamsPage() {
                       value={filterResult}
                       onChange={v => setFilterResult(v)}
                       activeColor="emerald"
+                    />
+                    <FilterDropdown
+                      label="Situação"
+                      icon={ShieldCheck}
+                      options={EXAM_STATUS_OPTIONS}
+                      value={filterStatus}
+                      onChange={v => setFilterStatus(v)}
+                      activeColor="blue"
                     />
                     <DateRangeFilter
                       startDate={filterStartDate}

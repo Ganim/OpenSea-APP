@@ -10,6 +10,7 @@ export * from './time-bank.service';
 export * from './time-control.service';
 export * from './vacations.service';
 export * from './work-schedules.service';
+export * from './shifts.service';
 export * from './dependants.service';
 export * from './medical-exams.service';
 export * from './terminations.service';
@@ -51,3 +52,17 @@ export {
 export * from './warnings.service';
 export * from './offboarding.service';
 export * from './enterprises.service';
+export {
+  approvalDelegationsService,
+  type ListDelegationsParams,
+} from './approval-delegations.service';
+export * from './ppe.service';
+export {
+  reviewsService,
+  type ReviewCyclesResponse,
+  type ReviewCycleResponse,
+  type PerformanceReviewsResponse,
+  type PerformanceReviewResponse,
+  type ListReviewCyclesParams,
+  type ListPerformanceReviewsParams,
+} from './reviews.service';

@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Create Medical Exam Wizard
- * Modal de criação rápida de exame médico
+ * Modal de criação rápida de exame médico com campos PCMSO
  */
 
 'use client';
@@ -23,7 +23,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { translateError } from '@/lib/error-messages';
-import type { CreateMedicalExamData, MedicalExamType, MedicalExamResult } from '@/types/hr';
+import type {
+  CreateMedicalExamData,
+  MedicalExamType,
+  MedicalExamResult,
+  MedicalExamAptitude,
+} from '@/types/hr';
 import { Loader2, Stethoscope } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -48,6 +53,12 @@ const EXAM_RESULT_OPTIONS: { value: MedicalExamResult; label: string }[] = [
   { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restrições' },
 ];
 
+const APTITUDE_OPTIONS: { value: MedicalExamAptitude; label: string }[] = [
+  { value: 'APTO', label: 'Apto' },
+  { value: 'INAPTO', label: 'Inapto' },
+  { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restrições' },
+];
+
 export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
   const [employeeId, setEmployeeId] = useState('');
   const [type, setType] = useState<MedicalExamType | ''>('');
@@ -58,6 +69,15 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
   const [result, setResult] = useState<MedicalExamResult | ''>('');
   const [observations, setObservations] = useState('');
   const [documentUrl, setDocumentUrl] = useState('');
+  // PCMSO fields
+  const [aptitude, setAptitude] = useState<MedicalExamAptitude | ''>('');
+  const [clinicName, setClinicName] = useState('');
+  const [clinicAddress, setClinicAddress] = useState('');
+  const [physicianName, setPhysicianName] = useState('');
+  const [physicianCRM, setPhysicianCRM] = useState('');
+  const [validityMonths, setValidityMonths] = useState('');
+  const [restrictions, setRestrictions] = useState('');
+  const [nextExamDate, setNextExamDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -72,6 +92,14 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       setResult('');
       setObservations('');
       setDocumentUrl('');
+      setAptitude('');
+      setClinicName('');
+      setClinicAddress('');
+      setPhysicianName('');
+      setPhysicianCRM('');
+      setValidityMonths('');
+      setRestrictions('');
+      setNextExamDate('');
       setIsSubmitting(false);
       setFieldErrors({});
     }
@@ -99,6 +127,18 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         result: result as MedicalExamResult,
         observations: observations.trim() || undefined,
         documentUrl: documentUrl.trim() || undefined,
+        // PCMSO fields
+        examCategory: type as MedicalExamType,
+        aptitude: aptitude ? (aptitude as MedicalExamAptitude) : undefined,
+        clinicName: clinicName.trim() || undefined,
+        clinicAddress: clinicAddress.trim() || undefined,
+        physicianName: physicianName.trim() || undefined,
+        physicianCRM: physicianCRM.trim() || undefined,
+        validityMonths: validityMonths
+          ? parseInt(validityMonths, 10)
+          : undefined,
+        restrictions: restrictions.trim() || undefined,
+        nextExamDate: nextExamDate || undefined,
       };
       await onSubmit(data);
     } catch (error) {
@@ -116,12 +156,16 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
   const steps: WizardStep[] = useMemo(
     () => [
       {
-        title: 'Novo Exame Medico',
-        description: 'Registre um novo exame medico ocupacional.',
-        icon: (
-          <Stethoscope className="h-16 w-16 text-teal-400 opacity-50" />
-        ),
-        isValid: !!canSubmit,
+        title: 'Dados do Exame',
+        description: 'Informações básicas do exame médico ocupacional.',
+        icon: <Stethoscope className="h-16 w-16 text-teal-400 opacity-50" />,
+        isValid:
+          !!employeeId.trim() &&
+          !!type &&
+          !!examDate &&
+          !!doctorName.trim() &&
+          !!doctorCrm.trim() &&
+          !!result,
         content: (
           <div className="space-y-4 py-2">
             {/* Funcionário */}
@@ -187,6 +231,42 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
               </div>
             </div>
 
+            {/* Aptidão PCMSO */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-1.5">
+                <Label className="text-xs">Aptidão (ASO)</Label>
+                <Select
+                  value={aptitude}
+                  onValueChange={v => setAptitude(v as MedicalExamAptitude)}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Selecionar aptidão..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {APTITUDE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="validity-months" className="text-xs">
+                  Validade (meses)
+                </Label>
+                <Input
+                  id="validity-months"
+                  type="number"
+                  min="1"
+                  value={validityMonths}
+                  onChange={e => setValidityMonths(e.target.value)}
+                  placeholder="12"
+                  className="h-9"
+                />
+              </div>
+            </div>
+
             {/* Datas */}
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-1.5">
@@ -215,11 +295,25 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
               </div>
             </div>
 
-            {/* Medico */}
+            {/* Próximo Exame */}
+            <div className="space-y-1.5">
+              <Label htmlFor="next-exam-date" className="text-xs">
+                Próximo Exame Previsto
+              </Label>
+              <Input
+                id="next-exam-date"
+                type="date"
+                value={nextExamDate}
+                onChange={e => setNextExamDate(e.target.value)}
+                className="h-9"
+              />
+            </div>
+
+            {/* Médico Examinador */}
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="doctor-name" className="text-xs">
-                  Nome do Medico <span className="text-rose-500">*</span>
+                  Médico Examinador <span className="text-rose-500">*</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -259,16 +353,86 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
               </div>
             </div>
 
-            {/* Observacoes */}
+            {/* Médico Coordenador (PCMSO) */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="physician-name" className="text-xs">
+                  Médico Coordenador (PCMSO)
+                </Label>
+                <Input
+                  id="physician-name"
+                  value={physicianName}
+                  onChange={e => setPhysicianName(e.target.value)}
+                  placeholder="Dr. Nome Completo"
+                  className="h-9"
+                />
+              </div>
+              <div className="w-40 space-y-1.5">
+                <Label htmlFor="physician-crm" className="text-xs">
+                  CRM Coordenador
+                </Label>
+                <Input
+                  id="physician-crm"
+                  value={physicianCRM}
+                  onChange={e => setPhysicianCRM(e.target.value)}
+                  placeholder="CRM/UF 00000"
+                  className="h-9"
+                />
+              </div>
+            </div>
+
+            {/* Clínica */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="clinic-name" className="text-xs">
+                  Clínica / Laboratório
+                </Label>
+                <Input
+                  id="clinic-name"
+                  value={clinicName}
+                  onChange={e => setClinicName(e.target.value)}
+                  placeholder="Nome da clínica"
+                  className="h-9"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="clinic-address" className="text-xs">
+                Endereço da Clínica
+              </Label>
+              <Input
+                id="clinic-address"
+                value={clinicAddress}
+                onChange={e => setClinicAddress(e.target.value)}
+                placeholder="Endereço completo"
+                className="h-9"
+              />
+            </div>
+
+            {/* Restrições */}
+            <div className="space-y-1.5">
+              <Label htmlFor="exam-restrictions" className="text-xs">
+                Restrições
+              </Label>
+              <Textarea
+                id="exam-restrictions"
+                value={restrictions}
+                onChange={e => setRestrictions(e.target.value)}
+                placeholder="Descreva restrições identificadas no ASO..."
+                rows={2}
+              />
+            </div>
+
+            {/* Observações */}
             <div className="space-y-1.5">
               <Label htmlFor="exam-observations" className="text-xs">
-                Observacoes
+                Observações
               </Label>
               <Textarea
                 id="exam-observations"
                 value={observations}
                 onChange={e => setObservations(e.target.value)}
-                placeholder="Observacoes adicionais sobre o exame..."
+                placeholder="Observações adicionais sobre o exame..."
                 rows={2}
               />
             </div>
@@ -276,7 +440,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
             {/* URL do Documento */}
             <div className="space-y-1.5">
               <Label htmlFor="exam-doc-url" className="text-xs">
-                URL do Documento
+                URL do Documento (ASO)
               </Label>
               <Input
                 id="exam-doc-url"
@@ -311,7 +475,29 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         ),
       },
     ],
-    [employeeId, type, examDate, expirationDate, doctorName, doctorCrm, result, observations, documentUrl, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      employeeId,
+      type,
+      examDate,
+      expirationDate,
+      doctorName,
+      doctorCrm,
+      result,
+      aptitude,
+      validityMonths,
+      nextExamDate,
+      physicianName,
+      physicianCRM,
+      clinicName,
+      clinicAddress,
+      restrictions,
+      observations,
+      documentUrl,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

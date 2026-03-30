@@ -24,6 +24,7 @@ import {
   BookUser,
   BarChart3,
   CalendarDays,
+  ClipboardCheck,
   ClipboardList,
   FileCheck,
   Clock,
@@ -31,6 +32,7 @@ import {
   FileUser,
   FileX2,
   GitBranchPlus,
+  HardHat,
   GraduationCap,
   Heart,
   Hourglass,
@@ -190,6 +192,16 @@ const sections: {
         gradient: 'from-indigo-500 to-violet-600',
         hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
         permission: HR_PERMISSIONS.WORK_SCHEDULES.LIST,
+      },
+      {
+        id: 'shifts',
+        title: 'Turnos',
+        description: 'Turnos fixos, rotativos, flexíveis e sobreaviso',
+        icon: Timer,
+        href: '/hr/shifts',
+        gradient: 'from-sky-500 to-indigo-600',
+        hoverBg: 'hover:bg-sky-50 dark:hover:bg-sky-500/10',
+        permission: HR_PERMISSIONS.SHIFTS.LIST,
       },
       {
         id: 'time-control',
@@ -369,6 +381,21 @@ const sections: {
     ],
   },
   {
+    title: 'Desempenho',
+    cards: [
+      {
+        id: 'reviews',
+        title: 'Avaliações de Desempenho',
+        description: 'Ciclos de avaliação, autoavaliação e feedback',
+        icon: ClipboardCheck,
+        href: '/hr/reviews',
+        gradient: 'from-violet-500 to-violet-600',
+        hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+    ],
+  },
+  {
     title: 'Saúde e Segurança',
     cards: [
       {
@@ -410,6 +437,16 @@ const sections: {
         gradient: 'from-amber-500 to-amber-600',
         hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
         permission: HR_PERMISSIONS.CIPA.LIST,
+      },
+      {
+        id: 'ppe',
+        title: 'EPI',
+        description: 'Equipamentos de Proteção Individual',
+        icon: HardHat,
+        href: '/hr/ppe',
+        gradient: 'from-sky-500 to-sky-600',
+        hoverBg: 'hover:bg-sky-50 dark:hover:bg-sky-500/10',
+        permission: HR_PERMISSIONS.PPE.LIST,
       },
     ],
   },
