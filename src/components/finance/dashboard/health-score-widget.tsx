@@ -241,7 +241,7 @@ export function HealthScoreWidget() {
           </div>
 
           {/* Tips */}
-          <div className="lg:w-72 shrink-0">
+          <div className="hidden lg:block lg:w-72 shrink-0">
             <div className="flex items-center gap-1.5 mb-2">
               <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
               <span className="text-xs font-semibold text-muted-foreground">

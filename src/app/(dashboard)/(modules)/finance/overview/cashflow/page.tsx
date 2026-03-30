@@ -47,10 +47,8 @@ function getAccuracyColorClass(accuracy: number): string {
 }
 
 function getAccuracyBgClass(accuracy: number): string {
-  if (accuracy >= 80)
-    return 'bg-emerald-100 dark:bg-emerald-900/30';
-  if (accuracy >= 50)
-    return 'bg-amber-100 dark:bg-amber-900/30';
+  if (accuracy >= 80) return 'bg-emerald-100 dark:bg-emerald-900/30';
+  if (accuracy >= 50) return 'bg-amber-100 dark:bg-amber-900/30';
   return 'bg-rose-100 dark:bg-rose-900/30';
 }
 
@@ -73,13 +71,11 @@ export default function CashflowPage() {
     groupBy,
   });
 
-  const {
-    data: accuracyData,
-    isLoading: isAccuracyLoading,
-  } = useCashflowAccuracy({
-    startDate,
-    endDate,
-  });
+  const { data: accuracyData, isLoading: isAccuracyLoading } =
+    useCashflowAccuracy({
+      startDate,
+      endDate,
+    });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -233,19 +229,19 @@ export default function CashflowPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">
+                      <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
                         Período
                       </th>
-                      <th className="text-right py-3 px-4 font-medium">
+                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
                         Entradas
                       </th>
-                      <th className="text-right py-3 px-4 font-medium">
+                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
                         Saídas
                       </th>
-                      <th className="text-right py-3 px-4 font-medium">
+                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
                         Fluxo Líquido
                       </th>
-                      <th className="text-right py-3 px-4 font-medium">
+                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
                         Saldo Acumulado
                       </th>
                     </tr>
@@ -255,21 +251,23 @@ export default function CashflowPage() {
                       const isPositiveFlow = entry.netFlow >= 0;
                       return (
                         <tr key={index} className="border-b last:border-0">
-                          <td className="py-3 px-4">{entry.period}</td>
-                          <td className="py-3 px-4 text-right text-green-600 font-medium">
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-sm">
+                            {entry.period}
+                          </td>
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-green-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.inflow)}
                           </td>
-                          <td className="py-3 px-4 text-right text-red-600 font-medium">
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-red-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.outflow)}
                           </td>
                           <td
-                            className={`py-3 px-4 text-right font-medium ${
+                            className={`py-2 px-2 sm:py-3 sm:px-4 text-right font-medium text-xs sm:text-sm ${
                               isPositiveFlow ? 'text-green-600' : 'text-red-600'
                             }`}
                           >
                             {formatCurrency(entry.netFlow)}
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold">
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right font-semibold text-xs sm:text-sm">
                             {formatCurrency(entry.cumulativeBalance)}
                           </td>
                         </tr>

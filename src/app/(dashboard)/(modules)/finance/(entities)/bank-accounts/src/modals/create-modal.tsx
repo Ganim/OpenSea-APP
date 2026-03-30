@@ -168,7 +168,7 @@ export function CreateBankAccountModal({
           </div>
 
           {/* Row 2: Banco + Agência/Dígito */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Banco *</Label>
               <BankSelect
@@ -204,7 +204,7 @@ export function CreateBankAccountModal({
           </div>
 
           {/* Row 3: Tipo de Conta + Conta/Dígito */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="create-accountType">Tipo de Conta *</Label>
               <Select
@@ -254,7 +254,7 @@ export function CreateBankAccountModal({
           </div>
 
           {/* Row 4: Tipo de Chave PIX + Chave PIX */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="create-pixKeyType">Tipo de Chave PIX</Label>
               <Select

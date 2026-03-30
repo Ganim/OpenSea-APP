@@ -111,7 +111,7 @@ export function ReceivableStepConfirmation({
         {/* Dados Gerais */}
         <div className="rounded-xl border p-4">
           <h4 className="text-sm font-semibold mb-3">Dados Gerais</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Descrição" value={data.description} />
             <Field label="Cliente" value={data.customerName} />
             <Field label="Categoria" value={data.categoryName} />
@@ -123,7 +123,7 @@ export function ReceivableStepConfirmation({
         {/* Valores */}
         <div className="rounded-xl border p-4">
           <h4 className="text-sm font-semibold mb-3">Valores</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Valor" value={formatCurrency(data.expectedAmount)} />
             {data.interest > 0 && (
               <Field label="Juros" value={formatCurrency(data.interest)} />
@@ -160,7 +160,7 @@ export function ReceivableStepConfirmation({
         {data.installmentEnabled && (
           <div className="rounded-xl border border-violet-200 dark:border-violet-500/20 bg-violet-50/50 dark:bg-violet-500/5 p-4">
             <h4 className="text-sm font-semibold mb-3">Parcelamento</h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field
                 label="Parcelas"
                 value={`${data.totalInstallments}x de ${formatCurrency(data.expectedAmount / data.totalInstallments)}`}

@@ -375,7 +375,7 @@ export function EmitNfeModal({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* NFE Option */}
                 <button
                   type="button"
@@ -513,7 +513,7 @@ export function EmitNfeModal({
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label className="text-xs">Quantidade *</Label>
                         <Input
@@ -550,7 +550,7 @@ export function EmitNfeModal({
 
                     {/* NFE-specific fields */}
                     {documentType === 'NFE' && (
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-2">
                           <Label className="text-xs">NCM</Label>
                           <Input

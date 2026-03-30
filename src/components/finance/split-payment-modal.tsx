@@ -539,7 +539,7 @@ export function SplitPaymentModal({
   const step2Content = (
     <div className="flex flex-col gap-4 h-full overflow-y-auto">
       {/* Payment info row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs">Valor Total do Pagamento</Label>
           <Input
@@ -561,7 +561,7 @@ export function SplitPaymentModal({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs">Conta Bancária</Label>
           <Select value={bankAccountId} onValueChange={setBankAccountId}>

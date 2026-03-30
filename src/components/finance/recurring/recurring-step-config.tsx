@@ -155,7 +155,7 @@ export function RecurringStepConfig({
       {/* ================================================================= */}
       <SectionDivider label="Tipo" />
 
-      <div className="grid grid-cols-2 gap-3 py-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
         {(['PAYABLE', 'RECEIVABLE'] as FinanceEntryType[]).map(type => {
           const isSelected = data.type === type;
           const isPayable = type === 'PAYABLE';
@@ -281,7 +281,7 @@ export function RecurringStepConfig({
       {/* ================================================================= */}
       <SectionDivider label="Período" />
 
-      <div className="grid grid-cols-2 gap-3 py-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-1">
         <div className="space-y-1">
           <span className="text-sm text-muted-foreground">
             Data de início <span className="text-rose-500">*</span>

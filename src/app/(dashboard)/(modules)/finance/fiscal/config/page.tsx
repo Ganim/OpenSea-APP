@@ -147,7 +147,9 @@ function CertificateInfo({ config }: { config: Record<string, unknown> }) {
         <FileKey className="h-4 w-4 text-emerald-500" />
         <span className="font-medium text-sm">Certificado Ativo</span>
         {isExpired ? (
-          <Badge variant="destructive">Expirado</Badge>
+          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300">
+            Expirado
+          </span>
         ) : (
           <Badge variant="success">Válido</Badge>
         )}

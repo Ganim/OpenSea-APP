@@ -49,6 +49,7 @@ import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { CostCenterAllocation, FinanceEntryStatus } from '@/types/finance';
 import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowUpCircle,
   DollarSign,
@@ -479,416 +480,429 @@ export default function EditReceivablePage({
           </div>
         </Card>
 
-        {/* Form Card — Section 1: Identificação */}
+        {/* Form Card with Tabs */}
         <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={FileText}
-                title="Identificação"
-                subtitle="Dados básicos do recebimento"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="sm:col-span-2 lg:col-span-3 grid gap-2">
-                    <Label htmlFor="description">
-                      Descrição <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="description"
-                        value={description}
-                        onChange={e => {
-                          setDescription(e.target.value);
-                          if (fieldErrors.description)
-                            setFieldErrors(prev => ({
-                              ...prev,
-                              description: '',
-                            }));
-                        }}
-                        placeholder="Descrição do recebimento"
-                        required
-                        aria-invalid={!!fieldErrors.description}
-                      />
-                      <FormErrorIcon message={fieldErrors.description} />
-                    </div>
-                  </div>
+          <div className="px-6 py-4">
+            <Tabs defaultValue="general" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 h-12 mb-4">
+                <TabsTrigger value="general">Geral</TabsTrigger>
+                <TabsTrigger value="values">Valores</TabsTrigger>
+                <TabsTrigger value="allocation">Alocação</TabsTrigger>
+                <TabsTrigger value="other">Outros</TabsTrigger>
+              </TabsList>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="categoryId">
-                      Categoria <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger id="categoryId">
-                        <SelectValue placeholder="Selecione uma categoria..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredCategories.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="customerName">Cliente</Label>
-                    <Input
-                      id="customerName"
-                      value={customerName}
-                      onChange={e => setCustomerName(e.target.value)}
-                      placeholder="Nome do cliente"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="tags">Tags</Label>
-                    <Input
-                      id="tags"
-                      value={tags}
-                      onChange={e => setTags(e.target.value)}
-                      placeholder="Ex: urgente, mensal, aluguel"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Separe por vírgulas
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 2: Valores */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={DollarSign}
-                title="Valores"
-                subtitle="Montantes e datas do recebimento"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="expectedAmount">
-                      Valor Esperado (R$){' '}
-                      <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="expectedAmount"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={expectedAmount}
-                      onChange={e =>
-                        setExpectedAmount(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="dueDate">
-                      Data de Vencimento{' '}
-                      <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="dueDate"
-                      type="date"
-                      value={dueDate}
-                      onChange={e => setDueDate(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="issueDate">Data de Emissão</Label>
-                    <Input
-                      id="issueDate"
-                      type="date"
-                      value={issueDate}
-                      onChange={e => setIssueDate(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="competenceDate">Data de Competência</Label>
-                    <Input
-                      id="competenceDate"
-                      type="date"
-                      value={competenceDate}
-                      onChange={e => setCompetenceDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="discount">Desconto (R$)</Label>
-                    <Input
-                      id="discount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={discount}
-                      onChange={e =>
-                        setDiscount(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="interest">Juros (R$)</Label>
-                    <Input
-                      id="interest"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={interest}
-                      onChange={e =>
-                        setInterest(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="penalty">Multa (R$)</Label>
-                    <Input
-                      id="penalty"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={penalty}
-                      onChange={e =>
-                        setPenalty(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 3: Rateio */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Target}
-                title="Centro de Custo"
-                subtitle="Defina o centro de custo ou configure o rateio"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                {/* Toggle: simple vs allocation mode */}
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-white dark:bg-slate-800/60">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-medium">Modo Rateio</Label>
-                    <p className="text-xs text-muted-foreground">
-                      {useAllocations
-                        ? 'Distribuir entre múltiplos centros de custo'
-                        : 'Centro de custo único'}
-                    </p>
-                  </div>
-                  <Switch
-                    checked={useAllocations}
-                    onCheckedChange={checked => {
-                      setUseAllocations(checked);
-                      if (!checked) {
-                        setAllocations([]);
-                      } else {
-                        setCostCenterId('');
-                      }
-                    }}
+              {/* Tab: Geral — Identificação */}
+              <TabsContent value="general" className="flex-col space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={FileText}
+                    title="Identificação"
+                    subtitle="Dados básicos do recebimento"
                   />
-                </div>
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="sm:col-span-2 lg:col-span-3 grid gap-2">
+                        <Label htmlFor="description">
+                          Descrição <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="description"
+                            value={description}
+                            onChange={e => {
+                              setDescription(e.target.value);
+                              if (fieldErrors.description)
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  description: '',
+                                }));
+                            }}
+                            placeholder="Descrição do recebimento"
+                            required
+                            aria-invalid={!!fieldErrors.description}
+                          />
+                          <FormErrorIcon message={fieldErrors.description} />
+                        </div>
+                      </div>
 
-                {/* Simple mode: single cost center */}
-                {!useAllocations && (
-                  <div className="grid gap-2">
-                    <Label htmlFor="costCenterId">
-                      Centro de Custo <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      value={costCenterId}
-                      onValueChange={setCostCenterId}
-                    >
-                      <SelectTrigger id="costCenterId">
-                        <SelectValue placeholder="Selecione um centro de custo..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {costCenters.map(cc => (
-                          <SelectItem key={cc.id} value={cc.id}>
-                            {cc.code} - {cc.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Allocation mode: multiple cost centers with percentages */}
-                {useAllocations && (
-                  <div className="space-y-3">
-                    {allocations.length > 0 && (
-                      <Table aria-label="Tabela de rateio de centros de custo">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Centro de Custo</TableHead>
-                            <TableHead className="w-[140px]">
-                              Percentual (%)
-                            </TableHead>
-                            <TableHead className="w-[50px]" />
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {allocations.map((alloc, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                <Select
-                                  value={alloc.costCenterId}
-                                  onValueChange={value =>
-                                    updateAllocation(
-                                      index,
-                                      'costCenterId',
-                                      value
-                                    )
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {costCenters.map(cc => (
-                                      <SelectItem key={cc.id} value={cc.id}>
-                                        {cc.code} - {cc.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="100"
-                                  value={alloc.percentage}
-                                  onChange={e =>
-                                    updateAllocation(
-                                      index,
-                                      'percentage',
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-full"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <button
-                                  type="button"
-                                  onClick={() => removeAllocation(index)}
-                                  className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    )}
-
-                    {/* Total + Add button */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={addAllocation}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Adicionar centro de custo
-                      </button>
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">Total: </span>
-                        <span
-                          className={
-                            Math.abs(allocationTotal - 100) < 0.01
-                              ? 'font-semibold text-emerald-600'
-                              : 'font-semibold text-rose-600'
-                          }
+                      <div className="grid gap-2">
+                        <Label htmlFor="categoryId">
+                          Categoria <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={categoryId}
+                          onValueChange={setCategoryId}
                         >
-                          {allocationTotal.toFixed(1)}%
-                        </span>
+                          <SelectTrigger id="categoryId">
+                            <SelectValue placeholder="Selecione uma categoria..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredCategories.map(cat => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="customerName">Cliente</Label>
+                        <Input
+                          id="customerName"
+                          value={customerName}
+                          onChange={e => setCustomerName(e.target.value)}
+                          placeholder="Nome do cliente"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="tags">Tags</Label>
+                        <Input
+                          id="tags"
+                          value={tags}
+                          onChange={e => setTags(e.target.value)}
+                          placeholder="Ex: urgente, mensal, aluguel"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Separe por vírgulas
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 4: Conta Bancária */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Landmark}
-                title="Conta Bancária"
-                subtitle="Conta vinculada ao recebimento"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                <div className="grid gap-2">
-                  <Label htmlFor="bankAccountId">Conta Bancária</Label>
-                  <Select
-                    value={bankAccountId}
-                    onValueChange={setBankAccountId}
-                  >
-                    <SelectTrigger id="bankAccountId">
-                      <SelectValue placeholder="Selecione uma conta bancária..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {bankAccounts.map(ba => (
-                        <SelectItem key={ba.id} value={ba.id}>
-                          {ba.name}
-                          {ba.bankName ? ` (${ba.bankName})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+              </TabsContent>
 
-        {/* Form Card — Section 5: Observações */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={NotebookText}
-                title="Observações"
-                subtitle="Notas e informações adicionais"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                <div className="grid gap-2">
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Observações sobre este recebimento..."
-                    rows={4}
+              {/* Tab: Valores */}
+              <TabsContent value="values" className="flex-col space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={DollarSign}
+                    title="Valores"
+                    subtitle="Montantes e datas do recebimento"
                   />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="expectedAmount">
+                          Valor Esperado (R$){' '}
+                          <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="expectedAmount"
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={expectedAmount}
+                          onChange={e =>
+                            setExpectedAmount(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="dueDate">
+                          Data de Vencimento{' '}
+                          <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="dueDate"
+                          type="date"
+                          value={dueDate}
+                          onChange={e => setDueDate(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="issueDate">Data de Emissão</Label>
+                        <Input
+                          id="issueDate"
+                          type="date"
+                          value={issueDate}
+                          onChange={e => setIssueDate(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="competenceDate">
+                          Data de Competência
+                        </Label>
+                        <Input
+                          id="competenceDate"
+                          type="date"
+                          value={competenceDate}
+                          onChange={e => setCompetenceDate(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="discount">Desconto (R$)</Label>
+                        <Input
+                          id="discount"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={discount}
+                          onChange={e =>
+                            setDiscount(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="interest">Juros (R$)</Label>
+                        <Input
+                          id="interest"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={interest}
+                          onChange={e =>
+                            setInterest(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="penalty">Multa (R$)</Label>
+                        <Input
+                          id="penalty"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={penalty}
+                          onChange={e =>
+                            setPenalty(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+
+              {/* Tab: Alocação — Centro de Custo + Conta Bancária */}
+              <TabsContent value="allocation" className="flex-col space-y-8">
+                {/* Centro de Custo */}
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Target}
+                    title="Centro de Custo"
+                    subtitle="Defina o centro de custo ou configure o rateio"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    {/* Toggle: simple vs allocation mode */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-white dark:bg-slate-800/60">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium">
+                          Modo Rateio
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {useAllocations
+                            ? 'Distribuir entre múltiplos centros de custo'
+                            : 'Centro de custo único'}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={useAllocations}
+                        onCheckedChange={checked => {
+                          setUseAllocations(checked);
+                          if (!checked) {
+                            setAllocations([]);
+                          } else {
+                            setCostCenterId('');
+                          }
+                        }}
+                      />
+                    </div>
+
+                    {/* Simple mode: single cost center */}
+                    {!useAllocations && (
+                      <div className="grid gap-2">
+                        <Label htmlFor="costCenterId">
+                          Centro de Custo{' '}
+                          <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={costCenterId}
+                          onValueChange={setCostCenterId}
+                        >
+                          <SelectTrigger id="costCenterId">
+                            <SelectValue placeholder="Selecione um centro de custo..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {costCenters.map(cc => (
+                              <SelectItem key={cc.id} value={cc.id}>
+                                {cc.code} - {cc.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Allocation mode: multiple cost centers with percentages */}
+                    {useAllocations && (
+                      <div className="space-y-3">
+                        {allocations.length > 0 && (
+                          <Table aria-label="Tabela de rateio de centros de custo">
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Centro de Custo</TableHead>
+                                <TableHead className="w-[140px]">
+                                  Percentual (%)
+                                </TableHead>
+                                <TableHead className="w-[50px]" />
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {allocations.map((alloc, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>
+                                    <Select
+                                      value={alloc.costCenterId}
+                                      onValueChange={value =>
+                                        updateAllocation(
+                                          index,
+                                          'costCenterId',
+                                          value
+                                        )
+                                      }
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {costCenters.map(cc => (
+                                          <SelectItem key={cc.id} value={cc.id}>
+                                            {cc.code} - {cc.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Input
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      max="100"
+                                      value={alloc.percentage}
+                                      onChange={e =>
+                                        updateAllocation(
+                                          index,
+                                          'percentage',
+                                          parseFloat(e.target.value) || 0
+                                        )
+                                      }
+                                      className="w-full"
+                                    />
+                                  </TableCell>
+                                  <TableCell>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeAllocation(index)}
+                                      className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+
+                        {/* Total + Add button */}
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={addAllocation}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Adicionar centro de custo
+                          </button>
+                          <div className="text-sm">
+                            <span className="text-muted-foreground">
+                              Total:{' '}
+                            </span>
+                            <span
+                              className={
+                                Math.abs(allocationTotal - 100) < 0.01
+                                  ? 'font-semibold text-emerald-600'
+                                  : 'font-semibold text-rose-600'
+                              }
+                            >
+                              {allocationTotal.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Conta Bancária */}
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Landmark}
+                    title="Conta Bancária"
+                    subtitle="Conta vinculada ao recebimento"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                    <div className="grid gap-2">
+                      <Label htmlFor="bankAccountId">Conta Bancária</Label>
+                      <Select
+                        value={bankAccountId}
+                        onValueChange={setBankAccountId}
+                      >
+                        <SelectTrigger id="bankAccountId">
+                          <SelectValue placeholder="Selecione uma conta bancária..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankAccounts.map(ba => (
+                            <SelectItem key={ba.id} value={ba.id}>
+                              {ba.name}
+                              {ba.bankName ? ` (${ba.bankName})` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Outros — Observações */}
+              <TabsContent value="other" className="flex-col space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={NotebookText}
+                    title="Observações"
+                    subtitle="Notas e informações adicionais"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                    <div className="grid gap-2">
+                      <Label htmlFor="notes">Observações</Label>
+                      <Textarea
+                        id="notes"
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Observações sobre este recebimento..."
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </Card>
       </PageBody>

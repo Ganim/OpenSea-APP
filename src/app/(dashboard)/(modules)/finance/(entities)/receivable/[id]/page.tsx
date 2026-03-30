@@ -1086,6 +1086,7 @@ export default function ReceivableDetailPage({
         onOpenChange={setPixChargeModalOpen}
         pixCharge={pixChargeResult}
         entryDescription={entry.description}
+        entryId={id}
       />
 
       {/* Customer Summary Drawer */}

@@ -177,7 +177,7 @@ export function CreateCostCenterModal({
           </div>
 
           {/* Budget - 2 colunas */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cc-monthly">{'Or\u00E7amento Mensal (R$)'}</Label>
               <Input

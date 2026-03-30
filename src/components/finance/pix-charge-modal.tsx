@@ -9,10 +9,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, QrCode, Clock } from 'lucide-react';
+import { Copy, QrCode, Clock, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { financeEntriesService } from '@/services/finance';
 import type { CreatePixChargeResponse } from '@/types/finance';
 
 interface PixChargeModalProps {
@@ -20,6 +22,7 @@ interface PixChargeModalProps {
   onOpenChange: (open: boolean) => void;
   pixCharge: CreatePixChargeResponse | null;
   entryDescription?: string;
+  entryId?: string;
 }
 
 function formatCurrency(value: number): string {
@@ -84,16 +87,76 @@ function getStatusBadge(status: PixChargeStatus) {
   }
 }
 
+const MAX_POLLS = 60; // 5 minutes at 5s intervals
+
 export function PixChargeModal({
   open,
   onOpenChange,
   pixCharge,
   entryDescription,
+  entryId,
 }: PixChargeModalProps) {
+  const queryClient = useQueryClient();
   const [timeRemaining, setTimeRemaining] = useState<{
     expired: boolean;
     text: string;
   }>({ expired: false, text: '' });
+
+  // Payment polling state
+  const [pollCount, setPollCount] = useState(0);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const toastShownRef = useRef(false);
+
+  // Poll for payment status after charge is generated
+  const { data: entryStatus } = useQuery({
+    queryKey: ['finance-entry-pix-status', entryId],
+    queryFn: async () => {
+      const response = await financeEntriesService.get(entryId!);
+      return response.entry;
+    },
+    enabled: open && !!entryId && !!pixCharge && !paymentConfirmed,
+    refetchInterval:
+      open && !!pixCharge && !paymentConfirmed && pollCount < MAX_POLLS
+        ? 5000
+        : false,
+    refetchIntervalInBackground: false,
+  });
+
+  // Increment poll counter
+  useEffect(() => {
+    if (!open || !pixCharge || paymentConfirmed || pollCount >= MAX_POLLS)
+      return;
+
+    const timer = setInterval(() => {
+      setPollCount(c => c + 1);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [open, pixCharge, paymentConfirmed, pollCount]);
+
+  // Detect payment confirmation
+  useEffect(() => {
+    if (
+      entryStatus &&
+      (entryStatus.status === 'PAID' || entryStatus.status === 'RECEIVED') &&
+      !toastShownRef.current
+    ) {
+      toastShownRef.current = true;
+      setPaymentConfirmed(true);
+      toast.success('Pagamento PIX recebido com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['finance-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['finance-entry'] });
+    }
+  }, [entryStatus?.status, queryClient]);
+
+  // Reset state when modal closes or charge changes
+  useEffect(() => {
+    if (!open) {
+      setPollCount(0);
+      setPaymentConfirmed(false);
+      toastShownRef.current = false;
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!pixCharge?.expiresAt || !open) return;
@@ -109,7 +172,11 @@ export function PixChargeModal({
 
   if (!pixCharge) return null;
 
-  const status: PixChargeStatus = timeRemaining.expired ? 'EXPIRED' : 'ACTIVE';
+  const status: PixChargeStatus = paymentConfirmed
+    ? 'PAID'
+    : timeRemaining.expired
+      ? 'EXPIRED'
+      : 'ACTIVE';
 
   const handleCopyPixCode = async () => {
     try {
@@ -155,6 +222,27 @@ export function PixChargeModal({
             </div>
           </div>
 
+          {/* Payment Status Feedback */}
+          {status === 'ACTIVE' && !paymentConfirmed && (
+            <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/8 border border-amber-600/25 dark:border-amber-500/20 p-3 text-sm text-amber-700 dark:text-amber-300">
+              <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+              <span>Aguardando pagamento PIX...</span>
+            </div>
+          )}
+
+          {paymentConfirmed && (
+            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/8 border border-emerald-600/25 dark:border-emerald-500/20 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              <span>Pagamento confirmado!</span>
+            </div>
+          )}
+
+          {pollCount >= MAX_POLLS && !paymentConfirmed && !timeRemaining.expired && (
+            <p className="text-sm text-muted-foreground text-center">
+              Tempo de espera expirado. Verifique o status manualmente.
+            </p>
+          )}
+
           {/* QR Code */}
           {(pixCharge.pixCopiaECola || pixCharge.qrCodeUrl) && (
             <div className="flex justify-center">
@@ -192,7 +280,7 @@ export function PixChargeModal({
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Identificador</p>
               <Badge variant="outline" className="font-mono text-xs">
@@ -213,7 +301,7 @@ export function PixChargeModal({
               variant="default"
               className="w-full gap-2"
               onClick={handleCopyPixCode}
-              disabled={timeRemaining.expired}
+              disabled={timeRemaining.expired || paymentConfirmed}
             >
               <Copy className="h-4 w-4" />
               Copiar Código PIX

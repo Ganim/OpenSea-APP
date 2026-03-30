@@ -415,7 +415,7 @@ function ReconciliationCard({
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
           <div className="rounded-md bg-muted/50 p-1.5">
             <p className="text-xs text-muted-foreground">Total</p>
             <p className="text-sm font-semibold">{reconciliation.totalItems}</p>

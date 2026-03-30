@@ -114,7 +114,7 @@ export function RecurringStepConfirmation({
         {/* Configuração */}
         <div className="rounded-xl border p-4">
           <h4 className="text-sm font-semibold mb-3">Configuração</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field
               label="Tipo"
               value={isPayable ? 'A Pagar' : 'A Receber'}
@@ -144,7 +144,7 @@ export function RecurringStepConfirmation({
         {/* Detalhes */}
         <div className="rounded-xl border p-4">
           <h4 className="text-sm font-semibold mb-3">Detalhes</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Descrição" value={data.description} />
             <Field
               label={isPayable ? 'Fornecedor' : 'Cliente'}

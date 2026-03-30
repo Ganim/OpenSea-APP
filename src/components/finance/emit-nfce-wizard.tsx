@@ -492,7 +492,7 @@ export function EmitNfceWizard({
                     </div>
 
                     {/* Row 2: NCM + CFOP */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label className="text-xs">NCM</Label>
                         <Input
@@ -522,7 +522,7 @@ export function EmitNfceWizard({
                     </div>
 
                     {/* Row 3: Quantity + Unit Price */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label className="text-xs">Quantidade *</Label>
                         <Input

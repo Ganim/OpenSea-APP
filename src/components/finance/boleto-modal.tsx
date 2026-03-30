@@ -85,7 +85,7 @@ export function BoletoModal({
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Vencimento</p>
               <p className="font-medium">{formatDate(boleto.dueDate)}</p>

@@ -110,7 +110,7 @@ function StepAccountData({
       </div>
 
       {/* Row 2: Banco + Agencia */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>
             Banco <span className="text-rose-500">*</span>
@@ -146,7 +146,7 @@ function StepAccountData({
       </div>
 
       {/* Row 3: Tipo de Conta + Conta */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="wiz-accountType">
             Tipo de Conta <span className="text-rose-500">*</span>
@@ -234,7 +234,7 @@ function StepPixConfig({
   return (
     <div className="space-y-4">
       {/* Tipo de Chave PIX + Chave PIX */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="wiz-pixKeyType">Tipo de Chave PIX</Label>
           <Select

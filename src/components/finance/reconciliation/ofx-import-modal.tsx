@@ -285,7 +285,7 @@ export function OfxImportModal({
       content: preview ? (
         <div className="space-y-4 p-1">
           {/* Summary Stats */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-lg border p-3 space-y-1">
               <p className="text-xs text-muted-foreground">
                 Total de Transações
@@ -304,7 +304,7 @@ export function OfxImportModal({
           </div>
 
           {/* Credits / Debits */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-500/8 p-3 space-y-1">
               <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300">
                 <ArrowUpCircle className="h-3.5 w-3.5" />

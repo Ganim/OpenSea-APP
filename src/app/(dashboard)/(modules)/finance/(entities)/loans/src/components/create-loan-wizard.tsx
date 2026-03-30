@@ -396,7 +396,7 @@ export function CreateLoanWizard({
           </div>
 
           {/* Principal amount + interest rate */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="loan-principal">
                 Valor Principal <span className="text-rose-500">*</span>

@@ -238,7 +238,7 @@ export function QuickNavGrid() {
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {visibleItems.map(item => (
             <Link key={item.id} href={item.href}>
               <div className="flex items-center gap-2.5 p-3 rounded-lg border hover:bg-muted/50 hover:border-violet-200 dark:hover:border-violet-800/50 transition-colors cursor-pointer">

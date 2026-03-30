@@ -242,7 +242,7 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Row 1 — Payment Type Cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
           type="button"
           onClick={() => handleSelectType('BOLETO')}
@@ -391,7 +391,7 @@ export function PayableStepEntry({ data, onChange }: PayableStepEntryProps) {
             <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-3">
               Dados do Pix
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {pixParsed.merchantName && (
                 <div>
                   <p className="text-xs text-muted-foreground">Destinatário</p>
