@@ -170,7 +170,7 @@ export default function TimeBankDetailPage() {
               onClick: () => setDebitOpen(true),
               variant: 'outline',
               className:
-                'border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950',
+                'border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-400 dark:hover:bg-rose-950',
             },
             {
               id: 'credit',
@@ -270,7 +270,7 @@ export default function TimeBankDetailPage() {
                   </Badge>
                 )}
                 {timeBank.hasNegativeBalance && (
-                  <Badge className="gap-1 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+                  <Badge className="gap-1 bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">
                     <ArrowDownCircle className="h-3 w-3" />
                     Possui saldo negativo
                   </Badge>

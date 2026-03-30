@@ -12,7 +12,7 @@ const ENTRY_TYPE_LABELS: Record<string, string> = {
 const ENTRY_TYPE_COLORS: Record<string, string> = {
   CLOCK_IN:
     'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  CLOCK_OUT: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  CLOCK_OUT: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400',
   BREAK_START:
     'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
   BREAK_END:

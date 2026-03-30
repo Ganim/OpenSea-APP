@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import type { ShiftType, UpdateShiftData } from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -49,6 +51,10 @@ export default function EditShiftPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const shiftId = params.id as string;
+
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.SHIFTS.DELETE);
+  const canSave = hasPermission(HR_PERMISSIONS.SHIFTS.UPDATE);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
@@ -187,21 +193,29 @@ export default function EditShiftPage() {
             { label: 'Editar' },
           ]}
           buttons={[
-            {
-              id: 'delete-shift',
-              title: 'Excluir',
-              icon: Trash2,
-              onClick: () => setDeleteModalOpen(true),
-              variant: 'destructive',
-            },
-            {
-              id: 'save-shift',
-              title: 'Salvar',
-              icon: updateMutation.isPending ? Loader2 : Save,
-              onClick: handleSave,
-              variant: 'default',
-              disabled: updateMutation.isPending || !name || !startTime || !endTime,
-            },
+            ...(canDelete
+              ? [
+                  {
+                    id: 'delete-shift' as const,
+                    title: 'Excluir',
+                    icon: Trash2,
+                    onClick: () => setDeleteModalOpen(true),
+                    variant: 'destructive' as const,
+                  },
+                ]
+              : []),
+            ...(canSave
+              ? [
+                  {
+                    id: 'save-shift' as const,
+                    title: 'Salvar',
+                    icon: updateMutation.isPending ? Loader2 : Save,
+                    onClick: handleSave,
+                    variant: 'default' as const,
+                    disabled: updateMutation.isPending || !name || !startTime || !endTime,
+                  },
+                ]
+              : []),
           ]}
         />
       </PageHeader>

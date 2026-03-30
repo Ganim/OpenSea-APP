@@ -149,7 +149,33 @@ export default function WarningsPage() {
   } = useListWarnings(queryParams);
   const deleteWarning = useDeleteWarning();
 
-  const warnings = data?.pages.flatMap(p => p.warnings ?? []) ?? [];
+  const allWarnings = data?.pages.flatMap(p => p.warnings ?? []) ?? [];
+
+  const allEmployeeIds = useMemo(
+    () => [
+      ...allWarnings.map(w => w.employeeId),
+      ...allWarnings.map(w => w.issuedBy),
+    ],
+    [allWarnings]
+  );
+  const { getName } = useEmployeeMap(allEmployeeIds);
+
+  const warnings = useMemo(() => {
+    if (!searchQuery.trim()) return allWarnings;
+    const q = searchQuery.toLowerCase();
+    return allWarnings.filter(w => {
+      const employeeName = getName(w.employeeId)?.toLowerCase() ?? '';
+      const issuerName = getName(w.issuedBy)?.toLowerCase() ?? '';
+      const reason = (w.reason ?? '').toLowerCase();
+      const typeLabel = getWarningTypeLabel(w.type).toLowerCase();
+      return (
+        employeeName.includes(q) ||
+        issuerName.includes(q) ||
+        reason.includes(q) ||
+        typeLabel.includes(q)
+      );
+    });
+  }, [allWarnings, searchQuery, getName]);
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -170,15 +196,6 @@ export default function WarningsPage() {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const employeeIds = useMemo(
-    () => [
-      ...warnings.map(w => w.employeeId),
-      ...warnings.map(w => w.issuedBy),
-    ],
-    [warnings]
-  );
-  const { getName } = useEmployeeMap(employeeIds);
 
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'warnings-filter-options'],
@@ -545,7 +562,7 @@ export default function WarningsPage() {
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
               isLoading={isLoading}
-              isSearching={false}
+              isSearching={searchQuery.trim().length > 0}
               onItemDoubleClick={item => {
                 if (canView) {
                   router.push(`/hr/warnings/${item.id}`);

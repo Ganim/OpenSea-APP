@@ -9,18 +9,24 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Clock,
   Coffee,
   Moon,
   Pencil,
   Timer,
+  Trash2,
   Users,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import { translateError } from '@/lib/error-messages';
 import { shiftsApi, shiftKeys, SHIFT_TYPE_LABELS, SHIFT_TYPE_COLORS } from '../src';
 
 function formatDuration(hours: number): string {
@@ -32,7 +38,33 @@ function formatDuration(hours: number): string {
 export default function ShiftDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const shiftId = params.id as string;
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission(HR_PERMISSIONS.SHIFTS.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.SHIFTS.DELETE);
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await shiftsApi.delete(shiftId);
+    },
+    onSuccess: () => {
+      toast.success('Turno excluído com sucesso');
+      queryClient.invalidateQueries({ queryKey: shiftKeys.all });
+      router.push('/hr/shifts');
+    },
+    onError: (err) => {
+      toast.error(translateError(err));
+    },
+  });
+
+  const handleDeleteConfirm = useCallback(async () => {
+    await deleteMutation.mutateAsync();
+    setIsDeleteOpen(false);
+  }, [deleteMutation]);
 
   const {
     data: shiftData,
@@ -117,13 +149,28 @@ export default function ShiftDetailPage() {
             { label: shift.name },
           ]}
           buttons={[
-            {
-              id: 'edit-shift',
-              title: 'Editar',
-              icon: Pencil,
-              onClick: () => router.push(`/hr/shifts/${shiftId}/edit`),
-              variant: 'outline',
-            },
+            ...(canDelete
+              ? [
+                  {
+                    id: 'delete-shift' as const,
+                    title: 'Excluir',
+                    icon: Trash2,
+                    onClick: () => setIsDeleteOpen(true),
+                    variant: 'destructive' as const,
+                  },
+                ]
+              : []),
+            ...(canEdit
+              ? [
+                  {
+                    id: 'edit-shift' as const,
+                    title: 'Editar',
+                    icon: Pencil,
+                    onClick: () => router.push(`/hr/shifts/${shiftId}/edit`),
+                    variant: 'default' as const,
+                  },
+                ]
+              : []),
           ]}
         />
       </PageHeader>
@@ -280,6 +327,14 @@ export default function ShiftDetailPage() {
             </div>
           )}
         </Card>
+        {/* Delete Confirmation */}
+        <VerifyActionPinModal
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          onSuccess={handleDeleteConfirm}
+          title="Excluir Turno"
+          description="Digite seu PIN de ação para excluir este turno. Esta ação não pode ser desfeita."
+        />
       </PageBody>
     </PageLayout>
   );

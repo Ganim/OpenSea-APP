@@ -20,6 +20,7 @@ import { teamsService } from '@/services/core/teams.service';
 
 import {
   AlertTriangle,
+  ArrowRightLeft,
   Award,
   BookUser,
   BarChart3,
@@ -314,8 +315,8 @@ const sections: {
         description: 'Descontos, adiantamentos e pensões',
         icon: MinusCircle,
         href: '/hr/deductions',
-        gradient: 'from-red-500 to-red-600',
-        hoverBg: 'hover:bg-red-50 dark:hover:bg-red-500/10',
+        gradient: 'from-rose-500 to-rose-600',
+        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
         permission: HR_PERMISSIONS.DEDUCTIONS.LIST,
       },
     ],
@@ -493,6 +494,16 @@ const sections: {
   {
     title: 'Configurações',
     cards: [
+      {
+        id: 'delegations',
+        title: 'Delegações de Aprovação',
+        description: 'Delegue aprovações temporariamente a outros gestores',
+        icon: ArrowRightLeft,
+        href: '/hr/delegations',
+        gradient: 'from-indigo-500 to-indigo-600',
+        hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
+        permission: HR_PERMISSIONS.DELEGATIONS.LIST,
+      },
       {
         id: 'settings',
         title: 'Configurações Gerais',

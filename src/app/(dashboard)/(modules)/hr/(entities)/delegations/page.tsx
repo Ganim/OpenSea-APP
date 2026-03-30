@@ -1,6 +1,6 @@
 /**
  * HR Approval Delegations Page
- * Delegacao de autoridade de aprovacao entre gestores
+ * Delegação de autoridade de aprovação entre gestores
  */
 
 'use client';
@@ -73,10 +73,10 @@ type TabValue = 'outgoing' | 'incoming';
 
 const SCOPE_LABELS: Record<DelegationScope, string> = {
   ALL: 'Todas',
-  ABSENCES: 'Ausencias',
-  VACATIONS: 'Ferias',
+  ABSENCES: 'Ausências',
+  VACATIONS: 'Férias',
   OVERTIME: 'Horas Extras',
-  REQUESTS: 'Solicitacoes',
+  REQUESTS: 'Solicitações',
 };
 
 const SCOPE_BADGE_CLASSES: Record<DelegationScope, string> = {
@@ -235,12 +235,12 @@ function DelegationsPageContent() {
   const createMutation = useMutation({
     mutationFn: approvalDelegationsService.create,
     onSuccess: () => {
-      toast.success('Delegacao criada com sucesso');
+      toast.success('Delegação criada com sucesso');
       queryClient.invalidateQueries({ queryKey: ['hr-delegations-outgoing'] });
       queryClient.invalidateQueries({ queryKey: ['hr-delegations-incoming'] });
     },
     onError: () => {
-      toast.error('Erro ao criar delegacao');
+      toast.error('Erro ao criar delegação');
     },
   });
 
@@ -248,13 +248,13 @@ function DelegationsPageContent() {
     mutationFn: (delegationId: string) =>
       approvalDelegationsService.revoke(delegationId),
     onSuccess: () => {
-      toast.success('Delegacao revogada com sucesso');
+      toast.success('Delegação revogada com sucesso');
       setRevokeTargetId(null);
       queryClient.invalidateQueries({ queryKey: ['hr-delegations-outgoing'] });
       queryClient.invalidateQueries({ queryKey: ['hr-delegations-incoming'] });
     },
     onError: () => {
-      toast.error('Erro ao revogar delegacao');
+      toast.error('Erro ao revogar delegação');
     },
   });
 
@@ -267,7 +267,7 @@ function DelegationsPageContent() {
     if (canCreate) {
       buttons.push({
         id: 'create-delegation',
-        title: 'Nova Delegacao',
+        title: 'Nova Delegação',
         icon: Plus,
         onClick: () => setIsCreateOpen(true),
         variant: 'default',
@@ -281,8 +281,8 @@ function DelegationsPageContent() {
   // ============================================================================
 
   const tabLabels: { value: TabValue; label: string; icon: typeof ArrowUpRight }[] = [
-    { value: 'outgoing', label: 'Minhas Delegacoes', icon: ArrowUpRight },
-    { value: 'incoming', label: 'Delegacoes Recebidas', icon: ArrowDownLeft },
+    { value: 'outgoing', label: 'Minhas Delegações', icon: ArrowUpRight },
+    { value: 'incoming', label: 'Delegações Recebidas', icon: ArrowDownLeft },
   ];
 
   // ============================================================================
@@ -295,14 +295,14 @@ function DelegationsPageContent() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'RH', href: '/hr' },
-            { label: 'Delegacoes de Aprovacao', href: '/hr/delegations' },
+            { label: 'Delegações de Aprovação', href: '/hr/delegations' },
           ]}
           buttons={actionButtons}
         />
 
         <Header
-          title="Delegacoes de Aprovacao"
-          description="Delegue autoridade de aprovacao para outros colaboradores durante ausencias ou ferias"
+          title="Delegações de Aprovação"
+          description="Delegue autoridade de aprovação para outros colaboradores durante ausências ou férias"
         />
       </PageHeader>
 
@@ -333,8 +333,8 @@ function DelegationsPageContent() {
         ) : error ? (
           <GridError
             type="server"
-            title="Erro ao carregar delegacoes"
-            message="Ocorreu um erro ao tentar carregar as delegacoes. Por favor, tente novamente."
+            title="Erro ao carregar delegações"
+            message="Ocorreu um erro ao tentar carregar as delegações. Por favor, tente novamente."
             action={{
               label: 'Tentar Novamente',
               onClick: () => {
@@ -347,13 +347,13 @@ function DelegationsPageContent() {
             <Shield className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <h3 className="text-lg font-medium text-muted-foreground">
               {activeTab === 'outgoing'
-                ? 'Nenhuma delegacao criada'
-                : 'Nenhuma delegacao recebida'}
+                ? 'Nenhuma delegação criada'
+                : 'Nenhuma delegação recebida'}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground/70">
               {activeTab === 'outgoing'
-                ? 'Crie uma delegacao para permitir que outro colaborador aprove em seu nome.'
-                : 'Voce nao recebeu nenhuma delegacao de aprovacao.'}
+                ? 'Crie uma delegação para permitir que outro colaborador aprove em seu nome.'
+                : 'Você não recebeu nenhuma delegação de aprovação.'}
             </p>
             {canCreate && activeTab === 'outgoing' && (
               <button
@@ -361,7 +361,7 @@ function DelegationsPageContent() {
                 className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4" />
-                Nova Delegacao
+                Nova Delegação
               </button>
             )}
           </div>
@@ -408,8 +408,8 @@ function DelegationsPageContent() {
               revokeMutation.mutate(revokeTargetId);
             }
           }}
-          title="Revogar Delegacao"
-          description="Digite seu PIN de acao para revogar esta delegacao de aprovacao."
+          title="Revogar Delegação"
+          description="Digite seu PIN de ação para revogar esta delegação de aprovação."
         />
       </PageBody>
     </PageLayout>

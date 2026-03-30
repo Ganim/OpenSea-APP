@@ -250,6 +250,31 @@ export default function EsocialEventDetailPage() {
   const statusConfig = STATUS_CONFIG[event.status] || STATUS_CONFIG.DRAFT;
   const StatusIcon = statusConfig.icon;
 
+  // Static color map to avoid dynamic Tailwind class purging
+  const statusColorMap: Record<string, { iconWrapper: string; iconText: string }> = {
+    slate: {
+      iconWrapper: 'bg-slate-50 dark:bg-slate-500/8',
+      iconText: 'text-slate-600 dark:text-slate-400',
+    },
+    sky: {
+      iconWrapper: 'bg-sky-50 dark:bg-sky-500/8',
+      iconText: 'text-sky-600 dark:text-sky-400',
+    },
+    emerald: {
+      iconWrapper: 'bg-emerald-50 dark:bg-emerald-500/8',
+      iconText: 'text-emerald-600 dark:text-emerald-400',
+    },
+    rose: {
+      iconWrapper: 'bg-rose-50 dark:bg-rose-500/8',
+      iconText: 'text-rose-600 dark:text-rose-400',
+    },
+    violet: {
+      iconWrapper: 'bg-violet-50 dark:bg-violet-500/8',
+      iconText: 'text-violet-600 dark:text-violet-400',
+    },
+  };
+  const statusColors = statusColorMap[statusConfig.color] || statusColorMap.slate;
+
   // Available actions based on status
   const canReview = event.status === 'DRAFT';
   const canApprove = event.status === 'DRAFT' || event.status === 'REVIEWED';
@@ -342,10 +367,10 @@ export default function EsocialEventDetailPage() {
           <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
             <div className="flex items-start gap-4">
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-${statusConfig.color}-50 dark:bg-${statusConfig.color}-500/8`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl ${statusColors.iconWrapper}`}
               >
                 <StatusIcon
-                  className={`h-6 w-6 text-${statusConfig.color}-600 dark:text-${statusConfig.color}-400`}
+                  className={`h-6 w-6 ${statusColors.iconText}`}
                 />
               </div>
               <div className="min-w-0 flex-1">

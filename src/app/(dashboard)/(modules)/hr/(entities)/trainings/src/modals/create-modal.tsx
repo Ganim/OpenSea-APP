@@ -1,14 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,10 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { CreateTrainingProgramData } from '@/types/hr';
-import { Loader2 } from 'lucide-react';
+import { BookOpen, Loader2, Settings, User } from 'lucide-react';
 import { useState } from 'react';
 import {
   TRAINING_CATEGORY_OPTIONS,
@@ -70,11 +66,12 @@ export function CreateModal({
     onClose();
   };
 
-  const canProceedStep1 =
+  const step1Valid =
     name.trim().length > 0 &&
     category.length > 0 &&
-    format.length > 0 &&
-    Number(durationHours) > 0;
+    format.length > 0;
+
+  const step2Valid = Number(durationHours) > 0;
 
   const handleSubmit = async () => {
     const data: CreateTrainingProgramData = {
@@ -94,76 +91,86 @@ export function CreateModal({
     handleClose();
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle>Novo Programa de Treinamento</DialogTitle>
-          <DialogDescription>
-            {step === 1
-              ? 'Passo 1 de 2 - Informações do programa'
-              : 'Passo 2 de 2 - Configurações'}
-          </DialogDescription>
-        </DialogHeader>
+  const steps: WizardStep[] = [
+    {
+      title: 'Informações do Programa',
+      description: 'Defina o nome, categoria e formato do treinamento',
+      icon: (
+        <BookOpen className="h-16 w-16 text-violet-500 dark:text-violet-400" />
+      ),
+      isValid: step1Valid,
+      content: (
+        <div className="space-y-4 p-1">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome do programa *</Label>
+            <Input
+              id="name"
+              placeholder="Ex: NR-35 Trabalho em Altura"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
 
-        {step === 1 && (
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nome *</Label>
-              <Input
-                id="name"
-                placeholder="Ex: NR-35 Trabalho em Altura"
-                value={name}
-                onChange={e => setName(e.target.value)}
-              />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Categoria *</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRAINING_CATEGORY_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder="Descreva o objetivo do treinamento..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                rows={3}
-              />
+            <div className="space-y-2">
+              <Label>Formato *</Label>
+              <Select value={format} onValueChange={setFormat}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRAINING_FORMAT_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Detalhes e Configurações',
+      description: 'Descrição, duração, instrutor e configurações adicionais',
+      icon: (
+        <Settings className="h-16 w-16 text-violet-500 dark:text-violet-400" />
+      ),
+      isValid: step2Valid,
+      onBack: () => setStep(1),
+      content: (
+        <div className="space-y-4 p-1">
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              placeholder="Descreva o objetivo do treinamento..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              rows={3}
+            />
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>Categoria *</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRAINING_CATEGORY_OPTIONS.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Formato *</Label>
-                <Select value={format} onValueChange={setFormat}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRAINING_FORMAT_OPTIONS.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid gap-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="durationHours">Duração (horas) *</Label>
               <Input
                 id="durationHours"
@@ -174,13 +181,9 @@ export function CreateModal({
                 onChange={e => setDurationHours(e.target.value)}
               />
             </div>
-          </div>
-        )}
 
-        {step === 2 && (
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="instructor">Instrutor</Label>
+            <div className="space-y-2">
+              <Label htmlFor="instructor">Instrutor / Provedor</Label>
               <Input
                 id="instructor"
                 placeholder="Nome do instrutor"
@@ -188,71 +191,83 @@ export function CreateModal({
                 onChange={e => setInstructor(e.target.value)}
               />
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="maxParticipants">Máximo de Participantes</Label>
-                <Input
-                  id="maxParticipants"
-                  type="number"
-                  min={1}
-                  placeholder="Sem limite"
-                  value={maxParticipants}
-                  onChange={e => setMaxParticipants(e.target.value)}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="validityMonths">Validade (meses)</Label>
-                <Input
-                  id="validityMonths"
-                  type="number"
-                  min={1}
-                  placeholder="Sem validade"
-                  value={validityMonths}
-                  onChange={e => setValidityMonths(e.target.value)}
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="maxParticipants">Máximo de Participantes</Label>
+              <Input
+                id="maxParticipants"
+                type="number"
+                min={1}
+                placeholder="Sem limite"
+                value={maxParticipants}
+                onChange={e => setMaxParticipants(e.target.value)}
+              />
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border p-4">
-              <Switch
-                id="isMandatory"
-                checked={isMandatory}
-                onCheckedChange={setIsMandatory}
+            <div className="space-y-2">
+              <Label htmlFor="validityMonths">Validade (meses)</Label>
+              <Input
+                id="validityMonths"
+                type="number"
+                min={1}
+                placeholder="Sem validade"
+                value={validityMonths}
+                onChange={e => setValidityMonths(e.target.value)}
               />
-              <div>
-                <Label htmlFor="isMandatory" className="cursor-pointer">
-                  Treinamento Obrigatório
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Todos os funcionários devem completar este treinamento
-                </p>
-              </div>
             </div>
           </div>
-        )}
 
-        <DialogFooter>
-          {step === 2 && (
-            <Button variant="outline" onClick={() => setStep(1)}>
-              Voltar
-            </Button>
-          )}
-          {step === 1 ? (
-            <Button onClick={() => setStep(2)} disabled={!canProceedStep1}>
-              Próximo
-            </Button>
-          ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting && (
+          <div className="flex items-center gap-3 rounded-lg border p-4">
+            <Switch
+              id="isMandatory"
+              checked={isMandatory}
+              onCheckedChange={setIsMandatory}
+            />
+            <div>
+              <Label htmlFor="isMandatory" className="cursor-pointer">
+                Treinamento Obrigatório
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Todos os funcionários devem completar este treinamento
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+      footer: (
+        <div className="flex justify-end gap-2 p-4 border-t border-border/50">
+          <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!step2Valid || isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Criar Programa
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+                Criando...
+              </>
+            ) : (
+              'Criar Programa'
+            )}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={handleClose}
+      steps={steps}
+      currentStep={step}
+      onStepChange={setStep}
+      onClose={handleClose}
+      heightClass="h-[520px]"
+    />
   );
 }

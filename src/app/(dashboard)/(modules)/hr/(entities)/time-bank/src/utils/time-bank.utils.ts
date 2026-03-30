@@ -32,7 +32,7 @@ export function getBalanceStatus(
  */
 export function getBalanceColor(balance: number): string {
   if (balance > 0) return 'text-emerald-600 dark:text-emerald-400';
-  if (balance < 0) return 'text-red-600 dark:text-red-400';
+  if (balance < 0) return 'text-rose-600 dark:text-rose-400';
   return 'text-muted-foreground';
 }
 

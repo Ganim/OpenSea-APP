@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   HANDS: 'border-amber-500 bg-amber-50 dark:bg-amber-500/8',
   FEET: 'border-rose-500 bg-rose-50 dark:bg-rose-500/8',
   BODY: 'border-slate-500 bg-slate-50 dark:bg-slate-500/8',
-  FALL_PROTECTION: 'border-red-500 bg-red-50 dark:bg-red-500/8',
+  FALL_PROTECTION: 'border-rose-500 bg-rose-50 dark:bg-rose-500/8',
 };
 
 export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps) {

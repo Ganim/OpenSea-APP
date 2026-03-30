@@ -38,7 +38,7 @@ export function getWarningTypeColor(type: WarningType): string {
     VERBAL: 'sky',
     WRITTEN: 'amber',
     SUSPENSION: 'rose',
-    TERMINATION_WARNING: 'red',
+    TERMINATION_WARNING: 'rose',
   };
   return colors[type] ?? 'slate';
 }
@@ -48,7 +48,7 @@ export function getWarningTypeBadgeClass(type: WarningType): string {
     VERBAL: 'border-sky-500 text-sky-700 dark:text-sky-300',
     WRITTEN: 'border-amber-500 text-amber-700 dark:text-amber-300',
     SUSPENSION: 'border-rose-500 text-rose-700 dark:text-rose-300',
-    TERMINATION_WARNING: 'border-red-500 text-red-700 dark:text-red-300',
+    TERMINATION_WARNING: 'border-rose-500 text-rose-700 dark:text-rose-300',
   };
   return classes[type] ?? 'border-slate-500 text-slate-700 dark:text-slate-300';
 }

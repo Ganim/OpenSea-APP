@@ -121,7 +121,7 @@ export function ViewModal({ isOpen, onClose, workSchedule }: ViewModalProps) {
                       Ativo
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200">
                       Inativo
                     </span>
                   )}

@@ -17,24 +17,27 @@ import {
   EntityCard,
   EntityContextMenu,
   EntityGrid,
-  SelectionToolbar,
-  useEntityCrud,
-  useEntityPage,
 } from '@/core';
+import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
+import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 import type { Shift } from '@/types/hr';
 import {
   Clock,
   Coffee,
+  ExternalLink,
   Loader2,
   Moon,
+  Pencil,
   Plus,
-  Trash2,
   Timer,
+  Trash2,
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   shiftsApi,
   shiftsConfig,
@@ -44,89 +47,114 @@ import {
 
 const CreateShiftModal = dynamic(
   () =>
-    import('./src/modals/create-modal').then(m => ({
+    import('./src/modals/create-modal').then((m) => ({
       default: m.CreateShiftModal,
     })),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function ShiftsPage() {
-  return (
-    <Suspense
-      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
-    >
-      <ShiftsPageContent />
-    </Suspense>
-  );
-}
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
-type ActionButtonWithPermission = HeaderButton & {
-  permission?: string;
-};
-
-function ShiftsPageContent() {
-  const { hasPermission } = usePermissions();
+  // Permissions
+  const canView = hasPermission(HR_PERMISSIONS.SHIFTS.VIEW);
+  const canEdit = hasPermission(HR_PERMISSIONS.SHIFTS.UPDATE);
+  const canCreate = hasPermission(HR_PERMISSIONS.SHIFTS.CREATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.SHIFTS.DELETE);
 
   // ============================================================================
-  // DATA FETCHING
+  // FILTERS
+  // ============================================================================
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // ============================================================================
+  // DATA
   // ============================================================================
 
   const {
-    data: shiftsData,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: shiftKeys.list(),
     queryFn: async () => {
       const response = await shiftsApi.list();
-      return response.shifts;
+      return {
+        shifts: response.shifts,
+        hasMore: false,
+      };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? 2 : undefined,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await shiftsApi.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shiftKeys.all });
     },
   });
 
-  const allShifts = shiftsData ?? [];
+  const allShifts = useMemo(
+    () => data?.pages.flatMap((p) => p.shifts ?? []) ?? [],
+    [data],
+  );
 
-  // ============================================================================
-  // CRUD SETUP
-  // ============================================================================
-
-  const crud = useEntityCrud<Shift>({
-    entityName: 'Turno',
-    entityNamePlural: 'Turnos',
-    queryKey: shiftKeys.all as unknown as string[],
-    baseUrl: '/api/v1/hr/shifts',
-    listFn: async () => allShifts,
-    getFn: async (id: string) => {
-      const response = await shiftsApi.get(id);
-      return response.shift;
-    },
-    createFn: async (data: Record<string, unknown>) =>
-      shiftsApi.create(data as unknown as Parameters<typeof shiftsApi.create>[0]),
-    updateFn: async (id: string, data: Record<string, unknown>) =>
-      shiftsApi.update(id, data as unknown as Parameters<typeof shiftsApi.update>[1]),
-    deleteFn: shiftsApi.delete,
-  });
-
-  // ============================================================================
-  // PAGE SETUP
-  // ============================================================================
-
-  const page = useEntityPage<Shift>({
-    entityName: 'Turno',
-    entityNamePlural: 'Turnos',
-    queryKey: shiftKeys.all as unknown as string[],
-    crud,
-    viewRoute: id => `/hr/shifts/${id}`,
-    editRoute: id => `/hr/shifts/${id}/edit`,
-    filterFn: (item, query) => {
-      const q = query.toLowerCase();
-      return Boolean(
+  // Client-side search filter
+  const filteredShifts = useMemo(() => {
+    if (!searchQuery.trim()) return allShifts;
+    const q = searchQuery.toLowerCase();
+    return allShifts.filter(
+      (item) =>
         item.name.toLowerCase().includes(q) ||
-          (item.code && item.code.toLowerCase().includes(q)) ||
-          SHIFT_TYPE_LABELS[item.type]?.toLowerCase().includes(q)
-      );
-    },
-  });
+        (item.code && item.code.toLowerCase().includes(q)) ||
+        SHIFT_TYPE_LABELS[item.type]?.toLowerCase().includes(q),
+    );
+  }, [allShifts, searchQuery]);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  // ============================================================================
+  // COMPUTED
+  // ============================================================================
+
+  const initialIds = useMemo(
+    () => filteredShifts.map((i) => i.id),
+    [filteredShifts],
+  );
 
   // ============================================================================
   // HELPERS
@@ -142,36 +170,67 @@ function ShiftsPageContent() {
   // HANDLERS
   // ============================================================================
 
-  const handleContextView = (ids: string[]) => {
-    page.handlers.handleItemsView(ids);
-  };
+  const handleDeleteRequest = useCallback((ids: string[]) => {
+    if (ids.length > 0) {
+      setDeleteTarget(ids[0]);
+      setIsDeleteOpen(true);
+    }
+  }, []);
 
-  const handleContextEdit = (ids: string[]) => {
-    page.handlers.handleItemsEdit(ids);
-  };
-
-  const handleContextDelete = (ids: string[]) => {
-    page.modals.setItemsToDelete(ids);
-    page.modals.open('delete');
-  };
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget);
+      setDeleteTarget(null);
+      setIsDeleteOpen(false);
+    } catch {
+      // Toast handled by mutation
+    }
+  }, [deleteTarget, deleteMutation]);
 
   // ============================================================================
   // CONTEXT MENU ACTIONS
   // ============================================================================
 
-  const contextActions = useMemo(
-    () => [
-      {
+  const contextActions: ContextMenuAction[] = useMemo(() => {
+    const actions: ContextMenuAction[] = [];
+
+    if (canView) {
+      actions.push({
+        id: 'open',
+        label: 'Abrir',
+        icon: ExternalLink,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/shifts/${ids[0]}`);
+        },
+      });
+    }
+
+    if (canEdit) {
+      actions.push({
+        id: 'edit',
+        label: 'Editar',
+        icon: Pencil,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/shifts/${ids[0]}/edit`);
+        },
+      });
+    }
+
+    if (canDelete) {
+      actions.push({
         id: 'delete',
         label: 'Excluir',
         icon: Trash2,
-        onClick: handleContextDelete,
-        separator: 'before' as const,
-        variant: 'destructive' as const,
-      },
-    ],
-    []
-  );
+        onClick: handleDeleteRequest,
+        variant: 'destructive',
+        separator: 'before',
+      });
+    }
+
+    return actions;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canView, canEdit, canDelete]);
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -181,8 +240,13 @@ function ShiftsPageContent() {
     return (
       <EntityContextMenu
         itemId={item.id}
-        onView={handleContextView}
-        onEdit={handleContextEdit}
+        onView={
+          canView
+            ? (ids: string[]) => {
+                if (ids.length > 0) router.push(`/hr/shifts/${ids[0]}`);
+              }
+            : undefined
+        }
         actions={contextActions}
       >
         <EntityCard
@@ -223,11 +287,11 @@ function ShiftsPageContent() {
             },
           }}
           isSelected={isSelected}
-          showSelection={false}
-          clickable={false}
+          showSelection={true}
+          clickable
+          onClick={() => router.push(`/hr/shifts/${item.id}`)}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
-          showStatusBadges={false}
         />
       </EntityContextMenu>
     );
@@ -237,8 +301,13 @@ function ShiftsPageContent() {
     return (
       <EntityContextMenu
         itemId={item.id}
-        onView={handleContextView}
-        onEdit={handleContextEdit}
+        onView={
+          canView
+            ? (ids: string[]) => {
+                if (ids.length > 0) router.push(`/hr/shifts/${ids[0]}`);
+              }
+            : undefined
+        }
         actions={contextActions}
       >
         <EntityCard
@@ -271,60 +340,49 @@ function ShiftsPageContent() {
             },
           }}
           isSelected={isSelected}
-          showSelection={false}
-          clickable={false}
+          showSelection={true}
+          clickable
+          onClick={() => router.push(`/hr/shifts/${item.id}`)}
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
-          showStatusBadges={false}
         />
       </EntityContextMenu>
     );
   };
 
   // ============================================================================
-  // COMPUTED VALUES
-  // ============================================================================
-
-  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
-  const hasSelection = selectedIds.length > 0;
-  const displayedItems = page.filteredItems || [];
-
-  const initialIds = useMemo(
-    () => displayedItems.map(i => i.id),
-    [displayedItems]
-  );
-
-  // ============================================================================
   // HEADER BUTTONS
   // ============================================================================
 
-  const handleCreate = useCallback(() => {
-    page.modals.open('create');
-  }, [page.modals]);
+  const handleOpenCreate = useCallback(() => {
+    setIsCreateOpen(true);
+  }, []);
 
-  const actionButtons = useMemo<ActionButtonWithPermission[]>(
-    () => [
-      {
+  const actionButtons: HeaderButton[] = useMemo(() => {
+    const buttons: HeaderButton[] = [];
+    if (canCreate) {
+      buttons.push({
         id: 'create-shift',
         title: 'Novo Turno',
         icon: Plus,
-        onClick: handleCreate,
+        onClick: handleOpenCreate,
         variant: 'default',
-        permission: shiftsConfig.permissions?.create,
-      },
-    ],
-    [handleCreate]
-  );
+      });
+    }
+    return buttons;
+  }, [canCreate, handleOpenCreate]);
 
-  const visibleActionButtons = useMemo<HeaderButton[]>(
-    () =>
-      actionButtons
-        .filter(button =>
-          button.permission ? hasPermission(button.permission) : true
-        )
-        .map(({ permission, ...button }) => button),
-    [actionButtons, hasPermission]
-  );
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
+  if (isLoadingPermissions) {
+    return (
+      <PageLayout>
+        <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
+      </PageLayout>
+    );
+  }
 
   // ============================================================================
   // RENDER
@@ -344,7 +402,7 @@ function ShiftsPageContent() {
               { label: 'RH', href: '/hr' },
               { label: 'Turnos', href: '/hr/shifts' },
             ]}
-            buttons={visibleActionButtons}
+            buttons={actionButtons}
           />
 
           <Header
@@ -354,15 +412,17 @@ function ShiftsPageContent() {
         </PageHeader>
 
         <PageBody>
+          {/* Search Bar */}
           <SearchBar
+            value={searchQuery}
             placeholder={shiftsConfig.display.labels.searchPlaceholder}
-            value={page.searchQuery}
-            onSearch={value => page.handlers.handleSearch(value)}
-            onClear={() => page.handlers.handleSearch('')}
+            onSearch={(value) => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
           />
 
+          {/* Grid */}
           {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
           ) : error ? (
@@ -372,65 +432,74 @@ function ShiftsPageContent() {
               message="Ocorreu um erro ao tentar carregar os turnos. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => { refetch(); },
+                onClick: () => {
+                  refetch();
+                },
               }}
             />
           ) : (
-            <EntityGrid
-              config={shiftsConfig}
-              items={displayedItems}
-              renderGridItem={renderGridCard}
-              renderListItem={renderListCard}
-              isLoading={isLoading}
-              isSearching={!!page.searchQuery}
-              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
-              onItemDoubleClick={item =>
-                page.handlers.handleItemDoubleClick(item)
-              }
-              showSorting={true}
-              defaultSortField="name"
-              defaultSortDirection="asc"
-            />
+            <>
+              <EntityGrid
+                config={shiftsConfig}
+                items={filteredShifts}
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!searchQuery}
+                onItemDoubleClick={(item) => {
+                  if (canView) {
+                    router.push(`/hr/shifts/${item.id}`);
+                  }
+                }}
+                showSorting={true}
+                defaultSortField="name"
+                defaultSortDirection="asc"
+              />
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
 
-          {hasSelection && (
-            <SelectionToolbar
-              selectedIds={selectedIds}
-              totalItems={displayedItems.length}
-              onClear={() => page.selection?.actions.clear()}
-              onSelectAll={() => page.selection?.actions.selectAll()}
-              defaultActions={{
-                view: true,
-                edit: true,
-                delete: true,
-              }}
-              handlers={{
-                onView: page.handlers.handleItemsView,
-                onEdit: page.handlers.handleItemsEdit,
-                onDelete: page.handlers.handleItemsDelete,
-              }}
-            />
-          )}
-
+          {/* Create Modal */}
           <CreateShiftModal
-            isOpen={page.modals.isOpen('create')}
-            onClose={() => page.modals.close('create')}
-            onSubmit={async data => {
-              await crud.create(data as unknown as Record<string, unknown>);
+            isOpen={isCreateOpen}
+            onClose={() => setIsCreateOpen(false)}
+            onSubmit={async (data) => {
+              await shiftsApi.create(data as Parameters<typeof shiftsApi.create>[0]);
+              queryClient.invalidateQueries({ queryKey: shiftKeys.all });
+              setIsCreateOpen(false);
             }}
-            isLoading={crud.isCreating}
+            isLoading={false}
           />
 
+          {/* Delete Confirmation */}
           <VerifyActionPinModal
-            isOpen={page.modals.isOpen('delete')}
-            onClose={() => page.modals.close('delete')}
-            onSuccess={() => page.handlers.handleDeleteConfirm()}
-            title="Confirmar Exclusão"
-            description={
-              page.modals.itemsToDelete.length === 1
-                ? 'Digite seu PIN de ação para excluir este turno. Esta ação não pode ser desfeita.'
-                : `Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} turnos. Esta ação não pode ser desfeita.`
-            }
+            isOpen={isDeleteOpen}
+            onClose={() => {
+              setIsDeleteOpen(false);
+              setDeleteTarget(null);
+            }}
+            onSuccess={handleDeleteConfirm}
+            title="Excluir Turno"
+            description="Digite seu PIN de ação para excluir este turno. Esta ação não pode ser desfeita."
+          />
+
+          <HRSelectionToolbar
+            totalItems={filteredShifts.length}
+            defaultActions={{
+              delete: canDelete,
+            }}
+            handlers={{
+              onDelete: async (ids: string[]) => {
+                for (const id of ids) {
+                  await deleteMutation.mutateAsync(id);
+                }
+              },
+            }}
           />
         </PageBody>
       </PageLayout>

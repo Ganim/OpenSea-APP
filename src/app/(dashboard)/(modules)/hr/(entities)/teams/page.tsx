@@ -1,6 +1,7 @@
 /**
  * OpenSea OS - HR Teams Page
- * Página de gerenciamento de equipes no contexto do módulo de Recursos Humanos
+ * Página de gerenciamento de equipes no contexto HR
+ * Usa infinite scroll com useInfiniteQuery + IntersectionObserver
  */
 
 'use client';
@@ -26,18 +27,24 @@ import {
   EntityContextMenu,
   EntityGrid,
   SelectionToolbar,
-  useEntityCrud,
   useEntityPage,
   type ContextMenuAction,
 } from '@/core';
 import { logger } from '@/lib/logger';
 import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
 import { usePermissions } from '@/hooks/use-permissions';
+import { teamsService } from '@/services/core/teams.service';
 import type { Team } from '@/types/core';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   Calendar,
   CheckCircle2,
   Clock,
+  Loader2,
   Pencil,
   Plus,
   Trash2,
@@ -45,24 +52,38 @@ import {
 } from 'lucide-react';
 import { PiUsersThreeDuotone } from 'react-icons/pi';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   CreateModal,
   RenameModal,
-  createTeam,
-  deleteTeam,
   formatMembersCount,
   getStatusBadgeVariant,
   getStatusLabel,
-  getTeam,
   hrTeamsConfig,
-  listTeams,
   updateTeam,
 } from './src';
 
 export default function HRTeamsPage() {
+  return (
+    <Suspense
+      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+    >
+      <HRTeamsPageContent />
+    </Suspense>
+  );
+}
+
+function HRTeamsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
   // Permissions
@@ -71,49 +92,90 @@ export default function HRTeamsPage() {
   const canCreate = hasPermission(HR_PERMISSIONS.TEAMS.CREATE);
   const canDelete = hasPermission(HR_PERMISSIONS.TEAMS.DELETE);
 
+  // Local state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
+
   // Rename modal state
-  const [renameTeam, setRenameTeam] = useState<Team | null>(null);
+  const [renameTeamData, setRenameTeamData] = useState<Team | null>(null);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isRenameSubmitting, setIsRenameSubmitting] = useState(false);
 
   // ============================================================================
-  // CRUD SETUP
+  // INFINITE SCROLL DATA FETCHING
   // ============================================================================
 
-  const crud = useEntityCrud<Team>({
-    entityName: 'Equipe',
-    entityNamePlural: 'Equipes',
-    queryKey: ['hr-teams'],
-    baseUrl: '/v1/teams',
-    listFn: listTeams,
-    getFn: getTeam,
-    createFn: async (data: Record<string, unknown>) => {
-      return createTeam(data as Parameters<typeof createTeam>[0]);
+  const PAGE_SIZE = 20;
+
+  const {
+    data: infiniteData,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['hr-teams', 'infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return teamsService.listTeams({
+        page: pageParam,
+        limit: PAGE_SIZE,
+      });
     },
-    updateFn: async (id, data: Record<string, unknown>) => {
-      return updateTeam(id, data);
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const currentPage = lastPage.meta?.page ?? 1;
+      const totalPages = lastPage.meta?.pages ?? 1;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
     },
-    deleteFn: deleteTeam,
   });
 
+  const allTeams = useMemo(
+    () => infiniteData?.pages.flatMap(p => p.data ?? []) ?? [],
+    [infiniteData]
+  );
+
+  // Sentinel ref for infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   // ============================================================================
-  // PAGE SETUP
+  // MUTATIONS
   // ============================================================================
 
-  const page = useEntityPage<Team>({
-    entityName: 'Equipe',
-    entityNamePlural: 'Equipes',
-    queryKey: ['hr-teams'],
-    crud,
-    viewRoute: id => `/hr/teams/${id}`,
-    filterFn: (item, query) => {
-      const q = query.toLowerCase();
-      return Boolean(
-        item.name?.toLowerCase().includes(q) ||
-          item.slug?.toLowerCase().includes(q) ||
-          item.description?.toLowerCase().includes(q) ||
-          item.creatorName?.toLowerCase().includes(q)
-      );
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map(id => teamsService.deleteTeam(id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hr-teams'] });
+      showSuccessToast('Equipe(s) excluída(s) com sucesso');
+      setItemsToDelete([]);
+    },
+    onError: (err) => {
+      logger.error('Erro ao excluir equipe(s)', err instanceof Error ? err : undefined);
+      showErrorToast({
+        title: 'Erro ao excluir',
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+      });
     },
   });
 
@@ -127,8 +189,21 @@ export default function HRTeamsPage() {
   }, [searchParams]);
 
   const displayedTeams = useMemo(() => {
-    let items = page.filteredItems;
+    let items = allTeams;
 
+    // Search filter (client-side)
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(
+        team =>
+          team.name?.toLowerCase().includes(q) ||
+          team.slug?.toLowerCase().includes(q) ||
+          team.description?.toLowerCase().includes(q) ||
+          team.creatorName?.toLowerCase().includes(q)
+      );
+    }
+
+    // Active filter
     if (activeFilter.length === 1) {
       if (activeFilter[0] === 'true') {
         items = items.filter(team => team.isActive);
@@ -138,7 +213,7 @@ export default function HRTeamsPage() {
     }
 
     return items;
-  }, [page.filteredItems, activeFilter]);
+  }, [allTeams, searchQuery, activeFilter]);
 
   const buildFilterUrl = useCallback(
     (params: { isActive?: string[] }) => {
@@ -171,7 +246,9 @@ export default function HRTeamsPage() {
   // ============================================================================
 
   const handleContextView = (ids: string[]) => {
-    page.handlers.handleItemsView(ids);
+    if (ids.length === 1) {
+      router.push(`/hr/teams/${ids[0]}`);
+    }
   };
 
   const handleContextEdit = (ids: string[]) => {
@@ -182,9 +259,9 @@ export default function HRTeamsPage() {
 
   const handleContextRename = (ids: string[]) => {
     if (ids.length === 0) return;
-    const team = page.filteredItems.find(item => item.id === ids[0]);
+    const team = allTeams.find(item => item.id === ids[0]);
     if (team) {
-      setRenameTeam(team);
+      setRenameTeamData(team);
       setIsRenameOpen(true);
     }
   };
@@ -194,7 +271,7 @@ export default function HRTeamsPage() {
     try {
       await updateTeam(id, data);
       showSuccessToast('Equipe renomeada com sucesso');
-      page.crud.refetch();
+      queryClient.invalidateQueries({ queryKey: ['hr-teams'] });
     } catch (error) {
       logger.error(
         'Erro ao renomear equipe',
@@ -211,8 +288,15 @@ export default function HRTeamsPage() {
   };
 
   const handleContextDelete = (ids: string[]) => {
-    page.modals.setItemsToDelete(ids);
-    page.modals.open('delete');
+    setItemsToDelete(ids);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemsToDelete.length > 0) {
+      deleteMutation.mutate(itemsToDelete);
+    }
+    setIsDeleteOpen(false);
   };
 
   const handleDoubleClick = (itemId: string) => {
@@ -254,7 +338,7 @@ export default function HRTeamsPage() {
 
     return actions;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canEdit, canDelete, page.filteredItems]);
+  }, [canEdit, canDelete, allTeams]);
 
   // ============================================================================
   // SORT OPTIONS
@@ -422,9 +506,6 @@ export default function HRTeamsPage() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const selectedIds = Array.from(page.selection?.state.selectedIds || []);
-  const hasSelection = selectedIds.length > 0;
-
   const initialIds = useMemo(
     () => displayedTeams.map(i => i.id),
     [displayedTeams]
@@ -435,8 +516,8 @@ export default function HRTeamsPage() {
   // ============================================================================
 
   const handleCreate = useCallback(() => {
-    page.modals.open('create');
-  }, [page.modals]);
+    setIsCreateOpen(true);
+  }, []);
 
   const actionButtons: HeaderButton[] = useMemo(() => {
     const buttons: HeaderButton[] = [];
@@ -505,25 +586,26 @@ export default function HRTeamsPage() {
         <PageBody>
           {/* Search Bar */}
           <SearchBar
-            value={page.searchQuery}
+            value={searchQuery}
             placeholder={hrTeamsConfig.display.labels.searchPlaceholder}
-            onSearch={value => page.handlers.handleSearch(value)}
-            onClear={() => page.handlers.handleSearch('')}
+            onSearch={value => setSearchQuery(value)}
+            onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
           />
 
           {/* Grid */}
-          {page.isLoading ? (
+          {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
-          ) : page.error ? (
+          ) : error ? (
             <GridError
               type="server"
               title="Erro ao carregar equipes"
               message="Ocorreu um erro ao tentar carregar as equipes. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => crud.refetch(),
+                onClick: () =>
+                  queryClient.invalidateQueries({ queryKey: ['hr-teams'] }),
               }}
             />
           ) : (
@@ -532,12 +614,12 @@ export default function HRTeamsPage() {
               items={displayedTeams}
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
-              isLoading={page.isLoading}
-              isSearching={!!page.searchQuery}
-              onItemClick={(item, e) => page.handlers.handleItemClick(item, e)}
-              onItemDoubleClick={item =>
-                page.handlers.handleItemDoubleClick(item)
-              }
+              isLoading={isLoading}
+              isSearching={!!searchQuery}
+              onItemClick={(item, e) => {
+                // no-op for selection handled by CoreProvider
+              }}
+              onItemDoubleClick={item => handleDoubleClick(item.id)}
               showSorting={true}
               defaultSortField="name"
               defaultSortDirection="asc"
@@ -557,37 +639,21 @@ export default function HRTeamsPage() {
             />
           )}
 
-          {/* Selection Toolbar */}
-          {hasSelection && (
-            <SelectionToolbar
-              selectedIds={selectedIds}
-              totalItems={displayedTeams.length}
-              onClear={() => page.selection?.actions.clear()}
-              onSelectAll={() => page.selection?.actions.selectAll()}
-              defaultActions={{
-                view: canView,
-                edit: canEdit,
-                delete: canDelete,
-              }}
-              handlers={{
-                onView: page.handlers.handleItemsView,
-                onEdit: (ids: string[]) => {
-                  if (ids.length === 1) {
-                    router.push(`/hr/teams/${ids[0]}/edit`);
-                  }
-                },
-                onDelete: page.handlers.handleItemsDelete,
-              }}
-            />
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
           )}
 
           {/* Create Modal */}
           <CreateModal
-            open={page.modals.isOpen('create')}
-            onOpenChange={() => page.modals.close('create')}
+            open={isCreateOpen}
+            onOpenChange={setIsCreateOpen}
             onSuccess={() => {
-              page.crud.refetch();
-              page.modals.close('create');
+              queryClient.invalidateQueries({ queryKey: ['hr-teams'] });
+              setIsCreateOpen(false);
             }}
           />
 
@@ -595,18 +661,18 @@ export default function HRTeamsPage() {
           <RenameModal
             isOpen={isRenameOpen}
             onClose={() => setIsRenameOpen(false)}
-            team={renameTeam}
+            team={renameTeamData}
             isSubmitting={isRenameSubmitting}
             onSubmit={handleRenameSubmit}
           />
 
           {/* Delete PIN Confirmation */}
           <VerifyActionPinModal
-            isOpen={page.modals.isOpen('delete')}
-            onClose={() => page.modals.close('delete')}
-            onSuccess={() => page.handlers.handleDeleteConfirm()}
+            isOpen={isDeleteOpen}
+            onClose={() => setIsDeleteOpen(false)}
+            onSuccess={handleDeleteConfirm}
             title="Confirmar Exclusão"
-            description={`Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} equipe(s). Esta ação não pode ser desfeita.`}
+            description={`Digite seu PIN de ação para excluir ${itemsToDelete.length} equipe(s). Esta ação não pode ser desfeita.`}
           />
         </PageBody>
       </PageLayout>
