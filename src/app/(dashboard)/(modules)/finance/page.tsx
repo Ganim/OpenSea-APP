@@ -381,22 +381,6 @@ const heroBannerButtons: { id: string; label: string; icon: React.ElementType; h
     gradient: 'from-emerald-500 to-emerald-600',
     permission: FINANCE_PERMISSIONS.ENTRIES.ACCESS,
   },
-  {
-    id: 'quick-payable',
-    label: 'Nova Conta a Pagar',
-    icon: ArrowDownCircle,
-    href: '/finance/payable/new',
-    gradient: 'from-rose-500 to-rose-600',
-    permission: FINANCE_PERMISSIONS.ENTRIES.REGISTER,
-  },
-  {
-    id: 'quick-receivable',
-    label: 'Nova Conta a Receber',
-    icon: ArrowUpCircle,
-    href: '/finance/receivable/new',
-    gradient: 'from-emerald-500 to-emerald-600',
-    permission: FINANCE_PERMISSIONS.ENTRIES.REGISTER,
-  },
 ];
 
 // ============================================================================
