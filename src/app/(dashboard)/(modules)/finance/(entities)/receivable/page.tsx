@@ -75,6 +75,26 @@ import {
 import { toast } from 'sonner';
 
 // ============================================================================
+// OVERRIDE CONFIG — labels corretos para Contas a Receber
+// ============================================================================
+
+const receivableConfig = {
+  ...financeEntryConfig,
+  display: {
+    ...financeEntryConfig.display,
+    icon: ArrowUpCircle,
+    color: 'emerald' as const,
+    labels: {
+      ...financeEntryConfig.display.labels,
+      singular: 'Conta a Receber',
+      plural: 'Contas a Receber',
+      createButton: 'Nova Conta a Receber',
+      emptyState: 'Nenhuma conta a receber encontrada',
+    },
+  },
+};
+
+// ============================================================================
 // CONSTANTS
 // ============================================================================
 
@@ -757,7 +777,7 @@ function ReceivablePageContent() {
         <PageBody>
           {/* Search Bar */}
           <SearchBar
-            placeholder={financeEntryConfig.display.labels.searchPlaceholder}
+            placeholder={receivableConfig.display.labels.searchPlaceholder}
             value={searchQuery}
             onSearch={setSearchQuery}
             onClear={() => setSearchQuery('')}
@@ -783,7 +803,7 @@ function ReceivablePageContent() {
           ) : (
             <>
               <EntityGrid
-                config={financeEntryConfig}
+                config={receivableConfig}
                 items={entries}
                 showItemCount={false}
                 toolbarStart={

@@ -52,7 +52,7 @@ function categorizeOverdue(entries: FinanceEntry[]): AgingSegment[] {
     else bucket = '60+';
 
     buckets[bucket].count += 1;
-    buckets[bucket].total += entry.expectedAmount;
+    buckets[bucket].total += entry.remainingBalance ?? entry.expectedAmount;
   }
 
   return [

@@ -144,10 +144,10 @@ const navItems: NavItem[] = [
     iconColor: 'text-sky-500',
   },
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '/finance/dashboard',
+    id: 'chart-of-accounts',
+    label: 'Plano de Contas',
+    icon: Calculator,
+    href: '/finance/chart-of-accounts',
     iconColor: 'text-violet-500',
   },
   {
