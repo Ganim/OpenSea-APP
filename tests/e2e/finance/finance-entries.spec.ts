@@ -61,24 +61,9 @@ test.describe('Finance - Contas a Pagar', () => {
       await newBtn.click();
       await page.waitForTimeout(500);
 
-      // Should open a wizard dialog or navigate to /payable/new
+      // Should open a wizard dialog
       const dialog = page.locator('[role="dialog"]');
-      const isNewPage = page.url().includes('/payable/new');
-
-      if (await dialog.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        // Wizard modal opened
-        await expect(dialog).toBeVisible();
-      } else if (isNewPage) {
-        // Navigated to new page — verify form loads
-        await expect(page.locator('input').first()).toBeVisible({
-          timeout: 10_000,
-        });
-      } else {
-        // Fallback — page may have navigated
-        expect(
-          (await dialog.isVisible().catch(() => false)) || isNewPage
-        ).toBeTruthy();
-      }
+      await expect(dialog).toBeVisible({ timeout: 8_000 });
     }
   });
 

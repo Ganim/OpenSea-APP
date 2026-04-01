@@ -48,11 +48,9 @@ const FINANCE_PAGES = [
 
   // Payable
   { path: '/finance/payable', label: 'Contas a Pagar' },
-  { path: '/finance/payable/new', label: 'Nova Conta a Pagar' },
 
   // Receivable
   { path: '/finance/receivable', label: 'Contas a Receber' },
-  { path: '/finance/receivable/new', label: 'Nova Conta a Receber' },
 
   // Recurring
   { path: '/finance/recurring', label: 'Recorrências' },

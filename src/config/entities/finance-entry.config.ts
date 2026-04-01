@@ -44,7 +44,7 @@ export const financeEntryConfig = defineEntityConfig<FinanceEntry>()({
   routes: {
     list: '/finance/payable',
     detail: '/finance/payable/:id',
-    create: '/finance/payable/new',
+    create: '',
     edit: '/finance/payable/:id/edit',
   },
 
