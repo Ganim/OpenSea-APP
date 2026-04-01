@@ -31,6 +31,7 @@ import {
   useDeleteBankAccount,
   useUpdateBankAccount,
 } from '@/hooks/finance';
+import { useChartOfAccounts } from '@/hooks/finance/use-chart-of-accounts';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
   BANK_ACCOUNT_STATUS_LABELS,
@@ -43,6 +44,7 @@ import type {
   PixKeyType,
 } from '@/types/finance';
 import {
+  BookOpen,
   Building2,
   CreditCard,
   Loader2,
@@ -110,6 +112,9 @@ export default function EditBankAccountPage({
   const canDelete = hasPermission(PermissionCodes.FINANCE.BANK_ACCOUNTS.REMOVE);
   const account = data?.bankAccount;
 
+  // Chart of accounts: bank accounts are ASSET type
+  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true, type: 'ASSET' });
+
   // ==========================================================================
   // STATE
   // ==========================================================================
@@ -133,6 +138,7 @@ export default function EditBankAccountPage({
     color: '',
     isDefault: false,
     description: '',
+    chartOfAccountId: '',
   });
 
   // ==========================================================================
@@ -156,6 +162,7 @@ export default function EditBankAccountPage({
         color: account.color || '',
         isDefault: account.isDefault,
         description: '',
+        chartOfAccountId: account.chartOfAccountId || '',
       });
     }
   }, [account]);
@@ -199,6 +206,7 @@ export default function EditBankAccountPage({
           pixKey: formData.pixKey || undefined,
           color: formData.color || undefined,
           isDefault: formData.isDefault,
+          chartOfAccountId: formData.chartOfAccountId || null,
         },
       });
       toast.success('Conta bancária atualizada com sucesso!');
@@ -675,6 +683,48 @@ export default function EditBankAccountPage({
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Section: Conta Contábil */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={BookOpen}
+                    title="Conta Contábil"
+                    subtitle="Vínculo com o plano de contas contábil (tipo Ativo)"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="chartOfAccountId">Conta Contábil</Label>
+                      <Select
+                        value={formData.chartOfAccountId || 'none'}
+                        onValueChange={v =>
+                          setFormData({
+                            ...formData,
+                            chartOfAccountId: v === 'none' ? '' : v,
+                          })
+                        }
+                      >
+                        <SelectTrigger id="chartOfAccountId">
+                          <SelectValue placeholder="Sem vínculo contábil" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          {(chartOfAccountsData?.chartOfAccounts ?? []).map(acc => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              {acc.code} — {acc.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Opcional. Conta de ativo do plano de contas associada a esta conta bancária.
+                      </p>
                     </div>
                   </div>
                 </div>

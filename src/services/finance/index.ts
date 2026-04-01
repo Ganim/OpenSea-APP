@@ -25,3 +25,6 @@ export * from './exchange-rates.service';
 export * from './finance-query.service';
 export * from './customer-portal.service';
 export * from './compliance.service';
+export * from './payment-orders.service';
+export * from './boleto-pix.service';
+export * from './journal-entries.service';

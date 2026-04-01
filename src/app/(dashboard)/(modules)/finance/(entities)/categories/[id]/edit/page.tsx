@@ -33,6 +33,7 @@ import {
   useFinanceCategory,
   useUpdateFinanceCategory,
 } from '@/hooks/finance';
+import { useChartOfAccounts } from '@/hooks/finance/use-chart-of-accounts';
 import { usePermissions } from '@/hooks/use-permissions';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
@@ -42,6 +43,7 @@ import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import type { FinanceCategoryType } from '@/types/finance';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  BookOpen,
   FolderTree,
   Loader2,
   Palette,
@@ -108,6 +110,9 @@ export default function EditFinanceCategoryPage({
   const category = data?.category;
   const allCategories = allCategoriesData?.categories ?? [];
 
+  // Chart of accounts filtered by category type
+  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true });
+
   // Whether this category is a child (has a parent)
   const isChild = !!category?.parentId;
 
@@ -129,6 +134,7 @@ export default function EditFinanceCategoryPage({
     parentId: '',
     interestRate: '',
     penaltyRate: '',
+    chartOfAccountId: '',
   });
 
   // ==========================================================================
@@ -149,6 +155,7 @@ export default function EditFinanceCategoryPage({
           category.interestRate != null ? String(category.interestRate) : '',
         penaltyRate:
           category.penaltyRate != null ? String(category.penaltyRate) : '',
+        chartOfAccountId: category.chartOfAccountId || '',
       });
     }
   }, [category]);
@@ -207,6 +214,15 @@ export default function EditFinanceCategoryPage({
     [allCategories, id]
   );
 
+  // Chart of accounts filtered by category type
+  const availableChartAccounts = useMemo(() => {
+    const all = chartOfAccountsData?.chartOfAccounts ?? [];
+    if (formData.type === 'EXPENSE') return all.filter(a => a.type === 'EXPENSE');
+    if (formData.type === 'REVENUE') return all.filter(a => a.type === 'REVENUE');
+    // BOTH — show EXPENSE and REVENUE
+    return all.filter(a => a.type === 'EXPENSE' || a.type === 'REVENUE');
+  }, [chartOfAccountsData, formData.type]);
+
   // ==========================================================================
   // HANDLERS
   // ==========================================================================
@@ -229,6 +245,7 @@ export default function EditFinanceCategoryPage({
           displayOrder: formData.displayOrder || undefined,
           color: formData.color || undefined,
           parentId: formData.parentId || undefined,
+          chartOfAccountId: formData.chartOfAccountId || null,
         },
       });
       // Wait for cache to refetch before navigating
@@ -615,7 +632,49 @@ export default function EditFinanceCategoryPage({
               </div>
             </Card>
 
-            {/* Section 4: Aparência */}
+            {/* Section 4: Conta Contábil */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={BookOpen}
+                    title="Conta Contábil"
+                    subtitle="Vínculo com o plano de contas contábil"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="chartOfAccountId">Conta Contábil</Label>
+                      <Select
+                        value={formData.chartOfAccountId || 'none'}
+                        onValueChange={v =>
+                          setFormData({
+                            ...formData,
+                            chartOfAccountId: v === 'none' ? '' : v,
+                          })
+                        }
+                      >
+                        <SelectTrigger id="chartOfAccountId">
+                          <SelectValue placeholder="Sem vínculo contábil" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          {availableChartAccounts.map(acc => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              {acc.code} — {acc.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Opcional. Quando vinculada, os lançamentos desta categoria serão contabilizados automaticamente nesta conta.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Section 5: Aparência */}
             <Card className="bg-white/5 py-2 overflow-hidden">
               <div className="px-6 py-4 space-y-8">
                 <div className="space-y-5">

@@ -93,6 +93,7 @@ export interface FinanceEntry {
   originalAmount?: number | null;
   isOverdue: boolean;
   tags: string[];
+  chartOfAccountId?: string | null;
   payments?: FinanceEntryPayment[];
   attachments?: FinanceAttachment[];
   childEntries?: FinanceEntry[];
@@ -141,6 +142,7 @@ export interface CreateFinanceEntryData {
   tags?: string[];
   // Multi-currency
   currency?: string;
+  chartOfAccountId?: string | null;
 }
 
 export type UpdateFinanceEntryData = Partial<CreateFinanceEntryData>;

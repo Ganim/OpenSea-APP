@@ -45,6 +45,7 @@ import {
   useFinanceEntry,
   useUpdateFinanceEntry,
 } from '@/hooks/finance';
+import { useChartOfAccounts } from '@/hooks/finance/use-chart-of-accounts';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { CostCenterAllocation, FinanceEntryStatus } from '@/types/finance';
@@ -52,6 +53,7 @@ import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowUpCircle,
+  BookOpen,
   DollarSign,
   FileText,
   Landmark,
@@ -127,10 +129,12 @@ export default function EditReceivablePage({
   const { data: categoriesData } = useFinanceCategories({ type: 'REVENUE' });
   const { data: costCentersData } = useCostCenters();
   const { data: bankAccountsData } = useBankAccounts();
+  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true, type: 'REVENUE' });
 
   const categories = categoriesData?.categories ?? [];
   const costCenters = costCentersData?.costCenters ?? [];
   const bankAccounts = bankAccountsData?.bankAccounts ?? [];
+  const chartOfAccounts = chartOfAccountsData?.chartOfAccounts ?? [];
 
   // Filter categories: REVENUE or BOTH
   const filteredCategories = categories.filter(
@@ -170,6 +174,9 @@ export default function EditReceivablePage({
 
   // Section 5: Observacoes
   const [notes, setNotes] = useState('');
+
+  // Section 6: Conta Contábil (override)
+  const [chartOfAccountId, setChartOfAccountId] = useState('');
 
   // ============================================================================
   // EFFECTS
@@ -212,6 +219,7 @@ export default function EditReceivablePage({
 
       setBankAccountId(entry.bankAccountId || '');
       setNotes(entry.notes || '');
+      setChartOfAccountId(entry.chartOfAccountId || '');
     }
   }, [entry]);
 
@@ -318,6 +326,7 @@ export default function EditReceivablePage({
           customerName: customerName.trim() || undefined,
           notes: notes.trim() || undefined,
           tags: parsedTags.length > 0 ? parsedTags : undefined,
+          chartOfAccountId: chartOfAccountId || null,
         },
       });
 
@@ -880,8 +889,44 @@ export default function EditReceivablePage({
                 </div>
               </TabsContent>
 
-              {/* Tab: Outros — Observações */}
+              {/* Tab: Outros — Conta Contábil + Observações */}
               <TabsContent value="other" className="flex-col space-y-8">
+                {/* Conta Contábil */}
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={BookOpen}
+                    title="Contabilidade"
+                    subtitle="Substituir conta contábil da categoria"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="chartOfAccountId">Conta Contábil</Label>
+                      <Select
+                        value={chartOfAccountId || 'none'}
+                        onValueChange={v =>
+                          setChartOfAccountId(v === 'none' ? '' : v)
+                        }
+                      >
+                        <SelectTrigger id="chartOfAccountId">
+                          <SelectValue placeholder="Sem vínculo contábil" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          {chartOfAccounts.map(acc => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              {acc.code} — {acc.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Opcional. Quando preenchido, substitui a conta contábil definida na categoria para este recebimento específico.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Observações */}
                 <div className="space-y-5">
                   <SectionHeader
                     icon={NotebookText}

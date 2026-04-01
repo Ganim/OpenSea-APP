@@ -1,5 +1,9 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import type {
+  LedgerResponse,
+  TrialBalanceResponse,
+} from '@/types/finance';
 
 export interface DRENode {
   categoryId: string;
@@ -55,6 +59,31 @@ export type ExportFormat = 'CSV' | 'PDF' | 'XLSX' | 'DOCX';
 export type ReportType = 'ENTRIES' | 'DRE' | 'BALANCE' | 'CASHFLOW';
 
 export const financeReportsService = {
+  async getLedger(params: {
+    chartOfAccountId: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Promise<LedgerResponse> {
+    const query = new URLSearchParams();
+    if (params.dateFrom) query.append('dateFrom', params.dateFrom);
+    if (params.dateTo) query.append('dateTo', params.dateTo);
+    return apiClient.get<LedgerResponse>(
+      `${API_ENDPOINTS.FINANCE_REPORTS.LEDGER}/${params.chartOfAccountId}?${query.toString()}`
+    );
+  },
+
+  async getTrialBalance(params: {
+    dateFrom?: string;
+    dateTo?: string;
+  }): Promise<TrialBalanceResponse> {
+    const query = new URLSearchParams();
+    if (params.dateFrom) query.append('dateFrom', params.dateFrom);
+    if (params.dateTo) query.append('dateTo', params.dateTo);
+    return apiClient.get<TrialBalanceResponse>(
+      `${API_ENDPOINTS.FINANCE_REPORTS.TRIAL_BALANCE}?${query.toString()}`
+    );
+  },
+
   async getInteractiveDRE(params: {
     startDate: string;
     endDate: string;

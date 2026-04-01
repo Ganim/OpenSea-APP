@@ -28,9 +28,33 @@ export interface BankAccount {
   balanceUpdatedAt?: string | null;
   color?: string | null;
   isDefault: boolean;
+  // API Integration
+  apiProvider?: string | null;
+  apiClientId?: string | null;
+  apiScopes?: string | null;
+  apiEnabled?: boolean;
+  apiCertificatePath?: string | null;
+  apiKeyPath?: string | null;
+  autoEmitBoleto?: boolean;
+  autoLowThreshold?: number | null;
+  apiWebhookSecret?: string | null;
+  apiLastSyncAt?: string | null;
+  chartOfAccountId?: string | null;
+  chartOfAccountCode?: string;
+  chartOfAccountName?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
+}
+
+export interface BankApiConfigData {
+  apiProvider?: string;
+  apiClientId?: string;
+  apiScopes?: string;
+  apiEnabled?: boolean;
+  autoEmitBoleto?: boolean;
+  autoLowThreshold?: number;
+  apiWebhookSecret?: string;
 }
 
 export interface CreateBankAccountData {
@@ -47,6 +71,7 @@ export interface CreateBankAccountData {
   pixKey?: string;
   color?: string;
   isDefault?: boolean;
+  chartOfAccountId?: string | null;
 }
 
 export type UpdateBankAccountData = Partial<

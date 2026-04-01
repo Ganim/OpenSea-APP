@@ -15,6 +15,9 @@ export interface FinanceCategory {
   interestRate?: number | null;
   penaltyRate?: number | null;
   isSystem: boolean;
+  chartOfAccountId?: string | null;
+  chartOfAccountCode?: string;
+  chartOfAccountName?: string;
   childrenCount?: number;
   entryCount?: number;
   createdAt: string;
@@ -34,6 +37,7 @@ export interface CreateFinanceCategoryData {
   isActive?: boolean;
   interestRate?: number;
   penaltyRate?: number;
+  chartOfAccountId?: string | null;
 }
 
 export type UpdateFinanceCategoryData = Partial<CreateFinanceCategoryData>;

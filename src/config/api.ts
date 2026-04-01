@@ -868,6 +868,14 @@ export const API_ENDPOINTS = {
     SYNC: (id: string) => `/v1/finance/bank-connections/${id}/sync`,
     DELETE: (id: string) => `/v1/finance/bank-connections/${id}`,
   },
+  // Finance - Payment Orders
+  PAYMENT_ORDERS: {
+    LIST: '/v1/finance/payment-orders',
+    GET: (id: string) => `/v1/finance/payment-orders/${id}`,
+    CREATE: '/v1/finance/payment-orders',
+    APPROVE: (id: string) => `/v1/finance/payment-orders/${id}/approve`,
+    REJECT: (id: string) => `/v1/finance/payment-orders/${id}/reject`,
+  },
   // Finance - Payment Links
   PAYMENT_LINKS: {
     CREATE: '/v1/finance/payment-links',
@@ -931,6 +939,18 @@ export const API_ENDPOINTS = {
       `/v1/public/customer-portal/${token}/invoices/${id}`,
     PAY: (token: string, id: string) =>
       `/v1/public/customer-portal/${token}/invoices/${id}/pay`,
+  },
+  // Finance - Journal Entries
+  JOURNAL_ENTRIES: {
+    LIST: '/v1/finance/journal-entries',
+    GET: (id: string) => `/v1/finance/journal-entries/${id}`,
+    CREATE: '/v1/finance/journal-entries',
+    REVERSE: (id: string) => `/v1/finance/journal-entries/${id}/reverse`,
+  },
+  // Finance - Accounting Reports
+  FINANCE_REPORTS: {
+    LEDGER: '/v1/finance/reports/ledger',
+    TRIAL_BALANCE: '/v1/finance/reports/trial-balance',
   },
   // Storage - Folders
   STORAGE: {

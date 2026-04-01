@@ -62,4 +62,30 @@ export const bankAccountsService = {
   async delete(id: string): Promise<void> {
     await apiClient.delete<void>(API_ENDPOINTS.BANK_ACCOUNTS.DELETE(id));
   },
+
+  async updateApiConfig(
+    id: string,
+    data: {
+      apiProvider?: string;
+      apiClientId?: string;
+      apiScopes?: string;
+      apiEnabled?: boolean;
+      autoEmitBoleto?: boolean;
+      autoLowThreshold?: number;
+      apiWebhookSecret?: string;
+    }
+  ): Promise<void> {
+    await apiClient.patch<void>(
+      `/v1/finance/bank-accounts/${id}/api-config`,
+      data
+    );
+  },
+
+  async testBankApiConnection(
+    id: string
+  ): Promise<{ balance: number; message: string }> {
+    return apiClient.get<{ balance: number; message: string }>(
+      `/v1/finance/bank-accounts/${id}/balance`
+    );
+  },
 };

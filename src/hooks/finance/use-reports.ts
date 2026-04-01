@@ -4,12 +4,38 @@ import {
   type ReportType,
 } from '@/services/finance/finance-reports.service';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import type { LedgerResponse, TrialBalanceResponse } from '@/types/finance';
 import { toast } from 'sonner';
 
 const QUERY_KEYS = {
   DRE: ['finance-dre-interactive'],
   DRE_CONSOLIDATED: ['finance-dre-consolidated'],
+  LEDGER: ['finance-ledger'],
+  TRIAL_BALANCE: ['finance-trial-balance'],
 } as const;
+
+export function useLedger(params: {
+  chartOfAccountId: string;
+  dateFrom?: string;
+  dateTo?: string;
+}) {
+  return useQuery<LedgerResponse>({
+    queryKey: [...QUERY_KEYS.LEDGER, params],
+    queryFn: () => financeReportsService.getLedger(params),
+    enabled: !!params.chartOfAccountId,
+  });
+}
+
+export function useTrialBalance(params: {
+  dateFrom?: string;
+  dateTo?: string;
+}) {
+  return useQuery<TrialBalanceResponse>({
+    queryKey: [...QUERY_KEYS.TRIAL_BALANCE, params],
+    queryFn: () => financeReportsService.getTrialBalance(params),
+    enabled: !!params.dateFrom && !!params.dateTo,
+  });
+}
 
 export function useInteractiveDRE(params: {
   startDate: string;
