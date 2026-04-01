@@ -21,6 +21,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { VacationPeriod } from '@/types/hr';
@@ -83,6 +85,8 @@ export default function VacationEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const vacationId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.VACATIONS.DELETE);
 
   // ==========================================================================
   // STATE
@@ -169,18 +173,23 @@ export default function VacationEditPage() {
 
   const handleSubmit = async () => {
     if (!formData.startDate) {
-      setFieldErrors({ startDate: 'A data de in\u00edcio \u00e9 obrigat\u00f3ria.' });
+      setFieldErrors({
+        startDate: 'A data de in\u00edcio \u00e9 obrigat\u00f3ria.',
+      });
       return;
     }
 
     if (!formData.endDate) {
-      setFieldErrors({ endDate: 'A data de t\u00e9rmino \u00e9 obrigat\u00f3ria.' });
+      setFieldErrors({
+        endDate: 'A data de t\u00e9rmino \u00e9 obrigat\u00f3ria.',
+      });
       return;
     }
 
     if (formData.startDate > formData.endDate) {
       setFieldErrors({
-        endDate: 'A data de t\u00e9rmino deve ser posterior \u00e0 data de in\u00edcio.',
+        endDate:
+          'A data de t\u00e9rmino deve ser posterior \u00e0 data de in\u00edcio.',
       });
       return;
     }
@@ -236,14 +245,14 @@ export default function VacationEditPage() {
   // ==========================================================================
 
   const actionButtons: HeaderButton[] = isEditable
-    ? [
+    ? ([
         {
           id: 'cancel',
           title: 'Cancelar',
           onClick: () => router.push(`/hr/vacations/${vacationId}`),
           variant: 'ghost',
         },
-        {
+        canDelete && {
           id: 'delete',
           title: 'Excluir',
           icon: Trash2,
@@ -260,7 +269,7 @@ export default function VacationEditPage() {
           variant: 'default',
           disabled: isSaving,
         },
-      ]
+      ].filter(Boolean) as HeaderButton[])
     : [
         {
           id: 'back',
@@ -343,7 +352,8 @@ export default function VacationEditPage() {
               <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
               <div>
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                  N\u00e3o \u00e9 poss\u00edvel editar este per\u00edodo de f\u00e9rias
+                  N\u00e3o \u00e9 poss\u00edvel editar este per\u00edodo de
+                  f\u00e9rias
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-400/80">
                   Este per\u00edodo est\u00e1 com status{' '}
@@ -392,7 +402,8 @@ export default function VacationEditPage() {
                   {/* Data de In\u00edcio */}
                   <div className="grid gap-2">
                     <Label htmlFor="startDate">
-                      Data de In\u00edcio <span className="text-rose-500">*</span>
+                      Data de In\u00edcio{' '}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -422,7 +433,8 @@ export default function VacationEditPage() {
                   {/* Data de T\u00e9rmino */}
                   <div className="grid gap-2">
                     <Label htmlFor="endDate">
-                      Data de T\u00e9rmino <span className="text-rose-500">*</span>
+                      Data de T\u00e9rmino{' '}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
                       <Input

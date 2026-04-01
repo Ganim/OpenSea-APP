@@ -12,6 +12,9 @@ export interface CreateEmployeeWithUserRequest extends CreateEmployeeRequest {
   permissionGroupId?: string;
   userEmail?: string;
   userPassword?: string;
+  enableEmailLogin?: boolean;
+  enableCpfLogin?: boolean;
+  enableEnrollmentLogin?: boolean;
 }
 
 export const employeesApi = {

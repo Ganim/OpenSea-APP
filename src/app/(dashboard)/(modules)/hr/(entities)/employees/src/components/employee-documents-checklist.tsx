@@ -4,8 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { FilePreviewModal } from '@/components/storage/file-preview-modal';
 import { storageFilesService } from '@/services/storage/files.service';
-import type { StorageFile } from '@/types/storage';
+import { storageFoldersService } from '@/services/storage/folders.service';
+import type { StorageFile, StorageFolder } from '@/types/storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Briefcase,
@@ -25,7 +27,7 @@ import {
   User,
   Users,
 } from 'lucide-react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 // =============================================================================
@@ -51,6 +53,7 @@ interface EmployeeDocumentsChecklistProps {
   employeeId: string;
   employeeName: string;
   gender?: string | null;
+  readOnly?: boolean;
 }
 
 // =============================================================================
@@ -182,6 +185,7 @@ export function EmployeeDocumentsChecklist({
   employeeId,
   employeeName,
   gender,
+  readOnly = false,
 }: EmployeeDocumentsChecklistProps) {
   const queryClient = useQueryClient();
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
@@ -190,10 +194,62 @@ export function EmployeeDocumentsChecklist({
   const [uploadingDocType, setUploadingDocType] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<StorageFile | null>(null);
+  const [previewFile, setPreviewFile] = useState<StorageFile | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [docsFolderId, setDocsFolderId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingDocTypeRef = useRef<string | null>(null);
   const isUpdateRef = useRef(false);
+
+  // ============================================================================
+  // ENSURE FOLDER: RH > Funcionários > {Nome} > Documentos Pessoais
+  // ============================================================================
+
+  useEffect(() => {
+    if (readOnly) return;
+
+    async function resolveDocsFolder() {
+      try {
+        // Step 1: Ensure entity folders exist (creates if needed, no-op if exists)
+        const res = await storageFoldersService.ensureEntityFolder({
+          entityType: 'employee',
+          entityId: employeeId,
+          entityName: employeeName,
+        });
+
+        const created = res.folders ?? [];
+
+        if (created.length > 0) {
+          // Newly created — find "Documentos Pessoais" by path suffix
+          const docsFolder = created.find(f => f.path?.endsWith('/documentos-pessoais'));
+          setDocsFolderId(docsFolder?.id ?? created[0].id);
+          return;
+        }
+
+        // Step 2: Already exists — find entity folder, then find "Documentos Pessoais" child
+        const searchRes = await storageFoldersService.searchFolders(employeeName);
+        const searchFolders = (searchRes as { folders?: StorageFolder[] })?.folders ?? [];
+        const entityFolder = searchFolders.find(f => f.entityId === employeeId);
+
+        if (!entityFolder) return;
+
+        // Step 3: Get children of entity folder
+        const contents = await storageFoldersService.getFolderContents(entityFolder.id);
+        const children = contents.folders ?? [];
+
+        // Find "Documentos Pessoais" by path suffix (language-independent via slug)
+        const docsChild = children.find(f =>
+          f.path?.endsWith('/documentos-pessoais') || f.slug === 'documentos-pessoais'
+        );
+
+        setDocsFolderId(docsChild?.id ?? entityFolder.id);
+      } catch {
+        // Fallback: upload to root
+      }
+    }
+
+    resolveDocsFolder();
+  }, [employeeId, employeeName, readOnly]);
 
   // ============================================================================
   // DATA
@@ -326,10 +382,15 @@ export function EmployeeDocumentsChecklist({
         }
       }
 
-      // Rename file with doc type prefix
+      // File name format: {DocType}__{NomeFuncionário}_{timestamp}.{ext}
+      // The prefix before __ is used by extractDocType() to identify the document type
+      // The part after __ is the human-readable name shown in the file manager
+      const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
+      const sanitizedName = employeeName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\u00C0-\u024F]/g, '');
+      const timestamp = Date.now();
       const renamedFile = new File(
         [file],
-        `${docType}${DOC_TYPE_SEPARATOR}${file.name}`,
+        `${docType}${DOC_TYPE_SEPARATOR}${sanitizedName}_${timestamp}${ext ? `.${ext}` : ''}`,
         { type: file.type }
       );
 
@@ -338,7 +399,7 @@ export function EmployeeDocumentsChecklist({
 
       try {
         await storageFilesService.uploadFileWithProgress(
-          null,
+          docsFolderId,
           renamedFile,
           (percent) => setUploadProgress(percent),
           { entityType: 'employee', entityId: employeeId }
@@ -357,14 +418,13 @@ export function EmployeeDocumentsChecklist({
     [employeeId, filesByDocType, queryClient, queryKey]
   );
 
-  const handleView = useCallback(async (fileId: string) => {
-    try {
-      const url = await storageFilesService.getServeUrlWithToken(fileId);
-      window.open(url, '_blank');
-    } catch {
-      toast.error('Erro ao abrir documento');
+  const handleView = useCallback((fileId: string) => {
+    // Find the StorageFile object to open in the preview modal
+    const file = files.find(f => f.id === fileId);
+    if (file) {
+      setPreviewFile(file);
     }
-  }, []);
+  }, [files]);
 
   const handleDownload = useCallback(async (fileId: string) => {
     try {
@@ -434,14 +494,16 @@ export function EmployeeDocumentsChecklist({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        accept="image/*,.pdf,.doc,.docx"
-        onChange={handleFileSelected}
-      />
+      {/* Hidden file input (only in edit mode) */}
+      {!readOnly && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*,.pdf,.doc,.docx"
+          onChange={handleFileSelected}
+        />
+      )}
 
       {/* ================================================================== */}
       {/* Progress Summary Card                                               */}
@@ -617,7 +679,7 @@ export function EmployeeDocumentsChecklist({
                           )}
 
                           {/* Action buttons */}
-                          {status === 'PENDENTE' && !isUploading && (
+                          {!readOnly && status === 'PENDENTE' && !isUploading && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -649,30 +711,34 @@ export function EmployeeDocumentsChecklist({
                               >
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                title="Atualizar"
-                                onClick={() =>
-                                  handleUploadClick(doc.type, true)
-                                }
-                              >
-                                <RefreshCw className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
-                                title="Remover"
-                                onClick={() => handleDeleteClick(file)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
+                              {!readOnly && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    title="Atualizar"
+                                    onClick={() =>
+                                      handleUploadClick(doc.type, true)
+                                    }
+                                  >
+                                    <RefreshCw className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
+                                    title="Remover"
+                                    onClick={() => handleDeleteClick(file)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </>
+                              )}
                             </>
                           )}
 
-                          {isUploading && (
+                          {!readOnly && isUploading && (
                             <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
                           )}
                         </div>
@@ -722,17 +788,29 @@ export function EmployeeDocumentsChecklist({
       })}
 
       {/* ================================================================== */}
-      {/* Delete Confirmation Modal                                           */}
+      {/* Delete Confirmation Modal (only in edit mode)                       */}
       {/* ================================================================== */}
-      <VerifyActionPinModal
-        isOpen={isDeleteOpen}
-        onClose={() => {
-          setIsDeleteOpen(false);
-          setDeleteTarget(null);
-        }}
-        onSuccess={handleDeleteConfirm}
-        title="Confirmar Remoção"
-        description={`Digite seu PIN de ação para remover o documento "${deleteTarget?.originalName ?? ''}".`}
+      {!readOnly && (
+        <VerifyActionPinModal
+          isOpen={isDeleteOpen}
+          onClose={() => {
+            setIsDeleteOpen(false);
+            setDeleteTarget(null);
+          }}
+          onSuccess={handleDeleteConfirm}
+          title="Confirmar Remoção"
+          description={`Digite seu PIN de ação para remover o documento "${deleteTarget?.originalName ?? ''}".`}
+        />
+      )}
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        file={previewFile}
+        files={files}
+        open={!!previewFile}
+        onOpenChange={(open) => { if (!open) setPreviewFile(null); }}
+        onNavigate={setPreviewFile}
+        canDownload
       />
     </div>
   );

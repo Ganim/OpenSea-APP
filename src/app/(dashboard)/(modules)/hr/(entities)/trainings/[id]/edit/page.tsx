@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { trainingService } from '@/services/hr/training.service';
 import type { UpdateTrainingProgramData } from '@/types/hr';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -44,7 +45,7 @@ export default function EditTrainingProgramPage() {
   const { hasPermission } = usePermissions();
   const programId = params.id as string;
 
-  const canDelete = hasPermission('hr.training.remove');
+  const canDelete = hasPermission(HR_PERMISSIONS.TRAINING.DELETE);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [name, setName] = useState('');

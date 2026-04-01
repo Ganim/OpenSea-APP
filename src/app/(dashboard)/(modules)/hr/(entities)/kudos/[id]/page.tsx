@@ -14,6 +14,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/use-permissions';
 import { portalService } from '@/services/hr';
 import type { KudosCategory } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
@@ -31,6 +32,7 @@ import {
   User,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 // ============================================================================
 // CONSTANTS
@@ -95,6 +97,10 @@ const CATEGORY_CONFIG: Record<
 export default function KudosDetailPage() {
   const params = useParams();
   const kudosId = params.id as string;
+  const { hasPermission } = usePermissions();
+
+  // Kudos is view-only; permissions available for future action buttons
+  const _canManage = hasPermission(HR_PERMISSIONS.EMPLOYEES.MANAGE);
 
   // The backend doesn't have a GET /v1/hr/kudos/:id endpoint currently,
   // so we fetch from the feed and find by ID. This is a workaround until

@@ -15,18 +15,18 @@ export const cipaConfig = defineEntityConfig<CipaMandate>()({
   icon: Shield,
 
   api: {
-    baseUrl: '/api/v1/hr/cipa/mandates',
+    baseUrl: '/api/v1/hr/cipa-mandates',
     queryKey: 'cipa',
     queryKeys: {
       list: ['cipa', 'mandates'],
       detail: (id: string) => ['cipa', 'mandates', id],
     },
     endpoints: {
-      list: '/v1/hr/cipa/mandates',
-      get: '/v1/hr/cipa/mandates/:id',
-      create: '/v1/hr/cipa/mandates',
-      update: '/v1/hr/cipa/mandates/:id',
-      delete: '/v1/hr/cipa/mandates/:id',
+      list: '/v1/hr/cipa-mandates',
+      get: '/v1/hr/cipa-mandates/:id',
+      create: '/v1/hr/cipa-mandates',
+      update: '/v1/hr/cipa-mandates/:id',
+      delete: '/v1/hr/cipa-mandates/:id',
     },
   },
 

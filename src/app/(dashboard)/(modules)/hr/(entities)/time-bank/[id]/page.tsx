@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { TimeBank } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -37,15 +38,20 @@ import {
   useCreditTimeBank,
   useDebitTimeBank,
   useAdjustTimeBank,
-  CreditModal,
-  DebitModal,
-  AdjustModal,
 } from '../src';
+import { CreditModal } from '../src/modals/credit-modal';
+import { DebitModal } from '../src/modals/debit-modal';
+import { AdjustModal } from '../src/modals/adjust-modal';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function TimeBankDetailPage() {
   const params = useParams();
   const router = useRouter();
   const timeBankId = params.id as string;
+
+  const { hasPermission } = usePermissions();
+  const canUpdate = hasPermission(HR_PERMISSIONS.TIME_BANK.UPDATE);
+  const canManage = hasPermission(HR_PERMISSIONS.TIME_BANK.MANAGE);
 
   // ============================================================================
   // DATA FETCHING
@@ -114,7 +120,7 @@ export default function TimeBankDetailPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <Hourglass className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <Hourglass className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
               Registro não encontrado
             </h2>
@@ -156,29 +162,37 @@ export default function TimeBankDetailPage() {
             { label: getName(timeBank.employeeId) },
           ]}
           buttons={[
-            {
-              id: 'adjust',
-              title: 'Ajustar',
-              icon: SlidersHorizontal,
-              onClick: () => setAdjustOpen(true),
-              variant: 'outline',
-            },
-            {
-              id: 'debit',
-              title: 'Debitar',
-              icon: Minus,
-              onClick: () => setDebitOpen(true),
-              variant: 'outline',
-              className:
-                'border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-400 dark:hover:bg-rose-950',
-            },
-            {
-              id: 'credit',
-              title: 'Creditar',
-              icon: Plus,
-              onClick: () => setCreditOpen(true),
-              className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
-            },
+            ...(canManage
+              ? [
+                  {
+                    id: 'adjust',
+                    title: 'Ajustar',
+                    icon: SlidersHorizontal,
+                    onClick: () => setAdjustOpen(true),
+                    variant: 'outline' as const,
+                  },
+                ]
+              : []),
+            ...(canUpdate
+              ? [
+                  {
+                    id: 'debit',
+                    title: 'Debitar',
+                    icon: Minus,
+                    onClick: () => setDebitOpen(true),
+                    variant: 'outline' as const,
+                    className:
+                      'border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-400 dark:hover:bg-rose-950',
+                  },
+                  {
+                    id: 'credit',
+                    title: 'Creditar',
+                    icon: Plus,
+                    onClick: () => setCreditOpen(true),
+                    className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                  },
+                ]
+              : []),
           ]}
         />
 
@@ -225,87 +239,111 @@ export default function TimeBankDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Resumo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Resumo do Banco de Horas
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Funcionário"
-              value={getName(timeBank.employeeId)}
-              showCopyButton
-              copyTooltip="Copiar nome do funcionário"
-            />
-            <InfoField label="Ano" value={formatYear(timeBank.year)} />
-            <InfoField
-              label="Saldo"
-              value={formatBalance(timeBank.balance)}
-              badge={
-                <Badge variant={balanceVariant} className="gap-1">
-                  <Hourglass className="h-3 w-3" />
-                  {formatBalance(timeBank.balance)}
-                </Badge>
-              }
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <NotebookText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">
+                Resumo do Banco de Horas
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Informações gerais do registro
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <InfoField
+                label="Funcionário"
+                value={getName(timeBank.employeeId)}
+                showCopyButton
+                copyTooltip="Copiar nome do funcionário"
+              />
+              <InfoField label="Ano" value={formatYear(timeBank.year)} />
+              <InfoField
+                label="Saldo"
+                value={formatBalance(timeBank.balance)}
+                badge={
+                  <Badge variant={balanceVariant} className="gap-1">
+                    <Hourglass className="h-3 w-3" />
+                    {formatBalance(timeBank.balance)}
+                  </Badge>
+                }
+              />
+            </div>
           </div>
         </Card>
 
         {/* Detalhes */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <FileText className="h-5 w-5" />
-            Detalhes
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">
-                Histórico de Saldo
-              </p>
-              <div className="flex gap-2 mt-2">
-                {timeBank.hasPositiveBalance && (
-                  <Badge className="gap-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-                    <ArrowUpCircle className="h-3 w-3" />
-                    Possui saldo positivo
-                  </Badge>
-                )}
-                {timeBank.hasNegativeBalance && (
-                  <Badge className="gap-1 bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">
-                    <ArrowDownCircle className="h-3 w-3" />
-                    Possui saldo negativo
-                  </Badge>
-                )}
-                {!timeBank.hasPositiveBalance &&
-                  !timeBank.hasNegativeBalance && (
-                    <Badge variant="secondary">Sem movimentações</Badge>
-                  )}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Saldo Atual</p>
-              <p className={`text-3xl font-bold font-mono ${balanceColor}`}>
-                {formatBalance(timeBank.balance)}
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <FileText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Detalhes</h3>
+              <p className="text-sm text-muted-foreground">
+                Histórico e saldo atual
               </p>
             </div>
           </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  Histórico de Saldo
+                </p>
+                <div className="flex gap-2 mt-2">
+                  {timeBank.hasPositiveBalance && (
+                    <Badge className="gap-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                      <ArrowUpCircle className="h-3 w-3" />
+                      Possui saldo positivo
+                    </Badge>
+                  )}
+                  {timeBank.hasNegativeBalance && (
+                    <Badge className="gap-1 bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">
+                      <ArrowDownCircle className="h-3 w-3" />
+                      Possui saldo negativo
+                    </Badge>
+                  )}
+                  {!timeBank.hasPositiveBalance &&
+                    !timeBank.hasNegativeBalance && (
+                      <Badge variant="secondary">Sem movimentações</Badge>
+                    )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Saldo Atual</p>
+                <p className={`text-3xl font-bold font-mono ${balanceColor}`}>
+                  {formatBalance(timeBank.balance)}
+                </p>
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mt-6 pt-6 border-t">
-            <InfoField
-              label="Criado em"
-              value={new Date(timeBank.createdAt).toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              })}
-            />
-            <InfoField
-              label="Atualizado em"
-              value={new Date(timeBank.updatedAt).toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              })}
-            />
+            <div className="grid md:grid-cols-2 gap-6 mt-6 pt-6 border-t">
+              <InfoField
+                label="Criado em"
+                value={new Date(timeBank.createdAt).toLocaleDateString(
+                  'pt-BR',
+                  {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  }
+                )}
+              />
+              <InfoField
+                label="Atualizado em"
+                value={new Date(timeBank.updatedAt).toLocaleDateString(
+                  'pt-BR',
+                  {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  }
+                )}
+              />
+            </div>
           </div>
         </Card>
       </PageBody>

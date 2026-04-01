@@ -17,6 +17,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { TimePicker } from '@/components/ui/time-picker';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { logger } from '@/lib/logger';
 import type { WorkSchedule, UpdateWorkScheduleData } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -111,6 +113,8 @@ export default function WorkScheduleEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const scheduleId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.WORK_SCHEDULES.DELETE);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -307,15 +311,19 @@ export default function WorkScheduleEditPage() {
   // ==========================================================================
 
   const actionButtons: HeaderButton[] = [
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default',
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar',
@@ -361,7 +369,7 @@ export default function WorkScheduleEditPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <Clock className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
               Escala de trabalho não encontrada
             </h2>

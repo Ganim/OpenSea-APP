@@ -2,6 +2,7 @@
 
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -14,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { Progress } from '@/components/ui/progress';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import type {
@@ -27,7 +27,6 @@ import {
   Clock,
   Loader2,
   Plus,
-  Trash2,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -40,7 +39,6 @@ import {
   useState,
 } from 'react';
 import { useListOnboardingChecklists } from './src/api/list-onboarding.query';
-import { useDeleteOnboarding } from './src/api/mutations';
 
 const CreateOnboardingModal = dynamic(
   () =>
@@ -54,14 +52,10 @@ function OnboardingPageContent() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
   const canCreate = hasPermission(HR_PERMISSIONS.ONBOARDING.CREATE);
-  const canDelete = hasPermission(HR_PERMISSIONS.ONBOARDING.DELETE);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OnboardingStatus | ''>('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<OnboardingChecklist | null>(
-    null
-  );
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -81,10 +75,6 @@ function OnboardingPageContent() {
     hasNextPage,
     isFetchingNextPage,
   } = useListOnboardingChecklists(filters);
-
-  const deleteOnboarding = useDeleteOnboarding({
-    onSuccess: () => setDeleteTarget(null),
-  });
 
   const checklists = useMemo(
     () => data?.pages.flatMap(page => page.checklists) ?? [],
@@ -117,9 +107,9 @@ function OnboardingPageContent() {
   );
 
   const statusOptions = [
-    { label: 'Todos', value: '' },
-    { label: 'Em Progresso', value: 'IN_PROGRESS' },
-    { label: 'Concluído', value: 'COMPLETED' },
+    { id: '', label: 'Todos' },
+    { id: 'IN_PROGRESS', label: 'Em Progresso' },
+    { id: 'COMPLETED', label: 'Concluído' },
   ];
 
   return (
@@ -131,35 +121,41 @@ function OnboardingPageContent() {
             { label: 'Onboarding', href: '/hr/onboarding' },
           ]}
           hasPermission={hasPermission}
-          buttons={
-            canCreate
-              ? [
-                  {
-                    label: 'Novo Checklist',
-                    icon: Plus,
-                    onClick: () => setCreateModalOpen(true),
-                  },
-                ]
-              : undefined
+          actions={
+            canCreate ? (
+              <Button size="sm" className="gap-2" onClick={() => setCreateModalOpen(true)}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline">Novo Checklist</span>
+              </Button>
+            ) : undefined
           }
         />
+
+          <Header
+            title="Onboarding"
+            description="Checklists de integração para novos colaboradores"
+          />
       </PageHeader>
 
       <PageBody>
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <SearchBar
-              value={search}
-              onSearch={setSearch}
-              placeholder="Buscar por título..."
-              className="flex-1"
-            />
+          <SearchBar
+            value={search}
+            onSearch={setSearch}
+            placeholder="Buscar checklists de onboarding..."
+          />
+
+          <div className="flex items-center gap-2">
             <FilterDropdown
               label="Status"
               value={statusFilter}
               options={statusOptions}
               onChange={val => setStatusFilter(val as OnboardingStatus | '')}
+              activeColor="emerald"
             />
+            <span className="text-xs text-muted-foreground">
+              {checklists.length} checklist(s)
+            </span>
           </div>
 
           {isLoading ? (
@@ -168,7 +164,7 @@ function OnboardingPageContent() {
             <GridError type="server" title="Erro ao carregar" message={error?.message} />
           ) : checklists.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <ClipboardList className="h-12 w-12 mb-3 opacity-40" />
+              <ClipboardList className="h-8 w-8 mb-3 opacity-40" />
               <p className="text-sm font-medium">
                 Nenhum checklist de onboarding encontrado
               </p>
@@ -183,7 +179,7 @@ function OnboardingPageContent() {
               {checklists.map(checklist => (
                 <Card
                   key={checklist.id}
-                  className="p-4 cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-slate-800/60 border border-border"
+                  className="p-4 cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-white/5 border border-border"
                   onClick={() => handleChecklistClick(checklist)}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -191,9 +187,16 @@ function OnboardingPageContent() {
                       <h3 className="text-sm font-semibold truncate">
                         {checklist.title}
                       </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {checklist.items.length} itens
-                      </p>
+                      {checklist.employee ? (
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {checklist.employee.fullName}
+                          {checklist.employee.position && ` \u2022 ${checklist.employee.position.name}`}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {checklist.items.length} itens
+                        </p>
+                      )}
                     </div>
                     <Badge
                       variant={
@@ -229,22 +232,6 @@ function OnboardingPageContent() {
                       )}
                     </span>
                   </div>
-
-                  {canDelete && (
-                    <div className="flex justify-end mt-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setDeleteTarget(checklist);
-                        }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  )}
                 </Card>
               ))}
             </div>
@@ -268,17 +255,6 @@ function OnboardingPageContent() {
         />
       )}
 
-      <VerifyActionPinModal
-        isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onSuccess={() => {
-          if (deleteTarget) {
-            deleteOnboarding.mutate(deleteTarget.id);
-          }
-        }}
-        title="Confirmar Exclusão"
-        description={`Digite seu PIN de ação para excluir o checklist "${deleteTarget?.title ?? ''}".`}
-      />
     </PageLayout>
   );
 }

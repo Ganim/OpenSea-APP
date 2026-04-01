@@ -25,6 +25,7 @@ import {
   SelectionToolbar,
   useEntityCrud,
   useEntityPage,
+  type ContextMenuAction,
   type SortDirection,
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -33,19 +34,25 @@ import type { Employee } from '@/types/hr';
 import {
   Briefcase,
   Building2,
+  CalendarOff,
+  Clock,
   ExternalLink,
-  Factory,
   Loader2,
+  LogOut,
   Plus,
+  Printer,
+  Palmtree,
+  Trash2,
   Upload,
   Users,
 } from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useListCompanies } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
+import { HR_PERMISSIONS } from '../../_shared/constants/hr-permissions';
 import { useListDepartments } from '../departments/src';
 import { useListPositions } from '../positions/src';
 import {
@@ -72,6 +79,27 @@ const ViewModal = dynamic(
   { ssr: false }
 );
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+const QuickAbsenceModal = dynamic(
+  () =>
+    import('./src/modals/quick-absence-modal').then(m => ({
+      default: m.QuickAbsenceModal,
+    })),
+  { ssr: false }
+);
+const QuickVacationModal = dynamic(
+  () =>
+    import('./src/modals/quick-vacation-modal').then(m => ({
+      default: m.QuickVacationModal,
+    })),
+  { ssr: false }
+);
+const QuickTimeEntryModal = dynamic(
+  () =>
+    import('./src/modals/quick-time-entry-modal').then(m => ({
+      default: m.QuickTimeEntryModal,
+    })),
+  { ssr: false }
+);
 const DuplicateConfirmModal = dynamic(
   () =>
     import('./src/modals/duplicate-confirm-modal').then(m => ({
@@ -98,6 +126,14 @@ function EmployeesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { hasPermission } = usePermissions();
+
+  // ============================================================================
+  // QUICK-ACTION MODAL STATE
+  // ============================================================================
+
+  const [absenceTarget, setAbsenceTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [vacationTarget, setVacationTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [timeEntryTarget, setTimeEntryTarget] = useState<{ id: string; fullName: string } | null>(null);
 
   // ============================================================================
   // URL-BASED FILTERS
@@ -202,9 +238,9 @@ function EmployeesPageContent() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.page ?? 1;
-      const totalPages = lastPage.totalPages ?? 1;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+      const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
+      const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
+      return currentPage < total ? currentPage + 1 : undefined;
     },
   });
 
@@ -294,27 +330,42 @@ function EmployeesPageContent() {
   // ============================================================================
 
   const displayedEmployees = useMemo(() => {
-    let items = page.filteredItems || [];
+    let items = allEmployees;
+
+    // Apply search filter (mirrors useEntityPage filterFn)
+    if (page.searchQuery.trim()) {
+      const q = page.searchQuery.toLowerCase();
+      items = items.filter(item => {
+        const fullName = item.fullName?.toLowerCase() || '';
+        const registration = item.registrationNumber?.toLowerCase() || '';
+        const cpf = item.cpf || '';
+        return [fullName, registration, cpf].some(value => value.includes(q));
+      });
+    }
+
+    // Apply company filter
     if (companyIds.length > 0) {
       const set = new Set(companyIds);
       items = items.filter(e => {
-        // Check direct companyId or department's company
         if (e.companyId && set.has(e.companyId)) return true;
         const dept = e.departmentId ? departmentMap.get(e.departmentId) : null;
         return dept?.companyId && set.has(dept.companyId);
       });
     }
+    // Apply department filter
     if (departmentIds.length > 0) {
       const set = new Set(departmentIds);
       items = items.filter(e => e.departmentId && set.has(e.departmentId));
     }
+    // Apply position filter
     if (positionIds.length > 0) {
       const set = new Set(positionIds);
       items = items.filter(e => e.positionId && set.has(e.positionId));
     }
     return items;
   }, [
-    page.filteredItems,
+    allEmployees,
+    page.searchQuery,
     companyIds,
     departmentIds,
     positionIds,
@@ -448,6 +499,129 @@ function EmployeesPageContent() {
   };
 
   // ============================================================================
+  // PERMISSION CHECKS
+  // ============================================================================
+
+  const canView = hasPermission(HR_PERMISSIONS.EMPLOYEES.VIEW);
+  const canEdit = hasPermission(HR_PERMISSIONS.EMPLOYEES.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.EMPLOYEES.DELETE);
+  const canDuplicate = hasPermission(HR_PERMISSIONS.EMPLOYEES.CREATE);
+  const canCreateAbsence = hasPermission(HR_PERMISSIONS.ABSENCES.CREATE);
+  const canCreateVacation = hasPermission(HR_PERMISSIONS.VACATIONS.CREATE);
+  const canCreateTimeEntry = hasPermission(HR_PERMISSIONS.TIME_ENTRIES.CREATE);
+  const canTerminate = hasPermission(HR_PERMISSIONS.EMPLOYEES.TERMINATE);
+  const canPrint = hasPermission(HR_PERMISSIONS.EMPLOYEES.EXPORT);
+
+  // ============================================================================
+  // STATUS BADGE HELPER
+  // ============================================================================
+
+  const getStatusBadge = (employee: Employee) => {
+    const status = employee.status?.toUpperCase();
+    if (employee.terminationDate || status === 'TERMINATED' || status === 'INACTIVE') {
+      return { label: 'Inativo', variant: 'destructive' as const };
+    }
+    if (status === 'VACATION' || status === 'ON_VACATION') {
+      return { label: 'Férias', variant: 'warning' as const };
+    }
+    if (status === 'LEAVE' || status === 'ON_LEAVE' || status === 'AWAY') {
+      return { label: 'Afastado', variant: 'secondary' as const };
+    }
+    return { label: 'Ativo', variant: 'default' as const };
+  };
+
+  // ============================================================================
+  // CONTEXT MENU ACTIONS
+  // ============================================================================
+
+  const getContextActions = useCallback((): ContextMenuAction[] => {
+    const actions: ContextMenuAction[] = [];
+
+    // Group 2: Custom HR actions (after built-in View/Edit/Duplicate)
+    if (canCreateAbsence) {
+      actions.push({
+        id: 'register-absence',
+        label: 'Registrar Ausência',
+        icon: CalendarOff,
+        separator: 'before',
+        onClick: (ids: string[]) => {
+          const emp = allEmployees.find(e => e.id === ids[0]);
+          if (emp) setAbsenceTarget({ id: emp.id, fullName: emp.fullName });
+        },
+      });
+    }
+
+    if (canCreateVacation) {
+      actions.push({
+        id: 'request-vacation',
+        label: 'Solicitar Férias',
+        icon: Palmtree,
+        onClick: (ids: string[]) => {
+          const emp = allEmployees.find(e => e.id === ids[0]);
+          if (emp) setVacationTarget({ id: emp.id, fullName: emp.fullName });
+        },
+      });
+    }
+
+    if (canCreateTimeEntry) {
+      actions.push({
+        id: 'register-time',
+        label: 'Registrar Ponto',
+        icon: Clock,
+        onClick: (ids: string[]) => {
+          const emp = allEmployees.find(e => e.id === ids[0]);
+          if (emp) setTimeEntryTarget({ id: emp.id, fullName: emp.fullName });
+        },
+      });
+    }
+
+    if (canPrint) {
+      actions.push({
+        id: 'print-badge',
+        label: 'Imprimir Crachá',
+        icon: Printer,
+        separator: 'before',
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) {
+            toast.info('Preparando impressão do crachá...');
+            // Navigate to label/badge printing
+            router.push(`/hr/employees/${ids[0]}?tab=badge`);
+          }
+        },
+      });
+    }
+
+    if (canTerminate) {
+      actions.push({
+        id: 'terminate',
+        label: 'Desligar Funcionário',
+        icon: LogOut,
+        separator: 'before',
+        variant: 'destructive',
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/terminations?employeeId=${ids[0]}`);
+        },
+      });
+    }
+
+    if (canDelete) {
+      actions.push({
+        id: 'delete',
+        label: 'Excluir',
+        icon: Trash2,
+        separator: canTerminate ? undefined : 'before',
+        variant: 'destructive',
+        onClick: handleContextDelete,
+      });
+    }
+
+    return actions;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canCreateAbsence, canCreateVacation, canCreateTimeEntry, canPrint, canTerminate, canDelete, router, allEmployees]);
+
+  const contextActions = useMemo(() => getContextActions(), [getContextActions]);
+
+  // ============================================================================
   // RENDER FUNCTIONS
   // ============================================================================
 
@@ -462,51 +636,33 @@ function EmployeesPageContent() {
       : deptInfo?.companyId
         ? companyMap.get(deptInfo.companyId)
         : null;
-    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
+    const statusBadge = getStatusBadge(item);
+
+    // Subtitle: registration number (matrícula)
+    const subtitle = item.registrationNumber
+      ? `Matrícula ${item.registrationNumber}`
+      : 'Sem matrícula';
 
     return (
       <EntityContextMenu
         itemId={item.id}
-        onView={handleContextView}
-        onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        onView={canView ? handleContextView : undefined}
+        onEdit={canEdit ? handleContextEdit : undefined}
+        onDuplicate={canDuplicate ? handleContextDuplicate : undefined}
+        actions={contextActions}
       >
         <EntityCard
           id={item.id}
           variant="grid"
           title={item.fullName}
-          subtitle={posInfo?.name || 'Sem cargo definido'}
+          subtitle={subtitle}
           icon={Users}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(posInfo
-              ? [
-                  {
-                    label: posInfo.name,
-                    variant: 'outline' as const,
-                    icon: Briefcase,
-                  },
-                ]
-              : []),
-            ...(deptInfo
-              ? [
-                  {
-                    label: deptInfo.name,
-                    variant: 'outline' as const,
-                    icon: Building2,
-                  },
-                ]
-              : []),
-            ...(companyName
-              ? [
-                  {
-                    label: companyName,
-                    variant: 'outline' as const,
-                    icon: Factory,
-                  },
-                ]
-              : []),
+            {
+              label: statusBadge.label,
+              variant: statusBadge.variant,
+            },
           ]}
           isSelected={isSelected}
           showSelection={false}
@@ -514,6 +670,76 @@ function EmployeesPageContent() {
           createdAt={item.createdAt}
           updatedAt={item.updatedAt}
           showStatusBadges={true}
+          customFooter={
+            <>
+              {/* Body info lines */}
+              <div className="flex flex-col gap-1.5 px-6 pb-2">
+                {companyInfo && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Building2 className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{companyInfo.tradeName || companyInfo.legalName}</span>
+                  </div>
+                )}
+                {deptInfo && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{deptInfo.name}</span>
+                  </div>
+                )}
+                {posInfo && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Briefcase className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{posInfo.name}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Stats row */}
+              <div className="flex items-center gap-3 px-6 py-2 border-t border-border">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Ausências no mês">
+                  <CalendarOff className="h-3 w-3" />
+                  <span>&mdash;</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Atrasos">
+                  <Clock className="h-3 w-3" />
+                  <span>&mdash;</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Dias trabalhados">
+                  <Briefcase className="h-3 w-3" />
+                  <span>&mdash;</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Próximas férias">
+                  <Palmtree className="h-3 w-3" />
+                  <span>&mdash;</span>
+                </div>
+              </div>
+
+              {/* Footer buttons */}
+              <div className="flex rounded-b-xl overflow-hidden">
+                <button
+                  onClick={() => {
+                    setTimeEntryTarget({ id: item.id, fullName: item.fullName });
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white transition-colors cursor-pointer bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500"
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="truncate">Registrar Ponto</span>
+                  </div>
+                </button>
+                <div className="w-px bg-white/20 dark:bg-white/10" />
+                <a
+                  href={`/hr/employees/${item.id}?tab=badge`}
+                  className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white transition-colors cursor-pointer bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500"
+                >
+                  <div className="flex items-center gap-2">
+                    <Printer className="w-4 h-4" />
+                    <span className="truncate">Imprimir Crachá</span>
+                  </div>
+                </a>
+              </div>
+            </>
+          }
         />
       </EntityContextMenu>
     );
@@ -530,51 +756,75 @@ function EmployeesPageContent() {
       : deptInfo?.companyId
         ? companyMap.get(deptInfo.companyId)
         : null;
-    const companyName = companyInfo?.tradeName || companyInfo?.legalName;
+    const statusBadge = getStatusBadge(item);
+
+    // Subtitle: registration number (matrícula)
+    const subtitle = item.registrationNumber
+      ? `Matrícula ${item.registrationNumber}`
+      : 'Sem matrícula';
+
+    // Build metadata with info lines
+    const metadataContent = (
+      <div className="flex items-center gap-3 flex-wrap">
+        {companyInfo && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Building2 className="h-3 w-3 shrink-0" />
+            {companyInfo.tradeName || companyInfo.legalName}
+          </span>
+        )}
+        {deptInfo && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="h-3 w-3 shrink-0" />
+            {deptInfo.name}
+          </span>
+        )}
+        {posInfo && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Briefcase className="h-3 w-3 shrink-0" />
+            {posInfo.name}
+          </span>
+        )}
+        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Ausências">
+          <CalendarOff className="h-3 w-3" />
+          &mdash;
+        </span>
+        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Atrasos">
+          <Clock className="h-3 w-3" />
+          &mdash;
+        </span>
+        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Dias trabalhados">
+          <Briefcase className="h-3 w-3" />
+          &mdash;
+        </span>
+        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Próximas férias">
+          <Palmtree className="h-3 w-3" />
+          &mdash;
+        </span>
+      </div>
+    );
 
     return (
       <EntityContextMenu
         itemId={item.id}
-        onView={handleContextView}
-        onEdit={handleContextEdit}
-        onDuplicate={handleContextDuplicate}
-        onDelete={handleContextDelete}
+        onView={canView ? handleContextView : undefined}
+        onEdit={canEdit ? handleContextEdit : undefined}
+        onDuplicate={canDuplicate ? handleContextDuplicate : undefined}
+        actions={contextActions}
       >
         <EntityCard
           id={item.id}
           variant="list"
           title={item.fullName}
-          subtitle={posInfo?.name || 'Sem cargo definido'}
+          subtitle={subtitle}
+          metadata={metadataContent}
           icon={Users}
           iconBgColor="bg-linear-to-br from-emerald-500 to-teal-600"
           badges={[
-            ...(posInfo
-              ? [
-                  {
-                    label: posInfo.name,
-                    variant: 'outline' as const,
-                    icon: Briefcase,
-                  },
-                ]
-              : []),
-            ...(deptInfo
-              ? [
-                  {
-                    label: deptInfo.name,
-                    variant: 'outline' as const,
-                    icon: Building2,
-                  },
-                ]
-              : []),
-            ...(companyName
-              ? [
-                  {
-                    label: companyName,
-                    variant: 'outline' as const,
-                    icon: Factory,
-                  },
-                ]
-              : []),
+            {
+              label: statusBadge.label,
+              variant: statusBadge.variant,
+            },
           ]}
           isSelected={isSelected}
           showSelection={false}
@@ -788,10 +1038,10 @@ function EmployeesPageContent() {
               onClear={() => page.selection?.actions.clear()}
               onSelectAll={() => page.selection?.actions.selectAll()}
               defaultActions={{
-                view: true,
-                edit: true,
-                duplicate: true,
-                delete: true,
+                view: canView,
+                edit: canEdit,
+                duplicate: canDuplicate,
+                delete: canDelete,
               }}
               handlers={{
                 onView: page.handlers.handleItemsView,
@@ -822,13 +1072,15 @@ function EmployeesPageContent() {
                   permissionGroupId,
                   userEmail,
                   userPassword,
+                  enableEmailLogin,
+                  enableCpfLogin,
+                  enableEnrollmentLogin,
                   ...employeeData
                 } = data;
 
                 if (
                   createUser &&
                   permissionGroupId &&
-                  userEmail &&
                   userPassword
                 ) {
                   // Usar a nova rota que cria funcionario + usuario automaticamente
@@ -837,6 +1089,9 @@ function EmployeesPageContent() {
                     permissionGroupId,
                     userEmail,
                     userPassword,
+                    enableEmailLogin,
+                    enableCpfLogin,
+                    enableEnrollmentLogin,
                   });
                   await crud.invalidate();
                   toast.success('Funcionário e usuário criados com sucesso!', {
@@ -885,6 +1140,25 @@ function EmployeesPageContent() {
             itemCount={page.modals.itemsToDuplicate.length}
             onConfirm={page.handlers.handleDuplicateConfirm}
             isLoading={crud.isDuplicating}
+          />
+
+          {/* Quick Action Modals */}
+          <QuickAbsenceModal
+            isOpen={!!absenceTarget}
+            onClose={() => setAbsenceTarget(null)}
+            employee={absenceTarget}
+          />
+
+          <QuickVacationModal
+            isOpen={!!vacationTarget}
+            onClose={() => setVacationTarget(null)}
+            employee={vacationTarget}
+          />
+
+          <QuickTimeEntryModal
+            isOpen={!!timeEntryTarget}
+            onClose={() => setTimeEntryTarget(null)}
+            employee={timeEntryTarget}
           />
         </PageBody>
       </PageLayout>

@@ -22,6 +22,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { deductionsService } from '@/services/hr/deductions.service';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
@@ -81,6 +83,8 @@ export default function DeductionEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const deductionId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.DEDUCTIONS.DELETE);
 
   // ==========================================================================
   // STATE
@@ -111,9 +115,7 @@ export default function DeductionEditPage() {
     },
   });
 
-  const { getName } = useEmployeeMap(
-    deduction ? [deduction.employeeId] : []
-  );
+  const { getName } = useEmployeeMap(deduction ? [deduction.employeeId] : []);
 
   // ==========================================================================
   // MUTATIONS
@@ -178,9 +180,8 @@ export default function DeductionEditPage() {
           reason: formData.reason || undefined,
           date: formData.date || undefined,
           isRecurring: formData.isRecurring,
-          installments: !formData.isRecurring && installments
-            ? installments
-            : null,
+          installments:
+            !formData.isRecurring && installments ? installments : null,
         },
       });
       await queryClient.invalidateQueries({
@@ -232,15 +233,19 @@ export default function DeductionEditPage() {
       onClick: () => router.push(`/hr/deductions/${deductionId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default' as const,
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',
@@ -324,9 +329,7 @@ export default function DeductionEditPage() {
               <Receipt className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Editando desconto
-              </p>
+              <p className="text-sm text-muted-foreground">Editando desconto</p>
               <h1 className="text-xl font-bold truncate">{deduction.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {getName(deduction.employeeId)} ·{' '}
@@ -453,9 +456,7 @@ export default function DeductionEditPage() {
                 {!formData.isRecurring && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="installments">
-                        Parcelas
-                      </Label>
+                      <Label htmlFor="installments">Parcelas</Label>
                       <Input
                         id="installments"
                         type="number"

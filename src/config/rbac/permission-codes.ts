@@ -265,6 +265,15 @@ export const FINANCE_PERMISSIONS = {
     'export',
     'admin'
   ),
+  PAYMENT_ORDERS: perm(
+    'finance',
+    'payment-orders',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
 } as const;
 
 // =============================================================================
@@ -401,6 +410,45 @@ export const HR_PERMISSIONS = {
     'admin'
   ),
   PPE: perm('hr', 'ppe', 'access', 'register', 'modify', 'remove', 'admin'),
+  TRAINING: perm(
+    'hr',
+    'training',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
+  REVIEWS: perm(
+    'hr',
+    'reviews',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
+  ANNOUNCEMENTS: perm(
+    'hr',
+    'announcements',
+    'access',
+    'register',
+    'modify',
+    'remove'
+  ),
+  KUDOS: perm('hr', 'kudos', 'access', 'register'),
+  SURVEYS: perm('hr', 'surveys', 'access', 'register', 'modify', 'remove'),
+  OKRS: perm('hr', 'okrs', 'access', 'register', 'modify', 'remove'),
+  REPORTS: perm('hr', 'reports', 'access', 'export'),
+  RECRUITMENT: perm(
+    'hr',
+    'recruitment',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
 } as const;
 
 // =============================================================================

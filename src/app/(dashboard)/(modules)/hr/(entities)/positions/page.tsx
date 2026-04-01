@@ -58,14 +58,6 @@ const CreateModal = dynamic(
     import('./src/modals/create-modal').then(m => ({ default: m.CreateModal })),
   { ssr: false }
 );
-const EditModal = dynamic(
-  () => import('./src/modals/edit-modal').then(m => ({ default: m.EditModal })),
-  { ssr: false }
-);
-const ViewModal = dynamic(
-  () => import('./src/modals/view-modal').then(m => ({ default: m.ViewModal })),
-  { ssr: false }
-);
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 const DuplicateConfirmModal = dynamic(
   () =>
@@ -170,9 +162,9 @@ function PositionsPageContent() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.page ?? 1;
-      const totalPages = lastPage.totalPages ?? 1;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+      const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
+      const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
+      return currentPage < total ? currentPage + 1 : undefined;
     },
   });
 
@@ -230,6 +222,7 @@ function PositionsPageContent() {
     queryKey: ['positions'],
     crud,
     viewRoute: id => `/hr/positions/${id}`,
+    editRoute: id => `/hr/positions/${id}/edit`,
     filterFn: (item, query) => {
       const q = query.toLowerCase();
       return Boolean(
@@ -258,7 +251,20 @@ function PositionsPageContent() {
   // ============================================================================
 
   const displayedPositions = useMemo(() => {
-    let items = page.filteredItems || [];
+    let items = allPositionsInfinite;
+
+    // Apply search filter (mirrors useEntityPage filterFn)
+    if (page.searchQuery.trim()) {
+      const q = page.searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          item.name.toLowerCase().includes(q) ||
+          item.code.toLowerCase().includes(q) ||
+          (item.description && item.description.toLowerCase().includes(q))
+      );
+    }
+
+    // Apply company filter
     if (companyIds.length > 0) {
       const set = new Set(companyIds);
       items = items.filter(p => {
@@ -266,12 +272,13 @@ function PositionsPageContent() {
         return dept?.companyId && set.has(dept.companyId);
       });
     }
+    // Apply department filter
     if (departmentIds.length > 0) {
       const set = new Set(departmentIds);
       items = items.filter(p => p.departmentId && set.has(p.departmentId));
     }
     return items;
-  }, [page.filteredItems, companyIds, departmentIds, departmentMap]);
+  }, [allPositionsInfinite, page.searchQuery, companyIds, departmentIds, departmentMap]);
 
   // Derive filter options from hook data
   const availableCompanies = useMemo(() => {
@@ -725,13 +732,6 @@ function PositionsPageContent() {
             />
           )}
 
-          {/* View Modal */}
-          <ViewModal
-            isOpen={page.modals.isOpen('view')}
-            onClose={() => page.modals.close('view')}
-            position={page.modals.viewingItem}
-          />
-
           {/* Create Modal */}
           <CreateModal
             isOpen={page.modals.isOpen('create')}
@@ -739,17 +739,6 @@ function PositionsPageContent() {
             isSubmitting={crud.isCreating}
             onSubmit={async data => {
               await crud.create(data);
-            }}
-          />
-
-          {/* Edit Modal */}
-          <EditModal
-            isOpen={page.modals.isOpen('edit')}
-            onClose={() => page.modals.close('edit')}
-            position={page.modals.editingItem}
-            isSubmitting={crud.isUpdating}
-            onSubmit={async (id, data) => {
-              await crud.update(id, data);
             }}
           />
 

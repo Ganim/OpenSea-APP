@@ -1,4 +1,5 @@
 export * from './absences.service';
+export * from './analytics.service';
 export * from './bonuses.service';
 export * from './deductions.service';
 export * from './departments.service';
@@ -58,6 +59,14 @@ export {
 } from './approval-delegations.service';
 export * from './ppe.service';
 export {
+  surveysService,
+  type SurveysResponse,
+  type SurveyDetailResponse,
+  type SurveyQuestionResponse,
+  type SurveyResponseResponse,
+  type ListSurveysParams,
+} from './surveys.service';
+export {
   reviewsService,
   type ReviewCyclesResponse,
   type ReviewCycleResponse,
@@ -66,3 +75,29 @@ export {
   type ListReviewCyclesParams,
   type ListPerformanceReviewsParams,
 } from './reviews.service';
+export { hrReportsService } from './reports.service';
+export {
+  okrsService,
+  type ObjectivesResponse,
+  type ObjectiveResponse,
+  type KeyResultResponse,
+  type CheckInResponse,
+  type ListObjectivesParams,
+} from './okrs.service';
+export {
+  recruitmentService,
+  type JobPostingsResponse,
+  type JobPostingResponse,
+  type CandidatesResponse,
+  type CandidateResponse,
+  type ApplicationsResponse,
+  type ApplicationResponse,
+  type InterviewStagesResponse,
+  type InterviewStageResponse,
+  type InterviewsResponse,
+  type InterviewResponse,
+  type ListJobPostingsParams,
+  type ListCandidatesParams,
+  type ListApplicationsParams,
+  type ListInterviewsParams,
+} from './recruitment.service';

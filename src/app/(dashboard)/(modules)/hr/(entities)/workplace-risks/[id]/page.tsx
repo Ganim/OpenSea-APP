@@ -11,6 +11,7 @@ import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { SafetyProgram, WorkplaceRisk } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -38,6 +39,7 @@ import {
   formatDate,
 } from '../src';
 import { safetyProgramKeys } from '../../safety-programs/src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function WorkplaceRiskDetailPage() {
   const params = useParams();
@@ -46,6 +48,9 @@ export default function WorkplaceRiskDetailPage() {
   const riskId = params.id as string;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.WORKPLACE_RISKS.DELETE);
 
   // ============================================================================
   // DATA FETCHING
@@ -59,7 +64,9 @@ export default function WorkplaceRiskDetailPage() {
     queryKey: workplaceRiskKeys.detail(riskId),
     queryFn: async () => {
       // Fetch all programs, then search for the risk in each
-      const programsResponse = await safetyProgramsService.list({ perPage: 100 });
+      const programsResponse = await safetyProgramsService.list({
+        perPage: 100,
+      });
       const programs = programsResponse.safetyPrograms ?? [];
 
       for (const program of programs) {
@@ -155,15 +162,19 @@ export default function WorkplaceRiskDetailPage() {
             { label: 'Riscos Ocupacionais', href: '/hr/workplace-risks' },
             { label: risk.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-            },
-          ]}
+          buttons={
+            canDelete
+              ? [
+                  {
+                    id: 'delete',
+                    title: 'Excluir',
+                    icon: Trash,
+                    onClick: () => setIsDeleteModalOpen(true),
+                    variant: 'outline',
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -183,9 +194,7 @@ export default function WorkplaceRiskDetailPage() {
                 <Badge variant={getRiskSeverityVariant(risk.severity)}>
                   {getRiskSeverityLabel(risk.severity)}
                 </Badge>
-                {!risk.isActive && (
-                  <Badge variant="outline">Inativo</Badge>
-                )}
+                {!risk.isActive && <Badge variant="outline">Inativo</Badge>}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Programa: {program.name} ({program.type})
@@ -299,9 +308,7 @@ export default function WorkplaceRiskDetailPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                router.push(`/hr/safety-programs/${program.id}`)
-              }
+              onClick={() => router.push(`/hr/safety-programs/${program.id}`)}
             >
               Ver Programa Completo
             </Button>

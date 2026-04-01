@@ -25,6 +25,8 @@ import type {
 import {
   Briefcase,
   Check,
+  Copy,
+  ExternalLink,
   Loader2,
   UserPlus,
 } from 'lucide-react';
@@ -42,7 +44,7 @@ import { departmentsService, positionsService } from '@/services/hr';
 interface CreateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateAdmissionData) => void;
+  onSubmit: (data: CreateAdmissionData) => Promise<unknown>;
   isSubmitting: boolean;
 }
 
@@ -79,6 +81,8 @@ export function CreateModal({
   const [workRegime, setWorkRegime] = useState<WorkRegime | ''>('');
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [createdToken, setCreatedToken] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Fetch departments and positions
   const { data: departmentsData } = useQuery({
@@ -114,6 +118,8 @@ export function CreateModal({
     setContractType('');
     setWorkRegime('');
     setCurrentStep(1);
+    setCreatedToken(null);
+    setCopiedLink(false);
   }, []);
 
   const handleClose = () => {
@@ -140,7 +146,12 @@ export function CreateModal({
     };
 
     try {
-      await onSubmit(data);
+      const result = await onSubmit(data) as { token?: string } | undefined;
+      if (result?.token) {
+        setCreatedToken(result.token);
+        setCurrentStep(3);
+        return;
+      }
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       if (msg.includes('email') || msg.includes('e-mail')) {
@@ -359,6 +370,81 @@ export function CreateModal({
             Criar Convite
           </Button>
         </div>
+      ),
+    },
+    // Step 3: Success — show link
+    {
+      title: 'Convite Criado',
+      description: 'Compartilhe o link com o candidato',
+      icon: <Check className="h-16 w-16 text-emerald-500/60" />,
+      content: (
+        <div className="space-y-5 p-1">
+          <div className="flex flex-col items-center text-center space-y-3">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-500/10">
+              <Check className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Convite criado com sucesso!</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                O candidato <span className="font-medium text-foreground">{fullName}</span> poderá
+                acessar o formulário de admissão pelo link abaixo.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Link do Convite</Label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 rounded-lg border bg-muted/50 px-3 py-2.5 overflow-hidden">
+                <p className="text-sm font-mono truncate">
+                  {createdToken
+                    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/admission/${createdToken}`
+                    : '...'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 px-3 shrink-0 gap-2"
+                onClick={() => {
+                  const link = `${window.location.origin}/admission/${createdToken}`;
+                  navigator.clipboard.writeText(link);
+                  setCopiedLink(true);
+                  toast.success('Link copiado para a área de transferência');
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}
+              >
+                {copiedLink ? (
+                  <Check className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copiedLink ? 'Copiado' : 'Copiar'}
+              </Button>
+            </div>
+          </div>
+
+          <Card className="p-4 bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20">
+            <div className="flex gap-3">
+              <ExternalLink className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                  Envio manual necessário
+                </p>
+                <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">
+                  O envio automático por e-mail ainda não está configurado.
+                  Copie o link acima e envie diretamente ao candidato por e-mail, WhatsApp ou outro canal.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      ),
+      isValid: true,
+      footer: (
+        <Button onClick={handleClose}>
+          Fechar
+        </Button>
       ),
     },
   ];

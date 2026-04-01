@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../_shared/constants/hr-permissions';
 import { trainingService } from '@/services/hr/training.service';
 import type { TrainingProgram, TrainingCategory } from '@/types/hr';
 import {
@@ -76,9 +77,9 @@ function TrainingsPageContent() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [programToDelete, setProgramToDelete] = useState<string | null>(null);
 
-  const canCreate = hasPermission('hr.training.register');
-  const canModify = hasPermission('hr.training.modify');
-  const canDelete = hasPermission('hr.training.remove');
+  const canCreate = hasPermission(HR_PERMISSIONS.TRAINING.CREATE);
+  const canModify = hasPermission(HR_PERMISSIONS.TRAINING.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.TRAINING.DELETE);
 
   // ============================================================================
   // URL-BASED FILTERS

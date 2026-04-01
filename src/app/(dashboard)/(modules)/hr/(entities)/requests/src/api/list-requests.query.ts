@@ -34,6 +34,7 @@ const PAGE_SIZE = 20;
 export function useListMyRequests(params?: ListRequestsParams) {
   return useInfiniteQuery<ListRequestsResponse>({
     queryKey: requestKeys.myList(params),
+    enabled: params !== undefined,
 
     queryFn: async ({ pageParam }): Promise<ListRequestsResponse> => {
       const page = pageParam as number;
@@ -43,12 +44,15 @@ export function useListMyRequests(params?: ListRequestsParams) {
         perPage: PAGE_SIZE,
       });
 
+      // Backend meta may use `limit`/`pages` instead of `perPage`/`totalPages`
+      const meta = (response.meta ?? {}) as Record<string, number | undefined>;
+
       return {
         requests: response.employeeRequests ?? [],
-        total: response.meta?.total ?? 0,
-        page: response.meta?.page ?? page,
-        perPage: response.meta?.perPage ?? PAGE_SIZE,
-        totalPages: response.meta?.totalPages ?? 1,
+        total: meta.total ?? 0,
+        page: meta.page ?? page,
+        perPage: meta.perPage ?? meta.limit ?? PAGE_SIZE,
+        totalPages: meta.totalPages ?? meta.pages ?? 1,
       };
     },
 
@@ -67,6 +71,7 @@ export function useListMyRequests(params?: ListRequestsParams) {
 export function useListPendingRequests(params?: ListRequestsParams) {
   return useInfiniteQuery<ListRequestsResponse>({
     queryKey: requestKeys.pendingList(params),
+    enabled: params !== undefined,
 
     queryFn: async ({ pageParam }): Promise<ListRequestsResponse> => {
       const page = pageParam as number;
@@ -76,12 +81,15 @@ export function useListPendingRequests(params?: ListRequestsParams) {
         perPage: PAGE_SIZE,
       });
 
+      // Backend meta may use `limit`/`pages` instead of `perPage`/`totalPages`
+      const meta = (response.meta ?? {}) as Record<string, number | undefined>;
+
       return {
         requests: response.employeeRequests ?? [],
-        total: response.meta?.total ?? 0,
-        page: response.meta?.page ?? page,
-        perPage: response.meta?.perPage ?? PAGE_SIZE,
-        totalPages: response.meta?.totalPages ?? 1,
+        total: meta.total ?? 0,
+        page: meta.page ?? page,
+        perPage: meta.perPage ?? meta.limit ?? PAGE_SIZE,
+        totalPages: meta.totalPages ?? meta.pages ?? 1,
       };
     },
 

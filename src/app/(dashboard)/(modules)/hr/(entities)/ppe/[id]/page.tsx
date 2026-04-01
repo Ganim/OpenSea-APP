@@ -11,6 +11,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
@@ -19,7 +26,6 @@ import type { PPEItem, PPEAssignment } from '@/types/hr';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
-  ArrowLeft,
   Calendar,
   Edit,
   HardHat,
@@ -33,6 +39,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEmployeeMap } from '@/hooks/use-employee-map';
 import {
   ppeKeys,
   useDeletePPEItem,
@@ -56,6 +63,14 @@ const ReturnPPEModal = dynamic(
   () =>
     import('../src/modals/return-ppe-modal').then((m) => ({
       default: m.ReturnPPEModal,
+    })),
+  { ssr: false },
+);
+
+const AdjustStockModal = dynamic(
+  () =>
+    import('../src/modals/adjust-stock-modal').then((m) => ({
+      default: m.AdjustStockModal,
     })),
   { ssr: false },
 );
@@ -90,17 +105,23 @@ export default function PPEDetailPage() {
 
   const ppeItem = ppeItemData as PPEItem | undefined;
 
+  const [assignmentStatusFilter, setAssignmentStatusFilter] = useState('');
+
   const {
     data: assignmentsData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ppeKeys.assignmentList({ ppeItemId }),
+    queryKey: ppeKeys.assignmentList({
+      ppeItemId,
+      status: assignmentStatusFilter || undefined,
+    }),
     queryFn: async ({ pageParam }) => {
       const page = pageParam as number;
       const response = await ppeService.listAssignments({
         ppeItemId,
+        status: assignmentStatusFilter || undefined,
         page,
         perPage: PAGE_SIZE,
       });
@@ -120,6 +141,13 @@ export default function PPEDetailPage() {
     () => assignmentsData?.pages.flatMap((p) => p.assignments ?? []) ?? [],
     [assignmentsData],
   );
+
+  // Resolve employee names for display
+  const employeeIds = useMemo(
+    () => assignments.map((a) => a.employeeId),
+    [assignments],
+  );
+  const { getName: getEmployeeName } = useEmployeeMap(employeeIds);
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -144,8 +172,8 @@ export default function PPEDetailPage() {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isAdjustStockOpen, setIsAdjustStockOpen] = useState(false);
   const [returnTarget, setReturnTarget] = useState<PPEAssignment | null>(null);
-
   const deleteMutation = useDeletePPEItem({
     onSuccess: () => router.push('/hr/ppe'),
   });
@@ -301,7 +329,20 @@ export default function PPEDetailPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Estoque Atual</p>
-              <p className="text-sm font-medium">{ppeItem.currentStock}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">{ppeItem.currentStock}</p>
+                {canEdit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setIsAdjustStockOpen(true)}
+                  >
+                    <Package className="mr-1 h-3 w-3" />
+                    Ajustar
+                  </Button>
+                )}
+              </div>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Fabricante</p>
@@ -325,18 +366,37 @@ export default function PPEDetailPage() {
 
         {/* Assignments Section */}
         <div className="mt-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold">Histórico de Atribuições</h3>
-            {canAssign && ppeItem.currentStock > 0 && ppeItem.isActive && (
-              <Button
-                size="sm"
-                onClick={() => setIsAssignOpen(true)}
-                className="h-9 px-2.5"
+            <div className="flex items-center gap-2">
+              <Select
+                value={assignmentStatusFilter || 'ALL'}
+                onValueChange={(v) =>
+                  setAssignmentStatusFilter(v === 'ALL' ? '' : v)
+                }
               >
-                <Plus className="mr-1.5 h-4 w-4" />
-                Atribuir
-              </Button>
-            )}
+                <SelectTrigger className="h-9 w-40">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todos</SelectItem>
+                  <SelectItem value="ACTIVE">Ativos</SelectItem>
+                  <SelectItem value="RETURNED">Devolvidos</SelectItem>
+                  <SelectItem value="EXPIRED">Expirados</SelectItem>
+                  <SelectItem value="LOST">Perdidos</SelectItem>
+                </SelectContent>
+              </Select>
+              {canAssign && ppeItem.currentStock > 0 && ppeItem.isActive && (
+                <Button
+                  size="sm"
+                  onClick={() => setIsAssignOpen(true)}
+                  className="h-9 px-2.5"
+                >
+                  <Plus className="mr-1.5 h-4 w-4" />
+                  Atribuir
+                </Button>
+              )}
+            </div>
           </div>
 
           {assignments.length === 0 ? (
@@ -360,7 +420,7 @@ export default function PPEDetailPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">
-                          Colaborador: {assignment.employeeId.slice(0, 8)}...
+                          {getEmployeeName(assignment.employeeId)}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
@@ -424,6 +484,14 @@ export default function PPEDetailPage() {
           onClose={() => setReturnTarget(null)}
           assignment={returnTarget}
         />
+
+        {ppeItem && (
+          <AdjustStockModal
+            isOpen={isAdjustStockOpen}
+            onClose={() => setIsAdjustStockOpen(false)}
+            ppeItem={ppeItem}
+          />
+        )}
 
         <VerifyActionPinModal
           isOpen={isDeleteOpen}

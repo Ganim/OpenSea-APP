@@ -99,9 +99,9 @@ function WorkSchedulesPageContent() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.page ?? 1;
-      const totalPages = lastPage.totalPages ?? 1;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+      const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
+      const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
+      return currentPage < total ? currentPage + 1 : undefined;
     },
   });
 
@@ -227,12 +227,11 @@ function WorkSchedulesPageContent() {
 
   const handleContextRename = useCallback(
     (ids: string[]) => {
-      const allItems = page.filteredItems || [];
-      const item = allItems.find(i => i.id === ids[0]) || null;
+      const item = allWorkSchedulesInfinite.find(i => i.id === ids[0]) || null;
       setRenameItem(item);
       setRenameOpen(true);
     },
-    [page.filteredItems]
+    [allWorkSchedulesInfinite]
   );
 
   const handleRenameSubmit = useCallback(
@@ -394,7 +393,21 @@ function WorkSchedulesPageContent() {
 
   const selectedIds = Array.from(page.selection?.state.selectedIds || []);
   const hasSelection = selectedIds.length > 0;
-  const displayedItems = page.filteredItems || [];
+  const displayedItems = useMemo(() => {
+    let items = allWorkSchedulesInfinite;
+
+    // Apply search filter (mirrors useEntityPage filterFn)
+    if (page.searchQuery.trim()) {
+      const q = page.searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          item.name.toLowerCase().includes(q) ||
+          (item.description && item.description.toLowerCase().includes(q))
+      );
+    }
+
+    return items;
+  }, [allWorkSchedulesInfinite, page.searchQuery]);
 
   const initialIds = useMemo(
     () => displayedItems.map(i => i.id),

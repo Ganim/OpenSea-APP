@@ -12,6 +12,7 @@ import {
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
   EntityCard,
@@ -27,14 +28,20 @@ import {
   Clock,
   Coffee,
   ExternalLink,
+  Layers,
   Loader2,
   Moon,
   Pencil,
   Plus,
+  Power,
   Timer,
   Trash2,
 } from 'lucide-react';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -50,8 +57,21 @@ const CreateShiftModal = dynamic(
     import('./src/modals/create-modal').then((m) => ({
       default: m.CreateShiftModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
+
+const SHIFT_TYPE_OPTIONS: { id: string; label: string }[] = [
+  { id: 'FIXED', label: 'Fixo' },
+  { id: 'ROTATING', label: 'Rotativo' },
+  { id: 'FLEXIBLE', label: 'Flexível' },
+  { id: 'ON_CALL', label: 'Sobreaviso' },
+];
+
+const STATUS_OPTIONS: { id: string; label: string }[] = [
+  { id: 'active', label: 'Ativo' },
+  { id: 'inactive', label: 'Inativo' },
+  { id: 'night', label: 'Noturno' },
+];
 
 export default function ShiftsPage() {
   const router = useRouter();
@@ -69,6 +89,8 @@ export default function ShiftsPage() {
   // ============================================================================
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   // ============================================================================
   // DATA
@@ -92,8 +114,7 @@ export default function ShiftsPage() {
       };
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? 2 : undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? 2 : undefined),
   });
 
   const deleteMutation = useMutation({
@@ -107,20 +128,43 @@ export default function ShiftsPage() {
 
   const allShifts = useMemo(
     () => data?.pages.flatMap((p) => p.shifts ?? []) ?? [],
-    [data],
+    [data]
   );
 
-  // Client-side search filter
+  // Client-side filtering (search + type + status)
   const filteredShifts = useMemo(() => {
-    if (!searchQuery.trim()) return allShifts;
-    const q = searchQuery.toLowerCase();
-    return allShifts.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        (item.code && item.code.toLowerCase().includes(q)) ||
-        SHIFT_TYPE_LABELS[item.type]?.toLowerCase().includes(q),
-    );
-  }, [allShifts, searchQuery]);
+    let result = allShifts;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          (item.code && item.code.toLowerCase().includes(q)) ||
+          SHIFT_TYPE_LABELS[item.type]?.toLowerCase().includes(q)
+      );
+    }
+
+    // Type filter
+    if (selectedTypes.length > 0) {
+      const typeSet = new Set(selectedTypes);
+      result = result.filter((item) => typeSet.has(item.type));
+    }
+
+    // Status filter
+    if (selectedStatuses.length > 0) {
+      const statusSet = new Set(selectedStatuses);
+      result = result.filter((item) => {
+        if (statusSet.has('active') && item.isActive) return true;
+        if (statusSet.has('inactive') && !item.isActive) return true;
+        if (statusSet.has('night') && item.isNightShift) return true;
+        return false;
+      });
+    }
+
+    return result;
+  }, [allShifts, searchQuery, selectedTypes, selectedStatuses]);
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -133,7 +177,7 @@ export default function ShiftsPage() {
           fetchNextPage();
         }
       },
-      { rootMargin: '300px' },
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -153,7 +197,7 @@ export default function ShiftsPage() {
 
   const initialIds = useMemo(
     () => filteredShifts.map((i) => i.id),
-    [filteredShifts],
+    [filteredShifts]
   );
 
   // ============================================================================
@@ -255,7 +299,11 @@ export default function ShiftsPage() {
           title={item.name}
           subtitle={`${item.startTime} — ${item.endTime}`}
           icon={item.isNightShift ? Moon : Clock}
-          iconBgColor="bg-linear-to-br from-sky-500 to-indigo-600"
+          iconBgColor={
+            item.color
+              ? undefined
+              : 'bg-linear-to-br from-sky-500 to-indigo-600'
+          }
           badges={[
             {
               label: SHIFT_TYPE_LABELS[item.type] || item.type,
@@ -316,7 +364,11 @@ export default function ShiftsPage() {
           title={item.name}
           subtitle={`${item.startTime} — ${item.endTime} | ${SHIFT_TYPE_LABELS[item.type]}`}
           icon={item.isNightShift ? Moon : Clock}
-          iconBgColor="bg-linear-to-br from-sky-500 to-indigo-600"
+          iconBgColor={
+            item.color
+              ? undefined
+              : 'bg-linear-to-br from-sky-500 to-indigo-600'
+          }
           badges={[
             {
               label: SHIFT_TYPE_LABELS[item.type] || item.type,
@@ -445,7 +497,11 @@ export default function ShiftsPage() {
                 renderGridItem={renderGridCard}
                 renderListItem={renderListCard}
                 isLoading={isLoading}
-                isSearching={!!searchQuery}
+                isSearching={
+                  !!searchQuery ||
+                  selectedTypes.length > 0 ||
+                  selectedStatuses.length > 0
+                }
                 onItemDoubleClick={(item) => {
                   if (canView) {
                     router.push(`/hr/shifts/${item.id}`);
@@ -454,6 +510,30 @@ export default function ShiftsPage() {
                 showSorting={true}
                 defaultSortField="name"
                 defaultSortDirection="asc"
+                toolbarStart={
+                  <>
+                    <FilterDropdown
+                      label="Tipo"
+                      icon={Layers}
+                      options={SHIFT_TYPE_OPTIONS}
+                      selected={selectedTypes}
+                      onSelectionChange={setSelectedTypes}
+                      activeColor="cyan"
+                      searchPlaceholder="Buscar tipo..."
+                      emptyText="Nenhum tipo encontrado."
+                    />
+                    <FilterDropdown
+                      label="Status"
+                      icon={Power}
+                      options={STATUS_OPTIONS}
+                      selected={selectedStatuses}
+                      onSelectionChange={setSelectedStatuses}
+                      activeColor="emerald"
+                      searchPlaceholder="Buscar status..."
+                      emptyText="Nenhum status encontrado."
+                    />
+                  </>
+                }
               />
               <div ref={sentinelRef} className="h-1" />
               {isFetchingNextPage && (
@@ -469,7 +549,9 @@ export default function ShiftsPage() {
             isOpen={isCreateOpen}
             onClose={() => setIsCreateOpen(false)}
             onSubmit={async (data) => {
-              await shiftsApi.create(data as Parameters<typeof shiftsApi.create>[0]);
+              await shiftsApi.create(
+                data as Parameters<typeof shiftsApi.create>[0]
+              );
               queryClient.invalidateQueries({ queryKey: shiftKeys.all });
               setIsCreateOpen(false);
             }}

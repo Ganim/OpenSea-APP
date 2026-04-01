@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import { payrollService } from '@/services/hr/payroll.service';
 import type { Payroll } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -38,6 +39,7 @@ import {
   useCancelPayroll,
   usePayPayroll,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function PayrollDetailPage() {
   const params = useParams();
@@ -45,6 +47,11 @@ export default function PayrollDetailPage() {
   const queryClient = useQueryClient();
   const payrollId = params.id as string;
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canProcess = hasPermission(HR_PERMISSIONS.PAYROLL.PROCESS);
+  const canApprove = hasPermission(HR_PERMISSIONS.PAYROLL.APPROVE);
+  const canManage = hasPermission(HR_PERMISSIONS.PAYROLL.MANAGE);
 
   // ============================================================================
   // DATA FETCHING
@@ -116,7 +123,7 @@ export default function PayrollDetailPage() {
 
     const status = payroll.status;
 
-    if (status === 'DRAFT') {
+    if (status === 'DRAFT' && canProcess) {
       buttons.push({
         id: 'calculate',
         title: 'Calcular',
@@ -127,7 +134,7 @@ export default function PayrollDetailPage() {
       });
     }
 
-    if (status === 'CALCULATED') {
+    if (status === 'CALCULATED' && canApprove) {
       buttons.push({
         id: 'approve',
         title: 'Aprovar',
@@ -138,7 +145,7 @@ export default function PayrollDetailPage() {
       });
     }
 
-    if (status === 'APPROVED') {
+    if (status === 'APPROVED' && canManage) {
       buttons.push({
         id: 'pay',
         title: 'Pagar',
@@ -150,9 +157,10 @@ export default function PayrollDetailPage() {
     }
 
     if (
-      status === 'DRAFT' ||
-      status === 'CALCULATED' ||
-      status === 'APPROVED'
+      (status === 'DRAFT' ||
+        status === 'CALCULATED' ||
+        status === 'APPROVED') &&
+      canManage
     ) {
       buttons.push({
         id: 'cancel',
@@ -287,12 +295,17 @@ export default function PayrollDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Valores */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <DollarSign className="h-5 w-5" />
-            Valores
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <DollarSign className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Valores</h3>
+              <p className="text-sm text-muted-foreground">
+                Resumo financeiro da folha
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-3 gap-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Bruto</p>
               <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
@@ -316,12 +329,17 @@ export default function PayrollDetailPage() {
 
         {/* Processamento */}
         {hasProcessingInfo && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <Calculator className="h-5 w-5" />
-              Processamento
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <Calculator className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Processamento</h3>
+                <p className="text-sm text-muted-foreground">
+                  Histórico de processamento da folha
+                </p>
+              </div>
+            </div>
+            <div className="p-4 grid md:grid-cols-2 gap-6">
               {payroll.processedBy && (
                 <InfoField
                   label="Processado por"
@@ -357,12 +375,17 @@ export default function PayrollDetailPage() {
         )}
 
         {/* Metadados */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <CalendarDays className="h-5 w-5" />
-            Metadados
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <CalendarDays className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Metadados</h3>
+              <p className="text-sm text-muted-foreground">
+                Datas de criação e atualização
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-2 gap-6">
             <InfoField
               label="Criado em"
               value={formatDate(payroll.createdAt)}

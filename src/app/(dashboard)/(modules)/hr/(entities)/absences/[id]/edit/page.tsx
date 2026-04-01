@@ -21,6 +21,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { Absence, AbsenceType } from '@/types/hr';
@@ -101,6 +103,8 @@ export default function AbsenceEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const absenceId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.ABSENCES.DELETE);
 
   // ==========================================================================
   // STATE
@@ -174,23 +178,30 @@ export default function AbsenceEditPage() {
 
   const handleSubmit = async () => {
     if (!formData.type) {
-      setFieldErrors({ type: 'O tipo de aus\u00eancia \u00e9 obrigat\u00f3rio.' });
+      setFieldErrors({
+        type: 'O tipo de aus\u00eancia \u00e9 obrigat\u00f3rio.',
+      });
       return;
     }
 
     if (!formData.startDate) {
-      setFieldErrors({ startDate: 'A data de in\u00edcio \u00e9 obrigat\u00f3ria.' });
+      setFieldErrors({
+        startDate: 'A data de in\u00edcio \u00e9 obrigat\u00f3ria.',
+      });
       return;
     }
 
     if (!formData.endDate) {
-      setFieldErrors({ endDate: 'A data de t\u00e9rmino \u00e9 obrigat\u00f3ria.' });
+      setFieldErrors({
+        endDate: 'A data de t\u00e9rmino \u00e9 obrigat\u00f3ria.',
+      });
       return;
     }
 
     if (formData.startDate > formData.endDate) {
       setFieldErrors({
-        endDate: 'A data de t\u00e9rmino deve ser posterior \u00e0 data de in\u00edcio.',
+        endDate:
+          'A data de t\u00e9rmino deve ser posterior \u00e0 data de in\u00edcio.',
       });
       return;
     }
@@ -245,14 +256,14 @@ export default function AbsenceEditPage() {
   // ==========================================================================
 
   const actionButtons: HeaderButton[] = isEditable
-    ? [
+    ? ([
         {
           id: 'cancel',
           title: 'Cancelar',
           onClick: () => router.push(`/hr/absences/${absenceId}`),
           variant: 'ghost',
         },
-        {
+        canDelete && {
           id: 'delete',
           title: 'Excluir',
           icon: Trash2,
@@ -269,7 +280,7 @@ export default function AbsenceEditPage() {
           variant: 'default',
           disabled: isSaving,
         },
-      ]
+      ].filter(Boolean) as HeaderButton[])
     : [
         {
           id: 'back',
@@ -381,7 +392,8 @@ export default function AbsenceEditPage() {
               </h1>
               <p className="text-sm text-muted-foreground">
                 {getName(absence.employeeId)} \u00b7{' '}
-                {formatDatePtBr(absence.startDate)} \u2014 {formatDatePtBr(absence.endDate)}
+                {formatDatePtBr(absence.startDate)} \u2014{' '}
+                {formatDatePtBr(absence.endDate)}
               </p>
             </div>
             <div className="shrink-0">
@@ -442,7 +454,8 @@ export default function AbsenceEditPage() {
                   {/* Data de In\u00edcio */}
                   <div className="grid gap-2">
                     <Label htmlFor="startDate">
-                      Data de In\u00edcio <span className="text-rose-500">*</span>
+                      Data de In\u00edcio{' '}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -472,7 +485,8 @@ export default function AbsenceEditPage() {
                   {/* Data de T\u00e9rmino */}
                   <div className="grid gap-2">
                     <Label htmlFor="endDate">
-                      Data de T\u00e9rmino <span className="text-rose-500">*</span>
+                      Data de T\u00e9rmino{' '}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
                       <Input

@@ -47,6 +47,7 @@ import {
   getCategoryLabel,
   getStockVariant,
   PPE_CATEGORIES,
+  PPE_CATEGORY_COLORS,
   type PPEItemFilters,
 } from './src';
 
@@ -243,7 +244,7 @@ export default function PPEPage() {
           id={item.id}
           variant="grid"
           title={item.name}
-          subtitle={`${getCategoryLabel(item.category)}${item.caNumber ? ` · CA ${item.caNumber}` : ''}`}
+          subtitle={item.caNumber ? `CA ${item.caNumber}` : undefined}
           icon={HardHat}
           iconBgColor="bg-linear-to-br from-sky-500 to-sky-600"
           badges={[
@@ -254,6 +255,11 @@ export default function PPEPage() {
           ]}
           metadata={
             <div className="flex flex-col gap-1.5">
+              <span
+                className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium ${PPE_CATEGORY_COLORS[item.category]}`}
+              >
+                {getCategoryLabel(item.category)}
+              </span>
               {renderStockBadge(item)}
               {item.manufacturer && (
                 <span className="text-xs text-muted-foreground">
@@ -291,7 +297,7 @@ export default function PPEPage() {
           id={item.id}
           variant="list"
           title={item.name}
-          subtitle={`${getCategoryLabel(item.category)}${item.caNumber ? ` · CA ${item.caNumber}` : ''}`}
+          subtitle={item.caNumber ? `CA ${item.caNumber}` : undefined}
           icon={HardHat}
           iconBgColor="bg-linear-to-br from-sky-500 to-sky-600"
           badges={[
@@ -302,6 +308,11 @@ export default function PPEPage() {
           ]}
           metadata={
             <div className="flex items-center gap-3">
+              <span
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${PPE_CATEGORY_COLORS[item.category]}`}
+              >
+                {getCategoryLabel(item.category)}
+              </span>
               {renderStockBadge(item)}
               {item.manufacturer && (
                 <span className="text-xs text-muted-foreground">
@@ -405,63 +416,6 @@ export default function PPEPage() {
             size="md"
           />
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <Select
-              value={filterCategory || 'ALL'}
-              onValueChange={(v) => setFilterCategory(v === 'ALL' ? '' : v)}
-            >
-              <SelectTrigger className="w-full sm:w-52">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todas as Categorias</SelectItem>
-                {PPE_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {getCategoryLabel(cat)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filterActive || 'ALL'}
-              onValueChange={(v) => setFilterActive(v === 'ALL' ? '' : v)}
-            >
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todos</SelectItem>
-                <SelectItem value="true">Ativos</SelectItem>
-                <SelectItem value="false">Inativos</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filterLowStock || 'ALL'}
-              onValueChange={(v) => setFilterLowStock(v === 'ALL' ? '' : v)}
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Estoque" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todo Estoque</SelectItem>
-                <SelectItem value="true">Estoque Baixo</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-destructive/10"
-                onClick={clearFilters}
-              >
-                Limpar filtros
-              </Badge>
-            )}
-          </div>
-
           {/* Grid */}
           {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -494,6 +448,63 @@ export default function PPEPage() {
                 showSorting={true}
                 defaultSortField="name"
                 defaultSortDirection="asc"
+                toolbarStart={
+                  <>
+                    <Select
+                      value={filterCategory || 'ALL'}
+                      onValueChange={(v) => setFilterCategory(v === 'ALL' ? '' : v)}
+                    >
+                      <SelectTrigger className="w-full sm:w-52">
+                        <SelectValue placeholder="Categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ALL">Todas as Categorias</SelectItem>
+                        {PPE_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {getCategoryLabel(cat)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={filterActive || 'ALL'}
+                      onValueChange={(v) => setFilterActive(v === 'ALL' ? '' : v)}
+                    >
+                      <SelectTrigger className="w-full sm:w-40">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ALL">Todos</SelectItem>
+                        <SelectItem value="true">Ativos</SelectItem>
+                        <SelectItem value="false">Inativos</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={filterLowStock || 'ALL'}
+                      onValueChange={(v) => setFilterLowStock(v === 'ALL' ? '' : v)}
+                    >
+                      <SelectTrigger className="w-full sm:w-48">
+                        <SelectValue placeholder="Estoque" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ALL">Todo Estoque</SelectItem>
+                        <SelectItem value="true">Estoque Baixo</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {hasActiveFilters && (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-destructive/10"
+                        onClick={clearFilters}
+                      >
+                        Limpar filtros
+                      </Badge>
+                    )}
+                  </>
+                }
               />
               <div ref={sentinelRef} className="h-1" />
               {isFetchingNextPage && (

@@ -32,10 +32,10 @@ import { useCallback, useMemo, useState } from 'react';
 
 const SCOPE_OPTIONS: { value: DelegationScope; label: string }[] = [
   { value: 'ALL', label: 'Todas' },
-  { value: 'ABSENCES', label: 'Ausencias' },
-  { value: 'VACATIONS', label: 'Ferias' },
+  { value: 'ABSENCES', label: 'Ausências' },
+  { value: 'VACATIONS', label: 'Férias' },
   { value: 'OVERTIME', label: 'Horas Extras' },
-  { value: 'REQUESTS', label: 'Solicitacoes' },
+  { value: 'REQUESTS', label: 'Solicitações' },
 ];
 
 // ============================================================================
@@ -142,7 +142,7 @@ export function CreateDelegationModal({
       {
         title: 'Delegado e Escopo',
         description:
-          'Selecione o colaborador e o escopo da delegacao de aprovacao',
+          'Selecione o colaborador e o escopo da delegação de aprovação',
         icon: (
           <div className="flex flex-col items-center gap-3">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-100 dark:bg-violet-500/15">
@@ -179,12 +179,12 @@ export function CreateDelegationModal({
                 </Select>
               )}
               <p className="text-xs text-muted-foreground">
-                Este colaborador podera aprovar em seu nome
+                Este colaborador poderá aprovar em seu nome
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="scope">Escopo da Delegacao</Label>
+              <Label htmlFor="scope">Escopo da Delegação</Label>
               <Select
                 value={scope}
                 onValueChange={(val) => setScope(val as DelegationScope)}
@@ -201,7 +201,7 @@ export function CreateDelegationModal({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Defina quais tipos de aprovacao serao delegados
+                Defina quais tipos de aprovação serão delegados
               </p>
             </div>
           </div>
@@ -210,8 +210,8 @@ export function CreateDelegationModal({
 
       // Step 2: Dates and reason
       {
-        title: 'Periodo e Motivo',
-        description: 'Defina o periodo de vigencia e o motivo da delegacao',
+        title: 'Período e Motivo',
+        description: 'Defina o período de vigência e o motivo da delegação',
         icon: (
           <div className="flex flex-col items-center gap-3">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-100 dark:bg-sky-500/15">
@@ -225,7 +225,7 @@ export function CreateDelegationModal({
         content: (
           <div className="space-y-5 p-1">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Data de Inicio</Label>
+              <Label htmlFor="startDate">Data de Início</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -236,7 +236,7 @@ export function CreateDelegationModal({
 
             <div className="space-y-2">
               <Label htmlFor="endDate">
-                Data de Termino{' '}
+                Data de Término{' '}
                 <span className="text-muted-foreground">(opcional)</span>
               </Label>
               <Input
@@ -247,7 +247,7 @@ export function CreateDelegationModal({
                 min={startDate || undefined}
               />
               <p className="text-xs text-muted-foreground">
-                Se nao informada, a delegacao permanece ativa ate ser revogada
+                Se não informada, a delegação permanece ativa até ser revogada
               </p>
             </div>
 
@@ -260,7 +260,7 @@ export function CreateDelegationModal({
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Ex: Ferias, viagem, licenca..."
+                placeholder="Ex: Férias, viagem, licença..."
                 rows={3}
                 maxLength={500}
               />
@@ -270,7 +270,7 @@ export function CreateDelegationModal({
             {selectedEmployee && startDate && (
               <div className="rounded-lg border border-border bg-slate-50 dark:bg-white/5 p-3 space-y-1">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Resumo da Delegacao
+                  Resumo da Delegação
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Delegado:</span>{' '}
@@ -281,12 +281,12 @@ export function CreateDelegationModal({
                   {SCOPE_OPTIONS.find((o) => o.value === scope)?.label}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium">Inicio:</span>{' '}
+                  <span className="font-medium">Início:</span>{' '}
                   {new Date(startDate).toLocaleDateString('pt-BR')}
                   {endDate && (
                     <>
                       {' '}
-                      ate {new Date(endDate).toLocaleDateString('pt-BR')}
+                      até {new Date(endDate).toLocaleDateString('pt-BR')}
                     </>
                   )}
                 </p>
@@ -309,7 +309,7 @@ export function CreateDelegationModal({
                   Criando...
                 </>
               ) : (
-                'Criar Delegacao'
+                'Criar Delegação'
               )}
             </Button>
           </div>

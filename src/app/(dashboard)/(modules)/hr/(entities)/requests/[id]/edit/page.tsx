@@ -40,13 +40,13 @@ import {
   useApproveRequest,
   useRejectRequest,
   useCancelRequest,
-} from '../src/api';
+} from '../../src/api';
 import {
   getRequestTypeLabel,
   getRequestStatusLabel,
   getRequestStatusVariant,
   getRequestTypeGradient,
-} from '../src/utils';
+} from '../../src/utils';
 
 // ============================================================================
 // CONSTANTS

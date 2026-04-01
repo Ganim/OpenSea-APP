@@ -21,17 +21,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { Bonus } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Gift,
-  Loader2,
-  NotebookText,
-  Save,
-  Trash2,
-} from 'lucide-react';
+import { Gift, Loader2, NotebookText, Save, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -79,6 +75,8 @@ export default function BonusEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const bonusId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.BONUSES.DELETE);
 
   // ==========================================================================
   // STATE
@@ -206,15 +204,19 @@ export default function BonusEditPage() {
       onClick: () => router.push(`/hr/bonuses/${bonusId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default' as const,
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',

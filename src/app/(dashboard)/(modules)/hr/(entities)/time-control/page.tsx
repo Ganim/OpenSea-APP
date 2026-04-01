@@ -14,12 +14,26 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { TimeEntry } from '@/types/hr';
-import { Calculator, LayoutDashboard, Loader2, LogIn, LogOut, Settings } from 'lucide-react';
+import {
+  Calculator,
+  LayoutDashboard,
+  Loader2,
+  LogIn,
+  LogOut,
+  Settings,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   CalculateHoursModal,
   ClockInModal,
@@ -71,7 +85,15 @@ function TimeControlPageContent() {
     [employeeFilter, startDate, endDate]
   );
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTimeEntries(params);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListTimeEntries(params);
   const clockIn = useClockIn();
   const clockOut = useClockOut();
 
@@ -86,7 +108,7 @@ function TimeControlPageContent() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -96,6 +118,12 @@ function TimeControlPageContent() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const employeeIds = useMemo(
+    () => [...new Set(entries.map(e => e.employeeId))],
+    [entries]
+  );
+  const { getName } = useEmployeeMap(employeeIds);
+
   const groupedEntries = useMemo(() => groupEntriesByDate(entries), [entries]);
   const sortedDates = useMemo(
     () => Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a)),
@@ -280,8 +308,8 @@ function TimeControlPageContent() {
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground font-mono">
-                            {entry.employeeId.slice(0, 8)}...
+                          <span className="text-xs text-muted-foreground">
+                            {getName(entry.employeeId)}
                           </span>
                         </div>
                       </Card>

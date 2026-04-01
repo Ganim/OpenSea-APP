@@ -16,7 +16,6 @@ import {
 } from '@/components/layout/page-layout';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
@@ -186,7 +185,7 @@ function DelegationsPageContent() {
   });
 
   const delegationsData =
-    infiniteData?.pages.flatMap((p) => p.delegations) ?? [];
+    infiniteData?.pages.flatMap((p) => p.delegations ?? []) ?? [];
 
   // ============================================================================
   // EMPLOYEES FOR CREATE MODAL
@@ -308,7 +307,7 @@ function DelegationsPageContent() {
 
       <PageBody>
         {/* Tabs */}
-        <Tabs value={activeTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
             {tabLabels.map((tab) => {
               const Icon = tab.icon;
@@ -316,7 +315,6 @@ function DelegationsPageContent() {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
                   className="flex items-center gap-2"
                 >
                   <Icon className="h-4 w-4" />
@@ -436,6 +434,13 @@ function DelegationCard({
   const scopeLabel = SCOPE_LABELS[delegation.scope as DelegationScope] ?? delegation.scope;
   const scopeBadge = SCOPE_BADGE_CLASSES[delegation.scope as DelegationScope] ?? '';
 
+  // Determine precise status
+  const isExpired =
+    delegation.isActive &&
+    !delegation.isEffective &&
+    delegation.endDate &&
+    new Date(delegation.endDate) < new Date();
+
   const startFormatted = new Date(delegation.startDate).toLocaleDateString(
     'pt-BR',
     { day: '2-digit', month: 'short', year: 'numeric' },
@@ -467,22 +472,25 @@ function DelegationCard({
             </span>
 
             {/* Status badges */}
-            {delegation.isActive ? (
-              delegation.isEffective ? (
-                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Ativa
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300">
-                  <Clock className="h-3 w-3" />
-                  Agendada
-                </span>
-              )
-            ) : (
+            {!delegation.isActive ? (
               <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400">
                 <XCircle className="h-3 w-3" />
                 Revogada
+              </span>
+            ) : isExpired ? (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300">
+                <XCircle className="h-3 w-3" />
+                Expirada
+              </span>
+            ) : delegation.isEffective ? (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300">
+                <CheckCircle2 className="h-3 w-3" />
+                Ativa
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300">
+                <Clock className="h-3 w-3" />
+                Agendada
               </span>
             )}
           </div>
@@ -497,7 +505,7 @@ function DelegationCard({
             <span className="inline-flex items-center gap-1 text-xs">
               <Calendar className="h-3 w-3" />
               {startFormatted}
-              {endFormatted ? ` - ${endFormatted}` : ' (sem termino)'}
+              {endFormatted ? ` - ${endFormatted}` : ' (sem término)'}
             </span>
           </div>
 

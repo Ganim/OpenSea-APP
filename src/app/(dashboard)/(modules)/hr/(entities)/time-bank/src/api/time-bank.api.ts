@@ -2,7 +2,7 @@
  * OpenSea OS - Time Bank API
  */
 
-import { timeBankService } from '@/services/hr';
+import { timeBankService } from '@/services/hr/time-bank.service';
 import type {
   TimeBankResponse,
   TimeBanksResponse,

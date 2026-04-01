@@ -24,20 +24,21 @@ import {
   Award,
   BookUser,
   BarChart3,
+  Briefcase,
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  FileBarChart,
   FileCheck,
   Clock,
   Coffee,
   FileUser,
   FileX2,
-  GitBranchPlus,
   HardHat,
   GraduationCap,
   Heart,
   Hourglass,
-  MapPin,
+  MessageSquareText,
   Megaphone,
   MinusCircle,
   PalmtreeIcon,
@@ -47,6 +48,7 @@ import {
   ShieldCheck,
   SquareUserRound,
   Stethoscope,
+  Target,
   Timer,
   UserCircle,
   UserPlus,
@@ -54,7 +56,8 @@ import {
   UserX,
   Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 
 interface CardItem {
   id: string;
@@ -66,6 +69,7 @@ interface CardItem {
   hoverBg: string;
   permission?: string;
   countKey?: string;
+  hidden?: boolean;
 }
 
 const sections: {
@@ -83,7 +87,6 @@ const sections: {
         href: '/hr/my-profile',
         gradient: 'from-violet-500 to-violet-600',
         hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
-        // No permission required — self-service
       },
     ],
   },
@@ -102,44 +105,54 @@ const sections: {
         countKey: 'employees',
       },
       {
-        id: 'admissions',
-        title: 'Admissão Digital',
-        description: 'Convites de admissão com preenchimento online',
-        icon: UserPlus,
-        href: '/hr/admissions',
+        id: 'vacations',
+        title: 'Férias',
+        description: 'Períodos aquisitivos, programação e saldo',
+        icon: PalmtreeIcon,
+        href: '/hr/vacations',
+        gradient: 'from-green-500 to-green-600',
+        hoverBg: 'hover:bg-green-50 dark:hover:bg-green-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'absences',
+        title: 'Ausências',
+        description: 'Faltas, atestados e afastamentos',
+        icon: UserX,
+        href: '/hr/absences',
+        gradient: 'from-rose-500 to-rose-600',
+        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'warnings',
+        title: 'Advertências',
+        description: 'Advertências disciplinares e suspensões',
+        icon: AlertTriangle,
+        href: '/hr/warnings',
+        gradient: 'from-amber-500 to-amber-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+        permission: HR_PERMISSIONS.WARNINGS.LIST,
+      },
+      {
+        id: 'requests',
+        title: 'Solicitações',
+        description: 'Solicitações de férias, ausências e adiantamentos',
+        icon: ClipboardList,
+        href: '/hr/requests',
         gradient: 'from-blue-500 to-blue-600',
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.CREATE,
+        permission: HR_PERMISSIONS.EMPLOYEES.MANAGE,
       },
       {
-        id: 'onboarding',
-        title: 'Onboarding',
-        description: 'Checklists de integração para novos colaboradores',
-        icon: ClipboardList,
-        href: '/hr/onboarding',
-        gradient: 'from-teal-500 to-teal-600',
-        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
-        permission: HR_PERMISSIONS.ONBOARDING.LIST,
-      },
-      {
-        id: 'dependants',
-        title: 'Dependentes',
-        description: 'Gerencie dependentes dos funcionários',
-        icon: Heart,
-        href: '/hr/dependants',
-        gradient: 'from-pink-500 to-pink-600',
-        hoverBg: 'hover:bg-pink-50 dark:hover:bg-pink-500/10',
-        permission: HR_PERMISSIONS.DEPENDANTS.LIST,
-      },
-      {
-        id: 'org-chart',
-        title: 'Organograma',
-        description: 'Estrutura hierárquica visual da organização',
-        icon: GitBranchPlus,
-        href: '/hr/departments/org-chart',
-        gradient: 'from-purple-500 to-purple-600',
-        hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-500/10',
-        permission: HR_PERMISSIONS.DEPARTMENTS.LIST,
+        id: 'announcements',
+        title: 'Comunicados',
+        description: 'Comunicados e avisos para os colaboradores',
+        icon: Megaphone,
+        href: '/hr/announcements',
+        gradient: 'from-violet-500 to-violet-600',
+        hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.MANAGE,
       },
     ],
   },
@@ -178,6 +191,61 @@ const sections: {
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
         permission: HR_PERMISSIONS.TEAMS.LIST,
         countKey: 'teams',
+      },
+    ],
+  },
+  {
+    title: 'Ciclo de Vida',
+    cards: [
+      {
+        id: 'recruitment',
+        title: 'Recrutamento e Seleção',
+        description: 'Vagas, candidatos, candidaturas e entrevistas',
+        icon: Briefcase,
+        href: '/hr/recruitment',
+        gradient: 'from-indigo-500 to-indigo-600',
+        hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'admissions',
+        title: 'Admissão Digital',
+        description: 'Convites de admissão com preenchimento online',
+        icon: UserPlus,
+        href: '/hr/admissions',
+        gradient: 'from-blue-500 to-blue-600',
+        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.CREATE,
+      },
+      {
+        id: 'onboarding',
+        title: 'Onboarding',
+        description: 'Checklists de integração para novos colaboradores',
+        icon: ClipboardCheck,
+        href: '/hr/onboarding',
+        gradient: 'from-teal-500 to-teal-600',
+        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
+        permission: HR_PERMISSIONS.ONBOARDING.LIST,
+      },
+      {
+        id: 'offboarding',
+        title: 'Offboarding',
+        description: 'Checklists de desligamento de colaboradores',
+        icon: UserX,
+        href: '/hr/offboarding',
+        gradient: 'from-rose-400 to-rose-500',
+        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
+        permission: HR_PERMISSIONS.OFFBOARDING.LIST,
+      },
+      {
+        id: 'terminations',
+        title: 'Rescisões',
+        description: 'Rescisões de contrato e cálculos de verbas',
+        icon: FileX2,
+        href: '/hr/terminations',
+        gradient: 'from-rose-500 to-rose-600',
+        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
+        permission: HR_PERMISSIONS.TERMINATIONS.LIST,
       },
     ],
   },
@@ -225,16 +293,6 @@ const sections: {
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
       {
-        id: 'geofence-zones',
-        title: 'Zonas de Geofencing',
-        description: 'Configure zonas de geolocalização para ponto',
-        icon: MapPin,
-        href: '/hr/geofence-zones',
-        gradient: 'from-teal-500 to-teal-600',
-        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
-        permission: HR_PERMISSIONS.GEOFENCE_ZONES.LIST,
-      },
-      {
         id: 'overtime',
         title: 'Horas Extras',
         description: 'Solicitações e aprovações de horas extras',
@@ -247,47 +305,7 @@ const sections: {
     ],
   },
   {
-    title: 'Férias e Ausências',
-    cards: [
-      {
-        id: 'vacations',
-        title: 'Férias',
-        description: 'Períodos aquisitivos, programação e saldo',
-        icon: PalmtreeIcon,
-        href: '/hr/vacations',
-        gradient: 'from-green-500 to-green-600',
-        hoverBg: 'hover:bg-green-50 dark:hover:bg-green-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
-      },
-      {
-        id: 'absences',
-        title: 'Ausências',
-        description: 'Faltas, atestados e afastamentos',
-        icon: UserX,
-        href: '/hr/absences',
-        gradient: 'from-rose-500 to-rose-600',
-        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
-      },
-    ],
-  },
-  {
-    title: 'Gestão de Conduta',
-    cards: [
-      {
-        id: 'warnings',
-        title: 'Advertências',
-        description: 'Advertências disciplinares e suspensões',
-        icon: AlertTriangle,
-        href: '/hr/warnings',
-        gradient: 'from-amber-500 to-amber-600',
-        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-        permission: HR_PERMISSIONS.WARNINGS.LIST,
-      },
-    ],
-  },
-  {
-    title: 'Folha de Pagamento',
+    title: 'Remuneração e Benefícios',
     cards: [
       {
         id: 'payroll',
@@ -319,11 +337,6 @@ const sections: {
         hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
         permission: HR_PERMISSIONS.DEDUCTIONS.LIST,
       },
-    ],
-  },
-  {
-    title: 'Benefícios',
-    cards: [
       {
         id: 'benefits',
         title: 'Planos de Benefícios',
@@ -337,36 +350,16 @@ const sections: {
     ],
   },
   {
-    title: 'Comunicação e Portal',
+    title: 'Desenvolvimento e Desempenho',
     cards: [
       {
-        id: 'announcements',
-        title: 'Comunicados',
-        description: 'Comunicados e avisos para os colaboradores',
-        icon: Megaphone,
-        href: '/hr/announcements',
+        id: 'reviews',
+        title: 'Avaliações de Desempenho',
+        description: 'Ciclos de avaliação, autoavaliação e feedback',
+        icon: ClipboardCheck,
+        href: '/hr/reviews',
         gradient: 'from-violet-500 to-violet-600',
         hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.MANAGE,
-      },
-      {
-        id: 'requests',
-        title: 'Solicitações',
-        description: 'Solicitações de férias, ausências e adiantamentos',
-        icon: ClipboardList,
-        href: '/hr/requests',
-        gradient: 'from-blue-500 to-blue-600',
-        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
-        permission: HR_PERMISSIONS.EMPLOYEES.MANAGE,
-      },
-      {
-        id: 'kudos',
-        title: 'Reconhecimento',
-        description: 'Reconheça e celebre conquistas dos colegas',
-        icon: Award,
-        href: '/hr/kudos',
-        gradient: 'from-amber-500 to-amber-600',
-        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
       {
@@ -379,19 +372,34 @@ const sections: {
         hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
-    ],
-  },
-  {
-    title: 'Desempenho',
-    cards: [
       {
-        id: 'reviews',
-        title: 'Avaliações de Desempenho',
-        description: 'Ciclos de avaliação, autoavaliação e feedback',
-        icon: ClipboardCheck,
-        href: '/hr/reviews',
-        gradient: 'from-violet-500 to-violet-600',
-        hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+        id: 'kudos',
+        title: 'Reconhecimento',
+        description: 'Reconheça e celebre conquistas dos colegas',
+        icon: Award,
+        href: '/hr/kudos',
+        gradient: 'from-amber-500 to-amber-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'okrs',
+        title: 'OKRs',
+        description: 'Objetivos e Resultados-Chave da organização',
+        icon: Target,
+        href: '/hr/okrs',
+        gradient: 'from-emerald-500 to-emerald-600',
+        hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
+      },
+      {
+        id: 'surveys',
+        title: 'Pesquisas',
+        description: 'Pesquisas de clima, engajamento e satisfação',
+        icon: MessageSquareText,
+        href: '/hr/surveys',
+        gradient: 'from-cyan-500 to-cyan-600',
+        hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
     ],
@@ -452,33 +460,19 @@ const sections: {
     ],
   },
   {
-    title: 'Ciclo de Vida',
+    title: 'Obrigações e Configurações',
     cards: [
       {
-        id: 'terminations',
-        title: 'Rescisões',
-        description: 'Rescisões de contrato e cálculos de verbas',
-        icon: FileX2,
-        href: '/hr/terminations',
-        gradient: 'from-rose-500 to-rose-600',
-        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
-        permission: HR_PERMISSIONS.TERMINATIONS.LIST,
+        id: 'reports',
+        title: 'Relatórios',
+        description:
+          'Exportações CSV e relatórios legais (RAIS, DIRF, SEFIP, CAGED)',
+        icon: FileBarChart,
+        href: '/hr/reports',
+        gradient: 'from-teal-500 to-teal-600',
+        hoverBg: 'hover:bg-teal-50 dark:hover:bg-teal-500/10',
+        permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
-      {
-        id: 'offboarding',
-        title: 'Offboarding',
-        description: 'Checklists de desligamento para colaboradores',
-        icon: UserX,
-        href: '/hr/offboarding',
-        gradient: 'from-rose-400 to-rose-500',
-        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
-        permission: HR_PERMISSIONS.OFFBOARDING.LIST,
-      },
-    ],
-  },
-  {
-    title: 'Obrigações Legais',
-    cards: [
       {
         id: 'esocial',
         title: 'eSocial',
@@ -489,11 +483,6 @@ const sections: {
         hoverBg: 'hover:bg-sky-50 dark:hover:bg-sky-500/10',
         permission: HR_PERMISSIONS.CONFIG.VIEW,
       },
-    ],
-  },
-  {
-    title: 'Configurações',
-    cards: [
       {
         id: 'delegations',
         title: 'Delegações de Aprovação',
@@ -546,10 +535,40 @@ const heroBannerButtons: (CardItem & { label: string })[] = [
 export default function HRLandingPage() {
   const { currentTenant } = useTenant();
   const { hasPermission } = usePermissions();
+  const { user } = useAuth();
   const [counts, setCounts] = useState<Record<string, number | null>>({});
   const [countsLoading, setCountsLoading] = useState(true);
+  const [hasEmployee, setHasEmployee] = useState<boolean | null>(null);
 
   const tenantName = currentTenant?.name || 'Sua Empresa';
+
+  // Check if current user has an employee record linked
+  // 404 is expected when user has no linked employee — handled silently
+  useEffect(() => {
+    if (!user?.id) return;
+    employeesService
+      .getEmployeeByUserId(user.id)
+      .then(() => setHasEmployee(true))
+      .catch((err: unknown) => {
+        // 404 = no employee linked (expected), other errors = real failure
+        setHasEmployee(false);
+        void err; // suppress — already handled
+      });
+  }, [user?.id]);
+
+  // Hide "Meu Perfil" card when user has no linked employee
+  const dynamicSections = useMemo(
+    () =>
+      sections.map(section => ({
+        ...section,
+        cards: section.cards.map(card =>
+          card.id === 'my-profile'
+            ? { ...card, hidden: hasEmployee === false }
+            : card
+        ),
+      })),
+    [hasEmployee]
+  );
 
   useEffect(() => {
     async function fetchCounts() {
@@ -603,19 +622,21 @@ export default function HRLandingPage() {
         description="Gerencie funcionários, departamentos, cargos e a estrutura organizacional da sua empresa."
         icon={UserRoundCog}
         iconGradient="from-blue-500 to-purple-600"
-        buttons={heroBannerButtons.map(btn => ({
-          id: btn.id,
-          label: btn.label,
-          icon: btn.icon,
-          href: btn.href,
-          gradient: btn.gradient,
-          permission: btn.permission,
-        }))}
+        buttons={heroBannerButtons
+          .filter(btn => btn.id !== 'my-profile' || hasEmployee !== false)
+          .map(btn => ({
+            id: btn.id,
+            label: btn.label,
+            icon: btn.icon,
+            href: btn.href,
+            gradient: btn.gradient,
+            permission: btn.permission,
+          }))}
         hasPermission={hasPermission}
       />
 
       <PageDashboardSections
-        sections={sections}
+        sections={dynamicSections}
         counts={counts}
         countsLoading={countsLoading}
         hasPermission={hasPermission}

@@ -31,10 +31,12 @@ import {
   Calendar,
   CircleCheck,
   Clock,
+  ClipboardList,
   Download,
   ExternalLink,
   Eye,
   FileText,
+  Pencil,
   Loader2,
   Plus,
   ShieldAlert,
@@ -105,6 +107,7 @@ export default function MedicalExamsPage() {
   // Permissions
   const canView = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.VIEW);
   const canCreate = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.CREATE);
+  const canEdit = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.UPDATE);
   const canDelete = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.DELETE);
 
   // ============================================================================
@@ -350,6 +353,17 @@ export default function MedicalExamsPage() {
       });
     }
 
+    if (canEdit) {
+      actions.push({
+        id: 'edit',
+        label: 'Editar',
+        icon: Pencil,
+        onClick: (ids: string[]) => {
+          if (ids.length > 0) router.push(`/hr/medical-exams/${ids[0]}/edit`);
+        },
+      });
+    }
+
     if (canDelete) {
       actions.push({
         id: 'delete',
@@ -363,7 +377,7 @@ export default function MedicalExamsPage() {
 
     return actions;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canView, canDelete]);
+  }, [canView, canEdit, canDelete]);
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -498,6 +512,13 @@ export default function MedicalExamsPage() {
   const actionButtons: HeaderButton[] = useMemo(() => {
     const buttons: HeaderButton[] = [];
     buttons.push({
+      id: 'pcmso-dashboard',
+      title: 'Painel PCMSO',
+      icon: ClipboardList,
+      onClick: () => router.push('/hr/medical-exams/pcmso'),
+      variant: 'outline',
+    });
+    buttons.push({
       id: 'export-exams',
       title: 'Exportar',
       icon: Download,
@@ -514,7 +535,7 @@ export default function MedicalExamsPage() {
       });
     }
     return buttons;
-  }, [canCreate, handleOpenCreate, handleExport]);
+  }, [canCreate, handleOpenCreate, handleExport, router]);
 
   // ============================================================================
   // LOADING STATE

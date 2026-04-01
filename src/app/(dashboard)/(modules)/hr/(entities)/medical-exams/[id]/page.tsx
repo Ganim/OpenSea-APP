@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { MedicalExam } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -23,6 +24,7 @@ import {
   FileText,
   MapPin,
   NotebookText,
+  Pencil,
   ShieldAlert,
   ShieldCheck,
   Stethoscope,
@@ -46,6 +48,7 @@ import {
   getDaysUntilExpiry,
   useDeleteMedicalExam,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function MedicalExamDetailPage() {
   const params = useParams();
@@ -54,6 +57,10 @@ export default function MedicalExamDetailPage() {
   const examId = params.id as string;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.DELETE);
 
   // ============================================================================
   // DATA FETCHING
@@ -156,14 +163,30 @@ export default function MedicalExamDetailPage() {
             { label: getExamTypeLabel(exam.type) },
           ]}
           buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-              disabled: deleteMutation.isPending,
-            },
+            ...(canDelete
+              ? [
+                  {
+                    id: 'delete',
+                    title: 'Excluir',
+                    icon: Trash,
+                    onClick: () => setIsDeleteModalOpen(true),
+                    variant: 'outline' as const,
+                    disabled: deleteMutation.isPending,
+                  },
+                ]
+              : []),
+            ...(canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Pencil,
+                    onClick: () =>
+                      router.push(`/hr/medical-exams/${examId}/edit`),
+                    variant: 'default' as const,
+                  },
+                ]
+              : []),
           ]}
         />
 

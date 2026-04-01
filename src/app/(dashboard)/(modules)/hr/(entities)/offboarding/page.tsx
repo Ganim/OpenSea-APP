@@ -2,6 +2,7 @@
 
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -117,9 +118,9 @@ function OffboardingPageContent() {
   );
 
   const statusOptions = [
-    { label: 'Todos', value: '' },
-    { label: 'Em Progresso', value: 'IN_PROGRESS' },
-    { label: 'Concluído', value: 'COMPLETED' },
+    { id: '', label: 'Todos' },
+    { id: 'IN_PROGRESS', label: 'Em Progresso' },
+    { id: 'COMPLETED', label: 'Concluído' },
   ];
 
   return (
@@ -131,35 +132,41 @@ function OffboardingPageContent() {
             { label: 'Offboarding', href: '/hr/offboarding' },
           ]}
           hasPermission={hasPermission}
-          buttons={
-            canCreate
-              ? [
-                  {
-                    label: 'Novo Checklist',
-                    icon: Plus,
-                    onClick: () => setCreateModalOpen(true),
-                  },
-                ]
-              : undefined
+          actions={
+            canCreate ? (
+              <Button size="sm" className="gap-2" onClick={() => setCreateModalOpen(true)}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline">Novo Checklist</span>
+              </Button>
+            ) : undefined
           }
         />
+
+          <Header
+            title="Offboarding"
+            description="Checklists de desligamento de colaboradores"
+          />
       </PageHeader>
 
       <PageBody>
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <SearchBar
-              value={search}
-              onSearch={setSearch}
-              placeholder="Buscar por título..."
-              className="flex-1"
-            />
+          <SearchBar
+            value={search}
+            onSearch={setSearch}
+            placeholder="Buscar checklists de offboarding..."
+          />
+
+          <div className="flex items-center gap-2">
             <FilterDropdown
               label="Status"
               value={statusFilter}
               options={statusOptions}
               onChange={val => setStatusFilter(val as OffboardingStatus | '')}
+              activeColor="violet"
             />
+            <span className="text-xs text-muted-foreground">
+              {checklists.length} checklist(s)
+            </span>
           </div>
 
           {isLoading ? (

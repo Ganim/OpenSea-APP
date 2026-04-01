@@ -11,11 +11,11 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/use-permissions';
 import { benefitsService } from '@/services/hr/benefits.service';
 import type { BenefitPlan, BenefitEnrollment } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -27,7 +27,6 @@ import {
   Heart,
   NotebookText,
   ScrollText,
-  Trash,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -35,7 +34,8 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { benefitPlansApi, deleteBenefitPlan } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
+import { benefitPlansApi } from '../src';
 import {
   BENEFIT_TYPE_LABELS,
   BENEFIT_TYPE_COLORS,
@@ -61,8 +61,11 @@ export default function BenefitPlanDetailPage() {
   const queryClient = useQueryClient();
   const planId = params.id as string;
 
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { hasPermission } = usePermissions();
+
+  const canEdit = hasPermission(HR_PERMISSIONS.BENEFITS.UPDATE);
+  const canManage = hasPermission(HR_PERMISSIONS.BENEFITS.MANAGE);
+
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
 
@@ -97,30 +100,6 @@ export default function BenefitPlanDetailPage() {
 
   const handleEdit = () => {
     router.push(`/hr/benefits/${planId}/edit`);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!plan) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteBenefitPlan(plan.id);
-      await queryClient.invalidateQueries({ queryKey: ['benefit-plans'] });
-      toast.success('Plano de benefício excluído com sucesso!');
-      router.push('/hr/benefits');
-    } catch (error) {
-      logger.error(
-        'Erro ao excluir plano',
-        error instanceof Error ? error : undefined
-      );
-      toast.error('Erro ao excluir plano de benefício');
-    } finally {
-      setIsDeleting(false);
-    }
   };
 
   const handleEnroll = async (employeeIds: string[], startDate: string) => {
@@ -222,22 +201,18 @@ export default function BenefitPlanDetailPage() {
             { label: 'Benefícios', href: '/hr/benefits' },
             { label: plan.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: handleDelete,
-              variant: 'outline',
-              disabled: isDeleting,
-            },
-            {
-              id: 'edit',
-              title: 'Editar',
-              icon: Edit,
-              onClick: handleEdit,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: handleEdit,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -294,120 +269,141 @@ export default function BenefitPlanDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Detalhes do Plano */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Detalhes do Plano
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Nome"
-              value={plan.name}
-              showCopyButton
-              copyTooltip="Copiar Nome"
-            />
-            <InfoField
-              label="Tipo"
-              value={typeLabel}
-              badge={
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${colors.bg} ${colors.text}`}
-                >
-                  {typeLabel}
-                </span>
-              }
-            />
-            <InfoField
-              label="Status"
-              value={plan.isActive ? 'Ativo' : 'Inativo'}
-              badge={
-                <Badge variant={plan.isActive ? 'success' : 'secondary'}>
-                  {plan.isActive ? 'Ativo' : 'Inativo'}
-                </Badge>
-              }
-            />
-            <InfoField
-              label="Operadora/Fornecedor"
-              value={plan.provider || 'Não informado'}
-            />
-            <InfoField
-              label="Número da Apólice"
-              value={plan.policyNumber || 'Não informado'}
-              showCopyButton={!!plan.policyNumber}
-              copyTooltip="Copiar Apólice"
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <NotebookText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Detalhes do Plano</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações gerais do plano de benefício
+              </p>
+            </div>
           </div>
-          {plan.description && (
-            <div className="mt-6">
+          <div className="p-4 space-y-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <InfoField
+                label="Nome"
+                value={plan.name}
+                showCopyButton
+                copyTooltip="Copiar Nome"
+              />
+              <InfoField
+                label="Tipo"
+                value={typeLabel}
+                badge={
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${colors.bg} ${colors.text}`}
+                  >
+                    {typeLabel}
+                  </span>
+                }
+              />
+              <InfoField
+                label="Status"
+                value={plan.isActive ? 'Ativo' : 'Inativo'}
+                badge={
+                  <Badge variant={plan.isActive ? 'success' : 'secondary'}>
+                    {plan.isActive ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                }
+              />
+              <InfoField
+                label="Operadora/Fornecedor"
+                value={plan.provider || 'Não informado'}
+              />
+              <InfoField
+                label="Número da Apólice"
+                value={plan.policyNumber || 'Não informado'}
+                showCopyButton={!!plan.policyNumber}
+                copyTooltip="Copiar Apólice"
+              />
+            </div>
+            {plan.description && (
               <InfoField
                 label="Descrição"
                 value={plan.description}
                 showCopyButton
                 copyTooltip="Copiar Descrição"
               />
-            </div>
-          )}
+            )}
+          </div>
         </Card>
 
         {/* Regras */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <ScrollText className="h-5 w-5" />
-            Regras do Tipo
-          </h3>
-          <div className="p-4 rounded-lg border bg-muted/30">
-            <p className="text-sm font-medium mb-1">{typeLabel}</p>
-            <p className="text-sm text-muted-foreground">{ruleDescription}</p>
-          </div>
-          {plan.rules && Object.keys(plan.rules).length > 0 && (
-            <div className="mt-4 space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                Regras Customizadas
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <ScrollText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Regras do Tipo</h3>
+              <p className="text-sm text-muted-foreground">
+                Regras e configurações do tipo de benefício
               </p>
-              <div className="grid md:grid-cols-2 gap-3">
-                {Object.entries(plan.rules).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between p-3 rounded-lg border"
-                  >
-                    <span className="text-sm font-medium">{key}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {typeof value === 'number'
-                        ? formatCurrency(value)
-                        : String(value)}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
-          )}
+          </div>
+          <div className="p-4">
+            <div className="p-4 rounded-lg border bg-muted/30">
+              <p className="text-sm font-medium mb-1">{typeLabel}</p>
+              <p className="text-sm text-muted-foreground">{ruleDescription}</p>
+            </div>
+            {plan.rules && Object.keys(plan.rules).length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Regras Customizadas
+                </p>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {Object.entries(plan.rules).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                    >
+                      <span className="text-sm font-medium">{key}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {typeof value === 'number'
+                          ? formatCurrency(value)
+                          : String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Inscritos */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Inscritos
-              <Badge variant="secondary" className="ml-2">
-                {enrollments.length}
-              </Badge>
-            </h3>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setIsEnrollModalOpen(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-1" />
-              Inscrever Funcionários
-            </Button>
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">
+                  Inscritos
+                  <Badge variant="secondary" className="ml-2">
+                    {enrollments.length}
+                  </Badge>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Funcionários inscritos neste plano
+                </p>
+              </div>
+            </div>
+            {canManage && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setIsEnrollModalOpen(true)}
+              >
+                <UserPlus className="h-4 w-4 mr-1" />
+                Inscrever Funcionários
+              </Button>
+            )}
           </div>
           {enrollments.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
+            <p className="text-muted-foreground text-sm p-4">
               Nenhum funcionário inscrito neste plano.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="p-4 space-y-2">
               {enrollments.slice(0, 10).map((enrollment: BenefitEnrollment) => (
                 <Link
                   key={enrollment.id}
@@ -416,8 +412,9 @@ export default function BenefitPlanDetailPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-linear-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white text-sm font-medium">
-                      {enrollment.employee?.fullName?.charAt(0)?.toUpperCase() ||
-                        '?'}
+                      {enrollment.employee?.fullName
+                        ?.charAt(0)
+                        ?.toUpperCase() || '?'}
                     </div>
                     <div>
                       <p className="font-medium">
@@ -435,9 +432,7 @@ export default function BenefitPlanDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={
-                        ENROLLMENT_STATUS_COLORS[enrollment.status]
-                      }
+                      variant={ENROLLMENT_STATUS_COLORS[enrollment.status]}
                     >
                       {ENROLLMENT_STATUS_LABELS[enrollment.status]}
                     </Badge>
@@ -454,14 +449,6 @@ export default function BenefitPlanDetailPage() {
           )}
         </Card>
       </PageBody>
-
-      <VerifyActionPinModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onSuccess={confirmDelete}
-        title="Excluir Plano de Benefício"
-        description={`Digite seu PIN de ação para excluir o plano "${plan.name}". Esta ação não pode ser desfeita.`}
-      />
 
       <EnrollModal
         isOpen={isEnrollModalOpen}

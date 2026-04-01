@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   formatBalance,
   getBalanceColor,
@@ -70,16 +70,6 @@ const ViewModal = dynamic(
 import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolbar';
 
 export default function TimeBankPage() {
-  return (
-    <Suspense
-      fallback={<GridLoading count={6} layout="grid" size="md" gap="gap-4" />}
-    >
-      <TimeBankPageContent />
-    </Suspense>
-  );
-}
-
-function TimeBankPageContent() {
   const router = useRouter();
 
   // ============================================================================
@@ -102,7 +92,15 @@ function TimeBankPageContent() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTimeBanks(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListTimeBanks(queryParams);
   const credit = useCreditTimeBank({ onSuccess: () => setCreditOpen(false) });
   const debit = useDebitTimeBank({ onSuccess: () => setDebitOpen(false) });
   const adjust = useAdjustTimeBank({ onSuccess: () => setAdjustOpen(false) });
@@ -118,7 +116,7 @@ function TimeBankPageContent() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -158,7 +156,10 @@ function TimeBankPageContent() {
     });
   }, [timeBanks, searchQuery, getName]);
 
-  const initialIds = useMemo(() => filteredItems.map(i => i.id), [filteredItems]);
+  const initialIds = useMemo(
+    () => filteredItems.map(i => i.id),
+    [filteredItems]
+  );
 
   // ============================================================================
   // HANDLERS

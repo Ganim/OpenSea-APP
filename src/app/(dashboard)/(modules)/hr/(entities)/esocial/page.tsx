@@ -21,6 +21,7 @@ import {
   UserSearch,
 } from 'lucide-react';
 
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -603,16 +604,21 @@ export default function EsocialDashboardPage() {
         }
       />
 
+      <Header
+        title="eSocial"
+        description="Eventos, transmissão e acompanhamento do eSocial"
+      />
+
       {/* Certificate expiry alert */}
       {dashboard?.certificateExpiry &&
         !dashboard.certificateExpiry.hasCertificate && (
-          <div className="flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 dark:border-rose-500/20 dark:bg-rose-500/8 px-4 py-3">
-            <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-500/20 dark:bg-amber-500/8 px-4 py-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
                 Certificado digital não configurado
               </p>
-              <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
                 Configure um certificado ICP-Brasil para transmitir eventos ao
                 eSocial.
               </p>
@@ -620,7 +626,7 @@ export default function EsocialDashboardPage() {
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0 border-rose-300 text-rose-700 dark:border-rose-500/30 dark:text-rose-300"
+              className="shrink-0 border-amber-300 text-amber-700 dark:border-amber-500/30 dark:text-amber-300"
               onClick={() => router.push('/hr/esocial/settings')}
             >
               Configurar

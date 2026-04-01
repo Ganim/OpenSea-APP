@@ -29,3 +29,7 @@ export * from './training.types';
 export * from './ppe.types';
 export * from './approval-delegation.types';
 export * from './review.types';
+export * from './survey.types';
+export * from './report.types';
+export * from './okr.types';
+export * from './recruitment.types';

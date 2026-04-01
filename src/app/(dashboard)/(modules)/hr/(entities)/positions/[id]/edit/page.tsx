@@ -12,7 +12,8 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { Badge } from '@/components/ui/badge';
+import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { logger } from '@/lib/logger';
 import type { Department, Position } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,21 +35,26 @@ import {
   ArrowRight,
   Briefcase,
   Building2,
+  DollarSign,
   Loader2,
+  NotebookText,
   Save,
   Search,
+  Trash2,
   X,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { positionsApi } from '../../src';
+import { deletePosition, positionsApi } from '../../src';
 
 export default function PositionEditPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const positionId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.POSITIONS.DELETE);
 
   // Estados de edição
   const [showDepartmentSelector, setShowDepartmentSelector] = useState(false);
@@ -61,6 +69,7 @@ export default function PositionEditPage() {
   const [maxSalary, setMaxSalary] = useState<string>('');
   const [isActive, setIsActive] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -165,6 +174,22 @@ export default function PositionEditPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!position) return;
+    try {
+      await deletePosition(positionId);
+      await queryClient.invalidateQueries({ queryKey: ['positions'] });
+      toast.success('Cargo excluído com sucesso!');
+      router.push('/hr/positions');
+    } catch (error) {
+      logger.error(
+        'Erro ao excluir cargo',
+        error instanceof Error ? error : undefined
+      );
+      toast.error('Erro ao excluir cargo');
+    }
+  };
+
   // ============================================================================
   // LOADING STATE
   // ============================================================================
@@ -234,26 +259,31 @@ export default function PositionEditPage() {
             },
             { label: 'Editar' },
           ]}
-          buttons={[
-            {
-              id: 'cancel',
-              title: 'Cancelar',
-              icon: X,
-              onClick: () => router.push(`/hr/positions/${positionId}`),
-              variant: 'outline',
-              disabled: isSaving,
-            },
-            {
-              id: 'save',
-              title: 'Salvar',
-              icon: Save,
-              onClick: handleSave,
-              disabled: isSaving,
-            },
-          ]}
+          buttons={
+            [
+              canDelete && {
+                id: 'delete',
+                title: 'Excluir',
+                icon: Trash2,
+                onClick: () => setIsDeleteOpen(true),
+                variant: 'default' as const,
+                className:
+                  'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-[#334155] dark:text-white dark:hover:bg-rose-600',
+                disabled: isSaving,
+              },
+              {
+                id: 'save',
+                title: isSaving ? 'Salvando...' : 'Salvar',
+                icon: isSaving ? Loader2 : Save,
+                onClick: handleSave,
+                disabled:
+                  isSaving || !positionName.trim() || !positionCode.trim(),
+              },
+            ].filter(Boolean) as HeaderButton[]
+          }
         />
 
-        {/* Identity Card */}
+        {/* Identity Card with Active/Inactive Switch */}
         <Card className="bg-white/5 p-5">
           <div className="flex flex-col sm:flex-row items-start gap-5">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl shrink-0 bg-linear-to-br from-indigo-500 to-purple-600">
@@ -267,31 +297,49 @@ export default function PositionEditPage() {
                 {position.name} - {position.code}
               </p>
             </div>
-            <Badge variant={position.isActive ? 'success' : 'secondary'}>
-              {position.isActive ? 'Ativo' : 'Inativo'}
-            </Badge>
+            <div className="hidden sm:flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 rounded-lg bg-white/5 px-4 py-2">
+                <div className="text-right">
+                  <p className="text-xs font-semibold">Status</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {isActive ? 'Ativo' : 'Inativo'}
+                  </p>
+                </div>
+                <Switch
+                  checked={isActive}
+                  onCheckedChange={setIsActive}
+                  aria-label="Alternar status ativo/inativo"
+                />
+              </div>
+            </div>
           </div>
         </Card>
       </PageHeader>
 
       <PageBody className="space-y-6">
-        {/* Department Selection */}
+        {/* Department Selection (overlay mode) */}
         {showDepartmentSelector ? (
-          <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <Building2 className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">
                   Selecionar Departamento
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDepartmentSelector(false)}
-                >
-                  Cancelar
-                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Escolha o departamento vinculado
+                </p>
               </div>
-
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDepartmentSelector(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6 space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -315,9 +363,9 @@ export default function PositionEditPage() {
                   </div>
                 ) : (
                   filteredDepartments.map(department => (
-                    <Card
+                    <div
                       key={department.id}
-                      className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
                       role="button"
                       tabIndex={0}
                       onClick={() => handleSelectDepartment(department)}
@@ -328,23 +376,21 @@ export default function PositionEditPage() {
                         }
                       }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
-                          <Building2 className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">
-                            {department.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {department.company?.tradeName ||
-                              department.company?.legalName ||
-                              department.code}
-                          </p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
+                        <Building2 className="h-5 w-5 text-white" />
                       </div>
-                    </Card>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          {department.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {department.company?.tradeName ||
+                            department.company?.legalName ||
+                            department.code}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </div>
                   ))
                 )}
               </div>
@@ -353,38 +399,58 @@ export default function PositionEditPage() {
         ) : (
           <>
             {/* Departamento */}
-            <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-              <h3 className="text-lg font-semibold mb-4">
-                Departamento Vinculado
-              </h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
-                    {departmentName || 'Nenhum departamento selecionado'}
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Building2 className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">
+                    Departamento Vinculado
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Departamento associado ao cargo
                   </p>
-                  {selectedDepartment?.code && (
-                    <p className="text-sm text-muted-foreground">
-                      {selectedDepartment.code}
-                    </p>
-                  )}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDepartmentSelector(true)}
-                >
-                  Alterar
-                </Button>
+              </div>
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shrink-0">
+                    <Building2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {departmentName || 'Nenhum departamento selecionado'}
+                    </p>
+                    {selectedDepartment?.code && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedDepartment.code}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDepartmentSelector(true)}
+                  >
+                    Alterar
+                  </Button>
+                </div>
               </div>
             </Card>
 
             {/* Dados Cadastrais */}
-            <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-              <h3 className="text-lg font-semibold mb-4">Dados do Cargo</h3>
-              <div className="space-y-4">
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <NotebookText className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">Dados do Cargo</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Informações cadastrais básicas
+                  </p>
+                </div>
+              </div>
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome *</Label>
@@ -466,15 +532,16 @@ export default function PositionEditPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
+                {/* Mobile-only status switch */}
+                <div className="flex items-center justify-between pt-4 border-t sm:hidden">
                   <div className="space-y-0.5">
-                    <Label htmlFor="isActive">Status</Label>
+                    <Label htmlFor="isActiveMobile">Status</Label>
                     <p className="text-sm text-muted-foreground">
                       {isActive ? 'Cargo ativo' : 'Cargo inativo'}
                     </p>
                   </div>
                   <Switch
-                    id="isActive"
+                    id="isActiveMobile"
                     checked={isActive}
                     onCheckedChange={setIsActive}
                   />
@@ -484,6 +551,15 @@ export default function PositionEditPage() {
           </>
         )}
       </PageBody>
+
+      {/* Delete Confirmation */}
+      <VerifyActionPinModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onSuccess={handleDelete}
+        title="Excluir Cargo"
+        description={`Digite seu PIN de ação para excluir o cargo "${position.name}". Esta ação não pode ser desfeita.`}
+      />
     </PageLayout>
   );
 }

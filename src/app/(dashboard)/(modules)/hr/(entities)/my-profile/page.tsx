@@ -263,17 +263,29 @@ export default function MyProfilePage() {
   const [activeTab, setActiveTab] = useState('summary');
 
   // Fetch employee record linked to the current user
+  // Returns null (instead of throwing) when 404 — expected for users without linked employee
   const {
     data: employee,
     isLoading: isLoadingEmployee,
     error: employeeError,
-  } = useQuery<Employee>({
+  } = useQuery<Employee | null>({
     queryKey: ['my-employee', user?.id],
     queryFn: async () => {
-      const response = await employeesService.getEmployeeByUserId(user!.id);
-      return response.employee;
+      try {
+        const response = await employeesService.getEmployeeByUserId(user!.id);
+        return response.employee;
+      } catch (err: unknown) {
+        const status = (err as { status?: number })?.status;
+        if (status === 404) return null;
+        throw err;
+      }
     },
     enabled: !!user?.id,
+    retry: (failureCount, error) => {
+      const status = (error as { status?: number })?.status;
+      if (status === 404) return false;
+      return failureCount < 3;
+    },
   });
 
   // Photo URL resolver
@@ -457,7 +469,10 @@ export default function MyProfilePage() {
               Seu usuário ainda não está vinculado a um registro de funcionário.
               Entre em contato com o departamento de RH.
             </p>
-            <Button onClick={() => router.push('/hr')}>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/hr')}
+            >
               Voltar para Recursos Humanos
             </Button>
           </Card>

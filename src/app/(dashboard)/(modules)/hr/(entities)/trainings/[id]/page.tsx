@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 import { trainingService } from '@/services/hr/training.service';
 import type {
   TrainingProgram,
@@ -53,8 +54,8 @@ export default function TrainingProgramDetailPage() {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const canModify = hasPermission('hr.training.modify');
-  const canDelete = hasPermission('hr.training.remove');
+  const canModify = hasPermission(HR_PERMISSIONS.TRAINING.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.TRAINING.DELETE);
 
   const {
     data: program,

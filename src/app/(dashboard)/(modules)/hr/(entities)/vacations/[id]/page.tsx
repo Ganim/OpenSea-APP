@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { VacationPeriod } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -45,6 +46,7 @@ import {
   ScheduleModal,
   SellDaysModal,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function VacationDetailPage() {
   const params = useParams();
@@ -53,6 +55,10 @@ export default function VacationDetailPage() {
 
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isSellOpen, setIsSellOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canUpdate = hasPermission(HR_PERMISSIONS.VACATIONS.UPDATE);
+  const canManage = hasPermission(HR_PERMISSIONS.VACATIONS.MANAGE);
 
   // ============================================================================
   // DATA FETCHING
@@ -169,32 +175,41 @@ export default function VacationDetailPage() {
           buttons={
             vacation.status === 'AVAILABLE'
               ? [
-                  {
-                    id: 'schedule',
-                    title: 'Agendar',
-                    icon: CalendarDays,
-                    onClick: () => setIsScheduleOpen(true),
-                  },
-                  {
-                    id: 'sell',
-                    title: 'Vender Dias',
-                    icon: DollarSign,
-                    onClick: () => setIsSellOpen(true),
-                    variant: 'outline',
-                  },
+                  ...(canUpdate
+                    ? [
+                        {
+                          id: 'schedule',
+                          title: 'Agendar',
+                          icon: CalendarDays,
+                          onClick: () => setIsScheduleOpen(true),
+                        },
+                        {
+                          id: 'sell',
+                          title: 'Vender Dias',
+                          icon: DollarSign,
+                          onClick: () => setIsSellOpen(true),
+                          variant: 'outline' as const,
+                        },
+                      ]
+                    : []),
                 ]
               : vacation.status === 'SCHEDULED'
                 ? [
-                    {
-                      id: 'cancel-schedule',
-                      title: cancelScheduleMutation.isPending
-                        ? 'Cancelando...'
-                        : 'Cancelar Agendamento',
-                      icon: CalendarX2,
-                      onClick: () => cancelScheduleMutation.mutate(vacation.id),
-                      variant: 'destructive',
-                      disabled: cancelScheduleMutation.isPending,
-                    },
+                    ...(canManage
+                      ? [
+                          {
+                            id: 'cancel-schedule',
+                            title: cancelScheduleMutation.isPending
+                              ? 'Cancelando...'
+                              : 'Cancelar Agendamento',
+                            icon: CalendarX2,
+                            onClick: () =>
+                              cancelScheduleMutation.mutate(vacation.id),
+                            variant: 'destructive' as const,
+                            disabled: cancelScheduleMutation.isPending,
+                          },
+                        ]
+                      : []),
                   ]
                 : []
           }
@@ -249,13 +264,18 @@ export default function VacationDetailPage() {
       </PageHeader>
 
       <PageBody className="space-y-6">
-        {/* Funcionário */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Calendar className="h-5 w-5" />
-            Dados Gerais
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
+        {/* Dados Gerais */}
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Dados Gerais</h3>
+              <p className="text-sm text-muted-foreground">
+                Funcionário e período aquisitivo
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-3 gap-6">
             <InfoField
               label="Funcionário"
               value={getName(vacation.employeeId)}
@@ -274,12 +294,17 @@ export default function VacationDetailPage() {
         </Card>
 
         {/* Período Concessivo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <CalendarDays className="h-5 w-5" />
-            Período Concessivo
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <CalendarDays className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Período Concessivo</h3>
+              <p className="text-sm text-muted-foreground">
+                Prazo para gozo das férias
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-2 gap-6">
             <InfoField
               label="Início"
               value={formatDate(vacation.concessionStart)}
@@ -289,50 +314,64 @@ export default function VacationDetailPage() {
         </Card>
 
         {/* Saldo de Dias */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Clock className="h-5 w-5" />
-            Saldo de Dias
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <Clock className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-lg font-semibold mt-1">{vacation.totalDays}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Usados</p>
-              <p className="text-lg font-semibold mt-1 text-primary">
-                {vacation.usedDays}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Vendidos</p>
-              <p className="text-lg font-semibold mt-1 text-amber-600">
-                {vacation.soldDays}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Restantes</p>
-              <p className="text-lg font-semibold mt-1 text-green-600">
-                {vacation.remainingDays}
+              <h3 className="text-base font-semibold">Saldo de Dias</h3>
+              <p className="text-sm text-muted-foreground">
+                Resumo de utilização das férias
               </p>
             </div>
           </div>
-          <Progress value={usedPercent} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-2">
-            {usedPercent}% utilizado ({vacation.usedDays} usados +{' '}
-            {vacation.soldDays} vendidos)
-          </p>
+          <div className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-lg font-semibold mt-1">
+                  {vacation.totalDays}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Usados</p>
+                <p className="text-lg font-semibold mt-1 text-primary">
+                  {vacation.usedDays}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Vendidos</p>
+                <p className="text-lg font-semibold mt-1 text-amber-600">
+                  {vacation.soldDays}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Restantes</p>
+                <p className="text-lg font-semibold mt-1 text-green-600">
+                  {vacation.remainingDays}
+                </p>
+              </div>
+            </div>
+            <Progress value={usedPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-2">
+              {usedPercent}% utilizado ({vacation.usedDays} usados +{' '}
+              {vacation.soldDays} vendidos)
+            </p>
+          </div>
         </Card>
 
         {/* Agendamento (only if scheduled) */}
         {(vacation.scheduledStart || vacation.scheduledEnd) && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <CalendarDays className="h-5 w-5" />
-              Agendamento
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Agendamento</h3>
+                <p className="text-sm text-muted-foreground">
+                  Datas agendadas para as férias
+                </p>
+              </div>
+            </div>
+            <div className="p-4 grid md:grid-cols-2 gap-6">
               <InfoField
                 label="Início Agendado"
                 value={formatDate(vacation.scheduledStart)}
@@ -347,12 +386,19 @@ export default function VacationDetailPage() {
 
         {/* Observações (only if notes exist) */}
         {vacation.notes && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <FileText className="h-5 w-5" />
-              Observações
-            </h3>
-            <p className="text-sm">{vacation.notes}</p>
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Observações</h3>
+                <p className="text-sm text-muted-foreground">
+                  Notas adicionais sobre as férias
+                </p>
+              </div>
+            </div>
+            <div className="p-4">
+              <p className="text-sm">{vacation.notes}</p>
+            </div>
           </Card>
         )}
       </PageBody>

@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { reviewsService } from '@/services/hr/reviews.service';
 import type {
   ReviewCycle,
@@ -30,12 +31,7 @@ import type {
   UpdateReviewCycleData,
 } from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  CalendarDays,
-  ClipboardCheck,
-  Save,
-  Trash2,
-} from 'lucide-react';
+import { CalendarDays, ClipboardCheck, Save, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -45,7 +41,7 @@ import {
   REVIEW_CYCLE_TYPE_COLORS,
   REVIEW_CYCLE_STATUS_LABELS,
   REVIEW_CYCLE_STATUS_COLORS,
-} from '../src';
+} from '../../src';
 
 export default function ReviewCycleEditPage() {
   const router = useRouter();
@@ -54,7 +50,7 @@ export default function ReviewCycleEditPage() {
   const { hasPermission } = usePermissions();
   const cycleId = params.id as string;
 
-  const canDelete = hasPermission('hr.reviews.remove');
+  const canDelete = hasPermission(HR_PERMISSIONS.REVIEWS.DELETE);
 
   // ============================================================================
   // DATA
@@ -105,7 +101,9 @@ export default function ReviewCycleEditPage() {
       reviewsService.updateCycle(cycleId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-cycles', cycleId] });
-      queryClient.invalidateQueries({ queryKey: ['review-cycles', 'infinite'] });
+      queryClient.invalidateQueries({
+        queryKey: ['review-cycles', 'infinite'],
+      });
       toast.success('Ciclo de avaliação atualizado com sucesso');
       router.push(`/hr/reviews/${cycleId}`);
     },
@@ -286,7 +284,7 @@ export default function ReviewCycleEditPage() {
                   <Input
                     id="edit-name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value)}
                     placeholder="Nome do ciclo de avaliação"
                   />
                 </div>
@@ -295,17 +293,19 @@ export default function ReviewCycleEditPage() {
                   <Label htmlFor="edit-type">Tipo *</Label>
                   <Select
                     value={type}
-                    onValueChange={(val) => setType(val as ReviewCycleType)}
+                    onValueChange={val => setType(val as ReviewCycleType)}
                   >
                     <SelectTrigger id="edit-type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {REVIEW_CYCLE_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
+                      {REVIEW_CYCLE_TYPE_OPTIONS.map(
+                        (opt: { value: string; label: string }) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -315,7 +315,7 @@ export default function ReviewCycleEditPage() {
                   <Textarea
                     id="edit-description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={e => setDescription(e.target.value)}
                     placeholder="Descrição do ciclo de avaliação..."
                     rows={3}
                   />
@@ -340,7 +340,7 @@ export default function ReviewCycleEditPage() {
                       id="edit-start-date"
                       type="date"
                       value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      onChange={e => setStartDate(e.target.value)}
                       disabled={isClosed}
                     />
                   </div>
@@ -350,7 +350,7 @@ export default function ReviewCycleEditPage() {
                       id="edit-end-date"
                       type="date"
                       value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      onChange={e => setEndDate(e.target.value)}
                       disabled={isClosed}
                     />
                   </div>

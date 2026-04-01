@@ -2,6 +2,7 @@
 
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -9,6 +10,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
+import { Button } from '@/components/ui/button';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import {
   CoreProvider,
@@ -125,7 +127,7 @@ export default function AdmissionsPage() {
   // ============================================================================
 
   const createMutation = useCreateAdmission({
-    onSuccess: () => setIsCreateOpen(false),
+    showSuccessToast: false,
   });
 
   const cancelMutation = useCancelAdmission({
@@ -260,17 +262,19 @@ export default function AdmissionsPage() {
           ]}
           hasPermission={hasPermission}
           actions={
-            canCreate
-              ? [
-                  {
-                    label: 'Nova Admissão',
-                    icon: Plus,
-                    onClick: () => setIsCreateOpen(true),
-                  },
-                ]
-              : []
+            canCreate ? (
+              <Button size="sm" className="gap-2" onClick={() => setIsCreateOpen(true)}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline">Nova Admissão</span>
+              </Button>
+            ) : undefined
           }
         />
+
+          <Header
+            title="Admissões"
+            description="Gerencie os convites de admissão digital"
+          />
       </PageHeader>
 
       <PageBody>
@@ -312,7 +316,7 @@ export default function AdmissionsPage() {
                     id={item.id}
                     variant="grid"
                     title={item.fullName}
-                    subtitle={item.email}
+                    subtitle={[item.position?.name, item.email].filter(Boolean).join(' \u2022 ')}
                     icon={UserPlus}
                     iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
                     badges={[
@@ -338,7 +342,7 @@ export default function AdmissionsPage() {
                     id={item.id}
                     variant="list"
                     title={item.fullName}
-                    subtitle={item.email}
+                    subtitle={[item.position?.name, item.email].filter(Boolean).join(' \u2022 ')}
                     icon={UserPlus}
                     iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
                     badges={[
@@ -360,7 +364,7 @@ export default function AdmissionsPage() {
                   ? 'Nenhuma admissão encontrada. Crie um novo convite de admissão digital.'
                   : 'Nenhum convite de admissão no momento.'
               }
-              emptyIcon={<UserPlus className="h-12 w-12 text-muted-foreground" />}
+              emptyIcon={<UserPlus className="h-8 w-8 text-muted-foreground" />}
             />
             <div ref={sentinelRef} className="h-1" />
             {isFetchingNextPage && (

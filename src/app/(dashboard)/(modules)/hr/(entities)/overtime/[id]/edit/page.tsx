@@ -59,9 +59,7 @@ export default function OvertimeEditPage() {
 
   const overtime = overtimeData;
 
-  const { getName } = useEmployeeMap(
-    overtime ? [overtime.employeeId] : []
-  );
+  const { getName } = useEmployeeMap(overtime ? [overtime.employeeId] : []);
 
   // ============================================================================
   // FORM STATE
@@ -185,7 +183,9 @@ export default function OvertimeEditPage() {
                     title: 'Excluir',
                     icon: Trash2,
                     onClick: () => setIsDeleteOpen(true),
-                    variant: 'destructive' as const,
+                    variant: 'default' as const,
+                    className:
+                      'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
                   },
                 ]
               : []),
@@ -260,7 +260,7 @@ export default function OvertimeEditPage() {
                       id="edit-date"
                       type="date"
                       value={date}
-                      onChange={(e) => setDate(e.target.value)}
+                      onChange={e => setDate(e.target.value)}
                       disabled={!isPending}
                     />
                   </div>
@@ -272,7 +272,7 @@ export default function OvertimeEditPage() {
                       min="0.5"
                       step="0.5"
                       value={hours}
-                      onChange={(e) => setHours(e.target.value)}
+                      onChange={e => setHours(e.target.value)}
                       placeholder="Ex: 2"
                       disabled={!isPending}
                     />
@@ -306,7 +306,7 @@ export default function OvertimeEditPage() {
               </h3>
               <Textarea
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={e => setReason(e.target.value)}
                 placeholder="Descreva o motivo da hora extra (mínimo 10 caracteres)..."
                 rows={4}
               />

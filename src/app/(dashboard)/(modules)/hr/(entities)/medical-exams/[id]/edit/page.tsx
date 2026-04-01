@@ -1,5 +1,6 @@
 /**
  * OpenSea OS - Medical Exam Edit Page
+ * Edição completa de exame médico com campos PCMSO
  */
 
 'use client';
@@ -11,6 +12,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,12 +28,21 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
-import type { MedicalExam, MedicalExamType, MedicalExamResult } from '@/types/hr';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
+import type {
+  MedicalExam,
+  MedicalExamType,
+  MedicalExamResult,
+  MedicalExamAptitude,
+} from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Building2,
   FileText,
   NotebookText,
   Save,
+  ShieldAlert,
   Stethoscope,
   Trash,
   User,
@@ -50,6 +61,7 @@ import {
   useDeleteMedicalExam,
   EXAM_TYPE_LABELS,
   EXAM_RESULT_LABELS,
+  APTITUDE_LABELS,
 } from '../../src';
 
 // =============================================================================
@@ -88,20 +100,36 @@ export default function MedicalExamEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const examId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.MEDICAL_EXAMS.DELETE);
 
   // ============================================================================
   // STATE
   // ============================================================================
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Basic fields
   const [type, setType] = useState<MedicalExamType>('ADMISSIONAL');
-  const [scheduledDate, setScheduledDate] = useState('');
   const [examDate, setExamDate] = useState('');
+  const [expirationDate, setExpirationDate] = useState('');
   const [result, setResult] = useState<MedicalExamResult>('APTO');
   const [observations, setObservations] = useState('');
+  const [documentUrl, setDocumentUrl] = useState('');
+
+  // Doctor fields
   const [doctorName, setDoctorName] = useState('');
   const [doctorCrm, setDoctorCrm] = useState('');
+
+  // PCMSO fields
+  const [aptitude, setAptitude] = useState<MedicalExamAptitude | ''>('');
+  const [validityMonths, setValidityMonths] = useState('');
   const [clinicName, setClinicName] = useState('');
+  const [clinicAddress, setClinicAddress] = useState('');
+  const [physicianName, setPhysicianName] = useState('');
+  const [physicianCRM, setPhysicianCRM] = useState('');
+  const [restrictions, setRestrictions] = useState('');
+  const [nextExamDate, setNextExamDate] = useState('');
 
   // ============================================================================
   // DATA FETCHING
@@ -140,10 +168,23 @@ export default function MedicalExamEditPage() {
     if (exam) {
       setType(exam.type);
       setExamDate(exam.examDate ? exam.examDate.split('T')[0] : '');
+      setExpirationDate(
+        exam.expirationDate ? exam.expirationDate.split('T')[0] : ''
+      );
       setResult(exam.result);
       setObservations(exam.observations || '');
+      setDocumentUrl(exam.documentUrl || '');
       setDoctorName(exam.doctorName || '');
       setDoctorCrm(exam.doctorCrm || '');
+      // PCMSO fields
+      setAptitude(exam.aptitude || '');
+      setValidityMonths(exam.validityMonths ? String(exam.validityMonths) : '');
+      setClinicName(exam.clinicName || '');
+      setClinicAddress(exam.clinicAddress || '');
+      setPhysicianName(exam.physicianName || '');
+      setPhysicianCRM(exam.physicianCRM || '');
+      setRestrictions(exam.restrictions || '');
+      setNextExamDate(exam.nextExamDate ? exam.nextExamDate.split('T')[0] : '');
     }
   }, [exam]);
 
@@ -159,10 +200,24 @@ export default function MedicalExamEditPage() {
       data: {
         type,
         examDate: examDate || undefined,
+        expirationDate: expirationDate || undefined,
         result,
-        observations: observations || undefined,
-        doctorName: doctorName || undefined,
-        doctorCrm: doctorCrm || undefined,
+        observations: observations.trim() || undefined,
+        documentUrl: documentUrl.trim() || undefined,
+        doctorName: doctorName.trim() || undefined,
+        doctorCrm: doctorCrm.trim() || undefined,
+        // PCMSO fields
+        examCategory: type,
+        aptitude: aptitude || undefined,
+        validityMonths: validityMonths
+          ? parseInt(validityMonths, 10)
+          : undefined,
+        clinicName: clinicName.trim() || undefined,
+        clinicAddress: clinicAddress.trim() || undefined,
+        physicianName: physicianName.trim() || undefined,
+        physicianCRM: physicianCRM.trim() || undefined,
+        restrictions: restrictions.trim() || undefined,
+        nextExamDate: nextExamDate || undefined,
       },
     });
   };
@@ -240,31 +295,33 @@ export default function MedicalExamEditPage() {
             },
             { label: 'Editar' },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-              disabled: isSaving || deleteMutation.isPending,
-            },
-            {
-              id: 'cancel',
-              title: 'Cancelar',
-              icon: X,
-              onClick: () => router.push(`/hr/medical-exams/${examId}`),
-              variant: 'outline',
-              disabled: isSaving,
-            },
-            {
-              id: 'save',
-              title: 'Salvar',
-              icon: Save,
-              onClick: handleSave,
-              disabled: isSaving,
-            },
-          ]}
+          buttons={
+            [
+              canDelete && {
+                id: 'delete',
+                title: 'Excluir',
+                icon: Trash,
+                onClick: () => setIsDeleteModalOpen(true),
+                variant: 'outline',
+                disabled: isSaving || deleteMutation.isPending,
+              },
+              {
+                id: 'cancel',
+                title: 'Cancelar',
+                icon: X,
+                onClick: () => router.push(`/hr/medical-exams/${examId}`),
+                variant: 'outline',
+                disabled: isSaving,
+              },
+              {
+                id: 'save',
+                title: 'Salvar',
+                icon: Save,
+                onClick: handleSave,
+                disabled: isSaving,
+              },
+            ].filter(Boolean) as HeaderButton[]
+          }
         />
 
         {/* Identity Card */}
@@ -296,11 +353,13 @@ export default function MedicalExamEditPage() {
           <SectionHeader
             icon={NotebookText}
             title="Dados do Exame"
-            subtitle="Tipo, datas e resultado do exame"
+            subtitle="Tipo, datas e resultado do exame médico ocupacional"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Tipo de Exame *</Label>
+              <Label htmlFor="type">
+                Tipo de Exame <span className="text-rose-500">*</span>
+              </Label>
               <Select
                 value={type}
                 onValueChange={v => setType(v as MedicalExamType)}
@@ -319,7 +378,9 @@ export default function MedicalExamEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="result">Resultado *</Label>
+              <Label htmlFor="result">
+                Resultado <span className="text-rose-500">*</span>
+              </Label>
               <Select
                 value={result}
                 onValueChange={v => setResult(v as MedicalExamResult)}
@@ -338,17 +399,45 @@ export default function MedicalExamEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="scheduledDate">Data Agendada</Label>
+              <Label htmlFor="aptitude">Aptidão (ASO)</Label>
+              <Select
+                value={aptitude || '__none__'}
+                onValueChange={v =>
+                  setAptitude(
+                    v === '__none__' ? '' : (v as MedicalExamAptitude)
+                  )
+                }
+              >
+                <SelectTrigger id="aptitude">
+                  <SelectValue placeholder="Selecionar aptidão..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Não informada</SelectItem>
+                  {Object.entries(APTITUDE_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="validityMonths">Validade (meses)</Label>
               <Input
-                id="scheduledDate"
-                type="date"
-                value={scheduledDate}
-                onChange={e => setScheduledDate(e.target.value)}
+                id="validityMonths"
+                type="number"
+                min="1"
+                value={validityMonths}
+                onChange={e => setValidityMonths(e.target.value)}
+                placeholder="Ex: 12"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="examDate">Data do Exame *</Label>
+              <Label htmlFor="examDate">
+                Data do Exame <span className="text-rose-500">*</span>
+              </Label>
               <Input
                 id="examDate"
                 type="date"
@@ -357,22 +446,54 @@ export default function MedicalExamEditPage() {
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expirationDate">Data de Validade</Label>
+              <Input
+                id="expirationDate"
+                type="date"
+                value={expirationDate}
+                onChange={e => setExpirationDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nextExamDate">Próximo Exame Previsto</Label>
+              <Input
+                id="nextExamDate"
+                type="date"
+                value={nextExamDate}
+                onChange={e => setNextExamDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="documentUrl">URL do Documento (ASO)</Label>
+              <Input
+                id="documentUrl"
+                value={documentUrl}
+                onChange={e => setDocumentUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
           </div>
         </Card>
 
-        {/* Profissional/Clínica */}
+        {/* Médico Examinador */}
         <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <SectionHeader
             icon={User}
-            title="Profissional / Clínica"
-            subtitle="Dados do médico e clínica responsável"
+            title="Médico Examinador"
+            subtitle="Profissional responsável pela realização do exame"
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="doctorName">Nome do Médico *</Label>
+              <Label htmlFor="doctorName">
+                Nome do Médico <span className="text-rose-500">*</span>
+              </Label>
               <Input
                 id="doctorName"
-                placeholder="Ex: Dr. João Silva"
+                placeholder="Dr. Nome Completo"
                 value={doctorName}
                 onChange={e => setDoctorName(e.target.value)}
                 required
@@ -380,43 +501,99 @@ export default function MedicalExamEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="doctorCrm">CRM *</Label>
+              <Label htmlFor="doctorCrm">
+                CRM <span className="text-rose-500">*</span>
+              </Label>
               <Input
                 id="doctorCrm"
-                placeholder="Ex: CRM/SP 123456"
+                placeholder="CRM/UF 123456"
                 value={doctorCrm}
                 onChange={e => setDoctorCrm(e.target.value)}
                 required
               />
             </div>
+          </div>
+        </Card>
+
+        {/* PCMSO - Coordenador e Clínica */}
+        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <SectionHeader
+            icon={Building2}
+            title="Dados PCMSO"
+            subtitle="Médico coordenador e clínica responsável pelo programa"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="physicianName">Médico Coordenador (PCMSO)</Label>
+              <Input
+                id="physicianName"
+                placeholder="Dr. Nome Completo"
+                value={physicianName}
+                onChange={e => setPhysicianName(e.target.value)}
+              />
+            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="clinicName">Nome da Clínica</Label>
+              <Label htmlFor="physicianCRM">CRM Coordenador</Label>
+              <Input
+                id="physicianCRM"
+                placeholder="CRM/UF 123456"
+                value={physicianCRM}
+                onChange={e => setPhysicianCRM(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="clinicName">Clínica / Laboratório</Label>
               <Input
                 id="clinicName"
-                placeholder="Ex: Clínica Saúde Ocupacional"
+                placeholder="Nome da clínica"
                 value={clinicName}
                 onChange={e => setClinicName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="clinicAddress">Endereço da Clínica</Label>
+              <Input
+                id="clinicAddress"
+                placeholder="Endereço completo"
+                value={clinicAddress}
+                onChange={e => setClinicAddress(e.target.value)}
               />
             </div>
           </div>
         </Card>
 
-        {/* Observações */}
+        {/* Restrições e Observações */}
         <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <SectionHeader
             icon={FileText}
-            title="Observações"
-            subtitle="Anotações adicionais sobre o exame"
+            title="Restrições e Observações"
+            subtitle="Restrições identificadas e observações adicionais"
           />
-          <div className="mt-4">
-            <Textarea
-              id="observations"
-              placeholder="Observações sobre o exame médico..."
-              value={observations}
-              onChange={e => setObservations(e.target.value)}
-              rows={4}
-            />
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="restrictions">Restrições</Label>
+              <Textarea
+                id="restrictions"
+                placeholder="Descreva restrições identificadas no ASO..."
+                value={restrictions}
+                onChange={e => setRestrictions(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="observations">Observações</Label>
+              <Textarea
+                id="observations"
+                placeholder="Observações adicionais sobre o exame médico..."
+                value={observations}
+                onChange={e => setObservations(e.target.value)}
+                rows={3}
+              />
+            </div>
           </div>
         </Card>
       </PageBody>

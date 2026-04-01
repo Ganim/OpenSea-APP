@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { Absence } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -40,11 +41,15 @@ import {
   useApproveAbsence,
   useCancelAbsence,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function AbsenceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const absenceId = params.id as string;
+  const { hasPermission } = usePermissions();
+
+  const canManage = hasPermission(HR_PERMISSIONS.ABSENCES.MANAGE);
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -158,7 +163,7 @@ export default function AbsenceDetailPage() {
             { label: getTypeLabel(absence.type) },
           ]}
           buttons={
-            isPending
+            isPending && canManage
               ? [
                   {
                     id: 'approve',
@@ -237,12 +242,17 @@ export default function AbsenceDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados da Ausência */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Dados da Ausência
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <NotebookText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Dados da Ausência</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações principais do afastamento
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-3 gap-6">
             <InfoField
               label="Tipo"
               value={getTypeLabel(absence.type)}
@@ -284,28 +294,40 @@ export default function AbsenceDetailPage() {
 
         {/* Motivo */}
         {absence.reason && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <FileText className="h-5 w-5" />
-              Motivo
-            </h3>
-            <InfoField
-              label="Justificativa"
-              value={absence.reason}
-              showCopyButton
-              copyTooltip="Copiar motivo"
-            />
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Motivo</h3>
+                <p className="text-sm text-muted-foreground">
+                  Justificativa do afastamento
+                </p>
+              </div>
+            </div>
+            <div className="p-4">
+              <InfoField
+                label="Justificativa"
+                value={absence.reason}
+                showCopyButton
+                copyTooltip="Copiar motivo"
+              />
+            </div>
           </Card>
         )}
 
         {/* Dados Médicos (apenas para atestado médico) */}
         {isSickLeave && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <Heart className="h-5 w-5" />
-              Dados Médicos
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <Heart className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Dados Médicos</h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações do atestado médico
+                </p>
+              </div>
+            </div>
+            <div className="p-4 grid md:grid-cols-2 gap-6">
               <InfoField
                 label="CID"
                 value={absence.cid}
@@ -324,12 +346,17 @@ export default function AbsenceDetailPage() {
 
         {/* Aprovação */}
         {isApproved && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-emerald-500" />
-              Aprovação
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-base font-semibold">Aprovação</h3>
+                <p className="text-sm text-muted-foreground">
+                  Detalhes da aprovação
+                </p>
+              </div>
+            </div>
+            <div className="p-4 grid md:grid-cols-2 gap-6">
               <InfoField
                 label="Aprovado por"
                 value={absence.approvedBy ? getName(absence.approvedBy) : null}
@@ -348,13 +375,18 @@ export default function AbsenceDetailPage() {
 
         {/* Rejeição */}
         {isRejected && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
               <ShieldX className="h-5 w-5 text-rose-500" />
-              Rejeição
-            </h3>
-            {absence.rejectionReason && (
               <div>
+                <h3 className="text-base font-semibold">Rejeição</h3>
+                <p className="text-sm text-muted-foreground">
+                  Motivo da rejeição do afastamento
+                </p>
+              </div>
+            </div>
+            {absence.rejectionReason && (
+              <div className="p-4">
                 <InfoField
                   label="Motivo da Rejeição"
                   value={absence.rejectionReason}

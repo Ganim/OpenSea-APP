@@ -30,6 +30,8 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 import type { Termination, TerminationType, NoticeType } from '@/types/hr';
@@ -96,6 +98,8 @@ export default function TerminationEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const terminationId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.TERMINATIONS.DELETE);
 
   // ============================================================================
   // DATA FETCHING
@@ -114,9 +118,7 @@ export default function TerminationEditPage() {
     termination ? [termination.employeeId] : []
   );
 
-  const employeeName = termination
-    ? getName(termination.employeeId)
-    : '...';
+  const employeeName = termination ? getName(termination.employeeId) : '...';
 
   // ============================================================================
   // MUTATIONS
@@ -138,7 +140,8 @@ export default function TerminationEditPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Section 1: Dados da Rescisao
-  const [terminationType, setTerminationType] = useState<TerminationType>('SEM_JUSTA_CAUSA');
+  const [terminationType, setTerminationType] =
+    useState<TerminationType>('SEM_JUSTA_CAUSA');
   const [terminationDate, setTerminationDate] = useState('');
   const [reason, setReason] = useState('');
   const [lastWorkDay, setLastWorkDay] = useState('');
@@ -171,9 +174,7 @@ export default function TerminationEditPage() {
       );
       setReason(termination.notes || '');
       setLastWorkDay(
-        termination.lastWorkDay
-          ? termination.lastWorkDay.split('T')[0]
-          : ''
+        termination.lastWorkDay ? termination.lastWorkDay.split('T')[0] : ''
       );
 
       // Notice period
@@ -268,15 +269,19 @@ export default function TerminationEditPage() {
       onClick: () => router.push(`/hr/terminations/${terminationId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default',
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',
@@ -360,9 +365,7 @@ export default function TerminationEditPage() {
               <UserMinus className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Editando rescisão
-              </p>
+              <p className="text-sm text-muted-foreground">Editando rescisão</p>
               <h1 className="text-xl font-bold truncate">
                 {employeeName || 'Colaborador'}
               </h1>
@@ -403,7 +406,9 @@ export default function TerminationEditPage() {
                     </Label>
                     <Select
                       value={terminationType}
-                      onValueChange={v => setTerminationType(v as TerminationType)}
+                      onValueChange={v =>
+                        setTerminationType(v as TerminationType)
+                      }
                     >
                       <SelectTrigger id="terminationType">
                         <SelectValue placeholder="Selecione o tipo..." />
@@ -509,9 +514,7 @@ export default function TerminationEditPage() {
                         <Label htmlFor="noticeType">Tipo de Aviso</Label>
                         <Select
                           value={noticeType}
-                          onValueChange={v =>
-                            setNoticeType(v as NoticeType)
-                          }
+                          onValueChange={v => setNoticeType(v as NoticeType)}
                         >
                           <SelectTrigger id="noticeType">
                             <SelectValue placeholder="Selecione..." />
@@ -567,9 +570,7 @@ export default function TerminationEditPage() {
                           id="noticePeriodEndDate"
                           type="date"
                           value={noticePeriodEndDate}
-                          onChange={e =>
-                            setNoticePeriodEndDate(e.target.value)
-                          }
+                          onChange={e => setNoticePeriodEndDate(e.target.value)}
                         />
                       </div>
                     </div>

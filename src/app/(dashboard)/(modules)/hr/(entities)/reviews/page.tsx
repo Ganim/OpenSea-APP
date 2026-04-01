@@ -21,8 +21,13 @@ import { Card } from '@/components/ui/card';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../_shared/constants/hr-permissions';
 import { reviewsService } from '@/services/hr/reviews.service';
-import type { ReviewCycle, ReviewCycleType, ReviewCycleStatus } from '@/types/hr';
+import type {
+  ReviewCycle,
+  ReviewCycleType,
+  ReviewCycleStatus,
+} from '@/types/hr';
 import {
   useInfiniteQuery,
   useMutation,
@@ -77,8 +82,8 @@ function ReviewsPageContent() {
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
-  const canCreate = hasPermission('hr.reviews.register');
-  const canDelete = hasPermission('hr.reviews.remove');
+  const canCreate = hasPermission(HR_PERMISSIONS.REVIEWS.CREATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.REVIEWS.DELETE);
 
   // ============================================================================
   // INFINITE SCROLL DATA FETCHING
@@ -207,14 +212,6 @@ function ReviewsPageContent() {
     setIsDeleteOpen(false);
   }, [cycleToDelete, deleteMutation]);
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   // ============================================================================
   // RENDER
   // ============================================================================
@@ -239,6 +236,11 @@ function ReviewsPageContent() {
               </Button>
             ) : undefined
           }
+        />
+
+        <Header
+          title="Avaliações de Desempenho"
+          description="Gerencie ciclos de avaliação e desempenho dos colaboradores"
         />
       </PageHeader>
 
@@ -332,7 +334,8 @@ function CycleCard({
   onDelete?: () => void;
 }) {
   const typeColors = REVIEW_CYCLE_TYPE_COLORS[cycle.type as ReviewCycleType];
-  const statusColors = REVIEW_CYCLE_STATUS_COLORS[cycle.status as ReviewCycleStatus];
+  const statusColors =
+    REVIEW_CYCLE_STATUS_COLORS[cycle.status as ReviewCycleStatus];
 
   return (
     <Card
@@ -362,7 +365,8 @@ function CycleCard({
         <div className="min-w-0 flex-1">
           <h3 className="font-medium text-sm truncate">{cycle.name}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {REVIEW_CYCLE_TYPE_LABELS[cycle.type as ReviewCycleType] ?? cycle.type}
+            {REVIEW_CYCLE_TYPE_LABELS[cycle.type as ReviewCycleType] ??
+              cycle.type}
           </p>
         </div>
       </div>
@@ -373,7 +377,8 @@ function CycleCard({
           variant="secondary"
           className={`text-xs ${statusColors?.bg ?? ''} ${statusColors?.text ?? ''} border-0`}
         >
-          {REVIEW_CYCLE_STATUS_LABELS[cycle.status as ReviewCycleStatus] ?? cycle.status}
+          {REVIEW_CYCLE_STATUS_LABELS[cycle.status as ReviewCycleStatus] ??
+            cycle.status}
         </Badge>
         {!cycle.isActive && (
           <Badge

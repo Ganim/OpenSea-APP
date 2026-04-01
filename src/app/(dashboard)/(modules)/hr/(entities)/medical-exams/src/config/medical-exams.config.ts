@@ -125,7 +125,7 @@ export const medicalExamsConfig = defineEntityConfig<MedicalExam>()({
 
   features: {
     create: true,
-    edit: false,
+    edit: true,
     delete: true,
     duplicate: false,
     softDelete: false,

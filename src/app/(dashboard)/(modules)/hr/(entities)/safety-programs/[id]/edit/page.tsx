@@ -11,6 +11,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,8 @@ import type {
   SafetyProgramType,
   SafetyProgramStatus,
 } from '@/types/hr';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -92,6 +95,8 @@ export default function SafetyProgramEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const programId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.SAFETY_PROGRAMS.DELETE);
 
   // ============================================================================
   // STATE
@@ -255,31 +260,33 @@ export default function SafetyProgramEditPage() {
             },
             { label: 'Editar' },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-              disabled: isSaving || deleteMutation.isPending,
-            },
-            {
-              id: 'cancel',
-              title: 'Cancelar',
-              icon: X,
-              onClick: () => router.push(`/hr/safety-programs/${programId}`),
-              variant: 'outline',
-              disabled: isSaving,
-            },
-            {
-              id: 'save',
-              title: 'Salvar',
-              icon: Save,
-              onClick: handleSave,
-              disabled: isSaving || !name,
-            },
-          ]}
+          buttons={
+            [
+              canDelete && {
+                id: 'delete',
+                title: 'Excluir',
+                icon: Trash,
+                onClick: () => setIsDeleteModalOpen(true),
+                variant: 'outline',
+                disabled: isSaving || deleteMutation.isPending,
+              },
+              {
+                id: 'cancel',
+                title: 'Cancelar',
+                icon: X,
+                onClick: () => router.push(`/hr/safety-programs/${programId}`),
+                variant: 'outline',
+                disabled: isSaving,
+              },
+              {
+                id: 'save',
+                title: 'Salvar',
+                icon: Save,
+                onClick: handleSave,
+                disabled: isSaving || !name,
+              },
+            ].filter(Boolean) as HeaderButton[]
+          }
         />
 
         {/* Identity Card */}

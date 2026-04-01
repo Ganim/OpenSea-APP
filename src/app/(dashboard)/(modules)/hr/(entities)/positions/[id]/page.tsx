@@ -11,15 +11,14 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { logger } from '@/lib/logger';
+import { usePermissions } from '@/hooks/use-permissions';
 import { employeesService } from '@/services/hr/employees.service';
 import type { Employee, Position } from '@/types/hr';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
   Briefcase,
@@ -30,26 +29,20 @@ import {
   Edit,
   Factory,
   Layers,
-  Trash,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import {
-  deletePosition,
-  formatLevel,
-  getSalaryRange,
-  positionsApi,
-} from '../src';
+import { formatLevel, getSalaryRange, positionsApi } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function PositionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const positionId = params.id as string;
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission(HR_PERMISSIONS.POSITIONS.UPDATE);
 
   // ============================================================================
   // DATA FETCHING
@@ -82,25 +75,6 @@ export default function PositionDetailPage() {
 
   const handleEdit = () => {
     router.push(`/hr/positions/${positionId}/edit`);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      await deletePosition(positionId);
-      await queryClient.invalidateQueries({ queryKey: ['positions'] });
-      toast.success('Cargo excluído com sucesso!');
-      router.push('/hr/positions');
-    } catch (error) {
-      logger.error(
-        'Erro ao excluir cargo',
-        error instanceof Error ? error : undefined
-      );
-      toast.error('Erro ao excluir cargo');
-    }
   };
 
   // ============================================================================
@@ -164,21 +138,18 @@ export default function PositionDetailPage() {
             { label: 'Cargos', href: '/hr/positions' },
             { label: position.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: handleDelete,
-              variant: 'outline',
-            },
-            {
-              id: 'edit',
-              title: 'Editar',
-              icon: Edit,
-              onClick: handleEdit,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: handleEdit,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -224,95 +195,119 @@ export default function PositionDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Informações do Cargo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg uppercase font-semibold mb-4">
-            Informações do Cargo
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <InfoField
-              label="Nome"
-              value={position.name}
-              showCopyButton
-              copyTooltip="Copiar nome"
-            />
-            <InfoField
-              label="Código"
-              value={position.code}
-              showCopyButton
-              copyTooltip="Copiar código"
-            />
-            <InfoField
-              label="Descrição"
-              value={position.description}
-              className="md:col-span-2"
-            />
-            <InfoField
-              label="Nível"
-              value={formatLevel(position.level)}
-              icon={<Layers className="h-4 w-4" />}
-            />
-            <InfoField
-              label="Faixa Salarial"
-              value={getSalaryRange(position)}
-              icon={<DollarSign className="h-4 w-4" />}
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Briefcase className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Informações do Cargo</h3>
+              <p className="text-sm text-muted-foreground">
+                Dados cadastrais e classificação
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <InfoField
+                label="Nome"
+                value={position.name}
+                showCopyButton
+                copyTooltip="Copiar nome"
+              />
+              <InfoField
+                label="Código"
+                value={position.code}
+                showCopyButton
+                copyTooltip="Copiar código"
+              />
+              <InfoField
+                label="Descrição"
+                value={position.description}
+                className="md:col-span-2"
+              />
+              <InfoField
+                label="Nível"
+                value={formatLevel(position.level)}
+                icon={<Layers className="h-4 w-4" />}
+              />
+              <InfoField
+                label="Faixa Salarial"
+                value={getSalaryRange(position)}
+                icon={<DollarSign className="h-4 w-4" />}
+              />
+            </div>
           </div>
         </Card>
 
         {/* Hierarquia */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg uppercase font-semibold mb-4">
-            Hierarquia Organizacional
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            {position.department && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Departamento
-                </p>
-                <Link
-                  href={`/hr/departments/${position.department.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  <span className="font-medium">
-                    {position.department.name}
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              </div>
-            )}
-            {position.department?.company && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Factory className="h-4 w-4" />
-                  Empresa
-                </p>
-                <Link
-                  href={`/admin/companies/${position.department.company.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  <span className="font-medium">
-                    {position.department.company.tradeName ||
-                      position.department.company.legalName}
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              </div>
-            )}
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Building2 className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">
+                Hierarquia Organizacional
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Departamento e empresa vinculados
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              {position.department && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Departamento
+                  </p>
+                  <Link
+                    href={`/hr/departments/${position.department.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                  >
+                    <span className="font-medium">
+                      {position.department.name}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+                </div>
+              )}
+              {position.department?.company && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Factory className="h-4 w-4" />
+                    Empresa
+                  </p>
+                  <Link
+                    href={`/admin/companies/${position.department.company.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                  >
+                    <span className="font-medium">
+                      {position.department.company.tradeName ||
+                        position.department.company.legalName}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </Card>
 
         {/* Funcionários */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Funcionários neste Cargo
-              <Badge variant="secondary" className="ml-2">
-                {employees.length}
-              </Badge>
-            </h3>
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Users className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">
+                Funcionários neste Cargo
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {employees.length} funcionário
+                {employees.length !== 1 ? 's' : ''} vinculado
+                {employees.length !== 1 ? 's' : ''}
+              </p>
+            </div>
             <Link href={`/hr/employees?positionId=${positionId}`}>
               <Button variant="outline" size="sm">
                 Ver todos
@@ -320,49 +315,44 @@ export default function PositionDetailPage() {
               </Button>
             </Link>
           </div>
-          {employees.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
-              Nenhum funcionário neste cargo.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {employees.slice(0, 5).map((employee: Employee) => (
-                <Link
-                  key={employee.id}
-                  href={`/hr/employees/${employee.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
-                      {employee.fullName.charAt(0).toUpperCase()}
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            {employees.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-4">
+                Nenhum funcionário neste cargo.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {employees.slice(0, 5).map((employee: Employee) => (
+                  <Link
+                    key={employee.id}
+                    href={`/hr/employees/${employee.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
+                        {employee.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium">{employee.fullName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {employee.registrationNumber}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{employee.fullName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {employee.registrationNumber}
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
-              {employees.length > 5 && (
-                <p className="text-sm text-muted-foreground text-center pt-2">
-                  + {employees.length - 5} outros funcionários
-                </p>
-              )}
-            </div>
-          )}
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+                ))}
+                {employees.length > 5 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    + {employees.length - 5} outros funcionários
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </Card>
       </PageBody>
-
-      <VerifyActionPinModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onSuccess={confirmDelete}
-        title="Excluir Cargo"
-        description={`Digite seu PIN de ação para excluir o cargo "${position.name}". Esta ação não pode ser desfeita.`}
-      />
     </PageLayout>
   );
 }

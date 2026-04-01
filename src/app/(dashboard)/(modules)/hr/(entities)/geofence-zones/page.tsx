@@ -129,8 +129,9 @@ function GeofenceZonesPageContent() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.page ?? 1;
-      const totalPages = lastPage.totalPages ?? 1;
+      const meta = (lastPage as Record<string, unknown>).meta as { page?: number; totalPages?: number } | undefined;
+      const currentPage = meta?.page ?? 1;
+      const totalPages = meta?.totalPages ?? 1;
       return currentPage < totalPages ? currentPage + 1 : undefined;
     },
   });
@@ -214,7 +215,19 @@ function GeofenceZonesPageContent() {
   // ============================================================================
 
   const displayedZones = useMemo(() => {
-    let items = page.filteredItems || [];
+    let items = allGeofenceZonesInfinite;
+
+    // Apply search filter (mirrors useEntityPage filterFn)
+    if (page.searchQuery.trim()) {
+      const q = page.searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          item.name.toLowerCase().includes(q) ||
+          (item.address && item.address.toLowerCase().includes(q))
+      );
+    }
+
+    // Apply status filter
     if (statusFilter.length > 0) {
       const activeSet = new Set(statusFilter);
       items = items.filter(z => {
@@ -224,7 +237,7 @@ function GeofenceZonesPageContent() {
       });
     }
     return items;
-  }, [page.filteredItems, statusFilter]);
+  }, [allGeofenceZonesInfinite, page.searchQuery, statusFilter]);
 
   // Build URL preserving filter params
   const buildFilterUrl = useCallback(

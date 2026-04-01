@@ -11,22 +11,20 @@ import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import { deductionsService } from '@/services/hr/deductions.service';
 import type { Deduction } from '@/types/hr';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Calendar,
   Clock,
+  Edit,
   MinusCircle,
   NotebookText,
   RefreshCw,
   CheckCircle,
-  Trash,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   deductionKeys,
   formatCurrency,
@@ -34,16 +32,16 @@ import {
   getAppliedLabel,
   getAppliedColor,
   formatInstallments,
-  useDeleteDeduction,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function DeductionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const deductionId = params.id as string;
+  const { hasPermission } = usePermissions();
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const canEdit = hasPermission(HR_PERMISSIONS.DEDUCTIONS.UPDATE);
 
   // ============================================================================
   // DATA FETCHING
@@ -57,29 +55,7 @@ export default function DeductionDetailPage() {
     },
   });
 
-  // ============================================================================
-  // MUTATIONS
-  // ============================================================================
-
-  const deleteMutation = useDeleteDeduction({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: deductionKeys.all });
-      toast.success('Dedução excluída com sucesso!');
-      router.push('/hr/deductions');
-    },
-  });
-
   const { getName } = useEmployeeMap(deduction ? [deduction.employeeId] : []);
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
-
-  const handleDelete = async () => {
-    if (!deduction) return;
-    await deleteMutation.mutateAsync(deduction.id);
-    setShowDeleteModal(false);
-  };
 
   // ============================================================================
   // LOADING STATE
@@ -168,16 +144,19 @@ export default function DeductionDetailPage() {
             { label: 'Deduções', href: '/hr/deductions' },
             { label: deduction.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setShowDeleteModal(true),
-              variant: 'outline',
-              disabled: deleteMutation.isPending,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: () =>
+                      router.push(`/hr/deductions/${deductionId}/edit`),
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -226,94 +205,115 @@ export default function DeductionDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados da Dedução */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Dados da Dedução
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Nome"
-              value={deduction.name}
-              showCopyButton
-              copyTooltip="Copiar nome"
-            />
-            <InfoField
-              label="Valor"
-              value={formatCurrency(deduction.amount)}
-              badge={
-                <Badge variant="destructive" className="gap-1">
-                  {formatCurrency(deduction.amount)}
-                </Badge>
-              }
-            />
-            <InfoField label="Data" value={formatDate(deduction.date)} />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <NotebookText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Dados da Dedução</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações principais do desconto
+              </p>
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <InfoField
-              label="Funcionário"
-              value={getName(deduction.employeeId)}
-              showCopyButton
-              copyTooltip="Copiar nome do funcionário"
-            />
-            <InfoField
-              label="Motivo"
-              value={deduction.reason}
-              showCopyButton
-              copyTooltip="Copiar motivo"
-            />
+          <div className="p-4 space-y-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <InfoField
+                label="Nome"
+                value={deduction.name}
+                showCopyButton
+                copyTooltip="Copiar nome"
+              />
+              <InfoField
+                label="Valor"
+                value={formatCurrency(deduction.amount)}
+                badge={
+                  <Badge variant="destructive" className="gap-1">
+                    {formatCurrency(deduction.amount)}
+                  </Badge>
+                }
+              />
+              <InfoField label="Data" value={formatDate(deduction.date)} />
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <InfoField
+                label="Funcionário"
+                value={getName(deduction.employeeId)}
+                showCopyButton
+                copyTooltip="Copiar nome do funcionário"
+              />
+              <InfoField
+                label="Motivo"
+                value={deduction.reason}
+                showCopyButton
+                copyTooltip="Copiar motivo"
+              />
+            </div>
           </div>
         </Card>
 
         {/* Recorrência (only if recurring) */}
         {deduction.isRecurring && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <RefreshCw className="h-5 w-5" />
-              Recorrência
-            </h3>
-            <div className="grid md:grid-cols-3 gap-6">
-              <InfoField
-                label="Total de Parcelas"
-                value={
-                  deduction.installments ? String(deduction.installments) : '-'
-                }
-              />
-              <InfoField
-                label="Parcela Atual"
-                value={
-                  deduction.currentInstallment
-                    ? String(deduction.currentInstallment)
-                    : '-'
-                }
-              />
-              <InfoField label="Progresso" value={installmentsText ?? '-'} />
-            </div>
-            {deduction.installments && deduction.currentInstallment && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                  <span>Progresso das parcelas</span>
-                  <span>{progressPercent}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                  <div
-                    className="bg-linear-to-r from-rose-500 to-rose-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <RefreshCw className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Recorrência</h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de parcelamento
+                </p>
               </div>
-            )}
+            </div>
+            <div className="p-4">
+              <div className="grid md:grid-cols-3 gap-6">
+                <InfoField
+                  label="Total de Parcelas"
+                  value={
+                    deduction.installments
+                      ? String(deduction.installments)
+                      : '-'
+                  }
+                />
+                <InfoField
+                  label="Parcela Atual"
+                  value={
+                    deduction.currentInstallment
+                      ? String(deduction.currentInstallment)
+                      : '-'
+                  }
+                />
+                <InfoField label="Progresso" value={installmentsText ?? '-'} />
+              </div>
+              {deduction.installments && deduction.currentInstallment && (
+                <div className="mt-6">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <span>Progresso das parcelas</span>
+                    <span>{progressPercent}%</span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2.5">
+                    <div
+                      className="bg-linear-to-r from-rose-500 to-rose-600 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </Card>
         )}
 
         {/* Aplicação (only if applied) */}
         {deduction.isApplied && deduction.appliedAt && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <CheckCircle className="h-5 w-5" />
-              Aplicação
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-base font-semibold">Aplicação</h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de aplicação do desconto
+                </p>
+              </div>
+            </div>
+            <div className="p-4 grid md:grid-cols-2 gap-6">
               <InfoField
                 label="Data de Aplicação"
                 value={formatDate(deduction.appliedAt)}
@@ -323,12 +323,17 @@ export default function DeductionDetailPage() {
         )}
 
         {/* Metadados */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Clock className="h-5 w-5" />
-            Metadados
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Metadados</h3>
+              <p className="text-sm text-muted-foreground">
+                Datas de criação e atualização
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-2 gap-6">
             <InfoField
               label="Criado em"
               value={formatDate(deduction.createdAt)}
@@ -340,15 +345,6 @@ export default function DeductionDetailPage() {
           </div>
         </Card>
       </PageBody>
-
-      {/* Delete Confirm Modal */}
-      <VerifyActionPinModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onSuccess={handleDelete}
-        title="Excluir Dedução"
-        description="Digite seu PIN de ação para excluir esta dedução. Esta ação não pode ser desfeita."
-      />
     </PageLayout>
   );
 }

@@ -137,7 +137,7 @@ export default function HRSettingsPage() {
     queryKey: ['hr-config'],
     queryFn: async () => {
       const response = await hrConfigService.getConfig();
-      return response.config;
+      return response.hrConfig;
     },
   });
 
@@ -293,6 +293,7 @@ export default function HRSettingsPage() {
                 <Switch
                   checked={empresaCidadaEnabled}
                   onCheckedChange={setEmpresaCidadaEnabled}
+                  aria-label="Habilitar Programa Empresa Cidadã"
                 />
               </ConfigRow>
               {empresaCidadaEnabled && (
@@ -346,6 +347,7 @@ export default function HRSettingsPage() {
                 <Switch
                   checked={unionContributionEnabled}
                   onCheckedChange={setUnionContributionEnabled}
+                  aria-label="Habilitar Contribuição Sindical"
                 />
               </ConfigRow>
               {unionContributionEnabled && (
@@ -385,6 +387,7 @@ export default function HRSettingsPage() {
                 <Switch
                   checked={patEnabled}
                   onCheckedChange={setPatEnabled}
+                  aria-label="Habilitar PAT"
                 />
               </ConfigRow>
               {patEnabled && (

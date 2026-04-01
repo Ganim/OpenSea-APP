@@ -105,9 +105,9 @@ function BenefitsPageContent() {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.page ?? 1;
-      const totalPages = lastPage.totalPages ?? 1;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+      const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
+      const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
+      return currentPage < total ? currentPage + 1 : undefined;
     },
   });
 
@@ -192,11 +192,26 @@ function BenefitsPageContent() {
   // ============================================================================
 
   const displayedPlans = useMemo(() => {
-    let items = page.filteredItems || [];
+    let items = allBenefitPlansInfinite;
+
+    // Apply search filter (mirrors useEntityPage filterFn)
+    if (page.searchQuery.trim()) {
+      const q = page.searchQuery.toLowerCase();
+      items = items.filter(
+        item =>
+          item.name.toLowerCase().includes(q) ||
+          (item.provider && item.provider.toLowerCase().includes(q)) ||
+          (item.description && item.description.toLowerCase().includes(q)) ||
+          BENEFIT_TYPE_LABELS[item.type]?.toLowerCase().includes(q)
+      );
+    }
+
+    // Apply type filter
     if (typeFilter.length > 0) {
       const set = new Set(typeFilter);
       items = items.filter(p => set.has(p.type));
     }
+    // Apply status filter
     if (statusFilter.length > 0) {
       if (statusFilter.includes('active') && !statusFilter.includes('inactive')) {
         items = items.filter(p => p.isActive);
@@ -205,7 +220,7 @@ function BenefitsPageContent() {
       }
     }
     return items;
-  }, [page.filteredItems, typeFilter, statusFilter]);
+  }, [allBenefitPlansInfinite, page.searchQuery, typeFilter, statusFilter]);
 
   // Build URL preserving filter params
   const buildFilterUrl = useCallback(

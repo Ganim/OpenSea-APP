@@ -21,13 +21,14 @@ import type { PermissionGroup } from '@/types/rbac';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
-  BadgeCheck,
   Briefcase,
   Building2,
+  Check,
+  Copy,
   CreditCard,
   Eye,
   EyeOff,
-  Info,
+  Hash,
   Loader2,
   Lock,
   Mail,
@@ -48,6 +49,9 @@ interface CreateModalProps {
       permissionGroupId?: string;
       userEmail?: string;
       userPassword?: string;
+      enableEmailLogin?: boolean;
+      enableCpfLogin?: boolean;
+      enableEnrollmentLogin?: boolean;
     }
   ) => Promise<void>;
 }
@@ -66,10 +70,14 @@ export function CreateModal({
   const [cpfError, setCpfError] = useState<string>('');
   const [createUser, setCreateUser] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
-  const [userPassword, setUserPassword] = useState<string>('');
+  const [userPassword, setUserPassword] = useState<string>('Mudar@123');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
+  const [enableEmailLogin, setEnableEmailLogin] = useState<boolean>(false);
+  const [enableCpfLogin, setEnableCpfLogin] = useState<boolean>(true);
+  const [enableEnrollmentLogin, setEnableEnrollmentLogin] = useState<boolean>(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Fetch departments
   const { data: departmentsData } = useQuery<Department[]>({
@@ -264,6 +272,22 @@ export function CreateModal({
     }
   }, [userPassword]);
 
+  // Auto-enable CPF login when CPF is filled
+  useEffect(() => {
+    if (cpf && cpf.replace(/\D/g, '').length === 11 && !cpfError) {
+      setEnableCpfLogin(true);
+    }
+  }, [cpf, cpfError]);
+
+  const copyToClipboard = (value: string, field: string) => {
+    navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    toast.success('Copiado para a área de transferência');
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const registrationNumber = useMemo(() => `EMP${Date.now()}`, []);
+
   const handleSubmit = async () => {
     if (fullName && cpf) {
       const cleanCpf = cpf.replace(/\D/g, '');
@@ -274,7 +298,7 @@ export function CreateModal({
           companyId: selectedCompany?.id || selectedDepartment?.companyId || null,
           departmentId: selectedDepartment?.id || null,
           positionId: positionId || null,
-          registrationNumber: `EMP${Date.now()}`,
+          registrationNumber,
           cpf: cleanCpf,
           hireDate: new Date().toISOString(),
           contractType: 'CLT',
@@ -282,8 +306,11 @@ export function CreateModal({
           weeklyHours: 40,
           createUser,
           permissionGroupId: createUser ? defaultPermissionGroupId : undefined,
-          userEmail: createUser ? userEmail : undefined,
+          userEmail: createUser && enableEmailLogin ? userEmail : undefined,
           userPassword: createUser ? userPassword : undefined,
+          enableEmailLogin: createUser ? enableEmailLogin : undefined,
+          enableCpfLogin: createUser ? enableCpfLogin : undefined,
+          enableEnrollmentLogin: createUser ? enableEnrollmentLogin : undefined,
         });
         handleClose();
       } catch (error) {
@@ -308,21 +335,27 @@ export function CreateModal({
     setCpfError('');
     setCreateUser(false);
     setUserEmail('');
-    setUserPassword('');
+    setUserPassword('Mudar@123');
     setShowPassword(false);
     setEmailError('');
     setPasswordError('');
+    setEnableEmailLogin(false);
+    setEnableCpfLogin(true);
+    setEnableEnrollmentLogin(false);
+    setCopiedField(null);
     onClose();
   };
 
   const canProceedStep1 = positionId !== '';
   const canProceedStep2 =
     fullName !== '' && cpf.replace(/\D/g, '').length === 11 && !cpfError;
+  const hasAtLeastOneLoginMethod = enableEmailLogin || enableCpfLogin || enableEnrollmentLogin;
+  const emailFieldValid = !enableEmailLogin || (userEmail !== '' && !emailError);
   const canSubmit =
     !createUser ||
     (createUser &&
-      userEmail !== '' &&
-      !emailError &&
+      hasAtLeastOneLoginMethod &&
+      emailFieldValid &&
       userPassword !== '' &&
       !passwordError);
 
@@ -502,116 +535,195 @@ export function CreateModal({
       },
       {
         title: 'Dados de Acesso',
-        description: 'Defina o email e senha temporária do novo usuário',
+        description: 'Configure os métodos de login e a senha temporária',
         icon: <UserPlus className="h-16 w-16 text-teal-500/60" />,
         isValid: canSubmit && !isSubmitting,
         onBack: () => setCurrentStep(2),
         content: (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userEmail">
-                Email <span className="text-rose-500">*</span>
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="userEmail"
-                  type="email"
-                  value={userEmail}
-                  onChange={e => setUserEmail(e.target.value)}
-                  placeholder="email@exemplo.com"
-                  autoFocus
-                  className="pl-10"
-                  aria-invalid={!!emailError}
-                />
-                <FormErrorIcon message={emailError} />
-              </div>
+            {/* Login Methods */}
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Métodos de Login</Label>
+              <p className="text-xs text-muted-foreground">
+                Selecione como o funcionário poderá acessar o sistema
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="userPassword">
-                Senha Temporária <span className="text-rose-500">*</span>
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="userPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  value={userPassword}
-                  onChange={e => setUserPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="pl-10 pr-10"
-                  aria-invalid={!!passwordError}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={`absolute top-1/2 -translate-y-1/2 h-7 w-7 p-0 ${passwordError ? 'right-8' : 'right-1'}`}
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-                <FormErrorIcon message={passwordError} className="right-1" />
-              </div>
-            </div>
-
-            {/* Auth Link Indicators */}
-            {(cpf && authConfig?.allowedMethods?.includes('CPF')) ||
-            authConfig?.allowedMethods?.includes('ENROLLMENT') ? (
-              <div className="rounded-lg border border-blue-200 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/5 p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4 text-blue-500" />
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                    Métodos de login adicionais
-                  </p>
-                </div>
-                <p className="text-xs text-blue-600/80 dark:text-blue-400/80">
-                  Os seguintes métodos de login serão habilitados
-                  automaticamente com base nos dados do funcionário:
-                </p>
-                <div className="space-y-2">
-                  {cpf &&
-                    cpf.replace(/\D/g, '').length === 11 &&
-                    authConfig?.allowedMethods?.includes('CPF') && (
-                      <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-white/60 dark:bg-white/5 border border-blue-100 dark:border-blue-500/10">
-                        <div className="flex items-center justify-center h-7 w-7 rounded-md bg-emerald-50 dark:bg-emerald-500/8">
-                          <CreditCard className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-300" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            Login por CPF
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            O funcionário poderá acessar o sistema usando o CPF
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  {authConfig?.allowedMethods?.includes('ENROLLMENT') && (
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-md bg-white/60 dark:bg-white/5 border border-blue-100 dark:border-blue-500/10">
-                      <div className="flex items-center justify-center h-7 w-7 rounded-md bg-violet-50 dark:bg-violet-500/8">
-                        <BadgeCheck className="h-3.5 w-3.5 text-violet-700 dark:text-violet-300" />
+              {/* CPF Login */}
+              {cpf && cpf.replace(/\D/g, '').length === 11 && !cpfError && (
+                <div className={`rounded-lg border p-3 transition-colors ${enableCpfLogin ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5' : 'border-border'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableCpfLogin ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-muted'}`}>
+                        <CreditCard className={`h-4 w-4 ${enableCpfLogin ? 'text-emerald-700 dark:text-emerald-300' : 'text-muted-foreground'}`} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">
-                          Login por Matrícula
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          O funcionário poderá acessar o sistema usando a
-                          matrícula
-                        </p>
+                        <p className="text-sm font-medium">Login por CPF</p>
+                        <p className="text-xs text-muted-foreground">Acessar usando o CPF cadastrado</p>
                       </div>
+                    </div>
+                    <Switch
+                      checked={enableCpfLogin}
+                      onCheckedChange={setEnableCpfLogin}
+                    />
+                  </div>
+                  {enableCpfLogin && (
+                    <div className="mt-2.5 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-emerald-100 dark:border-emerald-500/10 px-3 py-2">
+                      <span className="text-sm font-mono flex-1">{cpf}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => copyToClipboard(cpf.replace(/\D/g, ''), 'cpf')}
+                      >
+                        {copiedField === 'cpf' ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                      </Button>
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Email Login */}
+              <div className={`rounded-lg border p-3 transition-colors ${enableEmailLogin ? 'border-sky-200 dark:border-sky-500/20 bg-sky-50/50 dark:bg-sky-500/5' : 'border-border'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEmailLogin ? 'bg-sky-100 dark:bg-sky-500/10' : 'bg-muted'}`}>
+                      <Mail className={`h-4 w-4 ${enableEmailLogin ? 'text-sky-700 dark:text-sky-300' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Login por Email</p>
+                      <p className="text-xs text-muted-foreground">Acessar usando email e senha</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={enableEmailLogin}
+                    onCheckedChange={setEnableEmailLogin}
+                  />
+                </div>
+                {enableEmailLogin && (
+                  <div className="mt-2.5 space-y-2">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        value={userEmail}
+                        onChange={e => setUserEmail(e.target.value)}
+                        placeholder="email@exemplo.com"
+                        className="pl-10"
+                        aria-invalid={!!emailError}
+                        autoFocus
+                      />
+                      <FormErrorIcon message={emailError} />
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : null}
+
+              {/* Enrollment Login */}
+              <div className={`rounded-lg border p-3 transition-colors ${enableEnrollmentLogin ? 'border-violet-200 dark:border-violet-500/20 bg-violet-50/50 dark:bg-violet-500/5' : 'border-border'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEnrollmentLogin ? 'bg-violet-100 dark:bg-violet-500/10' : 'bg-muted'}`}>
+                      <Hash className={`h-4 w-4 ${enableEnrollmentLogin ? 'text-violet-700 dark:text-violet-300' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Login por Matrícula</p>
+                      <p className="text-xs text-muted-foreground">Acessar usando o número de matrícula</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={enableEnrollmentLogin}
+                    onCheckedChange={setEnableEnrollmentLogin}
+                  />
+                </div>
+                {enableEnrollmentLogin && (
+                  <div className="mt-2.5 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-violet-100 dark:border-violet-500/10 px-3 py-2">
+                    <span className="text-sm font-mono flex-1">{registrationNumber}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => copyToClipboard(registrationNumber, 'enrollment')}
+                    >
+                      {copiedField === 'enrollment' ? (
+                        <Check className="h-3.5 w-3.5 text-emerald-500" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {!hasAtLeastOneLoginMethod && (
+              <p className="text-xs text-rose-500 font-medium">
+                Selecione pelo menos um método de login
+              </p>
+            )}
+
+            {/* Temporary Password */}
+            <div className="rounded-lg border border-border p-3 space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-500/10">
+                  <Lock className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Senha Temporária</p>
+                  <p className="text-xs text-muted-foreground">
+                    O funcionário deverá alterar no primeiro acesso
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={userPassword}
+                    onChange={e => setUserPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    className="pl-10 pr-10 font-mono"
+                    aria-invalid={!!passwordError}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={`absolute top-1/2 -translate-y-1/2 h-7 w-7 p-0 ${passwordError ? 'right-8' : 'right-1'}`}
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                  <FormErrorIcon message={passwordError} className="right-1" />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-2.5 shrink-0"
+                  onClick={() => copyToClipboard(userPassword, 'password')}
+                >
+                  {copiedField === 'password' ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         ),
         footer: (
@@ -640,6 +752,12 @@ export function CreateModal({
       isSubmitting,
       canProceedStep2,
       canSubmit,
+      enableCpfLogin,
+      enableEmailLogin,
+      enableEnrollmentLogin,
+      hasAtLeastOneLoginMethod,
+      copiedField,
+      registrationNumber,
     ]
   );
 

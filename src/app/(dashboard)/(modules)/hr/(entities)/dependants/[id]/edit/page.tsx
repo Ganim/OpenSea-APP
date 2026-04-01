@@ -19,6 +19,8 @@ import { Card } from '@/components/ui/card';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import { employeesService } from '@/services/hr/employees.service';
@@ -50,13 +52,14 @@ import {
 // RELATIONSHIP OPTIONS
 // =============================================================================
 
-const RELATIONSHIP_OPTIONS: { value: DependantRelationship; label: string }[] = [
-  { value: 'SPOUSE', label: 'Cônjuge' },
-  { value: 'CHILD', label: 'Filho(a)' },
-  { value: 'STEPCHILD', label: 'Enteado(a)' },
-  { value: 'PARENT', label: 'Pai/Mãe' },
-  { value: 'OTHER', label: 'Outro' },
-];
+const RELATIONSHIP_OPTIONS: { value: DependantRelationship; label: string }[] =
+  [
+    { value: 'SPOUSE', label: 'Cônjuge' },
+    { value: 'CHILD', label: 'Filho(a)' },
+    { value: 'STEPCHILD', label: 'Enteado(a)' },
+    { value: 'PARENT', label: 'Pai/Mãe' },
+    { value: 'OTHER', label: 'Outro' },
+  ];
 
 // =============================================================================
 // SECTION HEADER
@@ -94,6 +97,8 @@ export default function DependantEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const dependantId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.DEPENDANTS.DELETE);
 
   // ==========================================================================
   // STATE
@@ -268,15 +273,19 @@ export default function DependantEditPage() {
       onClick: () => router.push(`/hr/dependants/${dependantId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default' as const,
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',
@@ -366,8 +375,8 @@ export default function DependantEditPage() {
               <h1 className="text-xl font-bold truncate">{dependant.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {employeeName ?? 'Funcionário desconhecido'} ·{' '}
-                {getRelationshipLabel(dependant.relationship)} ·{' '}
-                Criado em {formatDate(dependant.createdAt)}
+                {getRelationshipLabel(dependant.relationship)} · Criado em{' '}
+                {formatDate(dependant.createdAt)}
               </p>
             </div>
           </div>
@@ -423,7 +432,8 @@ export default function DependantEditPage() {
                   {/* Data de Nascimento */}
                   <div className="grid gap-2">
                     <Label htmlFor="birthDate">
-                      Data de Nascimento <span className="text-rose-500">*</span>
+                      Data de Nascimento{' '}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -461,7 +471,8 @@ export default function DependantEditPage() {
                         onChange={e => {
                           setFormData({
                             ...formData,
-                            relationship: e.target.value as DependantRelationship,
+                            relationship: e.target
+                              .value as DependantRelationship,
                           });
                           if (fieldErrors.relationship)
                             setFieldErrors(prev => ({
@@ -534,7 +545,10 @@ export default function DependantEditPage() {
                       }
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                     />
-                    <Label htmlFor="isSalarioFamilia" className="cursor-pointer">
+                    <Label
+                      htmlFor="isSalarioFamilia"
+                      className="cursor-pointer"
+                    >
                       Salário Família
                     </Label>
                   </div>

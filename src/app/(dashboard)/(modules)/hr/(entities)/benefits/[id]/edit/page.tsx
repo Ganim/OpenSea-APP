@@ -11,6 +11,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,14 +25,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { logger } from '@/lib/logger';
 import type { BenefitPlan, BenefitType } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Heart, Loader2, Save, X } from 'lucide-react';
+import { Heart, Loader2, NotebookText, Save, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { benefitPlansApi } from '../../src';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { benefitPlansApi, deleteBenefitPlan } from '../../src';
 import {
   BENEFIT_TYPE_LABELS,
   BENEFIT_TYPE_COLORS,
@@ -43,6 +47,8 @@ export default function BenefitPlanEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const planId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.BENEFITS.DELETE);
 
   // Form states
   const [planName, setPlanName] = useState('');
@@ -52,6 +58,7 @@ export default function BenefitPlanEditPage() {
   const [planDescription, setPlanDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
@@ -79,6 +86,22 @@ export default function BenefitPlanEditPage() {
   // ============================================================================
   // HANDLERS
   // ============================================================================
+
+  const handleDeleteConfirm = async () => {
+    if (!plan) return;
+    try {
+      await deleteBenefitPlan(plan.id);
+      await queryClient.invalidateQueries({ queryKey: ['benefit-plans'] });
+      toast.success('Plano de benefício excluído com sucesso!');
+      router.push('/hr/benefits');
+    } catch (error) {
+      logger.error(
+        'Erro ao excluir plano',
+        error instanceof Error ? error : undefined
+      );
+      toast.error('Erro ao excluir plano de benefício');
+    }
+  };
 
   const handleSave = async () => {
     if (!plan || !planName) return;
@@ -174,23 +197,34 @@ export default function BenefitPlanEditPage() {
             },
             { label: 'Editar' },
           ]}
-          buttons={[
-            {
-              id: 'cancel',
-              title: 'Cancelar',
-              icon: X,
-              onClick: () => router.push(`/hr/benefits/${planId}`),
-              variant: 'outline',
-              disabled: isSaving,
-            },
-            {
-              id: 'save',
-              title: 'Salvar',
-              icon: Save,
-              onClick: handleSave,
-              disabled: isSaving,
-            },
-          ]}
+          buttons={
+            [
+              {
+                id: 'cancel',
+                title: 'Cancelar',
+                onClick: () => router.push(`/hr/benefits/${planId}`),
+                variant: 'ghost',
+                disabled: isSaving,
+              },
+              canDelete && {
+                id: 'delete',
+                title: 'Excluir',
+                icon: Trash2,
+                onClick: () => setDeleteModalOpen(true),
+                variant: 'default' as const,
+                className:
+                  'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+              },
+              {
+                id: 'save',
+                title: isSaving ? 'Salvando...' : 'Salvar Alterações',
+                icon: isSaving ? Loader2 : Save,
+                onClick: handleSave,
+                variant: 'default',
+                disabled: isSaving,
+              },
+            ].filter(Boolean) as HeaderButton[]
+          }
         />
 
         {/* Identity Card */}
@@ -218,89 +252,119 @@ export default function BenefitPlanEditPage() {
 
       <PageBody className="space-y-6">
         {/* Dados do Plano */}
-        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg font-semibold mb-4">Dados do Plano</h3>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome *</Label>
-                <Input
-                  id="name"
-                  placeholder="Ex: Plano Saúde Básico"
-                  value={planName}
-                  onChange={e => setPlanName(e.target.value)}
-                  required
-                />
+        <Card className="bg-white/5 py-2 overflow-hidden">
+          <div className="px-6 py-4 space-y-8">
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <NotebookText className="h-5 w-5 text-foreground" />
+                  <div>
+                    <h3 className="text-base font-semibold">Dados do Plano</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Informações principais do plano de benefício
+                    </p>
+                  </div>
+                </div>
+                <div className="border-b border-border" />
               </div>
+              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">
+                      Nome <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="Ex: Plano Saúde Básico"
+                      value={planName}
+                      onChange={e => setPlanName(e.target.value)}
+                      required
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="type">Tipo *</Label>
-                <Select
-                  value={planType}
-                  onValueChange={(v: string) => setPlanType(v as BenefitType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BENEFIT_TYPE_OPTIONS.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">
+                      Tipo <span className="text-rose-500">*</span>
+                    </Label>
+                    <Select
+                      value={planType}
+                      onValueChange={(v: string) =>
+                        setPlanType(v as BenefitType)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BENEFIT_TYPE_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="provider">Operadora/Fornecedor</Label>
+                    <Input
+                      id="provider"
+                      placeholder="Ex: Unimed, Alelo"
+                      value={planProvider}
+                      onChange={e => setPlanProvider(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="policyNumber">Número da Apólice</Label>
+                    <Input
+                      id="policyNumber"
+                      placeholder="Número do contrato"
+                      value={planPolicyNumber}
+                      onChange={e => setPlanPolicyNumber(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Input
+                    id="description"
+                    placeholder="Descrição do plano (opcional)"
+                    value={planDescription}
+                    onChange={e => setPlanDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="isActive">Status</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {isActive ? 'Plano ativo' : 'Plano inativo'}
+                    </p>
+                  </div>
+                  <Switch
+                    id="isActive"
+                    checked={isActive}
+                    onCheckedChange={setIsActive}
+                  />
+                </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="provider">Operadora/Fornecedor</Label>
-                <Input
-                  id="provider"
-                  placeholder="Ex: Unimed, Alelo"
-                  value={planProvider}
-                  onChange={e => setPlanProvider(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="policyNumber">Número da Apólice</Label>
-                <Input
-                  id="policyNumber"
-                  placeholder="Número do contrato"
-                  value={planPolicyNumber}
-                  onChange={e => setPlanPolicyNumber(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Input
-                id="description"
-                placeholder="Descrição do plano (opcional)"
-                value={planDescription}
-                onChange={e => setPlanDescription(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t">
-              <div className="space-y-0.5">
-                <Label htmlFor="isActive">Status</Label>
-                <p className="text-sm text-muted-foreground">
-                  {isActive ? 'Plano ativo' : 'Plano inativo'}
-                </p>
-              </div>
-              <Switch
-                id="isActive"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
             </div>
           </div>
         </Card>
       </PageBody>
+
+      {/* Delete PIN Modal */}
+      <VerifyActionPinModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onSuccess={handleDeleteConfirm}
+        title="Excluir Plano de Benefício"
+        description={`Digite seu PIN de ação para excluir o plano "${plan.name}". Esta ação não pode ser desfeita.`}
+      />
     </PageLayout>
   );
 }

@@ -20,6 +20,8 @@ import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import type { GeofenceZone } from '@/types/hr';
@@ -81,6 +83,8 @@ export default function GeofenceZoneEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const zoneId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.GEOFENCE_ZONES.DELETE);
 
   // ==========================================================================
   // STATE
@@ -229,15 +233,19 @@ export default function GeofenceZoneEditPage() {
       onClick: () => router.push(`/hr/geofence-zones/${zoneId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default' as const,
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',
@@ -327,8 +335,8 @@ export default function GeofenceZoneEditPage() {
               <h1 className="text-xl font-bold truncate">{zone.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {zone.isActive ? 'Ativa' : 'Inativa'} ·{' '}
-                {formatRadius(zone.radiusMeters)} ·{' '}
-                Criado em {formatDate(zone.createdAt)}
+                {formatRadius(zone.radiusMeters)} · Criado em{' '}
+                {formatDate(zone.createdAt)}
               </p>
             </div>
           </div>

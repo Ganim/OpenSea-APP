@@ -5,6 +5,8 @@
 'use client';
 
 import { companiesApi } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src/api';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
+import { departmentsApi } from '../src';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
@@ -12,16 +14,16 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { formatCNPJ } from '@/helpers';
+import { usePermissions } from '@/hooks/use-permissions';
 import { employeesService } from '@/services/hr/employees.service';
 import { positionsService } from '@/services/hr/positions.service';
 import type { Company, Department, Employee, Position } from '@/types/hr';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
   Briefcase,
@@ -31,24 +33,18 @@ import {
   Edit,
   Factory,
   NotebookText,
-  Trash,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { departmentsApi, deleteDepartment } from '../src';
-import { logger } from '@/lib/logger';
 
 export default function DepartmentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const departmentId = params.id as string;
+  const { hasPermission } = usePermissions();
 
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const canEdit = hasPermission(HR_PERMISSIONS.DEPARTMENTS.UPDATE);
 
   // ============================================================================
   // DATA FETCHING
@@ -108,30 +104,6 @@ export default function DepartmentDetailPage() {
 
   const handleEdit = () => {
     router.push(`/hr/departments/${departmentId}/edit`);
-  };
-
-  const handleDelete = () => {
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!department) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteDepartment(department.id);
-      await queryClient.invalidateQueries({ queryKey: ['departments'] });
-      toast.success('Departamento excluído com sucesso!');
-      router.push('/hr/departments');
-    } catch (error) {
-      logger.error(
-        'Erro ao excluir departamento',
-        error instanceof Error ? error : undefined
-      );
-      toast.error('Erro ao excluir departamento');
-    } finally {
-      setIsDeleting(false);
-    }
   };
 
   // ============================================================================
@@ -198,22 +170,18 @@ export default function DepartmentDetailPage() {
             { label: 'Departamentos', href: '/hr/departments' },
             { label: department.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: handleDelete,
-              variant: 'outline',
-              disabled: isDeleting,
-            },
-            {
-              id: 'edit',
-              title: 'Editar',
-              icon: Edit,
-              onClick: handleEdit,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: handleEdit,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -259,92 +227,113 @@ export default function DepartmentDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados do Departamento */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Dados do Departamento
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Nome"
-              value={department.name}
-              showCopyButton
-              copyTooltip="Copiar Nome"
-            />
-            <InfoField
-              label="Código"
-              value={department.code}
-              showCopyButton
-              copyTooltip="Copiar Código"
-            />
-            <InfoField
-              label="Status"
-              value={department.isActive ? 'Ativo' : 'Inativo'}
-              badge={
-                <Badge variant={department.isActive ? 'success' : 'secondary'}>
-                  {department.isActive ? 'Ativo' : 'Inativo'}
-                </Badge>
-              }
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <NotebookText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Dados do Departamento</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações cadastrais e status
+              </p>
+            </div>
           </div>
-          {department.description && (
-            <div className="mt-6">
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <InfoField
-                label="Descrição"
-                value={department.description}
+                label="Nome"
+                value={department.name}
                 showCopyButton
-                copyTooltip="Copiar Descrição"
+                copyTooltip="Copiar Nome"
+              />
+              <InfoField
+                label="Código"
+                value={department.code}
+                showCopyButton
+                copyTooltip="Copiar Código"
+              />
+              <InfoField
+                label="Status"
+                value={department.isActive ? 'Ativo' : 'Inativo'}
+                badge={
+                  <Badge
+                    variant={department.isActive ? 'success' : 'secondary'}
+                  >
+                    {department.isActive ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                }
               />
             </div>
-          )}
+            {department.description && (
+              <div className="mt-6">
+                <InfoField
+                  label="Descrição"
+                  value={department.description}
+                  showCopyButton
+                  copyTooltip="Copiar Descrição"
+                />
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Empresa Vinculada */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Factory className="h-5 w-5" />
-            Empresa
-          </h3>
-          {isLoadingCompany ? (
-            <p className="text-muted-foreground">Carregando empresa...</p>
-          ) : linkedCompany ? (
-            <Link
-              href={`/admin/companies/${linkedCompany.id}`}
-              className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors group"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
-                  <Factory className="h-6 w-6 text-white" />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Factory className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Empresa</h3>
+              <p className="text-sm text-muted-foreground">
+                Empresa vinculada ao departamento
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            {isLoadingCompany ? (
+              <p className="text-muted-foreground">Carregando empresa...</p>
+            ) : linkedCompany ? (
+              <Link
+                href={`/admin/companies/${linkedCompany.id}`}
+                className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 shrink-0">
+                    <Factory className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-lg">{companyName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      CNPJ:{' '}
+                      {linkedCompany.cnpj
+                        ? formatCNPJ(linkedCompany.cnpj)
+                        : 'Não informado'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-lg">{companyName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    CNPJ:{' '}
-                    {linkedCompany.cnpj
-                      ? formatCNPJ(linkedCompany.cnpj)
-                      : 'Não informado'}
-                  </p>
-                </div>
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </Link>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4">
-              Nenhuma empresa vinculada.
-            </p>
-          )}
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </Link>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4">
+                Nenhuma empresa vinculada.
+              </p>
+            )}
+          </div>
         </Card>
 
         {/* Cargos */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-              <Briefcase className="h-5 w-5" />
-              Cargos neste Departamento
-              <Badge variant="secondary" className="ml-2">
-                {positions.length}
-              </Badge>
-            </h3>
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Briefcase className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">
+                Cargos neste Departamento
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {positions.length} cargo{positions.length !== 1 ? 's' : ''}{' '}
+                cadastrado{positions.length !== 1 ? 's' : ''}
+              </p>
+            </div>
             <Link href={`/hr/positions?departmentId=${departmentId}`}>
               <Button variant="outline" size="sm">
                 Ver todos
@@ -352,51 +341,58 @@ export default function DepartmentDetailPage() {
               </Button>
             </Link>
           </div>
-          {positions.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
-              Nenhum cargo neste departamento.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {positions.slice(0, 5).map((position: Position) => (
-                <Link
-                  key={position.id}
-                  href={`/hr/positions/${position.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                      <Briefcase className="h-4 w-4 text-white" />
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            {positions.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-4">
+                Nenhum cargo neste departamento.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {positions.slice(0, 5).map((position: Position) => (
+                  <Link
+                    key={position.id}
+                    href={`/hr/positions/${position.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <Briefcase className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{position.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {position._count?.employees ?? 0} funcionário(s)
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{position.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {position._count?.employees ?? 0} funcionário(s)
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
-              {positions.length > 5 && (
-                <p className="text-sm text-muted-foreground text-center pt-2">
-                  + {positions.length - 5} outros cargos
-                </p>
-              )}
-            </div>
-          )}
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+                ))}
+                {positions.length > 5 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    + {positions.length - 5} outros cargos
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Funcionários */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg uppercase font-semibold flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Funcionários neste Departamento
-              <Badge variant="secondary" className="ml-2">
-                {employees.length}
-              </Badge>
-            </h3>
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Users className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">
+                Funcionários neste Departamento
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {employees.length} funcionário
+                {employees.length !== 1 ? 's' : ''} vinculado
+                {employees.length !== 1 ? 's' : ''}
+              </p>
+            </div>
             <Link href={`/hr/employees?departmentId=${departmentId}`}>
               <Button variant="outline" size="sm">
                 Ver todos
@@ -404,50 +400,45 @@ export default function DepartmentDetailPage() {
               </Button>
             </Link>
           </div>
-          {employees.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">
-              Nenhum funcionário neste departamento.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {employees.slice(0, 5).map((employee: Employee) => (
-                <Link
-                  key={employee.id}
-                  href={`/hr/employees/${employee.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
-                      {employee.fullName.charAt(0).toUpperCase()}
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            {employees.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-4">
+                Nenhum funcionário neste departamento.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {employees.slice(0, 5).map((employee: Employee) => (
+                  <Link
+                    key={employee.id}
+                    href={`/hr/employees/${employee.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
+                        {employee.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium">{employee.fullName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {employee.position?.name || 'Sem cargo'} •{' '}
+                          {employee.registrationNumber}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{employee.fullName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {employee.position?.name || 'Sem cargo'} •{' '}
-                        {employee.registrationNumber}
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
-              {employees.length > 5 && (
-                <p className="text-sm text-muted-foreground text-center pt-2">
-                  + {employees.length - 5} outros funcionários
-                </p>
-              )}
-            </div>
-          )}
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+                ))}
+                {employees.length > 5 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    + {employees.length - 5} outros funcionários
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </Card>
       </PageBody>
-
-      <VerifyActionPinModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onSuccess={confirmDelete}
-        title="Excluir Departamento"
-        description={`Digite seu PIN de ação para excluir o departamento "${department.name}". Esta ação não pode ser desfeita.`}
-      />
     </PageLayout>
   );
 }

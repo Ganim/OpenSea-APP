@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { CipaMandate, CipaMember } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -45,12 +46,17 @@ import {
   useRemoveCipaMember,
 } from '../src';
 import { AddMemberModal } from '../src/modals/add-member-modal';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function CipaMandateDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const mandateId = params.id as string;
+  const { hasPermission } = usePermissions();
+
+  const canDelete = hasPermission(HR_PERMISSIONS.CIPA.DELETE);
+  const canManage = hasPermission(HR_PERMISSIONS.CIPA.MANAGE);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
@@ -187,16 +193,20 @@ export default function CipaMandateDetailPage() {
             { label: 'CIPA', href: '/hr/cipa' },
             { label: mandate.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-              disabled: deleteMutation.isPending,
-            },
-          ]}
+          buttons={
+            canDelete
+              ? [
+                  {
+                    id: 'delete',
+                    title: 'Excluir',
+                    icon: Trash,
+                    onClick: () => setIsDeleteModalOpen(true),
+                    variant: 'outline',
+                    disabled: deleteMutation.isPending,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -290,14 +300,16 @@ export default function CipaMandateDetailPage() {
               <Users className="h-5 w-5" />
               Membros da CIPA
             </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMemberModalOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Adicionar Membro
-            </Button>
+            {canManage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMemberModalOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar Membro
+              </Button>
+            )}
           </div>
 
           {membersLoading ? (
@@ -341,14 +353,16 @@ export default function CipaMandateDetailPage() {
                           : ''}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setDeleteMemberTarget(member)}
-                    className="text-rose-500 hover:text-rose-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {canManage && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDeleteMemberTarget(member)}
+                      className="text-rose-500 hover:text-rose-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

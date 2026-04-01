@@ -11,6 +11,7 @@ import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { EmployeeDependant } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -36,12 +37,16 @@ import {
   getRelationshipColor,
   getDependantBadges,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function DependantDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const dependantId = params.id as string;
+  const { hasPermission } = usePermissions();
+
+  const canDelete = hasPermission(HR_PERMISSIONS.DEPENDANTS.DELETE);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -165,15 +170,19 @@ export default function DependantDetailPage() {
             { label: 'Dependentes', href: '/hr/dependants' },
             { label: dependant.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-            },
-          ]}
+          buttons={
+            canDelete
+              ? [
+                  {
+                    id: 'delete',
+                    title: 'Excluir',
+                    icon: Trash,
+                    onClick: () => setIsDeleteModalOpen(true),
+                    variant: 'outline',
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}

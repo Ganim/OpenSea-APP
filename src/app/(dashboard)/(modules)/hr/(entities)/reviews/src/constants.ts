@@ -88,10 +88,40 @@ export const REVIEW_CYCLE_STATUS_COLORS: Record<
   },
 };
 
+export const PERFORMANCE_REVIEW_STATUS_COLORS: Record<
+  PerformanceReviewStatus,
+  { bg: string; text: string; dot: string }
+> = {
+  PENDING: {
+    bg: 'bg-slate-50 dark:bg-slate-500/8',
+    text: 'text-slate-700 dark:text-slate-300',
+    dot: 'bg-slate-400',
+  },
+  SELF_ASSESSMENT: {
+    bg: 'bg-sky-50 dark:bg-sky-500/8',
+    text: 'text-sky-700 dark:text-sky-300',
+    dot: 'bg-sky-500',
+  },
+  MANAGER_REVIEW: {
+    bg: 'bg-violet-50 dark:bg-violet-500/8',
+    text: 'text-violet-700 dark:text-violet-300',
+    dot: 'bg-violet-500',
+  },
+  COMPLETED: {
+    bg: 'bg-emerald-50 dark:bg-emerald-500/8',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    dot: 'bg-emerald-500',
+  },
+};
+
 export const REVIEW_CYCLE_TYPE_OPTIONS = Object.entries(REVIEW_CYCLE_TYPE_LABELS).map(
   ([value, label]) => ({ value, label })
 );
 
 export const REVIEW_CYCLE_STATUS_OPTIONS = Object.entries(REVIEW_CYCLE_STATUS_LABELS).map(
+  ([value, label]) => ({ value, label })
+);
+
+export const PERFORMANCE_REVIEW_STATUS_OPTIONS = Object.entries(PERFORMANCE_REVIEW_STATUS_LABELS).map(
   ([value, label]) => ({ value, label })
 );

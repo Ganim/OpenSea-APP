@@ -8,32 +8,24 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { InfoField } from '@/components/shared/info-field';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import type { AdmissionInvite, AdmissionDocument } from '@/types/hr';
+import { usePermissions } from '@/hooks/use-permissions';
+import type { AdmissionInvite } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Briefcase,
-  Building2,
-  Calendar,
   CheckCircle,
   ClipboardList,
-  Clock,
+  Copy,
   ExternalLink,
   Eye,
   FileText,
-  Mail,
-  MapPin,
+  Link2,
   PenTool,
-  Phone,
   Send,
-  Shield,
-  Trash2,
   User,
   UserPlus,
   Users,
@@ -42,10 +34,10 @@ import {
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   admissionsApi,
   admissionKeys,
-  useCancelAdmission,
   useApproveAdmission,
   useRejectAdmission,
   useResendAdmission,
@@ -62,14 +54,17 @@ import {
   formatDate,
   formatCurrency,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function AdmissionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const admissionId = params.id as string;
+  const { hasPermission } = usePermissions();
 
-  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const canManage = hasPermission(HR_PERMISSIONS.ONBOARDING.MANAGE);
+
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
 
@@ -86,16 +81,8 @@ export default function AdmissionDetailPage() {
   // MUTATIONS
   // ============================================================================
 
-  const cancelMutation = useCancelAdmission({
-    onSuccess: () => {
-      setIsCancelOpen(false);
-      queryClient.invalidateQueries({ queryKey: admissionKeys.lists() });
-      router.push('/hr/admissions');
-    },
-  });
-
   const approveMutation = useApproveAdmission({
-    onSuccess: admission => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: admissionKeys.detail(admissionId),
       });
@@ -118,11 +105,6 @@ export default function AdmissionDetailPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleCancel = async () => {
-    if (!admission) return;
-    await cancelMutation.mutateAsync(admission.id);
-  };
-
   const handleApprove = () => {
     if (!admission) return;
     approveMutation.mutate(admission.id);
@@ -139,6 +121,13 @@ export default function AdmissionDetailPage() {
   const handleResend = () => {
     if (!admission) return;
     resendMutation.mutate(admission.id);
+  };
+
+  const handleCopyPublicLink = () => {
+    if (!admission?.token) return;
+    const publicUrl = `${window.location.origin}/admission/${admission.token}`;
+    navigator.clipboard.writeText(publicUrl);
+    toast.success('Link copiado para a área de transferência');
   };
 
   // ============================================================================
@@ -203,70 +192,97 @@ export default function AdmissionDetailPage() {
             { label: 'Admissões', href: '/hr/admissions' },
             { label: admission.fullName },
           ]}
-          actions={[
-            ...(isActive && admission.status !== 'COMPLETED'
-              ? [
-                  {
-                    label: 'Reenviar Convite',
-                    icon: Send,
-                    variant: 'outline' as const,
-                    onClick: handleResend,
-                    size: 'sm' as const,
-                  },
-                ]
-              : []),
-            ...(admission.status === 'COMPLETED'
-              ? [
-                  {
-                    label: 'Aprovar',
-                    icon: CheckCircle,
-                    onClick: handleApprove,
-                    size: 'sm' as const,
-                  },
-                ]
-              : []),
-            ...(isActive
-              ? [
-                  {
-                    label: 'Cancelar',
-                    icon: Trash2,
-                    variant: 'destructive' as const,
-                    onClick: () => setIsCancelOpen(true),
-                    size: 'sm' as const,
-                  },
-                ]
-              : []),
-          ]}
+          actions={
+            <div className="flex items-center gap-2">
+              {canManage && isActive && admission.status !== 'COMPLETED' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-2.5 gap-2"
+                  onClick={handleResend}
+                >
+                  <Send className="h-4 w-4" />
+                  <span className="hidden md:inline">Reenviar Convite</span>
+                </Button>
+              )}
+              {canManage &&
+                admission.status === 'COMPLETED' &&
+                !admission.employeeId && (
+                  <Button
+                    size="sm"
+                    className="h-9 px-2.5 gap-2"
+                    onClick={handleApprove}
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="hidden md:inline">Aprovar</span>
+                  </Button>
+                )}
+            </div>
+          }
         />
       </PageHeader>
 
       <PageBody>
         <div className="space-y-6">
           {/* Identity Card */}
-          <Card className="bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-                <UserPlus className="h-7 w-7" />
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+                  <UserPlus className="h-7 w-7" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-bold tracking-tight truncate">
+                    {admission.fullName}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {admission.email}
+                    {admission.phone && ` \u2022 ${admission.phone}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Criado em {formatDate(admission.createdAt)}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getAdmissionStatusColor(admission.status)}`}
+                >
+                  {getAdmissionStatusLabel(admission.status)}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-bold tracking-tight truncate">
-                  {admission.fullName}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {admission.email}
-                  {admission.phone && ` - ${admission.phone}`}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Criado em {formatDate(admission.createdAt)}
-                </p>
-              </div>
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getAdmissionStatusColor(admission.status)}`}
-              >
-                {getAdmissionStatusLabel(admission.status)}
-              </span>
             </div>
           </Card>
+
+          {/* Public Link */}
+          {admission.token && isActive && (
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Link2 className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">Link Público</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Link de acesso para o candidato preencher os dados
+                  </p>
+                </div>
+              </div>
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <code className="flex-1 text-sm bg-muted/50 rounded-lg px-3 py-2 truncate">
+                    {`${typeof window !== 'undefined' ? window.location.origin : ''}/admission/${admission.token}`}
+                  </code>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 px-2.5 gap-2 shrink-0"
+                    onClick={handleCopyPublicLink}
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copiar
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Employee link (if completed and approved) */}
           {admission.employeeId && (
@@ -278,12 +294,14 @@ export default function AdmissionDetailPage() {
                     Funcionário criado com sucesso
                   </p>
                   <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">
-                    {admission.employee?.fullName ?? 'Ver perfil do funcionário'}
+                    {admission.employee?.fullName ??
+                      'Ver perfil do funcionário'}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-9 px-2.5"
                   onClick={() =>
                     router.push(`/hr/employees/${admission.employeeId}`)
                   }
@@ -295,7 +313,7 @@ export default function AdmissionDetailPage() {
             </Card>
           )}
 
-          {/* Onboarding checklist link (if employee was created from approval) */}
+          {/* Onboarding checklist link */}
           {admission.employeeId && (
             <Card className="p-4 bg-sky-50/50 dark:bg-sky-500/5 border-sky-200 dark:border-sky-500/20">
               <div className="flex items-center gap-3">
@@ -311,6 +329,7 @@ export default function AdmissionDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-9 px-2.5"
                   onClick={() => router.push('/hr/onboarding')}
                 >
                   <ClipboardList className="h-4 w-4 mr-1" />
@@ -339,14 +358,18 @@ export default function AdmissionDetailPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Section: Vaga */}
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-blue-500" />
-                  <h2 className="text-sm font-semibold">Vaga</h2>
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Briefcase className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">Vaga</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Informações sobre o cargo e contrato
+                  </p>
                 </div>
               </div>
-              <div className="px-5 py-4 space-y-3">
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6 space-y-3">
                 <InfoField
                   label="Cargo"
                   value={admission.position?.name ?? '-'}
@@ -381,14 +404,20 @@ export default function AdmissionDetailPage() {
             </Card>
 
             {/* Section: Dados do Candidato */}
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-blue-500" />
-                  <h2 className="text-sm font-semibold">Dados do Candidato</h2>
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <User className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">
+                    Dados do Candidato
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Informações pessoais preenchidas pelo candidato
+                  </p>
                 </div>
               </div>
-              <div className="px-5 py-4 space-y-3">
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6 space-y-3">
                 {candidateData ? (
                   <>
                     <InfoField label="Nome" value={candidateData.fullName} />
@@ -426,14 +455,18 @@ export default function AdmissionDetailPage() {
 
           {/* Section: Dados Bancários */}
           {candidateData?.bankData && (
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-blue-500" />
-                  <h2 className="text-sm font-semibold">Dados Bancários</h2>
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Wallet className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">Dados Bancários</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Conta para depósito de salário
+                  </p>
                 </div>
               </div>
-              <div className="px-5 py-4">
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   <InfoField
                     label="Banco"
@@ -466,21 +499,25 @@ export default function AdmissionDetailPage() {
 
           {/* Section: Dependentes */}
           {candidateData?.dependants && candidateData.dependants.length > 0 && (
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  <h2 className="text-sm font-semibold">
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Users className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">
                     Dependentes ({candidateData.dependants.length})
-                  </h2>
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Dependentes declarados pelo candidato
+                  </p>
                 </div>
               </div>
-              <div className="px-5 py-4">
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6">
                 <div className="space-y-3">
                   {candidateData.dependants.map((dep, idx) => (
                     <div
                       key={dep.id ?? idx}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-white dark:bg-slate-800/60 border border-border"
+                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border"
                     >
                       <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                         <div>
@@ -520,22 +557,26 @@ export default function AdmissionDetailPage() {
           )}
 
           {/* Section: Documentos */}
-          <Card className="bg-white/5 py-2 overflow-hidden">
-            <div className="px-5 py-3 border-b border-border/50">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-blue-500" />
-                <h2 className="text-sm font-semibold">
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <FileText className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">
                   Documentos ({documents.length})
-                </h2>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Documentos enviados pelo candidato
+                </p>
               </div>
             </div>
-            <div className="px-5 py-4">
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
               {documents.length > 0 ? (
                 <div className="space-y-2">
                   {documents.map(doc => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-slate-800/60 border border-border"
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border"
                     >
                       <div className="flex items-center gap-3">
                         <FileText className="h-4 w-4 text-muted-foreground" />
@@ -576,14 +617,18 @@ export default function AdmissionDetailPage() {
           </Card>
 
           {/* Section: Assinatura Digital */}
-          <Card className="bg-white/5 py-2 overflow-hidden">
-            <div className="px-5 py-3 border-b border-border/50">
-              <div className="flex items-center gap-2">
-                <PenTool className="h-4 w-4 text-blue-500" />
-                <h2 className="text-sm font-semibold">Assinatura Digital</h2>
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <PenTool className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">Assinatura Digital</h3>
+                <p className="text-sm text-muted-foreground">
+                  Assinatura eletrônica do contrato de admissão
+                </p>
               </div>
             </div>
-            <div className="px-5 py-4">
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
               {signature ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   <InfoField label="Assinante" value={signature.signerName} />
@@ -608,49 +653,49 @@ export default function AdmissionDetailPage() {
           </Card>
 
           {/* Reject section (inline) */}
-          {admission.status === 'COMPLETED' && !admission.employeeId && (
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-rose-500" />
-                  <h2 className="text-sm font-semibold">Rejeitar Admissão</h2>
+          {canManage &&
+            admission.status === 'COMPLETED' &&
+            !admission.employeeId && (
+              <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+                <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                  <XCircle className="h-5 w-5 text-rose-500" />
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold">
+                      Rejeitar Admissão
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Informe o motivo para rejeitar esta admissão
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Motivo da rejeição</Label>
-                  <Textarea
-                    value={rejectionReason}
-                    onChange={e => setRejectionReason(e.target.value)}
-                    placeholder="Informe o motivo da rejeição..."
-                    rows={3}
-                  />
+                <div className="border-b border-border" />
+                <div className="p-4 sm:p-6 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Motivo da rejeição</Label>
+                    <Textarea
+                      value={rejectionReason}
+                      onChange={e => setRejectionReason(e.target.value)}
+                      placeholder="Informe o motivo da rejeição..."
+                      rows={3}
+                    />
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-9 px-2.5"
+                    onClick={handleReject}
+                    disabled={
+                      !rejectionReason.trim() || rejectMutation.isPending
+                    }
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Rejeitar
+                  </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleReject}
-                  disabled={
-                    !rejectionReason.trim() || rejectMutation.isPending
-                  }
-                >
-                  <XCircle className="h-4 w-4 mr-1" />
-                  Rejeitar
-                </Button>
-              </div>
-            </Card>
-          )}
+              </Card>
+            )}
         </div>
       </PageBody>
-
-      {/* Cancel PIN confirmation */}
-      <VerifyActionPinModal
-        isOpen={isCancelOpen}
-        onClose={() => setIsCancelOpen(false)}
-        onSuccess={handleCancel}
-        title="Cancelar Convite de Admissão"
-        description={`Digite seu PIN para cancelar o convite de ${admission.fullName}.`}
-      />
     </PageLayout>
   );
 }

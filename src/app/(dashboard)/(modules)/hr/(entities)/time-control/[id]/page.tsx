@@ -114,7 +114,7 @@ export default function TimeControlDetailPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <TimerOff className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <TimerOff className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
               Registro de ponto não encontrado
             </h2>
@@ -177,106 +177,138 @@ export default function TimeControlDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados do Registro */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Clock className="h-5 w-5" />
-            Dados do Registro
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Tipo"
-              value={getEntryTypeLabel(entry.entryType)}
-              badge={
-                <Badge className={getEntryTypeColor(entry.entryType)}>
-                  {getEntryTypeLabel(entry.entryType)}
-                </Badge>
-              }
-            />
-            <InfoField
-              label="Funcionário"
-              value={getName(entry.employeeId)}
-              showCopyButton
-              copyTooltip="Copiar nome do funcionário"
-            />
-            <InfoField label="Data" value={formatDate(entry.timestamp)} />
-            <InfoField label="Horário" value={formatTime(entry.timestamp)} />
-            <InfoField
-              label="Data/Hora Completa"
-              value={formatFullDateTime(entry.timestamp)}
-            />
-            <InfoField
-              label="Registrado em"
-              value={formatDateTime(entry.createdAt)}
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Clock className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Dados do Registro</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações do ponto
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <InfoField
+                label="Tipo"
+                value={getEntryTypeLabel(entry.entryType)}
+                badge={
+                  <Badge className={getEntryTypeColor(entry.entryType)}>
+                    {getEntryTypeLabel(entry.entryType)}
+                  </Badge>
+                }
+              />
+              <InfoField
+                label="Funcionário"
+                value={getName(entry.employeeId)}
+                showCopyButton
+                copyTooltip="Copiar nome do funcionário"
+              />
+              <InfoField label="Data" value={formatDate(entry.timestamp)} />
+              <InfoField label="Horário" value={formatTime(entry.timestamp)} />
+              <InfoField
+                label="Data/Hora Completa"
+                value={formatFullDateTime(entry.timestamp)}
+              />
+              <InfoField
+                label="Registrado em"
+                value={formatDateTime(entry.createdAt)}
+              />
+            </div>
           </div>
         </Card>
 
         {/* Localização */}
         {hasLocation && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <MapPin className="h-5 w-5" />
-              Localização
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InfoField
-                label="Latitude"
-                value={entry.latitude?.toFixed(6)}
-                showCopyButton
-                copyTooltip="Copiar latitude"
-              />
-              <InfoField
-                label="Longitude"
-                value={entry.longitude?.toFixed(6)}
-                showCopyButton
-                copyTooltip="Copiar longitude"
-              />
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <MapPin className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">Localização</h3>
+                <p className="text-sm text-muted-foreground">
+                  Dados de geolocalização
+                </p>
+              </div>
             </div>
-            <div className="mt-4">
-              <a
-                href={`https://www.google.com/maps?q=${entry.latitude},${entry.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-cyan-600 dark:text-cyan-400 hover:underline"
-              >
-                <Globe className="h-4 w-4" />
-                Ver no Google Maps
-              </a>
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <InfoField
+                  label="Latitude"
+                  value={entry.latitude?.toFixed(6)}
+                  showCopyButton
+                  copyTooltip="Copiar latitude"
+                />
+                <InfoField
+                  label="Longitude"
+                  value={entry.longitude?.toFixed(6)}
+                  showCopyButton
+                  copyTooltip="Copiar longitude"
+                />
+              </div>
+              <div className="mt-4">
+                <a
+                  href={`https://www.google.com/maps?q=${entry.latitude},${entry.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm text-cyan-600 dark:text-cyan-400 hover:underline"
+                >
+                  <Globe className="h-4 w-4" />
+                  Ver no Google Maps
+                </a>
+              </div>
             </div>
           </Card>
         )}
 
         {/* Rede */}
         {entry.ipAddress && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <Network className="h-5 w-5" />
-              Informações de Rede
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <InfoField
-                label="Endereço IP"
-                value={entry.ipAddress}
-                showCopyButton
-                copyTooltip="Copiar endereço IP"
-              />
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <Network className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">Informações de Rede</h3>
+                <p className="text-sm text-muted-foreground">
+                  Dados de conexão
+                </p>
+              </div>
+            </div>
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <InfoField
+                  label="Endereço IP"
+                  value={entry.ipAddress}
+                  showCopyButton
+                  copyTooltip="Copiar endereço IP"
+                />
+              </div>
             </div>
           </Card>
         )}
 
         {/* Observações */}
         {entry.notes && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <StickyNote className="h-5 w-5" />
-              Observações
-            </h3>
-            <InfoField
-              label="Notas"
-              value={entry.notes}
-              showCopyButton
-              copyTooltip="Copiar observações"
-            />
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <StickyNote className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">Observações</h3>
+                <p className="text-sm text-muted-foreground">
+                  Notas adicionais
+                </p>
+              </div>
+            </div>
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
+              <InfoField
+                label="Notas"
+                value={entry.notes}
+                showCopyButton
+                copyTooltip="Copiar observações"
+              />
+            </div>
           </Card>
         )}
       </PageBody>

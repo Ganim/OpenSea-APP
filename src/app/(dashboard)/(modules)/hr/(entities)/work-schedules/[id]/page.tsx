@@ -11,6 +11,7 @@ import { InfoField } from '@/components/shared/info-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { WorkSchedule } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -31,6 +32,7 @@ import {
   WEEK_DAYS,
   workSchedulesApi,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 type DayKey = (typeof WEEK_DAYS)[number];
 
@@ -49,6 +51,9 @@ export default function WorkScheduleDetailPage() {
   const params = useParams();
   const router = useRouter();
   const scheduleId = params.id as string;
+
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission(HR_PERMISSIONS.WORK_SCHEDULES.UPDATE);
 
   const { data: schedule, isLoading } = useQuery<WorkSchedule>({
     queryKey: ['work-schedules', scheduleId],
@@ -114,7 +119,7 @@ export default function WorkScheduleDetailPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <Clock className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
               Escala de trabalho não encontrada
             </h2>
@@ -138,14 +143,18 @@ export default function WorkScheduleDetailPage() {
             { label: 'Escalas de Trabalho', href: '/hr/work-schedules' },
             { label: schedule.name },
           ]}
-          buttons={[
-            {
-              id: 'edit',
-              title: 'Editar',
-              icon: Edit,
-              onClick: handleEdit,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: handleEdit,
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -193,47 +202,55 @@ export default function WorkScheduleDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Resumo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Resumo da Escala
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <InfoField
-              label="Horas Semanais"
-              value={formatWeeklyHours(schedule.weeklyHours)}
-              badge={
-                <Badge variant="outline" className="gap-1">
-                  <Timer className="h-3 w-3" />
-                  {formatWeeklyHours(schedule.weeklyHours)}
-                </Badge>
-              }
-            />
-            <InfoField
-              label="Dias de Trabalho"
-              value={`${workDaysCount} dias`}
-              badge={
-                <Badge variant="outline" className="gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {workDaysCount} dias
-                </Badge>
-              }
-            />
-            <InfoField
-              label="Intervalo"
-              value={`${schedule.breakDuration} minutos`}
-              badge={
-                <Badge variant="outline" className="gap-1">
-                  <Coffee className="h-3 w-3" />
-                  {schedule.breakDuration}min
-                </Badge>
-              }
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <NotebookText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Resumo da Escala</h3>
+              <p className="text-sm text-muted-foreground">
+                Horas semanais, dias de trabalho e intervalo
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <div className="grid md:grid-cols-3 gap-6">
+              <InfoField
+                label="Horas Semanais"
+                value={formatWeeklyHours(schedule.weeklyHours)}
+                badge={
+                  <Badge variant="outline" className="gap-1">
+                    <Timer className="h-3 w-3" />
+                    {formatWeeklyHours(schedule.weeklyHours)}
+                  </Badge>
+                }
+              />
+              <InfoField
+                label="Dias de Trabalho"
+                value={`${workDaysCount} dias`}
+                badge={
+                  <Badge variant="outline" className="gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {workDaysCount} dias
+                  </Badge>
+                }
+              />
+              <InfoField
+                label="Intervalo"
+                value={`${schedule.breakDuration} minutos`}
+                badge={
+                  <Badge variant="outline" className="gap-1">
+                    <Coffee className="h-3 w-3" />
+                    {schedule.breakDuration}min
+                  </Badge>
+                }
+              />
+            </div>
           </div>
         </Card>
 
         {/* Jornada Semanal */}
-        <Card className="bg-white/5 overflow-hidden py-2">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
           <div className="space-y-5 px-6 py-4">
             {/* Section header with pills */}
             <div className="flex items-start justify-between gap-4">

@@ -430,6 +430,92 @@ export const HR_PERMISSIONS = {
     DELETE: HR_CODES.EMPLOYEES.REMOVE,
     MANAGE: HR_CODES.EMPLOYEES.ADMIN,
   },
+
+  /**
+   * Permissões de Treinamentos (Training)
+   */
+  TRAINING: {
+    LIST: HR_CODES.TRAINING.ACCESS,
+    VIEW: HR_CODES.TRAINING.ACCESS,
+    CREATE: HR_CODES.TRAINING.REGISTER,
+    UPDATE: HR_CODES.TRAINING.MODIFY,
+    DELETE: HR_CODES.TRAINING.REMOVE,
+    MANAGE: HR_CODES.TRAINING.ADMIN,
+  },
+
+  /**
+   * Permissões de Avaliações de Desempenho (Reviews)
+   */
+  REVIEWS: {
+    LIST: HR_CODES.REVIEWS.ACCESS,
+    VIEW: HR_CODES.REVIEWS.ACCESS,
+    CREATE: HR_CODES.REVIEWS.REGISTER,
+    UPDATE: HR_CODES.REVIEWS.MODIFY,
+    DELETE: HR_CODES.REVIEWS.REMOVE,
+    MANAGE: HR_CODES.REVIEWS.ADMIN,
+  },
+
+  /**
+   * Permissões de Comunicados (Announcements)
+   */
+  ANNOUNCEMENTS: {
+    LIST: HR_CODES.ANNOUNCEMENTS.ACCESS,
+    VIEW: HR_CODES.ANNOUNCEMENTS.ACCESS,
+    CREATE: HR_CODES.ANNOUNCEMENTS.REGISTER,
+    UPDATE: HR_CODES.ANNOUNCEMENTS.MODIFY,
+    DELETE: HR_CODES.ANNOUNCEMENTS.REMOVE,
+  },
+
+  /**
+   * Permissões de Reconhecimento (Kudos)
+   */
+  KUDOS: {
+    LIST: HR_CODES.KUDOS.ACCESS,
+    VIEW: HR_CODES.KUDOS.ACCESS,
+    CREATE: HR_CODES.KUDOS.REGISTER,
+  },
+
+  /**
+   * Permissões de Pesquisas (Surveys)
+   */
+  SURVEYS: {
+    LIST: HR_CODES.SURVEYS.ACCESS,
+    VIEW: HR_CODES.SURVEYS.ACCESS,
+    CREATE: HR_CODES.SURVEYS.REGISTER,
+    UPDATE: HR_CODES.SURVEYS.MODIFY,
+    DELETE: HR_CODES.SURVEYS.REMOVE,
+  },
+
+  /**
+   * Permissões de OKRs (Objetivos e Resultados-Chave)
+   */
+  OKRS: {
+    LIST: HR_CODES.OKRS.ACCESS,
+    VIEW: HR_CODES.OKRS.ACCESS,
+    CREATE: HR_CODES.OKRS.REGISTER,
+    UPDATE: HR_CODES.OKRS.MODIFY,
+    DELETE: HR_CODES.OKRS.REMOVE,
+  },
+
+  /**
+   * Permissões de Recrutamento e Seleção (Recruitment)
+   */
+  RECRUITMENT: {
+    LIST: HR_CODES.RECRUITMENT.ACCESS,
+    VIEW: HR_CODES.RECRUITMENT.ACCESS,
+    CREATE: HR_CODES.RECRUITMENT.REGISTER,
+    UPDATE: HR_CODES.RECRUITMENT.MODIFY,
+    DELETE: HR_CODES.RECRUITMENT.REMOVE,
+    MANAGE: HR_CODES.RECRUITMENT.ADMIN,
+  },
+
+  /**
+   * Permissões de Relatórios (Reports)
+   */
+  REPORTS: {
+    VIEW: HR_CODES.REPORTS.ACCESS,
+    EXPORT: HR_CODES.REPORTS.EXPORT,
+  },
 } as const;
 
 /* ===========================================
@@ -508,11 +594,35 @@ export type HrConfigPermission =
 export type BenefitPermission =
   (typeof HR_PERMISSIONS.BENEFITS)[keyof typeof HR_PERMISSIONS.BENEFITS];
 
+export type OkrPermission =
+  (typeof HR_PERMISSIONS.OKRS)[keyof typeof HR_PERMISSIONS.OKRS];
+
 export type OnboardingPermission =
   (typeof HR_PERMISSIONS.ONBOARDING)[keyof typeof HR_PERMISSIONS.ONBOARDING];
 
 export type OffboardingPermission =
   (typeof HR_PERMISSIONS.OFFBOARDING)[keyof typeof HR_PERMISSIONS.OFFBOARDING];
+
+export type TrainingPermission =
+  (typeof HR_PERMISSIONS.TRAINING)[keyof typeof HR_PERMISSIONS.TRAINING];
+
+export type ReviewPermission =
+  (typeof HR_PERMISSIONS.REVIEWS)[keyof typeof HR_PERMISSIONS.REVIEWS];
+
+export type AnnouncementPermission =
+  (typeof HR_PERMISSIONS.ANNOUNCEMENTS)[keyof typeof HR_PERMISSIONS.ANNOUNCEMENTS];
+
+export type KudosPermission =
+  (typeof HR_PERMISSIONS.KUDOS)[keyof typeof HR_PERMISSIONS.KUDOS];
+
+export type SurveyPermission =
+  (typeof HR_PERMISSIONS.SURVEYS)[keyof typeof HR_PERMISSIONS.SURVEYS];
+
+export type RecruitmentPermission =
+  (typeof HR_PERMISSIONS.RECRUITMENT)[keyof typeof HR_PERMISSIONS.RECRUITMENT];
+
+export type ReportPermission =
+  (typeof HR_PERMISSIONS.REPORTS)[keyof typeof HR_PERMISSIONS.REPORTS];
 
 export type HRPermission =
   | CompanyPermission
@@ -537,7 +647,17 @@ export type HRPermission =
   | CipaPermission
   | GeofenceZonePermission
   | HrConfigPermission
-  | BenefitPermission;
+  | BenefitPermission
+  | OkrPermission
+  | OnboardingPermission
+  | OffboardingPermission
+  | TrainingPermission
+  | ReviewPermission
+  | AnnouncementPermission
+  | KudosPermission
+  | SurveyPermission
+  | RecruitmentPermission
+  | ReportPermission;
 
 /* ===========================================
    HELPER FUNCTIONS

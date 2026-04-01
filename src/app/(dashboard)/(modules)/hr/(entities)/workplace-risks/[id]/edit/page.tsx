@@ -20,6 +20,8 @@ import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { usePermissions } from '@/hooks/use-permissions';
+import { HR_PERMISSIONS } from '../../../../_shared/constants/hr-permissions';
 import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import { safetyProgramsService } from '@/services/hr/safety-programs.service';
@@ -91,6 +93,8 @@ export default function WorkplaceRiskEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const riskId = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canDelete = hasPermission(HR_PERMISSIONS.WORKPLACE_RISKS.DELETE);
 
   // ==========================================================================
   // STATE
@@ -277,15 +281,19 @@ export default function WorkplaceRiskEditPage() {
       onClick: () => router.push(`/hr/workplace-risks/${riskId}`),
       variant: 'ghost',
     },
-    {
-      id: 'delete',
-      title: 'Excluir',
-      icon: Trash2,
-      onClick: () => setDeleteModalOpen(true),
-      variant: 'default' as const,
-      className:
-        'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
-    },
+    ...(canDelete
+      ? [
+          {
+            id: 'delete',
+            title: 'Excluir',
+            icon: Trash2,
+            onClick: () => setDeleteModalOpen(true),
+            variant: 'default' as const,
+            className:
+              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+          },
+        ]
+      : []),
     {
       id: 'save',
       title: isSaving ? 'Salvando...' : 'Salvar Alterações',
@@ -375,9 +383,8 @@ export default function WorkplaceRiskEditPage() {
               <h1 className="text-xl font-bold truncate">{risk.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {getRiskCategoryLabel(risk.category)} ·{' '}
-                {getRiskSeverityLabel(risk.severity)} ·{' '}
-                Programa: {program.name} ·{' '}
-                Criado em {formatDate(risk.createdAt)}
+                {getRiskSeverityLabel(risk.severity)} · Programa: {program.name}{' '}
+                · Criado em {formatDate(risk.createdAt)}
               </p>
             </div>
           </div>
@@ -572,9 +579,7 @@ export default function WorkplaceRiskEditPage() {
               />
               <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="controlMeasures">
-                    Medidas de Controle
-                  </Label>
+                  <Label htmlFor="controlMeasures">Medidas de Controle</Label>
                   <Textarea
                     id="controlMeasures"
                     value={formData.controlMeasures}

@@ -12,20 +12,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import type { Bonus } from '@/types/hr';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Calendar,
   Clock,
+  Edit,
   FileText,
   NotebookText,
   PlusCircle,
-  Trash,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   bonusesApi,
   bonusKeys,
@@ -33,16 +31,16 @@ import {
   formatDate,
   getPaidLabel,
   getPaidColor,
-  useDeleteBonus,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function BonusDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const bonusId = params.id as string;
+  const { hasPermission } = usePermissions();
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const canEdit = hasPermission(HR_PERMISSIONS.BONUSES.UPDATE);
 
   // ============================================================================
   // DATA FETCHING
@@ -53,28 +51,7 @@ export default function BonusDetailPage() {
     queryFn: () => bonusesApi.get(bonusId),
   });
 
-  // ============================================================================
-  // MUTATIONS
-  // ============================================================================
-
-  const deleteMutation = useDeleteBonus({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: bonusKeys.lists() });
-      router.push('/hr/bonuses');
-    },
-  });
-
   const { getName } = useEmployeeMap(bonus ? [bonus.employeeId] : []);
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
-
-  const handleDelete = async () => {
-    if (!bonus) return;
-    await deleteMutation.mutateAsync(bonus.id);
-    setIsDeleteModalOpen(false);
-  };
 
   // ============================================================================
   // LOADING STATE
@@ -137,16 +114,18 @@ export default function BonusDetailPage() {
             { label: 'Bonificações', href: '/hr/bonuses' },
             { label: bonus.name },
           ]}
-          buttons={[
-            {
-              id: 'delete',
-              title: 'Excluir',
-              icon: Trash,
-              onClick: () => setIsDeleteModalOpen(true),
-              variant: 'outline',
-              disabled: deleteMutation.isPending,
-            },
-          ]}
+          buttons={
+            canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Edit,
+                    onClick: () => router.push(`/hr/bonuses/${bonusId}/edit`),
+                  },
+                ]
+              : []
+          }
         />
 
         {/* Identity Card */}
@@ -188,12 +167,17 @@ export default function BonusDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados da Bonificação */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Dados da Bonificação
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <NotebookText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Dados da Bonificação</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações principais da bonificação
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-2 gap-6">
             <InfoField
               label="Nome"
               value={bonus.name}
@@ -218,23 +202,35 @@ export default function BonusDetailPage() {
         </Card>
 
         {/* Motivo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <FileText className="h-5 w-5" />
-            Motivo
-          </h3>
-          <p className="text-sm text-foreground whitespace-pre-wrap">
-            {bonus.reason}
-          </p>
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Motivo</h3>
+              <p className="text-sm text-muted-foreground">
+                Justificativa da bonificação
+              </p>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-foreground whitespace-pre-wrap">
+              {bonus.reason}
+            </p>
+          </div>
         </Card>
 
         {/* Metadados */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <Clock className="h-5 w-5" />
-            Metadados
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="px-4 pt-4 pb-2 border-b border-border flex items-center gap-3">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="text-base font-semibold">Metadados</h3>
+              <p className="text-sm text-muted-foreground">
+                Datas de criação e atualização
+              </p>
+            </div>
+          </div>
+          <div className="p-4 grid md:grid-cols-2 gap-6">
             <InfoField label="Criado em" value={formatDate(bonus.createdAt)} />
             <InfoField
               label="Atualizado em"
@@ -243,15 +239,6 @@ export default function BonusDetailPage() {
           </div>
         </Card>
       </PageBody>
-
-      {/* Delete Confirm Modal */}
-      <VerifyActionPinModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onSuccess={handleDelete}
-        title="Excluir Bonificação"
-        description="Digite seu PIN de ação para excluir esta bonificação. Esta ação não pode ser desfeita."
-      />
     </PageLayout>
   );
 }

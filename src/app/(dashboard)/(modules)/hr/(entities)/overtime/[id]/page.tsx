@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
+import { usePermissions } from '@/hooks/use-permissions';
 import { overtimeService } from '@/services/hr/overtime.service';
 import type { Overtime } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -35,6 +36,7 @@ import {
   useApproveOvertime,
   ApproveModal,
 } from '../src';
+import { HR_PERMISSIONS } from '../../../_shared/constants/hr-permissions';
 
 export default function OvertimeDetailPage() {
   const params = useParams();
@@ -43,6 +45,9 @@ export default function OvertimeDetailPage() {
   const overtimeId = params.id as string;
 
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canManage = hasPermission(HR_PERMISSIONS.OVERTIME.APPROVE);
 
   // ============================================================================
   // DATA FETCHING
@@ -118,7 +123,7 @@ export default function OvertimeDetailPage() {
         </PageHeader>
         <PageBody>
           <Card className="bg-white/5 p-12 text-center">
-            <Coffee className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <Coffee className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
               Hora extra não encontrada
             </h2>
@@ -151,7 +156,7 @@ export default function OvertimeDetailPage() {
             { label: `Hora Extra - ${formatDate(overtime.date)}` },
           ]}
           buttons={
-            isPending
+            isPending && canManage
               ? [
                   {
                     id: 'approve',
@@ -208,81 +213,105 @@ export default function OvertimeDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados da Hora Extra */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <NotebookText className="h-5 w-5" />
-            Dados da Hora Extra
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <InfoField
-              label="Data"
-              value={formatDate(overtime.date)}
-              icon={<Calendar className="h-4 w-4" />}
-            />
-            <InfoField
-              label="Horas"
-              value={formatHours(overtime.hours)}
-              badge={
-                <Badge variant="outline" className="gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatHours(overtime.hours)}
-                </Badge>
-              }
-            />
-            <InfoField
-              label="Funcionário"
-              value={getName(overtime.employeeId)}
-              icon={<User className="h-4 w-4" />}
-              showCopyButton
-              copyTooltip="Copiar nome do funcionário"
-            />
-            <InfoField
-              label="Status"
-              value={getApprovalLabel(overtime)}
-              badge={
-                <Badge variant={getApprovalColor(overtime)}>
-                  {getApprovalLabel(overtime)}
-                </Badge>
-              }
-            />
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <NotebookText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Dados da Hora Extra</h3>
+              <p className="text-sm text-muted-foreground">
+                Informações do registro
+              </p>
+            </div>
           </div>
-        </Card>
-
-        {/* Motivo */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-          <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-            <FileText className="h-5 w-5" />
-            Motivo
-          </h3>
-          <p className="text-sm sm:text-base leading-relaxed">
-            {overtime.reason}
-          </p>
-        </Card>
-
-        {/* Aprovação (somente se approved !== null) */}
-        {!isPending && (
-          <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-            <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
-              <CheckCircle className="h-5 w-5" />
-              Aprovação
-            </h3>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
             <div className="grid md:grid-cols-2 gap-6">
               <InfoField
-                label="Aprovado por"
-                value={
-                  overtime.approvedBy ? getName(overtime.approvedBy) : null
+                label="Data"
+                value={formatDate(overtime.date)}
+                icon={<Calendar className="h-4 w-4" />}
+              />
+              <InfoField
+                label="Horas"
+                value={formatHours(overtime.hours)}
+                badge={
+                  <Badge variant="outline" className="gap-1">
+                    <Clock className="h-3 w-3" />
+                    {formatHours(overtime.hours)}
+                  </Badge>
                 }
+              />
+              <InfoField
+                label="Funcionário"
+                value={getName(overtime.employeeId)}
                 icon={<User className="h-4 w-4" />}
                 showCopyButton
                 copyTooltip="Copiar nome do funcionário"
               />
               <InfoField
-                label="Data da aprovação"
-                value={
-                  overtime.approvedAt ? formatDate(overtime.approvedAt) : null
+                label="Status"
+                value={getApprovalLabel(overtime)}
+                badge={
+                  <Badge variant={getApprovalColor(overtime)}>
+                    {getApprovalLabel(overtime)}
+                  </Badge>
                 }
-                icon={<Calendar className="h-4 w-4" />}
               />
+            </div>
+          </div>
+        </Card>
+
+        {/* Motivo */}
+        <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+          <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <FileText className="h-5 w-5 text-foreground" />
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">Motivo</h3>
+              <p className="text-sm text-muted-foreground">
+                Justificativa da hora extra
+              </p>
+            </div>
+          </div>
+          <div className="border-b border-border" />
+          <div className="p-4 sm:p-6">
+            <p className="text-sm sm:text-base leading-relaxed">
+              {overtime.reason}
+            </p>
+          </div>
+        </Card>
+
+        {/* Aprovação (somente se approved !== null) */}
+        {!isPending && (
+          <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <CheckCircle className="h-5 w-5 text-foreground" />
+              <div className="flex-1">
+                <h3 className="text-base font-semibold">Aprovação</h3>
+                <p className="text-sm text-muted-foreground">
+                  Detalhes da aprovação
+                </p>
+              </div>
+            </div>
+            <div className="border-b border-border" />
+            <div className="p-4 sm:p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <InfoField
+                  label="Aprovado por"
+                  value={
+                    overtime.approvedBy ? getName(overtime.approvedBy) : null
+                  }
+                  icon={<User className="h-4 w-4" />}
+                  showCopyButton
+                  copyTooltip="Copiar nome do funcionário"
+                />
+                <InfoField
+                  label="Data da aprovação"
+                  value={
+                    overtime.approvedAt ? formatDate(overtime.approvedAt) : null
+                  }
+                  icon={<Calendar className="h-4 w-4" />}
+                />
+              </div>
             </div>
           </Card>
         )}
