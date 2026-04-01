@@ -23,7 +23,7 @@ import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useChartOfAccounts } from '@/hooks/finance/use-chart-of-accounts';
-import { useLedger } from '@/hooks/finance/use-journal-reports';
+import { useLedger } from '@/hooks/finance/use-reports';
 import type { LedgerEntry } from '@/types/finance';
 import { cn } from '@/lib/utils';
 
@@ -456,7 +456,7 @@ export default function LedgerPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.entries.map((entry, idx) => (
+                    {data.entries.map((entry: LedgerEntry, idx: number) => (
                       <LedgerRow key={`${entry.journalEntryId}-${idx}`} entry={entry} />
                     ))}
                   </tbody>

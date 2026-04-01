@@ -36,4 +36,3 @@ export * from './use-finance-query';
 export * from './use-compliance';
 export * from './use-payment-orders';
 export * from './use-journal-entries';
-export * from './use-journal-reports';
