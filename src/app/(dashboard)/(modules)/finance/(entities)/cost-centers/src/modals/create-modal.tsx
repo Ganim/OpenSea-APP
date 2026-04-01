@@ -1,13 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -16,8 +9,12 @@ import type { CreateCostCenterData } from '@/types/finance';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { toast } from 'sonner';
-import { Landmark, Loader2 } from 'lucide-react';
+import { DollarSign, Landmark, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 
 interface CreateCostCenterModalProps {
   isOpen: boolean;
@@ -40,6 +37,7 @@ export function CreateCostCenterModal({
   const [monthlyBudget, setMonthlyBudget] = useState('');
   const [annualBudget, setAnnualBudget] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -50,11 +48,11 @@ export function CreateCostCenterModal({
       setMonthlyBudget('');
       setAnnualBudget('');
       setFieldErrors({});
+      setCurrentStep(1);
     }
   }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!name.trim()) return;
 
     const data: CreateCostCenterData = {
@@ -101,25 +99,15 @@ export function CreateCostCenterModal({
     }
   };
 
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={open => {
-        if (!open) handleClose();
-      }}
-    >
-      <DialogContent className="sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="flex items-center justify-center text-white shrink-0 bg-linear-to-br from-teal-500 to-emerald-600 p-2 rounded-lg">
-              <Landmark className="h-5 w-5" />
-            </div>
-            Novo Centro de Custo
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {/* Code (auto-gerado, somente leitura) */}
+  const steps: WizardStep[] = [
+    {
+      title: 'Identificação',
+      description: 'Dados básicos do centro de custo',
+      icon: <Landmark className="h-12 w-12 text-teal-400" />,
+      isValid: name.trim().length > 0,
+      content: (
+        <div className="space-y-4">
+          {/* Código (auto-gerado, somente leitura) */}
           <div className="space-y-2">
             <Label htmlFor="cc-code">{'C\u00F3digo'}</Label>
             <Input
@@ -152,7 +140,7 @@ export function CreateCostCenterModal({
             </div>
           </div>
 
-          {/* Description */}
+          {/* Descrição */}
           <div className="space-y-2">
             <Label htmlFor="cc-description">{'Descri\u00E7\u00E3o'}</Label>
             <Textarea
@@ -175,55 +163,84 @@ export function CreateCostCenterModal({
               onCheckedChange={setIsActive}
             />
           </div>
-
-          {/* Budget - 2 colunas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cc-monthly">{'Or\u00E7amento Mensal (R$)'}</Label>
-              <Input
-                id="cc-monthly"
-                type="number"
-                step="0.01"
-                min="0"
-                value={monthlyBudget}
-                onChange={e => setMonthlyBudget(e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cc-annual">{'Or\u00E7amento Anual (R$)'}</Label>
-              <Input
-                id="cc-annual"
-                type="number"
-                step="0.01"
-                min="0"
-                value={annualBudget}
-                onChange={e => setAnnualBudget(e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Orçamento',
+      description: 'Definição de limites orçamentários',
+      icon: <DollarSign className="h-12 w-12 text-emerald-400" />,
+      isValid: true,
+      content: (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="cc-monthly">{'Or\u00E7amento Mensal (R$)'}</Label>
+            <Input
+              id="cc-monthly"
+              type="number"
+              step="0.01"
+              min="0"
+              value={monthlyBudget}
+              onChange={e => setMonthlyBudget(e.target.value)}
+              placeholder="0,00"
+            />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="cc-annual">{'Or\u00E7amento Anual (R$)'}</Label>
+            <Input
+              id="cc-annual"
+              type="number"
+              step="0.01"
+              min="0"
+              value={annualBudget}
+              onChange={e => setAnnualBudget(e.target.value)}
+              placeholder="0,00"
+            />
+          </div>
+        </div>
+      ),
+      footer: (
+        <div className="flex items-center gap-2 w-full">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCurrentStep(1)}
+          >
+            ← Voltar
+          </Button>
+          <div className="flex-1" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !name.trim()}
+            className="gap-2"
+          >
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            Criar
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
-          <DialogFooter className="gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !name.trim()}
-              className="gap-2"
-            >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Criar
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) handleClose();
+      }}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }

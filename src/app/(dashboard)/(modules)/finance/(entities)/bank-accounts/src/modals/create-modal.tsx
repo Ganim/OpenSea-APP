@@ -1,14 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,11 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { StepWizardDialog, type WizardStep } from '@/components/ui/step-wizard-dialog';
 import { companiesService } from '@/services/admin/companies.service';
 import type { CreateBankAccountData, PixKeyType } from '@/types/finance';
 import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
 import { useQuery } from '@tanstack/react-query';
-import { Landmark, Loader2 } from 'lucide-react';
+import { CreditCard, Landmark, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
@@ -60,6 +53,7 @@ export function CreateBankAccountModal({
 }: CreateBankAccountModalProps) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [currentStep, setCurrentStep] = useState(1);
 
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies-for-bank-account'],
@@ -71,12 +65,12 @@ export function CreateBankAccountModal({
 
   const handleClose = () => {
     setForm(INITIAL_FORM);
+    setFieldErrors({});
+    setCurrentStep(1);
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleCreate = async () => {
     const data: CreateBankAccountData = {
       name: form.name,
       bankCode: form.bankCode,
@@ -97,10 +91,12 @@ export function CreateBankAccountModal({
       await onSubmit(data);
       setForm(INITIAL_FORM);
       setFieldErrors({});
+      setCurrentStep(1);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('already exists') || msg.includes('name already')) {
         setFieldErrors({ name: translateError(msg) });
+        setCurrentStep(1);
       } else {
         toast.error(translateError(msg));
       }
@@ -114,25 +110,21 @@ export function CreateBankAccountModal({
     form.accountNumber.trim() &&
     !isSubmitting;
 
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={open => {
-        if (!open) handleClose();
-      }}
-    >
-      <DialogContent className="sm:max-w-[580px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Landmark className="w-5 h-5 text-blue-500" />
-            Nova Conta Bancária
-          </DialogTitle>
-          <DialogDescription>
-            Preencha os dados para cadastrar uma nova conta bancária.
-          </DialogDescription>
-        </DialogHeader>
+  const step1Valid = !!(
+    form.name.trim() &&
+    form.bankCode.trim() &&
+    form.agency.trim() &&
+    form.accountNumber.trim()
+  );
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+  const steps: WizardStep[] = [
+    {
+      title: 'Dados Bancários',
+      description: 'Informações da conta bancária',
+      icon: <Landmark className="h-12 w-12 text-blue-400" />,
+      isValid: step1Valid,
+      content: (
+        <div className="space-y-4">
           {/* Row 1: Nome + Cor */}
           <div className="grid grid-cols-[1fr_80px] gap-4">
             <div className="space-y-1.5">
@@ -147,7 +139,6 @@ export function CreateBankAccountModal({
                     if (fieldErrors.name)
                       setFieldErrors(prev => ({ ...prev, name: '' }));
                   }}
-                  required
                   aria-invalid={!!fieldErrors.name}
                 />
                 {fieldErrors.name && (
@@ -189,7 +180,6 @@ export function CreateBankAccountModal({
                   placeholder="0001"
                   value={form.agency}
                   onChange={e => setForm({ ...form, agency: e.target.value })}
-                  required
                 />
                 <Input
                   placeholder="Díg"
@@ -239,7 +229,6 @@ export function CreateBankAccountModal({
                   onChange={e =>
                     setForm({ ...form, accountNumber: e.target.value })
                   }
-                  required
                 />
                 <Input
                   placeholder="Díg"
@@ -253,7 +242,42 @@ export function CreateBankAccountModal({
             </div>
           </div>
 
-          {/* Row 4: Tipo de Chave PIX + Chave PIX */}
+          {/* Row 4: Empresa */}
+          <div className="space-y-1.5">
+            <Label htmlFor="create-companyId">Empresa</Label>
+            <Select
+              value={form.companyId}
+              onValueChange={value => setForm({ ...form, companyId: value })}
+            >
+              <SelectTrigger id="create-companyId">
+                <SelectValue
+                  placeholder={
+                    isLoadingCompanies
+                      ? 'Carregando...'
+                      : 'Selecione uma empresa (opcional)'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map(company => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.tradeName || company.legalName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'PIX e Configurações',
+      description: 'Chave PIX e personalização',
+      icon: <CreditCard className="h-12 w-12 text-emerald-400" />,
+      isValid: true,
+      content: (
+        <div className="space-y-4">
+          {/* Tipo de Chave PIX + Chave PIX */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="create-pixKeyType">Tipo de Chave PIX</Label>
@@ -283,49 +307,46 @@ export function CreateBankAccountModal({
               />
             </div>
           </div>
+        </div>
+      ),
+      footer: (
+        <div className="flex items-center gap-2 w-full">
+          <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+            ← Voltar
+          </Button>
+          <div className="flex-1" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleCreate}
+            disabled={!canSubmit}
+            className="gap-2"
+          >
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isSubmitting ? 'Criando...' : 'Criar Conta'}
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
-          {/* Row 5: Empresa */}
-          <div className="space-y-1.5">
-            <Label htmlFor="create-companyId">Empresa</Label>
-            <Select
-              value={form.companyId}
-              onValueChange={value => setForm({ ...form, companyId: value })}
-            >
-              <SelectTrigger id="create-companyId">
-                <SelectValue
-                  placeholder={
-                    isLoadingCompanies
-                      ? 'Carregando...'
-                      : 'Selecione uma empresa (opcional)'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map(company => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.tradeName || company.legalName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <DialogFooter className="gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={!canSubmit} className="gap-2">
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isSubmitting ? 'Criando...' : 'Criar Conta'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) handleClose();
+      }}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }

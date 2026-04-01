@@ -1,14 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -19,12 +11,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { StepWizardDialog, type WizardStep } from '@/components/ui/step-wizard-dialog';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import type { FinanceCategory, FinanceCategoryType } from '@/types/finance';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { FileText, Loader2, Tag } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 interface CreateCategoryModalProps {
@@ -57,6 +50,7 @@ export function CreateCategoryModal({
   const [description, setDescription] = useState('');
   const [parentId, setParentId] = useState<string>('none');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Sync type when modal opens with a new defaultType
   useEffect(() => {
@@ -66,6 +60,7 @@ export function CreateCategoryModal({
       setName('');
       setDescription('');
       setFieldErrors({});
+      setCurrentStep(1);
     }
   }, [isOpen, defaultType]);
 
@@ -106,8 +101,7 @@ export function CreateCategoryModal({
       }));
   }, [categories, type]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!name.trim()) return;
     try {
       await onSubmit({
@@ -140,95 +134,107 @@ export function CreateCategoryModal({
 
   const typeLabel = FINANCE_CATEGORY_TYPE_LABELS[type];
 
+  const steps: WizardStep[] = [
+    {
+      title: 'Identificação',
+      description: 'Nome e classificação da categoria',
+      icon: <Tag className="h-12 w-12 text-violet-400" />,
+      isValid: name.trim().length > 0,
+      content: (
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="cat-name">Nome *</Label>
+            <div className="relative">
+              <Input
+                id="cat-name"
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
+                }}
+                placeholder={`Nome da categoria de ${typeLabel.toLowerCase()}`}
+                required
+                autoFocus
+                aria-invalid={!!fieldErrors.name}
+              />
+              {fieldErrors.name && (
+                <FormErrorIcon message={fieldErrors.name} />
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cat-parent">Categoria Pai</Label>
+            <Select value={parentId} onValueChange={setParentId}>
+              <SelectTrigger id="cat-parent">
+                <SelectValue placeholder="Nenhuma (raiz)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhuma (raiz)</SelectItem>
+                {availableParents.map(cat => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {'─'.repeat(cat.level)} {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Detalhes',
+      description: 'Informações adicionais',
+      icon: <FileText className="h-12 w-12 text-sky-400" />,
+      isValid: true,
+      content: (
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="cat-desc">Descrição</Label>
+            <Textarea
+              id="cat-desc"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Descrição opcional"
+              rows={3}
+            />
+          </div>
+        </div>
+      ),
+      footer: (
+        <div className="flex items-center gap-2 w-full">
+          <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+            ← Voltar
+          </Button>
+          <div className="flex-1" />
+          <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !name.trim()}
+            className="gap-2"
+          >
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            Criar
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <Dialog
+    <StepWizardDialog
       open={isOpen}
       onOpenChange={open => {
         if (!open) handleClose();
       }}
-    >
-      <DialogContent className="sm:max-w-lg">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Nova Categoria de {typeLabel}</DialogTitle>
-            <DialogDescription>
-              Preencha os dados para criar uma nova categoria de{' '}
-              {typeLabel.toLowerCase()}.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="cat-name">Nome *</Label>
-              <div className="relative">
-                <Input
-                  id="cat-name"
-                  value={name}
-                  onChange={e => {
-                    setName(e.target.value);
-                    if (fieldErrors.name)
-                      setFieldErrors(prev => ({ ...prev, name: '' }));
-                  }}
-                  placeholder={`Nome da categoria de ${typeLabel.toLowerCase()}`}
-                  required
-                  autoFocus
-                  aria-invalid={!!fieldErrors.name}
-                />
-                {fieldErrors.name && (
-                  <FormErrorIcon message={fieldErrors.name} />
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cat-parent">Categoria Pai</Label>
-              <Select value={parentId} onValueChange={setParentId}>
-                <SelectTrigger id="cat-parent">
-                  <SelectValue placeholder="Nenhuma (raiz)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhuma (raiz)</SelectItem>
-                  {availableParents.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {'─'.repeat(cat.level)} {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cat-desc">Descrição</Label>
-              <Textarea
-                id="cat-desc"
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Descrição opcional"
-                rows={3}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !name.trim()}
-              className="gap-2"
-            >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Criar
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }
