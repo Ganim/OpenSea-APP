@@ -35,6 +35,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { logger } from '@/lib/logger';
 import {
   DollarSign,
@@ -333,170 +334,183 @@ export default function EditCostCenterPage({
           </div>
         </Card>
 
-        {/* Section 1: Identificação */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Target}
-                title="Identificação"
-                subtitle="Nome e código do centro de custo"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">
-                      Nome <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={e => {
-                          setFormData({ ...formData, name: e.target.value });
-                          if (fieldErrors.name)
-                            setFieldErrors(prev => ({ ...prev, name: '' }));
-                        }}
-                        placeholder="Nome do centro de custo"
-                        aria-invalid={!!fieldErrors.name}
-                      />
-                      {fieldErrors.name && (
-                        <FormErrorIcon message={fieldErrors.name} />
-                      )}
-                    </div>
-                  </div>
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
+          </TabsList>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="code">
-                      Código <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="code"
-                        value={formData.code}
-                        onChange={e => {
-                          setFormData({ ...formData, code: e.target.value });
-                          if (fieldErrors.code)
-                            setFieldErrors(prev => ({ ...prev, code: '' }));
-                        }}
-                        placeholder="Código do centro de custo"
-                        aria-invalid={!!fieldErrors.code}
-                      />
-                      {fieldErrors.code && (
-                        <FormErrorIcon message={fieldErrors.code} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 2: Orçamento */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={DollarSign}
-                title="Orçamento"
-                subtitle="Limites orçamentários mensal e anual"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="monthlyBudget">Orçamento Mensal (R$)</Label>
-                    <Input
-                      id="monthlyBudget"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.monthlyBudget}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          monthlyBudget: e.target.value,
-                        })
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="annualBudget">Orçamento Anual (R$)</Label>
-                    <Input
-                      id="annualBudget"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.annualBudget}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          annualBudget: e.target.value,
-                        })
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 3: Configurações */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Configurações"
-                subtitle="Status e descrição do centro de custo"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.isActive ? 'active' : 'inactive'}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          isActive: v === 'active',
-                        })
-                      }
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Descrição opcional do centro de custo"
-                    rows={4}
+          {/* Tab 1: Identificação + Orçamento */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Section 1: Identificação */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Target}
+                    title="Identificação"
+                    subtitle="Nome e código do centro de custo"
                   />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">
+                          Nome <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={e => {
+                              setFormData({ ...formData, name: e.target.value });
+                              if (fieldErrors.name)
+                                setFieldErrors(prev => ({ ...prev, name: '' }));
+                            }}
+                            placeholder="Nome do centro de custo"
+                            aria-invalid={!!fieldErrors.name}
+                          />
+                          {fieldErrors.name && (
+                            <FormErrorIcon message={fieldErrors.name} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="code">
+                          Código <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="code"
+                            value={formData.code}
+                            onChange={e => {
+                              setFormData({ ...formData, code: e.target.value });
+                              if (fieldErrors.code)
+                                setFieldErrors(prev => ({ ...prev, code: '' }));
+                            }}
+                            placeholder="Código do centro de custo"
+                            aria-invalid={!!fieldErrors.code}
+                          />
+                          {fieldErrors.code && (
+                            <FormErrorIcon message={fieldErrors.code} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+
+            {/* Section 2: Orçamento */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={DollarSign}
+                    title="Orçamento"
+                    subtitle="Limites orçamentários mensal e anual"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="monthlyBudget">Orçamento Mensal (R$)</Label>
+                        <Input
+                          id="monthlyBudget"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.monthlyBudget}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              monthlyBudget: e.target.value,
+                            })
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="annualBudget">Orçamento Anual (R$)</Label>
+                        <Input
+                          id="annualBudget"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.annualBudget}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              annualBudget: e.target.value,
+                            })
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: Configurações */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Section 3: Configurações */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Configurações"
+                    subtitle="Status e descrição do centro de custo"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={formData.isActive ? 'active' : 'inactive'}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              isActive: v === 'active',
+                            })
+                          }
+                        >
+                          <SelectTrigger id="status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Ativo</SelectItem>
+                            <SelectItem value="inactive">Inativo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Descrição</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Descrição opcional do centro de custo"
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}

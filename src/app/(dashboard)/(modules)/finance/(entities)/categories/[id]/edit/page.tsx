@@ -36,6 +36,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { logger } from '@/lib/logger';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import type { FinanceCategoryType } from '@/types/finance';
@@ -396,257 +397,270 @@ export default function EditFinanceCategoryPage({
           </div>
         </Card>
 
-        {/* Section 1: Identificação */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={FolderTree}
-                title="Identificação"
-                subtitle="Nome e categoria pai"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">
-                      Nome <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={e => {
-                          setFormData({ ...formData, name: e.target.value });
-                          if (fieldErrors.name)
-                            setFieldErrors(prev => ({ ...prev, name: '' }));
-                        }}
-                        placeholder="Nome da categoria"
-                        aria-invalid={!!fieldErrors.name}
-                      />
-                      {fieldErrors.name && (
-                        <FormErrorIcon message={fieldErrors.name} />
-                      )}
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
+          </TabsList>
+
+          {/* Tab 1: Identificação + Configurações */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Section 1: Identificação */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={FolderTree}
+                    title="Identificação"
+                    subtitle="Nome e categoria pai"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">
+                          Nome <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={e => {
+                              setFormData({ ...formData, name: e.target.value });
+                              if (fieldErrors.name)
+                                setFieldErrors(prev => ({ ...prev, name: '' }));
+                            }}
+                            placeholder="Nome da categoria"
+                            aria-invalid={!!fieldErrors.name}
+                          />
+                          {fieldErrors.name && (
+                            <FormErrorIcon message={fieldErrors.name} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="parentId">Categoria Pai</Label>
+                        <Select
+                          value={formData.parentId || 'none'}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              parentId: v === 'none' ? '' : v,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="parentId">
+                            <SelectValue placeholder="Nenhuma (raiz)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhuma (raiz)</SelectItem>
+                            {availableParents.map(cat => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {'─'.repeat(cat.level)} {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </Card>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="parentId">Categoria Pai</Label>
-                    <Select
-                      value={formData.parentId || 'none'}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          parentId: v === 'none' ? '' : v,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="parentId">
-                        <SelectValue placeholder="Nenhuma (raiz)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Nenhuma (raiz)</SelectItem>
-                        {availableParents.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {'─'.repeat(cat.level)} {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            {/* Section 2: Configurações */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Configurações"
+                    subtitle="Tipo, status e ordem de exibição"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="type">
+                          Tipo <span className="text-rose-500">*</span>
+                        </Label>
+                        {isChild ? (
+                          <div className="flex items-center h-9 px-3 rounded-md border bg-muted text-sm text-muted-foreground">
+                            {FINANCE_CATEGORY_TYPE_LABELS[formData.type]}
+                            <span className="ml-2 text-xs">(herdado do pai)</span>
+                          </div>
+                        ) : (
+                          <Select
+                            value={formData.type}
+                            onValueChange={(value: string) =>
+                              setFormData({
+                                ...formData,
+                                type: value as FinanceCategoryType,
+                              })
+                            }
+                          >
+                            <SelectTrigger id="type">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(
+                                ([value, label]) => (
+                                  <SelectItem key={value} value={value}>
+                                    {label}
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                        {hasChildren && !isChild && (
+                          <p className="text-xs text-amber-500">
+                            Alterar o tipo irá propagar para todas as subcategorias.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={formData.isActive ? 'active' : 'inactive'}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              isActive: v === 'active',
+                            })
+                          }
+                        >
+                          <SelectTrigger id="status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Ativa</SelectItem>
+                            <SelectItem value="inactive">Inativa</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="displayOrder">Ordem de Exibição</Label>
+                        <Input
+                          id="displayOrder"
+                          type="number"
+                          value={formData.displayOrder}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              displayOrder: parseInt(e.target.value) || 0,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </TabsContent>
 
-        {/* Section 2: Configurações */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Configurações"
-                subtitle="Tipo, status e ordem de exibição"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="type">
-                      Tipo <span className="text-rose-500">*</span>
-                    </Label>
-                    {isChild ? (
-                      <div className="flex items-center h-9 px-3 rounded-md border bg-muted text-sm text-muted-foreground">
-                        {FINANCE_CATEGORY_TYPE_LABELS[formData.type]}
-                        <span className="ml-2 text-xs">(herdado do pai)</span>
+          {/* Tab 2: Taxas Padrão + Aparência */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Section 3: Taxas Padrão */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Percent}
+                    title="Taxas Padrão"
+                    subtitle="Taxas de juros e multa aplicadas por padrão"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="interestRate">Taxa de Juros (%)</Label>
+                        <Input
+                          id="interestRate"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.interestRate}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              interestRate: e.target.value,
+                            })
+                          }
+                          placeholder="0,00"
+                        />
                       </div>
-                    ) : (
-                      <Select
-                        value={formData.type}
-                        onValueChange={(value: string) =>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="penaltyRate">Taxa de Multa (%)</Label>
+                        <Input
+                          id="penaltyRate"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.penaltyRate}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              penaltyRate: e.target.value,
+                            })
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Section 4: Aparência */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Palette}
+                    title="Aparência"
+                    subtitle="Cor e descrição da categoria"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2 max-w-[200px]">
+                        <Label htmlFor="color">Cor</Label>
+                        <Input
+                          id="color"
+                          type="color"
+                          value={formData.color || '#8b5cf6'}
+                          onChange={e =>
+                            setFormData({ ...formData, color: e.target.value })
+                          }
+                          className="h-10 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Descrição</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={e =>
                           setFormData({
                             ...formData,
-                            type: value as FinanceCategoryType,
+                            description: e.target.value,
                           })
                         }
-                      >
-                        <SelectTrigger id="type">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(FINANCE_CATEGORY_TYPE_LABELS).map(
-                            ([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {hasChildren && !isChild && (
-                      <p className="text-xs text-amber-500">
-                        Alterar o tipo irá propagar para todas as subcategorias.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.isActive ? 'active' : 'inactive'}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          isActive: v === 'active',
-                        })
-                      }
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Ativa</SelectItem>
-                        <SelectItem value="inactive">Inativa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="displayOrder">Ordem de Exibição</Label>
-                    <Input
-                      id="displayOrder"
-                      type="number"
-                      value={formData.displayOrder}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          displayOrder: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
+                        placeholder="Descrição opcional da categoria"
+                        rows={4}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 3: Taxas Padrão */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Percent}
-                title="Taxas Padrão"
-                subtitle="Taxas de juros e multa aplicadas por padrão"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="interestRate">Taxa de Juros (%)</Label>
-                    <Input
-                      id="interestRate"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.interestRate}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          interestRate: e.target.value,
-                        })
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="penaltyRate">Taxa de Multa (%)</Label>
-                    <Input
-                      id="penaltyRate"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.penaltyRate}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          penaltyRate: e.target.value,
-                        })
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 4: Aparência */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Palette}
-                title="Aparência"
-                subtitle="Cor e descrição da categoria"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2 max-w-[200px]">
-                    <Label htmlFor="color">Cor</Label>
-                    <Input
-                      id="color"
-                      type="color"
-                      value={formData.color || '#8b5cf6'}
-                      onChange={e =>
-                        setFormData({ ...formData, color: e.target.value })
-                      }
-                      className="h-10 cursor-pointer"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Descrição opcional da categoria"
-                    rows={4}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}

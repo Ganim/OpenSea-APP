@@ -18,6 +18,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -354,210 +355,223 @@ export default function EditRecurringPage({
           </div>
         </Card>
 
-        {/* Form Card -- Section 1: Dados Basicos */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={FileText}
-                title="Dados Básicos"
-                subtitle="Informações principais da recorrência"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2 grid gap-2">
-                    <Label htmlFor="description">
-                      Descrição <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="description"
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Ex: Aluguel mensal"
-                      required
-                    />
-                  </div>
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="settings">Vinculação</TabsTrigger>
+          </TabsList>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="expectedAmount">
-                      Valor Base (R$) <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="expectedAmount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={expectedAmount}
-                      onChange={e =>
-                        setExpectedAmount(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="frequencyUnit">Frequência</Label>
-                    <Select
-                      value={frequencyUnit}
-                      onValueChange={v => setFrequencyUnit(v as RecurrenceUnit)}
-                    >
-                      <SelectTrigger id="frequencyUnit">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FREQUENCY_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="frequencyInterval">Intervalo</Label>
-                    <Input
-                      id="frequencyInterval"
-                      type="number"
-                      min="1"
-                      value={frequencyInterval}
-                      onChange={e =>
-                        setFrequencyInterval(parseInt(e.target.value) || 1)
-                      }
-                      placeholder="1"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Ex: 2 para a cada 2 meses
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card -- Section 2: Periodo */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Calendar}
-                title="Período"
-                subtitle="Data de término da recorrência"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="startDate">Data de Início</Label>
-                    <Input
-                      id="startDate"
-                      type="date"
-                      value={
-                        config.startDate ? config.startDate.split('T')[0] : ''
-                      }
-                      disabled
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      A data de início não pode ser alterada
-                    </p>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="endDate">Data de Término</Label>
-                    <Input
-                      id="endDate"
-                      type="date"
-                      value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Deixe em branco para sem data de término
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card -- Section 3: Configuracao */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Configuração"
-                subtitle="Taxas de juros e multa"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="interestRate">Taxa de Juros (%)</Label>
-                    <Input
-                      id="interestRate"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={interestRate ?? ''}
-                      onChange={e =>
-                        setInterestRate(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="penaltyRate">Taxa de Multa (%)</Label>
-                    <Input
-                      id="penaltyRate"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={penaltyRate ?? ''}
-                      onChange={e =>
-                        setPenaltyRate(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card -- Section 4: Observacoes */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={NotebookText}
-                title="Observações"
-                subtitle="Notas e informações adicionais"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                <div className="grid gap-2">
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Informações adicionais sobre a recorrência..."
-                    rows={4}
+          {/* Tab 1: Dados Gerais + Recorrência */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Form Card -- Section 1: Dados Basicos */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={FileText}
+                    title="Dados Básicos"
+                    subtitle="Informações principais da recorrência"
                   />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2 grid gap-2">
+                        <Label htmlFor="description">
+                          Descrição <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="description"
+                          value={description}
+                          onChange={e => setDescription(e.target.value)}
+                          placeholder="Ex: Aluguel mensal"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="expectedAmount">
+                          Valor Base (R$) <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="expectedAmount"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={expectedAmount}
+                          onChange={e =>
+                            setExpectedAmount(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="frequencyUnit">Frequência</Label>
+                        <Select
+                          value={frequencyUnit}
+                          onValueChange={v => setFrequencyUnit(v as RecurrenceUnit)}
+                        >
+                          <SelectTrigger id="frequencyUnit">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {FREQUENCY_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="frequencyInterval">Intervalo</Label>
+                        <Input
+                          id="frequencyInterval"
+                          type="number"
+                          min="1"
+                          value={frequencyInterval}
+                          onChange={e =>
+                            setFrequencyInterval(parseInt(e.target.value) || 1)
+                          }
+                          placeholder="1"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Ex: 2 para a cada 2 meses
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+
+            {/* Form Card -- Section 2: Periodo */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Calendar}
+                    title="Período"
+                    subtitle="Data de término da recorrência"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="startDate">Data de Início</Label>
+                        <Input
+                          id="startDate"
+                          type="date"
+                          value={
+                            config.startDate ? config.startDate.split('T')[0] : ''
+                          }
+                          disabled
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          A data de início não pode ser alterada
+                        </p>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="endDate">Data de Término</Label>
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={endDate}
+                          onChange={e => setEndDate(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Deixe em branco para sem data de término
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: Vinculação + Configurações */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Form Card -- Section 3: Configuracao */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Configuração"
+                    subtitle="Taxas de juros e multa"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="interestRate">Taxa de Juros (%)</Label>
+                        <Input
+                          id="interestRate"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={interestRate ?? ''}
+                          onChange={e =>
+                            setInterestRate(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="penaltyRate">Taxa de Multa (%)</Label>
+                        <Input
+                          id="penaltyRate"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={penaltyRate ?? ''}
+                          onChange={e =>
+                            setPenaltyRate(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Form Card -- Section 4: Observacoes */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={NotebookText}
+                    title="Observações"
+                    subtitle="Notas e informações adicionais"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                    <div className="grid gap-2">
+                      <Label htmlFor="notes">Observações</Label>
+                      <Textarea
+                        id="notes"
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Informações adicionais sobre a recorrência..."
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}

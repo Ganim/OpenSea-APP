@@ -16,6 +16,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -362,335 +363,352 @@ export default function EditBankAccountPage({
           </div>
         </Card>
 
-        {/* Section 1: Dados Básicos */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Building2}
-                title="Dados Básicos"
-                subtitle="Nome, banco e tipo da conta"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">
-                      Nome <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={e => {
-                          setFormData({ ...formData, name: e.target.value });
-                          if (fieldErrors.name)
-                            setFieldErrors(prev => ({ ...prev, name: '' }));
-                        }}
-                        placeholder="Nome da conta bancária"
-                        aria-invalid={!!fieldErrors.name}
-                      />
-                      {fieldErrors.name && (
-                        <FormErrorIcon message={fieldErrors.name} />
-                      )}
+        {/* Tabs */}
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="pix">PIX</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
+          </TabsList>
+
+          {/* Tab 1: Dados Gerais — Dados Básicos + Dados da Conta */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Section: Dados Básicos */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Building2}
+                    title="Dados Básicos"
+                    subtitle="Nome, banco e tipo da conta"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">
+                          Nome <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={e => {
+                              setFormData({ ...formData, name: e.target.value });
+                              if (fieldErrors.name)
+                                setFieldErrors(prev => ({ ...prev, name: '' }));
+                            }}
+                            placeholder="Nome da conta bancária"
+                            aria-invalid={!!fieldErrors.name}
+                          />
+                          {fieldErrors.name && (
+                            <FormErrorIcon message={fieldErrors.name} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="bankName">Banco</Label>
+                        <Input
+                          id="bankName"
+                          value={formData.bankName}
+                          onChange={e =>
+                            setFormData({ ...formData, bankName: e.target.value })
+                          }
+                          placeholder="Nome do banco"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="bankCode">
+                          Código do Banco <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="bankCode"
+                          value={formData.bankCode}
+                          onChange={e =>
+                            setFormData({ ...formData, bankCode: e.target.value })
+                          }
+                          placeholder="Ex: 001, 341, 237"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="accountType">
+                          Tipo de Conta <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.accountType}
+                          onValueChange={(value: string) =>
+                            setFormData({
+                              ...formData,
+                              accountType: value as BankAccountType,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="accountType">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="bankName">Banco</Label>
-                    <Input
-                      id="bankName"
-                      value={formData.bankName}
-                      onChange={e =>
-                        setFormData({ ...formData, bankName: e.target.value })
-                      }
-                      placeholder="Nome do banco"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="bankCode">
-                      Código do Banco <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="bankCode"
-                      value={formData.bankCode}
-                      onChange={e =>
-                        setFormData({ ...formData, bankCode: e.target.value })
-                      }
-                      placeholder="Ex: 001, 341, 237"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="accountType">
-                      Tipo de Conta <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.accountType}
-                      onValueChange={(value: string) =>
-                        setFormData({
-                          ...formData,
-                          accountType: value as BankAccountType,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="accountType">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(
-                          ([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
 
-        {/* Section 2: Dados da Conta */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={CreditCard}
-                title="Dados da Conta"
-                subtitle="Agência e número da conta"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="agency">
-                      Agência <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="agency"
-                      value={formData.agency}
-                      onChange={e =>
-                        setFormData({ ...formData, agency: e.target.value })
-                      }
-                      placeholder="0001"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="agencyDigit">Dígito da Agência</Label>
-                    <Input
-                      id="agencyDigit"
-                      value={formData.agencyDigit}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          agencyDigit: e.target.value,
-                        })
-                      }
-                      placeholder="0"
-                      maxLength={2}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="accountNumber">
-                      Número da Conta <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="accountNumber"
-                      value={formData.accountNumber}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          accountNumber: e.target.value,
-                        })
-                      }
-                      placeholder="12345"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="accountDigit">Dígito da Conta</Label>
-                    <Input
-                      id="accountDigit"
-                      value={formData.accountDigit}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          accountDigit: e.target.value,
-                        })
-                      }
-                      placeholder="0"
-                      maxLength={2}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 3: Status e Configurações */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Status e Configurações"
-                subtitle="Status, cor e conta padrão"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value: string) =>
-                        setFormData({
-                          ...formData,
-                          status: value as BankAccountStatus,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(BANK_ACCOUNT_STATUS_LABELS).map(
-                          ([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="color">Cor</Label>
-                    <Input
-                      id="color"
-                      type="color"
-                      value={formData.color || '#3b82f6'}
-                      onChange={e =>
-                        setFormData({ ...formData, color: e.target.value })
-                      }
-                      className="h-10 cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="isDefault">Conta Padrão</Label>
-                    <Select
-                      value={formData.isDefault ? 'true' : 'false'}
-                      onValueChange={value =>
-                        setFormData({
-                          ...formData,
-                          isDefault: value === 'true',
-                        })
-                      }
-                    >
-                      <SelectTrigger id="isDefault">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Sim</SelectItem>
-                        <SelectItem value="false">Não</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 4: PIX */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={QrCode}
-                title="PIX"
-                subtitle="Chave PIX vinculada à conta"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="pixKeyType">Tipo de Chave PIX</Label>
-                    <Select
-                      value={formData.pixKeyType || 'none'}
-                      onValueChange={value =>
-                        setFormData({
-                          ...formData,
-                          pixKeyType: value === 'none' ? '' : value,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="pixKeyType">
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Nenhum</SelectItem>
-                        {Object.entries(PIX_KEY_TYPE_LABELS).map(
-                          ([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="pixKey">Chave PIX</Label>
-                    <Input
-                      id="pixKey"
-                      value={formData.pixKey}
-                      onChange={e =>
-                        setFormData({ ...formData, pixKey: e.target.value })
-                      }
-                      placeholder="Chave PIX"
-                      disabled={!formData.pixKeyType}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 5: Descrição */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Observações"
-                subtitle="Notas e informações adicionais"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={e =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    placeholder="Observações sobre a conta bancária"
-                    rows={4}
+            {/* Section: Dados da Conta */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={CreditCard}
+                    title="Dados da Conta"
+                    subtitle="Agência e número da conta"
                   />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="agency">
+                          Agência <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="agency"
+                          value={formData.agency}
+                          onChange={e =>
+                            setFormData({ ...formData, agency: e.target.value })
+                          }
+                          placeholder="0001"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="agencyDigit">Dígito da Agência</Label>
+                        <Input
+                          id="agencyDigit"
+                          value={formData.agencyDigit}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              agencyDigit: e.target.value,
+                            })
+                          }
+                          placeholder="0"
+                          maxLength={2}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="accountNumber">
+                          Número da Conta <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="accountNumber"
+                          value={formData.accountNumber}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              accountNumber: e.target.value,
+                            })
+                          }
+                          placeholder="12345"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="accountDigit">Dígito da Conta</Label>
+                        <Input
+                          id="accountDigit"
+                          value={formData.accountDigit}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              accountDigit: e.target.value,
+                            })
+                          }
+                          placeholder="0"
+                          maxLength={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: PIX */}
+          <TabsContent value="pix" className="space-y-4">
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={QrCode}
+                    title="PIX"
+                    subtitle="Chave PIX vinculada à conta"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="pixKeyType">Tipo de Chave PIX</Label>
+                        <Select
+                          value={formData.pixKeyType || 'none'}
+                          onValueChange={value =>
+                            setFormData({
+                              ...formData,
+                              pixKeyType: value === 'none' ? '' : value,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="pixKeyType">
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {Object.entries(PIX_KEY_TYPE_LABELS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="pixKey">Chave PIX</Label>
+                        <Input
+                          id="pixKey"
+                          value={formData.pixKey}
+                          onChange={e =>
+                            setFormData({ ...formData, pixKey: e.target.value })
+                          }
+                          placeholder="Chave PIX"
+                          disabled={!formData.pixKeyType}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 3: Configurações — Status e Configurações + Observações */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Section: Status e Configurações */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Status e Configurações"
+                    subtitle="Status, cor e conta padrão"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={formData.status}
+                          onValueChange={(value: string) =>
+                            setFormData({
+                              ...formData,
+                              status: value as BankAccountStatus,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(BANK_ACCOUNT_STATUS_LABELS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="color">Cor</Label>
+                        <Input
+                          id="color"
+                          type="color"
+                          value={formData.color || '#3b82f6'}
+                          onChange={e =>
+                            setFormData({ ...formData, color: e.target.value })
+                          }
+                          className="h-10 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="isDefault">Conta Padrão</Label>
+                        <Select
+                          value={formData.isDefault ? 'true' : 'false'}
+                          onValueChange={value =>
+                            setFormData({
+                              ...formData,
+                              isDefault: value === 'true',
+                            })
+                          }
+                        >
+                          <SelectTrigger id="isDefault">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">Sim</SelectItem>
+                            <SelectItem value="false">Não</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Section: Observações */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Observações"
+                    subtitle="Notas e informações adicionais"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Descrição</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={e =>
+                          setFormData({ ...formData, description: e.target.value })
+                        }
+                        placeholder="Observações sobre a conta bancária"
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}

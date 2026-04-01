@@ -36,6 +36,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { translateError } from '@/lib/error-messages';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { logger } from '@/lib/logger';
 import type {
   ChartOfAccount,
@@ -433,212 +434,225 @@ export default function EditChartOfAccountPage({
           </div>
         )}
 
-        {/* Section 1: Identificacao */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Info}
-                title="Identificação"
-                subtitle="Código e nome da conta contábil"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="code">
-                      Código <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="code"
-                        value={formData.code}
-                        onChange={e => {
-                          setFormData({ ...formData, code: e.target.value });
-                          if (fieldErrors.code)
-                            setFieldErrors(prev => ({ ...prev, code: '' }));
-                        }}
-                        placeholder="Ex.: 1.1.1.01"
-                        className="font-mono"
-                        aria-invalid={!!fieldErrors.code}
-                      />
-                      {fieldErrors.code && (
-                        <FormErrorIcon message={fieldErrors.code} />
-                      )}
-                    </div>
-                  </div>
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
+          </TabsList>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">
-                      Nome <span className="text-rose-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={e => {
-                          setFormData({ ...formData, name: e.target.value });
-                          if (fieldErrors.name)
-                            setFieldErrors(prev => ({ ...prev, name: '' }));
-                        }}
-                        placeholder="Nome da conta contábil"
-                        aria-invalid={!!fieldErrors.name}
-                      />
-                      {fieldErrors.name && (
-                        <FormErrorIcon message={fieldErrors.name} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 2: Classificacao */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={FolderTree}
-                title="Classificação"
-                subtitle="Tipo, classe, natureza e hierarquia da conta"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="type">
-                      Tipo <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          type: v as ChartOfAccountType,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="type">
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TYPE_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="accountClass">
-                      Classe <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.accountClass}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          accountClass: v as ChartOfAccountClass,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="accountClass">
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CLASS_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="nature">
-                      Natureza <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.nature}
-                      onValueChange={v =>
-                        setFormData({
-                          ...formData,
-                          nature: v as ChartOfAccountNature,
-                        })
-                      }
-                    >
-                      <SelectTrigger id="nature">
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {NATURE_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="parentId">Conta Pai (opcional)</Label>
-                  <Select
-                    value={formData.parentId}
-                    onValueChange={v =>
-                      setFormData({ ...formData, parentId: v })
-                    }
-                  >
-                    <SelectTrigger id="parentId">
-                      <SelectValue placeholder="Nenhuma (raiz)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhuma (raiz)</SelectItem>
-                      {availableParents.map(acc => (
-                        <SelectItem key={acc.id} value={acc.id}>
-                          {'─'.repeat(acc.level)} {acc.code} - {acc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Section 3: Configuracoes */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Settings}
-                title="Configurações"
-                subtitle="Status da conta contábil"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="isActive">Conta Ativa</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Contas inativas não aparecem nas seleções de lançamentos.
-                    </p>
-                  </div>
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={checked =>
-                      setFormData({ ...formData, isActive: checked })
-                    }
+          {/* Tab 1: Identificação + Classificação */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Section 1: Identificacao */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Info}
+                    title="Identificação"
+                    subtitle="Código e nome da conta contábil"
                   />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="code">
+                          Código <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="code"
+                            value={formData.code}
+                            onChange={e => {
+                              setFormData({ ...formData, code: e.target.value });
+                              if (fieldErrors.code)
+                                setFieldErrors(prev => ({ ...prev, code: '' }));
+                            }}
+                            placeholder="Ex.: 1.1.1.01"
+                            className="font-mono"
+                            aria-invalid={!!fieldErrors.code}
+                          />
+                          {fieldErrors.code && (
+                            <FormErrorIcon message={fieldErrors.code} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">
+                          Nome <span className="text-rose-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={e => {
+                              setFormData({ ...formData, name: e.target.value });
+                              if (fieldErrors.name)
+                                setFieldErrors(prev => ({ ...prev, name: '' }));
+                            }}
+                            placeholder="Nome da conta contábil"
+                            aria-invalid={!!fieldErrors.name}
+                          />
+                          {fieldErrors.name && (
+                            <FormErrorIcon message={fieldErrors.name} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+
+            {/* Section 2: Classificacao */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={FolderTree}
+                    title="Classificação"
+                    subtitle="Tipo, classe, natureza e hierarquia da conta"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="type">
+                          Tipo <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.type}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              type: v as ChartOfAccountType,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="type">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TYPE_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="accountClass">
+                          Classe <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.accountClass}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              accountClass: v as ChartOfAccountClass,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="accountClass">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CLASS_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="nature">
+                          Natureza <span className="text-rose-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.nature}
+                          onValueChange={v =>
+                            setFormData({
+                              ...formData,
+                              nature: v as ChartOfAccountNature,
+                            })
+                          }
+                        >
+                          <SelectTrigger id="nature">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {NATURE_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="parentId">Conta Pai (opcional)</Label>
+                      <Select
+                        value={formData.parentId}
+                        onValueChange={v =>
+                          setFormData({ ...formData, parentId: v })
+                        }
+                      >
+                        <SelectTrigger id="parentId">
+                          <SelectValue placeholder="Nenhuma (raiz)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhuma (raiz)</SelectItem>
+                          {availableParents.map(acc => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              {'─'.repeat(acc.level)} {acc.code} - {acc.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: Configurações */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Section 3: Configuracoes */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Settings}
+                    title="Configurações"
+                    subtitle="Status da conta contábil"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="isActive">Conta Ativa</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Contas inativas não aparecem nas seleções de lançamentos.
+                        </p>
+                      </div>
+                      <Switch
+                        id="isActive"
+                        checked={formData.isActive}
+                        onCheckedChange={checked =>
+                          setFormData({ ...formData, isActive: checked })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}

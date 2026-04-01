@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
   useBankAccounts,
@@ -376,351 +377,381 @@ export default function EditContractPage({
           </div>
         </Card>
 
-        {/* Form Card — Section 1: Dados Básicos */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={FileText}
-                title="Dados Básicos"
-                subtitle="Informações principais do contrato"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2 grid gap-2">
-                    <Label htmlFor="title">
-                      Título <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="title"
-                      value={title}
-                      onChange={e => setTitle(e.target.value)}
-                      placeholder="Ex: Contrato de Fornecimento"
-                      required
-                    />
-                  </div>
+        {/* Tabbed Form */}
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
+            <TabsTrigger value="general">Dados Gerais</TabsTrigger>
+            <TabsTrigger value="period-values">Período e Valores</TabsTrigger>
+            <TabsTrigger value="links">Vinculação</TabsTrigger>
+          </TabsList>
 
-                  <div className="sm:col-span-2 grid gap-2">
-                    <Label htmlFor="description">Descrição</Label>
-                    <Textarea
-                      id="description"
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Descrição detalhada do contrato..."
-                      rows={2}
-                    />
+          {/* Tab 1: Dados Gerais — Dados Básicos + Fornecedor */}
+          <TabsContent value="general" className="space-y-4">
+            {/* Form Card — Section 1: Dados Básicos */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={FileText}
+                    title="Dados Básicos"
+                    subtitle="Informações principais do contrato"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2 grid gap-2">
+                        <Label htmlFor="title">
+                          Título <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="title"
+                          value={title}
+                          onChange={e => setTitle(e.target.value)}
+                          placeholder="Ex: Contrato de Fornecimento"
+                          required
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2 grid gap-2">
+                        <Label htmlFor="description">Descrição</Label>
+                        <Textarea
+                          id="description"
+                          value={description}
+                          onChange={e => setDescription(e.target.value)}
+                          placeholder="Descrição detalhada do contrato..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
 
-        {/* Form Card — Section 2: Fornecedor */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Building2}
-                title="Fornecedor"
-                subtitle="Dados da empresa e contato"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2 grid gap-2">
-                    <Label htmlFor="companyName">
-                      Empresa/Fornecedor{' '}
-                      <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="companyName"
-                      value={companyName}
-                      onChange={e => setCompanyName(e.target.value)}
-                      placeholder="Razão social ou nome fantasia"
-                      required
-                    />
-                  </div>
+            {/* Form Card — Section 2: Fornecedor */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Building2}
+                    title="Fornecedor"
+                    subtitle="Dados da empresa e contato"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2 grid gap-2">
+                        <Label htmlFor="companyName">
+                          Empresa/Fornecedor{' '}
+                          <span className="text-rose-500">*</span>
+                        </Label>
+                        <Input
+                          id="companyName"
+                          value={companyName}
+                          onChange={e => setCompanyName(e.target.value)}
+                          placeholder="Razão social ou nome fantasia"
+                          required
+                        />
+                      </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="contactName">Nome do Contato</Label>
-                    <Input
-                      id="contactName"
-                      value={contactName}
-                      onChange={e => setContactName(e.target.value)}
-                      placeholder="Responsável pelo contrato"
-                    />
-                  </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="contactName">Nome do Contato</Label>
+                        <Input
+                          id="contactName"
+                          value={contactName}
+                          onChange={e => setContactName(e.target.value)}
+                          placeholder="Responsável pelo contrato"
+                        />
+                      </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="contactEmail">E-mail do Contato</Label>
-                    <Input
-                      id="contactEmail"
-                      type="email"
-                      value={contactEmail}
-                      onChange={e => setContactEmail(e.target.value)}
-                      placeholder="email@empresa.com"
-                    />
+                      <div className="grid gap-2">
+                        <Label htmlFor="contactEmail">E-mail do Contato</Label>
+                        <Input
+                          id="contactEmail"
+                          type="email"
+                          value={contactEmail}
+                          onChange={e => setContactEmail(e.target.value)}
+                          placeholder="email@empresa.com"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </TabsContent>
 
-        {/* Form Card — Section 3: Período */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Calendar}
-                title="Período"
-                subtitle="Vigência e renovação automática"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="startDate">Data de Início</Label>
-                    <Input
-                      id="startDate"
-                      type="date"
-                      value={
-                        contract.startDate
-                          ? contract.startDate.split('T')[0]
-                          : ''
-                      }
-                      disabled
-                      className="opacity-60"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Não editável após criação
-                    </p>
-                  </div>
+          {/* Tab 2: Período e Valores — Período + Valores */}
+          <TabsContent value="period-values" className="space-y-4">
+            {/* Form Card — Section 3: Período */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Calendar}
+                    title="Período"
+                    subtitle="Vigência e renovação automática"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="startDate">Data de Início</Label>
+                        <Input
+                          id="startDate"
+                          type="date"
+                          value={
+                            contract.startDate
+                              ? contract.startDate.split('T')[0]
+                              : ''
+                          }
+                          disabled
+                          className="opacity-60"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Não editável após criação
+                        </p>
+                      </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="endDate">Data de Término</Label>
-                    <Input
-                      id="endDate"
-                      type="date"
-                      value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
-                    />
-                  </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="endDate">Data de Término</Label>
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={endDate}
+                          onChange={e => setEndDate(e.target.value)}
+                        />
+                      </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="alertDaysBefore">Alerta (dias antes)</Label>
-                    <Input
-                      id="alertDaysBefore"
-                      type="number"
-                      min="1"
-                      max="365"
-                      value={alertDaysBefore}
-                      onChange={e =>
-                        setAlertDaysBefore(parseInt(e.target.value) || 30)
-                      }
-                    />
+                      <div className="grid gap-2">
+                        <Label htmlFor="alertDaysBefore">
+                          Alerta (dias antes)
+                        </Label>
+                        <Input
+                          id="alertDaysBefore"
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={alertDaysBefore}
+                          onChange={e =>
+                            setAlertDaysBefore(parseInt(e.target.value) || 30)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="autoRenew"
+                          checked={autoRenew}
+                          onCheckedChange={checked =>
+                            setAutoRenew(checked === true)
+                          }
+                        />
+                        <Label
+                          htmlFor="autoRenew"
+                          className="font-normal text-sm"
+                        >
+                          Renovação automática
+                        </Label>
+                      </div>
+                      {autoRenew && (
+                        <div className="grid gap-2 pl-6 max-w-xs">
+                          <Label htmlFor="renewalPeriodMonths">
+                            Período de renovação (meses)
+                          </Label>
+                          <Input
+                            id="renewalPeriodMonths"
+                            type="number"
+                            min="1"
+                            max="120"
+                            value={renewalPeriodMonths}
+                            onChange={e =>
+                              setRenewalPeriodMonths(
+                                parseInt(e.target.value) || 12
+                              )
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+              </div>
+            </Card>
 
-                <div className="flex flex-col gap-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="autoRenew"
-                      checked={autoRenew}
-                      onCheckedChange={checked =>
-                        setAutoRenew(checked === true)
-                      }
-                    />
-                    <Label htmlFor="autoRenew" className="font-normal text-sm">
-                      Renovação automática
-                    </Label>
+            {/* Form Card — Section 4: Valores */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={DollarSign}
+                    title="Valores"
+                    subtitle="Valor total, parcela e frequência de pagamento"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="totalValue">Valor Total (R$)</Label>
+                        <Input
+                          id="totalValue"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={totalValue}
+                          onChange={e =>
+                            setTotalValue(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="paymentAmount">
+                          Valor da Parcela (R$)
+                        </Label>
+                        <Input
+                          id="paymentAmount"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={paymentAmount}
+                          onChange={e =>
+                            setPaymentAmount(parseFloat(e.target.value) || 0)
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="paymentFrequency">Frequência</Label>
+                        <Select
+                          value={paymentFrequency}
+                          onValueChange={v =>
+                            setPaymentFrequency(v as PaymentFrequency)
+                          }
+                        >
+                          <SelectTrigger id="paymentFrequency">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(PAYMENT_FREQUENCY_LABELS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
-                  {autoRenew && (
-                    <div className="grid gap-2 pl-6 max-w-xs">
-                      <Label htmlFor="renewalPeriodMonths">
-                        Período de renovação (meses)
-                      </Label>
-                      <Input
-                        id="renewalPeriodMonths"
-                        type="number"
-                        min="1"
-                        max="120"
-                        value={renewalPeriodMonths}
-                        onChange={e =>
-                          setRenewalPeriodMonths(parseInt(e.target.value) || 12)
-                        }
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 3: Vinculação — Vinculação + Observações */}
+          <TabsContent value="links" className="space-y-4">
+            {/* Form Card — Section 5: Vinculação */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={Landmark}
+                    title="Vinculação"
+                    subtitle="Conta bancária, centro de custo e categoria"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="bankAccountId">Conta Bancária</Label>
+                        <Select
+                          value={bankAccountId}
+                          onValueChange={setBankAccountId}
+                        >
+                          <SelectTrigger id="bankAccountId">
+                            <SelectValue placeholder="Selecione uma conta bancária..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {bankAccounts.map(ba => (
+                              <SelectItem key={ba.id} value={ba.id}>
+                                {ba.name}
+                                {ba.bankName ? ` (${ba.bankName})` : ''}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="costCenterId">Centro de Custo</Label>
+                        <Select
+                          value={costCenterId}
+                          onValueChange={setCostCenterId}
+                        >
+                          <SelectTrigger id="costCenterId">
+                            <SelectValue placeholder="Selecione um centro de custo..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {costCenters.map(cc => (
+                              <SelectItem key={cc.id} value={cc.id}>
+                                {cc.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="categoryId">Categoria</Label>
+                        <Select
+                          value={categoryId}
+                          onValueChange={setCategoryId}
+                        >
+                          <SelectTrigger id="categoryId">
+                            <SelectValue placeholder="Selecione uma categoria..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(cat => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Form Card — Section 6: Observações */}
+            <Card className="bg-white/5 py-2 overflow-hidden">
+              <div className="px-6 py-4 space-y-8">
+                <div className="space-y-5">
+                  <SectionHeader
+                    icon={NotebookText}
+                    title="Observações"
+                    subtitle="Notas e informações adicionais"
+                  />
+                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+                    <div className="grid gap-2">
+                      <Label htmlFor="notes">Observações</Label>
+                      <Textarea
+                        id="notes"
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Informações adicionais sobre o contrato..."
+                        rows={4}
                       />
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 4: Valores */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={DollarSign}
-                title="Valores"
-                subtitle="Valor total, parcela e frequência de pagamento"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="totalValue">Valor Total (R$)</Label>
-                    <Input
-                      id="totalValue"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={totalValue}
-                      onChange={e =>
-                        setTotalValue(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="paymentAmount">Valor da Parcela (R$)</Label>
-                    <Input
-                      id="paymentAmount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={paymentAmount}
-                      onChange={e =>
-                        setPaymentAmount(parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0,00"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="paymentFrequency">Frequência</Label>
-                    <Select
-                      value={paymentFrequency}
-                      onValueChange={v =>
-                        setPaymentFrequency(v as PaymentFrequency)
-                      }
-                    >
-                      <SelectTrigger id="paymentFrequency">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(PAYMENT_FREQUENCY_LABELS).map(
-                          ([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 5: Vinculação */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={Landmark}
-                title="Vinculação"
-                subtitle="Conta bancária, centro de custo e categoria"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="bankAccountId">Conta Bancária</Label>
-                    <Select
-                      value={bankAccountId}
-                      onValueChange={setBankAccountId}
-                    >
-                      <SelectTrigger id="bankAccountId">
-                        <SelectValue placeholder="Selecione uma conta bancária..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {bankAccounts.map(ba => (
-                          <SelectItem key={ba.id} value={ba.id}>
-                            {ba.name}
-                            {ba.bankName ? ` (${ba.bankName})` : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="costCenterId">Centro de Custo</Label>
-                    <Select
-                      value={costCenterId}
-                      onValueChange={setCostCenterId}
-                    >
-                      <SelectTrigger id="costCenterId">
-                        <SelectValue placeholder="Selecione um centro de custo..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {costCenters.map(cc => (
-                          <SelectItem key={cc.id} value={cc.id}>
-                            {cc.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="categoryId">Categoria</Label>
-                    <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger id="categoryId">
-                        <SelectValue placeholder="Selecione uma categoria..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Form Card — Section 6: Observações */}
-        <Card className="bg-white/5 py-2 overflow-hidden">
-          <div className="px-6 py-4 space-y-8">
-            <div className="space-y-5">
-              <SectionHeader
-                icon={NotebookText}
-                title="Observações"
-                subtitle="Notas e informações adicionais"
-              />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                <div className="grid gap-2">
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Informações adicionais sobre o contrato..."
-                    rows={4}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageBody>
 
       {/* Delete PIN Modal */}
