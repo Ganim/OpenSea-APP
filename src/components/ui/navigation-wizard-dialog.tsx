@@ -12,6 +12,8 @@ export interface NavigationSection {
   label: string;
   icon: ReactNode;
   description?: string;
+  /** Optional badge rendered to the right of the label (e.g., permission counts) */
+  badge?: ReactNode;
   hidden?: boolean;
 }
 
@@ -181,6 +183,9 @@ export function NavigationWizardDialog({
                       </span>
                     )}
                   </div>
+                  {section.badge && (
+                    <span className="shrink-0">{section.badge}</span>
+                  )}
                   {hasError && (
                     <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
                   )}
@@ -191,7 +196,7 @@ export function NavigationWizardDialog({
         </div>
 
         {/* Right column — header + content + footer */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
           {/* Header — active section title */}
           {(() => {
             const active = visibleSections.find(s => s.id === activeSection);
@@ -228,7 +233,7 @@ export function NavigationWizardDialog({
           })()}
 
           {/* Content */}
-          <ScrollArea className="flex-1 min-w-0">
+          <ScrollArea className="flex-1 min-w-0 min-h-0">
             <div className="p-6">{children}</div>
           </ScrollArea>
 

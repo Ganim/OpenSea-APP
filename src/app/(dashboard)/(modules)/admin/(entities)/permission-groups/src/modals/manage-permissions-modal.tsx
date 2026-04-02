@@ -1,13 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { NavigationWizardDialog } from '@/components/ui/navigation-wizard-dialog';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { showErrorToast, showSuccessToast } from '@/lib/toast-utils';
 import { logger } from '@/lib/logger';
@@ -17,20 +13,28 @@ import type {
   PermissionGroup,
   PermissionWithEffect,
 } from '@/types/rbac';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { ChevronRight, Loader2, Shield, X } from 'lucide-react';
+import {
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Loader2,
+  Search,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   MATRIX_TABS,
-  STANDARD_ACTIONS,
+  getActionChipLabel,
+  getResourceGroups,
   mapActionToStandard,
+  type MatrixTab,
   type StandardAction,
 } from '../config/permission-matrix-config';
-import {
-  PermissionMatrixTable,
-  type ResourcePermissionMap,
-} from '../components/permission-matrix-table';
+import { PermissionGroupHeader } from '../components/permission-group-header';
+import { PermissionResourceCard } from '../components/permission-resource-card';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface ManagePermissionsModalProps {
   isOpen: boolean;
@@ -38,6 +42,13 @@ interface ManagePermissionsModalProps {
   group: PermissionGroup | null;
   onSuccess: () => void;
 }
+
+/** Maps action → Set of permission codes for a given resource */
+type ActionCodeMap = Map<string, Set<string>>;
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function ManagePermissionsModal({
   isOpen,
@@ -52,9 +63,10 @@ export function ManagePermissionsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState(MATRIX_TABS[0].id);
-  const [showUnmapped, setShowUnmapped] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [allExpanded, setAllExpanded] = useState(false);
 
-  // Load data when modal opens
+  // ─── Load data ──────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     if (!group) return;
     setIsLoading(true);
@@ -88,23 +100,23 @@ export function ManagePermissionsModal({
   useEffect(() => {
     if (isOpen && group) {
       loadData();
+      setSearchQuery('');
+      setAllExpanded(false);
     }
   }, [isOpen, group, loadData]);
 
-  // ---------------------------------------------------------------------------
-  // Build permission maps for matrix
-  // ---------------------------------------------------------------------------
-
-  const { permissionMaps, selectedCounts, totalCounts, unmappedCodes } =
+  // ─── Build enriched tabs (static config + auto-generated resources) ──
+  const { enrichedTabs, resourceActionMaps, selectedCounts, totalCounts } =
     useMemo(() => {
       if (!allPermissions)
         return {
-          permissionMaps: {} as Record<string, ResourcePermissionMap[]>,
+          enrichedTabs: MATRIX_TABS,
+          resourceActionMaps: {} as Record<string, ActionCodeMap[]>,
           selectedCounts: {} as Record<string, number>,
           totalCounts: {} as Record<string, number>,
-          unmappedCodes: [] as string[],
         };
 
+      // Step 1: Index all backend codes by backendKey → action → codes
       const codesByBackendResource = new Map<
         string,
         Map<string, Set<string>>
@@ -121,127 +133,138 @@ export function ManagePermissionsModal({
           }
           const actionMap = codesByBackendResource.get(backendKey)!;
           for (const perm of resourceGroup.permissions) {
-            const standardAction = mapActionToStandard(perm.action);
-            if (!actionMap.has(standardAction)) {
-              actionMap.set(standardAction, new Set());
+            const action = mapActionToStandard(perm.action);
+            if (!actionMap.has(action)) {
+              actionMap.set(action, new Set());
             }
-            actionMap.get(standardAction)!.add(perm.code);
+            actionMap.get(action)!.add(perm.code);
           }
         }
       }
 
-      const allPermMaps: Record<string, ResourcePermissionMap[]> = {};
+      // Step 2: Find which backend resources are already mapped in config
+      const mappedBackendKeys = new Set<string>();
+      for (const tab of MATRIX_TABS) {
+        for (const resource of tab.resources) {
+          for (const br of resource.backendResources) {
+            mappedBackendKeys.add(br);
+          }
+        }
+      }
+
+      // Step 3: Build a module→tab lookup and collect unmapped resources
+      const moduleToTabId: Record<string, string> = {};
+      for (const tab of MATRIX_TABS) {
+        // Map module prefixes to tab ids
+        for (const resource of tab.resources) {
+          for (const br of resource.backendResources) {
+            const modulePart = br.split('.')[0];
+            if (!moduleToTabId[modulePart]) {
+              moduleToTabId[modulePart] = tab.id;
+            }
+          }
+        }
+      }
+      // Explicit mappings for modules that share tabs
+      moduleToTabId['esocial'] = moduleToTabId['esocial'] ?? 'hr';
+
+      // Group unmapped backend resources by tab
+      const unmappedByTab: Record<
+        string,
+        Array<{
+          label: string;
+          group: string;
+          backendResources: string[];
+          availableActions: StandardAction[];
+        }>
+      > = {};
+
+      for (const [backendKey, actionMap] of codesByBackendResource) {
+        if (mappedBackendKeys.has(backendKey)) continue;
+
+        const parts = backendKey.split('.');
+        const modulePart = parts[0];
+        const resourcePart = parts.slice(1).join('.');
+        const tabId = moduleToTabId[modulePart];
+        if (!tabId) continue; // truly orphaned — shouldn't happen
+
+        // Auto-generate a resource entry
+        const label = resourcePart
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, c => c.toUpperCase());
+
+        if (!unmappedByTab[tabId]) unmappedByTab[tabId] = [];
+        unmappedByTab[tabId].push({
+          label,
+          group: 'Outros',
+          backendResources: [backendKey],
+          availableActions: [...actionMap.keys()] as StandardAction[],
+        });
+      }
+
+      // Step 4: Create enriched tabs (original + auto-generated resources)
+      const enriched: MatrixTab[] = MATRIX_TABS.map(tab => {
+        const extra = unmappedByTab[tab.id];
+        if (!extra || extra.length === 0) return tab;
+        return {
+          ...tab,
+          resources: [...tab.resources, ...extra],
+        };
+      });
+
+      // Step 5: Build action-code maps and counts using enriched tabs
+      const allMaps: Record<string, ActionCodeMap[]> = {};
       const selCounts: Record<string, number> = {};
       const totCounts: Record<string, number> = {};
 
-      for (const tab of MATRIX_TABS) {
-        const maps: ResourcePermissionMap[] = [];
+      for (const tab of enriched) {
+        const maps: ActionCodeMap[] = [];
         let tabTotal = 0;
         let tabSelected = 0;
 
-        tab.resources.forEach((resource, idx) => {
-          const actionCodes = {} as Record<StandardAction, Set<string>>;
-          for (const action of STANDARD_ACTIONS) {
-            actionCodes[action] = new Set();
-          }
+        for (const resource of tab.resources) {
+          const actionCodes: ActionCodeMap = new Map();
 
           for (const br of resource.backendResources) {
-            const actionMap = codesByBackendResource.get(br);
-            if (!actionMap) continue;
-            for (const [action, codes] of actionMap) {
-              const stdAction = action as StandardAction;
+            const backendMap = codesByBackendResource.get(br);
+            if (!backendMap) continue;
+            for (const [action, codes] of backendMap) {
+              if (!actionCodes.has(action)) {
+                actionCodes.set(action, new Set());
+              }
               for (const code of codes) {
-                actionCodes[stdAction].add(code);
+                actionCodes.get(action)!.add(code);
               }
             }
           }
 
-          let resourceTotal = 0;
-          let resourceSelected = 0;
+          // Count ALL actions present (not just availableActions)
           for (const action of resource.availableActions) {
-            for (const code of actionCodes[action]) {
-              resourceTotal++;
-              if (selectedCodes.has(code)) resourceSelected++;
+            const codes = actionCodes.get(action);
+            if (!codes) continue;
+            for (const code of codes) {
+              tabTotal++;
+              if (selectedCodes.has(code)) tabSelected++;
             }
           }
-          tabTotal += resourceTotal;
-          tabSelected += resourceSelected;
 
-          maps.push({ resourceIndex: idx, actionCodes });
-        });
+          maps.push(actionCodes);
+        }
 
-        allPermMaps[tab.id] = maps;
+        allMaps[tab.id] = maps;
         selCounts[tab.id] = tabSelected;
         totCounts[tab.id] = tabTotal;
       }
 
-      const mappedCodes = new Set<string>();
-      for (const tab of MATRIX_TABS) {
-        const maps = allPermMaps[tab.id];
-        if (!maps) continue;
-        for (const pm of maps) {
-          const resource = tab.resources[pm.resourceIndex];
-          for (const action of resource.availableActions) {
-            for (const code of pm.actionCodes[action]) {
-              mappedCodes.add(code);
-            }
-          }
-        }
-      }
-
-      const allApiCodes: string[] = [];
-      for (const moduleGroup of allPermissions.permissions) {
-        for (const [, resourceGroup] of Object.entries(moduleGroup.resources)) {
-          for (const perm of resourceGroup.permissions) {
-            allApiCodes.push(perm.code);
-          }
-        }
-      }
-
-      const unmapped = allApiCodes.filter(c => !mappedCodes.has(c));
-
       return {
-        permissionMaps: allPermMaps,
+        enrichedTabs: enriched,
+        resourceActionMaps: allMaps,
         selectedCounts: selCounts,
         totalCounts: totCounts,
-        unmappedCodes: unmapped,
       };
     }, [allPermissions, selectedCodes]);
 
-  // ---------------------------------------------------------------------------
-  // Derived values
-  // ---------------------------------------------------------------------------
-
-  const activeTabConfig = useMemo(
-    () => MATRIX_TABS.find(t => t.id === activeTab),
-    [activeTab]
-  );
-
-  // ---------------------------------------------------------------------------
-  // Toggle handlers
-  // ---------------------------------------------------------------------------
-
-  const handleToggleCodes = useCallback(
-    (codes: string[], forceState?: boolean) => {
-      setSelectedCodes(prev => {
-        const next = new Set(prev);
-        if (forceState === true) {
-          codes.forEach(c => next.add(c));
-        } else if (forceState === false) {
-          codes.forEach(c => next.delete(c));
-        } else {
-          const allSelected = codes.every(c => next.has(c));
-          if (allSelected) {
-            codes.forEach(c => next.delete(c));
-          } else {
-            codes.forEach(c => next.add(c));
-          }
-        }
-        return next;
-      });
-    },
-    []
-  );
+  // ─── Toggle handlers ────────────────────────────────────────────────
 
   const handleToggleCode = useCallback((code: string) => {
     setSelectedCodes(prev => {
@@ -252,39 +275,75 @@ export function ManagePermissionsModal({
     });
   }, []);
 
-  const handleSelectAllInTab = useCallback(() => {
-    const maps = permissionMaps[activeTab];
-    if (!maps) return;
-    const tab = MATRIX_TABS.find(t => t.id === activeTab);
-    if (!tab) return;
-    const codes: string[] = [];
-    maps.forEach(pm => {
-      const resource = tab.resources[pm.resourceIndex];
-      for (const action of resource.availableActions) {
-        pm.actionCodes[action].forEach(c => codes.push(c));
-      }
-    });
-    handleToggleCodes(codes, true);
-  }, [activeTab, permissionMaps, handleToggleCodes]);
+  const handleBulkToggle = useCallback(
+    (codes: string[], forceState: boolean) => {
+      setSelectedCodes(prev => {
+        const next = new Set(prev);
+        for (const code of codes) {
+          if (forceState) next.add(code);
+          else next.delete(code);
+        }
+        return next;
+      });
+    },
+    []
+  );
 
-  const handleClearAllInTab = useCallback(() => {
-    const maps = permissionMaps[activeTab];
-    if (!maps) return;
-    const tab = MATRIX_TABS.find(t => t.id === activeTab);
-    if (!tab) return;
-    const codes: string[] = [];
-    maps.forEach(pm => {
-      const resource = tab.resources[pm.resourceIndex];
-      for (const action of resource.availableActions) {
-        pm.actionCodes[action].forEach(c => codes.push(c));
-      }
-    });
-    handleToggleCodes(codes, false);
-  }, [activeTab, permissionMaps, handleToggleCodes]);
+  /** Collect all codes for a given tab */
+  const getTabCodes = useCallback(
+    (tabId: string): string[] => {
+      const maps = resourceActionMaps[tabId];
+      const tab = enrichedTabs.find(t => t.id === tabId);
+      if (!maps || !tab) return [];
+      const codes: string[] = [];
+      tab.resources.forEach((resource, idx) => {
+        for (const action of resource.availableActions) {
+          const actionCodes = maps[idx]?.get(action);
+          if (actionCodes) codes.push(...actionCodes);
+        }
+      });
+      return codes;
+    },
+    [resourceActionMaps, enrichedTabs]
+  );
 
-  // ---------------------------------------------------------------------------
-  // Save changes (diff-based)
-  // ---------------------------------------------------------------------------
+  /** Collect all codes for a group within the active tab */
+  const getGroupCodes = useCallback(
+    (groupName: string): string[] => {
+      const maps = resourceActionMaps[activeTab];
+      const tab = enrichedTabs.find(t => t.id === activeTab);
+      if (!maps || !tab) return [];
+      const codes: string[] = [];
+      tab.resources.forEach((resource, idx) => {
+        if (resource.group !== groupName) return;
+        for (const action of resource.availableActions) {
+          const actionCodes = maps[idx]?.get(action);
+          if (actionCodes) codes.push(...actionCodes);
+        }
+      });
+      return codes;
+    },
+    [activeTab, resourceActionMaps, enrichedTabs]
+  );
+
+  /** Collect all codes for a specific resource */
+  const getResourceCodes = useCallback(
+    (resourceIdx: number): string[] => {
+      const maps = resourceActionMaps[activeTab];
+      const tab = enrichedTabs.find(t => t.id === activeTab);
+      if (!maps || !tab) return [];
+      const resource = tab.resources[resourceIdx];
+      const codes: string[] = [];
+      for (const action of resource.availableActions) {
+        const actionCodes = maps[resourceIdx]?.get(action);
+        if (actionCodes) codes.push(...actionCodes);
+      }
+      return codes;
+    },
+    [activeTab, resourceActionMaps, enrichedTabs]
+  );
+
+  // ─── Save (diff-based) ─────────────────────────────────────────────
 
   const handleSave = async () => {
     if (!group) return;
@@ -331,299 +390,254 @@ export function ManagePermissionsModal({
     selectedCodes.size !== currentCodes.size ||
     [...selectedCodes].some(c => !currentCodes.has(c));
 
-  if (!group) return null;
+  // ─── Active tab config ─────────────────────────────────────────────
 
-  // ---------------------------------------------------------------------------
-  // Badge color for nav items
-  // ---------------------------------------------------------------------------
+  const activeTabConfig = useMemo(
+    () => enrichedTabs.find(t => t.id === activeTab),
+    [activeTab, enrichedTabs]
+  );
 
-  function getBadgeStyle(tabId: string) {
+  const groups = useMemo(
+    () => (activeTabConfig ? getResourceGroups(activeTabConfig) : []),
+    [activeTabConfig]
+  );
+
+  // ─── Search filter ──────────────────────────────────────────────────
+
+  const normalizedSearch = searchQuery.toLowerCase().trim();
+
+  const matchesSearch = useCallback(
+    (resource: (typeof MATRIX_TABS)[0]['resources'][0]) => {
+      if (!normalizedSearch) return true;
+      if (resource.label.toLowerCase().includes(normalizedSearch)) return true;
+      // Match on action labels
+      for (const action of resource.availableActions) {
+        if (getActionChipLabel(action).toLowerCase().includes(normalizedSearch))
+          return true;
+      }
+      // Match on backend resource code
+      for (const br of resource.backendResources) {
+        if (br.toLowerCase().includes(normalizedSearch)) return true;
+      }
+      return false;
+    },
+    [normalizedSearch]
+  );
+
+  // ─── Nav badge color ────────────────────────────────────────────────
+
+  function getBadgeClass(tabId: string) {
     const selected = selectedCounts[tabId] ?? 0;
     const total = totalCounts[tabId] ?? 0;
     if (total === 0 || selected === 0) {
-      // Neutral
       return 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-white/40';
     }
     if (selected === total) {
-      // All defined — green
       return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400';
     }
-    // Partial — blue
-    return 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400';
+    return 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-400';
   }
 
+  // ─── Build NavigationWizardDialog sections ──────────────────────────
+
+  const navSections = useMemo(
+    () =>
+      enrichedTabs.map(tab => {
+        const Icon = tab.icon;
+        const selected = selectedCounts[tab.id] ?? 0;
+        const total = totalCounts[tab.id] ?? 0;
+
+        return {
+          id: tab.id,
+          label: tab.label,
+          icon: <Icon className="h-4 w-4" />,
+          description: `${tab.resources.length} recursos`,
+          badge: !isLoading ? (
+            <span
+              className={cn(
+                'text-[11px] font-medium tabular-nums rounded-full px-2 py-0.5',
+                getBadgeClass(tab.id)
+              )}
+            >
+              {selected}/{total}
+            </span>
+          ) : undefined,
+        };
+      }),
+    [enrichedTabs, selectedCounts, totalCounts, isLoading]
+  );
+
+  if (!group) return null;
+
+  // ─── Total across all modules ───────────────────────────────────────
+
+  const totalSelected = Object.values(selectedCounts).reduce(
+    (a, b) => a + b,
+    0
+  );
+  const totalAll = Object.values(totalCounts).reduce((a, b) => a + b, 0);
+
+  // ─── Render ─────────────────────────────────────────────────────────
+
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-[1380px] max-w-[1380px] h-[650px] p-0 gap-0 overflow-hidden flex flex-row"
-        onPointerDownOutside={e => {
-          if (isSaving) e.preventDefault();
-        }}
-        onEscapeKeyDown={e => {
-          if (isSaving) e.preventDefault();
-        }}
-      >
-        <VisuallyHidden>
-          <DialogTitle>Gerenciar Permissões</DialogTitle>
-        </VisuallyHidden>
-
-        {/* ── Left column ── */}
-        <div className="shrink-0 flex flex-col border-r border-border/50 bg-slate-50 dark:bg-white/[0.03] w-[270px]">
-          {/* Nav header */}
-          <div className="px-4 pt-5 pb-4">
-            <div className="flex items-center gap-2.5">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                <Shield className="h-4 w-4" />
-              </span>
-              <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
-                  Gerenciar Permissões
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                  Grupo {group.name}
-                </p>
-              </div>
-            </div>
+    <NavigationWizardDialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) onClose();
+      }}
+      title="Permissões"
+      subtitle={`Grupo: ${group.name}`}
+      sections={navSections}
+      activeSection={activeTab}
+      onSectionChange={id => {
+        setActiveTab(id);
+        setSearchQuery('');
+      }}
+      variant="detailed"
+      isPending={isSaving}
+      footer={
+        <>
+          <div className="flex-1 text-xs text-muted-foreground tabular-nums">
+            Total: {totalSelected} / {totalAll} permissões
           </div>
-
-          {/* Separator */}
-          <div className="mx-4 border-b border-border/50" />
-
-          {/* Nav items */}
-          <nav className="flex-1 overflow-y-auto px-3 pt-3 pb-3 space-y-1.5">
-            {isLoading
-              ? Array.from({ length: 7 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 w-full px-3.5 py-3 rounded-xl"
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-muted animate-pulse shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <div className="h-3.5 w-24 rounded bg-muted animate-pulse" />
-                      <div className="h-2.5 w-16 rounded bg-muted animate-pulse" />
-                    </div>
-                  </div>
-                ))
-              : MATRIX_TABS.map(tab => {
-                  const isActive = tab.id === activeTab;
-                  const Icon = tab.icon;
-                  const selected = selectedCounts[tab.id] ?? 0;
-                  const total = totalCounts[tab.id] ?? 0;
-
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      disabled={isSaving}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        'relative flex items-center gap-3 w-full px-3.5 py-3 rounded-xl text-left transition-all duration-200',
-                        'disabled:pointer-events-none disabled:opacity-50',
-                        isActive
-                          ? 'bg-white dark:bg-white/10 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.08]'
-                          : 'hover:bg-white/60 dark:hover:bg-white/[0.06]'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors',
-                          isActive
-                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                            : 'bg-gray-200/60 dark:bg-white/10 text-gray-500 dark:text-white/50'
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <span
-                          className={cn(
-                            'block text-sm font-medium truncate',
-                            isActive
-                              ? 'text-blue-600 dark:text-blue-400'
-                              : 'text-gray-700 dark:text-white/80'
-                          )}
-                        >
-                          {tab.label}
-                        </span>
-                        <span className="block text-[11px] text-muted-foreground truncate mt-0.5">
-                          {tab.resources.length} recursos
-                        </span>
-                      </div>
-                      {/* Badge */}
-                      <span
-                        className={cn(
-                          'shrink-0 text-[11px] font-medium tabular-nums rounded-full px-2 py-0.5',
-                          getBadgeStyle(tab.id)
-                        )}
-                      >
-                        {selected}/{total}
-                      </span>
-                    </button>
-                  );
-                })}
-          </nav>
-        </div>
-
-        {/* ── Right column ── */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Header */}
-          {(() => {
-            const Icon = activeTabConfig?.icon;
-            return (
-              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border/50 shrink-0">
-                <div className="flex items-center gap-3">
-                  {Icon && (
-                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                  )}
-                  <div>
-                    <h3 className="text-base font-semibold leading-none">
-                      {activeTabConfig?.label ?? ''}
-                    </h3>
-                    {!isLoading && (
-                      <p className="text-xs text-muted-foreground mt-1 tabular-nums">
-                        {selectedCounts[activeTab] ?? 0} de{' '}
-                        {totalCounts[activeTab] ?? 0} permissões ativas
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!isLoading && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 px-2.5 text-xs"
-                        onClick={handleClearAllInTab}
-                        disabled={isSaving}
-                      >
-                        Limpar tudo
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="h-7 px-2.5 text-xs"
-                        onClick={handleSelectAllInTab}
-                        disabled={isSaving}
-                      >
-                        Selecionar tudo
-                      </Button>
-                    </>
-                  )}
-                  <button
-                    type="button"
-                    disabled={isSaving}
-                    onClick={onClose}
-                    className="ml-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-40"
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Fechar</span>
-                  </button>
-                </div>
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar Permissões'
+            )}
+          </Button>
+        </>
+      }
+    >
+      <TooltipProvider delayDuration={300}>
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-12 rounded-xl bg-muted animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-0">
+            {/* Search + Actions bar */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={`Buscar em ${activeTabConfig?.label ?? ''}...`}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
               </div>
-            );
-          })()}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-2.5 text-xs gap-1.5"
+                onClick={() => setAllExpanded(prev => !prev)}
+              >
+                {allExpanded ? (
+                  <>
+                    <ChevronsDownUp className="h-3.5 w-3.5" />
+                    Recolher
+                  </>
+                ) : (
+                  <>
+                    <ChevronsUpDown className="h-3.5 w-3.5" />
+                    Expandir
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-2.5 text-xs"
+                onClick={() =>
+                  handleBulkToggle(getTabCodes(activeTab), false)
+                }
+                disabled={isSaving}
+              >
+                Limpar
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-2.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                onClick={() =>
+                  handleBulkToggle(getTabCodes(activeTab), true)
+                }
+                disabled={isSaving}
+              >
+                Ativar tudo
+              </Button>
+            </div>
 
-          {/* Content */}
-          <div className="flex-1 h-0 min-w-0 overflow-y-auto px-6">
-            <div>
-              {isLoading ? (
-                <div className="space-y-3">
-                  <div className="flex gap-1 pb-2">
-                    <div className="h-3 w-[180px] rounded bg-muted animate-pulse" />
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-3 w-[72px] rounded bg-muted animate-pulse"
-                      />
-                    ))}
-                  </div>
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-1 py-1.5">
-                      <div className="h-4 w-[180px] rounded bg-muted animate-pulse" />
-                      {Array.from({ length: 8 }).map((_, j) => (
-                        <div
-                          key={j}
-                          className="h-4 w-[72px] flex items-center justify-center"
-                        >
-                          <div className="h-4 w-4 rounded bg-muted animate-pulse" />
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <PermissionMatrixTable
-                    tab={activeTabConfig!}
-                    resources={activeTabConfig?.resources ?? []}
-                    permissionMaps={permissionMaps[activeTab] ?? []}
-                    selectedCodes={selectedCodes}
-                    onToggleCode={handleToggleCode}
-                    onToggleCodes={handleToggleCodes}
+            {/* Groups + Resources */}
+            {groups.map(groupName => {
+              const groupResources = activeTabConfig!.resources
+                .map((r, idx) => ({ resource: r, idx }))
+                .filter(({ resource }) => resource.group === groupName)
+                .filter(({ resource }) => matchesSearch(resource));
+
+              if (groupResources.length === 0) return null;
+
+              const groupCodes = getGroupCodes(groupName);
+              const allGroupActive =
+                groupCodes.length > 0 &&
+                groupCodes.every(c => selectedCodes.has(c));
+
+              return (
+                <div key={groupName}>
+                  <PermissionGroupHeader
+                    label={groupName}
+                    resourceCount={groupResources.length}
+                    onActivateAll={() =>
+                      handleBulkToggle(groupCodes, !allGroupActive)
+                    }
+                    allActive={allGroupActive}
+                    disabled={isSaving}
                   />
 
-                  {/* Unmapped permissions overflow */}
-                  {unmappedCodes.length > 0 && (
-                    <div className="mt-4 border-t border-border pt-3">
-                      <Collapsible
-                        open={showUnmapped}
-                        onOpenChange={setShowUnmapped}
-                      >
-                        <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted/30 rounded-lg transition-colors">
-                          <ChevronRight
-                            className={cn(
-                              'h-4 w-4 transition-transform',
-                              showUnmapped && 'rotate-90'
-                            )}
-                          />
-                          Outras permissões ({unmappedCodes.length})
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="grid grid-cols-2 gap-1 px-3 py-2">
-                            {unmappedCodes.map(code => (
-                              <label
-                                key={code}
-                                className="flex items-center gap-2 py-1 px-2 rounded hover:bg-muted/30 cursor-pointer text-sm"
-                              >
-                                <Checkbox
-                                  checked={selectedCodes.has(code)}
-                                  onCheckedChange={() => handleToggleCode(code)}
-                                  className="h-3.5 w-3.5"
-                                />
-                                <span className="truncate text-xs">{code}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+                  {groupResources.map(({ resource, idx }) => {
+                    const actionCodeMap =
+                      resourceActionMaps[activeTab]?.[idx] ?? new Map();
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border/50 shrink-0">
-            <Button variant="outline" onClick={onClose} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar Permissões'
-              )}
-            </Button>
+                    return (
+                      <PermissionResourceCard
+                        key={resource.backendResources.join(',')}
+                        label={resource.label}
+                        actions={resource.availableActions}
+                        actionCodeMap={actionCodeMap}
+                        selectedCodes={selectedCodes}
+                        onToggleCode={handleToggleCode}
+                        onActivateAll={() =>
+                          handleBulkToggle(getResourceCodes(idx), true)
+                        }
+                        onClearAll={() =>
+                          handleBulkToggle(getResourceCodes(idx), false)
+                        }
+                        disabled={isSaving}
+                        defaultExpanded={allExpanded}
+                        searchQuery={normalizedSearch}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
+
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        )}
+      </TooltipProvider>
+    </NavigationWizardDialog>
   );
 }

@@ -44,6 +44,109 @@ export const ACTION_LABELS: Record<StandardAction, string> = {
   onlyself: 'Pessoal',
 };
 
+// ---------------------------------------------------------------------------
+// Chip Labels & Descriptions (used by the toggle-chip permission UI)
+// ---------------------------------------------------------------------------
+
+export interface ActionChipConfig {
+  label: string;
+  description: string;
+  /** Whether this action should appear after the divider (special/admin actions) */
+  isSpecial?: boolean;
+}
+
+export const ACTION_CHIP_CONFIG: Record<string, ActionChipConfig> = {
+  access: {
+    label: 'Visualizar',
+    description: 'Permite visualizar e listar registros',
+  },
+  register: {
+    label: 'Criar',
+    description: 'Permite cadastrar novos registros',
+  },
+  modify: {
+    label: 'Editar',
+    description: 'Permite alterar registros existentes',
+  },
+  remove: {
+    label: 'Excluir',
+    description: 'Permite excluir registros permanentemente',
+  },
+  import: {
+    label: 'Importar',
+    description: 'Permite importar registros em massa via planilha',
+  },
+  export: {
+    label: 'Exportar',
+    description: 'Permite exportar dados para Excel/CSV',
+  },
+  print: {
+    label: 'Imprimir',
+    description: 'Permite gerar documentos para impressão/PDF',
+  },
+  share: {
+    label: 'Compartilhar',
+    description: 'Permite compartilhar registros internamente',
+  },
+  admin: {
+    label: 'Administrar',
+    description:
+      'Acesso administrativo — permite gerenciar registros de todos os usuários',
+    isSpecial: true,
+  },
+  onlyself: {
+    label: 'Somente próprios',
+    description: 'Restringe acesso apenas aos registros do próprio usuário',
+    isSpecial: true,
+  },
+  // Domain-specific actions (Sales)
+  confirm: { label: 'Confirmar', description: 'Permite confirmar registros' },
+  approve: { label: 'Aprovar', description: 'Permite aprovar registros pendentes' },
+  cancel: { label: 'Cancelar', description: 'Permite cancelar registros' },
+  reassign: { label: 'Reatribuir', description: 'Permite reatribuir registros para outro responsável' },
+  reply: { label: 'Responder', description: 'Permite responder a registros' },
+  execute: { label: 'Executar', description: 'Permite executar ações no registro' },
+  activate: { label: 'Ativar', description: 'Permite ativar registros' },
+  send: { label: 'Enviar', description: 'Permite enviar registros' },
+  convert: { label: 'Converter', description: 'Permite converter registros para outro tipo' },
+  sell: { label: 'Vender', description: 'Permite realizar vendas' },
+  open: { label: 'Abrir', description: 'Permite abrir registros' },
+  close: { label: 'Fechar', description: 'Permite fechar registros' },
+  withdraw: { label: 'Retirar', description: 'Permite retirar valores' },
+  supply: { label: 'Abastecer', description: 'Permite abastecer registros' },
+  receive: { label: 'Receber', description: 'Permite receber registros' },
+  verify: { label: 'Verificar', description: 'Permite verificar registros' },
+  override: { label: 'Sobrescrever', description: 'Permite sobrescrever valores ou configurações' },
+  publish: { label: 'Publicar', description: 'Permite publicar registros' },
+  generate: { label: 'Gerar', description: 'Permite gerar documentos ou relatórios' },
+  query: { label: 'Consultar', description: 'Permite consultar dados externos' },
+  sync: { label: 'Sincronizar', description: 'Permite sincronizar dados com sistemas externos' },
+};
+
+/**
+ * Returns the chip label for an action. Falls back to title-casing the action code.
+ */
+export function getActionChipLabel(action: string): string {
+  return (
+    ACTION_CHIP_CONFIG[action]?.label ??
+    action.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  );
+}
+
+/**
+ * Returns the chip tooltip description for an action.
+ */
+export function getActionChipDescription(action: string): string {
+  return ACTION_CHIP_CONFIG[action]?.description ?? `Permissão: ${action}`;
+}
+
+/**
+ * Whether this action should appear after the divider (admin/special zone).
+ */
+export function isSpecialAction(action: string): boolean {
+  return ACTION_CHIP_CONFIG[action]?.isSpecial === true;
+}
+
 /** Column groups for the matrix table super-header */
 export interface ActionGroup {
   label: string;
