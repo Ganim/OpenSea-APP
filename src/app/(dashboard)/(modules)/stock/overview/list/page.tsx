@@ -1068,6 +1068,13 @@ function StockOverviewListPageContent() {
             ]}
             buttons={[
               {
+                id: 'movements',
+                title: 'Ver Movimentações',
+                icon: ArrowRightLeft,
+                onClick: () => router.push('/stock/overview/movements'),
+                variant: 'outline' as const,
+              },
+              {
                 id: 'exits',
                 title: 'Verificar Saídas',
                 icon: LogOut,
