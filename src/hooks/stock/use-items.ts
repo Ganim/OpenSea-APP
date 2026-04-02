@@ -1,12 +1,14 @@
 import { itemMovementsService, itemsService } from '@/services/stock';
 import type {
   ItemMovementsQuery,
+  ItemStatus,
   ItemsQuery,
   RegisterItemEntryRequest,
   RegisterItemExitRequest,
   TransferItemRequest,
 } from '@/types/stock';
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -108,4 +110,58 @@ export function useItemMovements(query?: ItemMovementsQuery) {
     queryFn: () => itemMovementsService.listMovements(query),
     staleTime: 30_000,
   });
+}
+
+// =============================================================================
+// INFINITE SCROLL HOOK
+// =============================================================================
+
+export interface ItemsInfiniteFilters {
+  search?: string;
+  status?: string;
+  manufacturerId?: string;
+  zoneId?: string;
+  hideEmpty?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+const ITEMS_PAGE_SIZE = 20;
+
+export function useItemsInfinite(filters?: ItemsInfiniteFilters) {
+  const result = useInfiniteQuery({
+    queryKey: ['items', 'infinite', filters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await itemsService.list({
+        page: pageParam,
+        limit: ITEMS_PAGE_SIZE,
+        search: filters?.search || undefined,
+        status: (filters?.status as ItemStatus) || undefined,
+        manufacturerId: filters?.manufacturerId || undefined,
+        zoneId: filters?.zoneId || undefined,
+        hideEmpty: filters?.hideEmpty,
+        sortBy: filters?.sortBy,
+        sortOrder: filters?.sortOrder,
+      });
+      return response;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const meta = lastPage.meta;
+      if (meta.page < meta.pages) {
+        return meta.page + 1;
+      }
+      return undefined;
+    },
+    staleTime: 30_000,
+  });
+
+  const items = result.data?.pages.flatMap((p) => p.items) ?? [];
+  const total = result.data?.pages[0]?.meta.total ?? 0;
+
+  return {
+    ...result,
+    items,
+    total,
+  };
 }

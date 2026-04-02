@@ -1,20 +1,9 @@
-'use client';
+/**
+ * OpenSea OS - Listagem de Estoque (Stock Items)
+ * Listagem com infinite scroll, EntityGrid e filtros server-side
+ */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
-import {
-  Columns3,
-  Factory,
-  Grid3X3,
-  Loader2,
-  MapPin,
-  Palette,
-  Printer,
-  RefreshCw,
-  X,
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { useVirtualizer } from '@tanstack/react-virtual';
+'use client';
 
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
@@ -26,194 +15,181 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
-import type { FilterOption } from '@/components/ui/filter-dropdown';
+import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { useItems } from '@/hooks/stock/use-items';
-import { useManufacturers, useTemplates } from '@/hooks/stock';
-import { itemMovementsService } from '@/services/stock';
+  CoreProvider,
+  EntityCard,
+  EntityContextMenu,
+  EntityGrid,
+} from '@/core';
+import type { ContextMenuAction } from '@/core/components/entity-context-menu';
+import type { EntityConfig } from '@/core/types';
+import { useDebounce } from '@/hooks/use-debounce';
+import { usePermissions } from '@/hooks/use-permissions';
 import {
-  formatQuantity,
-  formatUnitOfMeasure,
-  getUnitAbbreviation,
-} from '@/helpers/formatters';
-import { normaliseName } from '@/helpers/normalise-name';
-import type { Item } from '@/types/stock';
-import type { Template, TemplateAttribute } from '@/types/stock';
+  useItemsInfinite,
+  type ItemsInfiniteFilters,
+} from '@/hooks/stock/use-items';
+import { useManufacturers } from '@/hooks/stock';
+import { useWarehouses } from '@/hooks/stock/use-warehouses';
+import { itemsService } from '@/services/stock';
 import { cn } from '@/lib/utils';
+import type { Item } from '@/types/stock';
+import { getUnitAbbreviation, formatUnitOfMeasure } from '@/helpers/formatters';
+import {
+  ArrowRightLeft,
+  Factory,
+  Grid3X3,
+  History,
+  Loader2,
+  MapPin,
+  PackageMinus,
+  Palette,
+  Printer,
+  RefreshCw,
+} from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ItemHistoryModal } from '../../(entities)/products/src/modals/item-history-modal';
+import { ChangeLocationModal } from '../../(entities)/products/src/modals/change-location-modal';
+import { ExitItemsModal } from '../../(entities)/products/src/modals/exit-items-modal';
+import { useTransferItem, useRegisterItemExit } from '@/hooks/stock/use-items';
+import {
+  SelectionToolbar,
+  type SelectionAction,
+} from '@/core/components/selection-toolbar';
+import { useSelectionContext } from '@/core/selection/selection-context';
 
-// IDs for optional fixed columns
-const COL_FABRICANTE = '_fabricante';
-const COL_LOCALIZACAO = '_localizacao';
-const COL_QUANTIDADE = '_quantidade';
+// =============================================================================
+// CONSTANTS
+// =============================================================================
 
-const OPTIONAL_FIXED_COLUMNS: FilterOption[] = [
-  { id: COL_FABRICANTE, label: 'Fabricante' },
-  { id: COL_LOCALIZACAO, label: 'Localização' },
-  { id: COL_QUANTIDADE, label: 'Quantidade' },
+const STATUS_OPTIONS = [
+  { id: 'AVAILABLE', label: 'Disponível' },
+  { id: 'RESERVED', label: 'Reservado' },
+  { id: 'IN_TRANSIT', label: 'Em Trânsito' },
+  { id: 'DAMAGED', label: 'Danificado' },
+  { id: 'EXPIRED', label: 'Vencido' },
 ];
 
-const DEFAULT_OPTIONAL_FIXED = [
-  COL_FABRICANTE,
-  COL_LOCALIZACAO,
-  COL_QUANTIDADE,
-];
+// =============================================================================
+// ENTITY CONFIG
+// =============================================================================
 
-/** Badge config para itens que saíram do estoque (qty=0) */
-const EXIT_REASON_BADGE: Record<string, { label: string; className: string }> =
-  {
-    SALE: {
-      label: 'Vendido',
-      className:
-        'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
+const itemsConfig: EntityConfig<Item> = {
+  name: 'item',
+  namePlural: 'items',
+  icon: Palette,
+  api: {
+    baseUrl: '/api/v1/items',
+    queryKey: 'items',
+  },
+  routes: {
+    list: '/stock/overview/list',
+    detail: '/stock/overview/list/:id',
+  },
+  display: {
+    titleField: 'productName',
+    subtitleField: 'fullCode',
+    labels: {
+      singular: 'item',
+      plural: 'itens',
+      createButton: 'Novo Item',
+      emptyState: 'Nenhum item encontrado no estoque',
+      searchPlaceholder: 'Buscar por código, produto, fabricante, lote...',
     },
-    SUPPLIER_RETURN: {
-      label: 'Devolvido',
-      className:
-        'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
-    },
-    INTERNAL_USE: {
-      label: 'Utilizado',
-      className:
-        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-    },
-    LOSS: {
-      label: 'Perdido',
-      className:
-        'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
-    },
-    PRODUCTION: {
-      label: 'Utilizado',
-      className:
-        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-    },
-    SAMPLE: {
-      label: 'Amostra',
-      className:
-        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
-    },
-  };
-
-const DEFAULT_EXIT_BADGE = {
-  label: 'Saiu',
-  className:
-    'bg-gray-500/20 text-gray-700 dark:text-gray-400 border-gray-500/30',
+  },
+  permissions: {
+    view: STOCK_PERMISSIONS.ITEMS.ACCESS,
+    create: STOCK_PERMISSIONS.ITEMS.ACCESS,
+    update: STOCK_PERMISSIONS.ITEMS.ADMIN,
+    delete: STOCK_PERMISSIONS.ITEMS.ADMIN,
+  },
 };
 
-function resolveItemName(item: Item) {
-  const parts = [item.templateName, item.productName, item.variantName].filter(
-    Boolean
-  ) as string[];
-  const name = parts.length > 0 ? parts.join(' ') : 'Item sem identificação';
-  const sku = item.variantSku;
-  // Don't append the SKU if it was auto-generated from the variant name
-  if (sku && item.variantName && normaliseName(item.variantName) === sku) {
-    return name;
-  }
-  return sku ? `${name} - ${sku}` : name;
-}
+// =============================================================================
+// HELPERS
+// =============================================================================
 
-function formatAttributeValue(value: unknown): string {
-  if (value === null || value === undefined) return '-';
-  if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
-  if (Array.isArray(value)) return value.join(', ');
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
-}
-
-interface DynamicColumn {
-  id: string;
-  label: string;
-  level: 'product' | 'variant' | 'item';
-  key: string;
-}
-
-function buildDynamicColumns(
-  items: Item[],
-  templates: Template[]
-): DynamicColumn[] {
-  const templateIds = new Set(
-    items.map(i => i.templateId).filter(Boolean) as string[]
-  );
-  const columns: DynamicColumn[] = [];
-  const seen = new Set<string>();
-
-  for (const template of templates) {
-    if (!templateIds.has(template.id)) continue;
-    const levels: Array<{
-      level: 'product' | 'variant' | 'item';
-      attrs?: Record<string, TemplateAttribute>;
-    }> = [
-      { level: 'product', attrs: template.productAttributes },
-      { level: 'variant', attrs: template.variantAttributes },
-      { level: 'item', attrs: template.itemAttributes },
-    ];
-    for (const { level, attrs } of levels) {
-      if (!attrs) continue;
-      for (const [key, def] of Object.entries(attrs)) {
-        const colId = `${level}:${key}`;
-        if (seen.has(colId)) continue;
-        seen.add(colId);
-        columns.push({ id: colId, label: def.label || key, level, key });
-      }
+function getStatusConfig(status: string) {
+  const configs: Record<string, { label: string; color: string }> = {
+    AVAILABLE: {
+      label: 'Disponível',
+      color:
+        'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
+    },
+    RESERVED: {
+      label: 'Reservado',
+      color:
+        'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
+    },
+    IN_TRANSIT: {
+      label: 'Em Trânsito',
+      color:
+        'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+    },
+    DAMAGED: {
+      label: 'Danificado',
+      color:
+        'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300',
+    },
+    EXPIRED: {
+      label: 'Vencido',
+      color:
+        'border-slate-600/25 dark:border-slate-500/20 bg-slate-50 dark:bg-slate-500/8 text-slate-700 dark:text-slate-300',
+    },
+    DISPOSED: {
+      label: 'Descartado',
+      color:
+        'border-slate-600/25 dark:border-slate-500/20 bg-slate-50 dark:bg-slate-500/8 text-slate-700 dark:text-slate-300',
+    },
+  };
+  return (
+    configs[status] ?? {
+      label: status,
+      color: 'border-slate-600/25 bg-slate-50 text-slate-700',
     }
-  }
-  return columns;
-}
-
-function getDefaultVisibleColumns(
-  items: Item[],
-  templates: Template[]
-): string[] {
-  const templateIds = new Set(
-    items.map(i => i.templateId).filter(Boolean) as string[]
   );
-  const visible = [...DEFAULT_OPTIONAL_FIXED];
-  const seen = new Set<string>();
-
-  for (const template of templates) {
-    if (!templateIds.has(template.id)) continue;
-    const levels: Array<{
-      level: string;
-      attrs?: Record<string, TemplateAttribute>;
-    }> = [
-      { level: 'product', attrs: template.productAttributes },
-      { level: 'variant', attrs: template.variantAttributes },
-      { level: 'item', attrs: template.itemAttributes },
-    ];
-    for (const { level, attrs } of levels) {
-      if (!attrs) continue;
-      for (const [key, def] of Object.entries(attrs)) {
-        const colId = `${level}:${key}`;
-        if (seen.has(colId)) continue;
-        seen.add(colId);
-        if (def.enableView) visible.push(colId);
-      }
-    }
-  }
-  return visible;
 }
 
-function getDynamicValue(item: Item, col: DynamicColumn): string {
-  let value: unknown;
-  if (col.level === 'product') value = item.productAttributes?.[col.key];
-  else if (col.level === 'variant') value = item.variantAttributes?.[col.key];
-  else value = item.attributes?.[col.key];
-  return formatAttributeValue(value);
+function formatItemQuantity(qty: number, unit?: string): string {
+  const formatted = new Intl.NumberFormat('pt-BR', {
+    maximumFractionDigits: 3,
+  }).format(qty);
+  const abbr = unit ? getUnitAbbreviation(unit) || unit : 'un';
+  return `${formatted} ${abbr}`;
 }
 
-/** Group items by unit of measure key (raw value or '_none'). */
+function resolveItemName(item: Item): string {
+  return (
+    [item.templateName, item.productName, item.variantName]
+      .filter(Boolean)
+      .join(' ') || 'Item sem identificação'
+  );
+}
+
+// =============================================================================
+// PRINT HELPERS (preserved from original)
+// =============================================================================
+
 function groupByUnit(items: Item[]): Map<string, Item[]> {
   const groups = new Map<string, Item[]>();
   for (const item of items) {
@@ -225,31 +201,23 @@ function groupByUnit(items: Item[]): Map<string, Item[]> {
   return groups;
 }
 
-/** Build an HTML table for a group of items sharing the same unit. */
 function buildGroupTable(groupItems: Item[], unitKey: string): string {
-  const abbr = unitKey === '_none' ? '' : getUnitAbbreviation(unitKey);
+  const abbr =
+    unitKey === '_none' ? '' : getUnitAbbreviation(unitKey);
   const unitLabel = abbr || (unitKey === '_none' ? '' : unitKey);
 
   const rows = groupItems
-    .map(item => {
+    .map((item) => {
       const name = [item.templateName, item.productName, item.variantName]
         .filter(Boolean)
         .join(' ');
-      const isAutoSku =
-        item.variantSku &&
-        item.variantName &&
-        normaliseName(item.variantName) === item.variantSku;
-      const sku = item.variantSku && !isAutoSku ? ` - ${item.variantSku}` : '';
       const code = item.fullCode || item.uniqueCode || '';
       const loc =
-        item.bin?.address ||
-        item.resolvedAddress ||
-        item.lastKnownAddress ||
-        '';
+        item.bin?.address || item.resolvedAddress || item.lastKnownAddress || '';
       const qty = item.currentQuantity;
       const manufacturer = item.manufacturerName || '';
       return `<tr>
-        <td>${name}${sku}</td>
+        <td>${name}</td>
         <td style="font-family:monospace;font-size:11px">${code}</td>
         <td>${manufacturer}</td>
         <td>${loc}</td>
@@ -269,21 +237,19 @@ function buildGroupTable(groupItems: Item[], unitKey: string): string {
 </table>`;
 }
 
-/** Opens a print window with items grouped by unit of measure. */
 function printItems(itemsToPrint: Item[]) {
   const groups = groupByUnit(itemsToPrint);
 
   let tables: string;
 
   if (groups.size <= 1) {
-    // Single unit (or no items) — one table, no subtitle
     const [unitKey, groupItems] = [...groups.entries()][0] ?? ['_none', []];
     tables = buildGroupTable(groupItems, unitKey);
   } else {
-    // Multiple units — one table per unit with a subtitle
     tables = [...groups.entries()]
       .map(([unitKey, groupItems]) => {
-        const abbr = unitKey === '_none' ? '' : getUnitAbbreviation(unitKey);
+        const abbr =
+          unitKey === '_none' ? '' : getUnitAbbreviation(unitKey);
         const label = abbr || unitKey;
         const subtitle = label
           ? `<h2 style="font-size:15px;margin:24px 0 8px">${formatUnitOfMeasure(unitKey)} — ${groupItems.length} ite${groupItems.length === 1 ? 'm' : 'ns'}</h2>`
@@ -319,718 +285,973 @@ ${tables}
   }
 }
 
+// =============================================================================
+// COMPONENT
+// =============================================================================
+
 export default function StockOverviewListPage() {
-  const [search, setSearch] = useState('');
-  const [visibleColumns, setVisibleColumns] = useState<string[] | null>(null);
-  const [hideExited, setHideExited] = useState(true);
-  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(
-    []
+  return (
+    <Suspense
+      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+    >
+      <StockOverviewListPageContent />
+    </Suspense>
   );
-  const [selectedZones, setSelectedZones] = useState<string[]>([]);
-  const [selectedBinAddresses, setSelectedBinAddresses] = useState<string[]>(
-    []
-  );
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+}
+
+function StockOverviewListPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { hasPermission } = usePermissions();
+
+  // ============================================================================
+  // PERMISSION FLAGS
+  // ============================================================================
+
+  const canView = hasPermission(STOCK_PERMISSIONS.ITEMS.ACCESS);
+  const canAdmin = hasPermission(STOCK_PERMISSIONS.ITEMS.ADMIN);
+  const canPrint = hasPermission(STOCK_PERMISSIONS.ITEMS.PRINT);
+
+  // ============================================================================
+  // FILTER STATE (synced with URL params)
+  // ============================================================================
+
+  const statusFromUrl = useMemo(() => {
+    const raw = searchParams.get('status');
+    return raw ? [raw] : [];
+  }, [searchParams]);
+
+  const manufacturerIdFromUrl = useMemo(() => {
+    const raw = searchParams.get('manufacturerId');
+    return raw ? [raw] : [];
+  }, [searchParams]);
+
+  const zoneIdFromUrl = useMemo(() => {
+    const raw = searchParams.get('zoneId');
+    return raw ? [raw] : [];
+  }, [searchParams]);
+
+  const [hideEmpty, setHideEmpty] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Sorting state (server-side)
+  const [sortBy, setSortBy] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemsToDelete, setItemsToDelete] = useState<string[]>([]);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyItem, setHistoryItem] = useState<Item | null>(null);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [actionSelectorOpen, setActionSelectorOpen] = useState(false);
+  const [actionItem, setActionItem] = useState<Item | null>(null);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
 
-  const { data, isLoading, error, refetch, isFetching } = useItems();
+  // ============================================================================
+  // DATA: Manufacturers for filter dropdown
+  // ============================================================================
 
-  const { data: templates = [] } = useTemplates();
   const { data: manufacturersData } = useManufacturers();
 
-  const allItems: Item[] = data?.items ?? [];
-
-  // Fetch exit reasons for items with qty=0
-  const exitedItemIds = useMemo(
-    () => allItems.filter(i => i.currentQuantity === 0).map(i => i.id),
-    [allItems]
-  );
-
-  const { data: exitReasonMap = {} } = useQuery({
-    queryKey: ['exit-reasons', 'overview', exitedItemIds],
-    queryFn: async () => {
-      if (exitedItemIds.length === 0) return {};
-      const results = await Promise.all(
-        exitedItemIds.map(itemId =>
-          itemMovementsService.listMovements({ itemId })
-        )
-      );
-      const reasonMap: Record<string, string> = {};
-      for (let i = 0; i < exitedItemIds.length; i++) {
-        const movements = results[i].movements;
-        const exitMovement = movements.find(
-          m =>
-            m.movementType !== 'PURCHASE' &&
-            m.movementType !== 'CUSTOMER_RETURN' &&
-            m.movementType !== 'TRANSFER' &&
-            m.movementType !== 'INVENTORY_ADJUSTMENT' &&
-            m.movementType !== 'ZONE_RECONFIGURE'
-        );
-        if (exitMovement) {
-          reasonMap[exitedItemIds[i]] = exitMovement.movementType;
-        }
-      }
-      return reasonMap;
-    },
-    enabled: exitedItemIds.length > 0,
-  });
-
-  const manufacturerOptions: FilterOption[] = useMemo(
+  const manufacturerOptions = useMemo(
     () =>
-      (manufacturersData?.manufacturers ?? []).map(m => ({
-        id: m.name,
+      (manufacturersData?.manufacturers ?? []).map((m) => ({
+        id: m.id,
         label: m.name,
       })),
     [manufacturersData]
   );
 
-  const zoneOptions: FilterOption[] = useMemo(() => {
+  // ============================================================================
+  // DATA: Infinite scroll
+  // ============================================================================
+
+  const filters: ItemsInfiniteFilters = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      status: statusFromUrl.length === 1 ? statusFromUrl[0] : undefined,
+      manufacturerId:
+        manufacturerIdFromUrl.length === 1
+          ? manufacturerIdFromUrl[0]
+          : undefined,
+      zoneId: zoneIdFromUrl.length === 1 ? zoneIdFromUrl[0] : undefined,
+      hideEmpty: hideEmpty || undefined,
+      sortBy,
+      sortOrder,
+    }),
+    [
+      debouncedSearch,
+      statusFromUrl,
+      manufacturerIdFromUrl,
+      zoneIdFromUrl,
+      hideEmpty,
+      sortBy,
+      sortOrder,
+    ]
+  );
+
+  const {
+    items,
+    total,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useItemsInfinite(filters);
+
+  // Extract zone options from loaded items (derived, not state)
+  const zoneOptions = useMemo(() => {
     const seen = new Map<string, string>();
-    for (const item of allItems) {
+    for (const item of items) {
       const zone = item.bin?.zone;
       if (zone?.id && !seen.has(zone.id)) {
         seen.set(zone.id, zone.name || zone.code);
       }
     }
     return [...seen.entries()].map(([id, label]) => ({ id, label }));
-  }, [allItems]);
+  }, [items]);
 
-  const binAddressOptions: FilterOption[] = useMemo(() => {
-    const seen = new Set<string>();
-    const options: FilterOption[] = [];
-    for (const item of allItems) {
-      const addr = item.bin?.address || item.resolvedAddress;
-      if (addr && !seen.has(addr)) {
-        seen.add(addr);
-        options.push({ id: addr, label: addr });
-      }
-    }
-    return options;
-  }, [allItems]);
+  // ============================================================================
+  // INFINITE SCROLL SENTINEL
+  // ============================================================================
 
-  // Client-side search filtering
-  const searchedItems = useMemo(() => {
-    if (!search.trim()) return allItems;
-    const s = search.toLowerCase().trim();
-    return allItems.filter(item => {
-      const name = resolveItemName(item).toLowerCase();
-      const code = (item.fullCode || item.uniqueCode || '').toLowerCase();
-      const manufacturer = (item.manufacturerName || '').toLowerCase();
-      const location = (
-        item.bin?.address ||
-        item.resolvedAddress ||
-        item.lastKnownAddress ||
-        ''
-      ).toLowerCase();
-      const batch = (item.batchNumber || '').toLowerCase();
-      return (
-        name.includes(s) ||
-        code.includes(s) ||
-        manufacturer.includes(s) ||
-        location.includes(s) ||
-        batch.includes(s)
-      );
-    });
-  }, [allItems, search]);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Client-side manufacturer filtering
-  const manufacturerFiltered = useMemo(
-    () =>
-      selectedManufacturers.length === 0
-        ? searchedItems
-        : searchedItems.filter(item =>
-            item.manufacturerName
-              ? selectedManufacturers.includes(item.manufacturerName)
-              : false
-          ),
-    [searchedItems, selectedManufacturers]
-  );
-
-  // Client-side zone filtering
-  const zoneFiltered = useMemo(
-    () =>
-      selectedZones.length === 0
-        ? manufacturerFiltered
-        : manufacturerFiltered.filter(item =>
-            item.bin?.zone?.id
-              ? selectedZones.includes(item.bin.zone.id)
-              : false
-          ),
-    [manufacturerFiltered, selectedZones]
-  );
-
-  // Client-side bin address filtering
-  const binFiltered = useMemo(
-    () =>
-      selectedBinAddresses.length === 0
-        ? zoneFiltered
-        : zoneFiltered.filter(item => {
-            const addr = item.bin?.address || item.resolvedAddress;
-            return addr ? selectedBinAddresses.includes(addr) : false;
-          }),
-    [zoneFiltered, selectedBinAddresses]
-  );
-
-  // Client-side exit filtering
-  const filteredItems = useMemo(
-    () =>
-      hideExited
-        ? binFiltered.filter(item => item.currentQuantity > 0)
-        : binFiltered,
-    [binFiltered, hideExited]
-  );
-
-  // Virtualizer for table rows
-  const rowVirtualizer = useVirtualizer({
-    count: filteredItems.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: () => 49,
-    overscan: 10,
-  });
-
-  const virtualItems = rowVirtualizer.getVirtualItems();
-
-  // Scroll to top when filters change
   useEffect(() => {
-    scrollContainerRef.current?.scrollTo({ top: 0 });
-  }, [
-    search,
-    selectedManufacturers,
-    selectedZones,
-    selectedBinAddresses,
-    hideExited,
-  ]);
+    const el = sentinelRef.current;
+    if (!el) return;
 
-  const dynamicColumns = useMemo(
-    () => buildDynamicColumns(filteredItems, templates),
-    [filteredItems, templates]
-  );
+    const observer = new IntersectionObserver(
+      (observerEntries) => {
+        if (
+          observerEntries[0].isIntersecting &&
+          hasNextPage &&
+          !isFetchingNextPage
+        ) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
 
-  const defaultVisible = useMemo(
-    () => getDefaultVisibleColumns(filteredItems, templates),
-    [filteredItems, templates]
-  );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const activeColumns = visibleColumns ?? defaultVisible;
+  // ============================================================================
+  // URL FILTER HELPERS
+  // ============================================================================
 
-  const columnOptions: FilterOption[] = useMemo(
-    () => [
-      ...OPTIONAL_FIXED_COLUMNS,
-      ...dynamicColumns.map(c => ({ id: c.id, label: c.label })),
-    ],
-    [dynamicColumns]
-  );
-
-  const activeDynamicColumns = useMemo(
-    () => dynamicColumns.filter(c => activeColumns.includes(c.id)),
-    [dynamicColumns, activeColumns]
-  );
-
-  const showFabricante = activeColumns.includes(COL_FABRICANTE);
-  const showLocalizacao = activeColumns.includes(COL_LOCALIZACAO);
-  const showQuantidade = activeColumns.includes(COL_QUANTIDADE);
-
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  // --- Selection ---
-  const toggleSelection = useCallback((id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
-
-  const handleRowClick = useCallback(
-    (item: Item) => {
-      // Delay single-click to distinguish from double-click
-      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = setTimeout(() => {
-        toggleSelection(item.id);
-      }, 200);
+  const buildFilterUrl = useCallback(
+    (params: {
+      status?: string[];
+      manufacturerId?: string[];
+      zoneId?: string[];
+    }) => {
+      const parts: string[] = [];
+      const sts =
+        params.status !== undefined ? params.status : statusFromUrl;
+      const mfr =
+        params.manufacturerId !== undefined
+          ? params.manufacturerId
+          : manufacturerIdFromUrl;
+      const zn =
+        params.zoneId !== undefined ? params.zoneId : zoneIdFromUrl;
+      if (sts.length > 0) parts.push(`status=${sts[0]}`);
+      if (mfr.length > 0) parts.push(`manufacturerId=${mfr[0]}`);
+      if (zn.length > 0) parts.push(`zoneId=${zn[0]}`);
+      return parts.length > 0
+        ? `/stock/overview/list?${parts.join('&')}`
+        : '/stock/overview/list';
     },
-    [toggleSelection]
+    [statusFromUrl, manufacturerIdFromUrl, zoneIdFromUrl]
   );
 
-  const handleRowDoubleClick = useCallback((item: Item) => {
-    // Cancel the pending single-click
-    if (clickTimerRef.current) {
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-    }
-    setHistoryItem(item);
-    setHistoryModalOpen(true);
+  const setStatusFilter = useCallback(
+    (ids: string[]) => router.push(buildFilterUrl({ status: ids })),
+    [router, buildFilterUrl]
+  );
+
+  const setManufacturerFilter = useCallback(
+    (ids: string[]) =>
+      router.push(buildFilterUrl({ manufacturerId: ids })),
+    [router, buildFilterUrl]
+  );
+
+  const setZoneFilter = useCallback(
+    (ids: string[]) => router.push(buildFilterUrl({ zoneId: ids })),
+    [router, buildFilterUrl]
+  );
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleContextView = useCallback(
+    (ids: string[]) => {
+      if (ids.length === 1) {
+        // Open history modal for the item
+        const item = items.find((i) => i.id === ids[0]);
+        if (item) {
+          setHistoryItem(item);
+          setHistoryModalOpen(true);
+        }
+      }
+    },
+    [items]
+  );
+
+  const handleContextDelete = useCallback((ids: string[]) => {
+    setItemsToDelete(ids);
+    setDeleteModalOpen(true);
   }, []);
 
-  // --- Selection summary (search across all items, not just current page) ---
-  const selectedItems = useMemo(
-    () => allItems.filter(i => selectedIds.has(i.id)),
-    [allItems, selectedIds]
+  const handleDeleteConfirm = useCallback(async () => {
+    for (const id of itemsToDelete) {
+      await itemsService.deleteItem(id);
+    }
+    setDeleteModalOpen(false);
+    setItemsToDelete([]);
+    toast.success(
+      itemsToDelete.length === 1
+        ? 'Item excluído com sucesso!'
+        : `${itemsToDelete.length} itens excluídos!`
+    );
+    refetch();
+  }, [itemsToDelete, refetch]);
+
+  const handleHistory = useCallback(
+    (ids: string[]) => {
+      if (ids.length === 1) {
+        const item = items.find((i) => i.id === ids[0]);
+        if (item) {
+          setHistoryItem(item);
+          setHistoryModalOpen(true);
+        }
+      }
+    },
+    [items]
   );
 
-  const selectionSummary = useMemo(() => {
-    if (selectedItems.length === 0) return null;
-    // Group totals by unit of measure
-    const unitTotals = new Map<string, number>();
-    for (const item of selectedItems) {
-      const key = item.templateUnitOfMeasure || '_none';
-      unitTotals.set(key, (unitTotals.get(key) || 0) + item.currentQuantity);
-    }
-    const totals = [...unitTotals.entries()].map(([unit, total]) => ({
-      unit,
-      total: Math.round(total * 1000) / 1000,
-      abbr: unit === '_none' ? 'un' : getUnitAbbreviation(unit) || 'un',
-    }));
-    return {
-      count: selectedItems.length,
-      totals,
-    };
-  }, [selectedItems]);
+  const transferMutation = useTransferItem();
+  const exitMutation = useRegisterItemExit();
 
-  const totalCols =
-    2 +
-    (showFabricante ? 1 : 0) +
-    (showLocalizacao ? 1 : 0) +
-    (showQuantidade ? 1 : 0) +
-    activeDynamicColumns.length;
+  const handleTransfer = useCallback(
+    (ids: string[]) => {
+      if (ids.length === 1) {
+        const item = items.find((i) => i.id === ids[0]);
+        if (item) {
+          setActionItem(item);
+          setTransferModalOpen(true);
+        }
+      }
+    },
+    [items]
+  );
+
+  const handleExit = useCallback(
+    (ids: string[]) => {
+      if (ids.length === 1) {
+        const item = items.find((i) => i.id === ids[0]);
+        if (item) {
+          setActionItem(item);
+          setExitModalOpen(true);
+        }
+      }
+    },
+    [items]
+  );
+
+  const handleOpenActionSelector = useCallback(
+    (item: Item) => {
+      setActionItem(item);
+      setActionSelectorOpen(true);
+    },
+    []
+  );
+
+  const handleTransferConfirm = useCallback(
+    async (newBinId: string, reason: string) => {
+      if (!actionItem) return;
+      await transferMutation.mutateAsync({
+        itemId: actionItem.id,
+        destinationBinId: newBinId,
+        notes: reason || undefined,
+      });
+      setTransferModalOpen(false);
+      setActionItem(null);
+      toast.success('Item transferido com sucesso!');
+      refetch();
+    },
+    [actionItem, transferMutation, refetch]
+  );
+
+  const handleExitConfirm = useCallback(
+    async (exitType: string, reason: string) => {
+      if (!actionItem) return;
+      await exitMutation.mutateAsync({
+        itemId: actionItem.id,
+        quantity: actionItem.currentQuantity,
+        movementType: exitType,
+        reasonCode: reason || undefined,
+      });
+      setExitModalOpen(false);
+      setActionItem(null);
+      toast.success('Saída registrada com sucesso!');
+      refetch();
+    },
+    [actionItem, exitMutation, refetch]
+  );
+
+  // ============================================================================
+  // RENDER FUNCTIONS
+  // ============================================================================
+
+  const renderGridCard = useCallback(
+    (item: Item, isSelected: boolean) => {
+      const statusCfg = getStatusConfig(item.status);
+      const variantColor = item.variantColorHex || '#64748b';
+
+      const customActions: ContextMenuAction[] = [];
+
+      if (canView) {
+        customActions.push({
+          id: 'transfer',
+          label: 'Transferir',
+          icon: ArrowRightLeft,
+          onClick: handleTransfer,
+          separator: 'before',
+        });
+        customActions.push({
+          id: 'exit',
+          label: 'Registrar saída',
+          icon: PackageMinus,
+          onClick: handleExit,
+        });
+        customActions.push({
+          id: 'history',
+          label: 'Ver histórico',
+          icon: History,
+          onClick: handleHistory,
+        });
+      }
+
+
+      const badges: {
+        label: string;
+        variant: 'outline';
+        color: string;
+      }[] = [];
+
+      if (item.manufacturerName) {
+        badges.push({
+          label: item.manufacturerName,
+          variant: 'outline',
+          color:
+            'border-cyan-600/25 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/8 text-cyan-700 dark:text-cyan-300',
+        });
+      }
+
+      badges.push({
+        label: statusCfg.label,
+        variant: 'outline',
+        color: statusCfg.color,
+      });
+
+      if (item.batchNumber) {
+        badges.push({
+          label: `Lote: ${item.batchNumber}`,
+          variant: 'outline',
+          color:
+            'border-violet-600/25 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300',
+        });
+      }
+
+      const locationText =
+        item.bin?.address || item.resolvedAddress || item.lastKnownAddress;
+      const locationUrl = item.bin
+        ? `/stock/locations/${item.bin.zone.warehouseId}?zone=${item.bin.zone.id}&highlight=${item.bin.id}&item=${item.id}`
+        : undefined;
+
+      return (
+        <EntityContextMenu
+          itemId={item.id}
+          onView={canView ? handleContextView : undefined}
+          actions={customActions}
+        >
+          <EntityCard
+            id={item.id}
+            variant="grid"
+            title={resolveItemName(item)}
+            subtitle={item.fullCode || item.uniqueCode || ''}
+            icon={Palette}
+            iconBgStyle={{
+              background: `linear-gradient(135deg, ${variantColor}, ${variantColor}dd)`,
+            }}
+            badges={badges}
+            footer={{
+              type: 'split',
+              left: {
+                icon: MapPin,
+                label: locationText || 'Sem localização',
+                onClick: () => {
+                  if (locationUrl) window.open(locationUrl, '_blank');
+                },
+                color: 'emerald',
+              },
+              right: {
+                icon: PackageMinus,
+                label: formatItemQuantity(
+                  item.currentQuantity,
+                  item.templateUnitOfMeasure
+                ),
+                onClick: () => handleOpenActionSelector(item),
+                color: 'emerald',
+              },
+            }}
+            isSelected={isSelected}
+            showSelection={false}
+            clickable={false}
+            createdAt={item.createdAt}
+            updatedAt={item.updatedAt}
+            showStatusBadges={false}
+          />
+        </EntityContextMenu>
+      );
+    },
+    [
+      canView,
+      canAdmin,
+      handleContextView,
+      handleContextDelete,
+      handleTransfer,
+      handleExit,
+      handleHistory,
+      handleOpenActionSelector,
+      router,
+    ]
+  );
+
+  const renderListCard = useCallback(
+    (item: Item, isSelected: boolean) => {
+      const statusCfg = getStatusConfig(item.status);
+      const variantColor = item.variantColorHex || '#64748b';
+      const locationText =
+        item.bin?.address || item.resolvedAddress || item.lastKnownAddress;
+
+      const customActions: ContextMenuAction[] = [];
+
+      if (canView) {
+        customActions.push({
+          id: 'transfer',
+          label: 'Transferir',
+          icon: ArrowRightLeft,
+          onClick: handleTransfer,
+          separator: 'before',
+        });
+        customActions.push({
+          id: 'exit',
+          label: 'Registrar saída',
+          icon: PackageMinus,
+          onClick: handleExit,
+        });
+        customActions.push({
+          id: 'history',
+          label: 'Ver histórico',
+          icon: History,
+          onClick: handleHistory,
+        });
+      }
+
+
+      return (
+        <EntityContextMenu
+          itemId={item.id}
+          onView={canView ? handleContextView : undefined}
+          actions={customActions}
+        >
+          <div
+            className={cn(
+              'flex border rounded-lg overflow-hidden transition-all bg-white dark:bg-white/5',
+              isSelected
+                ? 'border-blue-400 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-500/5'
+                : 'border-border hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600'
+            )}
+          >
+            {/* Left color bar */}
+            <div
+              className="w-1 shrink-0"
+              style={{ backgroundColor: variantColor }}
+            />
+            <div className="flex-1 flex items-center gap-3 px-3 py-2">
+              {/* Icon */}
+              <div
+                className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${variantColor}, ${variantColor}dd)`,
+                }}
+              >
+                <Palette className="h-4 w-4 text-white" />
+              </div>
+              {/* Name + Code + Batch */}
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-[13px] text-foreground truncate">
+                  {resolveItemName(item)}
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {item.fullCode || item.uniqueCode || ''}
+                  </span>
+                  {item.batchNumber && (
+                    <span className="inline-flex items-center rounded-full px-1.5 py-px text-[10px] font-medium border border-violet-600/25 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300">
+                      Lote: {item.batchNumber}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {/* Fabricante column */}
+              <div className="w-[120px] shrink-0 text-xs text-muted-foreground truncate hidden lg:block">
+                {item.manufacturerName || '—'}
+              </div>
+              {/* Localização column */}
+              <div className="w-[120px] shrink-0 text-xs text-muted-foreground hidden lg:flex items-center gap-1">
+                {locationText ? (
+                  <>
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{locationText}</span>
+                  </>
+                ) : (
+                  '—'
+                )}
+              </div>
+              {/* Status column */}
+              <div className="w-[100px] shrink-0 text-center hidden md:block">
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border',
+                    statusCfg.color
+                  )}
+                >
+                  {statusCfg.label}
+                </span>
+              </div>
+              {/* Quantity column */}
+              <div className="w-[80px] shrink-0 text-right">
+                <span className="text-[15px] font-bold text-foreground">
+                  {formatItemQuantity(
+                    item.currentQuantity,
+                    item.templateUnitOfMeasure
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        </EntityContextMenu>
+      );
+    },
+    [
+      canView,
+      canAdmin,
+      handleContextView,
+      handleContextDelete,
+      handleTransfer,
+      handleExit,
+      handleHistory,
+    ]
+  );
+
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const initialIds = useMemo(() => items.map((a) => a.id), [items]);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <PageLayout className="flex flex-col h-[calc(100dvh-10rem)] overflow-hidden">
-      <PageHeader className="shrink-0">
-        <PageActionBar
-          breadcrumbItems={[
-            { label: 'Estoque', href: '/stock' },
-            { label: 'Estoque Geral', href: '/stock/overview/list' },
-          ]}
-          buttons={[
-            {
-              id: 'print-all',
-              title: 'Imprimir',
-              icon: Printer,
-              onClick: () => printItems(filteredItems),
-              variant: 'outline',
-            },
-            {
-              id: 'refresh',
-              title: 'Atualizar',
-              icon: RefreshCw,
-              onClick: handleRefresh,
-              variant: 'outline',
-            },
-          ]}
-        />
-        <Header
-          title="Listagem de Estoque"
-          description="Visão consolidada de todos os itens com localização, quantidades e atributos personalizados."
-        />
-      </PageHeader>
+    <CoreProvider
+      selection={{
+        namespace: 'stock-items',
+        initialIds,
+      }}
+    >
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar
+            breadcrumbItems={[
+              { label: 'Estoque', href: '/stock' },
+              { label: 'Estoque Geral', href: '/stock/overview/list' },
+            ]}
+            buttons={[
+              ...(canPrint
+                ? [
+                    {
+                      id: 'print-all',
+                      title: 'Imprimir',
+                      icon: Printer,
+                      onClick: () => printItems(items),
+                      variant: 'outline' as const,
+                    },
+                  ]
+                : []),
+              {
+                id: 'refresh',
+                title: 'Atualizar',
+                icon: RefreshCw,
+                onClick: () => refetch(),
+                variant: 'outline' as const,
+              },
+            ]}
+          />
 
-      <PageBody className="flex flex-col flex-1 min-h-0 gap-4">
-        <SearchBar
-          value={search}
-          placeholder="Buscar por código, produto, variante ou atributos..."
-          onSearch={setSearch}
-          onClear={() => setSearch('')}
-        />
+          <Header
+            title="Listagem de Estoque"
+            description="Visão consolidada de todos os itens com localização, quantidades e atributos."
+          />
+        </PageHeader>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FilterDropdown
-              label="Fabricante"
-              icon={Factory}
-              options={manufacturerOptions}
-              selected={selectedManufacturers}
-              onSelectionChange={setSelectedManufacturers}
-              activeColor="violet"
-              searchPlaceholder="Buscar fabricante..."
-              emptyText="Nenhum fabricante encontrado."
+        <PageBody>
+          {/* Search Bar */}
+          <SearchBar
+            placeholder="Buscar por código, produto, fabricante, lote..."
+            value={searchQuery}
+            onSearch={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+            showClear={true}
+            size="md"
+          />
+
+          {/* Grid */}
+          {isLoading ? (
+            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+          ) : error ? (
+            <GridError
+              type="server"
+              title="Erro ao carregar estoque"
+              message="Não foi possível carregar a listagem de itens. Tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => {
+                  refetch();
+                },
+              }}
             />
-            <FilterDropdown
-              label="Zona"
-              icon={Grid3X3}
-              options={zoneOptions}
-              selected={selectedZones}
-              onSelectionChange={setSelectedZones}
-              activeColor="cyan"
-              searchPlaceholder="Buscar zona..."
-              emptyText="Nenhuma zona encontrada."
-            />
-            <FilterDropdown
-              label="Localização"
-              icon={MapPin}
-              options={binAddressOptions}
-              selected={selectedBinAddresses}
-              onSelectionChange={setSelectedBinAddresses}
-              activeColor="emerald"
-              searchPlaceholder="Buscar endereço..."
-              emptyText="Nenhuma localização encontrada."
-            />
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {filteredItems.length}{' '}
-              {filteredItems.length === 1 ? 'item' : 'itens'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Switch
-                id="hide-exited-overview"
-                checked={hideExited}
-                onCheckedChange={setHideExited}
-                className="scale-75"
+          ) : (
+            <>
+              <EntityGrid
+                config={itemsConfig}
+                items={items}
+                showItemCount={false}
+                toolbarStart={
+                  <>
+                    <FilterDropdown
+                      label="Status"
+                      icon={Palette}
+                      options={STATUS_OPTIONS}
+                      selected={statusFromUrl}
+                      onSelectionChange={setStatusFilter}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar status..."
+                      emptyText="Nenhum status encontrado."
+                    />
+                    <FilterDropdown
+                      label="Fabricante"
+                      icon={Factory}
+                      options={manufacturerOptions}
+                      selected={manufacturerIdFromUrl}
+                      onSelectionChange={setManufacturerFilter}
+                      activeColor="cyan"
+                      searchPlaceholder="Buscar fabricante..."
+                      emptyText="Nenhum fabricante encontrado."
+                    />
+                    <FilterDropdown
+                      label="Zona"
+                      icon={Grid3X3}
+                      options={zoneOptions}
+                      selected={zoneIdFromUrl}
+                      onSelectionChange={setZoneFilter}
+                      activeColor="emerald"
+                      searchPlaceholder="Buscar zona..."
+                      emptyText="Nenhuma zona encontrada."
+                    />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Switch
+                        id="hide-empty-items"
+                        checked={hideEmpty}
+                        onCheckedChange={setHideEmpty}
+                        className="scale-75"
+                      />
+                      <Label
+                        htmlFor="hide-empty-items"
+                        className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
+                      >
+                        Ocultar saídas
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                      {total} {total === 1 ? 'item' : 'itens'}
+                      {items.length < total &&
+                        ` (${items.length} carregados)`}
+                    </p>
+                  </>
+                }
+                renderGridItem={renderGridCard}
+                renderListItem={renderListCard}
+                isLoading={isLoading}
+                isSearching={!!debouncedSearch}
+                onItemDoubleClick={(item) => {
+                  setHistoryItem(item);
+                  setHistoryModalOpen(true);
+                }}
+                showSorting={true}
+                defaultSortField="createdAt"
+                defaultSortDirection="desc"
+                onSortChange={(field, direction) => {
+                  if (field !== 'custom') {
+                    setSortBy(field);
+                    setSortOrder(direction);
+                  }
+                }}
               />
-              <Label
-                htmlFor="hide-exited-overview"
-                className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap"
-              >
-                Ocultar saídas
-              </Label>
-            </div>
-            <FilterDropdown
-              label="Colunas"
-              icon={Columns3}
-              options={columnOptions}
-              selected={activeColumns}
-              onSelectionChange={setVisibleColumns}
-              activeColor="blue"
-              searchPlaceholder="Buscar coluna..."
-            />
-          </div>
-        </div>
 
-        {isLoading ? (
-          <GridLoading count={8} layout="list" size="md" />
-        ) : error ? (
-          <GridError
-            type="server"
-            title="Erro ao carregar estoque"
-            message="Não foi possível carregar a listagem. Tente novamente."
-            action={{
-              label: 'Tentar Novamente',
-              onClick: () => void refetch(),
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Delete PIN Confirmation Modal */}
+          <VerifyActionPinModal
+            isOpen={deleteModalOpen}
+            onClose={() => {
+              setDeleteModalOpen(false);
+              setItemsToDelete([]);
+            }}
+            onSuccess={handleDeleteConfirm}
+            title="Confirmar Exclusão"
+            description={
+              itemsToDelete.length === 1
+                ? 'Digite seu PIN de Ação para confirmar a exclusão deste item. Esta ação não pode ser desfeita.'
+                : `Digite seu PIN de Ação para excluir ${itemsToDelete.length} itens. Esta ação não pode ser desfeita.`
+            }
+          />
+
+          {/* Item History Modal */}
+          <ItemHistoryModal
+            open={historyModalOpen}
+            onOpenChange={setHistoryModalOpen}
+            item={historyItem}
+            productId={historyItem?.productId}
+            onBack={actionItem ? () => {
+              setHistoryModalOpen(false);
+              setActionSelectorOpen(true);
+            } : undefined}
+          />
+
+          {/* Action Selector Modal */}
+          <Dialog
+            open={actionSelectorOpen}
+            onOpenChange={(open) => {
+              setActionSelectorOpen(open);
+              if (!open) setActionItem(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Ações do Item</DialogTitle>
+              </DialogHeader>
+              {actionItem && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {resolveItemName(actionItem)}
+                    <span className="font-mono text-xs ml-2">
+                      {formatItemQuantity(
+                        actionItem.currentQuantity,
+                        actionItem.templateUnitOfMeasure
+                      )}
+                    </span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Ver Histórico */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionSelectorOpen(false);
+                        setHistoryItem(actionItem);
+                        setHistoryModalOpen(true);
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border bg-white dark:bg-white/5 hover:border-sky-400 dark:hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-500/5 transition-all group"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-500/10 flex items-center justify-center group-hover:bg-sky-100 dark:group-hover:bg-sky-500/20 transition-colors">
+                        <History className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                      </div>
+                      <span className="text-xs font-medium text-foreground">
+                        Ver Histórico
+                      </span>
+                    </button>
+
+                    {/* Transferir */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionSelectorOpen(false);
+                        setTransferModalOpen(true);
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border bg-white dark:bg-white/5 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/5 transition-all group"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
+                        <ArrowRightLeft className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <span className="text-xs font-medium text-foreground">
+                        Transferir
+                      </span>
+                    </button>
+
+                    {/* Dar Baixa */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionSelectorOpen(false);
+                        setExitModalOpen(true);
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border bg-white dark:bg-white/5 hover:border-rose-400 dark:hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/5 transition-all group"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 transition-colors">
+                        <PackageMinus className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                      </div>
+                      <span className="text-xs font-medium text-foreground">
+                        Dar Baixa
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Transfer Modal */}
+          <ChangeLocationModal
+            open={transferModalOpen}
+            onOpenChange={(open) => {
+              setTransferModalOpen(open);
+              if (!open) setActionItem(null);
+            }}
+            selectedItems={actionItem ? [actionItem] : []}
+            onConfirm={handleTransferConfirm}
+            onBack={() => {
+              setTransferModalOpen(false);
+              setActionSelectorOpen(true);
             }}
           />
-        ) : (
-          <div className="flex flex-col flex-1 min-h-0 gap-2">
-            <div
-              ref={scrollContainerRef}
-              className="rounded-lg overflow-auto flex-1 min-h-0"
-            >
-              <table className="w-full caption-bottom text-sm table-fixed">
-                <colgroup>
-                  <col style={{ width: 48 }} />
-                  <col />
-                  {showFabricante && <col style={{ width: 180 }} />}
-                  {showLocalizacao && <col style={{ width: 180 }} />}
-                  {showQuantidade && <col style={{ width: 160 }} />}
-                  {activeDynamicColumns.map(col => (
-                    <col key={col.id} style={{ width: 120 }} />
-                  ))}
-                </colgroup>
-                <TableHeader className="sticky top-0 z-10 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm">
-                  <TableRow className="border-b border-slate-200/60 dark:border-white/5 hover:bg-transparent">
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                      Cor
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                      Item
-                    </TableHead>
-                    {showFabricante && (
-                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                        Fabricante
-                      </TableHead>
-                    )}
-                    {showLocalizacao && (
-                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                        Localização
-                      </TableHead>
-                    )}
-                    {showQuantidade && (
-                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                        Quantidade
-                      </TableHead>
-                    )}
-                    {activeDynamicColumns.map(col => (
-                      <TableHead
-                        key={col.id}
-                        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70"
-                      >
-                        {col.label}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={totalCols} className="text-center">
-                        <div className="py-10 text-sm text-muted-foreground">
-                          Nenhum item encontrado.
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    <>
-                      {virtualItems.length > 0 && virtualItems[0].start > 0 && (
-                        <tr>
-                          <td
-                            colSpan={totalCols}
-                            style={{
-                              height: virtualItems[0].start,
-                              padding: 0,
-                              border: 'none',
-                            }}
-                          />
-                        </tr>
-                      )}
-                      {virtualItems.map(virtualRow => {
-                        const item = filteredItems[virtualRow.index];
-                        const unitAbbr = getUnitAbbreviation(
-                          item.templateUnitOfMeasure
-                        );
-                        const qtyLabel = unitAbbr
-                          ? `${formatQuantity(item.currentQuantity)} ${unitAbbr}`
-                          : formatQuantity(item.currentQuantity);
 
-                        const hasBin =
-                          item.bin?.zone?.id && item.bin?.zone?.warehouseId;
+          {/* Exit Modal */}
+          <ExitItemsModal
+            open={exitModalOpen}
+            onOpenChange={(open) => {
+              setExitModalOpen(open);
+              if (!open) setActionItem(null);
+            }}
+            selectedItems={actionItem ? [actionItem] : []}
+            onConfirm={handleExitConfirm}
+            onTransfer={() => {
+              setExitModalOpen(false);
+              setTransferModalOpen(true);
+            }}
+          />
 
-                        const isSelected = selectedIds.has(item.id);
-                        const isExited = item.currentQuantity === 0;
+          {/* Bulk Selection Toolbar */}
+          <StockSelectionToolbar
+            items={items}
+            total={total}
+            onBulkTransfer={handleTransfer}
+            onBulkExit={handleExit}
+            onBulkPrint={(ids) => {
+              const selected = items.filter((i) => ids.includes(i.id));
+              if (selected.length > 0) printItems(selected);
+            }}
+            canView={canView}
+            canPrint={canPrint}
+          />
+        </PageBody>
+      </PageLayout>
+    </CoreProvider>
+  );
+}
 
-                        return (
-                          <TableRow
-                            key={item.id}
-                            data-index={virtualRow.index}
-                            ref={rowVirtualizer.measureElement}
-                            className={cn(
-                              'cursor-pointer transition-colors border-b border-slate-100 dark:border-white/5',
-                              isSelected
-                                ? 'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100/80 dark:hover:bg-blue-500/15'
-                                : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/50',
-                              isExited && !isSelected && 'opacity-50'
-                            )}
-                            onClick={() => handleRowClick(item)}
-                            onDoubleClick={() => handleRowDoubleClick(item)}
-                          >
-                            {/* Cor */}
-                            <TableCell>
-                              {item.variantColorHex ? (
-                                <div
-                                  className="h-8 w-8 rounded-full shadow-sm"
-                                  style={{
-                                    backgroundColor: item.variantColorHex,
-                                  }}
-                                  title={item.variantColorHex}
-                                />
-                              ) : (
-                                <div
-                                  className="flex items-center justify-center bg-muted rounded-full h-8 w-8"
-                                  title="Cor não definida"
-                                >
-                                  <Palette className="h-3.5 w-3.5 text-muted-foreground" />
-                                </div>
-                              )}
-                            </TableCell>
+// =============================================================================
+// SELECTION TOOLBAR
+// =============================================================================
 
-                            {/* Item */}
-                            <TableCell>
-                              {(() => {
-                                const exitBadge = isExited
-                                  ? EXIT_REASON_BADGE[
-                                      exitReasonMap[item.id] || ''
-                                    ] || DEFAULT_EXIT_BADGE
-                                  : null;
-                                return (
-                                  <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-foreground">
-                                        {resolveItemName(item)}
-                                      </span>
-                                      {exitBadge && (
-                                        <Badge
-                                          variant="outline"
-                                          className={cn(
-                                            'text-[10px] px-1.5 py-0 border',
-                                            exitBadge.className
-                                          )}
-                                        >
-                                          {exitBadge.label}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <span className="text-[11px] font-mono text-muted-foreground/60">
-                                      {item.fullCode || item.uniqueCode || ''}
-                                    </span>
-                                  </div>
-                                );
-                              })()}
-                            </TableCell>
+function StockSelectionToolbar({
+  items,
+  total,
+  onBulkTransfer,
+  onBulkExit,
+  onBulkPrint,
+  canView,
+  canPrint,
+}: {
+  items: Item[];
+  total: number;
+  onBulkTransfer: (ids: string[]) => void;
+  onBulkExit: (ids: string[]) => void;
+  onBulkPrint: (ids: string[]) => void;
+  canView: boolean;
+  canPrint: boolean;
+}) {
+  const { state, actions } = useSelectionContext();
+  const selectedIds = useMemo(() => [...state.selectedIds], [state.selectedIds]);
 
-                            {/* Fabricante */}
-                            {showFabricante && (
-                              <TableCell>
-                                {item.manufacturerName ? (
-                                  <button
-                                    type="button"
-                                    className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      if (
-                                        !selectedManufacturers.includes(
-                                          item.manufacturerName!
-                                        )
-                                      ) {
-                                        setSelectedManufacturers(prev => [
-                                          ...prev,
-                                          item.manufacturerName!,
-                                        ]);
-                                      }
-                                    }}
-                                  >
-                                    {item.manufacturerName}
-                                  </button>
-                                ) : (
-                                  <span className="text-sm text-gray-700 dark:text-gray-200">
-                                    -
-                                  </span>
-                                )}
-                              </TableCell>
-                            )}
+  const selectionActions = useMemo<SelectionAction[]>(() => {
+    const acts: SelectionAction[] = [];
 
-                            {/* Localização */}
-                            {showLocalizacao && (
-                              <TableCell>
-                                {hasBin ? (
-                                  <Link
-                                    href={`/stock/locations/${item.bin!.zone!.warehouseId}?zone=${item.bin!.zone!.id}&highlight=${item.bin!.id}`}
-                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                                    onClick={e => e.stopPropagation()}
-                                  >
-                                    {item.bin!.address ||
-                                      item.resolvedAddress ||
-                                      '-'}
-                                  </Link>
-                                ) : (
-                                  <span className="text-sm text-gray-700 dark:text-gray-200">
-                                    {item.resolvedAddress ||
-                                      item.lastKnownAddress ||
-                                      '-'}
-                                  </span>
-                                )}
-                              </TableCell>
-                            )}
+    if (canView) {
+      acts.push({
+        id: 'bulk-transfer',
+        label: 'Transferir',
+        icon: ArrowRightLeft,
+        onClick: onBulkTransfer,
+      });
+      acts.push({
+        id: 'bulk-exit',
+        label: 'Dar Baixa',
+        icon: PackageMinus,
+        onClick: onBulkExit,
+      });
+    }
 
-                            {/* Quantidade */}
-                            {showQuantidade && (
-                              <TableCell>
-                                <Badge variant="secondary" className="text-sm">
-                                  {qtyLabel}
-                                </Badge>
-                              </TableCell>
-                            )}
+    if (canPrint) {
+      acts.push({
+        id: 'bulk-print',
+        label: 'Imprimir',
+        icon: Printer,
+        onClick: onBulkPrint,
+      });
+    }
 
-                            {/* Colunas dinâmicas */}
-                            {activeDynamicColumns.map(col => (
-                              <TableCell key={col.id} className="text-sm">
-                                {getDynamicValue(item, col)}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })}
-                      {virtualItems.length > 0 && (
-                        <tr>
-                          <td
-                            colSpan={totalCols}
-                            style={{
-                              height:
-                                rowVirtualizer.getTotalSize() -
-                                virtualItems[virtualItems.length - 1].end,
-                              padding: 0,
-                              border: 'none',
-                            }}
-                          />
-                        </tr>
-                      )}
-                    </>
-                  )}
-                </TableBody>
-              </table>
-            </div>
+    return acts;
+  }, [canView, canPrint, onBulkTransfer, onBulkExit, onBulkPrint]);
 
-            {isFetching && !isLoading && (
-              <div className="flex items-center justify-end gap-1 shrink-0 pr-1 text-xs text-muted-foreground">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Atualizando...
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Floating selection bar */}
-        {selectionSummary && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-            <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 dark:border-blue-400/30 bg-white dark:bg-blue-600/80 shadow-lg backdrop-blur-md">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {selectionSummary.count}{' '}
-                {selectionSummary.count === 1 ? 'item' : 'itens'}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                Total:{' '}
-                {selectionSummary.totals.map((t, i) => (
-                  <span key={t.unit}>
-                    {i > 0 && (
-                      <span className="mx-1 text-muted-foreground">|</span>
-                    )}
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {t.total.toLocaleString('pt-BR', {
-                        maximumFractionDigits: 3,
-                      })}
-                      {t.abbr ? ` ${t.abbr}` : ''}
-                    </span>
-                  </span>
-                ))}
-              </span>
-              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700" />
-              <Button
-                size="sm"
-                variant="default"
-                className="gap-1.5"
-                onClick={() => printItems(selectedItems)}
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Imprimir seleção
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="gap-1 text-muted-foreground"
-                onClick={clearSelection}
-              >
-                <X className="w-3.5 h-3.5" />
-                Limpar
-              </Button>
-            </div>
-          </div>
-        )}
-        {/* Item History Modal (opened on double-click) */}
-        <ItemHistoryModal
-          open={historyModalOpen}
-          onOpenChange={setHistoryModalOpen}
-          item={historyItem}
-          productId={historyItem?.productId}
-        />
-      </PageBody>
-    </PageLayout>
+  return (
+    <SelectionToolbar
+      selectedIds={selectedIds}
+      totalItems={total}
+      onClear={actions.clear}
+      onSelectAll={actions.selectAll}
+      actions={selectionActions}
+    />
   );
 }

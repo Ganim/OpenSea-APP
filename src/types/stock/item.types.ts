@@ -230,6 +230,7 @@ export interface RegisterItemExitRequest {
   reasonCode?: string;
   destinationRef?: string;
   notes?: string;
+  approvedBy?: string;
 }
 
 export interface TransferItemRequest {
@@ -441,9 +442,17 @@ export interface ItemsQuery extends PaginatedQuery {
   status?: ItemStatus;
   volumeId?: string;
   search?: string;
+  manufacturerId?: string;
+  zoneId?: string;
+  hideEmpty?: boolean;
 }
 
 export interface PaginatedItemsResponse {
-  items: ItemExtended[];
-  pagination: PaginationMeta;
+  items: Item[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }

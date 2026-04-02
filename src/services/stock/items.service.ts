@@ -50,6 +50,9 @@ export const itemsService = {
     if (query?.status) params.append('status', query.status);
     if (query?.volumeId) params.append('volumeId', query.volumeId);
     if (query?.search) params.append('search', query.search);
+    if (query?.manufacturerId) params.append('manufacturerId', query.manufacturerId);
+    if (query?.zoneId) params.append('zoneId', query.zoneId);
+    if (query?.hideEmpty) params.append('hideEmpty', 'true');
 
     const url = params.toString()
       ? `${API_ENDPOINTS.ITEMS.LIST}?${params.toString()}`

@@ -15,11 +15,13 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { getUnitAbbreviation } from '@/helpers/formatters';
 import { movementsService } from '@/services/stock';
 import type { Item, ItemMovementExtended } from '@/types/stock';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowDownRight,
+  ArrowLeft,
   ArrowRightLeft,
   ArrowUpRight,
   Bookmark,
@@ -43,12 +45,19 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+function formatUnit(unit?: string): string {
+  if (!unit) return 'un';
+  return getUnitAbbreviation(unit) || unit;
+}
+
 export interface ItemHistoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: Item | null;
   /** Optional productId — when provided, shows a "Ver Produto" link in the footer */
   productId?: string;
+  /** When provided, shows a "Voltar" button in the footer */
+  onBack?: () => void;
 }
 
 /** Action config resolved from movementType + reasonCode */
@@ -57,6 +66,8 @@ interface ActionConfig {
   icon: React.ComponentType<{ className?: string }>;
   badgeClass: string;
   iconColor: string;
+  iconBg: string;
+  iconBorder: string;
   quantityPrefix: '+' | '-' | '';
 }
 
@@ -77,8 +88,10 @@ const getActionConfig = (
       label: 'Compra',
       icon: ArrowDownRight,
       badgeClass:
-        'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
-      iconColor: 'text-green-500 border-green-500',
+        'bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300 border-emerald-600/25 dark:border-emerald-500/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      iconBorder: 'border-emerald-600/25 dark:border-emerald-500/20',
       quantityPrefix: '+',
     };
   }
@@ -88,8 +101,10 @@ const getActionConfig = (
       label: 'Devolução (Cliente)',
       icon: ArrowDownRight,
       badgeClass:
-        'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
-      iconColor: 'text-green-500 border-green-500',
+        'bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300 border-emerald-600/25 dark:border-emerald-500/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      iconBorder: 'border-emerald-600/25 dark:border-emerald-500/20',
       quantityPrefix: '+',
     };
   }
@@ -99,8 +114,10 @@ const getActionConfig = (
       label: 'Venda',
       icon: ShoppingCart,
       badgeClass:
-        'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
-      iconColor: 'text-emerald-500 border-emerald-500',
+        'bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300 border-emerald-600/25 dark:border-emerald-500/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      iconBorder: 'border-emerald-600/25 dark:border-emerald-500/20',
       quantityPrefix: '-',
     };
   }
@@ -110,8 +127,10 @@ const getActionConfig = (
       label: 'Utilização',
       icon: Building,
       badgeClass:
-        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-      iconColor: 'text-yellow-500 border-yellow-500',
+        'bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300 border-amber-600/25 dark:border-amber-500/20',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+      iconBorder: 'border-amber-600/25 dark:border-amber-500/20',
       quantityPrefix: '-',
     };
   }
@@ -121,8 +140,10 @@ const getActionConfig = (
       label: 'Amostra',
       icon: ArrowUpRight,
       badgeClass:
-        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
-      iconColor: 'text-purple-500 border-purple-500',
+        'bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300 border-violet-600/25 dark:border-violet-500/20',
+      iconColor: 'text-violet-600 dark:text-violet-400',
+      iconBg: 'bg-violet-50 dark:bg-violet-500/10',
+      iconBorder: 'border-violet-600/25 dark:border-violet-500/20',
       quantityPrefix: '-',
     };
   }
@@ -132,8 +153,10 @@ const getActionConfig = (
       label: 'Perda',
       icon: ShieldAlert,
       badgeClass:
-        'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
-      iconColor: 'text-red-500 border-red-500',
+        'bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300 border-rose-600/25 dark:border-rose-500/20',
+      iconColor: 'text-rose-600 dark:text-rose-400',
+      iconBg: 'bg-rose-50 dark:bg-rose-500/10',
+      iconBorder: 'border-rose-600/25 dark:border-rose-500/20',
       quantityPrefix: '-',
     };
   }
@@ -143,8 +166,10 @@ const getActionConfig = (
       label: 'Devolução (Fornecedor)',
       icon: Undo2,
       badgeClass:
-        'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
-      iconColor: 'text-blue-500 border-blue-500',
+        'bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300 border-sky-600/25 dark:border-sky-500/20',
+      iconColor: 'text-sky-600 dark:text-sky-400',
+      iconBg: 'bg-sky-50 dark:bg-sky-500/10',
+      iconBorder: 'border-sky-600/25 dark:border-sky-500/20',
       quantityPrefix: '-',
     };
   }
@@ -154,8 +179,10 @@ const getActionConfig = (
       label: 'Transferência',
       icon: ArrowRightLeft,
       badgeClass:
-        'bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-500/30',
-      iconColor: 'text-orange-500 border-orange-500',
+        'bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300 border-amber-600/25 dark:border-amber-500/20',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+      iconBorder: 'border-amber-600/25 dark:border-amber-500/20',
       quantityPrefix: '',
     };
   }
@@ -165,8 +192,10 @@ const getActionConfig = (
       label: 'Ajuste',
       icon: Package,
       badgeClass:
-        'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30',
-      iconColor: 'text-yellow-500 border-yellow-500',
+        'bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300 border-amber-600/25 dark:border-amber-500/20',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+      iconBorder: 'border-amber-600/25 dark:border-amber-500/20',
       quantityPrefix: '',
     };
   }
@@ -176,8 +205,10 @@ const getActionConfig = (
       label: 'Reconfiguração',
       icon: ArrowRightLeft,
       badgeClass:
-        'bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-500/30',
-      iconColor: 'text-purple-500 border-purple-500',
+        'bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300 border-violet-600/25 dark:border-violet-500/20',
+      iconColor: 'text-violet-600 dark:text-violet-400',
+      iconBg: 'bg-violet-50 dark:bg-violet-500/10',
+      iconBorder: 'border-violet-600/25 dark:border-violet-500/20',
       quantityPrefix: '',
     };
   }
@@ -187,8 +218,10 @@ const getActionConfig = (
     label: 'Movimento',
     icon: ArrowRightLeft,
     badgeClass:
-      'bg-gray-500/20 text-gray-700 dark:text-gray-400 border-gray-500/30',
-    iconColor: 'text-gray-500 border-gray-500',
+      'bg-gray-50 dark:bg-gray-500/8 text-gray-700 dark:text-gray-300 border-gray-600/25 dark:border-gray-500/20',
+    iconColor: 'text-gray-600 dark:text-gray-400',
+    iconBg: 'bg-gray-50 dark:bg-gray-500/10',
+    iconBorder: 'border-gray-600/25 dark:border-gray-500/20',
     quantityPrefix: '',
   };
 };
@@ -198,6 +231,7 @@ export function ItemHistoryModal({
   onOpenChange,
   item,
   productId,
+  onBack,
 }: ItemHistoryModalProps) {
   const { data: historyData, isLoading } = useQuery({
     queryKey: ['item-history', item?.id],
@@ -214,35 +248,58 @@ export function ItemHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Histórico do Item
-          </DialogTitle>
-          {item && (
-            <DialogDescription className="flex items-center gap-2">
-              <Package className="h-3.5 w-3.5" />
-              <span className="font-mono">{itemCode}</span>
-              {item.bin?.address && (
-                <>
-                  <span className="text-muted-foreground">•</span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {item.bin.address}
-                  </span>
-                </>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0 overflow-hidden" showCloseButton={false}>
+        {/* Hero header */}
+        <div className="bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5 border-b border-border px-6 pt-6 pb-5">
+          <DialogHeader>
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-sky-100 dark:bg-sky-500/15 border border-sky-600/25 dark:border-sky-500/20 shrink-0">
+                <History className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-base">
+                  Histórico do Item
+                </DialogTitle>
+                {item && (
+                  <DialogDescription className="mt-0.5">
+                    <span className="font-mono text-sm">{itemCode}</span>
+                  </DialogDescription>
+                )}
+              </div>
+              {item && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {item.bin?.address && (
+                    <div className="bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5 text-center">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Localização</div>
+                      <div className="text-sm font-semibold text-foreground flex items-center gap-1 justify-center mt-0.5">
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
+                        {item.bin.address}
+                      </div>
+                    </div>
+                  )}
+                  {item.currentQuantity !== undefined && (
+                    <div className="bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5 text-center">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Quantidade</div>
+                      <div className="text-sm font-semibold text-foreground mt-0.5">
+                        {new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 }).format(item.currentQuantity)}{' '}
+                        <span className="text-muted-foreground font-normal">
+                          {formatUnit(item.templateUnitOfMeasure)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-            </DialogDescription>
-          )}
-        </DialogHeader>
+            </div>
+          </DialogHeader>
+        </div>
 
-        <div className="flex-1 overflow-auto -mx-6 px-6">
+        <div className="flex-1 overflow-auto px-6">
           {isLoading ? (
             <div className="space-y-3 py-4">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="flex gap-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-9 w-9 rounded-lg" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-1/3" />
                     <Skeleton className="h-3 w-2/3" />
@@ -252,7 +309,9 @@ export function ItemHistoryModal({
             </div>
           ) : movements.length === 0 ? (
             <div className="py-12 text-center">
-              <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <div className="mx-auto w-16 h-16 rounded-xl bg-muted/50 flex items-center justify-center mb-4">
+                <Clock className="h-8 w-8 text-muted-foreground" />
+              </div>
               <h3 className="font-medium mb-1">Nenhum histórico</h3>
               <p className="text-sm text-muted-foreground">
                 Este item ainda não possui movimentações registradas.
@@ -271,8 +330,14 @@ export function ItemHistoryModal({
           )}
         </div>
 
-        <div className="flex justify-between pt-4 border-t">
-          <div>
+        <div className="flex justify-between items-center gap-2 px-6 py-4 border-t">
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <Button variant="outline" size="sm" onClick={onBack} className="gap-1.5">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+            )}
             {(productId || item?.productId) && (
               <Button variant="outline" size="sm" className="gap-1.5" asChild>
                 <Link href={`/stock/products/${productId || item?.productId}`}>
@@ -329,16 +394,16 @@ function MovementItem({
 
   return (
     <div className="flex gap-3">
-      {/* Timeline indicator */}
+      {/* Timeline indicator — rounded-lg filled squares */}
       <div className="flex flex-col items-center">
         <div
           className={cn(
-            'flex items-center justify-center h-9 w-9 rounded-full border-2',
-            config.iconColor,
-            'bg-background'
+            'flex items-center justify-center h-9 w-9 rounded-lg border',
+            config.iconBg,
+            config.iconBorder
           )}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className={cn('h-4 w-4', config.iconColor)} />
         </div>
         {!isLast && <div className="flex-1 w-0.5 bg-border my-1" />}
       </div>
@@ -365,9 +430,9 @@ function MovementItem({
                     className={cn(
                       'font-mono font-semibold',
                       config.quantityPrefix === '-'
-                        ? 'text-red-600 dark:text-red-400'
+                        ? 'text-rose-600 dark:text-rose-400'
                         : config.quantityPrefix === '+'
-                          ? 'text-green-600 dark:text-green-400'
+                          ? 'text-emerald-600 dark:text-emerald-400'
                           : 'text-foreground'
                     )}
                   >

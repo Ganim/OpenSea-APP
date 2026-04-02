@@ -37,10 +37,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 interface BinSelectorProps {
   value: string;
-  onChange: (binId: string) => void;
+  onChange: (binId: string, address?: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  label?: string;
 }
 
 interface EnrichedBin extends Bin {
@@ -161,11 +162,12 @@ export function BinSelector({
 
   const handleSelect = useCallback(
     (binId: string) => {
-      onChange(binId);
+      const bin = enrichedBins.find(b => b.id === binId);
+      onChange(binId, bin?.address);
       setOpen(false);
       setSearch('');
     },
-    [onChange]
+    [onChange, enrichedBins]
   );
 
   return (
