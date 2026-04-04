@@ -75,15 +75,12 @@ export interface PaymentInput {
   notes?: string;
 }
 
-export type TerminalMode =
-  | 'FAST_CHECKOUT'
-  | 'CONSULTIVE'
-  | 'SELF_SERVICE'
-  | 'EXTERNAL';
+export type TerminalMode = 'STANDARD' | 'FAST_CHECKOUT';
 
 export interface ReceivePaymentRequest {
   terminalMode: TerminalMode;
   posSessionId?: string;
+  expectedVersion: number;
   payments: PaymentInput[];
 }
 

@@ -78,6 +78,7 @@ export default function CaixaPage() {
   // ---------------------------------------------------------------------------
   const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
   const [paymentTotal, setPaymentTotal] = useState(0);
+  const [paymentVersion, setPaymentVersion] = useState(0);
   const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
 
   // ---------------------------------------------------------------------------
@@ -192,9 +193,10 @@ export default function CaixaPage() {
   }, [createPdvOrder]);
 
   const handleReceivePayment = useCallback(
-    (orderId: string, total: number) => {
+    (orderId: string, total: number, version?: number) => {
       setPaymentOrderId(orderId);
       setPaymentTotal(total);
+      setPaymentVersion(version ?? 0);
       setShowPaymentOverlay(true);
     },
     []
@@ -370,8 +372,9 @@ export default function CaixaPage() {
         onClose={() => setShowPaymentOverlay(false)}
         total={paymentTotal}
         orderId={paymentOrderId ?? ''}
-        terminalMode="FAST_CHECKOUT"
+        terminalMode="STANDARD"
         posSessionId={session?.id}
+        expectedVersion={paymentVersion}
         onSuccess={handlePaymentSuccess}
       />
 

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils';
 import { Numpad } from '@/components/ui/numpad';
 import { Button } from '@/components/ui/button';
+import { useReceivePayment } from '@/hooks/sales/use-pdv';
 
 // =============================================================================
 // TYPES
@@ -46,8 +47,9 @@ interface PaymentOverlayProps {
   /** Grand total in decimal (e.g., 45.90) */
   total: number;
   orderId: string;
-  terminalMode: string;
+  terminalMode: 'STANDARD' | 'FAST_CHECKOUT';
   posSessionId?: string;
+  expectedVersion: number;
   onSuccess: (result: { changeAmount: number; saleCode: string }) => void;
 }
 
@@ -94,6 +96,7 @@ function PaymentOverlay({
   orderId,
   terminalMode,
   posSessionId,
+  expectedVersion,
   onSuccess,
 }: PaymentOverlayProps) {
   const [selectedMethod, setSelectedMethod] =
@@ -101,6 +104,8 @@ function PaymentOverlay({
   const [payments, setPayments] = React.useState<PaymentEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const receivePayment = useReceivePayment();
 
   // Form state for current entry
   const [cashCents, setCashCents] = React.useState(0);
@@ -208,12 +213,28 @@ function PaymentOverlay({
     }
 
     try {
-      // Simulate API call — replace with actual endpoint
-      // await apiClient.post('/v1/sales/pos/checkout', intent);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const apiPayments = payments.map((p) => ({
+        method: p.method,
+        amount: p.amount,
+        receivedAmount: p.method === 'CASH' ? p.amount : undefined,
+        installments: p.installments,
+        authCode: p.authorizationCode,
+        nsu: p.nsu,
+        notes: p.notes,
+      }));
 
-      const changeAmount = Math.max(0, totalPaid - total);
-      const saleCode = `VND-${Date.now().toString(36).toUpperCase()}`;
+      const result = await receivePayment.mutateAsync({
+        orderId,
+        data: {
+          terminalMode,
+          posSessionId,
+          expectedVersion,
+          payments: apiPayments,
+        },
+      });
+
+      const changeAmount = result.transaction?.changeAmount ?? Math.max(0, totalPaid - total);
+      const saleCode = result.order?.saleCode ?? '';
 
       // Clear recovery intent
       try {

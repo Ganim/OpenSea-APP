@@ -148,7 +148,7 @@ function BalcaoTerminal() {
           <div className="flex items-center gap-2">
             <Zap className="size-5 text-violet-600 dark:text-violet-400" />
             <h1 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Balcao Rapido
+              Balcão Rápido
             </h1>
           </div>
         </div>
@@ -236,6 +236,7 @@ function BalcaoTerminal() {
         orderId={activeOrder?.id ?? ''}
         terminalMode="FAST_CHECKOUT"
         posSessionId={activeSession?.id}
+        expectedVersion={activeOrder?.version ?? 0}
         onSuccess={handlePaymentSuccess}
       />
 

@@ -18,6 +18,7 @@ import {
   useSendToCashier,
   useUpdateOrderItemQuantity,
 } from '@/hooks/sales/use-pdv';
+import { useUpdateOrder } from '@/hooks/sales/use-orders';
 
 // =============================================================================
 // Constants
@@ -53,6 +54,7 @@ interface CartActions {
   updateItemQuantity(itemId: string, quantity: number): Promise<void>;
   removeItem(itemId: string): Promise<void>;
   sendToCashier(): Promise<void>;
+  setCustomer(customerId: string): Promise<void>;
   switchCart(orderId: string): void;
   newCart(): Promise<void>;
   clearCart(): void;
@@ -63,6 +65,7 @@ const CartActionsContext = createContext<CartActions>({
   updateItemQuantity: async () => {},
   removeItem: async () => {},
   sendToCashier: async () => {},
+  setCustomer: async () => {},
   switchCart: () => {},
   newCart: async () => {},
   clearCart: () => {},
@@ -113,6 +116,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeOrderItem = useRemoveOrderItem();
   const updateItemQty = useUpdateOrderItemQuantity();
   const sendToCashierMutation = useSendToCashier();
+  const updateOrderMutation = useUpdateOrder();
 
   // Batching: accumulate addItem calls within BATCH_DELAY_MS window
   const batchQueueRef = useRef<
@@ -204,6 +208,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setActiveOrderId(null);
   }, [activeOrderId, sendToCashierMutation]);
 
+  const setCustomer = useCallback(
+    async (customerId: string) => {
+      if (!activeOrderId) return;
+      await updateOrderMutation.mutateAsync({
+        id: activeOrderId,
+        data: { customerId } as Record<string, unknown>,
+      });
+      await refetch();
+    },
+    [activeOrderId, updateOrderMutation, refetch]
+  );
+
   const switchCart = useCallback(
     (orderId: string) => {
       setActiveOrderId(orderId);
@@ -239,6 +255,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateItemQuantity,
       removeItem,
       sendToCashier,
+      setCustomer,
       switchCart,
       newCart,
       clearCart,
@@ -248,6 +265,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateItemQuantity,
       removeItem,
       sendToCashier,
+      setCustomer,
       switchCart,
       newCart,
       clearCart,
