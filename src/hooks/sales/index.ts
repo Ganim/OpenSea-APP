@@ -38,3 +38,4 @@ export * from './use-cadences';
 export * from './use-lead-scoring';
 export * from './use-lead-routing';
 export * from './use-pdv';
+export * from './use-payment-config';

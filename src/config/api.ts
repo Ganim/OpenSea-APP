@@ -1594,6 +1594,17 @@ export const API_ENDPOINTS = {
   PREDICTIONS: {
     DEAL: (dealId: string) => `/v1/sales/predictions/deals/${dealId}`,
   },
+  // Payment Config & Charges
+  PAYMENT_CONFIG: {
+    GET: '/v1/sales/payment-config',
+    SAVE: '/v1/sales/payment-config',
+    TEST: '/v1/sales/payment-config/test',
+    PROVIDERS: '/v1/sales/payment-config/providers',
+  },
+  PAYMENT_CHARGES: {
+    CREATE: '/v1/payments/charges',
+    STATUS: (chargeId: string) => `/v1/payments/charges/${chargeId}/status`,
+  },
   // Health
   HEALTH: '/health',
 } as const;
