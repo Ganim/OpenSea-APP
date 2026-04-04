@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { useUltrawide } from '@/hooks/use-layout-preferences';
 import { PrintQueuePanel } from '@/core/print-queue';
+import { CartIndicator } from '@/components/layout/cart-indicator';
 
 import { Crown, Grid3x3, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
@@ -54,6 +55,7 @@ export function Navbar({ onMenuOpen }: NavbarProps) {
               </Link>
             )}
             <PrintQueuePanel />
+            <CartIndicator />
             <NotificationsPanel />
 
             <Button
