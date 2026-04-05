@@ -98,6 +98,16 @@ const sections: { title: string; cards: CardItem[] }[] = [
         hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
         permission: FINANCE_PERMISSIONS.ENTRIES.ACCESS,
       },
+      {
+        id: 'payment-orders',
+        title: 'Ordens de Pagamento',
+        description: 'Aprovação e execução de pagamentos bancários',
+        icon: ShieldCheck,
+        href: '/finance/payment-orders',
+        gradient: 'from-amber-500 to-amber-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+        permission: FINANCE_PERMISSIONS.PAYMENT_ORDERS.ACCESS,
+      },
     ],
   },
   {
@@ -372,7 +382,14 @@ const sections: { title: string; cards: CardItem[] }[] = [
 // HERO BANNER BUTTONS
 // ============================================================================
 
-const heroBannerButtons: { id: string; label: string; icon: React.ElementType; href: string; gradient: string; permission?: string }[] = [
+const heroBannerButtons: {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  href: string;
+  gradient: string;
+  permission?: string;
+}[] = [
   {
     id: 'analytics',
     label: 'Painel Analítico',
@@ -396,14 +413,22 @@ export default function FinanceLandingPage() {
     async function fetchCounts() {
       const [payable, receivable, bankAccounts, categories] =
         await Promise.allSettled([
-          financeEntriesService.list({ type: 'PAYABLE', status: 'PENDING', perPage: 1 }),
-          financeEntriesService.list({ type: 'RECEIVABLE', status: 'PENDING', perPage: 1 }),
+          financeEntriesService.list({
+            type: 'PAYABLE',
+            status: 'PENDING',
+            perPage: 1,
+          }),
+          financeEntriesService.list({
+            type: 'RECEIVABLE',
+            status: 'PENDING',
+            perPage: 1,
+          }),
           bankAccountsService.list({ status: 'ACTIVE', perPage: 1 }),
-          financeCategoriesService.list({ perPage: 1 }),
+          financeCategoriesService.list(),
         ]);
 
       const extractCount = (
-        result: PromiseSettledResult<unknown>,
+        result: PromiseSettledResult<unknown>
       ): number | null => {
         if (result.status !== 'fulfilled') return null;
         const v = result.value as Record<string, unknown>;
