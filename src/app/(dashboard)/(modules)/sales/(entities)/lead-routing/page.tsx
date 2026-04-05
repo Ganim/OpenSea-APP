@@ -17,6 +17,7 @@ import {
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
+import { leadRoutingConfig } from '@/config/entities/lead-routing.config';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
   CoreProvider,
@@ -47,6 +48,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -76,7 +78,7 @@ const leadRoutingPermissions = {
   delete: SALES_PERMISSIONS.LEAD_ROUTING.REMOVE,
 };
 
-const STRATEGY_ICONS: Record<LeadRoutingStrategy, React.ElementType> = {
+const STRATEGY_ICONS: Record<LeadRoutingStrategy, LucideIcon> = {
   ROUND_ROBIN: RefreshCcw,
   TERRITORY: Globe,
   SEGMENT: GitBranch,
@@ -358,7 +360,7 @@ function LeadRoutingPageContent() {
     const listBadges: {
       label: string;
       variant: 'outline';
-      icon?: typeof Shuffle;
+      icon?: LucideIcon;
       color: string;
     }[] = [
       {
@@ -522,12 +524,15 @@ function LeadRoutingPageContent() {
               message="Ocorreu um erro ao tentar carregar as regras de roteamento. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => refetch(),
+                onClick: () => {
+                  void refetch();
+                },
               }}
             />
           ) : (
             <>
               <EntityGrid
+                config={leadRoutingConfig}
                 items={rules}
                 showItemCount={false}
                 toolbarStart={
@@ -538,7 +543,7 @@ function LeadRoutingPageContent() {
                       options={statusOptions}
                       selected={statusFilter}
                       onSelectionChange={setStatusFilter}
-                      activeColor="teal"
+                      activeColor="cyan"
                       searchPlaceholder="Buscar status..."
                       emptyText="Nenhum status encontrado."
                     />

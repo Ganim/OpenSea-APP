@@ -30,7 +30,22 @@ export * from './order-return.types';
 export * from './order.types';
 export * from './payment-condition.types';
 export * from './payment-config.types';
-export * from './pdv.types';
+export {
+    type PdvOrderStatus,
+    type PdvOrder,
+    type PdvOrderItem,
+    type CashierQueueItem,
+    type PaymentMethod,
+    type TerminalMode,
+    type ReceivePaymentRequest,
+    type ReceivePaymentResponse,
+    type CreatePdvOrderRequest,
+    type AddOrderItemRequest,
+    type CashierQueueQuery,
+    type CashierQueueResponse,
+    type MyDraftsQuery,
+    type MyDraftsResponse,
+} from './pdv.types';
 export * from './pipeline.types';
 export * from './pos.types';
 export * from './price-table.types';

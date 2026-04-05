@@ -46,6 +46,7 @@ export interface Quote {
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;
+  signatureEnvelopeId?: string | null;
   items?: QuoteItem[];
 }
 

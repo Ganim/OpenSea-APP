@@ -494,11 +494,7 @@ export default function QuoteDetailPage() {
             <SignatureStatusSection
               entityId={quoteId}
               entityType="quote"
-              signatureEnvelopeId={
-                (quote as Record<string, unknown>).signatureEnvelopeId as
-                  | string
-                  | undefined
-              }
+              signatureEnvelopeId={quote.signatureEnvelopeId}
               canRequestSignature={
                 quote.status === 'SENT' &&
                 hasPermission(SALES_PERMISSIONS.QUOTES.SEND)

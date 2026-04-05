@@ -575,11 +575,7 @@ export default function ProposalDetailPage() {
             <SignatureStatusSection
               entityId={proposalId}
               entityType="proposal"
-              signatureEnvelopeId={
-                (proposal as Record<string, unknown>).signatureEnvelopeId as
-                  | string
-                  | undefined
-              }
+              signatureEnvelopeId={proposal.signatureEnvelopeId}
               canRequestSignature={
                 proposal.status === 'SENT' &&
                 hasPermission(SALES_PERMISSIONS.PROPOSALS.SEND)

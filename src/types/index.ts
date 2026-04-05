@@ -6,10 +6,12 @@ export * from './cashier';
 export * from './common';
 export * from './core';
 export * from './email';
-export * from './finance';
+// Finance has naming collisions with other module barrels.
+// Import finance types directly from '@/types/finance'.
 export * from './messaging';
 export * from './fiscal';
-export * from './hr';
+// HR has naming collisions with finance (e.g., BankAccountType).
+// Import HR types directly from '@/types/hr'.
 export * from './esocial';
 export * from './sales';
 export * from './stock';

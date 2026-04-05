@@ -102,7 +102,12 @@ export default function LeadRoutingDetailPage() {
             type="server"
             title="Erro ao carregar regra"
             message="Não foi possível carregar os dados da regra de roteamento."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{
+              label: 'Tentar Novamente',
+              onClick: async () => {
+                await refetch();
+              },
+            }}
           />
         </PageBody>
       </PageLayout>

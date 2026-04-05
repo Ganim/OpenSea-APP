@@ -225,7 +225,7 @@ export default function PaymentConfigPage() {
       primaryConfig: primaryFields,
     };
 
-    if (fallbackProvider && fallbackProvider !== '') {
+    if (fallbackProvider) {
       payload.fallbackProvider = fallbackProvider as PaymentProviderName;
       payload.fallbackConfig = fallbackFields;
     }

@@ -20,6 +20,18 @@ export * from './payment-link.types';
 export * from './payment-timing.types';
 export * from './accountant.types';
 export * from './customer-portal.types';
-export * from './compliance.types';
+export {
+	type TaxObligationStatus,
+	type TaxObligation,
+	type SimplesNacionalStatus,
+	type SimplesNacionalValidation,
+	type TaxCalendarResponse,
+	type SimplesNacionalResponse,
+	type GenerateDarfsRequest,
+	type GenerateDarfsResponse,
+	type TaxType as ComplianceTaxType,
+	TAX_OBLIGATION_STATUS_LABELS,
+	COMPLIANCE_TAX_TYPE_LABELS,
+} from './compliance.types';
 export * from './payment-order.types';
 export * from './journal-entry.types';

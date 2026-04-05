@@ -76,7 +76,7 @@ function useSmartDebouncedSearch(value: string) {
   const [debounced, setDebounced] = React.useState(value);
   const lastKeystrokeRef = React.useRef(0);
   const isScanningRef = React.useRef(false);
-  const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     const now = Date.now();
@@ -114,7 +114,7 @@ function useSmartDebouncedSearch(value: string) {
 function useBarcodeDetection(onBarcode: (barcode: string) => void) {
   const bufferRef = React.useRef('');
   const lastKeystrokeRef = React.useRef(0);
-  const timeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleKeyDown = React.useCallback(
     (e: KeyboardEvent) => {
@@ -491,4 +491,4 @@ function ProductGridSkeleton() {
   );
 }
 
-export { ProductGrid, type ProductGridProps, type ProductVariant };
+export { ProductGrid, type ProductGridProps };

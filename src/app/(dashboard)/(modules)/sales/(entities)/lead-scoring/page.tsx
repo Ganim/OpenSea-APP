@@ -17,6 +17,7 @@ import {
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
+import { leadScoringConfig } from '@/config/entities/lead-scoring.config';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import {
   CoreProvider,
@@ -475,12 +476,15 @@ function LeadScoringPageContent() {
               message="Ocorreu um erro ao tentar carregar as regras de scoring. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => refetch(),
+                onClick: () => {
+                  void refetch();
+                },
               }}
             />
           ) : (
             <>
               <EntityGrid
+                config={leadScoringConfig}
                 items={rules}
                 showItemCount={false}
                 toolbarStart={
@@ -491,7 +495,7 @@ function LeadScoringPageContent() {
                       options={statusOptions}
                       selected={statusFilter}
                       onSelectionChange={setStatusFilter}
-                      activeColor="amber"
+                      activeColor="cyan"
                       searchPlaceholder="Buscar status..."
                       emptyText="Nenhum status encontrado."
                     />

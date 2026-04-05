@@ -20,7 +20,7 @@ export * from './use-smart-defaults';
 export * from './use-reconciliation';
 export * from './use-budgets';
 export * from './use-escalations';
-export * from './use-customer-score';
+export { useCustomerScore as useFinanceCustomerScore } from './use-customer-score';
 export * from './use-fiscal';
 export * from './use-boleto';
 export * from './use-pix-operations';

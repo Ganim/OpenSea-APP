@@ -53,6 +53,7 @@ export interface Proposal {
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;
+  signatureEnvelopeId?: string | null;
   items?: ProposalItem[];
   attachments?: ProposalAttachment[];
 }
