@@ -49,7 +49,9 @@ export interface ListPendingApprovalsParams {
 function buildQuery(params?: object): string {
   if (!params) return '';
   const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(
+    params as Record<string, unknown>
+  )) {
     if (value !== undefined && value !== null && value !== '') {
       query.append(key, String(value));
     }
@@ -76,8 +78,10 @@ export const portalService = {
   async listMyRequests(
     params?: ListRequestsParams
   ): Promise<EmployeeRequestsResponse> {
+    const { perPage, ...rest } = params ?? {};
+    const query = { ...rest, ...(perPage ? { limit: perPage } : {}) };
     return apiClient.get<EmployeeRequestsResponse>(
-      `/v1/hr/my/requests${buildQuery(params)}`
+      `/v1/hr/my/requests${buildQuery(query)}`
     );
   },
 
@@ -173,8 +177,10 @@ export const portalService = {
   async listPendingApprovals(
     params?: ListPendingApprovalsParams
   ): Promise<HRPendingApprovalsResponse> {
+    const { perPage, ...rest } = params ?? {};
+    const query = { ...rest, ...(perPage ? { limit: perPage } : {}) };
     return apiClient.get<HRPendingApprovalsResponse>(
-      `/v1/hr/requests/pending-approvals${buildQuery(params)}`
+      `/v1/hr/requests/pending-approvals${buildQuery(query)}`
     );
   },
 

@@ -121,7 +121,7 @@ export default function DashboardLayout({
               className="pt-24 sm:pt-28 pb-8 sm:pb-12 outline-none"
             >
               <div
-                className={`mx-auto transition-[max-width,padding] duration-[1000ms] ease-linear ${
+                className={`mx-auto transition-[max-width,padding] duration-1000 ease-linear ${
                   isUltrawide
                     ? 'max-w-[3840px] px-6 md:px-10 xl:px-16'
                     : 'max-w-[1600px] px-3 sm:px-4 md:px-6'

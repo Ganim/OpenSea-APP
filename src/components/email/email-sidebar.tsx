@@ -192,7 +192,7 @@ export function EmailSidebar({
               className={cn(
                 'flex-1 justify-start gap-3 rounded-xl h-10 text-sm font-medium',
                 isCentralInbox
-                  ? 'bg-gradient-to-r from-slate-700 to-emerald-600 hover:from-slate-600 hover:to-emerald-500 text-white border-0 shadow-md'
+                  ? 'bg-linear-to-r from-slate-700 to-emerald-600 hover:from-slate-600 hover:to-emerald-500 text-white border-0 shadow-md'
                   : ''
               )}
               onClick={onCentralInbox}

@@ -1,0 +1,30 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "session_id",
+          "value": "ea15c4ae-2d68-408d-877d-ef25d90a166e"
+        },
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiJlYTE1YzRhZS0yZDY4LTQwOGQtODc3ZC1lZjI1ZDkwYTE2NmUiLCJ0ZW5hbnRJZCI6ImM2N2EwMWY1LTA0YWEtNDg1Yy1hNjU3LTE2NjYxZGE3YTk3ZSIsImlzU3VwZXJBZG1pbiI6ZmFsc2UsImF1ZCI6Im9wZW5zZWEtY2xpZW50IiwiaXNzIjoib3BlbnNlYS1hcGkiLCJzdWIiOiJjNWIxZGRkYS0xMjM2LTQxMzEtODNjMi02NWIxNTVmOTUwMTAiLCJpYXQiOjE3NzQ5NTQ3OTksImV4cCI6MTc3NDk1NjU5OX0.xB2BsoZQQR9dSXpjvPPvFnqrIsY82SsUQVUCqOop_Mfkn-qX_-6vq3U_QJvnns_P9uht8tVdPtyjs2_-f1y9aITTqpw2DMD3wpt9XPu4XVb6E9KmXpoeLEoWqzHX1SwbV10TczdIRA6uRloJVUMMaZeX6JfHWCCBpqAfF8Dczrhrm5D8P54Npqjlw2MOG3feMx87AyZQ3eNbaNmaF-nb7UDOvWrIN-Go57k7vHjB6xTq-XXEeajOnH8NiQkjn-xQ-rdlgqVzCKz4VeU5EVXZ6YOV2uJBy57NMuV3whoI4-dipbzl_kmj_wSW6R-9aSKW5p4anFvTVtq2b-bsvp_QHQ"
+        },
+        {
+          "name": "opensea_saved_accounts",
+          "value": "[{\"id\":\"c5b1ddda-1236-4131-83c2-65b155f95010\",\"identifier\":\"admin@teste.com\",\"displayName\":\"admin\",\"lastLoginAt\":\"2026-03-31T10:59:59.215Z\"}]"
+        },
+        {
+          "name": "selected_tenant_id",
+          "value": "c67a01f5-04aa-485c-a657-16661da7a97e"
+        },
+        {
+          "name": "refresh_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiJlYTE1YzRhZS0yZDY4LTQwOGQtODc3ZC1lZjI1ZDkwYTE2NmUiLCJqdGkiOiJkODEyMTYyMi00MmNjLTRiNDUtYmNlYS0yOWE1YTA0ZDQ2NGIiLCJhdWQiOiJvcGVuc2VhLWNsaWVudCIsImlzcyI6Im9wZW5zZWEtYXBpIiwic3ViIjoiYzViMWRkZGEtMTIzNi00MTMxLTgzYzItNjViMTU1Zjk1MDEwIiwiaWF0IjoxNzc0OTU0Nzk5LCJleHAiOjE3NzU1NTk1OTl9.gTQFzu_tSRaBB2AVFhHrUJ7qhQ7ely0bHYxt4KxF1WucSnHbxPS8Pcs0uAhxf2nlOh4eoKATj7BwHkZkrf4p02AKBVkWvP3WBZw3KxFALvsUTbVKb_jg_tuKGB0ha9z9WcXu_xH4EovCYutMH7Fe0ga2n4OwGr-hfUffYK9TC5P3h3QQgfNhjctWhIJKs5gXhRfCdzJTEwsUCosdHvdMCxrQcMYSoNDtcnha6FiTawhUABam_GDQ9HV9CqJ_bjZaCArz2B7fteBa1XTfUmxHKtOrlMYgkpxefu5o7SAi2pSRnjdujBZHlwbS4VI1E6Nb6-OwQJKbeFhXwqov5NxrTQ"
+        }
+      ]
+    }
+  ]
+}

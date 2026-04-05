@@ -142,7 +142,7 @@ export default function AdminAuthSettingsPage() {
   // Sync fetched config to local state
   useEffect(() => {
     if (config) {
-      setAllowedMethods(config.allowedMethods);
+      setAllowedMethods(config.allowedMethods ?? []);
       setMagicLinkEnabled(config.magicLinkEnabled);
       setMagicLinkExpiresIn(config.magicLinkExpiresIn);
       setDefaultMethod(config.defaultMethod);

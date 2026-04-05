@@ -12,6 +12,11 @@ import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
+  bankAccountsService,
+  financeCategoriesService,
+  financeEntriesService,
+} from '@/services/finance';
+import {
   ArrowDownCircle,
   ArrowLeftRight,
   ArrowUpCircle,
@@ -36,11 +41,6 @@ import {
   Wifi,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import {
-  financeEntriesService,
-  bankAccountsService,
-  financeCategoriesService,
-} from '@/services/finance';
 
 // ============================================================================
 // TYPES

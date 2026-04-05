@@ -1,0 +1,1245 @@
+[
+  {
+    "path": "/hr",
+    "label": "Dashboard HR",
+    "type": "dashboard",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 7648,
+    "severity": "🟡 WARNING",
+    "notes": "Failed to load resource: the server responded with a status of 404 (Not Found); Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "path": "/hr/overview",
+    "label": "Visão Geral",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 5319,
+    "severity": "🟢 OK",
+    "notes": "OK (5319ms)"
+  },
+  {
+    "path": "/hr/settings",
+    "label": "Configurações",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3712,
+    "severity": "🟢 OK",
+    "notes": "OK (3712ms)"
+  },
+  {
+    "path": "/hr/employees",
+    "label": "Funcionários",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 5021,
+    "severity": "🟢 OK",
+    "notes": "OK (5021ms)"
+  },
+  {
+    "path": "/hr/departments",
+    "label": "Departamentos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3780,
+    "severity": "🟢 OK",
+    "notes": "OK (3780ms)"
+  },
+  {
+    "path": "/hr/departments/org-chart",
+    "label": "Organograma",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3695,
+    "severity": "🟢 OK",
+    "notes": "OK (3695ms)"
+  },
+  {
+    "path": "/hr/positions",
+    "label": "Cargos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3863,
+    "severity": "🟢 OK",
+    "notes": "OK (3863ms)"
+  },
+  {
+    "path": "/hr/teams",
+    "label": "Equipes",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3943,
+    "severity": "🟢 OK",
+    "notes": "OK (3943ms)"
+  },
+  {
+    "path": "/hr/recruitment",
+    "label": "Recrutamento - Vagas",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3816,
+    "severity": "🟢 OK",
+    "notes": "OK (3816ms)"
+  },
+  {
+    "path": "/hr/recruitment/candidates",
+    "label": "Recrutamento - Candidatos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3842,
+    "severity": "🟢 OK",
+    "notes": "OK (3842ms)"
+  },
+  {
+    "path": "/hr/admissions",
+    "label": "Admissões",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3699,
+    "severity": "🟢 OK",
+    "notes": "OK (3699ms)"
+  },
+  {
+    "path": "/hr/onboarding",
+    "label": "Onboarding",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4241,
+    "severity": "🟢 OK",
+    "notes": "OK (4241ms)"
+  },
+  {
+    "path": "/hr/offboarding",
+    "label": "Offboarding",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3537,
+    "severity": "🟢 OK",
+    "notes": "OK (3537ms)"
+  },
+  {
+    "path": "/hr/terminations",
+    "label": "Rescisões",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3624,
+    "severity": "🟢 OK",
+    "notes": "OK (3624ms)"
+  },
+  {
+    "path": "/hr/work-schedules",
+    "label": "Escalas de Trabalho",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3656,
+    "severity": "🟢 OK",
+    "notes": "OK (3656ms)"
+  },
+  {
+    "path": "/hr/shifts",
+    "label": "Turnos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3552,
+    "severity": "🟢 OK",
+    "notes": "OK (3552ms)"
+  },
+  {
+    "path": "/hr/time-control",
+    "label": "Controle de Ponto",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3501,
+    "severity": "🟢 OK",
+    "notes": "OK (3501ms)"
+  },
+  {
+    "path": "/hr/time-control/overview",
+    "label": "Ponto - Visão Geral",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3457,
+    "severity": "🟢 OK",
+    "notes": "OK (3457ms)"
+  },
+  {
+    "path": "/hr/time-control/settings",
+    "label": "Ponto - Configurações",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [
+      "A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or un"
+    ],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3603,
+    "severity": "🟡 WARNING",
+    "notes": "A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or un"
+  },
+  {
+    "path": "/hr/time-bank",
+    "label": "Banco de Horas",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3728,
+    "severity": "🟢 OK",
+    "notes": "OK (3728ms)"
+  },
+  {
+    "path": "/hr/overtime",
+    "label": "Horas Extras",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3528,
+    "severity": "🟢 OK",
+    "notes": "OK (3528ms)"
+  },
+  {
+    "path": "/hr/absences",
+    "label": "Ausências",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3891,
+    "severity": "🟢 OK",
+    "notes": "OK (3891ms)"
+  },
+  {
+    "path": "/hr/vacations",
+    "label": "Férias",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3775,
+    "severity": "🟢 OK",
+    "notes": "OK (3775ms)"
+  },
+  {
+    "path": "/hr/geofence-zones",
+    "label": "Zonas de Geofence",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3875,
+    "severity": "🟢 OK",
+    "notes": "OK (3875ms)"
+  },
+  {
+    "path": "/hr/payroll",
+    "label": "Folha de Pagamento",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3721,
+    "severity": "🟢 OK",
+    "notes": "OK (3721ms)"
+  },
+  {
+    "path": "/hr/bonuses",
+    "label": "Bonificações",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3862,
+    "severity": "🟢 OK",
+    "notes": "OK (3862ms)"
+  },
+  {
+    "path": "/hr/deductions",
+    "label": "Deduções",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3596,
+    "severity": "🟢 OK",
+    "notes": "OK (3596ms)"
+  },
+  {
+    "path": "/hr/benefits",
+    "label": "Benefícios",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4143,
+    "severity": "🟢 OK",
+    "notes": "OK (4143ms)"
+  },
+  {
+    "path": "/hr/dependants",
+    "label": "Dependentes",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3466,
+    "severity": "🟢 OK",
+    "notes": "OK (3466ms)"
+  },
+  {
+    "path": "/hr/warnings",
+    "label": "Advertências",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3551,
+    "severity": "🟢 OK",
+    "notes": "OK (3551ms)"
+  },
+  {
+    "path": "/hr/requests",
+    "label": "Solicitações",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3474,
+    "severity": "🟢 OK",
+    "notes": "OK (3474ms)"
+  },
+  {
+    "path": "/hr/announcements",
+    "label": "Comunicados",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3375,
+    "severity": "🟢 OK",
+    "notes": "OK (3375ms)"
+  },
+  {
+    "path": "/hr/kudos",
+    "label": "Reconhecimentos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3434,
+    "severity": "🟢 OK",
+    "notes": "OK (3434ms)"
+  },
+  {
+    "path": "/hr/delegations",
+    "label": "Delegações",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3363,
+    "severity": "🟢 OK",
+    "notes": "OK (3363ms)"
+  },
+  {
+    "path": "/hr/reviews",
+    "label": "Avaliações",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3455,
+    "severity": "🟢 OK",
+    "notes": "OK (3455ms)"
+  },
+  {
+    "path": "/hr/trainings",
+    "label": "Treinamentos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3436,
+    "severity": "🟢 OK",
+    "notes": "OK (3436ms)"
+  },
+  {
+    "path": "/hr/okrs",
+    "label": "OKRs",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3618,
+    "severity": "🟢 OK",
+    "notes": "OK (3618ms)"
+  },
+  {
+    "path": "/hr/surveys",
+    "label": "Pesquisas",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3540,
+    "severity": "🟢 OK",
+    "notes": "OK (3540ms)"
+  },
+  {
+    "path": "/hr/safety-programs",
+    "label": "Programas de Segurança",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3801,
+    "severity": "🟢 OK",
+    "notes": "OK (3801ms)"
+  },
+  {
+    "path": "/hr/workplace-risks",
+    "label": "Riscos Ocupacionais",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3630,
+    "severity": "🟢 OK",
+    "notes": "OK (3630ms)"
+  },
+  {
+    "path": "/hr/medical-exams",
+    "label": "Exames Médicos",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3591,
+    "severity": "🟢 OK",
+    "notes": "OK (3591ms)"
+  },
+  {
+    "path": "/hr/medical-exams/pcmso",
+    "label": "PCMSO",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3588,
+    "severity": "🟢 OK",
+    "notes": "OK (3588ms)"
+  },
+  {
+    "path": "/hr/ppe",
+    "label": "EPI",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3580,
+    "severity": "🟢 OK",
+    "notes": "OK (3580ms)"
+  },
+  {
+    "path": "/hr/cipa",
+    "label": "CIPA",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3655,
+    "severity": "🟢 OK",
+    "notes": "OK (3655ms)"
+  },
+  {
+    "path": "/hr/esocial",
+    "label": "eSocial",
+    "type": "listing",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3624,
+    "severity": "🟢 OK",
+    "notes": "OK (3624ms)"
+  },
+  {
+    "path": "/hr/esocial/batches",
+    "label": "eSocial - Lotes",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3354,
+    "severity": "🟢 OK",
+    "notes": "OK (3354ms)"
+  },
+  {
+    "path": "/hr/esocial/settings",
+    "label": "eSocial - Configurações",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3463,
+    "severity": "🟡 WARNING",
+    "notes": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "path": "/hr/my-profile",
+    "label": "Meu Perfil",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3706,
+    "severity": "🟡 WARNING",
+    "notes": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "path": "/hr/reports",
+    "label": "Relatórios",
+    "type": "special",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 3507,
+    "severity": "🟢 OK",
+    "notes": "OK (3507ms)"
+  },
+  {
+    "path": "/hr/employees/075e9cbf-7e18-408a-89ac-21da31843195",
+    "label": "Funcionários (detail)",
+    "type": "detail",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 6139,
+    "severity": "🟢 OK",
+    "notes": "OK (6139ms)"
+  },
+  {
+    "path": "/hr/employees/075e9cbf-7e18-408a-89ac-21da31843195/edit",
+    "label": "Funcionários (edit)",
+    "type": "edit",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4622,
+    "severity": "🟢 OK",
+    "notes": "OK (4622ms)"
+  },
+  {
+    "path": "/hr/departments/c2082ba3-c597-4dfc-b2e1-2d621dcd4629",
+    "label": "Departamentos (detail)",
+    "type": "detail",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4436,
+    "severity": "🟢 OK",
+    "notes": "OK (4436ms)"
+  },
+  {
+    "path": "/hr/departments/c2082ba3-c597-4dfc-b2e1-2d621dcd4629/edit",
+    "label": "Departamentos (edit)",
+    "type": "edit",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4361,
+    "severity": "🟢 OK",
+    "notes": "OK (4361ms)"
+  },
+  {
+    "path": "/hr/positions/ddc78e05-8271-4a19-b94f-33fd997fc0a0",
+    "label": "Cargos (detail)",
+    "type": "detail",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4810,
+    "severity": "🟢 OK",
+    "notes": "OK (4810ms)"
+  },
+  {
+    "path": "/hr/positions/ddc78e05-8271-4a19-b94f-33fd997fc0a0/edit",
+    "label": "Cargos (edit)",
+    "type": "edit",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4716,
+    "severity": "🟢 OK",
+    "notes": "OK (4716ms)"
+  },
+  {
+    "path": "/hr/teams/a67a762a-f5cf-45c9-8d26-3b4c8fbf1ce5",
+    "label": "Equipes (detail)",
+    "type": "detail",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 5046,
+    "severity": "🟢 OK",
+    "notes": "OK (5046ms)"
+  },
+  {
+    "path": "/hr/teams/a67a762a-f5cf-45c9-8d26-3b4c8fbf1ce5/edit",
+    "label": "Equipes (edit)",
+    "type": "edit",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 4694,
+    "severity": "🟢 OK",
+    "notes": "OK (4694ms)"
+  },
+  {
+    "path": "/hr/vacations/[id]",
+    "label": "Férias (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/absences/[id]",
+    "label": "Ausências (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/warnings/[id]",
+    "label": "Advertências (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/overtime/[id]",
+    "label": "Horas Extras (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/payroll/[id]",
+    "label": "Folha (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/bonuses/[id]",
+    "label": "Bonificações (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/deductions/[id]",
+    "label": "Deduções (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/benefits/[id]",
+    "label": "Benefícios (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/dependants/[id]",
+    "label": "Dependentes (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/announcements/[id]",
+    "label": "Comunicados (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/requests/[id]",
+    "label": "Solicitações (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/kudos/[id]",
+    "label": "Reconhecimentos (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/admissions/28f730c1-d529-4c00-9090-035a7f195852",
+    "label": "Admissões (detail)",
+    "type": "detail",
+    "loaded": true,
+    "httpStatus": 200,
+    "consoleErrors": [],
+    "httpErrors": [],
+    "hasContent": true,
+    "loadTimeMs": 6288,
+    "severity": "🟢 OK",
+    "notes": "OK (6288ms)"
+  },
+  {
+    "path": "/hr/onboarding/[id]",
+    "label": "Onboarding (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/offboarding/[id]",
+    "label": "Offboarding (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/terminations/[id]",
+    "label": "Rescisões (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/work-schedules/[id]",
+    "label": "Escalas (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/shifts/[id]",
+    "label": "Turnos (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/time-control/[id]",
+    "label": "Ponto (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/time-bank/[id]",
+    "label": "Banco de Horas (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/geofence-zones/[id]",
+    "label": "Geofence (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/safety-programs/[id]",
+    "label": "Programas Seg. (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/workplace-risks/[id]",
+    "label": "Riscos (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/medical-exams/[id]",
+    "label": "Exames (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/ppe/[id]",
+    "label": "EPI (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/cipa/[id]",
+    "label": "CIPA (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/esocial/[id]",
+    "label": "eSocial (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/reviews/[id]",
+    "label": "Avaliações (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/trainings/[id]",
+    "label": "Treinamentos (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/okrs/[id]",
+    "label": "OKRs (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/surveys/[id]",
+    "label": "Pesquisas (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/recruitment/[id]",
+    "label": "Vagas (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  },
+  {
+    "path": "/hr/recruitment/candidates/[id]",
+    "label": "Candidatos (detail)",
+    "type": "detail",
+    "loaded": false,
+    "httpStatus": null,
+    "consoleErrors": [
+      "NO_DATA: No items found to test detail page"
+    ],
+    "httpErrors": [],
+    "hasContent": false,
+    "loadTimeMs": 0,
+    "severity": "🟡 WARNING",
+    "notes": "Sem dados para testar"
+  }
+]

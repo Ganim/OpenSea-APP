@@ -7,6 +7,7 @@ export interface WorkSchedulesResponse {
   page: number;
   limit: number;
   totalPages: number;
+  meta?: { page?: number; totalPages?: number; total?: number };
 }
 
 export interface WorkScheduleResponse {

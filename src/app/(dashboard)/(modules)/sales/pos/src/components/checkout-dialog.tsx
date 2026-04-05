@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -17,8 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Banknote, CreditCard, QrCode, CheckCircle2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { Banknote, CheckCircle2, CreditCard, QrCode } from 'lucide-react';
+import { useState } from 'react';
+
+/**
+ * @deprecated Prefer the new POS components in src/components/sales.
+ */
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,13 +41,6 @@ interface CheckoutDialogProps {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
 
 const PAYMENT_METHODS: {
   value: PaymentMethod;

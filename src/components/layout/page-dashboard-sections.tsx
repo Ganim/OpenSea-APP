@@ -14,6 +14,7 @@ export interface DashboardCard {
   hoverBg: string;
   permission?: string;
   countKey?: string;
+  hidden?: boolean;
 }
 
 export interface DashboardSection {
@@ -77,7 +78,7 @@ export function PageDashboardSections({
     <>
       {sections.map(section => {
         const visibleCards = section.cards.filter(
-          card => !card.permission || hasPermission(card.permission)
+          card => !card.hidden && (!card.permission || hasPermission(card.permission))
         );
 
         if (visibleCards.length === 0) return null;

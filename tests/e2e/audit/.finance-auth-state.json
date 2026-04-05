@@ -1,0 +1,30 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "session_id",
+          "value": "991330d7-08bb-4707-86c9-2cf11139699e"
+        },
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI5OTEzMzBkNy0wOGJiLTQ3MDctODZjOS0yY2YxMTEzOTY5OWUiLCJ0ZW5hbnRJZCI6ImM2N2EwMWY1LTA0YWEtNDg1Yy1hNjU3LTE2NjYxZGE3YTk3ZSIsImlzU3VwZXJBZG1pbiI6ZmFsc2UsImF1ZCI6Im9wZW5zZWEtY2xpZW50IiwiaXNzIjoib3BlbnNlYS1hcGkiLCJzdWIiOiJjNWIxZGRkYS0xMjM2LTQxMzEtODNjMi02NWIxNTVmOTUwMTAiLCJpYXQiOjE3NzQ5NjM5MTYsImV4cCI6MTc3NDk2NTcxNn0.SgK_6AL6lYAzhm15B2YuixR2ar2Jk0iDDGFO1LCeVBvwudoT6Ty5m97tbLXtNOaBkC4l8MD2iN3FjzdejhYSfCnHOP7g1NwSN3d0ZzO3x9CQeyYsCvEiwzOsjyEoLA-VReHOmD_UgcoUmX5WO_xyORRewJs-V-fj_1M-ir9AXPleuM84WyUSrRnS-gtdtKiMSXP3IDrK6ldjw6GjHyop4Q5lzdIvHwwg9SToW8Flu6gl-vtigK6Uoal1D6YiihhELfhQLDA4J3y4bCOPYiZl9apoR3LeskMoDeeE1tHCexe5sWBb73pjfBT4lI9m3JOvGC192BgNoqruFqeWDlh-kw"
+        },
+        {
+          "name": "opensea_saved_accounts",
+          "value": "[{\"id\":\"c5b1ddda-1236-4131-83c2-65b155f95010\",\"identifier\":\"admin@teste.com\",\"displayName\":\"admin\",\"lastLoginAt\":\"2026-03-31T13:31:56.695Z\"}]"
+        },
+        {
+          "name": "selected_tenant_id",
+          "value": "c67a01f5-04aa-485c-a657-16661da7a97e"
+        },
+        {
+          "name": "refresh_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI5OTEzMzBkNy0wOGJiLTQ3MDctODZjOS0yY2YxMTEzOTY5OWUiLCJqdGkiOiIxNDg4OWMwNS1kYTY0LTQ2MTUtODU2OC1mYjBjNTAwMTMwZDgiLCJhdWQiOiJvcGVuc2VhLWNsaWVudCIsImlzcyI6Im9wZW5zZWEtYXBpIiwic3ViIjoiYzViMWRkZGEtMTIzNi00MTMxLTgzYzItNjViMTU1Zjk1MDEwIiwiaWF0IjoxNzc0OTYzOTE2LCJleHAiOjE3NzU1Njg3MTZ9.SHTkkfUR2vLpyH-tTf2iRKK2OiciPteMH8oVJ1RvEzxrAo-m3TyG9xdFGQ48fY-YyAIVT2ZGfq50sJv_5sWFgeNLbnOjK4MiEIfx_bz8BhQZicgQjW5xvcbufFzKAxwNnuXoPEGdx1PiG5ht1fejWuP9koqSPEyk3JnrtCuElB8Vu1-3Ais3O9EtcobrACdr4KYomKmQj3RzIqDQBeLxWy2qWOXBDhSAb2-lh2ybZcHuuyH0don4y2LhjwcvS-aYH5UZGYcJCCsiNiX9FeGhXDZdbzAsr1GRJdKSwuqd_i1F-86LqpoeTStumMU_9VS_Tb7Wqq6jI4HqZnqA2gX7sQ"
+        }
+      ]
+    }
+  ]
+}

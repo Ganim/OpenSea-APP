@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
+import type { CashierSessionReport } from '@/types/sales';
 
 export interface CashierSessionsQuery {
   page?: number;
@@ -83,6 +84,12 @@ export const cashierService = {
   async getSession(id: string): Promise<CashierSessionResponse> {
     return apiClient.get<CashierSessionResponse>(
       API_ENDPOINTS.SALES_CASHIER.SESSIONS.GET(id)
+    );
+  },
+
+  async getSessionReport(sessionId: string): Promise<CashierSessionReport> {
+    return apiClient.get<CashierSessionReport>(
+      API_ENDPOINTS.SALES_CASHIER.SESSIONS.REPORT(sessionId)
     );
   },
 

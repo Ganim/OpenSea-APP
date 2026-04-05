@@ -1,15 +1,11 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
 import { PageActionBar } from '@/components/layout/page-action-bar';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -17,28 +13,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { usePermissions } from '@/hooks/use-permissions';
-import { useChatbotConfig, useUpdateChatbotConfig } from '@/hooks/sales/use-chatbot';
-import { useForms } from '@/hooks/sales/use-forms';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
-import { cn } from '@/lib/utils';
-import { ApiError } from '@/lib/errors/api-error';
-import { translateError } from '@/lib/error-messages';
-import { toast } from 'sonner';
 import {
-  Bot,
-  Save,
-  Loader2,
+  useChatbotConfig,
+  useUpdateChatbotConfig,
+} from '@/hooks/sales/use-chatbot';
+import { useForms } from '@/hooks/sales/use-forms';
+import { usePermissions } from '@/hooks/use-permissions';
+import { translateError } from '@/lib/error-messages';
+import { ApiError } from '@/lib/errors/api-error';
+import { cn } from '@/lib/utils';
+import {
   AlertTriangle,
+  Bot,
+  Check,
+  Code,
+  Copy,
+  Loader2,
   MessageSquare,
   Palette,
-  Copy,
-  Check,
-  User,
-  FileText,
   Power,
-  Code,
+  Save,
+  User,
 } from 'lucide-react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 function ChatbotConfigContent() {
   const { hasPermission } = usePermissions();
@@ -49,7 +51,18 @@ function ChatbotConfigContent() {
   const updateConfig = useUpdateChatbotConfig();
   const { data: formsData } = useForms();
 
-  const forms = (formsData as { forms?: Array<{ id: string; name: string }> })?.forms ?? [];
+  const forms = (formsData?.forms ?? [])
+    .map(form => {
+      const id = form['id'];
+      const name = form['name'];
+
+      if (typeof id !== 'string' || typeof name !== 'string') {
+        return null;
+      }
+
+      return { id, name };
+    })
+    .filter((form): form is { id: string; name: string } => form !== null);
 
   const [greetingMessage, setGreetingMessage] = useState('');
   const [autoReplyMessage, setAutoReplyMessage] = useState('');
@@ -182,9 +195,7 @@ function ChatbotConfigContent() {
                   <Bot className="h-6 w-6 text-violet-500" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold">
-                    Configuração do Chatbot
-                  </h1>
+                  <h1 className="text-xl font-bold">Configuração do Chatbot</h1>
                   <p className="text-sm text-muted-foreground">
                     Configure o widget de chat para seu site.
                   </p>
@@ -237,8 +248,7 @@ function ChatbotConfigContent() {
                   disabled={!canAdmin}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Enviada automaticamente quando nenhum agente está
-                  disponível.
+                  Enviada automaticamente quando nenhum agente está disponível.
                 </p>
               </div>
             </div>
@@ -296,8 +306,7 @@ function ChatbotConfigContent() {
                   disabled={!canAdmin}
                 />
                 <p className="text-xs text-muted-foreground">
-                  As conversas serão atribuídas automaticamente a este
-                  usuário.
+                  As conversas serão atribuídas automaticamente a este usuário.
                 </p>
               </div>
 
@@ -305,9 +314,7 @@ function ChatbotConfigContent() {
                 <Label>Formulário Vinculado</Label>
                 <Select
                   value={formId || 'none'}
-                  onValueChange={v =>
-                    setFormId(v === 'none' ? '' : v)
-                  }
+                  onValueChange={v => setFormId(v === 'none' ? '' : v)}
                   disabled={!canAdmin}
                 >
                   <SelectTrigger>
@@ -414,9 +421,7 @@ function ChatbotConfigContent() {
                   <Bot className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">
-                    Chat
-                  </p>
+                  <p className="text-sm font-semibold text-white">Chat</p>
                   <p className="text-[10px] text-white/70">Online</p>
                 </div>
               </div>

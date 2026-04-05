@@ -177,7 +177,7 @@ export default function CadenceEditPage() {
             type="server"
             title="Erro ao carregar cadência"
             message="Não foi possível carregar os dados da cadência."
-            action={{ label: 'Tentar Novamente', onClick: () => refetch() }}
+            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
           />
         </PageBody>
       </PageLayout>

@@ -38,48 +38,59 @@ export const cipaService = {
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<CipaMandatesResponse>(
-      `/v1/hr/cipa/mandates${qs ? `?${qs}` : ''}`
+    const raw = await apiClient.get<{ cipaMandates: CipaMandate[] }>(
+      `/v1/hr/cipa-mandates${qs ? `?${qs}` : ''}`
     );
+    return { mandates: raw.cipaMandates ?? [] };
   },
 
   async getMandate(id: string): Promise<CipaMandateResponse> {
-    return apiClient.get<CipaMandateResponse>(`/v1/hr/cipa/mandates/${id}`);
+    const raw = await apiClient.get<{ cipaMandate: CipaMandate }>(
+      `/v1/hr/cipa-mandates/${id}`
+    );
+    return { mandate: raw.cipaMandate };
   },
 
   async createMandate(data: CreateCipaMandateData): Promise<CipaMandateResponse> {
-    return apiClient.post<CipaMandateResponse>('/v1/hr/cipa/mandates', data);
+    const raw = await apiClient.post<{ cipaMandate: CipaMandate }>(
+      '/v1/hr/cipa-mandates',
+      data
+    );
+    return { mandate: raw.cipaMandate };
   },
 
   async updateMandate(
     id: string,
     data: UpdateCipaMandateData
   ): Promise<CipaMandateResponse> {
-    return apiClient.patch<CipaMandateResponse>(
-      `/v1/hr/cipa/mandates/${id}`,
+    const raw = await apiClient.patch<{ cipaMandate: CipaMandate }>(
+      `/v1/hr/cipa-mandates/${id}`,
       data
     );
+    return { mandate: raw.cipaMandate };
   },
 
   async deleteMandate(id: string): Promise<void> {
-    return apiClient.delete<void>(`/v1/hr/cipa/mandates/${id}`);
+    return apiClient.delete<void>(`/v1/hr/cipa-mandates/${id}`);
   },
 
   // Members
   async listMembers(mandateId: string): Promise<CipaMembersResponse> {
-    return apiClient.get<CipaMembersResponse>(
-      `/v1/hr/cipa/mandates/${mandateId}/members`
+    const raw = await apiClient.get<{ cipaMembers: CipaMember[] }>(
+      `/v1/hr/cipa-mandates/${mandateId}/members`
     );
+    return { members: raw.cipaMembers ?? [] };
   },
 
   async addMember(
     mandateId: string,
     data: CreateCipaMemberData
   ): Promise<CipaMemberResponse> {
-    return apiClient.post<CipaMemberResponse>(
-      `/v1/hr/cipa/mandates/${mandateId}/members`,
+    const raw = await apiClient.post<{ cipaMember: CipaMember }>(
+      `/v1/hr/cipa-mandates/${mandateId}/members`,
       data
     );
+    return { member: raw.cipaMember };
   },
 
   async updateMember(
@@ -87,15 +98,16 @@ export const cipaService = {
     memberId: string,
     data: UpdateCipaMemberData
   ): Promise<CipaMemberResponse> {
-    return apiClient.patch<CipaMemberResponse>(
-      `/v1/hr/cipa/mandates/${mandateId}/members/${memberId}`,
+    const raw = await apiClient.patch<{ cipaMember: CipaMember }>(
+      `/v1/hr/cipa-mandates/${mandateId}/members/${memberId}`,
       data
     );
+    return { member: raw.cipaMember };
   },
 
   async removeMember(mandateId: string, memberId: string): Promise<void> {
     return apiClient.delete<void>(
-      `/v1/hr/cipa/mandates/${mandateId}/members/${memberId}`
+      `/v1/hr/cipa-mandates/${mandateId}/members/${memberId}`
     );
   },
 };

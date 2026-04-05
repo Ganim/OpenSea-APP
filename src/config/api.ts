@@ -354,6 +354,8 @@ export const API_ENDPOINTS = {
     CANCEL: (id: string) => `/v1/orders/${id}/cancel`,
     CHANGE_STAGE: (id: string) => `/v1/orders/${id}/stage`,
     CONVERT_QUOTE: (id: string) => `/v1/orders/${id}/convert-quote`,
+    SCAN: (code: string) => `/v1/orders/scan/${code}`,
+    SYNC_OFFLINE: '/v1/orders/sync-offline',
   },
   // Sales - Payment Conditions
   PAYMENT_CONDITIONS: {
@@ -1541,6 +1543,26 @@ export const API_ENDPOINTS = {
     PREVIEW: (id: string) => `/v1/sales/msg-templates/${id}/preview`,
     DUPLICATE: (id: string) => `/v1/sales/msg-templates/${id}/duplicate`,
   },
+  // Sales - Invoicing (NF-e / NFC-e)
+  INVOICING: {
+    ISSUE: (orderId: string) => `/v1/sales/orders/${orderId}/invoice`,
+    GET: (invoiceId: string) => `/v1/sales/invoices/${invoiceId}`,
+    LIST: '/v1/sales/invoices',
+    CANCEL: (invoiceId: string) => `/v1/sales/invoices/${invoiceId}`,
+    CONFIGURE_FOCUS_NFE: '/v1/sales/invoicing/config',
+  },
+  // Sales - Printers & Printing (ESC/POS)
+  SALES_PRINTING: {
+    PRINTERS: {
+      LIST: '/v1/sales/printers',
+      CREATE: '/v1/sales/printers',
+      DELETE: (printerId: string) => `/v1/sales/printers/${printerId}`,
+    },
+    RECEIPTS: {
+      QUEUE: (orderId: string) => `/v1/sales/orders/${orderId}/print`,
+      PREVIEW: (orderId: string) => `/v1/sales/orders/${orderId}/print/preview`,
+    },
+  },
   // Sales - Cashier (Caixa)
   SALES_CASHIER: {
     SESSIONS: {
@@ -1550,6 +1572,8 @@ export const API_ENDPOINTS = {
       CLOSE: (id: string) => `/v1/sales/cashier/sessions/${id}/close`,
       GET_ACTIVE: '/v1/sales/cashier/sessions/active',
       RECONCILE: (id: string) => `/v1/sales/cashier/sessions/${id}/reconcile`,
+      REPORT: (sessionId: string) =>
+        `/v1/sales/cashier/sessions/${sessionId}/report`,
     },
     TRANSACTIONS: {
       LIST: '/v1/sales/cashier/transactions',

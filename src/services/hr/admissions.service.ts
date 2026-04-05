@@ -60,17 +60,20 @@ export const admissionsService = {
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    return apiClient.get<AdmissionsResponse>(
+    const res = await apiClient.get<{ invites: AdmissionInvite[]; meta?: AdmissionsResponse['meta'] }>(
       `/v1/hr/admissions${qs ? `?${qs}` : ''}`
     );
+    return { admissions: res.invites, meta: res.meta };
   },
 
   async get(id: string): Promise<AdmissionResponse> {
-    return apiClient.get<AdmissionResponse>(`/v1/hr/admissions/${id}`);
+    const res = await apiClient.get<{ invite: AdmissionInvite }>(`/v1/hr/admissions/${id}`);
+    return { admission: res.invite };
   },
 
   async create(data: CreateAdmissionData): Promise<AdmissionResponse> {
-    return apiClient.post<AdmissionResponse>('/v1/hr/admissions', data);
+    const res = await apiClient.post<{ invite: AdmissionInvite }>('/v1/hr/admissions', data);
+    return { admission: res.invite };
   },
 
   async update(

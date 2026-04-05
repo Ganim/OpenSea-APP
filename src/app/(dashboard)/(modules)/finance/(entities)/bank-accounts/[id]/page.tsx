@@ -11,6 +11,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { BankApiSetupModal } from '@/components/finance/bank-api-setup-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,10 +24,20 @@ import {
   BANK_ACCOUNT_TYPE_LABELS,
   PIX_KEY_TYPE_LABELS,
 } from '@/types/finance';
-import { ArrowLeft, Building2, Edit, Trash } from 'lucide-react';
+import {
+  ArrowLeft,
+  Building2,
+  Edit,
+  Trash,
+  Plug,
+  CheckCircle2,
+  AlertCircle,
+  Settings2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export default function BankAccountDetailPage({
@@ -36,12 +47,15 @@ export default function BankAccountDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data, isLoading } = useBankAccount(id);
   const account = data?.bankAccount;
   const deleteMutation = useDeleteBankAccount();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [apiSetupOpen, setApiSetupOpen] = useState(false);
   const { hasPermission } = usePermissions();
   const canDelete = hasPermission(PermissionCodes.FINANCE.BANK_ACCOUNTS.REMOVE);
+  const canEdit = hasPermission(PermissionCodes.FINANCE.BANK_ACCOUNTS.MODIFY);
 
   if (isLoading) {
     return (
@@ -266,12 +280,112 @@ export default function BankAccountDetailPage({
         </div>
       </Card>
 
+      {/* API Integration Card */}
+      <Card className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Plug className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Integração API</h2>
+          </div>
+          {canEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 h-9 px-2.5"
+              onClick={() => setApiSetupOpen(true)}
+            >
+              <Settings2 className="h-4 w-4" />
+              Configurar
+            </Button>
+          )}
+        </div>
+
+        {account.apiEnabled ? (
+          <div className="space-y-4">
+            {/* Status: Connected */}
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                Conectado
+              </span>
+              {account.apiProvider && (
+                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border-0 text-xs">
+                  {account.apiProvider}
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              {account.apiClientId && (
+                <div>
+                  <p className="text-muted-foreground mb-1">Client ID</p>
+                  <p className="font-mono text-xs">
+                    {account.apiClientId.slice(0, 12)}...
+                  </p>
+                </div>
+              )}
+              {account.autoEmitBoleto !== undefined && (
+                <div>
+                  <p className="text-muted-foreground mb-1">
+                    Emissão automática de boleto
+                  </p>
+                  <Badge
+                    className={
+                      account.autoEmitBoleto
+                        ? 'bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 border-0'
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 border-0'
+                    }
+                  >
+                    {account.autoEmitBoleto ? 'Ativada' : 'Desativada'}
+                  </Badge>
+                </div>
+              )}
+              {account.apiLastSyncAt && (
+                <div>
+                  <p className="text-muted-foreground mb-1">
+                    Última sincronização
+                  </p>
+                  <p className="font-medium">
+                    {new Date(account.apiLastSyncAt).toLocaleString('pt-BR')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Integração de API bancária não configurada.
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Configure as credenciais para habilitar emissão de boletos e
+                cobranças PIX diretamente pelo sistema.
+              </p>
+            </div>
+          </div>
+        )}
+      </Card>
+
       <VerifyActionPinModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onSuccess={handleDeleteConfirm}
         title="Excluir Conta Bancária"
         description={`Digite seu PIN de ação para excluir "${account.name}".`}
+      />
+
+      <BankApiSetupModal
+        open={apiSetupOpen}
+        onOpenChange={setApiSetupOpen}
+        bankAccountId={id}
+        bankAccount={account}
+        onSaved={() => {
+          void queryClient.invalidateQueries({
+            queryKey: ['bank-accounts', id],
+          });
+        }}
       />
     </div>
   );

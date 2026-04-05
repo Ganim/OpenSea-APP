@@ -13,31 +13,24 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { cadencesConfig } from '@/config/entities/cadences.config';
-import { usePermissions } from '@/hooks/use-permissions';
 import { useCadence, useDeleteCadence } from '@/hooks/sales/use-cadences';
-import type {
-  CadenceEnrollment,
-  CadenceStep,
-  CadenceStepType,
-} from '@/types/sales';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
+import type { CadenceStepType } from '@/types/sales';
 import {
-  CADENCE_STEP_TYPE_LABELS,
   CADENCE_ENROLLMENT_STATUS_LABELS,
+  CADENCE_STEP_TYPE_LABELS,
 } from '@/types/sales';
 import {
   Activity,
-  ArrowLeft,
-  Calendar,
   Clock,
   Edit,
   Linkedin,
-  Loader2,
   Mail,
   MessageSquare,
   Phone,
@@ -46,7 +39,6 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -72,10 +64,14 @@ const STEP_TYPE_COLORS: Record<CadenceStepType, string> = {
 };
 
 const ENROLLMENT_STATUS_COLORS: Record<string, string> = {
-  ACTIVE: 'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
-  PAUSED: 'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
-  COMPLETED: 'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
-  BOUNCED: 'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300',
+  ACTIVE:
+    'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
+  PAUSED:
+    'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
+  COMPLETED:
+    'border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300',
+  BOUNCED:
+    'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300',
 };
 
 // ─── Page ─────────────────────────────────────────────────────
@@ -92,6 +88,12 @@ export default function CadenceDetailPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const cadence = data?.cadence;
+  const canDelete = cadencesConfig.permissions.delete
+    ? hasPermission(cadencesConfig.permissions.delete)
+    : false;
+  const canEdit = cadencesConfig.permissions.update
+    ? hasPermission(cadencesConfig.permissions.update)
+    : false;
 
   const handleDelete = useCallback(async () => {
     await deleteMutation.mutateAsync(cadenceId);
@@ -140,7 +142,9 @@ export default function CadenceDetailPage() {
             message="Não foi possível carregar os dados da cadência."
             action={{
               label: 'Tentar Novamente',
-              onClick: () => refetch(),
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         </PageBody>
@@ -160,7 +164,7 @@ export default function CadenceDetailPage() {
             { label: cadence.name },
           ]}
           buttons={[
-            ...(hasPermission(cadencesConfig.permissions.delete)
+            ...(canDelete
               ? [
                   {
                     id: 'delete',
@@ -171,7 +175,7 @@ export default function CadenceDetailPage() {
                   },
                 ]
               : []),
-            ...(hasPermission(cadencesConfig.permissions.update)
+            ...(canEdit
               ? [
                   {
                     id: 'edit',
@@ -261,7 +265,7 @@ export default function CadenceDetailPage() {
 
           <TabsContent value="steps">
             <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
-              {(!cadence.steps || cadence.steps.length === 0) ? (
+              {!cadence.steps || cadence.steps.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Nenhuma etapa configurada nesta cadência.
                 </p>
@@ -304,13 +308,16 @@ export default function CadenceDetailPage() {
                               {step.delayDays > 0 && (
                                 <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                                   <Clock className="h-3 w-3" />
-                                  Aguardar {step.delayDays} dia{step.delayDays !== 1 ? 's' : ''}
+                                  Aguardar {step.delayDays} dia
+                                  {step.delayDays !== 1 ? 's' : ''}
                                 </div>
                               )}
 
                               {step.subject && (
                                 <p className="text-sm mt-1">
-                                  <span className="text-muted-foreground">Assunto: </span>
+                                  <span className="text-muted-foreground">
+                                    Assunto:{' '}
+                                  </span>
                                   {step.subject}
                                 </p>
                               )}
@@ -332,7 +339,7 @@ export default function CadenceDetailPage() {
 
           <TabsContent value="enrollments">
             <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
-              {(!cadence.enrollments || cadence.enrollments.length === 0) ? (
+              {!cadence.enrollments || cadence.enrollments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Nenhuma inscrição nesta cadência.
                 </p>

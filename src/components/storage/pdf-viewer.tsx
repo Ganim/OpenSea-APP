@@ -18,12 +18,15 @@ import 'react-pdf/dist/Page/TextLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfViewerProps {
-  url: string;
+  /** URL to fetch PDF from (will be fetched as binary) */
+  url?: string;
+  /** Pre-fetched binary data — skips fetch entirely, immune to IDM */
+  binaryData?: ArrayBuffer | Uint8Array;
   /** Called when fetch or rendering fails — allows parent to show a fallback */
   onError?: () => void;
 }
 
-export function PdfViewer({ url, onError }: PdfViewerProps) {
+export function PdfViewer({ url, binaryData, onError }: PdfViewerProps) {
   const [pdfData, setPdfData] = useState<{ data: Uint8Array } | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
@@ -31,8 +34,15 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pre-fetch PDF as binary data to avoid IDM/extension interception
   useEffect(() => {
+    // If binary data provided directly, use it (no fetch = no IDM interception)
+    if (binaryData) {
+      const data = binaryData instanceof Uint8Array ? binaryData : new Uint8Array(binaryData);
+      setPdfData({ data });
+      setLoading(false);
+      return;
+    }
+
     if (!url) return;
 
     let cancelled = false;
@@ -42,7 +52,7 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
     setPageNumber(1);
     setNumPages(0);
 
-    fetch(url)
+    fetch(url, { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.arrayBuffer();
@@ -63,7 +73,7 @@ export function PdfViewer({ url, onError }: PdfViewerProps) {
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, binaryData]);
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages }: { numPages: number }) => {

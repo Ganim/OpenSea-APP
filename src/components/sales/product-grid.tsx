@@ -1,14 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/format';
 import { apiClient } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/config/api';
 import { categoriesService } from '@/services/stock/categories.service';
+import { ordersService } from '@/services/sales/orders.service';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PaginationMeta } from '@/types/common/pagination';
 
@@ -58,18 +60,53 @@ interface VariantListResponse {
 const PAGE_SIZE = 50;
 const DEBOUNCE_MS = 300;
 const BARCODE_KEYSTROKE_THRESHOLD_MS = 50;
+const BARCODE_SETTLE_MS = 100;
 
 // =============================================================================
 // HOOKS
 // =============================================================================
 
-function useDebouncedValue(value: string, delay: number) {
+/**
+ * Smart debounce that detects barcode scanner input vs manual typing.
+ * - Barcode scanner: keystrokes arrive < 50ms apart. Accumulates the full
+ *   string and emits once after a 100ms gap (scanner finished).
+ * - Manual typing: keystrokes > 50ms apart. Uses standard 300ms debounce.
+ */
+function useSmartDebouncedSearch(value: string) {
   const [debounced, setDebounced] = React.useState(value);
+  const lastKeystrokeRef = React.useRef(0);
+  const isScanningRef = React.useRef(false);
+  const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
+    const now = Date.now();
+    const gap = now - lastKeystrokeRef.current;
+    lastKeystrokeRef.current = now;
+
+    // Detect scanning mode: rapid keystrokes < 50ms apart
+    if (gap < BARCODE_KEYSTROKE_THRESHOLD_MS && value.length > 1) {
+      isScanningRef.current = true;
+    }
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (isScanningRef.current) {
+      // Scanner mode: wait for input to settle (100ms gap = scanner done)
+      timerRef.current = setTimeout(() => {
+        setDebounced(value);
+        isScanningRef.current = false;
+      }, BARCODE_SETTLE_MS);
+    } else {
+      // Manual typing: standard 300ms debounce
+      timerRef.current = setTimeout(() => {
+        setDebounced(value);
+      }, DEBOUNCE_MS);
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [value]);
 
   return debounced;
 }
@@ -128,15 +165,42 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
   >(null);
   const sentinelRef = React.useRef<HTMLDivElement>(null);
 
-  const debouncedSearch = useDebouncedValue(searchInput, DEBOUNCE_MS);
+  const debouncedSearch = useSmartDebouncedSearch(searchInput);
+
+  const { mutateAsync: scanVariantByCode, isPending: isScanningCode } =
+    useMutation({
+      mutationFn: (code: string) => ordersService.scanVariantByCode(code),
+    });
 
   // Barcode scanner detection
   useBarcodeDetection(
     React.useCallback(
       (barcode: string) => {
         setSearchInput(barcode);
+
+        void (async () => {
+          try {
+            const result = await scanVariantByCode(barcode);
+
+            onAddToCart({
+              id: result.variant.id,
+              name: result.variant.name,
+              sku: result.variant.sku,
+              barcode: result.variant.barcode,
+              price: result.variant.price,
+              imageUrl: null,
+              categoryName: null,
+              stockQuantity: 0,
+            });
+
+            setSearchInput('');
+            toast.success(`Produto ${result.variant.name} adicionado.`);
+          } catch {
+            // Fallback: keep scanner code in search input for local filtering.
+          }
+        })();
       },
-      []
+      [onAddToCart, scanVariantByCode]
     )
   );
 
@@ -240,6 +304,11 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
           )}
         />
       </div>
+      {isScanningCode && (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Validando codigo escaneado...
+        </p>
+      )}
 
       {/* Category Chips */}
       {categories.length > 0 && (
@@ -317,7 +386,7 @@ function CategoryChip({
       onClick={onClick}
       className={cn(
         'shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-150',
-        'min-h-[40px] select-none active:scale-95',
+        'min-h-10 select-none active:scale-95',
         isSelected
           ? 'bg-violet-600 text-white shadow-sm'
           : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'

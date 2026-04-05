@@ -229,6 +229,9 @@ export const employeesService = {
       permissionGroupId?: string;
       userEmail?: string;
       userPassword?: string;
+      enableEmailLogin?: boolean;
+      enableCpfLogin?: boolean;
+      enableEnrollmentLogin?: boolean;
     }
   ): Promise<EmployeeResponse> {
     return apiClient.post<EmployeeResponse>('/v1/hr/employees-with-user', data);

@@ -1,14 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  StepWizardDialog,
-  type WizardStep,
-} from '@/components/ui/step-wizard-dialog';
-import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import {
   Select,
   SelectContent,
@@ -16,24 +11,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCreateLandingPage } from '@/hooks/sales/use-landing-pages';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useForms } from '@/hooks/sales/use-forms';
-import { ApiError } from '@/lib/errors/api-error';
+import { useCreateLandingPage } from '@/hooks/sales/use-landing-pages';
 import { translateError } from '@/lib/error-messages';
+import { ApiError } from '@/lib/errors/api-error';
+import type { LandingPageSection, LandingPageTemplate } from '@/types/sales';
+import { LANDING_PAGE_TEMPLATE_LABELS } from '@/types/sales';
 import {
   Check,
+  FileText,
   Globe,
   Layout,
-  FileText,
   Loader2,
   Plus,
   Trash2,
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import type { LandingPageTemplate, LandingPageSection } from '@/types/sales';
-import { LANDING_PAGE_TEMPLATE_LABELS } from '@/types/sales';
 
 interface CreateLandingPageWizardProps {
   open: boolean;
@@ -170,9 +170,7 @@ function StepContentSections({
             <Input
               placeholder="Título da seção"
               value={section.title || ''}
-              onChange={e =>
-                onChange(section.tempId, 'title', e.target.value)
-              }
+              onChange={e => onChange(section.tempId, 'title', e.target.value)}
             />
           </div>
 
@@ -273,8 +271,7 @@ function StepReview({
             <strong>URL:</strong> /p/{slug}
           </p>
           <p>
-            <strong>Template:</strong>{' '}
-            {LANDING_PAGE_TEMPLATE_LABELS[template]}
+            <strong>Template:</strong> {LANDING_PAGE_TEMPLATE_LABELS[template]}
           </p>
           <p>
             <strong>Seções:</strong> {sections.length}
@@ -293,7 +290,18 @@ export function CreateLandingPageWizard({
   const createLandingPage = useCreateLandingPage();
   const { data: formsData } = useForms();
 
-  const forms = (formsData as { forms?: Array<{ id: string; name: string }> })?.forms ?? [];
+  const forms = (formsData?.forms ?? [])
+    .map(form => {
+      const id = form['id'];
+      const name = form['name'];
+
+      if (typeof id !== 'string' || typeof name !== 'string') {
+        return null;
+      }
+
+      return { id, name };
+    })
+    .filter((form): form is { id: string; name: string } => form !== null);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [title, setTitle] = useState('');
@@ -425,8 +433,20 @@ export function CreateLandingPageWizard({
           title={title}
           onTitleChange={v => {
             setTitle(v);
-            if (!slug || slug === title.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')) {
-              setSlug(v.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'));
+            if (
+              !slug ||
+              slug ===
+                title
+                  .toLowerCase()
+                  .replace(/[^a-z0-9-]/g, '-')
+                  .replace(/-+/g, '-')
+            ) {
+              setSlug(
+                v
+                  .toLowerCase()
+                  .replace(/[^a-z0-9-]/g, '-')
+                  .replace(/-+/g, '-')
+              );
             }
             setFieldErrors(prev => {
               const { title: _, ...rest } = prev;
@@ -451,9 +471,7 @@ export function CreateLandingPageWizard({
     {
       title: 'Conteúdo das Seções',
       description: 'Configure o conteúdo de cada seção.',
-      icon: (
-        <Layout className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
-      ),
+      icon: <Layout className="h-16 w-16 text-violet-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
       content: (
         <StepContentSections
@@ -485,11 +503,7 @@ export function CreateLandingPageWizard({
       ),
       isValid: true,
       footer: (
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

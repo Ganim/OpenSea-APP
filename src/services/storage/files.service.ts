@@ -111,9 +111,9 @@ export const storageFilesService = {
     options?: { entityType?: string; entityId?: string }
   ): Promise<FileResponse> {
     const formData = new FormData();
-    formData.append('file', file);
     if (options?.entityType) formData.append('entityType', options.entityType);
     if (options?.entityId) formData.append('entityId', options.entityId);
+    formData.append('file', file);
 
     const endpoint = folderId
       ? API_ENDPOINTS.STORAGE.FILES.UPLOAD(folderId)
@@ -136,10 +136,10 @@ export const storageFilesService = {
   ): Promise<FileResponse> {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
-      formData.append('file', file);
       if (options?.entityType)
         formData.append('entityType', options.entityType);
       if (options?.entityId) formData.append('entityId', options.entityId);
+      formData.append('file', file);
 
       const endpoint = folderId
         ? API_ENDPOINTS.STORAGE.FILES.UPLOAD(folderId)

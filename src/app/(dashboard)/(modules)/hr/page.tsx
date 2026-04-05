@@ -618,6 +618,16 @@ export default function HRLandingPage() {
     <div className="space-y-8">
       <PageActionBar
         breadcrumbItems={[{ label: 'Recursos Humanos', href: '/hr' }]}
+        actionButtons={[
+          {
+            id: 'time-control',
+            label: 'Bater Ponto',
+            icon: Timer,
+            href: '/hr/time-control',
+            variant: 'default',
+            permission: HR_PERMISSIONS.TIME_ENTRIES.LIST,
+          },
+        ]}
         hasPermission={hasPermission}
       />
 

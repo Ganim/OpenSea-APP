@@ -4,6 +4,7 @@ import type {
   ChangeOrderStageRequest,
   CreateOrderRequest,
   OrdersQuery,
+  SyncOfflineOrdersRequest,
   UpdateOrderRequest,
 } from '@/types/sales';
 import {
@@ -125,6 +126,24 @@ export function useConvertQuote() {
 
   return useMutation({
     mutationFn: (id: string) => ordersService.convertQuote(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ORDER_KEYS.all });
+    },
+  });
+}
+
+export function useScanOrderVariant() {
+  return useMutation({
+    mutationFn: (code: string) => ordersService.scanVariantByCode(code),
+  });
+}
+
+export function useSyncOfflineOrders() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SyncOfflineOrdersRequest) =>
+      ordersService.syncOfflineOrders(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ORDER_KEYS.all });
     },

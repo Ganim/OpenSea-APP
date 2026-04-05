@@ -1,0 +1,30 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "session_id",
+          "value": "7f95f5ed-1365-412c-82ed-e89f3756dded"
+        },
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI3Zjk1ZjVlZC0xMzY1LTQxMmMtODJlZC1lODlmMzc1NmRkZWQiLCJ0ZW5hbnRJZCI6ImM2N2EwMWY1LTA0YWEtNDg1Yy1hNjU3LTE2NjYxZGE3YTk3ZSIsImlzU3VwZXJBZG1pbiI6ZmFsc2UsImF1ZCI6Im9wZW5zZWEtY2xpZW50IiwiaXNzIjoib3BlbnNlYS1hcGkiLCJzdWIiOiJjNWIxZGRkYS0xMjM2LTQxMzEtODNjMi02NWIxNTVmOTUwMTAiLCJpYXQiOjE3NzQ5NjM5NDIsImV4cCI6MTc3NDk2NTc0Mn0.Owh0pYaVzKyXkU_IDcgQfvak9-0EFsx37iZqucqhSM9ESj2Brl3Fy8rb8NFX-LangPQaxdAjDbyi_pfmirFioPgo3iIAGc0VQocveRIqB1wlqe7y9Hb01Ma1W6wgvxj5cfhnpUMjHZG-6ffIgJvaWRo5g2jDEub40X9qxpgkEBJ8bfp2BY0qNW_hOhkxunLx-xIBAutlRMcpZIl0iq8h4QZJE-EH9T6A20ZBM6sfJXL0FnZQobsxTqPltp9wP4BVmZlORWDahgj2sC6s19mJRgzbh3WVj1I5kZZiVAudSjclrOrErjTMyE8zQ4ojYjY0-a_72vG3gFrApffowCkwKQ"
+        },
+        {
+          "name": "opensea_saved_accounts",
+          "value": "[{\"id\":\"c5b1ddda-1236-4131-83c2-65b155f95010\",\"identifier\":\"admin@teste.com\",\"displayName\":\"admin\",\"lastLoginAt\":\"2026-03-31T13:32:22.775Z\"}]"
+        },
+        {
+          "name": "selected_tenant_id",
+          "value": "c67a01f5-04aa-485c-a657-16661da7a97e"
+        },
+        {
+          "name": "refresh_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI3Zjk1ZjVlZC0xMzY1LTQxMmMtODJlZC1lODlmMzc1NmRkZWQiLCJqdGkiOiIxNWQwOGZjMC00NjI1LTQzYTgtYmEwOS04Yjc4YzE5Y2YzNTciLCJhdWQiOiJvcGVuc2VhLWNsaWVudCIsImlzcyI6Im9wZW5zZWEtYXBpIiwic3ViIjoiYzViMWRkZGEtMTIzNi00MTMxLTgzYzItNjViMTU1Zjk1MDEwIiwiaWF0IjoxNzc0OTYzOTQyLCJleHAiOjE3NzU1Njg3NDJ9.YVXN1SmvREnkRmNE9q0fOQznQR_aY4zBNNOeOwFkV7R4BL-UPv53ZLZBh45j71_K5ZVjnmyA8J9ynH_th40P2hbd7tsHuX-F-2hdOGN6UU69qRtjhRkbvlNXFIT6_2uqU1UzN7Y5JCDbrLYF8SP5JxuhylbIIhJO8_1Df9vjaQ46Tj1Rz5vl8qRw4R_Z_03DniU2cagNRMTHg1VNhErirPGrvZvkDTtVaH2WnkciDBhjOU59wXa-liIWgSG809eOcAF2gjtleQcxwy_F0KcDGkt8zXBjqiX9VPJM9A33pk-I4UO-1m_TMwS1mchBKgqRirmVtF8kZJLNLY3HDC7Gig"
+        }
+      ]
+    }
+  ]
+}

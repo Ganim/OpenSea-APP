@@ -158,6 +158,14 @@ export interface OnboardingChecklist {
   progress: number;
   createdAt: string;
   updatedAt: string;
+
+  // Populated relation
+  employee?: {
+    id: string;
+    fullName: string;
+    position?: { name: string };
+    department?: { name: string };
+  };
 }
 
 // ============================================================================

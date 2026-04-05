@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Loader2, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -46,13 +46,17 @@ export function FilePreviewModal({
   // fall back to the client-side OfficeViewer (docx-preview / xlsx)
   const [pdfConversionFailed, setPdfConversionFailed] = useState(false);
 
-  // Proxy serve URL — streams through backend, no direct S3 exposure
+  // Binary data fetched via authenticated request — never exposed as URL, immune to IDM
+  const [blobUrl, setBlobUrl] = useState<string>('');
+  const [binaryData, setBinaryData] = useState<ArrayBuffer | null>(null);
+  const [binaryDataPdf, setBinaryDataPdf] = useState<ArrayBuffer | null>(null);
+
+  // Proxy serve URL (used internally for fetch, NOT exposed to DOM)
   const serveUrl = useMemo(
     () => (file ? storageFilesService.getServeUrl(file.id, { password }) : ''),
     [file, password]
   );
 
-  // Office files are converted to PDF server-side (LibreOffice headless)
   const serveUrlPdf = useMemo(
     () =>
       file
@@ -61,10 +65,87 @@ export function FilePreviewModal({
     [file, password]
   );
 
-  // Reset fallback state when navigating between files
+  // Fetch file data via POST request — IDM only intercepts GET, not POST
   useEffect(() => {
+    if (!file || !serveUrl || !open) {
+      setBlobUrl('');
+      setBinaryData(null);
+      setBinaryDataPdf(null);
+      return;
+    }
+
+    let cancelled = false;
     setPdfConversionFailed(false);
-  }, [file?.id]);
+
+    // POST to /v1/storage/preview with fileId in JSON body
+    // IDM intercepts GET URLs but cannot intercept POST with JSON body
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+    const authToken = localStorage.getItem('auth_token') || '';
+
+    // POST JSON → receive base64 in JSON response — IDM never intercepts JSON
+    const fetchProtected = async (fileId: string, format?: string): Promise<ArrayBuffer> => {
+      const res = await fetch(`${apiBase}/v1/storage/preview`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({ fileId, format: format || undefined, password }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      // Decode base64 to ArrayBuffer
+      const binary = atob(json.data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes.buffer;
+    };
+
+    const isPdfFile = file.fileType === 'pdf';
+    const isOfficeFile = isOfficePreviewable(file.mimeType);
+
+    if (isPdfFile || isOfficeFile) {
+      fetchProtected(file.id)
+        .then(buffer => {
+          if (!cancelled) setBinaryData(buffer);
+        })
+        .catch(() => {
+          if (!cancelled) setBinaryData(null);
+        });
+
+      if (isOfficeFile) {
+        fetchProtected(file.id, 'pdf')
+          .then(buffer => {
+            if (!cancelled) setBinaryDataPdf(buffer);
+          })
+          .catch(() => {
+            if (!cancelled) {
+              setBinaryDataPdf(null);
+              setPdfConversionFailed(true);
+            }
+          });
+      }
+    } else {
+      fetchProtected(file.id)
+        .then(buffer => {
+          if (!cancelled) {
+            const blob = new Blob([buffer]);
+            setBlobUrl(URL.createObjectURL(blob));
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setBlobUrl('');
+        });
+    }
+
+    return () => {
+      cancelled = true;
+      setBlobUrl(prev => { if (prev) URL.revokeObjectURL(prev); return ''; });
+    };
+  }, [file?.id, serveUrl, serveUrlPdf, open]);
 
   const currentIndex = file ? files.findIndex(f => f.id === file.id) : -1;
   const hasPrevious = currentIndex > 0;
@@ -82,14 +163,37 @@ export function FilePreviewModal({
     }
   }, [hasNext, files, currentIndex, onNavigate]);
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     if (!file) return;
     try {
-      const downloadUrl = storageFilesService.getServeUrl(file.id, {
-        download: true,
-        password,
+      // POST JSON endpoint — returns base64, IDM cannot intercept JSON
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const token = localStorage.getItem('auth_token') || '';
+      const res = await fetch(`${apiBase}/v1/storage/preview`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ fileId: file.id, password }),
       });
-      window.open(downloadUrl, '_blank');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const binary = atob(json.data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const blob = new Blob([bytes.buffer], { type: json.mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.originalName || file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch {
       toast.error('Erro ao baixar o arquivo');
     }
@@ -166,33 +270,38 @@ export function FilePreviewModal({
             </>
           )}
 
-          {isImage && serveUrl ? (
+          {!blobUrl && !binaryData && !binaryDataPdf && !pdfConversionFailed ? (
+            <div className="flex flex-col items-center gap-3 py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Carregando arquivo...</p>
+            </div>
+          ) : isImage && blobUrl ? (
             <div className="flex items-center justify-center w-full max-h-[50vh] overflow-hidden rounded-lg bg-gray-50 dark:bg-slate-800/50">
               <ProtectedImageCanvas
-                src={serveUrl}
+                src={blobUrl}
                 alt={file.name}
                 watermarkText={`${userName} · ${new Date().toLocaleDateString('pt-BR')}`}
                 className="print-hidden"
                 maxHeight={500}
               />
             </div>
-          ) : isPdf && serveUrl ? (
-            <PdfViewer url={serveUrl} />
+          ) : isPdf && binaryData ? (
+            <PdfViewer binaryData={binaryData} />
           ) : (isOffice || isPresentation) &&
-            serveUrlPdf &&
+            binaryDataPdf &&
             !pdfConversionFailed ? (
             <PdfViewer
-              url={serveUrlPdf}
+              binaryData={binaryDataPdf}
               onError={() => setPdfConversionFailed(true)}
             />
-          ) : isOffice && pdfConversionFailed && serveUrl ? (
+          ) : isOffice && pdfConversionFailed && binaryData ? (
             <OfficeViewer
-              url={serveUrl}
+              url={URL.createObjectURL(new Blob([binaryData]))}
               fileName={file.name}
               mimeType={file.mimeType}
             />
-          ) : isVideo && serveUrl ? (
-            <VideoPlayer url={serveUrl} name={file.name} />
+          ) : isVideo && blobUrl ? (
+            <VideoPlayer url={blobUrl} name={file.name} />
           ) : (
             <div className="flex flex-col items-center gap-4 py-12">
               <FileTypeIcon fileType={file.fileType} size={64} />

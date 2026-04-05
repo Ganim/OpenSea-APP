@@ -164,3 +164,45 @@ export interface OrdersQuery {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface ScannedOrderVariantResponse {
+  matchedBy: 'barcode' | 'ean' | 'upc' | 'sku';
+  variant: {
+    id: string;
+    name: string;
+    sku: string | null;
+    barcode: string | null;
+    eanCode: string | null;
+    upcCode: string | null;
+    price: number;
+    isActive: boolean;
+  };
+}
+
+export interface OfflineOrderItemInput {
+  variantId: string;
+  quantity?: number;
+}
+
+export interface OfflineOrderInput {
+  offlineRef?: string;
+  customerId?: string;
+  terminalId?: string;
+  sendToCashier?: boolean;
+  items: OfflineOrderItemInput[];
+}
+
+export interface SyncOfflineOrdersRequest {
+  orders: OfflineOrderInput[];
+}
+
+export interface SyncOfflineOrdersResponse {
+  synced: Array<{
+    offlineRef?: string;
+    order?: OrderDTO;
+  }>;
+  failed: Array<{
+    offlineRef?: string;
+    error: string;
+  }>;
+}

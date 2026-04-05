@@ -113,7 +113,7 @@ export const storageFoldersService = {
   async searchFolders(query: string): Promise<FoldersResponse> {
     return apiClient.get<FoldersResponse>(
       API_ENDPOINTS.STORAGE.FOLDERS.SEARCH,
-      { params: { query } }
+      { params: { q: query } }
     );
   },
 

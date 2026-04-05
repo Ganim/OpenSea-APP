@@ -3,17 +3,15 @@
 import { Button } from '@/components/ui/button';
 import type { PosCartItem } from './product-search';
 import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
+
+/**
+ * @deprecated Prefer the new POS components in src/components/sales.
+ */
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
 
 // ---------------------------------------------------------------------------
 // Types

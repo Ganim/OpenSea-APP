@@ -4,7 +4,10 @@ import type {
   CancelOrderRequest,
   ChangeOrderStageRequest,
   CreateOrderRequest,
+  ScannedOrderVariantResponse,
   OrderResponse,
+  SyncOfflineOrdersRequest,
+  SyncOfflineOrdersResponse,
   OrdersQuery,
   OrdersResponse,
   UpdateOrderRequest,
@@ -84,6 +87,21 @@ export const ordersService = {
     return apiClient.post<{ order: OrderResponse['order'] }>(
       API_ENDPOINTS.ORDERS.CONVERT_QUOTE(id),
       {}
+    );
+  },
+
+  async scanVariantByCode(code: string): Promise<ScannedOrderVariantResponse> {
+    return apiClient.get<ScannedOrderVariantResponse>(
+      API_ENDPOINTS.ORDERS.SCAN(encodeURIComponent(code.trim()))
+    );
+  },
+
+  async syncOfflineOrders(
+    data: SyncOfflineOrdersRequest
+  ): Promise<SyncOfflineOrdersResponse> {
+    return apiClient.post<SyncOfflineOrdersResponse>(
+      API_ENDPOINTS.ORDERS.SYNC_OFFLINE,
+      data
     );
   },
 };

@@ -287,7 +287,7 @@ function ChipInput({
   return (
     <div className="relative">
       <div
-        className="flex flex-wrap items-center gap-1 rounded-(--input-radius) border border-[rgb(var(--color-border))] bg-(--input-bg) px-2 py-1 min-h-[32px] cursor-text transition-all duration-(--transition-normal) focus-within:border-[rgb(var(--color-border-focus))] focus-within:ring-[3px] focus-within:ring-[rgb(var(--color-ring)/0.5)]"
+        className="flex flex-wrap items-center gap-1 rounded-(--input-radius) border border-[rgb(var(--color-border))] bg-(--input-bg) px-2 py-1 min-h-8 cursor-text transition-all duration-(--transition-normal) focus-within:border-[rgb(var(--color-border-focus))] focus-within:ring-[3px] focus-within:ring-[rgb(var(--color-ring)/0.5)]"
         onClick={() => ref.current?.focus()}
       >
         {chips.map((chip, idx) => (
@@ -1453,7 +1453,7 @@ export function EmailComposeDialog({
           {/* TipTap editor body - fills remaining space, with drag-drop zone */}
           <div
             className={cn(
-              'flex-1 min-h-0 overflow-y-auto px-6 py-4 relative transition-colors bg-gray-50 dark:bg-white/[0.03]',
+              'flex-1 min-h-0 overflow-y-auto px-6 py-4 relative transition-colors bg-gray-50 dark:bg-white/3',
               isDragOver && 'bg-blue-50 dark:bg-blue-500/10'
             )}
             onDragEnter={handleDragEnter}
@@ -1482,7 +1482,7 @@ export function EmailComposeDialog({
               {attachmentFiles.map((file, idx) => (
                 <div
                   key={`${file.name}-${idx}`}
-                  className="flex items-center gap-1.5 bg-muted rounded-xl px-3 py-1.5 text-xs max-w-[240px]"
+                  className="flex items-center gap-1.5 bg-muted rounded-xl px-3 py-1.5 text-xs max-w-60"
                 >
                   <FileText className="size-3.5 shrink-0 text-muted-foreground" />
                   <span className="truncate font-medium" title={file.name}>

@@ -5,7 +5,7 @@ import type {
 } from '@/types/hr';
 
 export interface HrConfigResponse {
-  config: HrTenantConfig;
+  hrConfig: HrTenantConfig;
 }
 
 export const hrConfigService = {

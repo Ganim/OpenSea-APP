@@ -23,11 +23,33 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 
 /** Converte qualquer texto para Title Case (primeira letra de cada palavra maiúscula, compatível com acentos) */
+/**
+ * Converts text to title case while preserving:
+ * - All-caps words (acronyms like EPI, RH, CIPA)
+ * - Portuguese prepositions/articles in lowercase (de, do, da, dos, das, e, ou, a, o, as, os, em, no, na, nos, nas, por, para, com)
+ */
 function toTitleCase(text: string): string {
+  const lowerCaseWords = new Set([
+    'de', 'do', 'da', 'dos', 'das',
+    'e', 'ou', 'a', 'o', 'as', 'os',
+    'em', 'no', 'na', 'nos', 'nas',
+    'por', 'para', 'com',
+  ]);
+
   return text
-    .toLowerCase()
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word, index) => {
+      // Preserve all-caps words (acronyms like EPI, RH, CIPA)
+      if (word.length >= 2 && word === word.toUpperCase() && /^[A-ZÀ-Ú]+$/.test(word)) {
+        return word;
+      }
+      // Keep Portuguese prepositions/articles lowercase (except if first word)
+      if (index > 0 && lowerCaseWords.has(word.toLowerCase())) {
+        return word.toLowerCase();
+      }
+      // Title case the word
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
     .join(' ');
 }
 

@@ -1,0 +1,30 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "session_id",
+          "value": "7ddc21f1-78b8-44d4-b09f-ad54efcbf21f"
+        },
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI3ZGRjMjFmMS03OGI4LTQ0ZDQtYjA5Zi1hZDU0ZWZjYmYyMWYiLCJ0ZW5hbnRJZCI6ImM2N2EwMWY1LTA0YWEtNDg1Yy1hNjU3LTE2NjYxZGE3YTk3ZSIsImlzU3VwZXJBZG1pbiI6ZmFsc2UsImF1ZCI6Im9wZW5zZWEtY2xpZW50IiwiaXNzIjoib3BlbnNlYS1hcGkiLCJzdWIiOiJjNWIxZGRkYS0xMjM2LTQxMzEtODNjMi02NWIxNTVmOTUwMTAiLCJpYXQiOjE3NzQ5MjkxMDIsImV4cCI6MTc3NDkzMDkwMn0.drg8gkYpsrIkwl2l-gYvo2xzY8WqvBcI4nVtjqJaVKsStzIQQtX8nGJTCrYUb2TcoOZqZndGg8NxZOkzOi3ZcHbote73dbWJBLgO8YPh0k7ldgzLFcywcbJb46dXO_qB-Lwc6LyK8ysxN67DTJNhG0unATO_cxww1HOc5y5IxgMhiQ3JIT6izqEy6tWtifJyyzIWv7HV8tO-melzHVI0QApemK9BpCOM8uncEDnmdqvAgRvbQNW3yeOkCg271WMcLI4jmTukP73c_U0POSCxkdOj1Z-hHEzjiUVp8SMUxiT4N2JMnGYcmj4aZ76Nq1YRURWlfCUJE6U6bRWUU5Ht-A"
+        },
+        {
+          "name": "opensea_saved_accounts",
+          "value": "[{\"id\":\"c5b1ddda-1236-4131-83c2-65b155f95010\",\"identifier\":\"admin@teste.com\",\"displayName\":\"admin\",\"lastLoginAt\":\"2026-03-31T03:51:42.283Z\"}]"
+        },
+        {
+          "name": "selected_tenant_id",
+          "value": "c67a01f5-04aa-485c-a657-16661da7a97e"
+        },
+        {
+          "name": "refresh_token",
+          "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI3ZGRjMjFmMS03OGI4LTQ0ZDQtYjA5Zi1hZDU0ZWZjYmYyMWYiLCJqdGkiOiI5NDNmN2ZjMi01NmNjLTQyNzctOWEzMS0wMjE4ZjY4MTBlNDEiLCJhdWQiOiJvcGVuc2VhLWNsaWVudCIsImlzcyI6Im9wZW5zZWEtYXBpIiwic3ViIjoiYzViMWRkZGEtMTIzNi00MTMxLTgzYzItNjViMTU1Zjk1MDEwIiwiaWF0IjoxNzc0OTI5MTAyLCJleHAiOjE3NzU1MzM5MDJ9.dAlM7IJZ-zpqTb6WU8oyKzAZpOcxk8jxR4EAN1g6Z2q-5Fe2ha2BxTYdRHuky6nW_HwK2ZI7lBBN69JAE63v9zih1TsIZqp9_WnxQJzNCZIIYq1WTF8OZaIf7KyHOMkWg3UB5hDOMh54K9Rql-CjHlawnzZI6756sA1YvuJ1vpneMVBsVuWZTu6zKTl8pudjgMs0InkG4LOD-MtQxeKjHPoUVASax0S3rmyA7Cx8vJjpkm18339qqrarX9JQgqqDQHm4YS1KsEWlwh3qU_iPj9nXOJvy9yoGu3BUWQUU8ne84zU7JDC2INlsJOnbN5JtT5ekw-c8n0V2hdODukiNdA"
+        }
+      ]
+    }
+  ]
+}

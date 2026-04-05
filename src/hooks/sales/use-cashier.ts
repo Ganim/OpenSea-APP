@@ -1,13 +1,13 @@
 import { cashierService } from '@/services/sales';
 import type {
-  CashierSessionsQuery,
-  CashierTransactionsQuery,
+    CashierSessionsQuery,
+    CashierTransactionsQuery,
 } from '@/services/sales/cashier.service';
 import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
+    useInfiniteQuery,
+    useMutation,
+    useQuery,
+    useQueryClient,
 } from '@tanstack/react-query';
 
 export type CashierSessionsFilters = Omit<
@@ -26,6 +26,7 @@ const CASHIER_KEYS = {
   sessionsList: (filters?: CashierSessionsFilters) =>
     ['cashier', 'sessions', 'list', filters] as const,
   session: (id: string) => ['cashier', 'sessions', 'detail', id] as const,
+  sessionReport: (id: string) => ['cashier', 'sessions', 'report', id] as const,
   activeSession: ['cashier', 'sessions', 'active'] as const,
   transactions: ['cashier', 'transactions'] as const,
   transactionsList: (filters?: CashierTransactionsFilters) =>
@@ -59,6 +60,14 @@ export function useCashierSession(id: string) {
     queryKey: CASHIER_KEYS.session(id),
     queryFn: () => cashierService.getSession(id),
     enabled: !!id,
+  });
+}
+
+export function useCashierSessionReport(sessionId: string | null) {
+  return useQuery({
+    queryKey: CASHIER_KEYS.sessionReport(sessionId ?? ''),
+    queryFn: () => cashierService.getSessionReport(sessionId!),
+    enabled: !!sessionId,
   });
 }
 

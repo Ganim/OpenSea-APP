@@ -75,3 +75,29 @@ export interface CashierSessionsQuery extends PaginatedQuery {
   status?: CashierSessionStatus;
   cashierId?: string;
 }
+
+export interface CashierSessionReport {
+  sessionId: string;
+  status: CashierSessionStatus;
+  openingBalance: number;
+  closingBalance?: number;
+  expectedBalance?: number;
+  difference?: number;
+  totals: {
+    sales: number;
+    refunds: number;
+    cashIn: number;
+    cashOut: number;
+    netSales: number;
+    transactions: number;
+  };
+  paymentMethods: Array<{
+    method: string;
+    amount: number;
+    count: number;
+  }>;
+  hourlySales: Array<{
+    hour: number;
+    amount: number;
+  }>;
+}
