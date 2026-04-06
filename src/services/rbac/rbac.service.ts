@@ -289,10 +289,21 @@ export async function listGroupPermissions(
 
 export async function removePermissionFromGroup(
   groupId: string,
-  permissionCode: string
+  permissionIdOrCode: string
 ): Promise<void> {
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  let permissionId = permissionIdOrCode;
+
+  // Backward compatibility: some screens still pass permission code.
+  if (!UUID_REGEX.test(permissionIdOrCode)) {
+    const permission = await getPermissionByCode(permissionIdOrCode);
+    permissionId = permission.id;
+  }
+
   await apiClient.delete<void>(
-    API_ENDPOINTS.RBAC.GROUPS.REMOVE_PERMISSION(groupId, permissionCode)
+    API_ENDPOINTS.RBAC.GROUPS.REMOVE_PERMISSION(groupId, permissionId)
   );
 }
 

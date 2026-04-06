@@ -566,8 +566,8 @@ export const API_ENDPOINTS = {
         `/v1/rbac/permission-groups/${groupId}/permissions`,
       PERMISSIONS_BULK: (groupId: string) =>
         `/v1/rbac/permission-groups/${groupId}/permissions/bulk`,
-      REMOVE_PERMISSION: (groupId: string, code: string) =>
-        `/v1/rbac/permission-groups/${groupId}/permissions/${code}`,
+      REMOVE_PERMISSION: (groupId: string, permissionId: string) =>
+        `/v1/rbac/permission-groups/${groupId}/permissions/${permissionId}`,
       USERS: (groupId: string) => `/v1/rbac/permission-groups/${groupId}/users`,
     },
     USERS: {
