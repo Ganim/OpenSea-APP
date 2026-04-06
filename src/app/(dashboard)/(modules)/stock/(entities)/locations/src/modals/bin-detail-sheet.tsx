@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ArrowRightLeft,
   Lock,
@@ -13,6 +13,9 @@ import {
   Printer,
   Plus,
   X,
+  MoreVertical,
+  History,
+  PackageMinus,
 } from 'lucide-react';
 import {
   Sheet,
@@ -21,6 +24,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -30,13 +40,17 @@ import { toast } from 'sonner';
 import { useBinDetail } from '../api/bins.queries';
 import { useBlockBin, useUnblockBin } from '../api/bins.queries';
 import { useTransferItem } from '../api/items.queries';
+import { useCodeLookup } from '@/hooks/mobile/use-code-lookup';
+import { ScanResultSheet } from '@/components/mobile/scan-result-sheet';
+import type { LookupResult } from '@/services/stock/lookup.service';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 import { usePrintQueue } from '@/core/print-queue';
 import { BlockBinModal } from './block-bin-modal';
 import { MoveItemModal } from './move-item-modal';
 import { AddItemToBinModal } from './add-item-to-bin-modal';
 import { AdjustCapacityModal } from './adjust-capacity-modal';
-import type { BinItem, Bin } from '@/types/stock';
+import { ExitItemsModal } from '../../../products/src/modals/exit-items-modal';
+import type { BinItem, Bin, Item } from '@/types/stock';
 
 // ============================================
 // TYPES
@@ -118,10 +132,43 @@ export function BinDetailSheet({
   const { actions: printActions } = usePrintQueue();
 
   const [moveItem, setMoveItem] = useState<BinItem | null>(null);
+  const [exitItem, setExitItem] = useState<BinItem | null>(null);
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showCapacityModal, setShowCapacityModal] = useState(false);
   const transferItem = useTransferItem();
+
+  // Scan result sheet (reused from mobile scanner — same modal as QR code)
+  const [scanResult, setScanResult] = useState<LookupResult | null>(null);
+  const [scanSheetOpen, setScanSheetOpen] = useState(false);
+  const codeLookup = useCodeLookup();
+
+  // Manual double-click detection (native dblclick is unreliable inside Sheet scroll containers)
+  const clickTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const handleItemClick = useCallback(
+    (item: BinItem) => {
+      const key = item.id;
+      if (clickTimers.current[key]) {
+        clearTimeout(clickTimers.current[key]);
+        delete clickTimers.current[key];
+        // Double click — open ScanResultSheet using item code lookup
+        codeLookup.mutate(item.itemCode, {
+          onSuccess: result => {
+            setScanResult(result);
+            setScanSheetOpen(true);
+          },
+          onError: () => {
+            toast.error('Não foi possível carregar os detalhes do item.');
+          },
+        });
+      } else {
+        clickTimers.current[key] = setTimeout(() => {
+          delete clickTimers.current[key];
+        }, 300);
+      }
+    },
+    [codeLookup]
+  );
 
   const bin = data?.bin;
   const items = data?.items ?? [];
@@ -413,8 +460,10 @@ export function BinDetailSheet({
                         <div
                           key={item.id}
                           data-item-id={item.id}
+                          onClick={() => handleItemClick(item)}
+                          title="Duplo clique para ações"
                           className={cn(
-                            'flex gap-3 p-3 rounded-lg border transition-all',
+                            'flex gap-3 p-3 rounded-lg border transition-all cursor-pointer select-none',
                             isHighlighted
                               ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-500 ring-2 ring-blue-500/30 animate-pulse'
                               : 'bg-muted/40 border-border hover:border-blue-300 dark:hover:border-blue-500/40'
@@ -441,7 +490,8 @@ export function BinDetailSheet({
                               </span>
                               <button
                                 type="button"
-                                onClick={() => {
+                                onClick={e => {
+                                  e.stopPropagation();
                                   navigator.clipboard.writeText(item.itemCode);
                                   toast.success('Código copiado!');
                                 }}
@@ -484,7 +534,7 @@ export function BinDetailSheet({
                             )}
                           </div>
 
-                          {/* Quantity + Print + Move */}
+                          {/* Quantity + Print + Actions */}
                           <div className="flex flex-col items-end gap-1 shrink-0">
                             <Badge
                               variant="secondary"
@@ -499,21 +549,44 @@ export function BinDetailSheet({
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-muted-foreground hover:text-violet-600"
-                                onClick={() => handlePrintItem(item)}
+                                onClick={e => { e.stopPropagation(); handlePrintItem(item); }}
                                 title="Imprimir etiqueta"
                               >
                                 <Printer className="h-3.5 w-3.5" />
                               </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-blue-600"
-                                onClick={() => setMoveItem(item)}
-                                title="Mover item"
-                              >
-                                <ArrowRightLeft className="h-3.5 w-3.5" />
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    <MoreVertical className="h-3.5 w-3.5" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                  <DropdownMenuItem
+                                    onClick={() => toast.info('Histórico em breve')}
+                                  >
+                                    <History className="mr-2 h-4 w-4" />
+                                    Ver Histórico
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setMoveItem(item)}>
+                                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                                    Transferir
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator className="!bg-gray-200 dark:!bg-gray-600" />
+                                  <DropdownMenuItem
+                                    onClick={() => setExitItem(item)}
+                                    className="text-rose-600 dark:text-rose-400 focus:text-rose-700 dark:focus:text-rose-300"
+                                  >
+                                    <PackageMinus className="mr-2 h-4 w-4" />
+                                    Dar Baixa
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </div>
                         </div>
@@ -528,7 +601,8 @@ export function BinDetailSheet({
                   onClick={() => setShowAddItemModal(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Item
+                  <span className="hidden sm:inline">Adicionar Item</span>
+                  <span className="sm:hidden">Adicionar</span>
                 </Button>
               </div>
             </div>
@@ -567,6 +641,25 @@ export function BinDetailSheet({
         />
       )}
 
+      {/* Exit Item Modal */}
+      {exitItem && bin && (
+        <ExitItemsModal
+          open={!!exitItem}
+          onOpenChange={(val: boolean) => {
+            if (!val) setExitItem(null);
+          }}
+          selectedItems={[{
+            ...exitItem,
+            currentQuantity: exitItem.quantity,
+            fullCode: exitItem.itemCode,
+            uniqueCode: exitItem.itemCode,
+          } as unknown as Item]}
+          onConfirm={async () => {
+            setExitItem(null);
+          }}
+        />
+      )}
+
       {/* Add Item to Bin Modal */}
       {bin && (
         <AddItemToBinModal
@@ -587,6 +680,16 @@ export function BinDetailSheet({
           zoneId={zone.id}
         />
       )}
+
+      {/* Scan Result Sheet (reused from mobile scanner) */}
+      <ScanResultSheet
+        open={scanSheetOpen}
+        onOpenChange={open => {
+          setScanSheetOpen(open);
+          if (!open) setScanResult(null);
+        }}
+        result={scanResult}
+      />
     </>
   );
 }

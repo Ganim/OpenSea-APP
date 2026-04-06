@@ -25,6 +25,7 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  ScanLine,
   Settings,
   Edit,
   Trash2,
@@ -194,6 +195,13 @@ export default function WarehouseDetailPage({ params }: PageProps) {
 
   const actionButtons = useMemo(
     () => [
+      {
+        id: 'scan-item',
+        title: 'Escanear Item',
+        icon: ScanLine,
+        onClick: () => router.push('/m/stock/scanner'),
+        variant: 'outline' as const,
+      },
       ...(canEditWarehouse
         ? [
             {
@@ -476,8 +484,8 @@ export default function WarehouseDetailPage({ params }: PageProps) {
 
                     {/* Right: filter toggle group + actions dropdown */}
                     <div className="flex items-center gap-2">
-                      {/* Toggle group */}
-                      <div className="inline-flex items-center rounded-lg border border-border bg-muted/30 p-0.5">
+                      {/* Toggle group — scrollable on mobile */}
+                      <div className="flex items-center rounded-lg border border-border bg-muted/30 p-0.5 overflow-x-auto max-w-[min(100%,320px)] sm:max-w-none">
                         {(
                           [
                             'all',
@@ -491,7 +499,7 @@ export default function WarehouseDetailPage({ params }: PageProps) {
                             key={opt}
                             onClick={() => setBinFilter(opt)}
                             className={cn(
-                              'px-2.5 py-1 text-xs font-medium rounded-md transition-colors',
+                              'shrink-0 px-2.5 py-1 text-xs font-medium rounded-md transition-colors',
                               binFilter === opt
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'

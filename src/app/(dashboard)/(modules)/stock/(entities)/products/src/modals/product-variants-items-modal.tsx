@@ -640,6 +640,7 @@ export function ProductVariantsItemsModal({
       <VariantFormModal
         product={product}
         variant={editingVariant}
+        itemCount={editingVariant ? (variantStatsMap?.[editingVariant.id]?.count ?? 0) : 0}
         open={showEditVariantModal}
         onOpenChange={setShowEditVariantModal}
       />

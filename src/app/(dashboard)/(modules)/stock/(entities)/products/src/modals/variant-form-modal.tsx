@@ -6,6 +6,7 @@
 
 'use client';
 
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Button } from '@/components/ui/button';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -58,6 +59,7 @@ import {
   Plus,
   Save,
   SlidersHorizontal,
+  Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -69,6 +71,8 @@ import { toast } from 'sonner';
 interface VariantFormModalProps {
   product: Product | null;
   variant?: Variant | null;
+  /** Number of items registered for this variant (used to block deletion) */
+  itemCount?: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -131,6 +135,7 @@ const INITIAL_FORM: FormData = {
 export function VariantFormModal({
   product,
   variant,
+  itemCount = 0,
   open,
   onOpenChange,
 }: VariantFormModalProps) {
@@ -143,6 +148,7 @@ export function VariantFormModal({
     {}
   );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showDeletePin, setShowDeletePin] = useState(false);
 
   // Fetch template for dynamic attributes
   const { data: template } = useTemplate(product?.templateId || '');
@@ -158,7 +164,8 @@ export function VariantFormModal({
       const attrs: Record<string, unknown> = {};
       if (variant.attributes && typeof variant.attributes === 'object') {
         for (const [key, value] of Object.entries(variant.attributes)) {
-          attrs[key] = value;
+          // Convert numbers to string so decimal inputs work without losing format
+          attrs[key] = typeof value === 'number' ? String(value) : value;
         }
       }
       setFormData({
@@ -348,7 +355,20 @@ export function VariantFormModal({
     },
   });
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => variantsService.deleteVariant(id),
+    onSuccess: () => {
+      invalidateQueries();
+      toast.success('Variante excluída com sucesso!');
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast.error(translateError(msg));
+    },
+  });
+
+  const isPending = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   // ---------------------------------------------------------------------------
   // Validation
@@ -409,6 +429,19 @@ export function VariantFormModal({
     }));
   }, []);
 
+  const handleDeleteClick = useCallback(() => {
+    if (itemCount > 0) {
+      toast.error('Não é possível excluir uma variante com itens lançados');
+      return;
+    }
+    setShowDeletePin(true);
+  }, [itemCount]);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!variant) return;
+    deleteMutation.mutate(variant.id);
+  }, [variant, deleteMutation]);
+
   const handleClose = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
@@ -443,7 +476,17 @@ export function VariantFormModal({
       maxStock: formData.maxStock || undefined,
       reorderPoint: formData.reorderPoint || undefined,
       reorderQuantity: formData.reorderQuantity || undefined,
-      attributes: formData.attributes,
+      attributes: Object.fromEntries(
+        Object.entries(formData.attributes).map(([key, value]) => {
+          // Convert string-typed numeric attributes back to numbers for the API
+          const attrConfig = variantAttributes[key];
+          if (attrConfig?.type === 'number' && typeof value === 'string' && value !== '') {
+            const num = parseFloat(value.replace(',', '.'));
+            return [key, isNaN(num) ? value : num];
+          }
+          return [key, value];
+        })
+      ),
     };
 
     if (isEditMode && variant) {
@@ -460,6 +503,7 @@ export function VariantFormModal({
     validate,
     createMutation,
     updateMutation,
+    variantAttributes,
   ]);
 
   // ---------------------------------------------------------------------------
@@ -469,6 +513,7 @@ export function VariantFormModal({
   if (!product) return null;
 
   return (
+    <>
     <NavigationWizardDialog
       open={open}
       onOpenChange={handleClose}
@@ -483,30 +528,47 @@ export function VariantFormModal({
       onSectionChange={id => setActiveSection(id as SectionId)}
       sectionErrors={sectionErrors}
       isPending={isPending}
+      contentClassName="max-w-[calc(100vw-2rem)] sm:max-w-[1000px]"
       footer={
-        <>
-          <Button variant="outline" onClick={handleClose} disabled={isPending}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {isEditMode ? 'Salvando...' : 'Criando...'}
-              </>
-            ) : isEditMode ? (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Alterações
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Variante
-              </>
-            )}
-          </Button>
-        </>
+        <div className="flex items-center justify-between w-full">
+          {/* Left: Delete (edit mode only) */}
+          {isEditMode && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteClick}
+              disabled={isPending}
+              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir Variante
+            </Button>
+          )}
+          {/* Right: Cancel + Save */}
+          <div className={cn('flex items-center gap-2', !isEditMode && 'ml-auto')}>
+            <Button variant="outline" onClick={handleClose} disabled={isPending}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isEditMode ? 'Salvando...' : 'Criando...'}
+                </>
+              ) : isEditMode ? (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar Variante
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       }
     >
       {activeSection === 'basic' && (
@@ -552,6 +614,15 @@ export function VariantFormModal({
         />
       )}
     </NavigationWizardDialog>
+
+    <VerifyActionPinModal
+      isOpen={showDeletePin}
+      onClose={() => setShowDeletePin(false)}
+      onSuccess={handleDeleteConfirm}
+      title="Confirmar Exclusão"
+      description={`Digite seu PIN de ação para excluir a variante "${variant?.name}".`}
+    />
+    </>
   );
 }
 
@@ -1308,12 +1379,13 @@ function AttributesSection({
                     ) : config.type === 'number' ? (
                       <Input
                         id={`vfm-attr-${key}`}
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={currentValue}
                         onChange={e =>
-                          updateAttribute(key, parseFloat(e.target.value) || 0)
+                          updateAttribute(key, e.target.value.replace(/[^0-9.,]/g, ''))
                         }
-                        placeholder={config.placeholder || ''}
+                        placeholder={config.placeholder || '0'}
                         disabled={isPending}
                       />
                     ) : config.type === 'date' ? (

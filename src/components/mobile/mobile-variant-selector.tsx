@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 import { apiClient } from '@/lib/api-client';
@@ -354,9 +355,10 @@ export function MobileVariantSelector({
     );
   }
 
-  // Open state — fullscreen search
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
+  // Open state — fullscreen search (portal to body to escape transformed Drawer ancestor)
+  if (typeof document === 'undefined') return null;
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950">
       <MobileTopBar
         title="Selecionar Variante"
         showBack
@@ -443,6 +445,7 @@ export function MobileVariantSelector({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

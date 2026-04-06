@@ -57,6 +57,7 @@ import {
   PackageMinus,
   Palette,
   Printer,
+  QrCode,
   RefreshCw,
   Search,
   Tag,
@@ -828,7 +829,7 @@ function StockOverviewListPageContent() {
                 )}
               </span>
             }
-            icon={Palette}
+            thumbnailFallback={<span />}
             iconBgStyle={{
               background: `linear-gradient(135deg, ${variantColor}, ${variantColor}dd)`,
             }}
@@ -947,15 +948,13 @@ function StockOverviewListPageContent() {
               style={{ backgroundColor: variantColor }}
             />
             <div className="flex-1 flex items-center gap-3 px-3 py-2">
-              {/* Icon */}
+              {/* Color swatch */}
               <div
-                className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center"
+                className="w-9 h-9 rounded-lg shrink-0"
                 style={{
                   background: `linear-gradient(135deg, ${variantColor}, ${variantColor}dd)`,
                 }}
-              >
-                <Palette className="h-4 w-4 text-white" />
-              </div>
+              />
               {/* Name + Code + Batch */}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-[13px] text-foreground truncate">
@@ -1129,6 +1128,18 @@ function StockOverviewListPageContent() {
                   </div>
                   <div className="flex items-center gap-1 ml-auto">
                     <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => router.push('/m/stock/scanner')}
+                            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
+                          >
+                            <QrCode className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>Escanear item</TooltipContent>
+                      </Tooltip>
                       {canPrint && (
                         <Tooltip>
                           <TooltipTrigger asChild>

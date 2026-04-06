@@ -399,10 +399,27 @@ export default function QuickEntryPage() {
     return isNaN(q) || q <= 0 ? 0 : Math.round(q * 1000) / 1000;
   }, [formData.quantity]);
 
-  // Reset attributes when variant changes
+  // Reset attributes when variant changes, pre-populating defaults
   useEffect(() => {
     setFormData(prev => ({ ...prev, attributes: {} }));
   }, [selectedVariant?.id]);
+
+  // Pre-populate default values when template attributes load
+  useEffect(() => {
+    if (!itemAttributes || Object.keys(itemAttributes).length === 0) return;
+    setFormData(prev => {
+      const defaults: Record<string, unknown> = {};
+      for (const [key, config] of Object.entries(itemAttributes)) {
+        if (config.defaultValue !== undefined && config.defaultValue !== null && config.defaultValue !== '') {
+          if (!(key in prev.attributes)) {
+            defaults[key] = config.defaultValue;
+          }
+        }
+      }
+      if (Object.keys(defaults).length === 0) return prev;
+      return { ...prev, attributes: { ...defaults, ...prev.attributes } };
+    });
+  }, [itemAttributes]);
 
   // Mutation
   const registerEntry = useMutation({

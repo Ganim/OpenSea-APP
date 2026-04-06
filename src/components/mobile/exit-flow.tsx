@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { ArrowLeft, PackageMinus, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRegisterItemExit } from '@/hooks/stock/use-items';
 import { scanSuccess, scanError } from '@/lib/scan-feedback';
-import { sanitizeQuantityInput } from '@/helpers/formatters';
 import { cn } from '@/lib/utils';
 import type { LookupResult } from '@/services/stock/lookup.service';
 import type { ExitMovementType } from '@/types/stock';
@@ -42,7 +41,6 @@ const EXIT_TYPES: {
 
 export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
   const [exitType, setExitType] = useState<ExitMovementType>('SALE');
-  const [quantity, setQuantity] = useState('1');
   const [notes, setNotes] = useState('');
 
   const exit = useRegisterItemExit();
@@ -53,13 +51,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
   const currentQuantity = Number(e.quantity) || 0;
   const unitOfMeasure = (e.unitOfMeasure as string) || '';
 
-  const parsedQuantity = useMemo(() => {
-    const q = parseFloat(quantity.replace(',', '.'));
-    return isNaN(q) || q <= 0 ? 0 : Math.round(q * 1000) / 1000;
-  }, [quantity]);
-
-  const canSubmit =
-    parsedQuantity > 0 && parsedQuantity <= currentQuantity && !exit.isPending;
+  const canSubmit = currentQuantity > 0 && !exit.isPending;
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
@@ -67,7 +59,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
     exit.mutate(
       {
         itemId: item.entityId,
-        quantity: parsedQuantity,
+        quantity: currentQuantity,
         movementType: exitType,
         notes: notes.trim() || undefined,
       },
@@ -75,7 +67,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
         onSuccess: () => {
           scanSuccess();
           toast.success(
-            `Baixa de ${parsedQuantity} ${unitOfMeasure || 'un'} registrada`
+            `Baixa de ${currentQuantity} ${unitOfMeasure || 'un'} registrada`
           );
           onSuccess();
         },
@@ -89,7 +81,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
     canSubmit,
     exit,
     item.entityId,
-    parsedQuantity,
+    currentQuantity,
     exitType,
     notes,
     unitOfMeasure,
@@ -153,59 +145,6 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Quantity */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Quantidade
-          </label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const q = Math.max(1, parsedQuantity - 1);
-                setQuantity(String(q));
-              }}
-              disabled={exit.isPending || parsedQuantity <= 1}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
-            >
-              −
-            </button>
-            <div className="relative flex-1">
-              <input
-                type="text"
-                inputMode="decimal"
-                value={quantity}
-                onChange={e =>
-                  setQuantity(sanitizeQuantityInput(e.target.value))
-                }
-                disabled={exit.isPending}
-                className="w-full rounded-xl border border-slate-700/50 bg-slate-800/60 px-4 py-3 text-center text-lg font-bold tabular-nums text-slate-100 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
-              />
-              {unitOfMeasure && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                  {unitOfMeasure}
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const q = Math.min(currentQuantity, parsedQuantity + 1);
-                setQuantity(String(q));
-              }}
-              disabled={exit.isPending || parsedQuantity >= currentQuantity}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
-            >
-              +
-            </button>
-          </div>
-          {parsedQuantity > currentQuantity && (
-            <p className="text-xs text-rose-400">
-              Quantidade excede o estoque disponível
-            </p>
-          )}
         </div>
 
         {/* Notes */}

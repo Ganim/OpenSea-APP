@@ -30,6 +30,8 @@ export interface NavigationWizardDialogProps {
   footer: ReactNode;
   sectionErrors?: Record<string, boolean>;
   isPending?: boolean;
+  /** Extra class names merged into DialogContent (e.g. for responsive max-width overrides) */
+  contentClassName?: string;
 }
 
 export function NavigationWizardDialog({
@@ -45,6 +47,7 @@ export function NavigationWizardDialog({
   footer,
   sectionErrors,
   isPending,
+  contentClassName,
 }: NavigationWizardDialogProps) {
   const visibleSections = sections.filter(s => !s.hidden);
 
@@ -61,7 +64,7 @@ export function NavigationWizardDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-[1000px] max-w-[1000px] h-[600px] p-0 gap-0 overflow-hidden flex flex-row"
+        className={cn("sm:max-w-[1000px] max-w-[1000px] h-[600px] p-0 gap-0 overflow-hidden flex flex-row", contentClassName)}
         onPointerDownOutside={e => {
           if (isPending) e.preventDefault();
         }}
