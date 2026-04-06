@@ -2,7 +2,16 @@
 
 import { useState, useCallback } from 'react';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
+import { Button } from '@/components/ui/button';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import {
   ArrowRightLeft,
@@ -14,6 +23,10 @@ import {
   Factory,
   Copy,
   FileText,
+  Search,
+  Loader2,
+  AlertCircle,
+  ClipboardPaste,
 } from 'lucide-react';
 import { toast } from 'sonner';
 // TODO: re-add permission checks once mobile RBAC is stable
@@ -21,6 +34,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { TransferFlow } from '@/components/mobile/transfer-flow';
 import { ExitFlow } from '@/components/mobile/exit-flow';
+import { useCodeLookup } from '@/hooks/mobile/use-code-lookup';
 import type { LookupResult } from '@/services/stock/lookup.service';
 
 // ============================================
@@ -503,7 +517,10 @@ export function ScanResultDialog({
   if (!result) return null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden bg-slate-900 border-slate-700 gap-0 h-[640px] max-h-[85vh] flex flex-col">
+      <DialogContent
+        className="max-w-lg p-0 overflow-hidden bg-slate-900 border-slate-700 gap-0 h-[640px] max-h-[85vh] flex flex-col"
+        showCloseButton={false}
+      >
         <VisuallyHidden>
           <DialogTitle>Resultado da leitura</DialogTitle>
         </VisuallyHidden>
@@ -512,6 +529,143 @@ export function ScanResultDialog({
           variant="desktop"
           onClose={() => onOpenChange(false)}
         />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ============================================
+// Lookup Item Dialog (desktop) — search-only input that resolves a code
+// and emits the LookupResult to the parent for display via ScanResultDialog
+// ============================================
+
+interface LookupItemDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onResult: (result: LookupResult) => void;
+}
+
+export function LookupItemDialog({
+  open,
+  onOpenChange,
+  onResult,
+}: LookupItemDialogProps) {
+  const [code, setCode] = useState('');
+  const lookup = useCodeLookup();
+
+  const handleClose = useCallback(
+    (next: boolean) => {
+      if (!next) {
+        setCode('');
+        lookup.reset();
+      }
+      onOpenChange(next);
+    },
+    [onOpenChange, lookup]
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const value = code.trim();
+      if (!value) return;
+      lookup.mutate(value, {
+        onSuccess: result => {
+          setCode('');
+          lookup.reset();
+          onOpenChange(false);
+          onResult(result);
+        },
+      });
+    },
+    [code, lookup, onOpenChange, onResult]
+  );
+
+  const handlePaste = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const trimmed = text.trim();
+      if (!trimmed) {
+        toast.error('Área de transferência vazia');
+        return;
+      }
+      setCode(trimmed);
+      lookup.reset();
+    } catch {
+      toast.error('Não foi possível ler a área de transferência');
+    }
+  }, [lookup]);
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-indigo-500" />
+            Consultar Item
+          </DialogTitle>
+          <DialogDescription>
+            Digite o código completo do item para visualizar seus detalhes.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <InputGroup>
+            <Input
+              autoFocus
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="Ex: 001.001.0020.001-00003"
+              className="font-mono rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              disabled={lookup.isPending}
+            />
+            <InputGroupAddon align="inline-end">
+              <button
+                type="button"
+                onClick={handlePaste}
+                disabled={lookup.isPending}
+                title="Colar código da área de transferência"
+                className="flex h-9 items-center gap-1.5 rounded-r-md border border-input bg-muted px-3 text-xs font-medium text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                <ClipboardPaste className="h-3.5 w-3.5" />
+                Colar
+              </button>
+            </InputGroupAddon>
+          </InputGroup>
+
+          {lookup.isError && (
+            <div className="flex items-start gap-2 rounded-md border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>
+                Item não encontrado. Verifique o código e tente novamente.
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleClose(false)}
+              disabled={lookup.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={!code.trim() || lookup.isPending}>
+              {lookup.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Buscando...
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Consultar
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

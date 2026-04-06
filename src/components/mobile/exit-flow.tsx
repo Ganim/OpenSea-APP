@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useRegisterItemExit } from '@/hooks/stock/use-items';
 import { scanSuccess, scanError } from '@/lib/scan-feedback';
 import { cn } from '@/lib/utils';
+import { formatUnitName, formatUnitAbbreviation } from '@/helpers/formatters';
 import type { LookupResult } from '@/services/stock/lookup.service';
 import type { ExitMovementType } from '@/types/stock';
 
@@ -23,8 +24,8 @@ const EXIT_TYPES: {
   type: ExitMovementType;
   label: string;
   description: string;
+  fullWidth?: boolean;
 }[] = [
-  { type: 'SALE', label: 'Venda', description: 'Saída por venda' },
   { type: 'PRODUCTION', label: 'Produção', description: 'Uso em produção' },
   { type: 'SAMPLE', label: 'Amostra', description: 'Envio de amostra' },
   { type: 'LOSS', label: 'Perda', description: 'Perda ou avaria' },
@@ -33,6 +34,12 @@ const EXIT_TYPES: {
     label: 'Devolução',
     description: 'Devolução ao fornecedor',
   },
+  {
+    type: 'INVENTORY_ADJUSTMENT',
+    label: 'Ajuste',
+    description: 'Ajuste de inventário',
+    fullWidth: true,
+  },
 ];
 
 // ============================================
@@ -40,7 +47,7 @@ const EXIT_TYPES: {
 // ============================================
 
 export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
-  const [exitType, setExitType] = useState<ExitMovementType>('SALE');
+  const [exitType, setExitType] = useState<ExitMovementType>('PRODUCTION');
   const [notes, setNotes] = useState('');
 
   const exit = useRegisterItemExit();
@@ -50,6 +57,8 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
     (e.name as string) || (e.productName as string) || item.entityId;
   const currentQuantity = Number(e.quantity) || 0;
   const unitOfMeasure = (e.unitOfMeasure as string) || '';
+  const unitName = formatUnitName(unitOfMeasure);
+  const unitAbbr = formatUnitAbbreviation(unitOfMeasure);
 
   const canSubmit = currentQuantity > 0 && !exit.isPending;
 
@@ -67,7 +76,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
         onSuccess: () => {
           scanSuccess();
           toast.success(
-            `Baixa de ${currentQuantity} ${unitOfMeasure || 'un'} registrada`
+            `Baixa de ${currentQuantity} ${unitAbbr} registrada`
           );
           onSuccess();
         },
@@ -84,7 +93,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
     currentQuantity,
     exitType,
     notes,
-    unitOfMeasure,
+    unitAbbr,
     onSuccess,
   ]);
 
@@ -98,12 +107,12 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex-1">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
+          <PackageMinus className="h-4 w-4" />
+        </div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-sm font-semibold text-slate-100">Dar Baixa</h2>
           <p className="truncate text-xs text-slate-500">{itemName}</p>
-        </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
-          <PackageMinus className="h-4 w-4" />
         </div>
       </div>
 
@@ -112,7 +121,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
         <div className="rounded-xl border border-slate-700/50 bg-slate-800/60 p-3">
           <p className="text-[11px] text-slate-500">Estoque atual</p>
           <p className="text-lg font-bold tabular-nums text-slate-100">
-            {currentQuantity} {unitOfMeasure}
+            {currentQuantity} {unitName}
           </p>
         </div>
 
@@ -128,6 +137,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
                 onClick={() => setExitType(opt.type)}
                 className={cn(
                   'rounded-xl border p-3 text-left transition-colors',
+                  opt.fullWidth && 'col-span-2',
                   exitType === opt.type
                     ? 'border-rose-500/30 bg-rose-500/5'
                     : 'border-slate-700/50 bg-slate-800/40 active:bg-slate-700/60'

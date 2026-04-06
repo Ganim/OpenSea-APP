@@ -38,6 +38,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  LookupItemDialog,
+  ScanResultDialog,
+} from '@/components/mobile/scan-result-sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
+import type { LookupResult } from '@/services/stock/lookup.service';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -75,6 +81,12 @@ export default function WarehouseDetailPage({ params }: PageProps) {
   const highlightZoneId = searchParams.get('zone');
   const highlightItemId = searchParams.get('item');
   const { hasPermission } = usePermissions();
+  const isMobile = useIsMobile();
+
+  // Lookup / scan result state (desktop "Consultar Item")
+  const [lookupOpen, setLookupOpen] = useState(false);
+  const [lookupResult, setLookupResult] = useState<LookupResult | null>(null);
+  const [lookupResultOpen, setLookupResultOpen] = useState(false);
 
   const canEditWarehouse = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.MODIFY);
   const canCreateZone = hasPermission(STOCK_PERMISSIONS.WAREHOUSES.REGISTER);
@@ -196,10 +208,16 @@ export default function WarehouseDetailPage({ params }: PageProps) {
   const actionButtons = useMemo(
     () => [
       {
-        id: 'scan-item',
-        title: 'Escanear Item',
+        id: 'lookup-item',
+        title: 'Consultar Item',
         icon: ScanLine,
-        onClick: () => router.push('/m/stock/scanner'),
+        onClick: () => {
+          if (isMobile) {
+            router.push('/m/stock/scanner');
+          } else {
+            setLookupOpen(true);
+          }
+        },
         variant: 'outline' as const,
       },
       ...(canEditWarehouse
@@ -215,7 +233,7 @@ export default function WarehouseDetailPage({ params }: PageProps) {
           ]
         : []),
     ],
-    [router, warehouseId, canEditWarehouse]
+    [router, warehouseId, canEditWarehouse, isMobile]
   );
 
   // ============================================================================
@@ -462,30 +480,78 @@ export default function WarehouseDetailPage({ params }: PageProps) {
               </div>
 
               {/* Selected zone detail */}
-              {selectedZone && (
+              {selectedZone && (() => {
+                const zoneDropdown = (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        aria-label="Ações da zona"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {canConfigureZone && (
+                        <DropdownMenuItem
+                          onClick={() => setConfiguringZone(selectedZone)}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Reconfigurar
+                        </DropdownMenuItem>
+                      )}
+                      {canEditZone && (
+                        <DropdownMenuItem
+                          onClick={() => setEditingZone(selectedZone)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Renomear
+                        </DropdownMenuItem>
+                      )}
+                      {canDeleteZone && (
+                        <>
+                          <DropdownMenuSeparator className="!bg-gray-200 dark:!bg-gray-600" />
+                          <DropdownMenuItem
+                            onClick={() => setDeletingZone(selectedZone)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+                return (
                 <div className="border border-border rounded-lg overflow-hidden bg-white dark:bg-slate-800/60">
                   {/* Zone detail header */}
-                  <div className="flex items-center gap-3 p-4 border-b border-border">
-                    {/* Left: icon + title */}
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
-                      <MapPin className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="font-semibold text-foreground">
-                        {selectedZone.name}
-                      </span>
-                      <p className="text-xs font-mono text-muted-foreground">
-                        {selectedZone.code}
-                      </p>
+                  <div className="p-4 border-b border-border space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
+                    {/* Title row: icon + name + (mobile-only) dropdown */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+                        <MapPin className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold text-foreground block truncate">
+                          {selectedZone.name}
+                        </span>
+                        <p className="text-xs font-mono text-muted-foreground truncate">
+                          {selectedZone.code}
+                        </p>
+                      </div>
+                      {/* Mobile-only dropdown (next to title) */}
+                      <div className="sm:hidden">{zoneDropdown}</div>
                     </div>
 
-                    {/* Spacer */}
-                    <div className="flex-1" />
+                    {/* Spacer (desktop only) */}
+                    <div className="hidden sm:block sm:flex-1" />
 
-                    {/* Right: filter toggle group + actions dropdown */}
+                    {/* Filter row (mobile) / right group (desktop) */}
                     <div className="flex items-center gap-2">
-                      {/* Toggle group — scrollable on mobile */}
-                      <div className="flex items-center rounded-lg border border-border bg-muted/30 p-0.5 overflow-x-auto max-w-[min(100%,320px)] sm:max-w-none">
+                      {/* Toggle group — full-width with equal items on mobile, fixed on desktop */}
+                      <div className="flex items-stretch rounded-lg border border-border bg-muted/30 p-0.5 w-full sm:w-auto">
                         {(
                           [
                             'all',
@@ -499,7 +565,7 @@ export default function WarehouseDetailPage({ params }: PageProps) {
                             key={opt}
                             onClick={() => setBinFilter(opt)}
                             className={cn(
-                              'shrink-0 px-2.5 py-1 text-xs font-medium rounded-md transition-colors',
+                              'flex-1 sm:flex-none px-2.5 py-1 text-xs font-medium rounded-md transition-colors text-center',
                               binFilter === opt
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -518,48 +584,8 @@ export default function WarehouseDetailPage({ params }: PageProps) {
                         ))}
                       </div>
 
-                      {/* Dropdown menu */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            aria-label="Ações da zona"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {canConfigureZone && (
-                            <DropdownMenuItem
-                              onClick={() => setConfiguringZone(selectedZone)}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              Reconfigurar
-                            </DropdownMenuItem>
-                          )}
-                          {canEditZone && (
-                            <DropdownMenuItem
-                              onClick={() => setEditingZone(selectedZone)}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Renomear
-                            </DropdownMenuItem>
-                          )}
-                          {canDeleteZone && (
-                            <>
-                              <DropdownMenuSeparator className="!bg-gray-200 dark:!bg-gray-600" />
-                              <DropdownMenuItem
-                                onClick={() => setDeletingZone(selectedZone)}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {/* Desktop-only dropdown (next to filter) */}
+                      <div className="hidden sm:block">{zoneDropdown}</div>
                     </div>
                   </div>
 
@@ -589,7 +615,8 @@ export default function WarehouseDetailPage({ params }: PageProps) {
                     )}
                   </div>
                 </div>
-              )}
+                );
+              })()}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center min-h-[200px] rounded-lg border border-dashed">
@@ -738,6 +765,24 @@ export default function WarehouseDetailPage({ params }: PageProps) {
             }}
           />
         )}
+
+        {/* Lookup Item — desktop search dialog + result viewer */}
+        <LookupItemDialog
+          open={lookupOpen}
+          onOpenChange={setLookupOpen}
+          onResult={result => {
+            setLookupResult(result);
+            setLookupResultOpen(true);
+          }}
+        />
+        <ScanResultDialog
+          open={lookupResultOpen}
+          onOpenChange={open => {
+            setLookupResultOpen(open);
+            if (!open) setLookupResult(null);
+          }}
+          result={lookupResult}
+        />
       </PageBody>
     </PageLayout>
   );

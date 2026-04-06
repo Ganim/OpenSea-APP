@@ -199,6 +199,31 @@ export function formatUnitAbbreviation(
 }
 
 /**
+ * Retorna o nome amigável da unidade de medida em português,
+ * sem a abreviação em parênteses (ex: "Metros", "Quilogramas").
+ */
+export function formatUnitName(
+  unitOfMeasure: string | null | undefined
+): string {
+  if (!unitOfMeasure) return 'Unidades';
+
+  const nameMap: Record<string, string> = {
+    UNITS: 'Unidades',
+    METERS: 'Metros',
+    KILOGRAMS: 'Quilogramas',
+    GRAMS: 'Gramas',
+    LITERS: 'Litros',
+    MILLILITERS: 'Mililitros',
+    SQUARE_METERS: 'Metros quadrados',
+    PAIRS: 'Pares',
+    BOXES: 'Caixas',
+    PACKS: 'Pacotes',
+  };
+
+  return nameMap[unitOfMeasure] || unitOfMeasure;
+}
+
+/**
  * Retorna a abreviação da unidade de medida (ex: "kg", "m", "L")
  * Extrai o conteúdo entre parênteses do formatUnitOfMeasure()
  * @param uom - Código da unidade de medida (ex: "METERS", "KILOGRAMS")

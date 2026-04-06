@@ -16,11 +16,12 @@ export interface ProductFormData {
  * Tipos de saída de estoque (alinhados com backend MovementType)
  */
 export type ExitType =
-  | 'SALE' // Venda
+  | 'SALE' // Venda (gerado por pedido, não exposto na UI manual)
   | 'PRODUCTION' // Utilização / Consumo Interno
   | 'SAMPLE' // Amostra
   | 'LOSS' // Perda/Furto/Roubo
   | 'SUPPLIER_RETURN' // Devolução ao Fornecedor
+  | 'INVENTORY_ADJUSTMENT' // Ajuste de inventário
   | 'TRANSFER'; // Transferência de Estoque
 
 export const EXIT_TYPE_CONFIG: Record<
@@ -51,6 +52,11 @@ export const EXIT_TYPE_CONFIG: Record<
     label: 'Devolução ao Fornecedor',
     description: 'Retorno do item ao fornecedor',
     icon: 'Undo2',
+  },
+  INVENTORY_ADJUSTMENT: {
+    label: 'Ajuste',
+    description: 'Ajuste de inventário',
+    icon: 'SlidersHorizontal',
   },
   TRANSFER: {
     label: 'Transferência de Estoque',

@@ -30,6 +30,7 @@ import {
   Package,
   ShieldAlert,
   ShoppingCart,
+  SlidersHorizontal,
   Undo2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -40,8 +41,9 @@ interface ExitOptionConfig {
   label: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
-  color: 'emerald' | 'amber' | 'violet' | 'sky' | 'rose';
+  color: 'emerald' | 'amber' | 'violet' | 'sky' | 'rose' | 'slate';
   requiresPin?: boolean;
+  fullWidth?: boolean;
 }
 
 const EXIT_OPTIONS: ExitOptionConfig[] = [
@@ -74,6 +76,15 @@ const EXIT_OPTIONS: ExitOptionConfig[] = [
     icon: ShieldAlert,
     color: 'rose',
     requiresPin: true,
+  },
+  {
+    type: 'INVENTORY_ADJUSTMENT',
+    label: 'Ajuste',
+    description: 'Ajuste de inventário',
+    icon: SlidersHorizontal,
+    color: 'slate',
+    requiresPin: true,
+    fullWidth: true,
   },
 ];
 
@@ -132,6 +143,15 @@ const COLOR_CLASSES: Record<
       'hover:border-rose-400 dark:hover:border-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-500/5',
     badgeClass:
       'bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300 border-rose-600/25 dark:border-rose-500/20',
+  },
+  slate: {
+    iconBg: 'bg-slate-100 dark:bg-slate-500/15',
+    iconText: 'text-slate-600 dark:text-slate-300',
+    iconBorder: 'border-slate-400/30 dark:border-slate-500/25',
+    hoverBorder:
+      'hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-50/80 dark:hover:bg-slate-500/10',
+    badgeClass:
+      'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-400/30 dark:border-slate-500/25',
   },
 };
 
@@ -336,6 +356,7 @@ export function ExitItemsModal({
                     onClick={() => handleSelectType(option.type)}
                     className={cn(
                       'flex flex-col items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-all text-left',
+                      option.fullWidth && 'col-span-2',
                       colors.hoverBorder
                     )}
                   >

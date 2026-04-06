@@ -40,7 +40,8 @@ export type ExitMovementType =
   | 'PRODUCTION'
   | 'SAMPLE'
   | 'LOSS'
-  | 'SUPPLIER_RETURN';
+  | 'SUPPLIER_RETURN'
+  | 'INVENTORY_ADJUSTMENT';
 
 export const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
   PURCHASE: 'Compra',
