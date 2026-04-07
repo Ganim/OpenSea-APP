@@ -315,14 +315,22 @@ function MobileAddItemSheet({
     !!selectedVariant && parsedQuantity > 0 && !registerEntry.isPending;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction="bottom">
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      direction="bottom"
+      repositionInputs={false}
+    >
       <DrawerContent className="bg-slate-950 border-slate-700 [&>div:first-child]:hidden max-h-[92vh] flex flex-col">
         <VisuallyHidden>
           <DrawerTitle>Adicionar Item</DrawerTitle>
         </VisuallyHidden>
 
         {/* Header */}
-        <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3 shrink-0">
+        <div
+          data-vaul-no-drag
+          className="flex items-center gap-3 border-b border-slate-800 px-4 py-3 shrink-0"
+        >
           <button
             onClick={() => onOpenChange(false)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 active:bg-slate-800"
@@ -349,7 +357,10 @@ function MobileAddItemSheet({
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div
+          data-vaul-no-drag
+          className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        >
           {/* Variant selector */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -425,7 +436,10 @@ function MobileAddItemSheet({
         </div>
 
         {/* Submit */}
-        <div className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div
+          data-vaul-no-drag
+          className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm"
+        >
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
