@@ -19,7 +19,8 @@ export const approvalRulesService = {
     const query = new URLSearchParams();
     if (params?.page) query.set('page', String(params.page));
     if (params?.limit) query.set('limit', String(params.limit));
-    if (params?.isActive !== undefined) query.set('isActive', String(params.isActive));
+    if (params?.isActive !== undefined)
+      query.set('isActive', String(params.isActive));
     if (params?.action) query.set('action', params.action);
 
     return apiClient.get<ApprovalRuleListResponse>(
@@ -54,7 +55,10 @@ export const approvalRulesService = {
     await apiClient.delete(API_ENDPOINTS.FINANCE_APPROVAL_RULES.DELETE(id));
   },
 
-  async toggleActive(id: string, isActive: boolean): Promise<ApprovalRuleResponse> {
+  async toggleActive(
+    id: string,
+    isActive: boolean
+  ): Promise<ApprovalRuleResponse> {
     return apiClient.patch<ApprovalRuleResponse>(
       API_ENDPOINTS.FINANCE_APPROVAL_RULES.UPDATE(id),
       { isActive }

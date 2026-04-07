@@ -65,7 +65,7 @@ export function FormFieldWrapper({
         'form-field-wrapper',
         colSpanClasses[colSpan],
         disabled && 'opacity-60 pointer-events-none',
-        className,
+        className
       )}
       data-disabled={disabled || undefined}
       data-field-id={id}

@@ -104,7 +104,9 @@ test.describe('Finance Module Page Audit — FASE 1', () => {
     await identifierInput.waitFor({ timeout: 10000 });
     await identifierInput.fill(LOGIN_EMAIL);
 
-    const continueBtn = page.locator('button:has-text("Continuar"), button[type="submit"]').first();
+    const continueBtn = page
+      .locator('button:has-text("Continuar"), button[type="submit"]')
+      .first();
     await continueBtn.click();
 
     // Step 2: Fill password
@@ -112,22 +114,35 @@ test.describe('Finance Module Page Audit — FASE 1', () => {
     await passwordInput.waitFor({ timeout: 10000 });
     await passwordInput.fill(LOGIN_PASSWORD);
 
-    const loginBtn = page.locator('button:has-text("Entrar"), button[type="submit"]').first();
+    const loginBtn = page
+      .locator('button:has-text("Entrar"), button[type="submit"]')
+      .first();
     await loginBtn.click();
 
-    await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 15000 });
+    await page.waitForURL(url => !url.toString().includes('/login'), {
+      timeout: 15000,
+    });
 
     // Handle tenant selection if needed
     if (page.url().includes('select-tenant')) {
       await page.waitForTimeout(1000);
-      const tenantCard = page.locator('[data-testid="tenant-card"], .cursor-pointer, [role="button"]').first();
+      const tenantCard = page
+        .locator(
+          '[data-testid="tenant-card"], .cursor-pointer, [role="button"]'
+        )
+        .first();
       if (await tenantCard.isVisible({ timeout: 5000 })) {
         await tenantCard.click();
-        await page.waitForURL(url => !url.toString().includes('select-tenant'), { timeout: 10000 });
+        await page.waitForURL(
+          url => !url.toString().includes('select-tenant'),
+          { timeout: 10000 }
+        );
       }
     }
 
-    await context.storageState({ path: 'tests/e2e/audit/.finance-auth-state.json' });
+    await context.storageState({
+      path: 'tests/e2e/audit/.finance-auth-state.json',
+    });
     await context.close();
   });
 
@@ -147,14 +162,19 @@ test.describe('Finance Module Page Audit — FASE 1', () => {
         if (msg.type() === 'error') {
           if (
             !text.includes('favicon') &&
-            !text.includes('Failed to load resource: the server responded with a status of 404') &&
+            !text.includes(
+              'Failed to load resource: the server responded with a status of 404'
+            ) &&
             !text.includes('Download the React DevTools') &&
             !text.includes('Hydration') // Next.js hydration warnings
           ) {
             consoleErrors.push(text.substring(0, 500));
           }
         }
-        if (msg.type() === 'warning' && text.includes('Query data cannot be undefined')) {
+        if (
+          msg.type() === 'warning' &&
+          text.includes('Query data cannot be undefined')
+        ) {
           consoleErrors.push(`[QUERY ERROR] ${text.substring(0, 500)}`);
         }
       });
@@ -179,15 +199,23 @@ test.describe('Finance Module Page Audit — FASE 1', () => {
         await page.waitForTimeout(3000);
 
         // Check for React error boundaries
-        const errorBoundary = await page.locator('text=/Something went wrong|Erro ao carregar|Objects are not valid/i').count();
+        const errorBoundary = await page
+          .locator(
+            'text=/Something went wrong|Erro ao carregar|Objects are not valid/i'
+          )
+          .count();
         if (errorBoundary > 0) {
-          consoleErrors.push('[UI] Error boundary or error message visible on page');
+          consoleErrors.push(
+            '[UI] Error boundary or error message visible on page'
+          );
         }
 
         // Check for React rendering errors in page content
-        const bodyText = await page.textContent('body') || '';
+        const bodyText = (await page.textContent('body')) || '';
         if (bodyText.includes('Objects are not valid as a React child')) {
-          consoleErrors.push('[REACT] Objects are not valid as a React child — rendering error');
+          consoleErrors.push(
+            '[REACT] Objects are not valid as a React child — rendering error'
+          );
         }
         if (bodyText.includes('Cannot read properties of')) {
           consoleErrors.push('[REACT] Runtime TypeError visible in page');
@@ -240,15 +268,29 @@ test.describe('Finance Module Page Audit — FASE 1', () => {
       results.push(result);
 
       // Log immediately
-      const icon = result.status === 'OK' ? '✅' : result.status === 'WARNING' ? '⚠️' : '❌';
-      console.log(`${icon} ${result.label} (${result.path}) — ${result.loadTimeMs}ms${result.consoleErrors.length > 0 ? ` — ${result.consoleErrors.length} error(s)` : ''}`);
+      const icon =
+        result.status === 'OK'
+          ? '✅'
+          : result.status === 'WARNING'
+            ? '⚠️'
+            : '❌';
+      console.log(
+        `${icon} ${result.label} (${result.path}) — ${result.loadTimeMs}ms${result.consoleErrors.length > 0 ? ` — ${result.consoleErrors.length} error(s)` : ''}`
+      );
       for (const err of result.consoleErrors) {
         console.log(`   ↳ ${err}`);
       }
 
       // Assert no critical errors (React crashes)
-      if (consoleErrors.some(e => e.includes('[REACT]') || e.includes('[PAGE CRASH]'))) {
-        expect(consoleErrors, `Critical errors on ${pageInfo.path}`).toHaveLength(0);
+      if (
+        consoleErrors.some(
+          e => e.includes('[REACT]') || e.includes('[PAGE CRASH]')
+        )
+      ) {
+        expect(
+          consoleErrors,
+          `Critical errors on ${pageInfo.path}`
+        ).toHaveLength(0);
       }
 
       await context.close();

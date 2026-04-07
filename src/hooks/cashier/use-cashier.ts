@@ -4,10 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { cashierService } from '@/services/cashier';
-import type {
-  CreatePixChargeRequest,
-  PixChargeStatus,
-} from '@/types/cashier';
+import type { CreatePixChargeRequest, PixChargeStatus } from '@/types/cashier';
 import { toast } from 'sonner';
 
 export interface PixChargesFilters {
@@ -42,7 +39,7 @@ export function usePixCharges(filters?: PixChargesFilters) {
       });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.meta.page < lastPage.meta.pages) {
         return lastPage.meta.page + 1;
       }
@@ -51,7 +48,7 @@ export function usePixCharges(filters?: PixChargesFilters) {
     staleTime: 30_000,
   });
 
-  const charges = result.data?.pages.flatMap((p) => p.charges) ?? [];
+  const charges = result.data?.pages.flatMap(p => p.charges) ?? [];
   const total = result.data?.pages[0]?.meta.total ?? 0;
 
   return { ...result, charges, total };

@@ -403,7 +403,7 @@ export default function RequestEditPage() {
                         <Textarea
                           id="rejection-reason"
                           value={rejectionReason}
-                          onChange={(e) => setRejectionReason(e.target.value)}
+                          onChange={e => setRejectionReason(e.target.value)}
                           placeholder="Informe o motivo da rejeição..."
                           rows={3}
                         />
@@ -415,8 +415,7 @@ export default function RequestEditPage() {
                           className="h-9 px-2.5 rounded-lg text-sm text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10"
                           onClick={handleReject}
                           disabled={
-                            rejectRequest.isPending ||
-                            !rejectionReason.trim()
+                            rejectRequest.isPending || !rejectionReason.trim()
                           }
                         >
                           {rejectRequest.isPending ? (

@@ -151,7 +151,8 @@ export default function OvertimePage() {
   // Employee options for filter dropdown
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'filter-options'],
-    queryFn: () => employeesService.listEmployees({ perPage: 100, status: 'ACTIVE' }),
+    queryFn: () =>
+      employeesService.listEmployees({ perPage: 100, status: 'ACTIVE' }),
     staleTime: 60_000,
   });
 
@@ -279,7 +280,9 @@ export default function OvertimePage() {
     setBulkApproveIds([]);
 
     if (failCount === 0) {
-      toast.success(`${successCount} hora(s) extra(s) aprovada(s) com sucesso!`);
+      toast.success(
+        `${successCount} hora(s) extra(s) aprovada(s) com sucesso!`
+      );
     } else if (successCount > 0) {
       toast.warning(
         `${successCount} hora(s) extra(s) aprovada(s), ${failCount} falhou(aram).`

@@ -94,7 +94,8 @@ export function AdjustModal({
                 value={newBalance}
                 onChange={e => {
                   setNewBalance(e.target.value);
-                  if (fieldErrors.newBalance) setFieldErrors(prev => ({ ...prev, newBalance: '' }));
+                  if (fieldErrors.newBalance)
+                    setFieldErrors(prev => ({ ...prev, newBalance: '' }));
                 }}
                 required
                 aria-invalid={!!fieldErrors.newBalance}

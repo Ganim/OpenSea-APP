@@ -35,29 +35,29 @@ export function useListDependants(params?: ListDependantsParams) {
       if (_cachedKey === cacheKey && _cachedDependants && pageParam > 1) {
         allDependants = _cachedDependants;
       } else {
-      // If a specific employee is selected, fetch dependants for that employee
-      if (params?.employeeId) {
-        const response = await dependantsService.list(params.employeeId);
-        allDependants = response.dependants ?? [];
-      } else {
-        // Otherwise, fetch all active employees, then aggregate dependants from each
-        const employeesResponse = await employeesService.listEmployees({
-          perPage: 100,
-          status: 'ACTIVE',
-        });
-        const employees = employeesResponse.employees ?? [];
+        // If a specific employee is selected, fetch dependants for that employee
+        if (params?.employeeId) {
+          const response = await dependantsService.list(params.employeeId);
+          allDependants = response.dependants ?? [];
+        } else {
+          // Otherwise, fetch all active employees, then aggregate dependants from each
+          const employeesResponse = await employeesService.listEmployees({
+            perPage: 100,
+            status: 'ACTIVE',
+          });
+          const employees = employeesResponse.employees ?? [];
 
-        allDependants = [];
-        for (const employee of employees) {
-          try {
-            const response = await dependantsService.list(employee.id);
-            const dependants = response.dependants ?? [];
-            allDependants.push(...dependants);
-          } catch {
-            // Skip employees that fail — they may not have dependants access
+          allDependants = [];
+          for (const employee of employees) {
+            try {
+              const response = await dependantsService.list(employee.id);
+              const dependants = response.dependants ?? [];
+              allDependants.push(...dependants);
+            } catch {
+              // Skip employees that fail — they may not have dependants access
+            }
           }
         }
-      }
 
         _cachedKey = cacheKey;
         _cachedDependants = allDependants;
@@ -77,7 +77,7 @@ export function useListDependants(params?: ListDependantsParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.page < lastPage.totalPages) {
         return lastPage.page + 1;
       }

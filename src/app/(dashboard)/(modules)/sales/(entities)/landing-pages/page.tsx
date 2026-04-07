@@ -42,8 +42,7 @@ import {
 import { CreateLandingPageWizard } from './src/components/create-landing-page-wizard';
 
 const STATUS_COLORS: Record<LandingPageStatus, string> = {
-  DRAFT:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  DRAFT: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
   PUBLISHED:
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   ARCHIVED:
@@ -175,9 +174,7 @@ export default function LandingPagesListPage() {
                 'hover:shadow-md hover:border-violet-300 dark:hover:border-violet-500/30',
                 page.status === 'ARCHIVED' && 'opacity-60'
               )}
-              onClick={() =>
-                router.push(`/sales/landing-pages/${page.id}`)
-              }
+              onClick={() => router.push(`/sales/landing-pages/${page.id}`)}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
@@ -211,9 +208,7 @@ export default function LandingPagesListPage() {
                       <DropdownMenuItem
                         onClick={e => {
                           e.stopPropagation();
-                          router.push(
-                            `/sales/landing-pages/${page.id}`
-                          );
+                          router.push(`/sales/landing-pages/${page.id}`);
                         }}
                       >
                         Visualizar
@@ -221,9 +216,7 @@ export default function LandingPagesListPage() {
                       <DropdownMenuItem
                         onClick={e => {
                           e.stopPropagation();
-                          router.push(
-                            `/sales/landing-pages/${page.id}/edit`
-                          );
+                          router.push(`/sales/landing-pages/${page.id}/edit`);
                         }}
                       >
                         Editar
@@ -291,10 +284,7 @@ export default function LandingPagesListPage() {
       />
 
       {/* Create Wizard */}
-      <CreateLandingPageWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-      />
+      <CreateLandingPageWizard open={wizardOpen} onOpenChange={setWizardOpen} />
     </div>
   );
 }

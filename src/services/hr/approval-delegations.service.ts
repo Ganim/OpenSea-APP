@@ -25,7 +25,7 @@ function buildQuery(params?: object): string {
   if (!params) return '';
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(
-    params as Record<string, unknown>,
+    params as Record<string, unknown>
   )) {
     if (value !== undefined && value !== null && value !== '') {
       query.append(key, String(value));
@@ -42,46 +42,42 @@ function buildQuery(params?: object): string {
 export const approvalDelegationsService = {
   /** List outgoing delegations (created by the current user) */
   async listOutgoing(
-    params?: ListDelegationsParams,
+    params?: ListDelegationsParams
   ): Promise<ApprovalDelegationsResponse> {
     return apiClient.get<ApprovalDelegationsResponse>(
-      `/v1/hr/approval-delegations/outgoing${buildQuery(params)}`,
+      `/v1/hr/approval-delegations/outgoing${buildQuery(params)}`
     );
   },
 
   /** List incoming delegations (received by the current user) */
   async listIncoming(
-    params?: ListDelegationsParams,
+    params?: ListDelegationsParams
   ): Promise<ApprovalDelegationsResponse> {
     return apiClient.get<ApprovalDelegationsResponse>(
-      `/v1/hr/approval-delegations/incoming${buildQuery(params)}`,
+      `/v1/hr/approval-delegations/incoming${buildQuery(params)}`
     );
   },
 
   /** Get currently active/effective delegations */
-  async getActive(
-    scope?: DelegationScope,
-  ): Promise<ActiveDelegationsResponse> {
+  async getActive(scope?: DelegationScope): Promise<ActiveDelegationsResponse> {
     const query = scope ? `?scope=${scope}` : '';
     return apiClient.get<ActiveDelegationsResponse>(
-      `/v1/hr/approval-delegations/active${query}`,
+      `/v1/hr/approval-delegations/active${query}`
     );
   },
 
   /** Create a new delegation */
-  async create(
-    data: CreateDelegationData,
-  ): Promise<CreateDelegationResponse> {
+  async create(data: CreateDelegationData): Promise<CreateDelegationResponse> {
     return apiClient.post<CreateDelegationResponse>(
       '/v1/hr/approval-delegations',
-      data,
+      data
     );
   },
 
   /** Revoke a delegation */
   async revoke(delegationId: string): Promise<RevokeDelegationResponse> {
     return apiClient.patch<RevokeDelegationResponse>(
-      `/v1/hr/approval-delegations/${delegationId}/revoke`,
+      `/v1/hr/approval-delegations/${delegationId}/revoke`
     );
   },
 };

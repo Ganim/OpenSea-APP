@@ -231,9 +231,7 @@ export default function EditCustomerPricePage() {
     { label: 'Vendas', href: '/sales' },
     { label: 'Precos por Cliente', href: '/sales/customer-prices' },
     {
-      label: customerPrice
-        ? formatPrice(customerPrice.price)
-        : '...',
+      label: customerPrice ? formatPrice(customerPrice.price) : '...',
       href: `/sales/customer-prices/${id}`,
     },
     { label: 'Editar' },

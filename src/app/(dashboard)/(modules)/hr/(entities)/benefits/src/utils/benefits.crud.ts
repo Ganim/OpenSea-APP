@@ -3,7 +3,11 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { BenefitPlan, CreateBenefitPlanData, UpdateBenefitPlanData } from '@/types/hr';
+import type {
+  BenefitPlan,
+  CreateBenefitPlanData,
+  UpdateBenefitPlanData,
+} from '@/types/hr';
 import { benefitPlansApi } from '../api';
 
 /**
@@ -35,10 +39,14 @@ export async function updateBenefitPlan(
 
   if (data.name !== undefined && data.name !== null) cleanData.name = data.name;
   if (data.type !== undefined && data.type !== null) cleanData.type = data.type;
-  if (data.provider !== undefined) cleanData.provider = data.provider ?? undefined;
-  if (data.policyNumber !== undefined) cleanData.policyNumber = data.policyNumber ?? undefined;
-  if (data.description !== undefined) cleanData.description = data.description ?? undefined;
-  if (data.isActive !== undefined && data.isActive !== null) cleanData.isActive = data.isActive;
+  if (data.provider !== undefined)
+    cleanData.provider = data.provider ?? undefined;
+  if (data.policyNumber !== undefined)
+    cleanData.policyNumber = data.policyNumber ?? undefined;
+  if (data.description !== undefined)
+    cleanData.description = data.description ?? undefined;
+  if (data.isActive !== undefined && data.isActive !== null)
+    cleanData.isActive = data.isActive;
   if (data.rules !== undefined) cleanData.rules = data.rules;
 
   return benefitPlansApi.update(id, cleanData);

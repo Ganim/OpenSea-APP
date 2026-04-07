@@ -63,7 +63,7 @@ export function AdjustStockModal({
     (mode === 'add' || numQuantity <= (ppeItem?.currentStock ?? 0));
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ajustar Estoque</DialogTitle>
@@ -112,14 +112,15 @@ export function AdjustStockModal({
               min="1"
               max={mode === 'remove' ? ppeItem?.currentStock : undefined}
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={e => setQuantity(e.target.value)}
               placeholder="Quantidade a ajustar"
             />
-            {mode === 'remove' && numQuantity > (ppeItem?.currentStock ?? 0) && (
-              <p className="mt-1 text-xs text-rose-500">
-                Quantidade excede o estoque atual ({ppeItem?.currentStock})
-              </p>
-            )}
+            {mode === 'remove' &&
+              numQuantity > (ppeItem?.currentStock ?? 0) && (
+                <p className="mt-1 text-xs text-rose-500">
+                  Quantidade excede o estoque atual ({ppeItem?.currentStock})
+                </p>
+              )}
           </div>
 
           {/* Preview */}

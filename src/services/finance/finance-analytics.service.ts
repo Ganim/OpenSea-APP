@@ -68,7 +68,10 @@ export const financeAnalyticsService = {
     );
   },
 
-  async getExchangeRate(currency: string, date?: string): Promise<ExchangeRateResponse> {
+  async getExchangeRate(
+    currency: string,
+    date?: string
+  ): Promise<ExchangeRateResponse> {
     const query = new URLSearchParams({ currency });
     if (date) query.append('date', date);
     return apiClient.get<ExchangeRateResponse>(

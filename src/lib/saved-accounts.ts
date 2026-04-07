@@ -48,9 +48,7 @@ export function saveAccount(account: Omit<SavedAccount, 'lastLoginAt'>): void {
 
   try {
     const accounts = getSavedAccounts();
-    const existingIndex = accounts.findIndex(
-      a => a.id === account.id
-    );
+    const existingIndex = accounts.findIndex(a => a.id === account.id);
 
     const updatedAccount: SavedAccount = {
       ...account,

@@ -329,9 +329,7 @@ export default function ConversationDetailPage() {
                           {!isAgent && msg.sentiment && (
                             <div
                               className={`h-2.5 w-2.5 rounded-full mt-3 shrink-0 ${sentimentColor}`}
-                              title={
-                                MESSAGE_SENTIMENT_LABELS[msg.sentiment]
-                              }
+                              title={MESSAGE_SENTIMENT_LABELS[msg.sentiment]}
                             />
                           )}
                           <div
@@ -357,9 +355,7 @@ export default function ConversationDetailPage() {
                           {isAgent && msg.sentiment && (
                             <div
                               className={`h-2.5 w-2.5 rounded-full mt-3 shrink-0 ${sentimentColor}`}
-                              title={
-                                MESSAGE_SENTIMENT_LABELS[msg.sentiment]
-                              }
+                              title={MESSAGE_SENTIMENT_LABELS[msg.sentiment]}
                             />
                           )}
                         </div>

@@ -16,7 +16,10 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Card } from '@/components/ui/card';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import { useStoreCredit, useDeleteStoreCredit } from '@/hooks/sales/use-store-credits';
+import {
+  useStoreCredit,
+  useDeleteStoreCredit,
+} from '@/hooks/sales/use-store-credits';
 import { usePermissions } from '@/hooks/use-permissions';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { STORE_CREDIT_SOURCE_LABELS } from '@/types/sales';
@@ -182,12 +185,9 @@ export default function StoreCreditDetailPage() {
 
   const usedAmount = credit.amount - credit.balance;
   const usagePercent =
-    credit.amount > 0
-      ? Math.round((credit.balance / credit.amount) * 100)
-      : 0;
+    credit.amount > 0 ? Math.round((credit.balance / credit.amount) * 100) : 0;
 
-  const isExpired =
-    credit.expiresAt && new Date(credit.expiresAt) < new Date();
+  const isExpired = credit.expiresAt && new Date(credit.expiresAt) < new Date();
   const statusLabel = !credit.isActive
     ? 'Inativo'
     : isExpired
@@ -195,11 +195,12 @@ export default function StoreCreditDetailPage() {
       : credit.balance <= 0
         ? 'Esgotado'
         : 'Ativo';
-  const statusColor = !credit.isActive || credit.balance <= 0
-    ? 'border-gray-300 dark:border-white/[0.1] bg-gray-100 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400'
-    : isExpired
-      ? 'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300'
-      : 'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300';
+  const statusColor =
+    !credit.isActive || credit.balance <= 0
+      ? 'border-gray-300 dark:border-white/[0.1] bg-gray-100 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400'
+      : isExpired
+        ? 'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300'
+        : 'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300';
 
   // ============================================================================
   // RENDER
@@ -352,12 +353,12 @@ export default function StoreCreditDetailPage() {
                   icon={Calendar}
                   label="Data de Expiracao"
                   value={
-                    credit.expiresAt ? formatDate(credit.expiresAt) : 'Sem expiracao'
+                    credit.expiresAt
+                      ? formatDate(credit.expiresAt)
+                      : 'Sem expiracao'
                   }
                   valueClassName={
-                    isExpired
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : undefined
+                    isExpired ? 'text-rose-600 dark:text-rose-400' : undefined
                   }
                 />
               </div>

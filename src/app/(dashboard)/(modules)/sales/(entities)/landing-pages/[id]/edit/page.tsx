@@ -97,7 +97,13 @@ function LandingPageEditContent() {
           slug: slug.trim(),
           description: description.trim() || undefined,
           sections: sections.map((s, idx) => ({
-            type: s.type as 'HERO' | 'FEATURES' | 'CTA' | 'FORM' | 'TESTIMONIALS' | 'CUSTOM',
+            type: s.type as
+              | 'HERO'
+              | 'FEATURES'
+              | 'CTA'
+              | 'FORM'
+              | 'TESTIMONIALS'
+              | 'CUSTOM',
             title: s.title || undefined,
             content: s.content || undefined,
             ctaText: s.ctaText || undefined,
@@ -115,7 +121,16 @@ function LandingPageEditContent() {
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, pageId, title, slug, description, sections, updatePage, router]);
+  }, [
+    isSaving,
+    pageId,
+    title,
+    slug,
+    description,
+    sections,
+    updatePage,
+    router,
+  ]);
 
   function handleDelete() {
     deletePage.mutate(pageId, {
@@ -231,9 +246,7 @@ function LandingPageEditContent() {
             <h1 className="text-xl font-bold">Editar Página de Captura</h1>
             <p className="text-sm text-muted-foreground">
               Criada em{' '}
-              {new Date(data.landingPage.createdAt).toLocaleDateString(
-                'pt-BR'
-              )}
+              {new Date(data.landingPage.createdAt).toLocaleDateString('pt-BR')}
             </p>
           </div>
         </div>
@@ -333,11 +346,7 @@ function LandingPageEditContent() {
                   <Input
                     value={section.ctaText}
                     onChange={e =>
-                      updateSection(
-                        section.tempId,
-                        'ctaText',
-                        e.target.value
-                      )
+                      updateSection(section.tempId, 'ctaText', e.target.value)
                     }
                     placeholder="Ex: Saiba Mais"
                   />
@@ -347,11 +356,7 @@ function LandingPageEditContent() {
                   <Input
                     value={section.ctaLink}
                     onChange={e =>
-                      updateSection(
-                        section.tempId,
-                        'ctaLink',
-                        e.target.value
-                      )
+                      updateSection(section.tempId, 'ctaLink', e.target.value)
                     }
                     placeholder="https://..."
                   />

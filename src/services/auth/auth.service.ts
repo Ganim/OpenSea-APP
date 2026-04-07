@@ -33,7 +33,10 @@ export const authService = {
   },
 
   // POST /v1/auth/login/unified — explicit unified method
-  async loginUnified(credentials: { identifier: string; password: string }): Promise<AuthResponse> {
+  async loginUnified(credentials: {
+    identifier: string;
+    password: string;
+  }): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.AUTH.LOGIN_UNIFIED,
       credentials
@@ -50,7 +53,9 @@ export const authService = {
   },
 
   // POST /v1/auth/magic-link/request
-  async requestMagicLink(identifier: string): Promise<MagicLinkRequestResponse> {
+  async requestMagicLink(
+    identifier: string
+  ): Promise<MagicLinkRequestResponse> {
     return apiClient.post<MagicLinkRequestResponse>(
       API_ENDPOINTS.AUTH.MAGIC_LINK_REQUEST,
       { identifier }

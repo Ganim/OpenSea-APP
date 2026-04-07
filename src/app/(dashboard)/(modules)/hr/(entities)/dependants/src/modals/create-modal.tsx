@@ -208,10 +208,7 @@ export function CreateModal({
                 <Label className="text-xs">
                   Parentesco <span className="text-rose-500">*</span>
                 </Label>
-                <Select
-                  value={relationship}
-                  onValueChange={setRelationship}
-                >
+                <Select value={relationship} onValueChange={setRelationship}>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
@@ -229,10 +226,7 @@ export function CreateModal({
             {/* Toggles */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="dep-irrf"
-                  className="cursor-pointer text-xs"
-                >
+                <Label htmlFor="dep-irrf" className="cursor-pointer text-xs">
                   Dependente para o IRRF
                 </Label>
                 <Switch

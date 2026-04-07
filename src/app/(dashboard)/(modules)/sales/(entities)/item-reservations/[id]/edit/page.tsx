@@ -208,9 +208,7 @@ export default function EditItemReservationPage() {
     { label: 'Vendas', href: '/sales' },
     { label: 'Reservas', href: '/sales/item-reservations' },
     {
-      label: reservation
-        ? `Reserva #${reservation.id.slice(0, 8)}`
-        : '...',
+      label: reservation ? `Reserva #${reservation.id.slice(0, 8)}` : '...',
       href: `/sales/item-reservations/${reservationId}`,
     },
     { label: 'Editar' },

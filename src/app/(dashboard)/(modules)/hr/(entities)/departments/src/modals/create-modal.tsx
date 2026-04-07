@@ -126,7 +126,11 @@ export function CreateModal({
       handleClose();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+      if (
+        msg.includes('name already') ||
+        msg.includes('already exists') ||
+        msg.includes('nome')
+      ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
       } else if (msg.includes('code') || msg.includes('código')) {
         setFieldErrors(prev => ({ ...prev, code: translateError(msg) }));
@@ -249,7 +253,8 @@ export function CreateModal({
                     value={departmentName}
                     onChange={e => {
                       setDepartmentName(e.target.value);
-                      if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                      if (fieldErrors.name)
+                        setFieldErrors(prev => ({ ...prev, name: '' }));
                     }}
                     aria-invalid={!!fieldErrors.name}
                   />
@@ -268,7 +273,8 @@ export function CreateModal({
                     value={departmentCode}
                     onChange={e => {
                       setDepartmentCode(e.target.value.toUpperCase());
-                      if (fieldErrors.code) setFieldErrors(prev => ({ ...prev, code: '' }));
+                      if (fieldErrors.code)
+                        setFieldErrors(prev => ({ ...prev, code: '' }));
                     }}
                     aria-invalid={!!fieldErrors.code}
                   />

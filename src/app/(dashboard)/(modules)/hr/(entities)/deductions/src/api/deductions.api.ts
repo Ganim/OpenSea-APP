@@ -23,10 +23,7 @@ export const deductionsApi = {
     return deduction;
   },
 
-  async update(
-    id: string,
-    data: UpdateDeductionRequest
-  ): Promise<Deduction> {
+  async update(id: string, data: UpdateDeductionRequest): Promise<Deduction> {
     const { deduction } = await deductionsService.update(id, data);
     return deduction;
   },

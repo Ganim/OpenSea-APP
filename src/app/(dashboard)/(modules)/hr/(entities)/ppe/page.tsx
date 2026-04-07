@@ -57,10 +57,10 @@ import { HRSelectionToolbar } from '../../_shared/components/hr-selection-toolba
 
 const CreatePPEItemModal = dynamic(
   () =>
-    import('./src/modals/create-ppe-item-modal').then((m) => ({
+    import('./src/modals/create-ppe-item-modal').then(m => ({
       default: m.CreatePPEItemModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 export default function PPEPage() {
@@ -106,8 +106,8 @@ export default function PPEPage() {
   const deleteMutation = useDeletePPEItem();
 
   const ppeItems = useMemo(
-    () => data?.pages.flatMap((p) => p.ppeItems ?? []) ?? [],
-    [data],
+    () => data?.pages.flatMap(p => p.ppeItems ?? []) ?? [],
+    [data]
   );
 
   // Infinite scroll sentinel
@@ -116,12 +116,12 @@ export default function PPEPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { rootMargin: '300px' },
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -139,10 +139,7 @@ export default function PPEPage() {
   // COMPUTED
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => ppeItems.map((i) => i.id),
-    [ppeItems],
-  );
+  const initialIds = useMemo(() => ppeItems.map(i => i.id), [ppeItems]);
 
   // ============================================================================
   // HANDLERS
@@ -410,7 +407,7 @@ export default function PPEPage() {
           <SearchBar
             value={searchQuery}
             placeholder={ppeConfig.display.labels.searchPlaceholder}
-            onSearch={(value) => setSearchQuery(value)}
+            onSearch={value => setSearchQuery(value)}
             onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
@@ -440,7 +437,7 @@ export default function PPEPage() {
                 renderListItem={renderListCard}
                 isLoading={isLoading}
                 isSearching={!!searchQuery}
-                onItemDoubleClick={(item) => {
+                onItemDoubleClick={item => {
                   if (canView) {
                     router.push(`/hr/ppe/${item.id}`);
                   }
@@ -452,14 +449,16 @@ export default function PPEPage() {
                   <>
                     <Select
                       value={filterCategory || 'ALL'}
-                      onValueChange={(v) => setFilterCategory(v === 'ALL' ? '' : v)}
+                      onValueChange={v =>
+                        setFilterCategory(v === 'ALL' ? '' : v)
+                      }
                     >
                       <SelectTrigger className="w-full sm:w-52">
                         <SelectValue placeholder="Categoria" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ALL">Todas as Categorias</SelectItem>
-                        {PPE_CATEGORIES.map((cat) => (
+                        {PPE_CATEGORIES.map(cat => (
                           <SelectItem key={cat} value={cat}>
                             {getCategoryLabel(cat)}
                           </SelectItem>
@@ -469,7 +468,7 @@ export default function PPEPage() {
 
                     <Select
                       value={filterActive || 'ALL'}
-                      onValueChange={(v) => setFilterActive(v === 'ALL' ? '' : v)}
+                      onValueChange={v => setFilterActive(v === 'ALL' ? '' : v)}
                     >
                       <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="Status" />
@@ -483,7 +482,9 @@ export default function PPEPage() {
 
                     <Select
                       value={filterLowStock || 'ALL'}
-                      onValueChange={(v) => setFilterLowStock(v === 'ALL' ? '' : v)}
+                      onValueChange={v =>
+                        setFilterLowStock(v === 'ALL' ? '' : v)
+                      }
                     >
                       <SelectTrigger className="w-full sm:w-48">
                         <SelectValue placeholder="Estoque" />

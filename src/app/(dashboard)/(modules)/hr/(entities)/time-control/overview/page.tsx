@@ -99,7 +99,9 @@ function formatTime(timestamp: string): string {
 function EmployeeRow({ emp }: { emp: AttendanceEmployee }) {
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 last:border-0">
-      <div className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[emp.status]}`} />
+      <div
+        className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[emp.status]}`}
+      />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{emp.name}</p>
         {emp.department && (
@@ -182,7 +184,9 @@ function StatRow({
   return (
     <div className="flex items-center justify-between py-1.5">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={`text-sm font-medium tabular-nums ${STAT_COLORS[color]}`}>
+      <span
+        className={`text-sm font-medium tabular-nums ${STAT_COLORS[color]}`}
+      >
         {value}
       </span>
     </div>
@@ -395,7 +399,7 @@ function AttendanceOverviewContent() {
                 <TabsContent value="present" className="flex-col mt-0">
                   {data?.presentEmployees.length ? (
                     <div className="max-h-[400px] overflow-y-auto">
-                      {data.presentEmployees.map((emp) => (
+                      {data.presentEmployees.map(emp => (
                         <EmployeeRow key={emp.id} emp={emp} />
                       ))}
                     </div>
@@ -407,7 +411,7 @@ function AttendanceOverviewContent() {
                 <TabsContent value="late" className="flex-col mt-0">
                   {data?.lateEmployees.length ? (
                     <div className="max-h-[400px] overflow-y-auto">
-                      {data.lateEmployees.map((emp) => (
+                      {data.lateEmployees.map(emp => (
                         <EmployeeRow key={emp.id} emp={emp} />
                       ))}
                     </div>
@@ -419,7 +423,7 @@ function AttendanceOverviewContent() {
                 <TabsContent value="absent" className="flex-col mt-0">
                   {data?.absentEmployees.length ? (
                     <div className="max-h-[400px] overflow-y-auto">
-                      {data.absentEmployees.map((emp) => (
+                      {data.absentEmployees.map(emp => (
                         <EmployeeRow key={emp.id} emp={emp} />
                       ))}
                     </div>
@@ -435,7 +439,10 @@ function AttendanceOverviewContent() {
           <div className="space-y-4">
             {/* Pending Approvals */}
             <Card className="overflow-hidden">
-              <SectionHeader icon={ClipboardCheck} title="Aprovações Pendentes" />
+              <SectionHeader
+                icon={ClipboardCheck}
+                title="Aprovações Pendentes"
+              />
               <div className="space-y-1 p-3">
                 <ApprovalRow
                   icon={Clock}

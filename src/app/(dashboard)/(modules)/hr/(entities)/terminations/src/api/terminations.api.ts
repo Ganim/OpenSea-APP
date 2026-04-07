@@ -15,7 +15,9 @@ export interface TerminationsListResponse {
 }
 
 export const terminationsApi = {
-  async list(params?: ListTerminationsParams): Promise<TerminationsListResponse> {
+  async list(
+    params?: ListTerminationsParams
+  ): Promise<TerminationsListResponse> {
     const response = await terminationsService.list(params);
     const items = response.terminations ?? [];
     const page = params?.page ?? 1;

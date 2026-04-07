@@ -36,7 +36,7 @@ export function useGoToField() {
 
     // Try to focus the input inside
     const input = el.querySelector<HTMLElement>(
-      'input, select, textarea, [role="combobox"]',
+      'input, select, textarea, [role="combobox"]'
     );
     if (input) {
       setTimeout(() => input.focus(), 300);

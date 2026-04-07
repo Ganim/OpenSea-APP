@@ -245,10 +245,7 @@ export default function FastLoginPage() {
                     role="button"
                     tabIndex={0}
                     onClick={e =>
-                      handleRemoveAccount(
-                        e as React.MouseEvent,
-                        account.id
-                      )
+                      handleRemoveAccount(e as React.MouseEvent, account.id)
                     }
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {

@@ -18,8 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ProductGrid, type ProductVariant } from '@/components/sales/product-grid';
-import { usePdvOrder, useAddOrderItem, useRemoveOrderItem, useUpdateOrderItemQuantity } from '@/hooks/sales/use-pdv';
+import {
+  ProductGrid,
+  type ProductVariant,
+} from '@/components/sales/product-grid';
+import {
+  usePdvOrder,
+  useAddOrderItem,
+  useRemoveOrderItem,
+  useUpdateOrderItemQuantity,
+} from '@/hooks/sales/use-pdv';
 
 // =============================================================================
 // Types
@@ -86,7 +94,7 @@ export function SaleDetail({ orderId, onReceivePayment }: SaleDetailProps) {
 
   function handleUpdateQuantity(itemId: string, delta: number) {
     if (!orderId) return;
-    const item = order?.items.find((i) => i.id === itemId);
+    const item = order?.items.find(i => i.id === itemId);
     if (!item) return;
     const newQty = item.quantity + delta;
     if (newQty <= 0) {
@@ -131,7 +139,7 @@ export function SaleDetail({ orderId, onReceivePayment }: SaleDetailProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {order.items.map((item) => (
+            {order.items.map(item => (
               <div
                 key={item.id}
                 className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900"

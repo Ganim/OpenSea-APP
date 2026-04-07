@@ -92,8 +92,7 @@ export default function DiscountRuleDetailPage() {
             id: 'edit',
             title: 'Editar',
             icon: Edit,
-            onClick: () =>
-              router.push(`/sales/discount-rules/${ruleId}/edit`),
+            onClick: () => router.push(`/sales/discount-rules/${ruleId}/edit`),
             variant: 'default' as const,
           },
         ]
@@ -266,9 +265,7 @@ export default function DiscountRuleDetailPage() {
                     <InfoRow
                       icon={Calendar}
                       label="Fim"
-                      value={new Date(rule.endDate).toLocaleDateString(
-                        'pt-BR'
-                      )}
+                      value={new Date(rule.endDate).toLocaleDateString('pt-BR')}
                     />
                     <InfoRow
                       icon={Hash}
@@ -330,9 +327,7 @@ export default function DiscountRuleDetailPage() {
                       icon={Hash}
                       label="Quantidade Mínima"
                       value={
-                        rule.minQuantity
-                          ? String(rule.minQuantity)
-                          : undefined
+                        rule.minQuantity ? String(rule.minQuantity) : undefined
                       }
                     />
                     <InfoRow

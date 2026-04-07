@@ -229,8 +229,12 @@ function BankAccountsPageContent() {
   const filters: BankAccountsFilters = useMemo(
     () => ({
       search: debouncedSearch || undefined,
-      status: statusIds.length === 1 ? (statusIds[0] as BankAccountStatus) : undefined,
-      accountType: typeIds.length === 1 ? (typeIds[0] as BankAccountType) : undefined,
+      status:
+        statusIds.length === 1
+          ? (statusIds[0] as BankAccountStatus)
+          : undefined,
+      accountType:
+        typeIds.length === 1 ? (typeIds[0] as BankAccountType) : undefined,
       sortBy,
       sortOrder,
     }),
@@ -445,8 +449,7 @@ function BankAccountsPageContent() {
           badges={[
             {
               label:
-                BANK_ACCOUNT_TYPE_LABELS[item.accountType] ??
-                item.accountType,
+                BANK_ACCOUNT_TYPE_LABELS[item.accountType] ?? item.accountType,
               variant: 'outline',
               color: getTypeBadgeColor(),
             },
@@ -538,8 +541,7 @@ function BankAccountsPageContent() {
       color: string;
     }[] = [
       {
-        label:
-          BANK_ACCOUNT_TYPE_LABELS[item.accountType] ?? item.accountType,
+        label: BANK_ACCOUNT_TYPE_LABELS[item.accountType] ?? item.accountType,
         variant: 'outline',
         color: getTypeBadgeColor(),
       },

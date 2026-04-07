@@ -117,7 +117,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         title: 'Nova Dedução',
         description: 'Registre uma nova dedução para um funcionário.',
         icon: (
-          <Receipt className="h-16 w-16 text-rose-400 opacity-50" strokeWidth={1.2} />
+          <Receipt
+            className="h-16 w-16 text-rose-400 opacity-50"
+            strokeWidth={1.2}
+          />
         ),
         isValid: !!canSubmit,
         content: (
@@ -214,10 +217,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
 
             {/* Recorrente */}
             <div className="flex items-center justify-between">
-              <Label
-                htmlFor="ded-recurring"
-                className="cursor-pointer text-xs"
-              >
+              <Label htmlFor="ded-recurring" className="cursor-pointer text-xs">
                 Dedução recorrente
               </Label>
               <Switch
@@ -269,7 +269,19 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         ),
       },
     ],
-    [employeeId, name, amount, reason, date, isRecurring, installments, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      employeeId,
+      name,
+      amount,
+      reason,
+      date,
+      isRecurring,
+      installments,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

@@ -13,7 +13,13 @@ import { useVariants } from '@/hooks/stock/use-variants';
 import { ApiError } from '@/lib/errors/api-error';
 import { translateError } from '@/lib/error-messages';
 import type { CreateCustomerPriceRequest } from '@/types/sales';
-import { BadgeDollarSign, Check, DollarSign, Loader2, User } from 'lucide-react';
+import {
+  BadgeDollarSign,
+  Check,
+  DollarSign,
+  Loader2,
+  User,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -71,7 +77,8 @@ function StepSelectEntities({
           <option value="">Selecione uma variante</option>
           {variants.map(v => (
             <option key={v.id} value={v.id}>
-              {v.name}{v.sku ? ` (${v.sku})` : ''}
+              {v.name}
+              {v.sku ? ` (${v.sku})` : ''}
             </option>
           ))}
         </select>
@@ -173,11 +180,13 @@ export function CreateCustomerPriceWizard({
 
   const variantsList = useMemo(
     () =>
-      (variantsData?.variants ?? []).map((v: { id: string; name: string; sku?: string }) => ({
-        id: v.id,
-        name: v.name,
-        sku: v.sku,
-      })),
+      (variantsData?.variants ?? []).map(
+        (v: { id: string; name: string; sku?: string }) => ({
+          id: v.id,
+          name: v.name,
+          sku: v.sku,
+        })
+      ),
     [variantsData]
   );
 
@@ -221,7 +230,10 @@ export function CreateCustomerPriceWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(2); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(2);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -237,7 +249,16 @@ export function CreateCustomerPriceWizard({
         toast.error(translateError(apiError.message));
       }
     }
-  }, [customerId, variantId, price, validFrom, validUntil, notes, onSubmit, handleClose]);
+  }, [
+    customerId,
+    variantId,
+    price,
+    validFrom,
+    validUntil,
+    notes,
+    onSubmit,
+    handleClose,
+  ]);
 
   const steps: WizardStep[] = [
     {
@@ -259,7 +280,9 @@ export function CreateCustomerPriceWizard({
     {
       title: 'Preco e Validade',
       description: 'Defina o preco negociado e periodo de validade.',
-      icon: <DollarSign className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
+      icon: (
+        <DollarSign className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+      ),
       onBack: () => setCurrentStep(1),
       content: (
         <StepPriceDetails
@@ -275,7 +298,11 @@ export function CreateCustomerPriceWizard({
       ),
       isValid: !!price && parseFloat(price) > 0,
       footer: (
-        <Button type="button" onClick={handleSubmit} disabled={isSubmitting || !price || parseFloat(price) <= 0}>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !price || parseFloat(price) <= 0}
+        >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

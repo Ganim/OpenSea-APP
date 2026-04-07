@@ -97,11 +97,11 @@ function BalcaoCart({ onCharge, className }: BalcaoCartProps) {
           </div>
         ) : (
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {items.map((item) => (
+            {items.map(item => (
               <CartItemRow
                 key={item.id}
                 item={item}
-                onUpdateQuantity={(qty) => updateItemQuantity(item.id, qty)}
+                onUpdateQuantity={qty => updateItemQuantity(item.id, qty)}
                 onRemove={() => removeItem(item.id)}
               />
             ))}

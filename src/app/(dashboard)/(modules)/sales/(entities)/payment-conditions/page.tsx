@@ -23,21 +23,12 @@ import {
   useDeletePaymentCondition,
 } from '@/hooks/sales/use-payment-conditions';
 import type { PaymentConditionDTO } from '@/types/sales';
-import {
-  PAYMENT_CONDITION_TYPE_LABELS,
-} from '@/types/sales/payment-condition.types';
+import { PAYMENT_CONDITION_TYPE_LABELS } from '@/types/sales/payment-condition.types';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
 import { CreatePaymentConditionWizard } from './src/components/create-payment-condition-wizard';
-import {
-  CreditCard,
-  Plus,
-  Tag,
-  Trash2,
-  Calendar,
-  Percent,
-} from 'lucide-react';
+import { CreditCard, Plus, Tag, Trash2, Calendar, Percent } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -142,7 +133,9 @@ function PaymentConditionsPageContent() {
     []
   );
 
-  const canCreate = hasPermission(SALES_PERMISSIONS.PAYMENT_CONDITIONS.REGISTER);
+  const canCreate = hasPermission(
+    SALES_PERMISSIONS.PAYMENT_CONDITIONS.REGISTER
+  );
   const canDelete = hasPermission(SALES_PERMISSIONS.PAYMENT_CONDITIONS.REMOVE);
 
   const handleDelete = (ids: string[]) => {
@@ -182,7 +175,10 @@ function PaymentConditionsPageContent() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Vendas', href: '/sales' },
-            { label: 'Condicoes de Pagamento', href: '/sales/payment-conditions' },
+            {
+              label: 'Condicoes de Pagamento',
+              href: '/sales/payment-conditions',
+            },
           ]}
           buttons={
             canCreate
@@ -252,8 +248,7 @@ function PaymentConditionsPageContent() {
                 emptyText="Nenhum status encontrado."
               />
               <p className="text-sm text-muted-foreground whitespace-nowrap">
-                {total}{' '}
-                {total === 1 ? 'condicao' : 'condicoes'}
+                {total} {total === 1 ? 'condicao' : 'condicoes'}
               </p>
             </div>
 

@@ -45,16 +45,11 @@ import {
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  shiftsApi,
-  shiftsConfig,
-  shiftKeys,
-  SHIFT_TYPE_LABELS,
-} from './src';
+import { shiftsApi, shiftsConfig, shiftKeys, SHIFT_TYPE_LABELS } from './src';
 
 const CreateShiftModal = dynamic(
   () =>
-    import('./src/modals/create-modal').then((m) => ({
+    import('./src/modals/create-modal').then(m => ({
       default: m.CreateShiftModal,
     })),
   { ssr: false }
@@ -114,7 +109,7 @@ export default function ShiftsPage() {
       };
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => (lastPage.hasMore ? 2 : undefined),
+    getNextPageParam: lastPage => (lastPage.hasMore ? 2 : undefined),
   });
 
   const deleteMutation = useMutation({
@@ -127,7 +122,7 @@ export default function ShiftsPage() {
   });
 
   const allShifts = useMemo(
-    () => data?.pages.flatMap((p) => p.shifts ?? []) ?? [],
+    () => data?.pages.flatMap(p => p.shifts ?? []) ?? [],
     [data]
   );
 
@@ -139,7 +134,7 @@ export default function ShiftsPage() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
-        (item) =>
+        item =>
           item.name.toLowerCase().includes(q) ||
           (item.code && item.code.toLowerCase().includes(q)) ||
           SHIFT_TYPE_LABELS[item.type]?.toLowerCase().includes(q)
@@ -149,13 +144,13 @@ export default function ShiftsPage() {
     // Type filter
     if (selectedTypes.length > 0) {
       const typeSet = new Set(selectedTypes);
-      result = result.filter((item) => typeSet.has(item.type));
+      result = result.filter(item => typeSet.has(item.type));
     }
 
     // Status filter
     if (selectedStatuses.length > 0) {
       const statusSet = new Set(selectedStatuses);
-      result = result.filter((item) => {
+      result = result.filter(item => {
         if (statusSet.has('active') && item.isActive) return true;
         if (statusSet.has('inactive') && !item.isActive) return true;
         if (statusSet.has('night') && item.isNightShift) return true;
@@ -172,7 +167,7 @@ export default function ShiftsPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -196,7 +191,7 @@ export default function ShiftsPage() {
   // ============================================================================
 
   const initialIds = useMemo(
-    () => filteredShifts.map((i) => i.id),
+    () => filteredShifts.map(i => i.id),
     [filteredShifts]
   );
 
@@ -468,7 +463,7 @@ export default function ShiftsPage() {
           <SearchBar
             value={searchQuery}
             placeholder={shiftsConfig.display.labels.searchPlaceholder}
-            onSearch={(value) => setSearchQuery(value)}
+            onSearch={value => setSearchQuery(value)}
             onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
@@ -502,7 +497,7 @@ export default function ShiftsPage() {
                   selectedTypes.length > 0 ||
                   selectedStatuses.length > 0
                 }
-                onItemDoubleClick={(item) => {
+                onItemDoubleClick={item => {
                   if (canView) {
                     router.push(`/hr/shifts/${item.id}`);
                   }
@@ -548,7 +543,7 @@ export default function ShiftsPage() {
           <CreateShiftModal
             isOpen={isCreateOpen}
             onClose={() => setIsCreateOpen(false)}
-            onSubmit={async (data) => {
+            onSubmit={async data => {
               await shiftsApi.create(
                 data as Parameters<typeof shiftsApi.create>[0]
               );

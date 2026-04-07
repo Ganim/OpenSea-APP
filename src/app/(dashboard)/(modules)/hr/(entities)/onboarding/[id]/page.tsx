@@ -118,7 +118,11 @@ export default function OnboardingDetailPage() {
           />
         </PageHeader>
         <PageBody>
-          <GridError type="server" title="Erro ao carregar" message={error?.message} />
+          <GridError
+            type="server"
+            title="Erro ao carregar"
+            message={error?.message}
+          />
         </PageBody>
       </PageLayout>
     );
@@ -166,8 +170,10 @@ export default function OnboardingDetailPage() {
                   {checklist.employee && (
                     <p className="text-sm text-muted-foreground">
                       {checklist.employee.fullName}
-                      {checklist.employee.position && ` \u2022 ${checklist.employee.position.name}`}
-                      {checklist.employee.department && ` \u2022 ${checklist.employee.department.name}`}
+                      {checklist.employee.position &&
+                        ` \u2022 ${checklist.employee.position.name}`}
+                      {checklist.employee.department &&
+                        ` \u2022 ${checklist.employee.department.name}`}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -210,7 +216,9 @@ export default function OnboardingDetailPage() {
                 <User className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Colaborador</h3>
-                  <p className="text-sm text-muted-foreground">Informações do novo funcionário</p>
+                  <p className="text-sm text-muted-foreground">
+                    Informações do novo funcionário
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
@@ -218,18 +226,26 @@ export default function OnboardingDetailPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Nome</p>
-                    <p className="text-sm font-medium">{checklist.employee.fullName}</p>
+                    <p className="text-sm font-medium">
+                      {checklist.employee.fullName}
+                    </p>
                   </div>
                   {checklist.employee.position && (
                     <div>
                       <p className="text-xs text-muted-foreground">Cargo</p>
-                      <p className="text-sm font-medium">{checklist.employee.position.name}</p>
+                      <p className="text-sm font-medium">
+                        {checklist.employee.position.name}
+                      </p>
                     </div>
                   )}
                   {checklist.employee.department && (
                     <div>
-                      <p className="text-xs text-muted-foreground">Departamento</p>
-                      <p className="text-sm font-medium">{checklist.employee.department.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Departamento
+                      </p>
+                      <p className="text-sm font-medium">
+                        {checklist.employee.department.name}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -243,7 +259,9 @@ export default function OnboardingDetailPage() {
               <BarChart3 className="h-5 w-5 text-foreground" />
               <div className="flex-1">
                 <h3 className="text-base font-semibold">Progresso</h3>
-                <p className="text-sm text-muted-foreground">Acompanhamento da integração</p>
+                <p className="text-sm text-muted-foreground">
+                  Acompanhamento da integração
+                </p>
               </div>
             </div>
             <div className="border-b border-border" />
@@ -266,7 +284,9 @@ export default function OnboardingDetailPage() {
               <ListChecks className="h-5 w-5 text-foreground" />
               <div className="flex-1">
                 <h3 className="text-base font-semibold">Itens do Checklist</h3>
-                <p className="text-sm text-muted-foreground">Tarefas a serem concluídas pelo colaborador</p>
+                <p className="text-sm text-muted-foreground">
+                  Tarefas a serem concluídas pelo colaborador
+                </p>
               </div>
             </div>
             <div className="border-b border-border" />
@@ -309,7 +329,9 @@ export default function OnboardingDetailPage() {
                       {item.completedAt && (
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
                           Concluído em{' '}
-                          {new Date(item.completedAt).toLocaleDateString('pt-BR')}
+                          {new Date(item.completedAt).toLocaleDateString(
+                            'pt-BR'
+                          )}
                         </p>
                       )}
                     </div>

@@ -10,16 +10,17 @@ export type IntegrationCategory =
   | 'SOCIAL'
   | 'OTHER';
 
-export const INTEGRATION_CATEGORY_LABELS: Record<IntegrationCategory, string> = {
-  CRM: 'CRM',
-  MARKETING: 'Marketing',
-  MESSAGING: 'Mensagens',
-  PAYMENT: 'Pagamentos',
-  ECOMMERCE: 'E-commerce',
-  ANALYTICS: 'Analytics',
-  SOCIAL: 'Redes Sociais',
-  OTHER: 'Outros',
-};
+export const INTEGRATION_CATEGORY_LABELS: Record<IntegrationCategory, string> =
+  {
+    CRM: 'CRM',
+    MARKETING: 'Marketing',
+    MESSAGING: 'Mensagens',
+    PAYMENT: 'Pagamentos',
+    ECOMMERCE: 'E-commerce',
+    ANALYTICS: 'Analytics',
+    SOCIAL: 'Redes Sociais',
+    OTHER: 'Outros',
+  };
 
 export type IntegrationStatus = 'CONNECTED' | 'DISCONNECTED' | 'ERROR';
 

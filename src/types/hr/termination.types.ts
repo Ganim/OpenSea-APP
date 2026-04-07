@@ -12,15 +12,9 @@ export type TerminationType =
   | 'RESCISAO_INDIRETA'
   | 'FALECIMENTO';
 
-export type NoticeType =
-  | 'TRABALHADO'
-  | 'INDENIZADO'
-  | 'DISPENSADO';
+export type NoticeType = 'TRABALHADO' | 'INDENIZADO' | 'DISPENSADO';
 
-export type TerminationStatus =
-  | 'PENDING'
-  | 'CALCULATED'
-  | 'PAID';
+export type TerminationStatus = 'PENDING' | 'CALCULATED' | 'PAID';
 
 export interface Termination {
   id: string;

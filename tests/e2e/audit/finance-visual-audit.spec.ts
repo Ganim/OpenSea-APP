@@ -59,9 +59,12 @@ interface VisualIssue {
   description: string;
 }
 
-async function analyzePageUX(page: Page, pageInfo: { path: string; label: string }): Promise<VisualIssue[]> {
+async function analyzePageUX(
+  page: Page,
+  pageInfo: { path: string; label: string }
+): Promise<VisualIssue[]> {
   const issues: VisualIssue[] = [];
-  const bodyText = await page.textContent('body') || '';
+  const bodyText = (await page.textContent('body')) || '';
 
   // 1. Check for English text that should be Portuguese
   const englishPatterns = [
@@ -181,7 +184,11 @@ async function analyzePageUX(page: Page, pageInfo: { path: string; label: string
   }
 
   // 4. Check for oversized icons in main content
-  const mainLargeIcons = await page.locator('main svg[class*="h-12"], main svg[class*="h-16"], [class*="PageBody"] svg[class*="h-12"]').count();
+  const mainLargeIcons = await page
+    .locator(
+      'main svg[class*="h-12"], main svg[class*="h-16"], [class*="PageBody"] svg[class*="h-12"]'
+    )
+    .count();
   if (mainLargeIcons > 3) {
     issues.push({
       type: 'warning',
@@ -209,7 +216,9 @@ async function analyzePageUX(page: Page, pageInfo: { path: string; label: string
 
   // 6. Check for empty states
   const emptyGrids = await page.locator('text=/Nenhum.*encontrad/i').count();
-  const emptyGeneric = await page.locator('text=/Sem dados|Sem registros|Nenhum registro/i').count();
+  const emptyGeneric = await page
+    .locator('text=/Sem dados|Sem registros|Nenhum registro/i')
+    .count();
   if (emptyGrids > 0 || emptyGeneric > 0) {
     issues.push({
       type: 'info',
@@ -240,7 +249,11 @@ async function analyzePageUX(page: Page, pageInfo: { path: string; label: string
 
   // 8. Check page has breadcrumb (skip dashboard)
   if (pageInfo.path !== '/finance') {
-    const hasBreadcrumb = await page.locator('nav[aria-label*="breadcrumb"], [class*="breadcrumb"], [class*="Breadcrumb"]').count();
+    const hasBreadcrumb = await page
+      .locator(
+        'nav[aria-label*="breadcrumb"], [class*="breadcrumb"], [class*="Breadcrumb"]'
+      )
+      .count();
     if (hasBreadcrumb === 0) {
       issues.push({
         type: 'warning',
@@ -289,30 +302,47 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
     const identifierInput = page.locator('input').first();
     await identifierInput.waitFor({ timeout: 10000 });
     await identifierInput.fill(LOGIN_EMAIL);
-    const continueBtn = page.locator('button:has-text("Continuar"), button[type="submit"]').first();
+    const continueBtn = page
+      .locator('button:has-text("Continuar"), button[type="submit"]')
+      .first();
     await continueBtn.click();
     const passwordInput = page.locator('input[type="password"]').first();
     await passwordInput.waitFor({ timeout: 10000 });
     await passwordInput.fill(LOGIN_PASSWORD);
-    const loginBtn = page.locator('button:has-text("Entrar"), button[type="submit"]').first();
+    const loginBtn = page
+      .locator('button:has-text("Entrar"), button[type="submit"]')
+      .first();
     await loginBtn.click();
-    await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 15000 });
+    await page.waitForURL(url => !url.toString().includes('/login'), {
+      timeout: 15000,
+    });
 
     if (page.url().includes('select-tenant')) {
       await page.waitForTimeout(1000);
-      const tenantCard = page.locator('[data-testid="tenant-card"], .cursor-pointer, [role="button"]').first();
+      const tenantCard = page
+        .locator(
+          '[data-testid="tenant-card"], .cursor-pointer, [role="button"]'
+        )
+        .first();
       if (await tenantCard.isVisible({ timeout: 5000 })) {
         await tenantCard.click();
-        await page.waitForURL(url => !url.toString().includes('select-tenant'), { timeout: 10000 });
+        await page.waitForURL(
+          url => !url.toString().includes('select-tenant'),
+          { timeout: 10000 }
+        );
       }
     }
 
-    await context.storageState({ path: 'tests/e2e/audit/.finance-visual-auth-state.json' });
+    await context.storageState({
+      path: 'tests/e2e/audit/.finance-visual-auth-state.json',
+    });
     await context.close();
   });
 
   for (const pageInfo of FINANCE_PAGES) {
-    test(`Visual: ${pageInfo.label} (${pageInfo.path})`, async ({ browser }) => {
+    test(`Visual: ${pageInfo.label} (${pageInfo.path})`, async ({
+      browser,
+    }) => {
       const context = await browser.newContext({
         storageState: 'tests/e2e/audit/.finance-visual-auth-state.json',
         viewport: { width: 1440, height: 900 },
@@ -329,7 +359,8 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
         await page.waitForTimeout(4000);
 
         // Take full-page screenshot
-        const screenshotName = (pageInfo.path.replace(/\//g, '_').replace(/^_/, '') || 'finance_root');
+        const screenshotName =
+          pageInfo.path.replace(/\//g, '_').replace(/^_/, '') || 'finance_root';
         await page.screenshot({
           path: `${SCREENSHOTS_DIR}/${screenshotName}.png`,
           fullPage: true,
@@ -343,18 +374,29 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
         const errorCount = issues.filter(i => i.type === 'error').length;
         const warnCount = issues.filter(i => i.type === 'warning').length;
         const icon = errorCount > 0 ? '❌' : warnCount > 0 ? '⚠️' : '✅';
-        console.log(`${icon} ${pageInfo.label} (${pageInfo.path}) — ${issues.length} issue(s)`);
+        console.log(
+          `${icon} ${pageInfo.label} (${pageInfo.path}) — ${issues.length} issue(s)`
+        );
         for (const issue of issues) {
-          const issueIcon = issue.type === 'error' ? '🔴' : issue.type === 'warning' ? '🟡' : '🔵';
-          console.log(`   ${issueIcon} [${issue.category}] ${issue.description}`);
+          const issueIcon =
+            issue.type === 'error'
+              ? '🔴'
+              : issue.type === 'warning'
+                ? '🟡'
+                : '🔵';
+          console.log(
+            `   ${issueIcon} [${issue.category}] ${issue.description}`
+          );
         }
       } catch (error) {
         console.log(`❌ ${pageInfo.label} (${pageInfo.path}) — FAILED TO LOAD`);
-        allIssues.set(pageInfo.path, [{
-          type: 'error',
-          category: 'navigation',
-          description: `Página não carregou: ${error instanceof Error ? error.message : String(error)}`,
-        }]);
+        allIssues.set(pageInfo.path, [
+          {
+            type: 'error',
+            category: 'navigation',
+            description: `Página não carregou: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ]);
       }
 
       await context.close();
@@ -383,7 +425,10 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
     console.log(`📸 Screenshots saved to: ${SCREENSHOTS_DIR}/`);
 
     // Group by category
-    const byCategory = new Map<string, { path: string; issue: VisualIssue }[]>();
+    const byCategory = new Map<
+      string,
+      { path: string; issue: VisualIssue }[]
+    >();
     for (const [pagePath, issues] of allIssues) {
       for (const issue of issues) {
         if (!byCategory.has(issue.category)) byCategory.set(issue.category, []);
@@ -396,7 +441,12 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
       for (const [category, items] of byCategory) {
         console.log(`[${category.toUpperCase()}] (${items.length} issues)`);
         for (const { path: p, issue } of items) {
-          const icon = issue.type === 'error' ? '🔴' : issue.type === 'warning' ? '🟡' : '🔵';
+          const icon =
+            issue.type === 'error'
+              ? '🔴'
+              : issue.type === 'warning'
+                ? '🟡'
+                : '🔵';
           console.log(`  ${icon} ${p} — ${issue.description}`);
         }
         console.log('');
@@ -404,7 +454,9 @@ test.describe('Finance Visual & UX Audit — FASE 2', () => {
     }
 
     // Pages with no issues
-    const cleanPages = [...allIssues.entries()].filter(([, issues]) => issues.length === 0);
+    const cleanPages = [...allIssues.entries()].filter(
+      ([, issues]) => issues.length === 0
+    );
     console.log(`\n✅ ${cleanPages.length} páginas sem problemas detectados`);
 
     // Pages with most issues

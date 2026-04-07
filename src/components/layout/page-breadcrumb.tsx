@@ -30,17 +30,36 @@ import { useIsMobile } from '@/hooks/use-mobile';
  */
 function toTitleCase(text: string): string {
   const lowerCaseWords = new Set([
-    'de', 'do', 'da', 'dos', 'das',
-    'e', 'ou', 'a', 'o', 'as', 'os',
-    'em', 'no', 'na', 'nos', 'nas',
-    'por', 'para', 'com',
+    'de',
+    'do',
+    'da',
+    'dos',
+    'das',
+    'e',
+    'ou',
+    'a',
+    'o',
+    'as',
+    'os',
+    'em',
+    'no',
+    'na',
+    'nos',
+    'nas',
+    'por',
+    'para',
+    'com',
   ]);
 
   return text
     .split(' ')
     .map((word, index) => {
       // Preserve all-caps words (acronyms like EPI, RH, CIPA)
-      if (word.length >= 2 && word === word.toUpperCase() && /^[A-ZÀ-Ú]+$/.test(word)) {
+      if (
+        word.length >= 2 &&
+        word === word.toUpperCase() &&
+        /^[A-ZÀ-Ú]+$/.test(word)
+      ) {
         return word;
       }
       // Keep Portuguese prepositions/articles lowercase (except if first word)

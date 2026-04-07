@@ -9,27 +9,27 @@ import type {
 class TaxRetentionService {
   async calculate(
     entryId: string,
-    config: RetentionConfig,
+    config: RetentionConfig
   ): Promise<CalculateRetentionsResponse> {
     return apiClient.post<CalculateRetentionsResponse>(
       `/v1/finance/entries/${entryId}/retentions/calculate`,
-      config,
+      config
     );
   }
 
   async apply(
     entryId: string,
-    config: RetentionConfig,
+    config: RetentionConfig
   ): Promise<ApplyRetentionsResponse> {
     return apiClient.post<ApplyRetentionsResponse>(
       `/v1/finance/entries/${entryId}/retentions/apply`,
-      config,
+      config
     );
   }
 
   async list(entryId: string): Promise<ListRetentionsResponse> {
     return apiClient.get<ListRetentionsResponse>(
-      `/v1/finance/entries/${entryId}/retentions`,
+      `/v1/finance/entries/${entryId}/retentions`
     );
   }
 }

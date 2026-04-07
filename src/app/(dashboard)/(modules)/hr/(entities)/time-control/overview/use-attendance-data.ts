@@ -9,7 +9,13 @@ import {
   absencesService,
   vacationsService,
 } from '@/services/hr';
-import type { Employee, TimeEntry, TimeBank, Overtime, Absence } from '@/types/hr';
+import type {
+  Employee,
+  TimeEntry,
+  TimeBank,
+  Overtime,
+  Absence,
+} from '@/types/hr';
 
 // ============================================================================
 // TYPES
@@ -96,7 +102,7 @@ function aggregate(
   pendingVacationsCount: number
 ): AttendanceData {
   const activeEmployees = employees.filter(
-    (e) => e.status !== 'TERMINATED' && e.status !== 'INACTIVE'
+    e => e.status !== 'TERMINATED' && e.status !== 'INACTIVE'
   );
   const employeeMap = buildEmployeeMap(activeEmployees);
 
@@ -119,13 +125,13 @@ function aggregate(
   for (const emp of activeEmployees) {
     const entries = entriesByEmployee.get(emp.id) ?? [];
     const clockIns = entries
-      .filter((e) => e.entryType === 'CLOCK_IN')
+      .filter(e => e.entryType === 'CLOCK_IN')
       .sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
     const clockOuts = entries
-      .filter((e) => e.entryType === 'CLOCK_OUT')
+      .filter(e => e.entryType === 'CLOCK_OUT')
       .sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -135,8 +141,7 @@ function aggregate(
 
     if (clockIns.length > 0) {
       const firstClockIn = new Date(clockIns[0].timestamp);
-      const lastClockOut =
-        clockOuts.length > 0 ? clockOuts[0].timestamp : null;
+      const lastClockOut = clockOuts.length > 0 ? clockOuts[0].timestamp : null;
       const late = minutesDiff(firstClockIn, scheduleStart);
 
       const row: AttendanceEmployee = {
@@ -159,7 +164,7 @@ function aggregate(
       // Check if employee has an active absence today
       const today = getTodayISO();
       const hasAbsence = absences.some(
-        (a) =>
+        a =>
           a.employeeId === emp.id &&
           (a.status === 'APPROVED' || a.status === 'IN_PROGRESS') &&
           a.startDate <= today &&
@@ -192,12 +197,8 @@ function aggregate(
   absentEmployees.sort((a, b) => a.name.localeCompare(b.name));
 
   // Pending approvals
-  const pendingOvertime = overtimeList.filter(
-    (o) => o.approved === null
-  ).length;
-  const pendingAbsences = absences.filter(
-    (a) => a.status === 'PENDING'
-  ).length;
+  const pendingOvertime = overtimeList.filter(o => o.approved === null).length;
+  const pendingAbsences = absences.filter(a => a.status === 'PENDING').length;
 
   // Time bank summary
   let positiveBankCount = 0;
@@ -216,7 +217,7 @@ function aggregate(
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     )
     .slice(0, 20)
-    .map((entry) => ({
+    .map(entry => ({
       employeeName:
         employeeMap.get(entry.employeeId)?.fullName ??
         entry.employeeId.slice(0, 8),
@@ -275,25 +276,19 @@ async function fetchAttendanceData(): Promise<AttendanceData> {
       ? employeesResult.value.employees
       : [];
   const entries =
-    entriesResult.status === 'fulfilled'
-      ? entriesResult.value.timeEntries
-      : [];
+    entriesResult.status === 'fulfilled' ? entriesResult.value.timeEntries : [];
   const timeBanks =
     timeBanksResult.status === 'fulfilled'
       ? timeBanksResult.value.timeBanks
       : [];
   const overtime =
-    overtimeResult.status === 'fulfilled'
-      ? overtimeResult.value.overtime
-      : [];
+    overtimeResult.status === 'fulfilled' ? overtimeResult.value.overtime : [];
   const absences =
-    absencesResult.status === 'fulfilled'
-      ? absencesResult.value.absences
-      : [];
+    absencesResult.status === 'fulfilled' ? absencesResult.value.absences : [];
   const pendingVacations =
     vacationsResult.status === 'fulfilled'
       ? vacationsResult.value.vacationPeriods.filter(
-          (v) => v.status === 'SCHEDULED' || v.status === 'PENDING'
+          v => v.status === 'SCHEDULED' || v.status === 'PENDING'
         ).length
       : 0;
 

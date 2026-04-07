@@ -162,7 +162,7 @@ export function useUpdateAbsence() {
       return response.absence;
     },
 
-    onSuccess: (absence) => {
+    onSuccess: absence => {
       queryClient.invalidateQueries({ queryKey: absenceKeys.all });
       queryClient.invalidateQueries({
         queryKey: absenceKeys.detail(absence.id),

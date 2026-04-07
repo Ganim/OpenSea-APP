@@ -161,7 +161,7 @@ function PositionsPageContent() {
       return positionsApi.list({ page: pageParam, perPage: PAGE_SIZE });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
       const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
       return currentPage < total ? currentPage + 1 : undefined;
@@ -278,7 +278,13 @@ function PositionsPageContent() {
       items = items.filter(p => p.departmentId && set.has(p.departmentId));
     }
     return items;
-  }, [allPositionsInfinite, page.searchQuery, companyIds, departmentIds, departmentMap]);
+  }, [
+    allPositionsInfinite,
+    page.searchQuery,
+    companyIds,
+    departmentIds,
+    departmentMap,
+  ]);
 
   // Derive filter options from hook data
   const availableCompanies = useMemo(() => {

@@ -109,7 +109,11 @@ export default function OffboardingDetailPage() {
           />
         </PageHeader>
         <PageBody>
-          <GridError type="server" title="Erro ao carregar" message={error?.message} />
+          <GridError
+            type="server"
+            title="Erro ao carregar"
+            message={error?.message}
+          />
         </PageBody>
       </PageLayout>
     );

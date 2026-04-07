@@ -48,7 +48,9 @@ export function QuickTimeEntryModal({
   const queryClient = useQueryClient();
 
   const [entryType, setEntryType] = useState<EntryAction>('CLOCK_IN');
-  const [dateTime, setDateTime] = useState(() => formatDateTimeLocal(new Date()));
+  const [dateTime, setDateTime] = useState(() =>
+    formatDateTimeLocal(new Date())
+  );
   const [notes, setNotes] = useState('');
 
   function resetForm() {
@@ -99,7 +101,7 @@ export function QuickTimeEntryModal({
   const isValid = !!dateTime && !!employee;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -122,24 +124,24 @@ export function QuickTimeEntryModal({
           <div className="space-y-2">
             <Label>Tipo de Registro *</Label>
             <div className="grid grid-cols-2 gap-3">
-              {(Object.entries(ENTRY_TYPE_LABELS) as [EntryAction, string][]).map(
-                ([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setEntryType(key)}
-                    className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-all ${
-                      entryType === key
-                        ? key === 'CLOCK_IN' || key === 'BREAK_END'
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300'
-                          : 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300'
-                        : 'border-border hover:border-primary/30'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                )
-              )}
+              {(
+                Object.entries(ENTRY_TYPE_LABELS) as [EntryAction, string][]
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setEntryType(key)}
+                  className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-all ${
+                    entryType === key
+                      ? key === 'CLOCK_IN' || key === 'BREAK_END'
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300'
+                        : 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300'
+                      : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -150,7 +152,7 @@ export function QuickTimeEntryModal({
               id="time-entry-datetime"
               type="datetime-local"
               value={dateTime}
-              onChange={(e) => setDateTime(e.target.value)}
+              onChange={e => setDateTime(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
               Padrão: horário atual. Altere se necessário.
@@ -163,7 +165,7 @@ export function QuickTimeEntryModal({
             <Textarea
               id="time-entry-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Informações adicionais (opcional)"
               rows={3}
             />

@@ -1,9 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
-import type {
-  LedgerResponse,
-  TrialBalanceResponse,
-} from '@/types/finance';
+import type { LedgerResponse, TrialBalanceResponse } from '@/types/finance';
 
 export interface DRENode {
   categoryId: string;

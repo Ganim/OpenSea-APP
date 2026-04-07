@@ -78,7 +78,8 @@ export function PageDashboardSections({
     <>
       {sections.map(section => {
         const visibleCards = section.cards.filter(
-          card => !card.hidden && (!card.permission || hasPermission(card.permission))
+          card =>
+            !card.hidden && (!card.permission || hasPermission(card.permission))
         );
 
         if (visibleCards.length === 0) return null;

@@ -9,12 +9,15 @@ import type {
 } from '@/types/sales';
 
 export const cadencesService = {
-  async list(query?: CadencesQuery): Promise<PaginatedCadenceSequencesResponse> {
+  async list(
+    query?: CadencesQuery
+  ): Promise<PaginatedCadenceSequencesResponse> {
     const params = new URLSearchParams();
     if (query?.page) params.append('page', query.page.toString());
     if (query?.limit) params.append('perPage', query.limit.toString());
     if (query?.search) params.append('search', query.search);
-    if (query?.isActive !== undefined) params.append('isActive', String(query.isActive));
+    if (query?.isActive !== undefined)
+      params.append('isActive', String(query.isActive));
     if (query?.sortBy) params.append('sortBy', query.sortBy);
     if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
 
@@ -36,15 +39,26 @@ export const cadencesService = {
   },
 
   async get(id: string): Promise<CadenceSequenceResponse> {
-    return apiClient.get<CadenceSequenceResponse>(API_ENDPOINTS.CADENCES.GET(id));
+    return apiClient.get<CadenceSequenceResponse>(
+      API_ENDPOINTS.CADENCES.GET(id)
+    );
   },
 
   async create(data: CreateCadenceRequest): Promise<CadenceSequenceResponse> {
-    return apiClient.post<CadenceSequenceResponse>(API_ENDPOINTS.CADENCES.CREATE, data);
+    return apiClient.post<CadenceSequenceResponse>(
+      API_ENDPOINTS.CADENCES.CREATE,
+      data
+    );
   },
 
-  async update(id: string, data: UpdateCadenceRequest): Promise<CadenceSequenceResponse> {
-    return apiClient.put<CadenceSequenceResponse>(API_ENDPOINTS.CADENCES.UPDATE(id), data);
+  async update(
+    id: string,
+    data: UpdateCadenceRequest
+  ): Promise<CadenceSequenceResponse> {
+    return apiClient.put<CadenceSequenceResponse>(
+      API_ENDPOINTS.CADENCES.UPDATE(id),
+      data
+    );
   },
 
   async delete(id: string): Promise<void> {

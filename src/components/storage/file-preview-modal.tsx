@@ -83,13 +83,16 @@ export function FilePreviewModal({
     const authToken = localStorage.getItem('auth_token') || '';
 
     // POST JSON → receive base64 in JSON response — IDM never intercepts JSON
-    const fetchProtected = async (fileId: string, format?: string): Promise<ArrayBuffer> => {
+    const fetchProtected = async (
+      fileId: string,
+      format?: string
+    ): Promise<ArrayBuffer> => {
       const res = await fetch(`${apiBase}/v1/storage/preview`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
         body: JSON.stringify({ fileId, format: format || undefined, password }),
       });
@@ -143,7 +146,10 @@ export function FilePreviewModal({
 
     return () => {
       cancelled = true;
-      setBlobUrl(prev => { if (prev) URL.revokeObjectURL(prev); return ''; });
+      setBlobUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return '';
+      });
     };
   }, [file?.id, serveUrl, serveUrlPdf, open]);
 
@@ -167,14 +173,15 @@ export function FilePreviewModal({
     if (!file) return;
     try {
       // POST JSON endpoint — returns base64, IDM cannot intercept JSON
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
       const token = localStorage.getItem('auth_token') || '';
       const res = await fetch(`${apiBase}/v1/storage/preview`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ fileId: file.id, password }),
       });
@@ -273,7 +280,9 @@ export function FilePreviewModal({
           {!blobUrl && !binaryData && !binaryDataPdf && !pdfConversionFailed ? (
             <div className="flex flex-col items-center gap-3 py-12">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Carregando arquivo...</p>
+              <p className="text-sm text-muted-foreground">
+                Carregando arquivo...
+              </p>
             </div>
           ) : isImage && blobUrl ? (
             <div className="flex items-center justify-center w-full max-h-[50vh] overflow-hidden rounded-lg bg-gray-50 dark:bg-slate-800/50">

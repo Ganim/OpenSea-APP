@@ -423,7 +423,8 @@ export default function BalanceSheetPage() {
                     </p>
                     <p className="text-xl font-bold font-mono tabular-nums text-rose-600 dark:text-rose-400">
                       {formatCurrency(
-                        (data.liabilities?.total ?? 0) + (data.equity?.total ?? 0)
+                        (data.liabilities?.total ?? 0) +
+                          (data.equity?.total ?? 0)
                       )}
                     </p>
                   </div>

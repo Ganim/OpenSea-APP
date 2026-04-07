@@ -77,7 +77,8 @@ const CATEGORIES: NotificationCategory[] = [
   {
     id: 'orders',
     title: 'Pedidos',
-    subtitle: 'Notificacoes sobre criacao, atualizacao e finalizacao de pedidos',
+    subtitle:
+      'Notificacoes sobre criacao, atualizacao e finalizacao de pedidos',
     icon: ShoppingCart,
     iconColor: 'text-violet-600 dark:text-violet-400',
     iconBg: 'bg-violet-50 dark:bg-violet-500/10',
@@ -170,7 +171,8 @@ const CATEGORIES: NotificationCategory[] = [
       {
         id: 'stock_low',
         label: 'Estoque baixo',
-        description: 'Quando um produto vendido estiver com estoque abaixo do minimo',
+        description:
+          'Quando um produto vendido estiver com estoque abaixo do minimo',
       },
       {
         id: 'stock_reserved',
@@ -207,7 +209,9 @@ const CATEGORIES: NotificationCategory[] = [
 
 type PreferenceMap = Record<string, Record<string, boolean>>;
 
-function buildPreferenceMap(preferences: NotificationPreference[]): PreferenceMap {
+function buildPreferenceMap(
+  preferences: NotificationPreference[]
+): PreferenceMap {
   const map: PreferenceMap = {};
   for (const pref of preferences) {
     if (!map[pref.notificationType]) {
@@ -235,7 +239,11 @@ function findPref(
 interface CategorySectionProps {
   category: NotificationCategory;
   preferenceMap: PreferenceMap;
-  onToggle: (notificationType: string, channel: string, enabled: boolean) => void;
+  onToggle: (
+    notificationType: string,
+    channel: string,
+    enabled: boolean
+  ) => void;
   isSaving: boolean;
 }
 
@@ -487,13 +495,7 @@ export default function NotificationPreferencesPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [
-    pendingChanges,
-    updatePreference,
-    createPreference,
-    user?.id,
-    refetch,
-  ]);
+  }, [pendingChanges, updatePreference, createPreference, user?.id, refetch]);
 
   const hasPendingChanges = pendingChanges.length > 0;
 
@@ -557,7 +559,9 @@ export default function NotificationPreferencesPage() {
             message="Nao foi possivel carregar suas preferencias de notificacao."
             action={{
               label: 'Tentar novamente',
-              onClick: () => { refetch(); },
+              onClick: () => {
+                refetch();
+              },
             }}
           />
         ) : (

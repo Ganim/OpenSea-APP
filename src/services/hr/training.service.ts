@@ -100,18 +100,13 @@ class TrainingService {
   }
 
   async getProgram(id: string): Promise<TrainingProgramResponse> {
-    return apiClient.get<TrainingProgramResponse>(
-      `${this.baseUrl}/${id}`
-    );
+    return apiClient.get<TrainingProgramResponse>(`${this.baseUrl}/${id}`);
   }
 
   async createProgram(
     programData: CreateTrainingProgramData
   ): Promise<TrainingProgramResponse> {
-    return apiClient.post<TrainingProgramResponse>(
-      this.baseUrl,
-      programData
-    );
+    return apiClient.post<TrainingProgramResponse>(this.baseUrl, programData);
   }
 
   async updateProgram(

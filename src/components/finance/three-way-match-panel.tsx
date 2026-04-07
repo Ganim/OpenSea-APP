@@ -29,13 +29,15 @@ const STATUS_CONFIG = {
     label: 'Correspondencia Completa',
     icon: CheckCircle2,
     color: 'text-emerald-600 dark:text-emerald-400',
-    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+    badge:
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   },
   PARTIAL_MATCH: {
     label: 'Correspondencia Parcial',
     icon: AlertTriangle,
     color: 'text-amber-600 dark:text-amber-400',
-    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+    badge:
+      'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
   },
   NO_MATCH: {
     label: 'Sem Correspondencia',
@@ -54,7 +56,7 @@ export function ThreeWayMatchPanel({ entryId }: ThreeWayMatchPanelProps) {
 
   const matchMutation = useMutation({
     mutationFn: () => financeAnalyticsService.threeWayMatch(entryId),
-    onSuccess: (data) => setResult(data),
+    onSuccess: data => setResult(data),
   });
 
   if (!result) {
@@ -85,7 +87,8 @@ export function ThreeWayMatchPanel({ entryId }: ThreeWayMatchPanelProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Clique para verificar a correspondencia entre nota fiscal, pedido de compra e recebimento de mercadoria.
+            Clique para verificar a correspondencia entre nota fiscal, pedido de
+            compra e recebimento de mercadoria.
           </p>
         </CardContent>
       </Card>
@@ -137,7 +140,9 @@ export function ThreeWayMatchPanel({ entryId }: ThreeWayMatchPanelProps) {
             {result.invoice ? (
               <div className="text-xs text-muted-foreground space-y-0.5">
                 <p>N.o {result.invoice.number}</p>
-                <p className="font-mono">{formatCurrency(result.invoice.amount)}</p>
+                <p className="font-mono">
+                  {formatCurrency(result.invoice.amount)}
+                </p>
                 <p>{result.invoice.date}</p>
               </div>
             ) : (
@@ -208,7 +213,8 @@ export function ThreeWayMatchPanel({ entryId }: ThreeWayMatchPanelProps) {
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                 <span>
                   <strong className="capitalize">{d.field}</strong>: esperado{' '}
-                  {d.expected}, encontrado {d.actual} (tolerancia: {d.tolerance})
+                  {d.expected}, encontrado {d.actual} (tolerancia: {d.tolerance}
+                  )
                 </span>
               </div>
             ))}

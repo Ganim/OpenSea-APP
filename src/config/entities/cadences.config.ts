@@ -55,9 +55,7 @@ export const cadencesConfig = defineEntityConfig<CadenceSequence>()({
       searchPlaceholder: 'Buscar cadências por nome...',
     },
     badgeFields: [],
-    metaFields: [
-      { field: 'createdAt', label: 'Criado em', format: 'date' },
-    ],
+    metaFields: [{ field: 'createdAt', label: 'Criado em', format: 'date' }],
   },
 
   grid: {
@@ -179,7 +177,8 @@ export const cadencesConfig = defineEntityConfig<CadenceSequence>()({
         permission: SALES_PERMISSIONS.CADENCES.REMOVE,
         confirm: true,
         confirmTitle: 'Excluir Cadências',
-        confirmMessage: 'Tem certeza que deseja excluir as cadências selecionadas?',
+        confirmMessage:
+          'Tem certeza que deseja excluir as cadências selecionadas?',
       },
     ],
   },

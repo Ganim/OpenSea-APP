@@ -18,7 +18,11 @@ import { SearchBar } from '@/components/layout/search-bar';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
-import { useReturnsInfinite, useCreateReturn, useDeleteReturn } from '@/hooks/sales/use-returns';
+import {
+  useReturnsInfinite,
+  useCreateReturn,
+  useDeleteReturn,
+} from '@/hooks/sales/use-returns';
 import type {
   OrderReturnDTO,
   ReturnStatus,
@@ -163,10 +167,7 @@ function ReturnsPageContent() {
   const deleteMutation = useDeleteReturn();
   const createMutation = useCreateReturn();
 
-  const returns = useMemo(
-    () => data?.pages.flatMap(p => p.data) ?? [],
-    [data]
-  );
+  const returns = useMemo(() => data?.pages.flatMap(p => p.data) ?? [], [data]);
   const total = data?.pages[0]?.meta.total ?? 0;
 
   // Infinite scroll

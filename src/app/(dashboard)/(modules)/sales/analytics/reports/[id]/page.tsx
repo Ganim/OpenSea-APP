@@ -17,12 +17,7 @@ import { Card } from '@/components/ui/card';
 import { useReportsInfinite } from '@/hooks/sales/use-analytics';
 import type { AnalyticsReport, ReportType } from '@/types/sales';
 import { cn } from '@/lib/utils';
-import {
-  Calendar,
-  Clock,
-  FileText,
-  Settings,
-} from 'lucide-react';
+import { Calendar, Clock, FileText, Settings } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 

@@ -32,7 +32,7 @@ export function useListEmployees(params?: ListEmployeesParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.page ?? 1;
       const totalPages = lastPage.totalPages ?? 1;
       if (currentPage < totalPages) {
@@ -46,7 +46,7 @@ export function useListEmployees(params?: ListEmployeesParams) {
 
   // Flatten pages into single array
   const employees =
-    result.data?.pages.flatMap((p) => {
+    result.data?.pages.flatMap(p => {
       const items = p.employees ?? [];
       return params?.includeDeleted
         ? items

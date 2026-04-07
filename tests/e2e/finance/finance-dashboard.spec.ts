@@ -52,9 +52,11 @@ test.describe('Finance - Dashboard', () => {
     const errorBoundary = page.locator(
       '[data-testid="error-boundary"], .error-boundary, .next-error-h1'
     );
-    await expect(errorBoundary).not.toBeVisible({ timeout: 2_000 }).catch(() => {
-      // Ignore — error boundary locator simply not found is fine
-    });
+    await expect(errorBoundary)
+      .not.toBeVisible({ timeout: 2_000 })
+      .catch(() => {
+        // Ignore — error boundary locator simply not found is fine
+      });
   });
 
   test('3.2 - Abrir modal de Lancamento Rapido', async ({ page }) => {
@@ -63,9 +65,9 @@ test.describe('Finance - Dashboard', () => {
     await page.waitForLoadState('networkidle');
 
     // Wait for dashboard to render
-    await expect(
-      page.locator('text=Financeiro').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Financeiro').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Click "Lancamento Rapido" button
     const quickEntryBtn = page
@@ -73,9 +75,7 @@ test.describe('Finance - Dashboard', () => {
       .filter({ hasText: /Lançamento Rápido/i })
       .first();
 
-    if (
-      await quickEntryBtn.isVisible({ timeout: 5_000 }).catch(() => false)
-    ) {
+    if (await quickEntryBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await quickEntryBtn.click();
       await page.waitForTimeout(500);
 
@@ -125,16 +125,12 @@ test.describe('Finance - Dashboard', () => {
       .locator('text=Câmbio, text=Conversor, text=Dólar, text=Euro')
       .first();
 
-    if (
-      await converterText.isVisible({ timeout: 5_000 }).catch(() => false)
-    ) {
+    if (await converterText.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await expect(converterText).toBeVisible();
     }
 
     // Verify there are card widgets for conversion
-    const cards = page.locator(
-      '[class*="Card"], [class*="card"]'
-    );
+    const cards = page.locator('[class*="Card"], [class*="card"]');
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThan(0);
 
@@ -142,8 +138,10 @@ test.describe('Finance - Dashboard', () => {
     const errorBoundary = page.locator(
       '[data-testid="error-boundary"], .next-error-h1'
     );
-    await expect(errorBoundary).not.toBeVisible({ timeout: 2_000 }).catch(() => {
-      // Fine — locator simply not present
-    });
+    await expect(errorBoundary)
+      .not.toBeVisible({ timeout: 2_000 })
+      .catch(() => {
+        // Fine — locator simply not present
+      });
   });
 });

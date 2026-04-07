@@ -63,18 +63,30 @@ function getPatternStyle(
 
   switch (p) {
     case 'STRIPED':
-      return { background: `repeating-linear-gradient(135deg, ${colorHex}, ${colorHex} 4px, ${secondary} 4px, ${secondary} 8px)` };
+      return {
+        background: `repeating-linear-gradient(135deg, ${colorHex}, ${colorHex} 4px, ${secondary} 4px, ${secondary} 8px)`,
+      };
     case 'PLAID':
-      return { background: `repeating-linear-gradient(0deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 7px), repeating-linear-gradient(90deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 7px), ${colorHex}` };
+      return {
+        background: `repeating-linear-gradient(0deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 7px), repeating-linear-gradient(90deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 7px), ${colorHex}`,
+      };
     case 'GRADIENT':
-      return { background: `linear-gradient(135deg, ${colorHex}, ${secondary})` };
+      return {
+        background: `linear-gradient(135deg, ${colorHex}, ${secondary})`,
+      };
     case 'PRINTED':
-      return { background: `radial-gradient(circle at 25% 25%, ${secondary} 2px, transparent 2px), radial-gradient(circle at 75% 75%, ${secondary} 2px, transparent 2px), ${colorHex}` };
+      return {
+        background: `radial-gradient(circle at 25% 25%, ${secondary} 2px, transparent 2px), radial-gradient(circle at 75% 75%, ${secondary} 2px, transparent 2px), ${colorHex}`,
+      };
     case 'JACQUARD':
-      return { background: `repeating-conic-gradient(${colorHex} 0% 25%, ${secondary} 0% 50%) 50% / 10px 10px` };
+      return {
+        background: `repeating-conic-gradient(${colorHex} 0% 25%, ${secondary} 0% 50%) 50% / 10px 10px`,
+      };
     default:
       if (secondaryColorHex && secondaryColorHex !== colorHex) {
-        return { background: `linear-gradient(135deg, ${colorHex} 50%, ${secondaryColorHex} 50%)` };
+        return {
+          background: `linear-gradient(135deg, ${colorHex} 50%, ${secondaryColorHex} 50%)`,
+        };
       }
       return { backgroundColor: colorHex };
   }
@@ -400,10 +412,12 @@ export function TransferFlow({ item, onClose, onSuccess }: TransferFlowProps) {
                                   : 'bg-amber-500'
                             )}
                           />
-                          <span className={cn(
-                            'truncate font-mono text-sm font-medium',
-                            isCurrent ? 'text-slate-400' : 'text-slate-200'
-                          )}>
+                          <span
+                            className={cn(
+                              'truncate font-mono text-sm font-medium',
+                              isCurrent ? 'text-slate-400' : 'text-slate-200'
+                            )}
+                          >
                             {bin.address}
                           </span>
                           {isCurrent && (

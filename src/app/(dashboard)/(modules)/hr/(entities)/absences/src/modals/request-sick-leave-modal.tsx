@@ -47,7 +47,11 @@ export function RequestSickLeaveModal({
     },
     onError: (error: Error) => {
       const msg = error.message;
-      if (msg.includes('date') || msg.includes('data') || msg.includes('overlap')) {
+      if (
+        msg.includes('date') ||
+        msg.includes('data') ||
+        msg.includes('overlap')
+      ) {
         setFieldErrors(prev => ({ ...prev, startDate: translateError(msg) }));
       } else if (msg.includes('CID') || msg.includes('cid')) {
         setFieldErrors(prev => ({ ...prev, cid: translateError(msg) }));
@@ -159,7 +163,8 @@ export function RequestSickLeaveModal({
                       value={startDate}
                       onChange={e => {
                         setStartDate(e.target.value);
-                        if (fieldErrors.startDate) setFieldErrors(prev => ({ ...prev, startDate: '' }));
+                        if (fieldErrors.startDate)
+                          setFieldErrors(prev => ({ ...prev, startDate: '' }));
                       }}
                       required
                       aria-invalid={!!fieldErrors.startDate}
@@ -188,7 +193,8 @@ export function RequestSickLeaveModal({
                       value={cid}
                       onChange={e => {
                         setCid(e.target.value);
-                        if (fieldErrors.cid) setFieldErrors(prev => ({ ...prev, cid: '' }));
+                        if (fieldErrors.cid)
+                          setFieldErrors(prev => ({ ...prev, cid: '' }));
                       }}
                       placeholder="Ex.: J11, A09"
                       required

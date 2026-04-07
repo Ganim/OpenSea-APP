@@ -3,12 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SalesDashboardData } from '@/hooks/sales/use-sales-dashboard';
-import {
-  DollarSign,
-  Percent,
-  ShoppingCart,
-  TrendingUp,
-} from 'lucide-react';
+import { DollarSign, Percent, ShoppingCart, TrendingUp } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Helpers

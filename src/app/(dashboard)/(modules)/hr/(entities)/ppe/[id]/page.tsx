@@ -53,26 +53,26 @@ import {
 
 const AssignPPEModal = dynamic(
   () =>
-    import('../src/modals/assign-ppe-modal').then((m) => ({
+    import('../src/modals/assign-ppe-modal').then(m => ({
       default: m.AssignPPEModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 const ReturnPPEModal = dynamic(
   () =>
-    import('../src/modals/return-ppe-modal').then((m) => ({
+    import('../src/modals/return-ppe-modal').then(m => ({
       default: m.ReturnPPEModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 const AdjustStockModal = dynamic(
   () =>
-    import('../src/modals/adjust-stock-modal').then((m) => ({
+    import('../src/modals/adjust-stock-modal').then(m => ({
       default: m.AdjustStockModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 const PAGE_SIZE = 20;
@@ -132,20 +132,20 @@ export default function PPEDetailPage() {
       };
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.hasMore ? lastPage.page + 1 : undefined,
     enabled: !!ppeItemId,
   });
 
   const assignments = useMemo(
-    () => assignmentsData?.pages.flatMap((p) => p.assignments ?? []) ?? [],
-    [assignmentsData],
+    () => assignmentsData?.pages.flatMap(p => p.assignments ?? []) ?? [],
+    [assignmentsData]
   );
 
   // Resolve employee names for display
   const employeeIds = useMemo(
-    () => assignments.map((a) => a.employeeId),
-    [assignments],
+    () => assignments.map(a => a.employeeId),
+    [assignments]
   );
   const { getName: getEmployeeName } = useEmployeeMap(employeeIds);
 
@@ -155,12 +155,12 @@ export default function PPEDetailPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { rootMargin: '300px' },
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -237,7 +237,10 @@ export default function PPEDetailPage() {
   // RENDER
   // ============================================================================
 
-  const stockVariant = getStockVariant(ppeItem.isLowStock, ppeItem.currentStock);
+  const stockVariant = getStockVariant(
+    ppeItem.isLowStock,
+    ppeItem.currentStock
+  );
 
   return (
     <PageLayout>
@@ -371,7 +374,7 @@ export default function PPEDetailPage() {
             <div className="flex items-center gap-2">
               <Select
                 value={assignmentStatusFilter || 'ALL'}
-                onValueChange={(v) =>
+                onValueChange={v =>
                   setAssignmentStatusFilter(v === 'ALL' ? '' : v)
                 }
               >
@@ -408,7 +411,7 @@ export default function PPEDetailPage() {
             </Card>
           ) : (
             <div className="space-y-2">
-              {assignments.map((assignment) => (
+              {assignments.map(assignment => (
                 <Card
                   key={assignment.id}
                   className="bg-white dark:bg-slate-800/60 border border-border p-4"
@@ -440,9 +443,7 @@ export default function PPEDetailPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Badge
-                        variant={getStatusVariant(assignment.status)}
-                      >
+                      <Badge variant={getStatusVariant(assignment.status)}>
                         {getStatusLabel(assignment.status)}
                       </Badge>
                       {assignment.status === 'ACTIVE' && canEdit && (

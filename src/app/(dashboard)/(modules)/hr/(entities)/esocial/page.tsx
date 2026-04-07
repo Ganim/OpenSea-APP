@@ -346,9 +346,7 @@ function GenerateEventModal({ open, onClose }: GenerateEventModalProps) {
       content: (
         <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="referenceId">
-              ID do(a) {referenceLabel}
-            </Label>
+            <Label htmlFor="referenceId">ID do(a) {referenceLabel}</Label>
             <Input
               id="referenceId"
               value={referenceId}
@@ -356,8 +354,8 @@ function GenerateEventModal({ open, onClose }: GenerateEventModalProps) {
               placeholder={`Informe o ID do(a) ${referenceLabel.toLowerCase()}`}
             />
             <p className="text-xs text-muted-foreground">
-              Insira o identificador único da entidade de referência para gerar o
-              evento eSocial.
+              Insira o identificador único da entidade de referência para gerar
+              o evento eSocial.
             </p>
           </div>
 
@@ -399,9 +397,7 @@ function GenerateEventModal({ open, onClose }: GenerateEventModalProps) {
           </Button>
           <Button
             type="button"
-            disabled={
-              referenceId.trim() === '' || generateMutation.isPending
-            }
+            disabled={referenceId.trim() === '' || generateMutation.isPending}
             onClick={() => generateMutation.mutate()}
           >
             {generateMutation.isPending ? (

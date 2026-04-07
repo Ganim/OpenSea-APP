@@ -37,7 +37,10 @@ export function PdfViewer({ url, binaryData, onError }: PdfViewerProps) {
   useEffect(() => {
     // If binary data provided directly, use it (no fetch = no IDM interception)
     if (binaryData) {
-      const data = binaryData instanceof Uint8Array ? binaryData : new Uint8Array(binaryData);
+      const data =
+        binaryData instanceof Uint8Array
+          ? binaryData
+          : new Uint8Array(binaryData);
       setPdfData({ data });
       setLoading(false);
       return;

@@ -75,9 +75,7 @@ export function ExitFlow({ item, onClose, onSuccess }: ExitFlowProps) {
       {
         onSuccess: () => {
           scanSuccess();
-          toast.success(
-            `Baixa de ${currentQuantity} ${unitAbbr} registrada`
-          );
+          toast.success(`Baixa de ${currentQuantity} ${unitAbbr} registrada`);
           onSuccess();
         },
         onError: (error: Error) => {

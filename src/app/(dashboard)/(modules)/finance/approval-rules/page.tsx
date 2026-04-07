@@ -126,7 +126,10 @@ function ApprovalRuleCard({
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               {rule.maxAmount && (
                 <span>
-                  Até R$ {Number(rule.maxAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  Até R${' '}
+                  {Number(rule.maxAmount).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                  })}
                 </span>
               )}
               {conditionCount > 0 && (
@@ -301,7 +304,8 @@ export default function ApprovalRulesPage() {
           <div>
             <h1 className="text-2xl font-bold">Regras de Aprovação</h1>
             <p className="text-sm text-muted-foreground">
-              Configure regras automáticas de aprovação e pagamento de lançamentos
+              Configure regras automáticas de aprovação e pagamento de
+              lançamentos
             </p>
           </div>
         </div>
@@ -354,7 +358,7 @@ export default function ApprovalRulesPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rules.map((rule) => (
+          {rules.map(rule => (
             <ApprovalRuleCard
               key={rule.id}
               rule={rule}
@@ -380,7 +384,7 @@ export default function ApprovalRulesPage() {
       {editId && (
         <ApprovalRuleModal
           open={!!editId}
-          onOpenChange={(open) => !open && setEditId(null)}
+          onOpenChange={open => !open && setEditId(null)}
           ruleId={editId}
           onSaved={() => {
             refetch();

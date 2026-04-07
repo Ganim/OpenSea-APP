@@ -91,11 +91,7 @@ export default function EditDealPage() {
   // DATA FETCHING
   // ============================================================================
 
-  const {
-    data: dealData,
-    isLoading: isLoadingDeal,
-    error,
-  } = useDeal(dealId);
+  const { data: dealData, isLoading: isLoadingDeal, error } = useDeal(dealId);
 
   const deal = dealData?.deal as Deal | undefined;
 
@@ -159,9 +155,7 @@ export default function EditDealPage() {
           : ''
       );
       setExpectedCloseDate(
-        deal.expectedCloseDate
-          ? deal.expectedCloseDate.substring(0, 10)
-          : ''
+        deal.expectedCloseDate ? deal.expectedCloseDate.substring(0, 10) : ''
       );
       setPipelineId(deal.pipelineId || '');
       setStageId(deal.stageId || '');
@@ -194,7 +188,10 @@ export default function EditDealPage() {
       });
 
       // If pipeline/stage changed, call changeStage
-      if (deal && (stageId !== deal.stageId || pipelineId !== deal.pipelineId)) {
+      if (
+        deal &&
+        (stageId !== deal.stageId || pipelineId !== deal.pipelineId)
+      ) {
         await changeStageMutation.mutateAsync({
           dealId,
           data: {

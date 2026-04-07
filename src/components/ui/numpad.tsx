@@ -104,7 +104,7 @@ function Numpad({
       {/* Shortcuts */}
       {shortcuts && shortcuts.length > 0 && (
         <div className="flex gap-2">
-          {shortcuts.map((shortcut) => (
+          {shortcuts.map(shortcut => (
             <button
               key={shortcut.label}
               type="button"
@@ -125,29 +125,25 @@ function Numpad({
       {/* Numpad Grid */}
       <div className="grid grid-cols-3 gap-2">
         {/* Row 1 */}
-        {['1', '2', '3'].map((d) => (
+        {['1', '2', '3'].map(d => (
           <NumpadButton key={d} onClick={() => handleDigit(d)}>
             {d}
           </NumpadButton>
         ))}
         {/* Row 2 */}
-        {['4', '5', '6'].map((d) => (
+        {['4', '5', '6'].map(d => (
           <NumpadButton key={d} onClick={() => handleDigit(d)}>
             {d}
           </NumpadButton>
         ))}
         {/* Row 3 */}
-        {['7', '8', '9'].map((d) => (
+        {['7', '8', '9'].map(d => (
           <NumpadButton key={d} onClick={() => handleDigit(d)}>
             {d}
           </NumpadButton>
         ))}
         {/* Row 4 */}
-        <NumpadButton
-          onClick={handleClear}
-          variant="clear"
-          aria-label="Limpar"
-        >
+        <NumpadButton onClick={handleClear} variant="clear" aria-label="Limpar">
           <X className="size-5" />
         </NumpadButton>
         <NumpadButton onClick={() => handleDigit('0')}>0</NumpadButton>

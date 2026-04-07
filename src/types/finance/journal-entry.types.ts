@@ -71,7 +71,13 @@ export interface LedgerEntry {
 }
 
 export interface LedgerResponse {
-  account: { id: string; code: string; name: string; type: string; nature: string };
+  account: {
+    id: string;
+    code: string;
+    name: string;
+    type: string;
+    nature: string;
+  };
   period: { from: string; to: string };
   openingBalance: number;
   entries: LedgerEntry[];

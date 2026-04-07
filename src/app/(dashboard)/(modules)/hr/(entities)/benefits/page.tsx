@@ -104,7 +104,7 @@ function BenefitsPageContent() {
       return benefitPlansApi.list({ page: pageParam, perPage: PAGE_SIZE });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
       const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
       return currentPage < total ? currentPage + 1 : undefined;
@@ -213,9 +213,15 @@ function BenefitsPageContent() {
     }
     // Apply status filter
     if (statusFilter.length > 0) {
-      if (statusFilter.includes('active') && !statusFilter.includes('inactive')) {
+      if (
+        statusFilter.includes('active') &&
+        !statusFilter.includes('inactive')
+      ) {
         items = items.filter(p => p.isActive);
-      } else if (statusFilter.includes('inactive') && !statusFilter.includes('active')) {
+      } else if (
+        statusFilter.includes('inactive') &&
+        !statusFilter.includes('active')
+      ) {
         items = items.filter(p => !p.isActive);
       }
     }
@@ -226,7 +232,8 @@ function BenefitsPageContent() {
   const buildFilterUrl = useCallback(
     (params: { type?: string[]; status?: string[] }) => {
       const types = params.type !== undefined ? params.type : typeFilter;
-      const statuses = params.status !== undefined ? params.status : statusFilter;
+      const statuses =
+        params.status !== undefined ? params.status : statusFilter;
       const parts: string[] = [];
       if (types.length > 0) parts.push(`type=${types.join(',')}`);
       if (statuses.length > 0) parts.push(`status=${statuses.join(',')}`);

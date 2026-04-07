@@ -49,7 +49,14 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { useListCompanies } from '@/app/(dashboard)/(modules)/admin/(entities)/companies/src';
 import { HR_PERMISSIONS } from '../../_shared/constants/hr-permissions';
@@ -131,9 +138,18 @@ function EmployeesPageContent() {
   // QUICK-ACTION MODAL STATE
   // ============================================================================
 
-  const [absenceTarget, setAbsenceTarget] = useState<{ id: string; fullName: string } | null>(null);
-  const [vacationTarget, setVacationTarget] = useState<{ id: string; fullName: string } | null>(null);
-  const [timeEntryTarget, setTimeEntryTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [absenceTarget, setAbsenceTarget] = useState<{
+    id: string;
+    fullName: string;
+  } | null>(null);
+  const [vacationTarget, setVacationTarget] = useState<{
+    id: string;
+    fullName: string;
+  } | null>(null);
+  const [timeEntryTarget, setTimeEntryTarget] = useState<{
+    id: string;
+    fullName: string;
+  } | null>(null);
 
   // ============================================================================
   // URL-BASED FILTERS
@@ -237,7 +253,7 @@ function EmployeesPageContent() {
       });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
       const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
       return currentPage < total ? currentPage + 1 : undefined;
@@ -245,7 +261,10 @@ function EmployeesPageContent() {
   });
 
   const allEmployees = useMemo(
-    () => (infiniteData?.pages.flatMap(p => p.employees ?? []) ?? []).filter(e => !e.deletedAt),
+    () =>
+      (infiniteData?.pages.flatMap(p => p.employees ?? []) ?? []).filter(
+        e => !e.deletedAt
+      ),
     [infiniteData]
   );
   const totalEmployees = infiniteData?.pages[0]?.total ?? 0;
@@ -518,7 +537,11 @@ function EmployeesPageContent() {
 
   const getStatusBadge = (employee: Employee) => {
     const status = employee.status?.toUpperCase();
-    if (employee.terminationDate || status === 'TERMINATED' || status === 'INACTIVE') {
+    if (
+      employee.terminationDate ||
+      status === 'TERMINATED' ||
+      status === 'INACTIVE'
+    ) {
       return { label: 'Inativo', variant: 'destructive' as const };
     }
     if (status === 'VACATION' || status === 'ON_VACATION') {
@@ -599,7 +622,8 @@ function EmployeesPageContent() {
         separator: 'before',
         variant: 'destructive',
         onClick: (ids: string[]) => {
-          if (ids.length > 0) router.push(`/hr/terminations?employeeId=${ids[0]}`);
+          if (ids.length > 0)
+            router.push(`/hr/terminations?employeeId=${ids[0]}`);
         },
       });
     }
@@ -616,10 +640,22 @@ function EmployeesPageContent() {
     }
 
     return actions;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canCreateAbsence, canCreateVacation, canCreateTimeEntry, canPrint, canTerminate, canDelete, router, allEmployees]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    canCreateAbsence,
+    canCreateVacation,
+    canCreateTimeEntry,
+    canPrint,
+    canTerminate,
+    canDelete,
+    router,
+    allEmployees,
+  ]);
 
-  const contextActions = useMemo(() => getContextActions(), [getContextActions]);
+  const contextActions = useMemo(
+    () => getContextActions(),
+    [getContextActions]
+  );
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -677,7 +713,9 @@ function EmployeesPageContent() {
                 {companyInfo && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Building2 className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{companyInfo.tradeName || companyInfo.legalName}</span>
+                    <span className="truncate">
+                      {companyInfo.tradeName || companyInfo.legalName}
+                    </span>
                   </div>
                 )}
                 {deptInfo && (
@@ -696,19 +734,31 @@ function EmployeesPageContent() {
 
               {/* Stats row */}
               <div className="flex items-center gap-3 px-6 py-2 border-t border-border">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Ausências no mês">
+                <div
+                  className="flex items-center gap-1 text-xs text-muted-foreground"
+                  title="Ausências no mês"
+                >
                   <CalendarOff className="h-3 w-3" />
                   <span>&mdash;</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Atrasos">
+                <div
+                  className="flex items-center gap-1 text-xs text-muted-foreground"
+                  title="Atrasos"
+                >
                   <Clock className="h-3 w-3" />
                   <span>&mdash;</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Dias trabalhados">
+                <div
+                  className="flex items-center gap-1 text-xs text-muted-foreground"
+                  title="Dias trabalhados"
+                >
                   <Briefcase className="h-3 w-3" />
                   <span>&mdash;</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground" title="Próximas férias">
+                <div
+                  className="flex items-center gap-1 text-xs text-muted-foreground"
+                  title="Próximas férias"
+                >
                   <Palmtree className="h-3 w-3" />
                   <span>&mdash;</span>
                 </div>
@@ -718,7 +768,10 @@ function EmployeesPageContent() {
               <div className="flex rounded-b-xl overflow-hidden">
                 <button
                   onClick={() => {
-                    setTimeEntryTarget({ id: item.id, fullName: item.fullName });
+                    setTimeEntryTarget({
+                      id: item.id,
+                      fullName: item.fullName,
+                    });
                   }}
                   className="w-full flex items-center justify-between px-3 py-4 text-xs font-medium text-white transition-colors cursor-pointer bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500"
                 >
@@ -785,19 +838,31 @@ function EmployeesPageContent() {
           </span>
         )}
         <span className="text-gray-300 dark:text-gray-600">|</span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Ausências">
+        <span
+          className="flex items-center gap-1 text-xs text-muted-foreground"
+          title="Ausências"
+        >
           <CalendarOff className="h-3 w-3" />
           &mdash;
         </span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Atrasos">
+        <span
+          className="flex items-center gap-1 text-xs text-muted-foreground"
+          title="Atrasos"
+        >
           <Clock className="h-3 w-3" />
           &mdash;
         </span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Dias trabalhados">
+        <span
+          className="flex items-center gap-1 text-xs text-muted-foreground"
+          title="Dias trabalhados"
+        >
           <Briefcase className="h-3 w-3" />
           &mdash;
         </span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Próximas férias">
+        <span
+          className="flex items-center gap-1 text-xs text-muted-foreground"
+          title="Próximas férias"
+        >
           <Palmtree className="h-3 w-3" />
           &mdash;
         </span>
@@ -1078,11 +1143,7 @@ function EmployeesPageContent() {
                   ...employeeData
                 } = data;
 
-                if (
-                  createUser &&
-                  permissionGroupId &&
-                  userPassword
-                ) {
+                if (createUser && permissionGroupId && userPassword) {
                   // Usar a nova rota que cria funcionario + usuario automaticamente
                   await employeesApi.createWithUser({
                     ...(employeeData as CreateEmployeeWithUserRequest),

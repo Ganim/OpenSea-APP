@@ -94,17 +94,30 @@ function getPresetRange(preset: DatePreset): { from: Date; to: Date } {
   const from = new Date();
   from.setHours(0, 0, 0, 0);
   switch (preset) {
-    case '1d': from.setDate(from.getDate() - 1); break;
-    case '7d': from.setDate(from.getDate() - 7); break;
-    case '30d': from.setDate(from.getDate() - 30); break;
-    case '60d': from.setDate(from.getDate() - 60); break;
-    default: from.setDate(from.getDate() - 30);
+    case '1d':
+      from.setDate(from.getDate() - 1);
+      break;
+    case '7d':
+      from.setDate(from.getDate() - 7);
+      break;
+    case '30d':
+      from.setDate(from.getDate() - 30);
+      break;
+    case '60d':
+      from.setDate(from.getDate() - 60);
+      break;
+    default:
+      from.setDate(from.getDate() - 30);
   }
   return { from, to };
 }
 
 function formatShortDate(date: Date): string {
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 }
 
 function maskDateInput(value: string): string {
@@ -128,14 +141,22 @@ interface ItemInfo {
 function buildItemInfoMap(items: Item[]): Map<string, ItemInfo> {
   const map = new Map<string, ItemInfo>();
   for (const item of items) {
-    const parts = [item.templateName, item.productName, item.variantName].filter(Boolean) as string[];
+    const parts = [
+      item.templateName,
+      item.productName,
+      item.variantName,
+    ].filter(Boolean) as string[];
     const productLabel = parts.length > 0 ? parts.join(' ') : 'Item sem nome';
     map.set(item.id, {
       productLabel,
-      sku: item.variantSku && item.variantSku !== item.variantName ? item.variantSku : undefined,
+      sku:
+        item.variantSku && item.variantSku !== item.variantName
+          ? item.variantSku
+          : undefined,
       fullCode: item.fullCode || item.uniqueCode || item.id.slice(0, 8),
       unitAbbr: item.templateUnitOfMeasure
-        ? (getUnitAbbreviation(item.templateUnitOfMeasure) || item.templateUnitOfMeasure)
+        ? getUnitAbbreviation(item.templateUnitOfMeasure) ||
+          item.templateUnitOfMeasure
         : 'un',
     });
   }
@@ -147,7 +168,7 @@ function getInitials(name: string): string {
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
+    .map(w => w[0].toUpperCase())
     .join('');
 }
 
@@ -156,7 +177,10 @@ function stripBinPrefix(ref: string): string {
 }
 
 function getReference(m: ItemMovement): string {
-  if ((m.movementType === 'TRANSFER' || m.movementType === 'ZONE_RECONFIGURE') && (m.originRef || m.destinationRef)) {
+  if (
+    (m.movementType === 'TRANSFER' || m.movementType === 'ZONE_RECONFIGURE') &&
+    (m.originRef || m.destinationRef)
+  ) {
     const from = m.originRef ? stripBinPrefix(m.originRef) : '?';
     const to = m.destinationRef ? stripBinPrefix(m.destinationRef) : '?';
     return `${from} → ${to}`;
@@ -167,7 +191,10 @@ function getReference(m: ItemMovement): string {
 }
 
 function getPrintReference(m: ItemMovement): string {
-  if ((m.movementType === 'TRANSFER' || m.movementType === 'ZONE_RECONFIGURE') && (m.originRef || m.destinationRef)) {
+  if (
+    (m.movementType === 'TRANSFER' || m.movementType === 'ZONE_RECONFIGURE') &&
+    (m.originRef || m.destinationRef)
+  ) {
     const from = m.originRef ? stripBinPrefix(m.originRef) : '?';
     const to = m.destinationRef ? stripBinPrefix(m.destinationRef) : '?';
     return `<span style="color:#64748b">De:</span> ${from}<br><span style="color:#64748b">Para:</span> ${to}`;
@@ -177,13 +204,18 @@ function getPrintReference(m: ItemMovement): string {
   return '—';
 }
 
-function printMovements(movements: ItemMovement[], infoMap: Map<string, ItemInfo>) {
-  const rows = movements.map((m) => {
+function printMovements(
+  movements: ItemMovement[],
+  infoMap: Map<string, ItemInfo>
+) {
+  const rows = movements.map(m => {
     const info = infoMap.get(m.itemId);
     const code = info?.fullCode ?? m.itemId.slice(0, 8);
     const name = info?.productLabel ?? 'Item sem nome';
     const unitAbbr = info?.unitAbbr ?? 'un';
-    const qty = Number(m.quantity).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
+    const qty = Number(m.quantity).toLocaleString('pt-BR', {
+      maximumFractionDigits: 3,
+    });
     const dir = getMovementDirection(m);
     const sign = dir === 'IN' ? '+' : dir === 'OUT' ? '-' : '';
     const userName = m.user?.name ?? '—';
@@ -204,7 +236,13 @@ function printMovements(movements: ItemMovement[], infoMap: Map<string, ItemInfo
       { key: 'registro', label: 'Registro', width: '130px' },
       { key: 'product', label: 'Produto' },
       { key: 'reference', label: 'Referência', width: '140px' },
-      { key: 'qty', label: 'Quantidade', align: 'right', width: '90px', bold: true },
+      {
+        key: 'qty',
+        label: 'Quantidade',
+        align: 'right',
+        width: '90px',
+        bold: true,
+      },
     ],
     rows,
     summary: [
@@ -233,16 +271,24 @@ const DIRECTION_BAR_COLORS = {
 
 /** Gradient background for type icon */
 const TYPE_ICON_BG: Record<string, string> = {
-  PURCHASE: 'bg-linear-to-br from-green-500 to-green-700 dark:from-green-600 dark:to-green-800',
-  CUSTOMER_RETURN: 'bg-linear-to-br from-green-500 to-green-700 dark:from-green-600 dark:to-green-800',
+  PURCHASE:
+    'bg-linear-to-br from-green-500 to-green-700 dark:from-green-600 dark:to-green-800',
+  CUSTOMER_RETURN:
+    'bg-linear-to-br from-green-500 to-green-700 dark:from-green-600 dark:to-green-800',
   SALE: 'bg-linear-to-br from-rose-500 to-rose-700 dark:from-rose-600 dark:to-rose-800',
-  PRODUCTION: 'bg-linear-to-br from-rose-500 to-rose-700 dark:from-rose-600 dark:to-rose-800',
-  SAMPLE: 'bg-linear-to-br from-slate-400 to-slate-600 dark:from-slate-500 dark:to-slate-700',
+  PRODUCTION:
+    'bg-linear-to-br from-rose-500 to-rose-700 dark:from-rose-600 dark:to-rose-800',
+  SAMPLE:
+    'bg-linear-to-br from-slate-400 to-slate-600 dark:from-slate-500 dark:to-slate-700',
   LOSS: 'bg-linear-to-br from-rose-600 to-rose-800 dark:from-rose-700 dark:to-rose-900',
-  SUPPLIER_RETURN: 'bg-linear-to-br from-rose-500 to-rose-700 dark:from-rose-600 dark:to-rose-800',
-  TRANSFER: 'bg-linear-to-br from-blue-500 to-blue-700 dark:from-blue-600 dark:to-blue-800',
-  INVENTORY_ADJUSTMENT: 'bg-linear-to-br from-amber-500 to-amber-700 dark:from-amber-600 dark:to-amber-800',
-  ZONE_RECONFIGURE: 'bg-linear-to-br from-violet-500 to-violet-700 dark:from-violet-600 dark:to-violet-800',
+  SUPPLIER_RETURN:
+    'bg-linear-to-br from-rose-500 to-rose-700 dark:from-rose-600 dark:to-rose-800',
+  TRANSFER:
+    'bg-linear-to-br from-blue-500 to-blue-700 dark:from-blue-600 dark:to-blue-800',
+  INVENTORY_ADJUSTMENT:
+    'bg-linear-to-br from-amber-500 to-amber-700 dark:from-amber-600 dark:to-amber-800',
+  ZONE_RECONFIGURE:
+    'bg-linear-to-br from-violet-500 to-violet-700 dark:from-violet-600 dark:to-violet-800',
 };
 
 /** Outline badge for type label — thick colored border, neutral text */
@@ -260,11 +306,18 @@ const TYPE_BADGE_BG: Record<string, string> = {
 };
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return new Date(dateStr).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  });
 }
 
 function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 // =============================================================================
@@ -355,7 +408,7 @@ export default function MovementsListPage() {
     if (!dateRange?.from) return allMovements;
     const from = dateRange.from.getTime();
     const to = dateRange.to ? dateRange.to.getTime() : Date.now();
-    return allMovements.filter((m) => {
+    return allMovements.filter(m => {
       const t = new Date(m.createdAt).getTime();
       return t >= from && t <= to;
     });
@@ -364,7 +417,7 @@ export default function MovementsListPage() {
   const searchFiltered = useMemo(() => {
     if (!search.trim()) return dateFiltered;
     const s = search.toLowerCase().trim();
-    return dateFiltered.filter((m) => {
+    return dateFiltered.filter(m => {
       const info = itemInfoMap.get(m.itemId);
       return (
         (info?.productLabel ?? '').toLowerCase().includes(s) ||
@@ -378,17 +431,20 @@ export default function MovementsListPage() {
   }, [dateFiltered, search, itemInfoMap]);
 
   const directionFiltered = useMemo(() => {
-    if (selectedDirection.length === 0 || selectedDirection.length === 2) return searchFiltered;
+    if (selectedDirection.length === 0 || selectedDirection.length === 2)
+      return searchFiltered;
     const dir = selectedDirection[0] as DirectionFilter;
     return dir === 'IN'
-      ? searchFiltered.filter((m) => getMovementDirection(m) === 'IN')
-      : searchFiltered.filter((m) => getMovementDirection(m) !== 'IN');
+      ? searchFiltered.filter(m => getMovementDirection(m) === 'IN')
+      : searchFiltered.filter(m => getMovementDirection(m) !== 'IN');
   }, [searchFiltered, selectedDirection]);
 
   const filteredMovements = useMemo(() => {
     if (selectedSubtypes.length === 0) return directionFiltered;
-    return directionFiltered.filter((m) =>
-      selectedSubtypes.some((subtype) => MOVEMENT_SUBTYPE_CONFIG[subtype]?.match(m))
+    return directionFiltered.filter(m =>
+      selectedSubtypes.some(subtype =>
+        MOVEMENT_SUBTYPE_CONFIG[subtype]?.match(m)
+      )
     );
   }, [directionFiltered, selectedSubtypes]);
 
@@ -445,7 +501,7 @@ export default function MovementsListPage() {
                   <Input
                     placeholder="Buscar por produto, código, usuário, lote..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={e => setSearch(e.target.value)}
                     className="pl-9 h-9 text-sm bg-white dark:bg-white/5"
                   />
                   {search && (
@@ -464,7 +520,9 @@ export default function MovementsListPage() {
                       <TooltipTrigger asChild>
                         <button
                           type="button"
-                          onClick={() => printMovements(filteredMovements, itemInfoMap)}
+                          onClick={() =>
+                            printMovements(filteredMovements, itemInfoMap)
+                          }
                           className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
                         >
                           <Printer className="h-4 w-4" />
@@ -531,13 +589,14 @@ export default function MovementsListPage() {
                 <CalendarDays className="h-3.5 w-3.5" />
                 {datePreset === 'custom' && dateRange?.from
                   ? `${formatShortDate(dateRange.from)}${dateRange.to ? ` — ${formatShortDate(dateRange.to)}` : ''}`
-                  : DATE_PRESETS.find((p) => p.id === datePreset)?.label ?? '30 dias'}
+                  : (DATE_PRESETS.find(p => p.id === datePreset)?.label ??
+                    '30 dias')}
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <div className="p-3 space-y-3">
                 <div className="flex flex-wrap gap-1.5">
-                  {DATE_PRESETS.filter((p) => p.id !== 'custom').map((preset) => (
+                  {DATE_PRESETS.filter(p => p.id !== 'custom').map(preset => (
                     <button
                       key={preset.id}
                       type="button"
@@ -554,22 +613,65 @@ export default function MovementsListPage() {
                   ))}
                 </div>
                 <div className="border-t pt-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Período personalizado</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    Período personalizado
+                  </p>
                   <div className="flex items-center gap-2 mb-3">
-                    <Input placeholder="dd/mm/aaaa" value={customFromInput} onChange={(e) => setCustomFromInput(maskDateInput(e.target.value))} maxLength={10} className="h-8 text-xs w-[110px]" />
+                    <Input
+                      placeholder="dd/mm/aaaa"
+                      value={customFromInput}
+                      onChange={e =>
+                        setCustomFromInput(maskDateInput(e.target.value))
+                      }
+                      maxLength={10}
+                      className="h-8 text-xs w-[110px]"
+                    />
                     <span className="text-xs text-muted-foreground">até</span>
-                    <Input placeholder="dd/mm/aaaa" value={customToInput} onChange={(e) => setCustomToInput(maskDateInput(e.target.value))} maxLength={10} className="h-8 text-xs w-[110px]" />
-                    <Button size="sm" variant="outline" className="h-8 text-xs px-2" onClick={handleDateInputApply}>Aplicar</Button>
-                    <Button size="sm" variant="ghost" className="h-8 text-xs px-2 text-muted-foreground" onClick={() => { handlePresetChange('30d'); setCustomFromInput(''); setCustomToInput(''); }}>Resetar</Button>
+                    <Input
+                      placeholder="dd/mm/aaaa"
+                      value={customToInput}
+                      onChange={e =>
+                        setCustomToInput(maskDateInput(e.target.value))
+                      }
+                      maxLength={10}
+                      className="h-8 text-xs w-[110px]"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs px-2"
+                      onClick={handleDateInputApply}
+                    >
+                      Aplicar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 text-xs px-2 text-muted-foreground"
+                      onClick={() => {
+                        handlePresetChange('30d');
+                        setCustomFromInput('');
+                        setCustomToInput('');
+                      }}
+                    >
+                      Resetar
+                    </Button>
                   </div>
-                  <Calendar mode="range" selected={dateRange} onSelect={handleCalendarSelect} numberOfMonths={2} disabled={{ after: new Date() }} />
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={handleCalendarSelect}
+                    numberOfMonths={2}
+                    disabled={{ after: new Date() }}
+                  />
                 </div>
               </div>
             </PopoverContent>
           </Popover>
 
           <p className="text-sm text-muted-foreground whitespace-nowrap">
-            {filteredMovements.length} {filteredMovements.length === 1 ? 'movimentação' : 'movimentações'}
+            {filteredMovements.length}{' '}
+            {filteredMovements.length === 1 ? 'movimentação' : 'movimentações'}
           </p>
         </div>
 
@@ -581,7 +683,10 @@ export default function MovementsListPage() {
             type="server"
             title="Erro ao carregar movimentações"
             message="Não foi possível carregar as movimentações. Tente novamente."
-            action={{ label: 'Tentar Novamente', onClick: () => void refetch() }}
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => void refetch(),
+            }}
           />
         ) : filteredMovements.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
@@ -589,18 +694,25 @@ export default function MovementsListPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-1.5">
-            {filteredMovements.map((movement) => {
+            {filteredMovements.map(movement => {
               const info = itemInfoMap.get(movement.itemId);
               const dir = getMovementDirection(movement);
               const barColor = DIRECTION_BAR_COLORS[dir];
-              const typeCfg = MOVEMENT_CONFIG[movement.movementType] ?? MOVEMENT_CONFIG_FALLBACK;
+              const typeCfg =
+                MOVEMENT_CONFIG[movement.movementType] ??
+                MOVEMENT_CONFIG_FALLBACK;
               const TypeIcon = typeCfg.icon;
-              const typeLabel = MOVEMENT_TYPE_LABELS[movement.movementType] ?? typeCfg.label;
+              const typeLabel =
+                MOVEMENT_TYPE_LABELS[movement.movementType] ?? typeCfg.label;
               const ref = getReference(movement);
               const code = info?.fullCode ?? movement.itemId.slice(0, 8);
               const unitAbbr = info?.unitAbbr ?? 'un';
-              const iconBg = TYPE_ICON_BG[movement.movementType] ?? 'bg-linear-to-br from-slate-400 to-slate-600';
-              const badgeBg = TYPE_BADGE_BG[movement.movementType] ?? 'bg-linear-to-r from-slate-400 to-slate-500 text-white';
+              const iconBg =
+                TYPE_ICON_BG[movement.movementType] ??
+                'bg-linear-to-br from-slate-400 to-slate-600';
+              const badgeBg =
+                TYPE_BADGE_BG[movement.movementType] ??
+                'bg-linear-to-r from-slate-400 to-slate-500 text-white';
               const hasDetails = !!ref;
 
               return (
@@ -609,11 +721,19 @@ export default function MovementsListPage() {
                   className="flex border rounded-lg overflow-hidden transition-all bg-white dark:bg-white/5 border-border hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600"
                 >
                   {/* Left color bar */}
-                  <div className="w-1 shrink-0" style={{ backgroundColor: barColor }} />
+                  <div
+                    className="w-1 shrink-0"
+                    style={{ backgroundColor: barColor }}
+                  />
 
                   <div className="flex-1 flex items-center gap-3 px-3 py-2">
                     {/* Type icon — solid background */}
-                    <div className={cn('w-9 h-9 rounded-lg shrink-0 flex items-center justify-center', iconBg)}>
+                    <div
+                      className={cn(
+                        'w-9 h-9 rounded-lg shrink-0 flex items-center justify-center',
+                        iconBg
+                      )}
+                    >
                       <TypeIcon className="h-4 w-4 text-white" />
                     </div>
 
@@ -636,7 +756,9 @@ export default function MovementsListPage() {
                         </div>
                       )}
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="font-mono text-[11px] text-muted-foreground">{code}</span>
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          {code}
+                        </span>
                         <button
                           type="button"
                           className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
@@ -656,7 +778,12 @@ export default function MovementsListPage() {
                         <TooltipProvider delayDuration={200}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className={cn('inline-flex items-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-200 cursor-default', badgeBg)}>
+                              <span
+                                className={cn(
+                                  'inline-flex items-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-200 cursor-default',
+                                  badgeBg
+                                )}
+                              >
                                 {typeLabel}
                               </span>
                             </TooltipTrigger>
@@ -664,7 +791,12 @@ export default function MovementsListPage() {
                           </Tooltip>
                         </TooltipProvider>
                       ) : (
-                        <span className={cn('inline-flex items-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-200', badgeBg)}>
+                        <span
+                          className={cn(
+                            'inline-flex items-center whitespace-nowrap rounded-full border-2 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-200',
+                            badgeBg
+                          )}
+                        >
                           {typeLabel}
                         </span>
                       )}
@@ -686,7 +818,9 @@ export default function MovementsListPage() {
                     <div className="w-[140px] shrink-0 hidden lg:flex items-center gap-2">
                       <Avatar className="h-6 w-6 shrink-0">
                         <AvatarFallback className="text-[10px] font-medium bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200">
-                          {movement.user?.name ? getInitials(movement.user.name) : '?'}
+                          {movement.user?.name
+                            ? getInitials(movement.user.name)
+                            : '?'}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-xs text-gray-700 dark:text-gray-300 truncate">
@@ -696,13 +830,24 @@ export default function MovementsListPage() {
 
                     {/* Quantity + unit */}
                     <div className="w-[80px] shrink-0 text-right">
-                      <span className={cn(
-                        'text-sm font-bold tabular-nums',
-                        dir === 'IN' ? 'text-green-600 dark:text-green-400' : dir === 'OUT' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'
-                      )}>
-                        {dir === 'IN' ? '+' : dir === 'OUT' ? '-' : ''}{Number(movement.quantity).toLocaleString('pt-BR', { maximumFractionDigits: 3 })}
+                      <span
+                        className={cn(
+                          'text-sm font-bold tabular-nums',
+                          dir === 'IN'
+                            ? 'text-green-600 dark:text-green-400'
+                            : dir === 'OUT'
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-blue-600 dark:text-blue-400'
+                        )}
+                      >
+                        {dir === 'IN' ? '+' : dir === 'OUT' ? '-' : ''}
+                        {Number(movement.quantity).toLocaleString('pt-BR', {
+                          maximumFractionDigits: 3,
+                        })}
+                      </span>{' '}
+                      <span className="text-[10px] text-muted-foreground">
+                        {unitAbbr}
                       </span>
-                      {' '}<span className="text-[10px] text-muted-foreground">{unitAbbr}</span>
                     </div>
                   </div>
                 </div>

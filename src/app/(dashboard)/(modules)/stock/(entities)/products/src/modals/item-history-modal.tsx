@@ -248,7 +248,10 @@ export function ItemHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0 overflow-hidden" showCloseButton={false}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0 overflow-hidden"
+        showCloseButton={false}
+      >
         {/* Hero header */}
         <div className="bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5 border-b border-border px-6 pt-6 pb-5">
           <DialogHeader>
@@ -270,7 +273,9 @@ export function ItemHistoryModal({
                 <div className="flex items-center gap-2 shrink-0">
                   {item.bin?.address && (
                     <div className="bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5 text-center">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Localização</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        Localização
+                      </div>
                       <div className="text-sm font-semibold text-foreground flex items-center gap-1 justify-center mt-0.5">
                         <MapPin className="h-3 w-3 text-muted-foreground" />
                         {item.bin.address}
@@ -279,9 +284,13 @@ export function ItemHistoryModal({
                   )}
                   {item.currentQuantity !== undefined && (
                     <div className="bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5 text-center">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Quantidade</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        Quantidade
+                      </div>
                       <div className="text-sm font-semibold text-foreground mt-0.5">
-                        {new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 }).format(item.currentQuantity)}{' '}
+                        {new Intl.NumberFormat('pt-BR', {
+                          maximumFractionDigits: 3,
+                        }).format(item.currentQuantity)}{' '}
                         <span className="text-muted-foreground font-normal">
                           {formatUnit(item.templateUnitOfMeasure)}
                         </span>
@@ -333,7 +342,12 @@ export function ItemHistoryModal({
         <div className="flex justify-between items-center gap-2 px-6 py-4 border-t">
           <div className="flex items-center gap-2">
             {onBack && (
-              <Button variant="outline" size="sm" onClick={onBack} className="gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBack}
+                className="gap-1.5"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar
               </Button>

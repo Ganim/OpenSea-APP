@@ -673,8 +673,8 @@ export function EntityGrid<T extends BaseEntity>({
   return (
     <div className={cn('entity-grid', className)}>
       {/* Header: Filters + Count + View Toggle */}
-      {(showItemCount || showViewToggle || toolbarStart) && (
-        isMobile && toolbarStart ? (
+      {(showItemCount || showViewToggle || toolbarStart) &&
+        (isMobile && toolbarStart ? (
           // ============================================================
           // MOBILE LAYOUT — single Filtros button + compact sort/view
           // ============================================================
@@ -896,8 +896,7 @@ export function EntityGrid<T extends BaseEntity>({
               </div>
             )}
           </div>
-        )
-      )}
+        ))}
 
       {/* Empty State */}
       {isEmpty && (

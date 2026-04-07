@@ -34,9 +34,19 @@ export function useListPayrolls(params?: ListPayrollsParams) {
       });
 
       const payrolls = (response as { payrolls?: Payroll[] }).payrolls ?? [];
-      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const meta = (
+        response as {
+          meta?: {
+            total?: number;
+            page?: number;
+            perPage?: number;
+            totalPages?: number;
+          };
+        }
+      ).meta;
       const total = meta?.total ?? payrolls.length;
-      const totalPages = meta?.totalPages ?? (payrolls.length < PAGE_SIZE ? page : page + 1);
+      const totalPages =
+        meta?.totalPages ?? (payrolls.length < PAGE_SIZE ? page : page + 1);
 
       return {
         payrolls,
@@ -48,7 +58,7 @@ export function useListPayrolls(params?: ListPayrollsParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 5 * 60 * 1000,

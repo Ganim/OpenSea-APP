@@ -25,7 +25,11 @@ import { CalendarOff, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-type AbsenceCategory = 'SICK_LEAVE' | 'PERSONAL_LEAVE' | 'UNPAID_LEAVE' | 'OTHER';
+type AbsenceCategory =
+  | 'SICK_LEAVE'
+  | 'PERSONAL_LEAVE'
+  | 'UNPAID_LEAVE'
+  | 'OTHER';
 
 const ABSENCE_TYPE_LABELS: Record<AbsenceCategory, string> = {
   SICK_LEAVE: 'Atestado Médico',
@@ -104,7 +108,7 @@ export function QuickAbsenceModal({
     !!reason;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -128,7 +132,7 @@ export function QuickAbsenceModal({
             <Label htmlFor="absence-type">Tipo de Ausência *</Label>
             <Select
               value={absenceType}
-              onValueChange={(v) => setAbsenceType(v as AbsenceCategory)}
+              onValueChange={v => setAbsenceType(v as AbsenceCategory)}
             >
               <SelectTrigger id="absence-type">
                 <SelectValue placeholder="Selecione o tipo" />
@@ -151,7 +155,7 @@ export function QuickAbsenceModal({
                 id="absence-start"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -160,7 +164,7 @@ export function QuickAbsenceModal({
                 id="absence-end"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={startDate || undefined}
               />
             </div>
@@ -183,7 +187,7 @@ export function QuickAbsenceModal({
               <Input
                 id="absence-cid"
                 value={cid}
-                onChange={(e) => setCid(e.target.value)}
+                onChange={e => setCid(e.target.value)}
                 placeholder="Ex: J06.9, A09"
                 maxLength={10}
               />
@@ -198,7 +202,7 @@ export function QuickAbsenceModal({
             <Input
               id="absence-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               placeholder="Motivo da ausência"
             />
           </div>
@@ -209,7 +213,7 @@ export function QuickAbsenceModal({
             <Textarea
               id="absence-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Informações adicionais (opcional)"
               rows={3}
             />

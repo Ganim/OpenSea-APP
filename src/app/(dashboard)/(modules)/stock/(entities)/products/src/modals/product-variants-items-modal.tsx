@@ -277,29 +277,55 @@ export function ProductVariantsItemsModal({
     if (!selectedVariant || !product) return;
 
     const tplName = product.template?.name || 'Template';
-    const unit = formatUnitAbbreviation(product.template?.unitOfMeasure || 'UNITS');
+    const unit = formatUnitAbbreviation(
+      product.template?.unitOfMeasure || 'UNITS'
+    );
     const mfgName = product.manufacturer?.name;
-    const patternLabel = PATTERN_LABELS[selectedVariant.pattern as Pattern] || '';
+    const patternLabel =
+      PATTERN_LABELS[selectedVariant.pattern as Pattern] || '';
 
     const inStockItems = items.filter((i: Item) => i.currentQuantity > 0);
-    const totalQty = Math.round(inStockItems.reduce((sum, i) => sum + i.currentQuantity, 0) * 1000) / 1000;
+    const totalQty =
+      Math.round(
+        inStockItems.reduce((sum, i) => sum + i.currentQuantity, 0) * 1000
+      ) / 1000;
 
     const chips: import('@/helpers/print-listing').PrintChip[] = [];
-    if (selectedVariant.sku) chips.push({ label: `SKU: ${selectedVariant.sku}` });
-    if (selectedVariant.reference) chips.push({ label: `Ref: ${selectedVariant.reference}` });
-    if (selectedVariant.barcode) chips.push({ label: `EAN: ${selectedVariant.barcode}`, mono: true });
+    if (selectedVariant.sku)
+      chips.push({ label: `SKU: ${selectedVariant.sku}` });
+    if (selectedVariant.reference)
+      chips.push({ label: `Ref: ${selectedVariant.reference}` });
+    if (selectedVariant.barcode)
+      chips.push({ label: `EAN: ${selectedVariant.barcode}`, mono: true });
     if (patternLabel) chips.push({ label: patternLabel });
-    if (selectedVariant.colorHex) chips.push({ label: selectedVariant.colorHex, colorDot: selectedVariant.colorHex });
+    if (selectedVariant.colorHex)
+      chips.push({
+        label: selectedVariant.colorHex,
+        colorDot: selectedVariant.colorHex,
+      });
 
     const rows = inStockItems.map((item, idx) => {
-      const status = item.status === 'AVAILABLE' ? '' : item.status === 'RESERVED' ? 'Reservado' : item.status === 'DAMAGED' ? 'Danificado' : item.status;
+      const status =
+        item.status === 'AVAILABLE'
+          ? ''
+          : item.status === 'RESERVED'
+            ? 'Reservado'
+            : item.status === 'DAMAGED'
+              ? 'Danificado'
+              : item.status;
       return {
         num: String(idx + 1),
         code: item.fullCode || item.uniqueCode || '',
-        location: item.bin?.address || item.resolvedAddress || item.lastKnownAddress || '—',
+        location:
+          item.bin?.address ||
+          item.resolvedAddress ||
+          item.lastKnownAddress ||
+          '—',
         qty: formatQuantity(item.currentQuantity),
         batch: item.batchNumber || '',
-        entryDate: item.entryDate ? new Date(item.entryDate).toLocaleDateString('pt-BR') : '',
+        entryDate: item.entryDate
+          ? new Date(item.entryDate).toLocaleDateString('pt-BR')
+          : '',
         status,
       };
     });
@@ -321,7 +347,11 @@ export function ProductVariantsItemsModal({
       rows,
       summary: [
         { label: 'Itens em estoque', value: String(inStockItems.length) },
-        { label: 'Quantidade total', value: totalQty.toLocaleString('pt-BR', { maximumFractionDigits: 3 }), unit },
+        {
+          label: 'Quantidade total',
+          value: totalQty.toLocaleString('pt-BR', { maximumFractionDigits: 3 }),
+          unit,
+        },
         { label: 'Fabricante', value: mfgName || '—' },
       ],
       footerLabel: `Total — ${inStockItems.length} ${inStockItems.length === 1 ? 'item' : 'itens'}`,
@@ -696,7 +726,11 @@ export function ProductVariantsItemsModal({
       <VariantFormModal
         product={product}
         variant={editingVariant}
-        itemCount={editingVariant ? (variantStatsMap?.[editingVariant.id]?.count ?? 0) : 0}
+        itemCount={
+          editingVariant
+            ? (variantStatsMap?.[editingVariant.id]?.count ?? 0)
+            : 0
+        }
         open={showEditVariantModal}
         onOpenChange={setShowEditVariantModal}
       />

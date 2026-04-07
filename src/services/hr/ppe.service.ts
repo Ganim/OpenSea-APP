@@ -73,7 +73,7 @@ export const ppeService = {
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
     return apiClient.get<PPEItemsResponse>(
-      `/v1/hr/ppe-items${qs ? `?${qs}` : ''}`,
+      `/v1/hr/ppe-items${qs ? `?${qs}` : ''}`
     );
   },
 
@@ -87,7 +87,7 @@ export const ppeService = {
 
   async updateItem(
     id: string,
-    data: UpdatePPEItemData,
+    data: UpdatePPEItemData
   ): Promise<PPEItemResponse> {
     return apiClient.put<PPEItemResponse>(`/v1/hr/ppe-items/${id}`, data);
   },
@@ -98,11 +98,11 @@ export const ppeService = {
 
   async adjustStock(
     id: string,
-    data: AdjustPPEItemStockData,
+    data: AdjustPPEItemStockData
   ): Promise<PPEItemResponse> {
     return apiClient.patch<PPEItemResponse>(
       `/v1/hr/ppe-items/${id}/stock`,
-      data,
+      data
     );
   },
 
@@ -111,7 +111,7 @@ export const ppeService = {
   // ============================================================================
 
   async listAssignments(
-    params?: ListPPEAssignmentsParams,
+    params?: ListPPEAssignmentsParams
   ): Promise<PPEAssignmentsResponse> {
     const query = new URLSearchParams();
     if (params?.employeeId) query.append('employeeId', params.employeeId);
@@ -121,12 +121,12 @@ export const ppeService = {
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
     return apiClient.get<PPEAssignmentsResponse>(
-      `/v1/hr/ppe-assignments${qs ? `?${qs}` : ''}`,
+      `/v1/hr/ppe-assignments${qs ? `?${qs}` : ''}`
     );
   },
 
   async listExpiringAssignments(
-    params?: ListExpiringAssignmentsParams,
+    params?: ListExpiringAssignmentsParams
   ): Promise<PPEAssignmentsResponse> {
     const query = new URLSearchParams();
     if (params?.daysAhead) query.append('daysAhead', String(params.daysAhead));
@@ -134,24 +134,24 @@ export const ppeService = {
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
     return apiClient.get<PPEAssignmentsResponse>(
-      `/v1/hr/ppe-assignments/expiring${qs ? `?${qs}` : ''}`,
+      `/v1/hr/ppe-assignments/expiring${qs ? `?${qs}` : ''}`
     );
   },
 
   async assignPPE(data: AssignPPEData): Promise<PPEAssignmentResponse> {
     return apiClient.post<PPEAssignmentResponse>(
       '/v1/hr/ppe-assignments',
-      data,
+      data
     );
   },
 
   async returnPPE(
     assignmentId: string,
-    data: ReturnPPEData,
+    data: ReturnPPEData
   ): Promise<PPEAssignmentResponse> {
     return apiClient.patch<PPEAssignmentResponse>(
       `/v1/hr/ppe-assignments/${assignmentId}/return`,
-      data,
+      data
     );
   },
 };

@@ -55,8 +55,7 @@ export function useFormErrorHandler<T extends FieldValues>({
 }: UseFormErrorHandlerOptions<T>) {
   const handleError = useCallback(
     (error: unknown) => {
-      const apiError =
-        error instanceof ApiError ? error : ApiError.from(error);
+      const apiError = error instanceof ApiError ? error : ApiError.from(error);
 
       // 1. Try structured fieldErrors from backend
       if (apiError.fieldErrors && apiError.fieldErrors.length > 0) {
@@ -110,7 +109,7 @@ export function useFormErrorHandler<T extends FieldValues>({
         toast.error(translateError(apiError.message));
       }
     },
-    [form, fieldMap, onUnmappedError],
+    [form, fieldMap, onUnmappedError]
   );
 
   return { handleError };

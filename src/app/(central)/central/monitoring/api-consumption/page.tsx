@@ -231,8 +231,7 @@ export default function ApiConsumptionPage() {
 
           {/* Categories */}
           {report.categories.map((category: ApiUsageCategory) => {
-            const color =
-              CATEGORY_COLORS[category.category] ?? category.color;
+            const color = CATEGORY_COLORS[category.category] ?? category.color;
             const icon = CATEGORY_ICONS[category.category] ?? (
               <Activity className="h-4 w-4" />
             );
@@ -245,9 +244,7 @@ export default function ApiConsumptionPage() {
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: color }}
                     />
-                    <span style={{ color }}>
-                      {icon}
-                    </span>
+                    <span style={{ color }}>{icon}</span>
                     <h3
                       className="text-sm font-semibold"
                       style={{ color: 'var(--central-text-primary)' }}
@@ -260,7 +257,8 @@ export default function ApiConsumptionPage() {
                       className="text-xs tabular-nums"
                       style={{ color: 'var(--central-text-secondary)' }}
                     >
-                      {formatNumber(category.totalUsed)} / {formatNumber(category.totalIncluded)} usados
+                      {formatNumber(category.totalUsed)} /{' '}
+                      {formatNumber(category.totalIncluded)} usados
                     </span>
                     <span
                       className="text-sm font-semibold tabular-nums"
@@ -342,8 +340,7 @@ export default function ApiConsumptionPage() {
                               <div
                                 className="flex-1 h-1.5 rounded-full max-w-[80px]"
                                 style={{
-                                  backgroundColor:
-                                    'var(--central-separator)',
+                                  backgroundColor: 'var(--central-separator)',
                                 }}
                               >
                                 <div

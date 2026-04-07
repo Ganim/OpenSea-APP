@@ -211,7 +211,8 @@ function DealsPageContent() {
     (params: { status?: string[]; pipeline?: string[] }) => {
       const parts: string[] = [];
       const s = params.status !== undefined ? params.status : statusFilter;
-      const p = params.pipeline !== undefined ? params.pipeline : pipelineFilter;
+      const p =
+        params.pipeline !== undefined ? params.pipeline : pipelineFilter;
       if (s.length > 0) parts.push(`status=${s.join(',')}`);
       if (p.length > 0) parts.push(`pipeline=${p.join(',')}`);
       return parts.length > 0
@@ -362,7 +363,8 @@ function DealsPageContent() {
 
   const renderListCard = (item: Deal, isSelected: boolean) => {
     const statusLabel = DEAL_STATUS_LABELS[item.status] || item.status;
-    const statusColor = DEAL_STATUS_COLORS[item.status] || DEAL_STATUS_COLORS.OPEN;
+    const statusColor =
+      DEAL_STATUS_COLORS[item.status] || DEAL_STATUS_COLORS.OPEN;
     const stageName = item.stage?.name || 'Sem etapa';
 
     const listBadges: {

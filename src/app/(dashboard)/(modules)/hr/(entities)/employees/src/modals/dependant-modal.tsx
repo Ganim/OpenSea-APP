@@ -182,7 +182,8 @@ export function DependantModal({
                       value={name}
                       onChange={e => {
                         setName(e.target.value);
-                        if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                        if (fieldErrors.name)
+                          setFieldErrors(prev => ({ ...prev, name: '' }));
                       }}
                       placeholder="Nome completo do dependente"
                       className="h-9"
@@ -201,7 +202,8 @@ export function DependantModal({
                       value={cpf}
                       onChange={e => {
                         setCpf(e.target.value);
-                        if (fieldErrors.cpf) setFieldErrors(prev => ({ ...prev, cpf: '' }));
+                        if (fieldErrors.cpf)
+                          setFieldErrors(prev => ({ ...prev, cpf: '' }));
                       }}
                       placeholder="000.000.000-00"
                       className="h-9"

@@ -62,7 +62,15 @@ export function ManagerReviewModal({
       goals: goals.trim() || undefined,
     });
     resetForm();
-  }, [managerScore, managerComments, strengths, improvements, goals, onSubmit, resetForm]);
+  }, [
+    managerScore,
+    managerComments,
+    strengths,
+    improvements,
+    goals,
+    onSubmit,
+    resetForm,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={val => !val && handleClose()}>

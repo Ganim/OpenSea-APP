@@ -54,8 +54,9 @@ export function ReviewDetailModal({
   const statusColors =
     PERFORMANCE_REVIEW_STATUS_COLORS[review.status as PerformanceReviewStatus];
   const statusLabel =
-    PERFORMANCE_REVIEW_STATUS_LABELS[review.status as PerformanceReviewStatus] ??
-    review.status;
+    PERFORMANCE_REVIEW_STATUS_LABELS[
+      review.status as PerformanceReviewStatus
+    ] ?? review.status;
 
   const renderScore = (score: number | null, label: string) => {
     if (score === null) return null;
@@ -93,9 +94,7 @@ export function ReviewDetailModal({
     onSubmitSelfAssessment;
 
   const showManagerReviewAction =
-    canModify &&
-    review.status === 'MANAGER_REVIEW' &&
-    onSubmitManagerReview;
+    canModify && review.status === 'MANAGER_REVIEW' && onSubmitManagerReview;
 
   const showAcknowledgeAction =
     canModify &&
@@ -163,7 +162,9 @@ export function ReviewDetailModal({
                   {review.finalScore.toFixed(1)} -{' '}
                   {SCORE_LABELS[Math.round(review.finalScore)] ?? ''}
                 </span>
-                <span className="text-xs text-muted-foreground">(Nota final)</span>
+                <span className="text-xs text-muted-foreground">
+                  (Nota final)
+                </span>
               </div>
             )}
           </div>
@@ -218,7 +219,9 @@ export function ReviewDetailModal({
           </div>
 
           {/* Actions */}
-          {(showSelfAssessmentAction || showManagerReviewAction || showAcknowledgeAction) && (
+          {(showSelfAssessmentAction ||
+            showManagerReviewAction ||
+            showAcknowledgeAction) && (
             <div className="flex justify-end gap-2 pt-2 border-t border-border/50">
               {showSelfAssessmentAction && (
                 <Button

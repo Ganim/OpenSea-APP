@@ -47,8 +47,7 @@ export interface CreateDiscountRuleRequest {
   isStackable?: boolean;
 }
 
-export interface UpdateDiscountRuleRequest
-  extends Partial<CreateDiscountRuleRequest> {}
+export type UpdateDiscountRuleRequest = Partial<CreateDiscountRuleRequest>;
 
 export interface DiscountRulesQuery extends PaginatedQuery {
   type?: DiscountType;

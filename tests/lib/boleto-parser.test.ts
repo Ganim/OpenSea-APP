@@ -73,7 +73,8 @@ describe('boleto-parser', () => {
       const factor = '1030';
       const amount = '0000015000';
       const freeField = '0'.repeat(25);
-      const barcode = bank + currency + checkDigit + factor + amount + freeField;
+      const barcode =
+        bank + currency + checkDigit + factor + amount + freeField;
 
       const result = parseBoleto(barcode);
       expect(result.success).toBe(true);
@@ -115,8 +116,7 @@ describe('boleto-parser', () => {
 
     it('resolves bank name from expanded bank mapping', () => {
       const bank = '336'; // C6 Bank
-      const barcode =
-        bank + '9' + '0' + '1030' + '0000015000' + '0'.repeat(25);
+      const barcode = bank + '9' + '0' + '1030' + '0000015000' + '0'.repeat(25);
       const result = parseBoleto(barcode);
       expect(result.bankCode).toBe('336');
       expect(result.bankName).toBe('C6 Bank');
@@ -124,8 +124,7 @@ describe('boleto-parser', () => {
 
     it('returns null bankName for unknown bank code', () => {
       const bank = '999';
-      const barcode =
-        bank + '9' + '0' + '1030' + '0000015000' + '0'.repeat(25);
+      const barcode = bank + '9' + '0' + '1030' + '0000015000' + '0'.repeat(25);
       const result = parseBoleto(barcode);
       expect(result.bankCode).toBe('999');
       expect(result.bankName).toBeNull();

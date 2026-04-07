@@ -44,9 +44,7 @@ export type MaritalStatus =
   | 'SEPARATED'
   | 'STABLE_UNION';
 
-export type BankAccountType =
-  | 'CHECKING'
-  | 'SAVINGS';
+export type BankAccountType = 'CHECKING' | 'SAVINGS';
 
 export interface AdmissionInvite {
   id: string;

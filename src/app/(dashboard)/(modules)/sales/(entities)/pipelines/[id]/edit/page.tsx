@@ -85,11 +85,7 @@ export default function EditPipelinePage() {
   // DATA FETCHING
   // ============================================================================
 
-  const {
-    data: pipelineData,
-    isLoading,
-    error,
-  } = usePipeline(pipelineId);
+  const { data: pipelineData, isLoading, error } = usePipeline(pipelineId);
 
   const pipeline = pipelineData?.pipeline as Pipeline | undefined;
 
@@ -269,9 +265,7 @@ export default function EditPipelinePage() {
               <GitBranch className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Editando pipeline
-              </p>
+              <p className="text-sm text-muted-foreground">Editando pipeline</p>
               <h1 className="text-xl font-bold truncate">{pipeline.name}</h1>
             </div>
             <div className="hidden sm:flex items-center gap-3 shrink-0">

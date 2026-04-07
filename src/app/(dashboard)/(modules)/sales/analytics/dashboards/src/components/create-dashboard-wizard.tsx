@@ -202,7 +202,10 @@ export function CreateDashboardWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -235,7 +238,13 @@ export function CreateDashboardWizard({
       content: (
         <StepDashboardInfo
           name={name}
-          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+          onNameChange={v => {
+            setName(v);
+            setFieldErrors(prev => {
+              const { name: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           description={description}
           onDescriptionChange={setDescription}
           fieldErrors={fieldErrors}

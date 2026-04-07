@@ -6,7 +6,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { StepWizardDialog, type WizardStep } from '@/components/ui/step-wizard-dialog';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils';

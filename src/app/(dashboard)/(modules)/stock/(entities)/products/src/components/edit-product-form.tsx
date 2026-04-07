@@ -92,7 +92,10 @@ export function EditProductForm({
       });
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already exists') || msg.includes('Product with this name')) {
+      if (
+        msg.includes('name already exists') ||
+        msg.includes('Product with this name')
+      ) {
         setFieldErrors({ name: translateError(msg) });
       } else if (msg.includes('Name must be at most')) {
         setFieldErrors({ name: translateError(msg) });
@@ -111,7 +114,8 @@ export function EditProductForm({
       {/* Nome */}
       <div className="space-y-2">
         <Label htmlFor="name">
-          Nome do Produto <span className="text-[rgb(var(--color-destructive))]">*</span>
+          Nome do Produto{' '}
+          <span className="text-[rgb(var(--color-destructive))]">*</span>
         </Label>
         <div className="relative">
           <Input
@@ -119,7 +123,8 @@ export function EditProductForm({
             value={name}
             onChange={e => {
               setName(e.target.value);
-              if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+              if (fieldErrors.name)
+                setFieldErrors(prev => ({ ...prev, name: '' }));
             }}
             placeholder="Ex: Tecido Denim Santista"
             required

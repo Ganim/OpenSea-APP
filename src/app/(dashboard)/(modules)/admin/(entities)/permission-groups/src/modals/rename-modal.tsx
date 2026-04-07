@@ -30,6 +30,7 @@ export function RenameModal({
   onSubmit,
 }: RenameModalProps) {
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (group) {
@@ -38,8 +39,6 @@ export function RenameModal({
   }, [group]);
 
   if (!group) return null;
-
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +52,11 @@ export function RenameModal({
       await onSubmit(group.id, { name: trimmed });
       onClose();
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : 'Erro ao renomear grupo';
-      if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('já existe')) {
+      const msg = err instanceof Error ? err.message : 'Erro ao renomear grupo';
+      if (
+        msg.toLowerCase().includes('already exists') ||
+        msg.toLowerCase().includes('já existe')
+      ) {
         setError('Este nome já está em uso');
       } else {
         setError(msg);

@@ -351,7 +351,9 @@ export default function FinanceSettingsPage() {
   };
 
   const accounts = Array.isArray(accountsQuery.data) ? accountsQuery.data : [];
-  const categories = Array.isArray(categoriesQuery.data) ? categoriesQuery.data : [];
+  const categories = Array.isArray(categoriesQuery.data)
+    ? categoriesQuery.data
+    : [];
   const config = configQuery.data;
   const isLoading = configQuery.isLoading || accountsQuery.isLoading;
 

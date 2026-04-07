@@ -31,7 +31,12 @@ export function useListOffboardingChecklists(filters?: OffboardingFilters) {
         if (status === 403 || status === 404) {
           return {
             checklists: [],
-            meta: { page: pageParam, perPage: PAGE_SIZE, total: 0, totalPages: 0 },
+            meta: {
+              page: pageParam,
+              perPage: PAGE_SIZE,
+              total: 0,
+              totalPages: 0,
+            },
           };
         }
         throw err;

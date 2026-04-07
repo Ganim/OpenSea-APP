@@ -180,9 +180,7 @@ export default function EditCampaignPage() {
       );
       setEndDate(campaign.endDate ? campaign.endDate.substring(0, 10) : '');
       setMaxUsageTotal(
-        campaign.maxUsageTotal != null
-          ? String(campaign.maxUsageTotal)
-          : ''
+        campaign.maxUsageTotal != null ? String(campaign.maxUsageTotal) : ''
       );
       setMaxUsagePerCustomer(
         campaign.maxUsagePerCustomer != null
@@ -368,9 +366,7 @@ export default function EditCampaignPage() {
               <Megaphone className="h-7 w-7" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Editando campanha
-              </p>
+              <p className="text-sm text-muted-foreground">Editando campanha</p>
               <h1 className="text-xl font-bold truncate">{campaign.name}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <span
@@ -539,9 +535,7 @@ export default function EditCampaignPage() {
               <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="maxUsageTotal">
-                      Limite Total de Uso
-                    </Label>
+                    <Label htmlFor="maxUsageTotal">Limite Total de Uso</Label>
                     <Input
                       id="maxUsageTotal"
                       type="number"

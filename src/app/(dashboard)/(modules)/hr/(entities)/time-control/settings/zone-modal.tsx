@@ -98,7 +98,11 @@ export function GeofenceZoneModal({
       setFieldErrors({});
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+      if (
+        msg.includes('name already') ||
+        msg.includes('already exists') ||
+        msg.includes('nome')
+      ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -133,7 +137,8 @@ export function GeofenceZoneModal({
                 value={name}
                 onChange={e => {
                   setName(e.target.value);
-                  if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
                 }}
                 aria-invalid={!!fieldErrors.name}
               />
@@ -214,10 +219,7 @@ export function GeofenceZoneModal({
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSubmit || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={!canSubmit || isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

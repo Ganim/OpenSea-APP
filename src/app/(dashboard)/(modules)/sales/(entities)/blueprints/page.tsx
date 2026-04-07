@@ -10,7 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { usePermissions } from '@/hooks/use-permissions';
-import { useBlueprints, useDeleteBlueprint } from '@/hooks/sales/use-blueprints';
+import {
+  useBlueprints,
+  useDeleteBlueprint,
+} from '@/hooks/sales/use-blueprints';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -39,8 +42,7 @@ const STATUS_COLORS: Record<BlueprintStatus, string> = {
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   INACTIVE:
     'bg-slate-100 text-slate-500 dark:bg-slate-500/10 dark:text-slate-400',
-  DRAFT:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  DRAFT: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
 };
 
 export default function BlueprintsListPage() {
@@ -168,9 +170,7 @@ export default function BlueprintsListPage() {
                 'hover:shadow-md hover:border-violet-300 dark:hover:border-violet-500/30',
                 blueprint.status === 'INACTIVE' && 'opacity-60'
               )}
-              onClick={() =>
-                router.push(`/sales/blueprints/${blueprint.id}`)
-              }
+              onClick={() => router.push(`/sales/blueprints/${blueprint.id}`)}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
@@ -205,9 +205,7 @@ export default function BlueprintsListPage() {
                       <DropdownMenuItem
                         onClick={e => {
                           e.stopPropagation();
-                          router.push(
-                            `/sales/blueprints/${blueprint.id}`
-                          );
+                          router.push(`/sales/blueprints/${blueprint.id}`);
                         }}
                       >
                         Visualizar
@@ -215,9 +213,7 @@ export default function BlueprintsListPage() {
                       <DropdownMenuItem
                         onClick={e => {
                           e.stopPropagation();
-                          router.push(
-                            `/sales/blueprints/${blueprint.id}/edit`
-                          );
+                          router.push(`/sales/blueprints/${blueprint.id}/edit`);
                         }}
                       >
                         Editar
@@ -241,10 +237,7 @@ export default function BlueprintsListPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Badge
                   variant="secondary"
-                  className={cn(
-                    'text-xs',
-                    STATUS_COLORS[blueprint.status]
-                  )}
+                  className={cn('text-xs', STATUS_COLORS[blueprint.status])}
                 >
                   {BLUEPRINT_STATUS_LABELS[blueprint.status]}
                 </Badge>
@@ -277,10 +270,7 @@ export default function BlueprintsListPage() {
       />
 
       {/* Create Wizard */}
-      <CreateBlueprintWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-      />
+      <CreateBlueprintWizard open={wizardOpen} onOpenChange={setWizardOpen} />
     </div>
   );
 }

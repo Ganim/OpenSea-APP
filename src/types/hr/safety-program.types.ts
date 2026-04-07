@@ -3,7 +3,15 @@
  * Tipos para programas de segurança do trabalho (PCMSO, PGR, LTCAT, PPRA)
  */
 
-export type SafetyProgramType = 'PPRA' | 'PCMSO' | 'PGR' | 'LTCAT' | 'PPP' | 'PCMAT' | 'SIPAT' | 'OTHER';
+export type SafetyProgramType =
+  | 'PPRA'
+  | 'PCMSO'
+  | 'PGR'
+  | 'LTCAT'
+  | 'PPP'
+  | 'PCMAT'
+  | 'SIPAT'
+  | 'OTHER';
 
 export type SafetyProgramStatus = 'ACTIVE' | 'EXPIRED' | 'DRAFT';
 

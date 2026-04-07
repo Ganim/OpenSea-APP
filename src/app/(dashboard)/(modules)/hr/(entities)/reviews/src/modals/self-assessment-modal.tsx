@@ -60,7 +60,15 @@ export function SelfAssessmentModal({
       goals: goals.trim() || undefined,
     });
     resetForm();
-  }, [selfScore, selfComments, strengths, improvements, goals, onSubmit, resetForm]);
+  }, [
+    selfScore,
+    selfComments,
+    strengths,
+    improvements,
+    goals,
+    onSubmit,
+    resetForm,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={val => !val && handleClose()}>
@@ -156,10 +164,7 @@ export function SelfAssessmentModal({
           <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={selfScore < 1 || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={selfScore < 1 || isLoading}>
             {isLoading ? 'Enviando...' : 'Enviar Autoavaliação'}
           </Button>
         </DialogFooter>

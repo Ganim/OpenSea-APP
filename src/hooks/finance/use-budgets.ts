@@ -38,8 +38,7 @@ export function useSaveBudget() {
     mutationFn: (data: SaveBudgetRequest) => budgetService.save(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        predicate: (query) =>
-          (query.queryKey[0] as string).startsWith('budget'),
+        predicate: query => (query.queryKey[0] as string).startsWith('budget'),
       });
     },
   });

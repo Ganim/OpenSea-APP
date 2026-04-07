@@ -24,9 +24,9 @@ test.describe('Admin - Authentication Settings', () => {
 
   test('should access auth settings page', async ({ page }) => {
     // Page should load with the auth settings title
-    await expect(
-      page.getByText('Autenticação').first()
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Autenticação').first()).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   // ─── PROVIDER TOGGLES ─────────────────────────────────────────────
@@ -84,9 +84,9 @@ test.describe('Admin - Authentication Settings', () => {
     await page.waitForTimeout(500);
 
     // The save button text should change to "Salvar Alterações"
-    await expect(
-      page.getByText('Salvar Alterações')
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Salvar Alterações')).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Toggle back to restore original state
     await firstSwitch.click();

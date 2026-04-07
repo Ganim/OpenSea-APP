@@ -58,7 +58,9 @@ export function PermissionChip({
                 : 'bg-slate-100 border border-slate-300 dark:bg-white/10 dark:border-white/20'
             )}
           >
-            {isActive && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+            {isActive && (
+              <Check className="w-3 h-3 text-white" strokeWidth={3} />
+            )}
           </span>
           {label}
         </button>

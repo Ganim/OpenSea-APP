@@ -31,8 +31,7 @@ const STATUS_COLORS: Record<BlueprintStatus, string> = {
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   INACTIVE:
     'bg-slate-100 text-slate-500 dark:bg-slate-500/10 dark:text-slate-400',
-  DRAFT:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  DRAFT: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
 };
 
 function BlueprintDetailContent() {
@@ -145,8 +144,7 @@ function BlueprintDetailContent() {
           <Layers className="h-5 w-5 text-violet-500" />
           <h2 className="text-base font-semibold">Regras por Etapa</h2>
           <Badge variant="secondary" className="text-xs ml-2">
-            {sortedRules.length}{' '}
-            {sortedRules.length === 1 ? 'etapa' : 'etapas'}
+            {sortedRules.length} {sortedRules.length === 1 ? 'etapa' : 'etapas'}
           </Badge>
         </div>
 

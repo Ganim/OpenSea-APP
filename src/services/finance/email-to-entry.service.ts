@@ -50,23 +50,23 @@ export interface ProcessEmailToEntryResult {
 export const emailToEntryService = {
   async getConfig(): Promise<{ config: EmailToEntryConfig | null }> {
     return apiClient.get<{ config: EmailToEntryConfig | null }>(
-      API_ENDPOINTS.EMAIL_TO_ENTRY.CONFIG,
+      API_ENDPOINTS.EMAIL_TO_ENTRY.CONFIG
     );
   },
 
   async upsertConfig(
-    data: UpsertEmailToEntryConfigData,
+    data: UpsertEmailToEntryConfigData
   ): Promise<{ config: EmailToEntryConfig }> {
     return apiClient.post<{ config: EmailToEntryConfig }>(
       API_ENDPOINTS.EMAIL_TO_ENTRY.CONFIG,
-      data,
+      data
     );
   },
 
   async processEmails(): Promise<ProcessEmailToEntryResult> {
     return apiClient.post<ProcessEmailToEntryResult>(
       API_ENDPOINTS.EMAIL_TO_ENTRY.PROCESS,
-      {},
+      {}
     );
   },
 };

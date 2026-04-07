@@ -4,7 +4,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { medicalExamsService } from '@/services/hr/medical-exams.service';
-import type { MedicalExam, CreateMedicalExamData, UpdateMedicalExamData } from '@/types/hr';
+import type {
+  MedicalExam,
+  CreateMedicalExamData,
+  UpdateMedicalExamData,
+} from '@/types/hr';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 import { medicalExamKeys } from './keys';

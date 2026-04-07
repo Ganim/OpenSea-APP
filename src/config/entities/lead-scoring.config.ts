@@ -1,7 +1,7 @@
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { LeadScoringRule } from '@/types/sales';
-import { Eye, Edit, Star, Plus, Trash2 } from 'lucide-react';
+import { Edit, Eye, Plus, Star, Trash2 } from 'lucide-react';
 
 export const leadScoringConfig = defineEntityConfig<LeadScoringRule>()({
   name: 'Regra de Scoring',

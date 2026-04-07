@@ -17,11 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { translateError } from '@/lib/error-messages';
-import type {
-  CreateAdmissionData,
-  ContractType,
-  WorkRegime,
-} from '@/types/hr';
+import type { CreateAdmissionData, ContractType, WorkRegime } from '@/types/hr';
 import {
   Briefcase,
   Check,
@@ -32,10 +28,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  CONTRACT_TYPE_LABELS,
-  WORK_REGIME_LABELS,
-} from '../utils';
+import { CONTRACT_TYPE_LABELS, WORK_REGIME_LABELS } from '../utils';
 
 // Department and Position selectors
 import { useQuery } from '@tanstack/react-query';
@@ -89,7 +82,10 @@ export function CreateModal({
     queryKey: ['departments', 'all'],
     queryFn: async () => {
       const res = await departmentsService.listDepartments({ perPage: 100 });
-      return (res as { departments?: { id: string; name: string }[] }).departments ?? [];
+      return (
+        (res as { departments?: { id: string; name: string }[] }).departments ??
+        []
+      );
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -98,7 +94,9 @@ export function CreateModal({
     queryKey: ['positions', 'all'],
     queryFn: async () => {
       const res = await positionsService.listPositions({ perPage: 100 });
-      return (res as { positions?: { id: string; name: string }[] }).positions ?? [];
+      return (
+        (res as { positions?: { id: string; name: string }[] }).positions ?? []
+      );
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -130,7 +128,15 @@ export function CreateModal({
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !email || !positionId || !departmentId || !expectedStartDate || !contractType || !workRegime)
+    if (
+      !fullName ||
+      !email ||
+      !positionId ||
+      !departmentId ||
+      !expectedStartDate ||
+      !contractType ||
+      !workRegime
+    )
       return;
 
     const data: CreateAdmissionData = {
@@ -146,7 +152,7 @@ export function CreateModal({
     };
 
     try {
-      const result = await onSubmit(data) as { token?: string } | undefined;
+      const result = (await onSubmit(data)) as { token?: string } | undefined;
       if (result?.token) {
         setCreatedToken(result.token);
         setCurrentStep(3);
@@ -169,7 +175,11 @@ export function CreateModal({
 
   const step1Valid = !!fullName.trim() && !!email.trim() && email.includes('@');
   const step2Valid =
-    !!positionId && !!departmentId && !!expectedStartDate && !!contractType && !!workRegime;
+    !!positionId &&
+    !!departmentId &&
+    !!expectedStartDate &&
+    !!contractType &&
+    !!workRegime;
 
   const steps: WizardStep[] = [
     {
@@ -231,8 +241,9 @@ export function CreateModal({
                   Admissão Digital
                 </p>
                 <p className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-1">
-                  Um link de admissão será enviado ao candidato para que ele preencha
-                  seus dados pessoais, envie documentos e assine digitalmente.
+                  Um link de admissão será enviado ao candidato para que ele
+                  preencha seus dados pessoais, envie documentos e assine
+                  digitalmente.
                 </p>
               </div>
             </div>
@@ -384,10 +395,13 @@ export function CreateModal({
               <Check className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">Convite criado com sucesso!</h3>
+              <h3 className="text-lg font-semibold">
+                Convite criado com sucesso!
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                O candidato <span className="font-medium text-foreground">{fullName}</span> poderá
-                acessar o formulário de admissão pelo link abaixo.
+                O candidato{' '}
+                <span className="font-medium text-foreground">{fullName}</span>{' '}
+                poderá acessar o formulário de admissão pelo link abaixo.
               </p>
             </div>
           </div>
@@ -433,7 +447,8 @@ export function CreateModal({
                 </p>
                 <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">
                   O envio automático por e-mail ainda não está configurado.
-                  Copie o link acima e envie diretamente ao candidato por e-mail, WhatsApp ou outro canal.
+                  Copie o link acima e envie diretamente ao candidato por
+                  e-mail, WhatsApp ou outro canal.
                 </p>
               </div>
             </div>
@@ -441,11 +456,7 @@ export function CreateModal({
         </div>
       ),
       isValid: true,
-      footer: (
-        <Button onClick={handleClose}>
-          Fechar
-        </Button>
-      ),
+      footer: <Button onClick={handleClose}>Fechar</Button>,
     },
   ];
 

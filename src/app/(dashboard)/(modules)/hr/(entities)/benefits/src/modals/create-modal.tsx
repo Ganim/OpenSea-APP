@@ -184,9 +184,8 @@ export function CreateModal({
                     <p className="text-xs text-muted-foreground">Tipo</p>
                     <p className="font-medium text-sm truncate">
                       {
-                        BENEFIT_TYPE_OPTIONS.find(
-                          o => o.value === selectedType
-                        )?.label
+                        BENEFIT_TYPE_OPTIONS.find(o => o.value === selectedType)
+                          ?.label
                       }
                     </p>
                   </div>

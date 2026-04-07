@@ -7,7 +7,11 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
-import type { CreateReportRequest, ReportFormat, ReportType } from '@/types/sales';
+import type {
+  CreateReportRequest,
+  ReportFormat,
+  ReportType,
+} from '@/types/sales';
 import { Check, FileText, Filter, Loader2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -210,7 +214,8 @@ export function CreateReportWizard({
 
   const handleSubmit = useCallback(async () => {
     const config: Record<string, unknown> = {};
-    if (startDate) config.startDate = new Date(startDate + 'T00:00:00').toISOString();
+    if (startDate)
+      config.startDate = new Date(startDate + 'T00:00:00').toISOString();
     if (endDate) config.endDate = new Date(endDate + 'T23:59:59').toISOString();
 
     const payload: CreateReportRequest = {
@@ -224,18 +229,13 @@ export function CreateReportWizard({
     handleClose();
   }, [name, type, format, startDate, endDate, onSubmit, handleClose]);
 
-  const step1Valid = useMemo(
-    () => name.trim().length > 0,
-    [name]
-  );
+  const step1Valid = useMemo(() => name.trim().length > 0, [name]);
 
   const steps: WizardStep[] = [
     {
       title: 'Nome e Tipo',
       description: 'Defina o nome e o tipo do relatório.',
-      icon: (
-        <FileText className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
-      ),
+      icon: <FileText className="h-16 w-16 text-sky-400" strokeWidth={1.2} />,
       content: (
         <StepNameAndType
           name={name}
@@ -251,9 +251,7 @@ export function CreateReportWizard({
     {
       title: 'Período e Filtros',
       description: 'Configure o período e revise os dados.',
-      icon: (
-        <Filter className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
-      ),
+      icon: <Filter className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
       content: (
         <StepPeriodAndFilters

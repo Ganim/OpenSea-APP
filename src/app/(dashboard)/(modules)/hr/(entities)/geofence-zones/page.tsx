@@ -128,8 +128,10 @@ function GeofenceZonesPageContent() {
       };
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const meta = (lastPage as Record<string, unknown>).meta as { page?: number; totalPages?: number } | undefined;
+    getNextPageParam: lastPage => {
+      const meta = (lastPage as Record<string, unknown>).meta as
+        | { page?: number; totalPages?: number }
+        | undefined;
       const currentPage = meta?.page ?? 1;
       const totalPages = meta?.totalPages ?? 1;
       return currentPage < totalPages ? currentPage + 1 : undefined;

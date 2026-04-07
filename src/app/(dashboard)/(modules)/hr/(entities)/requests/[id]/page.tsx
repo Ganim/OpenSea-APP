@@ -53,7 +53,7 @@ import {
 
 const RejectModal = dynamic(
   () =>
-    import('../src/modals/reject-modal').then((m) => ({
+    import('../src/modals/reject-modal').then(m => ({
       default: m.RejectModal,
     })),
   { ssr: false }

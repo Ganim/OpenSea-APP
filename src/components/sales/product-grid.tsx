@@ -12,7 +12,13 @@ import { API_ENDPOINTS } from '@/config/api';
 import { categoriesService } from '@/services/stock/categories.service';
 import { ordersService } from '@/services/sales/orders.service';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { PaginationMeta } from '@/types/common/pagination';
+
+interface MetaShape {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
 
 // =============================================================================
 // TYPES
@@ -50,7 +56,7 @@ interface VariantListResponse {
       images?: Array<{ url: string }>;
     };
   }>;
-  pagination: PaginationMeta;
+  meta: MetaShape;
 }
 
 // =============================================================================
@@ -215,36 +221,31 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
   });
 
   // Fetch variants with infinite scroll
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey: ['pos-variants', debouncedSearch, selectedCategoryId],
-    queryFn: async ({ pageParam = 1 }) => {
-      const params: Record<string, string> = {
-        page: String(pageParam),
-        limit: String(PAGE_SIZE),
-        hasStock: 'true',
-      };
-      if (debouncedSearch) params.search = debouncedSearch;
-      if (selectedCategoryId) params.categoryId = selectedCategoryId;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ['pos-variants', debouncedSearch, selectedCategoryId],
+      queryFn: async ({ pageParam = 1 }) => {
+        const params: Record<string, string> = {
+          page: String(pageParam),
+          limit: String(PAGE_SIZE),
+          hasStock: 'true',
+        };
+        if (debouncedSearch) params.search = debouncedSearch;
+        if (selectedCategoryId) params.categoryId = selectedCategoryId;
 
-      return apiClient.get<VariantListResponse>(API_ENDPOINTS.VARIANTS.LIST, {
-        params,
-      });
-    },
-    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      const currentPage = (lastPageParam as number) ?? 1;
-      if (currentPage < lastPage.pagination.totalPages) {
-        return currentPage + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 1,
-  });
+        return apiClient.get<VariantListResponse>(API_ENDPOINTS.VARIANTS.LIST, {
+          params,
+        });
+      },
+      getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+        const currentPage = (lastPageParam as number) ?? 1;
+        if (currentPage < (lastPage.meta?.pages ?? 1)) {
+          return currentPage + 1;
+        }
+        return undefined;
+      },
+      initialPageParam: 1,
+    });
 
   // IntersectionObserver for infinite scroll
   React.useEffect(() => {
@@ -252,7 +253,7 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -267,7 +268,7 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
   // Flatten variants
   const variants = React.useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages.flatMap((page) =>
+    return data.pages.flatMap(page =>
       page.variants.map(
         (v): ProductVariant => ({
           id: v.id,
@@ -275,10 +276,8 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
           sku: v.sku ?? null,
           barcode: v.barcode ?? null,
           price: v.price,
-          imageUrl:
-            v.imageUrl ?? v.product?.images?.[0]?.url ?? null,
-          categoryName:
-            v.categoryName ?? v.product?.category?.name ?? null,
+          imageUrl: v.imageUrl ?? v.product?.images?.[0]?.url ?? null,
+          categoryName: v.categoryName ?? v.product?.category?.name ?? null,
           stockQuantity: v.stockQuantity ?? 0,
         })
       )
@@ -295,7 +294,7 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
         <input
           type="text"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={e => setSearchInput(e.target.value)}
           placeholder="Buscar produto, SKU ou código de barras..."
           className={cn(
             'h-14 w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 text-base',
@@ -318,7 +317,7 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
             isSelected={selectedCategoryId === null}
             onClick={() => setSelectedCategoryId(null)}
           />
-          {categories.map((cat) => (
+          {categories.map(cat => (
             <CategoryChip
               key={cat.id}
               label={cat.name}
@@ -344,7 +343,7 @@ function ProductGrid({ onAddToCart, className }: ProductGridProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-          {variants.map((variant) => (
+          {variants.map(variant => (
             <ProductTile
               key={variant.id}
               variant={variant}
@@ -414,7 +413,8 @@ function ProductTile({
     'bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300',
     'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300',
   ];
-  const colorIndex = (variant.categoryName ?? '').length % placeholderColors.length;
+  const colorIndex =
+    (variant.categoryName ?? '').length % placeholderColors.length;
   const placeholderColor = placeholderColors[colorIndex];
 
   return (

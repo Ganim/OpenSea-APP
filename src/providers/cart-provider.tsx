@@ -82,20 +82,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Lazy fetch — only queries if activeOrderId exists
-  const {
-    data: orderData,
-    isLoading,
-    refetch,
-  } = usePdvOrder(activeOrderId);
+  const { data: orderData, isLoading, refetch } = usePdvOrder(activeOrderId);
 
   const activeOrder = orderData?.order ?? null;
 
   // If the fetched order is no longer DRAFT, clear it
   useEffect(() => {
-    if (
-      activeOrder &&
-      activeOrder.status !== 'DRAFT'
-    ) {
+    if (activeOrder && activeOrder.status !== 'DRAFT') {
       setActiveOrderId(null);
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -120,7 +113,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Batching: accumulate addItem calls within BATCH_DELAY_MS window
   const batchQueueRef = useRef<
-    Array<{ variantId: string; quantity: number; resolve: () => void; reject: (err: unknown) => void }>
+    Array<{
+      variantId: string;
+      quantity: number;
+      resolve: () => void;
+      reject: (err: unknown) => void;
+    }>
   >([]);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -134,7 +132,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Merge same variantId entries
-    const merged = new Map<string, { quantity: number; entries: typeof queue }>();
+    const merged = new Map<
+      string,
+      { quantity: number; entries: typeof queue }
+    >();
     for (const entry of queue) {
       const existing = merged.get(entry.variantId);
       if (existing) {
@@ -243,7 +244,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       activeOrder,
       items: activeOrder?.items ?? [],
-      itemCount: activeOrder?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0,
+      itemCount:
+        activeOrder?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0,
       isLoading,
     }),
     [activeOrder, isLoading]

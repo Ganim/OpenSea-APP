@@ -67,7 +67,10 @@ export interface UpdatePaymentConditionRequest {
   isDefault?: boolean;
 }
 
-export const PAYMENT_CONDITION_TYPE_LABELS: Record<PaymentConditionType, string> = {
+export const PAYMENT_CONDITION_TYPE_LABELS: Record<
+  PaymentConditionType,
+  string
+> = {
   CASH: 'A Vista',
   INSTALLMENT: 'Parcelado',
   CUSTOM: 'Personalizado',
@@ -79,7 +82,10 @@ export const INTEREST_TYPE_LABELS: Record<InterestType, string> = {
   COMPOUND: 'Composto',
 };
 
-export const PAYMENT_CONDITION_APPLICABLE_LABELS: Record<PaymentConditionApplicable, string> = {
+export const PAYMENT_CONDITION_APPLICABLE_LABELS: Record<
+  PaymentConditionApplicable,
+  string
+> = {
   ALL: 'Todos',
   RETAIL: 'Varejo',
   WHOLESALE: 'Atacado',

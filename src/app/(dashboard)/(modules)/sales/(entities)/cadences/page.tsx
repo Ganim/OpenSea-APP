@@ -174,10 +174,9 @@ function CadencesPageContent() {
     const el = sentinelRef.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
-      () => {},
-      { rootMargin: '300px' }
-    );
+    const observer = new IntersectionObserver(() => {}, {
+      rootMargin: '300px',
+    });
 
     observer.observe(el);
     return () => observer.disconnect();

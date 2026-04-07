@@ -1,8 +1,18 @@
 // Cadence Sequence Types
 
-export type CadenceStepType = 'EMAIL' | 'CALL' | 'TASK' | 'LINKEDIN' | 'WHATSAPP' | 'WAIT';
+export type CadenceStepType =
+  | 'EMAIL'
+  | 'CALL'
+  | 'TASK'
+  | 'LINKEDIN'
+  | 'WHATSAPP'
+  | 'WAIT';
 
-export type CadenceEnrollmentStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'BOUNCED';
+export type CadenceEnrollmentStatus =
+  | 'ACTIVE'
+  | 'PAUSED'
+  | 'COMPLETED'
+  | 'BOUNCED';
 
 export const CADENCE_STEP_TYPE_LABELS: Record<CadenceStepType, string> = {
   EMAIL: 'E-mail',
@@ -13,7 +23,10 @@ export const CADENCE_STEP_TYPE_LABELS: Record<CadenceStepType, string> = {
   WAIT: 'Espera',
 };
 
-export const CADENCE_ENROLLMENT_STATUS_LABELS: Record<CadenceEnrollmentStatus, string> = {
+export const CADENCE_ENROLLMENT_STATUS_LABELS: Record<
+  CadenceEnrollmentStatus,
+  string
+> = {
   ACTIVE: 'Ativa',
   PAUSED: 'Pausada',
   COMPLETED: 'Concluída',

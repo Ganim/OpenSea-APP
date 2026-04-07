@@ -127,10 +127,7 @@ export function CreateShiftModal({
               <Label className="text-xs">
                 Tipo de Turno <span className="text-rose-500">*</span>
               </Label>
-              <Select
-                value={type}
-                onValueChange={v => setType(v as ShiftType)}
-              >
+              <Select value={type} onValueChange={v => setType(v as ShiftType)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>

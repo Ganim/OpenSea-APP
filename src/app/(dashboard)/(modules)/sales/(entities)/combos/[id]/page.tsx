@@ -246,11 +246,7 @@ export default function ComboDetailPage() {
 
             <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <InfoRow
-                  icon={Layers}
-                  label="Tipo"
-                  value={typeLabel}
-                />
+                <InfoRow icon={Layers} label="Tipo" value={typeLabel} />
                 {combo.type === 'FIXED' && combo.fixedPrice != null && (
                   <InfoRow
                     icon={DollarSign}
@@ -320,9 +316,7 @@ export default function ComboDetailPage() {
               <div className="flex items-center gap-3">
                 <Package className="h-5 w-5 text-foreground" />
                 <div>
-                  <h3 className="text-base font-semibold">
-                    Itens do Combo
-                  </h3>
+                  <h3 className="text-base font-semibold">Itens do Combo</h3>
                   <p className="text-sm text-muted-foreground">
                     Produtos e categorias incluidos neste combo
                   </p>
@@ -336,13 +330,15 @@ export default function ComboDetailPage() {
                 {combo.minItems != null && (
                   <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300">
                     <Hash className="h-3 w-3" />
-                    Mínimo: {combo.minItems} {combo.minItems === 1 ? 'item' : 'itens'}
+                    Mínimo: {combo.minItems}{' '}
+                    {combo.minItems === 1 ? 'item' : 'itens'}
                   </div>
                 )}
                 {combo.maxItems != null && (
                   <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border border-sky-600/25 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/8 text-sky-700 dark:text-sky-300">
                     <Hash className="h-3 w-3" />
-                    Máximo: {combo.maxItems} {combo.maxItems === 1 ? 'item' : 'itens'}
+                    Máximo: {combo.maxItems}{' '}
+                    {combo.maxItems === 1 ? 'item' : 'itens'}
                   </div>
                 )}
               </div>
@@ -354,20 +350,39 @@ export default function ComboDetailPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Produto</th>
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">SKU</th>
-                      <th className="text-center px-4 py-3 font-medium text-muted-foreground">Qtd</th>
-                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Preço Unit.</th>
-                      <th className="text-center px-4 py-3 font-medium text-muted-foreground">Obrigatório</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                        Produto
+                      </th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                        SKU
+                      </th>
+                      <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                        Qtd
+                      </th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">
+                        Preço Unit.
+                      </th>
+                      <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                        Obrigatório
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {(combo as any).items.map((item: any, idx: number) => (
-                      <tr key={item.id || idx} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3 font-medium">{item.variant?.name || 'Produto removido'}</td>
-                        <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{item.variant?.sku || '-'}</td>
-                        <td className="px-4 py-3 text-center">{item.quantity}</td>
+                      <tr
+                        key={item.id || idx}
+                        className="border-b border-border last:border-0"
+                      >
+                        <td className="px-4 py-3 font-medium">
+                          {item.variant?.name || 'Produto removido'}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+                          {item.variant?.sku || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {item.quantity}
+                        </td>
                         <td className="px-4 py-3 text-right">
                           {item.variant?.price != null
                             ? `R$ ${Number(item.variant.price).toFixed(2)}`
@@ -375,9 +390,13 @@ export default function ComboDetailPage() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           {item.isRequired ? (
-                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300">Sim</span>
+                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300">
+                              Sim
+                            </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-500/8 dark:text-slate-400">Não</span>
+                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-500/8 dark:text-slate-400">
+                              Não
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -390,7 +409,8 @@ export default function ComboDetailPage() {
                 <div className="flex items-start gap-3">
                   <Info className="h-5 w-5 text-sky-500 mt-0.5 shrink-0" />
                   <p className="text-sm text-muted-foreground">
-                    Nenhum item adicionado a este combo. Use o botão &quot;Editar Combo&quot; para adicionar produtos.
+                    Nenhum item adicionado a este combo. Use o botão
+                    &quot;Editar Combo&quot; para adicionar produtos.
                   </p>
                 </div>
               </div>

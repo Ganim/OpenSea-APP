@@ -37,7 +37,9 @@ export function useCreateWorkplaceRisk(
   } = options;
 
   return useMutation({
-    mutationFn: async (data: CreateWorkplaceRiskData): Promise<WorkplaceRisk> => {
+    mutationFn: async (
+      data: CreateWorkplaceRiskData
+    ): Promise<WorkplaceRisk> => {
       const response = await workplaceRisksService.create(programId, data);
       return response.workplaceRisk;
     },

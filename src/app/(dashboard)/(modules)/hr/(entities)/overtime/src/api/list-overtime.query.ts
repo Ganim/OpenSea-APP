@@ -35,9 +35,19 @@ export function useListOvertime(params?: ListOvertimeParams) {
       });
 
       const overtime = (response as { overtime?: Overtime[] }).overtime ?? [];
-      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const meta = (
+        response as {
+          meta?: {
+            total?: number;
+            page?: number;
+            perPage?: number;
+            totalPages?: number;
+          };
+        }
+      ).meta;
       const total = meta?.total ?? overtime.length;
-      const totalPages = meta?.totalPages ?? (overtime.length < PAGE_SIZE ? page : page + 1);
+      const totalPages =
+        meta?.totalPages ?? (overtime.length < PAGE_SIZE ? page : page + 1);
 
       return {
         overtime,
@@ -49,7 +59,7 @@ export function useListOvertime(params?: ListOvertimeParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 5 * 60 * 1000,

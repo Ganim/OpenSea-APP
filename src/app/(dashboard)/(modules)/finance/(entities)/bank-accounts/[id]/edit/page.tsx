@@ -113,7 +113,10 @@ export default function EditBankAccountPage({
   const account = data?.bankAccount;
 
   // Chart of accounts: bank accounts are ASSET type
-  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true, type: 'ASSET' });
+  const { data: chartOfAccountsData } = useChartOfAccounts({
+    isActive: true,
+    type: 'ASSET',
+  });
 
   // ==========================================================================
   // STATE
@@ -401,7 +404,10 @@ export default function EditBankAccountPage({
                             id="name"
                             value={formData.name}
                             onChange={e => {
-                              setFormData({ ...formData, name: e.target.value });
+                              setFormData({
+                                ...formData,
+                                name: e.target.value,
+                              });
                               if (fieldErrors.name)
                                 setFieldErrors(prev => ({ ...prev, name: '' }));
                             }}
@@ -420,7 +426,10 @@ export default function EditBankAccountPage({
                           id="bankName"
                           value={formData.bankName}
                           onChange={e =>
-                            setFormData({ ...formData, bankName: e.target.value })
+                            setFormData({
+                              ...formData,
+                              bankName: e.target.value,
+                            })
                           }
                           placeholder="Nome do banco"
                         />
@@ -428,13 +437,17 @@ export default function EditBankAccountPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="bankCode">
-                          Código do Banco <span className="text-rose-500">*</span>
+                          Código do Banco{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="bankCode"
                           value={formData.bankCode}
                           onChange={e =>
-                            setFormData({ ...formData, bankCode: e.target.value })
+                            setFormData({
+                              ...formData,
+                              bankCode: e.target.value,
+                            })
                           }
                           placeholder="Ex: 001, 341, 237"
                         />
@@ -516,7 +529,8 @@ export default function EditBankAccountPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="accountNumber">
-                          Número da Conta <span className="text-rose-500">*</span>
+                          Número da Conta{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="accountNumber"
@@ -714,16 +728,21 @@ export default function EditBankAccountPage({
                           <SelectValue placeholder="Sem vínculo contábil" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
-                          {(chartOfAccountsData?.chartOfAccounts ?? []).map(acc => (
-                            <SelectItem key={acc.id} value={acc.id}>
-                              {acc.code} — {acc.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="none">
+                            Sem vínculo contábil
+                          </SelectItem>
+                          {(chartOfAccountsData?.chartOfAccounts ?? []).map(
+                            acc => (
+                              <SelectItem key={acc.id} value={acc.id}>
+                                {acc.code} — {acc.name}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Opcional. Conta de ativo do plano de contas associada a esta conta bancária.
+                        Opcional. Conta de ativo do plano de contas associada a
+                        esta conta bancária.
                       </p>
                     </div>
                   </div>
@@ -747,7 +766,10 @@ export default function EditBankAccountPage({
                         id="description"
                         value={formData.description}
                         onChange={e =>
-                          setFormData({ ...formData, description: e.target.value })
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
                         }
                         placeholder="Observações sobre a conta bancária"
                         rows={4}

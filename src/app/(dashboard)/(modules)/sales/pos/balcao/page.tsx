@@ -7,7 +7,11 @@ import { ArrowLeft, ShoppingCart, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { CartProvider, useCartData, useCartActions } from '@/providers/cart-provider';
+import {
+  CartProvider,
+  useCartData,
+  useCartActions,
+} from '@/providers/cart-provider';
 import { ProductGrid } from '@/components/sales/product-grid';
 import type { ProductVariant } from '@/components/sales/product-grid';
 import { PaymentOverlay } from '@/components/sales/payment-overlay';
@@ -165,9 +169,7 @@ function BalcaoTerminal() {
         >
           <ShoppingCart className="size-5" />
           {itemCount > 0 && (
-            <span className="text-sm">
-              {formatCurrency(total)}
-            </span>
+            <span className="text-sm">{formatCurrency(total)}</span>
           )}
           {itemCount > 0 && (
             <span className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white">

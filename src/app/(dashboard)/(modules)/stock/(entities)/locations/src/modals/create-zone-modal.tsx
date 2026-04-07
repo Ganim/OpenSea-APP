@@ -74,7 +74,10 @@ export function CreateZoneModal({
       handleClose();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('code already exists') || msg.includes('zone with this code')) {
+      if (
+        msg.includes('code already exists') ||
+        msg.includes('zone with this code')
+      ) {
         setFieldErrors({ code: translateError(msg) });
       } else {
         toast.error(translateError(msg));
@@ -123,14 +126,17 @@ export function CreateZoneModal({
                   value={code}
                   onChange={e => {
                     handleCodeChange(e.target.value);
-                    if (fieldErrors.code) setFieldErrors(prev => ({ ...prev, code: '' }));
+                    if (fieldErrors.code)
+                      setFieldErrors(prev => ({ ...prev, code: '' }));
                   }}
                   placeholder="Ex: EST"
                   maxLength={5}
                   className="uppercase font-mono"
                   aria-invalid={!!fieldErrors.code}
                 />
-                {fieldErrors.code && <FormErrorIcon message={fieldErrors.code} />}
+                {fieldErrors.code && (
+                  <FormErrorIcon message={fieldErrors.code} />
+                )}
               </div>
               <p className="text-[11px] text-muted-foreground">
                 2 a 5 caracteres (letras e números)

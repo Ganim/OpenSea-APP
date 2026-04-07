@@ -31,31 +31,36 @@ export * from './order.types';
 export * from './payment-condition.types';
 export * from './payment-config.types';
 export {
-    type PdvOrderStatus,
-    type PdvOrder,
-    type PdvOrderItem,
-    type CashierQueueItem,
-    type PaymentMethod,
-    type TerminalMode,
-    type ReceivePaymentRequest,
-    type ReceivePaymentResponse,
-    type CreatePdvOrderRequest,
-    type AddOrderItemRequest,
-    type CashierQueueQuery,
-    type CashierQueueResponse,
-    type MyDraftsQuery,
-    type MyDraftsResponse,
+  type PdvOrderStatus,
+  type PdvOrder,
+  type PdvOrderItem,
+  type CashierQueueItem,
+  type PaymentMethod,
+  type TerminalMode,
+  type ReceivePaymentRequest,
+  type ReceivePaymentResponse,
+  type CreatePdvOrderRequest,
+  type AddOrderItemRequest,
+  type CashierQueueQuery,
+  type CashierQueueResponse,
+  type MyDraftsQuery,
+  type MyDraftsResponse,
 } from './pdv.types';
 export * from './pipeline.types';
 export * from './pos.types';
 export * from './price-table.types';
 export * from './printer.types';
 export {
-    DISCOUNT_TYPE_LABELS as PROMOTION_DISCOUNT_TYPE_LABELS, type CreateVariantPromotionRequest, type DiscountType as PromotionDiscountType, type UpdateVariantPromotionRequest, type VariantPromotion, type VariantPromotionResponse, type VariantPromotionsResponse
+  DISCOUNT_TYPE_LABELS as PROMOTION_DISCOUNT_TYPE_LABELS,
+  type CreateVariantPromotionRequest,
+  type DiscountType as PromotionDiscountType,
+  type UpdateVariantPromotionRequest,
+  type VariantPromotion,
+  type VariantPromotionResponse,
+  type VariantPromotionsResponse,
 } from './promotion.types';
 export * from './proposal.types';
 export * from './quote.types';
 export * from './reservation.types';
 export * from './store-credit.types';
 export * from './workflow.types';
-

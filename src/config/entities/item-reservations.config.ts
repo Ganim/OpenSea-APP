@@ -63,12 +63,9 @@ export const itemReservationsConfig = defineEntityConfig<ItemReservation>()({
         field: 'status',
         label: 'Status',
         colorMap: {
-          PENDING:
-            'bg-amber-500/20 text-amber-700 dark:text-amber-400',
-          CONFIRMED:
-            'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
-          CANCELLED:
-            'bg-rose-500/20 text-rose-700 dark:text-rose-400',
+          PENDING: 'bg-amber-500/20 text-amber-700 dark:text-amber-400',
+          CONFIRMED: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+          CANCELLED: 'bg-rose-500/20 text-rose-700 dark:text-rose-400',
         },
         render: (value: unknown) => {
           const labels = {

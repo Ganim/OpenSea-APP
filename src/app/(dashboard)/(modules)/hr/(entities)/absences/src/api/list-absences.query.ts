@@ -51,7 +51,7 @@ export function useListAbsences(params?: ListAbsencesParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 2 * 60 * 1000,

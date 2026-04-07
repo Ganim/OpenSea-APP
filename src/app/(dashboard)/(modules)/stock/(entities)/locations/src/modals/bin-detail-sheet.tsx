@@ -554,7 +554,10 @@ export function BinDetailSheet({
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-muted-foreground hover:text-violet-600"
-                                onClick={e => { e.stopPropagation(); handlePrintItem(item); }}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handlePrintItem(item);
+                                }}
                                 title="Imprimir etiqueta"
                               >
                                 <Printer className="h-3.5 w-3.5" />
@@ -571,14 +574,21 @@ export function BinDetailSheet({
                                     <MoreVertical className="h-3.5 w-3.5" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-44"
+                                >
                                   <DropdownMenuItem
-                                    onClick={() => toast.info('Histórico em breve')}
+                                    onClick={() =>
+                                      toast.info('Histórico em breve')
+                                    }
                                   >
                                     <History className="mr-2 h-4 w-4" />
                                     Ver Histórico
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => setMoveItem(item)}>
+                                  <DropdownMenuItem
+                                    onClick={() => setMoveItem(item)}
+                                  >
                                     <ArrowRightLeft className="mr-2 h-4 w-4" />
                                     Transferir
                                   </DropdownMenuItem>
@@ -653,12 +663,14 @@ export function BinDetailSheet({
           onOpenChange={(val: boolean) => {
             if (!val) setExitItem(null);
           }}
-          selectedItems={[{
-            ...exitItem,
-            currentQuantity: exitItem.quantity,
-            fullCode: exitItem.itemCode,
-            uniqueCode: exitItem.itemCode,
-          } as unknown as Item]}
+          selectedItems={[
+            {
+              ...exitItem,
+              currentQuantity: exitItem.quantity,
+              fullCode: exitItem.itemCode,
+              uniqueCode: exitItem.itemCode,
+            } as unknown as Item,
+          ]}
           onConfirm={async () => {
             setExitItem(null);
           }}

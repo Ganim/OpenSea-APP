@@ -101,14 +101,26 @@ export const ACTION_CHIP_CONFIG: Record<string, ActionChipConfig> = {
   },
   // Domain-specific actions (Sales)
   confirm: { label: 'Confirmar', description: 'Permite confirmar registros' },
-  approve: { label: 'Aprovar', description: 'Permite aprovar registros pendentes' },
+  approve: {
+    label: 'Aprovar',
+    description: 'Permite aprovar registros pendentes',
+  },
   cancel: { label: 'Cancelar', description: 'Permite cancelar registros' },
-  reassign: { label: 'Reatribuir', description: 'Permite reatribuir registros para outro responsável' },
+  reassign: {
+    label: 'Reatribuir',
+    description: 'Permite reatribuir registros para outro responsável',
+  },
   reply: { label: 'Responder', description: 'Permite responder a registros' },
-  execute: { label: 'Executar', description: 'Permite executar ações no registro' },
+  execute: {
+    label: 'Executar',
+    description: 'Permite executar ações no registro',
+  },
   activate: { label: 'Ativar', description: 'Permite ativar registros' },
   send: { label: 'Enviar', description: 'Permite enviar registros' },
-  convert: { label: 'Converter', description: 'Permite converter registros para outro tipo' },
+  convert: {
+    label: 'Converter',
+    description: 'Permite converter registros para outro tipo',
+  },
   sell: { label: 'Vender', description: 'Permite realizar vendas' },
   open: { label: 'Abrir', description: 'Permite abrir registros' },
   close: { label: 'Fechar', description: 'Permite fechar registros' },
@@ -116,11 +128,23 @@ export const ACTION_CHIP_CONFIG: Record<string, ActionChipConfig> = {
   supply: { label: 'Abastecer', description: 'Permite abastecer registros' },
   receive: { label: 'Receber', description: 'Permite receber registros' },
   verify: { label: 'Verificar', description: 'Permite verificar registros' },
-  override: { label: 'Sobrescrever', description: 'Permite sobrescrever valores ou configurações' },
+  override: {
+    label: 'Sobrescrever',
+    description: 'Permite sobrescrever valores ou configurações',
+  },
   publish: { label: 'Publicar', description: 'Permite publicar registros' },
-  generate: { label: 'Gerar', description: 'Permite gerar documentos ou relatórios' },
-  query: { label: 'Consultar', description: 'Permite consultar dados externos' },
-  sync: { label: 'Sincronizar', description: 'Permite sincronizar dados com sistemas externos' },
+  generate: {
+    label: 'Gerar',
+    description: 'Permite gerar documentos ou relatórios',
+  },
+  query: {
+    label: 'Consultar',
+    description: 'Permite consultar dados externos',
+  },
+  sync: {
+    label: 'Sincronizar',
+    description: 'Permite sincronizar dados com sistemas externos',
+  },
 };
 
 /**
@@ -683,13 +707,7 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Conversas',
         group: 'CRM',
         backendResources: ['sales.conversations'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Chatbot',
@@ -713,37 +731,19 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Workflows',
         group: 'CRM',
         backendResources: ['sales.workflows'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Formulários',
         group: 'CRM',
         backendResources: ['sales.forms'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Landing Pages',
         group: 'CRM',
         backendResources: ['sales.landing-pages'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Propostas',
@@ -763,13 +763,7 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Templates de Mensagem',
         group: 'CRM',
         backendResources: ['sales.msg-templates'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       // Pedidos e Orçamentos
       {
@@ -836,25 +830,13 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Descontos',
         group: 'Preços e Promoções',
         backendResources: ['sales.discounts'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Pontuação de Leads',
         group: 'Preços e Promoções',
         backendResources: ['sales.lead-scoring'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Cupons',
@@ -866,13 +848,7 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Combos',
         group: 'Preços e Promoções',
         backendResources: ['sales.combos'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Campanhas',
@@ -1052,25 +1028,13 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Cadências',
         group: 'Automação',
         backendResources: ['sales.cadences'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Roteamento de Leads',
         group: 'Automação',
         backendResources: ['sales.lead-routing'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Integrações',
@@ -1179,13 +1143,7 @@ export const MATRIX_TABS: MatrixTab[] = [
         label: 'Mensageria: Contas',
         group: 'Mensageria',
         backendResources: ['tools.messaging.accounts'],
-        availableActions: [
-          'access',
-          'register',
-          'modify',
-          'remove',
-          'admin',
-        ],
+        availableActions: ['access', 'register', 'modify', 'remove', 'admin'],
       },
       {
         label: 'Mensageria: Contatos',

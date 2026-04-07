@@ -1,4 +1,8 @@
-import type { ReviewCycleType, ReviewCycleStatus, PerformanceReviewStatus } from '@/types/hr';
+import type {
+  ReviewCycleType,
+  ReviewCycleStatus,
+  PerformanceReviewStatus,
+} from '@/types/hr';
 
 export const REVIEW_CYCLE_TYPE_LABELS: Record<ReviewCycleType, string> = {
   ANNUAL: 'Anual',
@@ -16,7 +20,10 @@ export const REVIEW_CYCLE_STATUS_LABELS: Record<ReviewCycleStatus, string> = {
   CLOSED: 'Fechado',
 };
 
-export const PERFORMANCE_REVIEW_STATUS_LABELS: Record<PerformanceReviewStatus, string> = {
+export const PERFORMANCE_REVIEW_STATUS_LABELS: Record<
+  PerformanceReviewStatus,
+  string
+> = {
   PENDING: 'Pendente',
   SELF_ASSESSMENT: 'Autoavaliação',
   MANAGER_REVIEW: 'Avaliação do Gestor',
@@ -114,14 +121,14 @@ export const PERFORMANCE_REVIEW_STATUS_COLORS: Record<
   },
 };
 
-export const REVIEW_CYCLE_TYPE_OPTIONS = Object.entries(REVIEW_CYCLE_TYPE_LABELS).map(
-  ([value, label]) => ({ value, label })
-);
+export const REVIEW_CYCLE_TYPE_OPTIONS = Object.entries(
+  REVIEW_CYCLE_TYPE_LABELS
+).map(([value, label]) => ({ value, label }));
 
-export const REVIEW_CYCLE_STATUS_OPTIONS = Object.entries(REVIEW_CYCLE_STATUS_LABELS).map(
-  ([value, label]) => ({ value, label })
-);
+export const REVIEW_CYCLE_STATUS_OPTIONS = Object.entries(
+  REVIEW_CYCLE_STATUS_LABELS
+).map(([value, label]) => ({ value, label }));
 
-export const PERFORMANCE_REVIEW_STATUS_OPTIONS = Object.entries(PERFORMANCE_REVIEW_STATUS_LABELS).map(
-  ([value, label]) => ({ value, label })
-);
+export const PERFORMANCE_REVIEW_STATUS_OPTIONS = Object.entries(
+  PERFORMANCE_REVIEW_STATUS_LABELS
+).map(([value, label]) => ({ value, label }));

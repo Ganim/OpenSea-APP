@@ -68,7 +68,7 @@ export function CashierQueue({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por código, cliente ou CPF..."
             className={cn(
               'h-11 w-full rounded-lg border border-zinc-200 bg-white pl-10 pr-4 text-sm',
@@ -115,7 +115,7 @@ export function CashierQueue({
           </div>
         ) : (
           <div className="flex flex-col gap-2 p-4">
-            {orders.map((order) => {
+            {orders.map(order => {
               const isClaimedByOther =
                 order.claimedByUserId !== null &&
                 order.claimedByUserId !== currentUserId;
@@ -167,7 +167,8 @@ export function CashierQueue({
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {order.itemCount} {order.itemCount === 1 ? 'item' : 'itens'}
+                        {order.itemCount}{' '}
+                        {order.itemCount === 1 ? 'item' : 'itens'}
                       </span>
                       {isClaimedByOther && (
                         <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">

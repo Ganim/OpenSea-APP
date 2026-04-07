@@ -27,7 +27,12 @@ import {
   vacationsService,
 } from '@/services/hr';
 import { storageFilesService } from '@/services/storage/files.service';
-import type { Employee, EmployeeDependant, TimeEntry, VacationPeriod } from '@/types/hr';
+import type {
+  Employee,
+  EmployeeDependant,
+  TimeEntry,
+  VacationPeriod,
+} from '@/types/hr';
 import type { Payroll } from '@/types/hr';
 import type { TimeBank } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
@@ -57,7 +62,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
-import { RequestsTab, AnnouncementsTab, KudosTab, OnboardingTab } from './_portal';
+import {
+  RequestsTab,
+  AnnouncementsTab,
+  KudosTab,
+  OnboardingTab,
+} from './_portal';
 import { portalService } from '@/services/hr';
 import type { OnboardingChecklist } from '@/types/hr';
 
@@ -249,8 +259,18 @@ function getPayrollStatusVariant(status: string) {
 }
 
 const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ];
 
 // ============================================================================
@@ -355,8 +375,8 @@ export default function MyProfilePage() {
   });
 
   // Vacation periods
-  const { data: vacationPeriodsData, isLoading: isLoadingVacations } =
-    useQuery({
+  const { data: vacationPeriodsData, isLoading: isLoadingVacations } = useQuery(
+    {
       queryKey: ['my-vacations', employee?.id],
       queryFn: async () => {
         const response = await vacationsService.list({
@@ -366,7 +386,8 @@ export default function MyProfilePage() {
         return response.vacationPeriods;
       },
       enabled: !!employee?.id && activeTab === 'vacations',
-    });
+    }
+  );
 
   // Vacation balance
   const { data: vacationBalanceData } = useQuery({
@@ -411,7 +432,10 @@ export default function MyProfilePage() {
     enabled: !!employee?.id,
   });
 
-  const hasOnboarding = !!onboardingData && onboardingData.items?.length > 0 && onboardingData.progress < 100;
+  const hasOnboarding =
+    !!onboardingData &&
+    onboardingData.items?.length > 0 &&
+    onboardingData.progress < 100;
 
   // ============================================================================
   // TODAY'S PUNCHES
@@ -469,10 +493,7 @@ export default function MyProfilePage() {
               Seu usuário ainda não está vinculado a um registro de funcionário.
               Entre em contato com o departamento de RH.
             </p>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/hr')}
-            >
+            <Button variant="outline" onClick={() => router.push('/hr')}>
               Voltar para Recursos Humanos
             </Button>
           </Card>
@@ -552,23 +573,38 @@ export default function MyProfilePage() {
               <Timer className="h-4 w-4 hidden sm:inline" />
               <span>Ponto</span>
             </TabsTrigger>
-            <TabsTrigger value="vacations" className="gap-2 flex-1 min-w-[100px]">
+            <TabsTrigger
+              value="vacations"
+              className="gap-2 flex-1 min-w-[100px]"
+            >
               <PalmtreeIcon className="h-4 w-4 hidden sm:inline" />
               <span>Férias</span>
             </TabsTrigger>
-            <TabsTrigger value="payslips" className="gap-2 flex-1 min-w-[100px]">
+            <TabsTrigger
+              value="payslips"
+              className="gap-2 flex-1 min-w-[100px]"
+            >
               <FileText className="h-4 w-4 hidden sm:inline" />
               <span>Holerites</span>
             </TabsTrigger>
-            <TabsTrigger value="dependants" className="gap-2 flex-1 min-w-[100px]">
+            <TabsTrigger
+              value="dependants"
+              className="gap-2 flex-1 min-w-[100px]"
+            >
               <Users className="h-4 w-4 hidden sm:inline" />
               <span>Dependentes</span>
             </TabsTrigger>
-            <TabsTrigger value="requests" className="gap-2 flex-1 min-w-[100px]">
+            <TabsTrigger
+              value="requests"
+              className="gap-2 flex-1 min-w-[100px]"
+            >
               <FileCheck className="h-4 w-4 hidden sm:inline" />
               <span>Solicitações</span>
             </TabsTrigger>
-            <TabsTrigger value="announcements" className="gap-2 flex-1 min-w-[100px]">
+            <TabsTrigger
+              value="announcements"
+              className="gap-2 flex-1 min-w-[100px]"
+            >
               <Megaphone className="h-4 w-4 hidden sm:inline" />
               <span>Comunicados</span>
             </TabsTrigger>
@@ -577,7 +613,10 @@ export default function MyProfilePage() {
               <span>Reconhecimentos</span>
             </TabsTrigger>
             {hasOnboarding && (
-              <TabsTrigger value="onboarding" className="gap-2 flex-1 min-w-[100px]">
+              <TabsTrigger
+                value="onboarding"
+                className="gap-2 flex-1 min-w-[100px]"
+              >
                 <ClipboardCheck className="h-4 w-4 hidden sm:inline" />
                 <span>Onboarding</span>
               </TabsTrigger>
@@ -626,7 +665,10 @@ export default function MyProfilePage() {
                   value={employee.maritalStatus}
                 />
                 {employee.email && (
-                  <InfoField label="E-mail Corporativo" value={employee.email} />
+                  <InfoField
+                    label="E-mail Corporativo"
+                    value={employee.email}
+                  />
                 )}
                 {employee.phone && (
                   <InfoField label="Telefone" value={employee.phone} />
@@ -787,7 +829,9 @@ export default function MyProfilePage() {
                       Banco de Horas
                     </p>
                     <p className="text-lg font-semibold">
-                      {timeBankData ? `${timeBankData.balance.toFixed(1)}h` : '-'}
+                      {timeBankData
+                        ? `${timeBankData.balance.toFixed(1)}h`
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -988,7 +1032,9 @@ export default function MyProfilePage() {
                           <p className="font-semibold">{period.totalDays}d</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-muted-foreground text-xs">Usados</p>
+                          <p className="text-muted-foreground text-xs">
+                            Usados
+                          </p>
                           <p className="font-semibold">{period.usedDays}d</p>
                         </div>
                         <div className="text-center">

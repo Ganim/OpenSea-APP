@@ -76,7 +76,7 @@ export function AssignPPEModal({
     onClose();
   }
 
-  const selectedEmployee = employees.find((emp) => emp.id === employeeId);
+  const selectedEmployee = employees.find(emp => emp.id === employeeId);
 
   const steps: WizardStep[] = [
     {
@@ -92,7 +92,7 @@ export function AssignPPEModal({
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={employeeSearch}
-                onChange={(e) => setEmployeeSearch(e.target.value)}
+                onChange={e => setEmployeeSearch(e.target.value)}
                 placeholder="Buscar por nome..."
                 className="pl-10"
               />
@@ -105,7 +105,7 @@ export function AssignPPEModal({
             </div>
           ) : (
             <div className="max-h-60 space-y-2 overflow-y-auto">
-              {employees.map((emp) => (
+              {employees.map(emp => (
                 <button
                   key={emp.id}
                   type="button"
@@ -138,7 +138,8 @@ export function AssignPPEModal({
       title: 'Detalhes',
       description: 'Quantidade e condição',
       icon: <Package className="h-10 w-10 text-sky-500" />,
-      isValid: Number(quantity) >= 1 && Number(quantity) <= ppeItem.currentStock,
+      isValid:
+        Number(quantity) >= 1 && Number(quantity) <= ppeItem.currentStock,
       content: (
         <div className="space-y-4">
           {selectedEmployee && (
@@ -159,7 +160,7 @@ export function AssignPPEModal({
                 min="1"
                 max={ppeItem.currentStock}
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={e => setQuantity(e.target.value)}
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Disponível: {ppeItem.currentStock}
@@ -185,7 +186,7 @@ export function AssignPPEModal({
             <Textarea
               id="assign-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Observações sobre a entrega..."
               rows={3}
             />
@@ -230,7 +231,7 @@ export function AssignPPEModal({
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(open) => !open && handleClose()}
+      onOpenChange={open => !open && handleClose()}
       steps={steps}
       currentStep={currentStep}
       onStepChange={setCurrentStep}

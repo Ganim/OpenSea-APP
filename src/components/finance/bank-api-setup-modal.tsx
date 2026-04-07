@@ -485,8 +485,8 @@ function CertificateSection({
               </label>
             </div>
             <p className="text-xs text-muted-foreground">
-              Arquivo de chave privada correspondente ao certificado, em formato KEY
-              ou PEM.
+              Arquivo de chave privada correspondente ao certificado, em formato
+              KEY ou PEM.
             </p>
             {form.keyPath && (
               <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
@@ -657,9 +657,12 @@ function TestSection({
   };
 
   const statusColors = {
-    healthy: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
-    degraded: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
-    unhealthy: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
+    healthy:
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+    degraded:
+      'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+    unhealthy:
+      'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
   };
 
   const statusLabels = {
@@ -783,15 +786,16 @@ function TestSection({
             </div>
             <div className="flex items-center gap-1.5">
               {healthResult.sandbox && (
-                <Badge
-                  className="border-0 text-xs bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300"
-                >
+                <Badge className="border-0 text-xs bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
                   <FlaskConical className="h-3 w-3 mr-1" />
                   Sandbox
                 </Badge>
               )}
               <Badge
-                className={cn('border-0 text-xs', statusColors[healthResult.status])}
+                className={cn(
+                  'border-0 text-xs',
+                  statusColors[healthResult.status]
+                )}
               >
                 {statusLabels[healthResult.status]}
               </Badge>
@@ -966,11 +970,12 @@ export function BankApiSetupModal({
         formData.append('file', pfxFileRef.current);
         formData.append('password', pfxPassword);
 
-        const pfxRes = await apiClient.post<{ certFileId: string; keyFileId: string }>(
-          `/v1/finance/bank-accounts/${bankAccountId}/convert-pfx`,
-          formData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        );
+        const pfxRes = await apiClient.post<{
+          certFileId: string;
+          keyFileId: string;
+        }>(`/v1/finance/bank-accounts/${bankAccountId}/convert-pfx`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
 
         certFileId = pfxRes.certFileId;
         keyFileId = pfxRes.keyFileId;

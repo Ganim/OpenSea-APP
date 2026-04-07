@@ -27,11 +27,7 @@ interface CreateModalProps {
   onSubmit: (data: CreateOvertimeData) => Promise<void>;
 }
 
-export function CreateModal({
-  isOpen,
-  onClose,
-  onSubmit,
-}: CreateModalProps) {
+export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
   const [employeeId, setEmployeeId] = useState('');
   const [date, setDate] = useState('');
   const [hours, setHours] = useState('');
@@ -90,7 +86,10 @@ export function CreateModal({
         title: 'Solicitar Hora Extra',
         description: 'Registre horas extras realizadas pelo funcionário.',
         icon: (
-          <Clock className="h-16 w-16 text-amber-400 opacity-50" strokeWidth={1.2} />
+          <Clock
+            className="h-16 w-16 text-amber-400 opacity-50"
+            strokeWidth={1.2}
+          />
         ),
         isValid: !!canSubmit,
         content: (
@@ -120,7 +119,9 @@ export function CreateModal({
               <div className="space-y-2">
                 <Label htmlFor="ot-date">
                   Data{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -141,7 +142,9 @@ export function CreateModal({
               <div className="space-y-2">
                 <Label htmlFor="ot-hours">
                   Horas{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -216,7 +219,17 @@ export function CreateModal({
         ),
       },
     ],
-    [employeeId, date, hours, reason, isSubmitting, canSubmit, isReasonValid, onClose, fieldErrors]
+    [
+      employeeId,
+      date,
+      hours,
+      reason,
+      isSubmitting,
+      canSubmit,
+      isReasonValid,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

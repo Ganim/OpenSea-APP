@@ -29,7 +29,9 @@ export default function PublicPaymentPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [paymentLink, setPaymentLink] = useState<PaymentLinkDetail | null>(null);
+  const [paymentLink, setPaymentLink] = useState<PaymentLinkDetail | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,8 +107,7 @@ export default function PublicPaymentPage() {
             </p>
             {paymentLink.paidAt && (
               <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1">
-                Pago em{' '}
-                {new Date(paymentLink.paidAt).toLocaleString('pt-BR')}
+                Pago em {new Date(paymentLink.paidAt).toLocaleString('pt-BR')}
               </p>
             )}
           </div>

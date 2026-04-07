@@ -94,7 +94,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         title: 'Nova Bonificação',
         description: 'Registre uma nova bonificação para um funcionário.',
         icon: (
-          <Gift className="h-16 w-16 text-lime-400 opacity-50" strokeWidth={1.2} />
+          <Gift
+            className="h-16 w-16 text-lime-400 opacity-50"
+            strokeWidth={1.2}
+          />
         ),
         isValid: !!canSubmit,
         content: (
@@ -213,7 +216,17 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         ),
       },
     ],
-    [employeeId, name, amount, reason, date, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      employeeId,
+      name,
+      amount,
+      reason,
+      date,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

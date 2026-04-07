@@ -91,7 +91,7 @@ export function WeeklyObligations() {
 
     return Object.keys(groups)
       .sort()
-      .map((day) => ({
+      .map(day => ({
         day,
         label: formatDayLabel(day),
         entries: groups[day],
@@ -134,9 +134,7 @@ export function WeeklyObligations() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            <CardTitle className="text-base">
-              Obrigações da Semana
-            </CardTitle>
+            <CardTitle className="text-base">Obrigações da Semana</CardTitle>
           </div>
           {totalEntries > 0 && (
             <Badge variant="secondary" className="text-xs">
@@ -156,7 +154,7 @@ export function WeeklyObligations() {
           </div>
         ) : (
           <div className="space-y-4">
-            {grouped.map((group) => (
+            {grouped.map(group => (
               <div key={group.day}>
                 {/* Day header */}
                 <div className="flex items-center justify-between mb-2">
@@ -179,7 +177,7 @@ export function WeeklyObligations() {
 
                 {/* Entries */}
                 <div className="space-y-1.5">
-                  {group.entries.slice(0, 5).map((entry) => (
+                  {group.entries.slice(0, 5).map(entry => (
                     <Link
                       key={entry.id}
                       href={`/finance/${entry.type === 'PAYABLE' ? 'payable' : 'receivable'}/${entry.id}`}

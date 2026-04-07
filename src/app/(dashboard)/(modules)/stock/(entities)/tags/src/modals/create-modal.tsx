@@ -51,7 +51,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       onClose();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already exists') || msg.includes('tag with this name')) {
+      if (
+        msg.includes('name already exists') ||
+        msg.includes('tag with this name')
+      ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
       } else if (msg.includes('Color must be')) {
         setFieldErrors(prev => ({ ...prev, color: translateError(msg) }));
@@ -77,7 +80,8 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
-                Nome <span className="text-[rgb(var(--color-destructive))]">*</span>
+                Nome{' '}
+                <span className="text-[rgb(var(--color-destructive))]">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -85,7 +89,8 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   value={formData.name}
                   onChange={e => {
                     setFormData({ ...formData, name: e.target.value });
-                    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                    if (fieldErrors.name)
+                      setFieldErrors(prev => ({ ...prev, name: '' }));
                   }}
                   placeholder="Ex: Novo, Em Promoção, Destaque"
                   required
@@ -131,7 +136,9 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                     className="font-mono"
                     aria-invalid={!!fieldErrors.color}
                   />
-                  {fieldErrors.color && <FormErrorIcon message={fieldErrors.color} />}
+                  {fieldErrors.color && (
+                    <FormErrorIcon message={fieldErrors.color} />
+                  )}
                 </div>
               </div>
             </div>

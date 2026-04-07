@@ -34,11 +34,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { logger } from '@/lib/logger';
-import type {
-  OrderReturnDTO,
-  RefundMethod,
-  ReturnReason,
-} from '@/types/sales';
+import type { OrderReturnDTO, RefundMethod, ReturnReason } from '@/types/sales';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Banknote,

@@ -381,8 +381,7 @@ export default function PaymentConditionDetailPage() {
               <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Array.from({ length: pc.installments }, (_, i) => {
-                    const daysFromNow =
-                      pc.firstDueDays + i * pc.intervalDays;
+                    const daysFromNow = pc.firstDueDays + i * pc.intervalDays;
                     return (
                       <div
                         key={i}

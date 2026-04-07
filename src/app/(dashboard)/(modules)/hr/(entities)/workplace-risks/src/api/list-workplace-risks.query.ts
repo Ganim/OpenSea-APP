@@ -81,7 +81,7 @@ export function useListWorkplaceRisks(params?: WorkplaceRiskFilters) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.page < lastPage.totalPages) {
         return lastPage.page + 1;
       }

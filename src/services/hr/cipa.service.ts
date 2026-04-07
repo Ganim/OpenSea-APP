@@ -32,7 +32,9 @@ export interface ListCipaMandatesParams {
 
 export const cipaService = {
   // Mandates
-  async listMandates(params?: ListCipaMandatesParams): Promise<CipaMandatesResponse> {
+  async listMandates(
+    params?: ListCipaMandatesParams
+  ): Promise<CipaMandatesResponse> {
     const query = new URLSearchParams();
     if (params?.status) query.append('status', params.status);
     if (params?.page) query.append('page', String(params.page));
@@ -51,7 +53,9 @@ export const cipaService = {
     return { mandate: raw.cipaMandate };
   },
 
-  async createMandate(data: CreateCipaMandateData): Promise<CipaMandateResponse> {
+  async createMandate(
+    data: CreateCipaMandateData
+  ): Promise<CipaMandateResponse> {
     const raw = await apiClient.post<{ cipaMandate: CipaMandate }>(
       '/v1/hr/cipa-mandates',
       data

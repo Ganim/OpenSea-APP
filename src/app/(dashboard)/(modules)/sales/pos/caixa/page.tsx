@@ -49,10 +49,8 @@ export default function CaixaPage() {
   // ---------------------------------------------------------------------------
   // Session state
   // ---------------------------------------------------------------------------
-  const {
-    data: session,
-    isLoading: isSessionLoading,
-  } = useActiveSession(terminalId);
+  const { data: session, isLoading: isSessionLoading } =
+    useActiveSession(terminalId);
   const openSession = useOpenPosSession();
   const closeSession = useClosePosSession();
   const createCashMovement = useCreatePosCashMovement();
@@ -185,7 +183,7 @@ export default function CaixaPage() {
 
   const handleCreateDirect = useCallback(() => {
     createPdvOrder.mutate(undefined, {
-      onSuccess: (result) => {
+      onSuccess: result => {
         setSelectedOrderId(result.order.id);
         toast.success('Venda direta criada.');
       },

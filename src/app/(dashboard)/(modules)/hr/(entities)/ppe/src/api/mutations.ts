@@ -34,7 +34,7 @@ export function useCreatePPEItem(options: CreatePPEItemOptions = {}) {
       const response = await ppeService.createItem(data);
       return response.ppeItem;
     },
-    onSuccess: (item) => {
+    onSuccess: item => {
       queryClient.invalidateQueries({ queryKey: ppeKeys.items() });
       toast.success('EPI cadastrado com sucesso!');
       onSuccess?.(item);
@@ -168,7 +168,7 @@ export function useAssignPPE(options: AssignPPEOptions = {}) {
       const response = await ppeService.assignPPE(data);
       return response.assignment;
     },
-    onSuccess: (assignment) => {
+    onSuccess: assignment => {
       queryClient.invalidateQueries({ queryKey: ppeKeys.all });
       toast.success('EPI atribuído com sucesso!');
       onSuccess?.(assignment);

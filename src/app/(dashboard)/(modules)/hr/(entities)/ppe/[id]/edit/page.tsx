@@ -27,14 +27,7 @@ import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants
 import { ppeService } from '@/services/hr/ppe.service';
 import type { PPEItem, PPECategory, UpdatePPEItemData } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
-import {
-  HardHat,
-  Loader2,
-  Minus,
-  Plus,
-  Save,
-  Trash2,
-} from 'lucide-react';
+import { HardHat, Loader2, Minus, Plus, Save, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -98,7 +91,7 @@ export default function PPEEditPage() {
       setManufacturer(ppeItem.manufacturer ?? '');
       setModel(ppeItem.model ?? '');
       setExpirationMonths(
-        ppeItem.expirationMonths ? String(ppeItem.expirationMonths) : '',
+        ppeItem.expirationMonths ? String(ppeItem.expirationMonths) : ''
       );
       setMinStock(String(ppeItem.minStock));
       setIsActive(ppeItem.isActive);
@@ -161,7 +154,7 @@ export default function PPEEditPage() {
       });
       setStockAdjustment('');
     },
-    [adjustStockMutation, ppeItemId],
+    [adjustStockMutation, ppeItemId]
   );
 
   // ============================================================================
@@ -284,7 +277,7 @@ export default function PPEEditPage() {
                   <Input
                     id="edit-name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value)}
                     placeholder="Nome do EPI"
                   />
                 </div>
@@ -294,13 +287,13 @@ export default function PPEEditPage() {
                     <Label htmlFor="edit-category">Categoria *</Label>
                     <Select
                       value={category}
-                      onValueChange={(val) => setCategory(val as PPECategory)}
+                      onValueChange={val => setCategory(val as PPECategory)}
                     >
                       <SelectTrigger id="edit-category">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {PPE_CATEGORIES.map((cat) => (
+                        {PPE_CATEGORIES.map(cat => (
                           <SelectItem key={cat} value={cat}>
                             {getCategoryLabel(cat)}
                           </SelectItem>
@@ -313,7 +306,7 @@ export default function PPEEditPage() {
                     <Input
                       id="edit-ca"
                       value={caNumber}
-                      onChange={(e) => setCaNumber(e.target.value)}
+                      onChange={e => setCaNumber(e.target.value)}
                       placeholder="CA-12345"
                     />
                   </div>
@@ -325,7 +318,7 @@ export default function PPEEditPage() {
                     <Input
                       id="edit-manufacturer"
                       value={manufacturer}
-                      onChange={(e) => setManufacturer(e.target.value)}
+                      onChange={e => setManufacturer(e.target.value)}
                       placeholder="Fabricante"
                     />
                   </div>
@@ -334,7 +327,7 @@ export default function PPEEditPage() {
                     <Input
                       id="edit-model"
                       value={model}
-                      onChange={(e) => setModel(e.target.value)}
+                      onChange={e => setModel(e.target.value)}
                       placeholder="Modelo"
                     />
                   </div>
@@ -348,7 +341,7 @@ export default function PPEEditPage() {
                       type="number"
                       min="1"
                       value={expirationMonths}
-                      onChange={(e) => setExpirationMonths(e.target.value)}
+                      onChange={e => setExpirationMonths(e.target.value)}
                       placeholder="12"
                     />
                   </div>
@@ -382,7 +375,7 @@ export default function PPEEditPage() {
                       type="number"
                       min="0"
                       value={minStock}
-                      onChange={(e) => setMinStock(e.target.value)}
+                      onChange={e => setMinStock(e.target.value)}
                     />
                   </div>
                   <div>
@@ -403,7 +396,7 @@ export default function PPEEditPage() {
                       type="number"
                       placeholder="Quantidade"
                       value={stockAdjustment}
-                      onChange={(e) => setStockAdjustment(e.target.value)}
+                      onChange={e => setStockAdjustment(e.target.value)}
                       className="w-32"
                     />
                     <Button
@@ -457,7 +450,7 @@ export default function PPEEditPage() {
               </h3>
               <Textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={e => setNotes(e.target.value)}
                 placeholder="Observações sobre o EPI..."
                 rows={4}
               />

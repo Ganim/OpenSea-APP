@@ -26,7 +26,14 @@ function formatCurrency(value: number): string {
 
 const SEVERITY_CONFIG: Record<
   AnomalySeverity,
-  { color: string; bgLight: string; bgDark: string; textLight: string; textDark: string; label: string }
+  {
+    color: string;
+    bgLight: string;
+    bgDark: string;
+    textLight: string;
+    textDark: string;
+    label: string;
+  }
 > = {
   CRITICAL: {
     color: 'bg-rose-600',
@@ -118,12 +125,15 @@ function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
           </p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
             <span>
-              Valor: <strong className="text-foreground">{formatCurrency(anomaly.currentValue)}</strong>
+              Valor:{' '}
+              <strong className="text-foreground">
+                {formatCurrency(anomaly.currentValue)}
+              </strong>
             </span>
-            <span>
-              Esperado: {formatCurrency(anomaly.expectedValue)}
-            </span>
-            <span className={`font-medium ${severity.textLight} ${severity.textDark}`}>
+            <span>Esperado: {formatCurrency(anomaly.expectedValue)}</span>
+            <span
+              className={`font-medium ${severity.textLight} ${severity.textDark}`}
+            >
               +{anomaly.deviationPercent}%
             </span>
           </div>
@@ -161,11 +171,9 @@ export function AnomalyAlerts() {
 
   const hasAnomalies = data.anomalies.length > 0;
   const criticalCount = data.anomalies.filter(
-    (a) => a.severity === 'CRITICAL',
+    a => a.severity === 'CRITICAL'
   ).length;
-  const highCount = data.anomalies.filter(
-    (a) => a.severity === 'HIGH',
-  ).length;
+  const highCount = data.anomalies.filter(a => a.severity === 'HIGH').length;
 
   return (
     <Card
@@ -180,9 +188,7 @@ export function AnomalyAlerts() {
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
             <AlertTriangle
               className={`w-4 h-4 ${
-                hasAnomalies
-                  ? 'text-rose-500'
-                  : 'text-emerald-500'
+                hasAnomalies ? 'text-rose-500' : 'text-emerald-500'
               }`}
             />
             Alertas de Anomalias
@@ -222,9 +228,14 @@ export function AnomalyAlerts() {
                 Nenhuma anomalia detectada
               </p>
               <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
-                Todos os lançamentos dos últimos 6 meses estão dentro dos padrões normais.
+                Todos os lançamentos dos últimos 6 meses estão dentro dos
+                padrões normais.
                 {data.totalEntriesAnalyzed > 0 && (
-                  <> {data.totalEntriesAnalyzed} lançamentos analisados em {data.categoriesAnalyzed} categorias.</>
+                  <>
+                    {' '}
+                    {data.totalEntriesAnalyzed} lançamentos analisados em{' '}
+                    {data.categoriesAnalyzed} categorias.
+                  </>
                 )}
               </p>
             </div>
@@ -232,12 +243,16 @@ export function AnomalyAlerts() {
         ) : (
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {data.anomalies.map((anomaly, index) => (
-              <AnomalyRow key={anomaly.entryId ?? `anomaly-${index}`} anomaly={anomaly} />
+              <AnomalyRow
+                key={anomaly.entryId ?? `anomaly-${index}`}
+                anomaly={anomaly}
+              />
             ))}
             {data.totalEntriesAnalyzed > 0 && (
               <p className="text-xs text-muted-foreground pt-2 text-center">
-                {data.totalEntriesAnalyzed} lançamentos analisados em {data.categoriesAnalyzed} categorias
-                ({data.analyzedPeriod.from} a {data.analyzedPeriod.to})
+                {data.totalEntriesAnalyzed} lançamentos analisados em{' '}
+                {data.categoriesAnalyzed} categorias ({data.analyzedPeriod.from}{' '}
+                a {data.analyzedPeriod.to})
               </p>
             )}
           </div>

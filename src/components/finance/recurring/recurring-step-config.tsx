@@ -17,7 +17,11 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import type { FinanceEntryType, IndexationType, RecurrenceUnit } from '@/types/finance';
+import type {
+  FinanceEntryType,
+  IndexationType,
+  RecurrenceUnit,
+} from '@/types/finance';
 import { INDEXATION_TYPE_LABELS, MONTH_LABELS } from '@/types/finance';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -292,9 +296,7 @@ export function RecurringStepConfig({
           />
         </div>
         <div className="space-y-1">
-          <span className="text-sm text-muted-foreground">
-            Data de término
-          </span>
+          <span className="text-sm text-muted-foreground">Data de término</span>
           <InlineDatePicker
             value={data.endDate}
             onChange={d => onChange({ endDate: d })}
@@ -331,7 +333,7 @@ export function RecurringStepConfig({
               <span className="text-sm text-muted-foreground">Indexação</span>
               <Select
                 value={data.indexationType ?? 'NONE'}
-                onValueChange={(v) =>
+                onValueChange={v =>
                   onChange({ indexationType: v as IndexationType })
                 }
               >
@@ -339,11 +341,13 @@ export function RecurringStepConfig({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(INDEXATION_TYPE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(INDEXATION_TYPE_LABELS).map(
+                    ([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -359,7 +363,7 @@ export function RecurringStepConfig({
                   min={0}
                   step={0.1}
                   value={data.fixedAdjustmentRate || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     onChange({
                       fixedAdjustmentRate: parseFloat(e.target.value) || 0,
                     })
@@ -378,7 +382,7 @@ export function RecurringStepConfig({
                 </span>
                 <Select
                   value={String(data.adjustmentMonth ?? 1)}
-                  onValueChange={(v) =>
+                  onValueChange={v =>
                     onChange({ adjustmentMonth: parseInt(v) })
                   }
                 >
@@ -400,7 +404,7 @@ export function RecurringStepConfig({
             <div className="flex items-center gap-2.5 py-1">
               <Switch
                 checked={data.adjustBusinessDays ?? true}
-                onCheckedChange={(v) => onChange({ adjustBusinessDays: v })}
+                onCheckedChange={v => onChange({ adjustBusinessDays: v })}
                 id="adjust-bdays"
               />
               <label

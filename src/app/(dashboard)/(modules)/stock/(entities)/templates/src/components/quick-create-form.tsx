@@ -26,10 +26,19 @@ const UOM_ENTRIES = Object.entries(UNIT_OF_MEASURE_LABELS) as [
   string,
 ][];
 
-export function QuickCreateForm({ onBack, onSubmit, error }: QuickCreateFormProps) {
+export function QuickCreateForm({
+  onBack,
+  onSubmit,
+  error,
+}: QuickCreateFormProps) {
   const [name, setName] = useState('');
   const [unitOfMeasure, setUnitOfMeasure] = useState<UnitOfMeasure>('UNITS');
-  const nameError = error && (error.includes('name already exists') || error.includes('Template with this name')) ? error : '';
+  const nameError =
+    error &&
+    (error.includes('name already exists') ||
+      error.includes('Template with this name'))
+      ? error
+      : '';
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -60,7 +69,8 @@ export function QuickCreateForm({ onBack, onSubmit, error }: QuickCreateFormProp
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="template-name">
-            Nome do Template <span className="text-[rgb(var(--color-destructive))]">*</span>
+            Nome do Template{' '}
+            <span className="text-[rgb(var(--color-destructive))]">*</span>
           </Label>
           <div className="relative">
             <Input

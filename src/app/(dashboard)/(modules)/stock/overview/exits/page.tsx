@@ -30,11 +30,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { STOCK_PERMISSIONS } from '@/config/rbac/permission-codes';
-import {
-  EntityCard,
-  EntityContextMenu,
-  EntityGrid,
-} from '@/core';
+import { EntityCard, EntityContextMenu, EntityGrid } from '@/core';
 import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import type { EntityConfig } from '@/core/types';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -180,7 +176,7 @@ function formatItemQuantity(qty: number, unit?: string): string {
 }
 
 function toTitleCase(str: string): string {
-  return str.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function resolveItemName(item: Item): string {
@@ -278,7 +274,9 @@ const exitsConfig: EntityConfig<Item> = {
 
 export default function StockExitsPage() {
   return (
-    <Suspense fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}>
+    <Suspense
+      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+    >
       <StockExitsPageContent />
     </Suspense>
   );
@@ -385,7 +383,7 @@ function StockExitsPageContent() {
 
   const manufacturerOptions = useMemo(
     () =>
-      (manufacturersData?.manufacturers ?? []).map((m) => ({
+      (manufacturersData?.manufacturers ?? []).map(m => ({
         id: m.id,
         label: m.name,
       })),
@@ -424,7 +422,7 @@ function StockExitsPageContent() {
   const items = useMemo(() => {
     if (exitTypeFromUrl.length === 0) return allItems;
     return allItems.filter(
-      (item) => item.exitMovementType === exitTypeFromUrl[0]
+      item => item.exitMovementType === exitTypeFromUrl[0]
     );
   }, [allItems, exitTypeFromUrl]);
 
@@ -456,8 +454,7 @@ function StockExitsPageContent() {
   );
 
   const setManufacturerFilter = useCallback(
-    (ids: string[]) =>
-      router.push(buildFilterUrl({ manufacturerId: ids })),
+    (ids: string[]) => router.push(buildFilterUrl({ manufacturerId: ids })),
     [router, buildFilterUrl]
   );
 
@@ -472,7 +469,7 @@ function StockExitsPageContent() {
     if (!el) return;
 
     const observer = new IntersectionObserver(
-      (observerEntries) => {
+      observerEntries => {
         if (
           observerEntries[0]?.isIntersecting &&
           hasNextPage &&
@@ -495,7 +492,7 @@ function StockExitsPageContent() {
   const handleHistory = useCallback(
     (ids: string[]) => {
       if (ids.length === 1) {
-        const item = items.find((i) => i.id === ids[0]);
+        const item = items.find(i => i.id === ids[0]);
         if (item) {
           setHistoryItem(item);
           setHistoryModalOpen(true);
@@ -508,7 +505,7 @@ function StockExitsPageContent() {
   const handleViewProduct = useCallback(
     (ids: string[]) => {
       if (ids.length === 1) {
-        const item = items.find((i) => i.id === ids[0]);
+        const item = items.find(i => i.id === ids[0]);
         if (item?.productId) {
           router.push(`/stock/products/${item.productId}`);
         }
@@ -519,11 +516,9 @@ function StockExitsPageContent() {
 
   const handlePrintLabel = useCallback(
     (ids: string[]) => {
-      const selected = items.filter((i) => ids.includes(i.id));
+      const selected = items.filter(i => ids.includes(i.id));
       if (selected.length > 0) {
-        printQueueActions.addToQueue(
-          selected.map((item) => ({ item }))
-        );
+        printQueueActions.addToQueue(selected.map(item => ({ item })));
         toast.success(
           selected.length === 1
             ? 'Etiqueta adicionada à fila de impressão'
@@ -624,9 +619,11 @@ function StockExitsPageContent() {
                   <button
                     type="button"
                     className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
-                      navigator.clipboard.writeText(item.fullCode || item.uniqueCode || '');
+                      navigator.clipboard.writeText(
+                        item.fullCode || item.uniqueCode || ''
+                      );
                       toast.success('Código copiado!');
                     }}
                   >
@@ -702,9 +699,7 @@ function StockExitsPageContent() {
           labels={{ view: 'Ver Produto' }}
           actions={customActions}
         >
-          <div
-            className="flex border rounded-lg overflow-hidden transition-all bg-white dark:bg-white/5 border-border hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 opacity-75"
-          >
+          <div className="flex border rounded-lg overflow-hidden transition-all bg-white dark:bg-white/5 border-border hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 opacity-75">
             {/* Left color bar - muted for exited items */}
             <div
               className="w-1 shrink-0"
@@ -733,7 +728,7 @@ function StockExitsPageContent() {
                     <button
                       type="button"
                       className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         const code = item.fullCode || item.uniqueCode || '';
                         navigator.clipboard.writeText(code);
@@ -854,7 +849,7 @@ function StockExitsPageContent() {
                   <Input
                     placeholder="Buscar por código, produto, fabricante, lote..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="pl-9 h-9 text-sm bg-white dark:bg-white/5"
                   />
                   {searchQuery && (
@@ -890,7 +885,6 @@ function StockExitsPageContent() {
       </PageHeader>
 
       <PageBody>
-
         {isLoading ? (
           <GridLoading count={9} layout="list" size="md" gap="gap-4" />
         ) : error ? (
@@ -934,7 +928,10 @@ function StockExitsPageContent() {
                 />
 
                 {/* Date range filter */}
-                <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <Popover
+                  open={datePopoverOpen}
+                  onOpenChange={setDatePopoverOpen}
+                >
                   <PopoverTrigger asChild>
                     <button
                       type="button"
@@ -948,28 +945,31 @@ function StockExitsPageContent() {
                       <CalendarDays className="h-3.5 w-3.5" />
                       {datePreset === 'custom' && dateRange?.from
                         ? `${formatShortDate(dateRange.from)}${dateRange.to ? ` — ${formatShortDate(dateRange.to)}` : ''}`
-                        : DATE_PRESETS.find((p) => p.id === datePreset)?.label ?? '30 dias'}
+                        : (DATE_PRESETS.find(p => p.id === datePreset)?.label ??
+                          '30 dias')}
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <div className="p-3 space-y-3">
                       {/* Quick presets */}
                       <div className="flex flex-wrap gap-1.5">
-                        {DATE_PRESETS.filter((p) => p.id !== 'custom').map((preset) => (
-                          <button
-                            key={preset.id}
-                            type="button"
-                            onClick={() => handlePresetChange(preset.id)}
-                            className={cn(
-                              'px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer',
-                              datePreset === preset.id
-                                ? 'bg-violet-600 text-white'
-                                : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                            )}
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
+                        {DATE_PRESETS.filter(p => p.id !== 'custom').map(
+                          preset => (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handlePresetChange(preset.id)}
+                              className={cn(
+                                'px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer',
+                                datePreset === preset.id
+                                  ? 'bg-violet-600 text-white'
+                                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                              )}
+                            >
+                              {preset.label}
+                            </button>
+                          )
+                        )}
                       </div>
 
                       <div className="border-t pt-3">
@@ -981,15 +981,21 @@ function StockExitsPageContent() {
                           <Input
                             placeholder="dd/mm/aaaa"
                             value={customFromInput}
-                            onChange={(e) => setCustomFromInput(maskDateInput(e.target.value))}
+                            onChange={e =>
+                              setCustomFromInput(maskDateInput(e.target.value))
+                            }
                             maxLength={10}
                             className="h-8 text-xs w-[110px]"
                           />
-                          <span className="text-xs text-muted-foreground">até</span>
+                          <span className="text-xs text-muted-foreground">
+                            até
+                          </span>
                           <Input
                             placeholder="dd/mm/aaaa"
                             value={customToInput}
-                            onChange={(e) => setCustomToInput(maskDateInput(e.target.value))}
+                            onChange={e =>
+                              setCustomToInput(maskDateInput(e.target.value))
+                            }
                             maxLength={10}
                             className="h-8 text-xs w-[110px]"
                           />

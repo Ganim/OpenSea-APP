@@ -4,7 +4,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { terminationsService } from '@/services/hr/terminations.service';
-import type { Termination, CreateTerminationData, UpdateTerminationData } from '@/types/hr';
+import type {
+  Termination,
+  CreateTerminationData,
+  UpdateTerminationData,
+} from '@/types/hr';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
 import { terminationKeys } from './keys';

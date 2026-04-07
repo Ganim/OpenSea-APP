@@ -101,13 +101,7 @@ export function BulkCategorizeModal({
     } catch (err) {
       toast.error(translateError(err));
     }
-  }, [
-    categoryId,
-    selectedIds,
-    bulkCategorizeMutation,
-    handleClose,
-    onSuccess,
-  ]);
+  }, [categoryId, selectedIds, bulkCategorizeMutation, handleClose, onSuccess]);
 
   const steps: WizardStep[] = useMemo(
     () => [
@@ -115,10 +109,7 @@ export function BulkCategorizeModal({
         title: 'Selecionar Categoria',
         description: 'Escolha a categoria para os lançamentos selecionados',
         icon: (
-          <FolderTree
-            className="h-16 w-16 text-sky-400"
-            strokeWidth={1.2}
-          />
+          <FolderTree className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
         ),
         content: (
           <div className="space-y-4 py-2">

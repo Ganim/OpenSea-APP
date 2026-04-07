@@ -21,9 +21,7 @@ import type {
   PaymentConditionType,
   CreatePaymentConditionRequest,
 } from '@/types/sales';
-import {
-  PAYMENT_CONDITION_TYPE_LABELS,
-} from '@/types/sales/payment-condition.types';
+import { PAYMENT_CONDITION_TYPE_LABELS } from '@/types/sales/payment-condition.types';
 import { Check, CreditCard, Loader2, Settings2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -111,7 +109,10 @@ export function CreatePaymentConditionWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -129,8 +130,7 @@ export function CreatePaymentConditionWizard({
     }
   }
 
-  const step1Valid =
-    name.trim().length > 0 && Number(installments) > 0;
+  const step1Valid = name.trim().length > 0 && Number(installments) > 0;
 
   const steps: WizardStep[] = [
     {
@@ -147,7 +147,13 @@ export function CreatePaymentConditionWizard({
               <Input
                 placeholder="Ex: 30/60/90 dias"
                 value={name}
-                onChange={e => { setName(e.target.value); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+                onChange={e => {
+                  setName(e.target.value);
+                  setFieldErrors(prev => {
+                    const { name: _, ...rest } = prev;
+                    return rest;
+                  });
+                }}
                 aria-invalid={!!fieldErrors.name}
               />
               <FormErrorIcon message={fieldErrors.name} />
@@ -170,9 +176,7 @@ export function CreatePaymentConditionWizard({
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={type}
-                onChange={e =>
-                  setType(e.target.value as PaymentConditionType)
-                }
+                onChange={e => setType(e.target.value as PaymentConditionType)}
               >
                 {Object.entries(PAYMENT_CONDITION_TYPE_LABELS).map(
                   ([key, label]) => (

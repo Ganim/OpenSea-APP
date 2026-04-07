@@ -333,9 +333,7 @@ export function CreateDiscountRuleWizard({
     {
       title: 'Condições',
       description: 'Configure período, limites e regras de acúmulo.',
-      icon: (
-        <Settings className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
-      ),
+      icon: <Settings className="h-16 w-16 text-sky-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
       content: (
         <StepConditions

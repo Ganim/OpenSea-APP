@@ -10,12 +10,15 @@ import type {
 } from '@/types/sales';
 
 export const leadScoringService = {
-  async list(query?: LeadScoringQuery): Promise<PaginatedLeadScoringRulesResponse> {
+  async list(
+    query?: LeadScoringQuery
+  ): Promise<PaginatedLeadScoringRulesResponse> {
     const params = new URLSearchParams();
     if (query?.page) params.append('page', query.page.toString());
     if (query?.limit) params.append('perPage', query.limit.toString());
     if (query?.search) params.append('search', query.search);
-    if (query?.isActive !== undefined) params.append('isActive', String(query.isActive));
+    if (query?.isActive !== undefined)
+      params.append('isActive', String(query.isActive));
     if (query?.sortBy) params.append('sortBy', query.sortBy);
     if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
 
@@ -37,15 +40,28 @@ export const leadScoringService = {
   },
 
   async get(id: string): Promise<LeadScoringRuleResponse> {
-    return apiClient.get<LeadScoringRuleResponse>(API_ENDPOINTS.LEAD_SCORING.GET(id));
+    return apiClient.get<LeadScoringRuleResponse>(
+      API_ENDPOINTS.LEAD_SCORING.GET(id)
+    );
   },
 
-  async create(data: CreateLeadScoringRuleRequest): Promise<LeadScoringRuleResponse> {
-    return apiClient.post<LeadScoringRuleResponse>(API_ENDPOINTS.LEAD_SCORING.CREATE, data);
+  async create(
+    data: CreateLeadScoringRuleRequest
+  ): Promise<LeadScoringRuleResponse> {
+    return apiClient.post<LeadScoringRuleResponse>(
+      API_ENDPOINTS.LEAD_SCORING.CREATE,
+      data
+    );
   },
 
-  async update(id: string, data: UpdateLeadScoringRuleRequest): Promise<LeadScoringRuleResponse> {
-    return apiClient.put<LeadScoringRuleResponse>(API_ENDPOINTS.LEAD_SCORING.UPDATE(id), data);
+  async update(
+    id: string,
+    data: UpdateLeadScoringRuleRequest
+  ): Promise<LeadScoringRuleResponse> {
+    return apiClient.put<LeadScoringRuleResponse>(
+      API_ENDPOINTS.LEAD_SCORING.UPDATE(id),
+      data
+    );
   },
 
   async delete(id: string): Promise<void> {
@@ -53,6 +69,8 @@ export const leadScoringService = {
   },
 
   async getCustomerScore(customerId: string): Promise<CustomerScore> {
-    return apiClient.get<CustomerScore>(API_ENDPOINTS.LEAD_SCORING.CUSTOMER_SCORE(customerId));
+    return apiClient.get<CustomerScore>(
+      API_ENDPOINTS.LEAD_SCORING.CUSTOMER_SCORE(customerId)
+    );
   },
 };

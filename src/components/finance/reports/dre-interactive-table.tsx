@@ -21,7 +21,11 @@ interface DREInteractiveTableProps {
   previousNetResult?: number;
   variationPercent?: number;
   isLoading: boolean;
-  onDrillDown?: (categoryId: string, categoryName: string, amount: number) => void;
+  onDrillDown?: (
+    categoryId: string,
+    categoryName: string,
+    amount: number
+  ) => void;
 }
 
 function formatCurrency(value: number): string {
@@ -50,7 +54,11 @@ function DRERow({
   node: DRENode;
   expanded: RowState;
   toggleExpand: (id: string) => void;
-  onDrillDown?: (categoryId: string, categoryName: string, amount: number) => void;
+  onDrillDown?: (
+    categoryId: string,
+    categoryName: string,
+    amount: number
+  ) => void;
   isRevenue: boolean;
 }) {
   const hasChildren = node.children.length > 0;

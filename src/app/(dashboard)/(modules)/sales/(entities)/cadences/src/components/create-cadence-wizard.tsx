@@ -57,11 +57,14 @@ const STEP_TYPE_ICONS: Record<CadenceStepType, React.ElementType> = {
 };
 
 const STEP_TYPE_COLORS: Record<CadenceStepType, string> = {
-  EMAIL: 'bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-500/20',
+  EMAIL:
+    'bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-500/20',
   CALL: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20',
   TASK: 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-500/20',
-  LINKEDIN: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20',
-  WHATSAPP: 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-300 border-green-200 dark:border-green-500/20',
+  LINKEDIN:
+    'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20',
+  WHATSAPP:
+    'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-300 border-green-200 dark:border-green-500/20',
   WAIT: 'bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-500/20',
 };
 
@@ -128,7 +131,10 @@ function StepConfiguration({
     onStepsChange(steps.filter((_, i) => i !== index));
   };
 
-  const updateStep = (index: number, updates: Partial<CreateCadenceStepInput>) => {
+  const updateStep = (
+    index: number,
+    updates: Partial<CreateCadenceStepInput>
+  ) => {
     const newSteps = [...steps];
     newSteps[index] = { ...newSteps[index], ...updates };
     onStepsChange(newSteps);
@@ -138,7 +144,10 @@ function StepConfiguration({
     const newSteps = [...steps];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newSteps.length) return;
-    [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
+    [newSteps[index], newSteps[targetIndex]] = [
+      newSteps[targetIndex],
+      newSteps[index],
+    ];
     onStepsChange(newSteps);
   };
 
@@ -146,7 +155,8 @@ function StepConfiguration({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {steps.length} {steps.length === 1 ? 'etapa' : 'etapas'} configurada{steps.length !== 1 ? 's' : ''}
+          {steps.length} {steps.length === 1 ? 'etapa' : 'etapas'} configurada
+          {steps.length !== 1 ? 's' : ''}
         </p>
         <Button type="button" variant="outline" size="sm" onClick={addStep}>
           <Plus className="h-4 w-4 mr-1" />
@@ -156,7 +166,8 @@ function StepConfiguration({
 
       {steps.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground text-sm">
-          Nenhuma etapa adicionada. Clique em &quot;Adicionar Etapa&quot; para começar.
+          Nenhuma etapa adicionada. Clique em &quot;Adicionar Etapa&quot; para
+          começar.
         </div>
       ) : (
         <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
@@ -202,13 +213,15 @@ function StepConfiguration({
                         })
                       }
                     >
-                      {(Object.keys(CADENCE_STEP_TYPE_LABELS) as CadenceStepType[]).map(
-                        type => (
-                          <option key={type} value={type}>
-                            {CADENCE_STEP_TYPE_LABELS[type]}
-                          </option>
-                        )
-                      )}
+                      {(
+                        Object.keys(
+                          CADENCE_STEP_TYPE_LABELS
+                        ) as CadenceStepType[]
+                      ).map(type => (
+                        <option key={type} value={type}>
+                          {CADENCE_STEP_TYPE_LABELS[type]}
+                        </option>
+                      ))}
                     </select>
 
                     <div className="flex items-center gap-1">
@@ -224,7 +237,9 @@ function StepConfiguration({
                           })
                         }
                       />
-                      <span className="text-xs text-muted-foreground">dias</span>
+                      <span className="text-xs text-muted-foreground">
+                        dias
+                      </span>
                     </div>
                   </div>
 
@@ -279,11 +294,11 @@ function StepReview({
       </div>
 
       <div className="space-y-2">
-        <h4 className="font-medium text-sm">
-          Etapas ({steps.length})
-        </h4>
+        <h4 className="font-medium text-sm">Etapas ({steps.length})</h4>
         {steps.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma etapa configurada.</p>
+          <p className="text-sm text-muted-foreground">
+            Nenhuma etapa configurada.
+          </p>
         ) : (
           <div className="space-y-2">
             {steps.map((step, index) => {
@@ -396,9 +411,7 @@ export function CreateCadenceWizard({
       description: 'Configure as etapas e intervalos.',
       icon: <Clock className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
-      content: (
-        <StepConfiguration steps={steps} onStepsChange={setSteps} />
-      ),
+      content: <StepConfiguration steps={steps} onStepsChange={setSteps} />,
       isValid: true,
     },
     {

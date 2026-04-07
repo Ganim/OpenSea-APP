@@ -11,11 +11,7 @@ export type RequestType =
   | 'SUPPORT';
 
 /** Status of an employee request */
-export type RequestStatus =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'CANCELLED';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 /** Priority levels for company announcements */
 export type AnnouncementPriority = 'NORMAL' | 'IMPORTANT' | 'URGENT';

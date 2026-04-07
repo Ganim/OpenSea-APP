@@ -125,7 +125,9 @@ export function InviteCustomerPortalModal({
             }}
             className={fieldErrors.customerId ? 'border-rose-500' : ''}
           />
-          {fieldErrors.customerId && <FormErrorIcon message={fieldErrors.customerId} />}
+          {fieldErrors.customerId && (
+            <FormErrorIcon message={fieldErrors.customerId} />
+          )}
         </div>
       </div>
 
@@ -179,8 +181,7 @@ export function InviteCustomerPortalModal({
           <User className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-300">
             Este link permite que o cliente visualize faturas em aberto e
-            realize pagamentos. Voce pode revogar o acesso a qualquer
-            momento.
+            realize pagamentos. Voce pode revogar o acesso a qualquer momento.
           </p>
         </div>
       </div>
@@ -191,7 +192,9 @@ export function InviteCustomerPortalModal({
     {
       title: 'Dados do Cliente',
       description: 'Informe os dados do cliente para gerar o acesso ao portal',
-      icon: <Link2 className="h-10 w-10 text-violet-600 dark:text-violet-300" />,
+      icon: (
+        <Link2 className="h-10 w-10 text-violet-600 dark:text-violet-300" />
+      ),
       content: stepOneContent,
       footer: (
         <div className="flex gap-2 justify-end w-full">
@@ -216,7 +219,9 @@ export function InviteCustomerPortalModal({
     {
       title: 'Link Gerado',
       description: 'Compartilhe o link com o cliente',
-      icon: <CheckCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />,
+      icon: (
+        <CheckCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />
+      ),
       content: stepTwoContent,
       footer: (
         <div className="flex justify-end w-full">

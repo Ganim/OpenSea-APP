@@ -95,9 +95,7 @@ export function FinanceKPICards() {
           ? 'bg-rose-600 dark:bg-rose-600'
           : 'bg-slate-100 dark:bg-slate-800',
       accentIcon:
-        overdueCount > 0
-          ? 'text-white'
-          : 'text-slate-500 dark:text-slate-400',
+        overdueCount > 0 ? 'text-white' : 'text-slate-500 dark:text-slate-400',
       accentValue:
         overdueCount > 0
           ? 'text-rose-700 dark:text-rose-300'
@@ -118,13 +116,11 @@ export function FinanceKPICards() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card) => (
+      {cards.map(card => (
         <Link key={card.label} href={card.href}>
           <Card
             className={`p-4 rounded-xl transition-colors hover:shadow-md cursor-pointer ${
-              card.isAlarming
-                ? 'border-rose-200 dark:border-rose-800/50'
-                : ''
+              card.isAlarming ? 'border-rose-200 dark:border-rose-800/50' : ''
             }`}
           >
             <div className="flex items-start justify-between">

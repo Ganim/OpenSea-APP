@@ -8,7 +8,9 @@ import type { DuplicateMatch } from '@/types/finance';
 // =============================================================================
 
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+    v
+  );
 
 const formatDate = (d: string) => {
   if (!d) return '—';
@@ -65,7 +67,7 @@ export function DuplicateWarningBanner({
 
       {/* Matches list */}
       <div className="space-y-2">
-        {duplicates.map((match) => (
+        {duplicates.map(match => (
           <div
             key={match.entryId}
             className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1.5"
@@ -83,15 +85,13 @@ export function DuplicateWarningBanner({
               {match.supplierName && (
                 <span>Fornecedor: {match.supplierName}</span>
               )}
-              {match.customerName && (
-                <span>Cliente: {match.customerName}</span>
-              )}
+              {match.customerName && <span>Cliente: {match.customerName}</span>}
               <span>Valor: {formatCurrency(match.expectedAmount)}</span>
               <span>Vencimento: {formatDate(match.dueDate)}</span>
             </div>
 
             <div className="flex flex-wrap gap-1.5 mt-1">
-              {match.matchReasons.map((reason) => (
+              {match.matchReasons.map(reason => (
                 <span
                   key={reason}
                   className="px-1.5 py-0.5 rounded bg-amber-500/10 text-[10px] text-amber-700 dark:text-amber-300"

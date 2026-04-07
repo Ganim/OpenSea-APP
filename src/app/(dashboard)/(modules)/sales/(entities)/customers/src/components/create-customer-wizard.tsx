@@ -286,7 +286,10 @@ export function CreateCustomerWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -326,13 +329,31 @@ export function CreateCustomerWizard({
       content: (
         <StepBasicInfo
           name={name}
-          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+          onNameChange={v => {
+            setName(v);
+            setFieldErrors(prev => {
+              const { name: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           type={type}
           onTypeChange={setType}
           document={document}
-          onDocumentChange={(v) => { setDocument(v); setFieldErrors(prev => { const { document: _, ...rest } = prev; return rest; }); }}
+          onDocumentChange={v => {
+            setDocument(v);
+            setFieldErrors(prev => {
+              const { document: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           email={email}
-          onEmailChange={(v) => { setEmail(v); setFieldErrors(prev => { const { email: _, ...rest } = prev; return rest; }); }}
+          onEmailChange={v => {
+            setEmail(v);
+            setFieldErrors(prev => {
+              const { email: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           fieldErrors={fieldErrors}
         />
       ),

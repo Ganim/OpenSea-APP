@@ -79,20 +79,17 @@ export function OfxImportModal({
   // HANDLERS
   // ============================================================================
 
-  const handleFileSelect = useCallback(
-    (selectedFile: File) => {
-      const validExtensions = ['.ofx', '.ofc'];
-      const ext = selectedFile.name
-        .slice(selectedFile.name.lastIndexOf('.'))
-        .toLowerCase();
-      if (!validExtensions.includes(ext)) {
-        toast.error('Formato inválido. Selecione um arquivo .ofx ou .ofc.');
-        return;
-      }
-      setFile(selectedFile);
-    },
-    []
-  );
+  const handleFileSelect = useCallback((selectedFile: File) => {
+    const validExtensions = ['.ofx', '.ofc'];
+    const ext = selectedFile.name
+      .slice(selectedFile.name.lastIndexOf('.'))
+      .toLowerCase();
+    if (!validExtensions.includes(ext)) {
+      toast.error('Formato inválido. Selecione um arquivo .ofx ou .ofc.');
+      return;
+    }
+    setFile(selectedFile);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -227,9 +224,7 @@ export function OfxImportModal({
                   <FileUp
                     className={cn(
                       'h-10 w-10',
-                      isDragging
-                        ? 'text-sky-500'
-                        : 'text-muted-foreground'
+                      isDragging ? 'text-sky-500' : 'text-muted-foreground'
                     )}
                   />
                   <div className="text-center">
@@ -290,9 +285,7 @@ export function OfxImportModal({
               <p className="text-xs text-muted-foreground">
                 Total de Transações
               </p>
-              <p className="text-xl font-bold">
-                {preview.totalTransactions}
-              </p>
+              <p className="text-xl font-bold">{preview.totalTransactions}</p>
             </div>
             <div className="rounded-lg border p-3 space-y-1">
               <p className="text-xs text-muted-foreground">Período</p>

@@ -301,13 +301,16 @@ export function VariantFormModal({
       toast.success('Variante criada com sucesso!');
       onOpenChange(false);
     },
-    onError: (error) => {
+    onError: error => {
       const msg = error instanceof Error ? error.message : String(error);
       if (msg.includes('SKU already exists')) {
         setFieldErrors(prev => ({ ...prev, sku: translateError(msg) }));
         setActiveSection('basic');
       } else if (msg.includes('Price cannot be negative')) {
-        setFieldErrors(prev => ({ ...prev, definedSalePrice: translateError(msg) }));
+        setFieldErrors(prev => ({
+          ...prev,
+          definedSalePrice: translateError(msg),
+        }));
         setActiveSection('pricing');
       } else if (msg.includes('Min stock cannot be greater')) {
         setFieldErrors(prev => ({ ...prev, minStock: translateError(msg) }));
@@ -332,13 +335,16 @@ export function VariantFormModal({
       toast.success('Variante atualizada com sucesso!');
       onOpenChange(false);
     },
-    onError: (error) => {
+    onError: error => {
       const msg = error instanceof Error ? error.message : String(error);
       if (msg.includes('SKU already exists')) {
         setFieldErrors(prev => ({ ...prev, sku: translateError(msg) }));
         setActiveSection('basic');
       } else if (msg.includes('Price cannot be negative')) {
-        setFieldErrors(prev => ({ ...prev, definedSalePrice: translateError(msg) }));
+        setFieldErrors(prev => ({
+          ...prev,
+          definedSalePrice: translateError(msg),
+        }));
         setActiveSection('pricing');
       } else if (msg.includes('Min stock cannot be greater')) {
         setFieldErrors(prev => ({ ...prev, minStock: translateError(msg) }));
@@ -362,13 +368,16 @@ export function VariantFormModal({
       toast.success('Variante excluída com sucesso!');
       onOpenChange(false);
     },
-    onError: (error) => {
+    onError: error => {
       const msg = error instanceof Error ? error.message : String(error);
       toast.error(translateError(msg));
     },
   });
 
-  const isPending = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+  const isPending =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   // ---------------------------------------------------------------------------
   // Validation
@@ -480,7 +489,11 @@ export function VariantFormModal({
         Object.entries(formData.attributes).map(([key, value]) => {
           // Convert string-typed numeric attributes back to numbers for the API
           const attrConfig = variantAttributes[key];
-          if (attrConfig?.type === 'number' && typeof value === 'string' && value !== '') {
+          if (
+            attrConfig?.type === 'number' &&
+            typeof value === 'string' &&
+            value !== ''
+          ) {
             const num = parseFloat(value.replace(',', '.'));
             return [key, isNaN(num) ? value : num];
           }
@@ -514,114 +527,123 @@ export function VariantFormModal({
 
   return (
     <>
-    <NavigationWizardDialog
-      open={open}
-      onOpenChange={handleClose}
-      title={isEditMode ? 'Editar Variante' : 'Nova Variante'}
-      subtitle={
-        isEditMode
-          ? `Editando ${variant?.name}`
-          : `Adicionar variante para ${product.name}`
-      }
-      sections={sections}
-      activeSection={activeSection}
-      onSectionChange={id => setActiveSection(id as SectionId)}
-      sectionErrors={sectionErrors}
-      isPending={isPending}
-      contentClassName="max-w-[calc(100vw-2rem)] sm:max-w-[1000px]"
-      footer={
-        <div className="flex items-center justify-between w-full">
-          {/* Left: Delete (edit mode only) */}
-          {isEditMode && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteClick}
-              disabled={isPending}
-              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Excluir Variante
-            </Button>
-          )}
-          {/* Right: Cancel + Save */}
-          <div className={cn('flex items-center gap-2', !isEditMode && 'ml-auto')}>
-            <Button variant="outline" onClick={handleClose} disabled={isPending}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Salvando...' : 'Criando...'}
-                </>
-              ) : isEditMode ? (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Variante
-                </>
+      <NavigationWizardDialog
+        open={open}
+        onOpenChange={handleClose}
+        title={isEditMode ? 'Editar Variante' : 'Nova Variante'}
+        subtitle={
+          isEditMode
+            ? `Editando ${variant?.name}`
+            : `Adicionar variante para ${product.name}`
+        }
+        sections={sections}
+        activeSection={activeSection}
+        onSectionChange={id => setActiveSection(id as SectionId)}
+        sectionErrors={sectionErrors}
+        isPending={isPending}
+        contentClassName="max-w-[calc(100vw-2rem)] sm:max-w-[1000px]"
+        footer={
+          <div className="flex items-center justify-between w-full">
+            {/* Left: Delete (edit mode only) */}
+            {isEditMode && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteClick}
+                disabled={isPending}
+                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Excluir Variante
+              </Button>
+            )}
+            {/* Right: Cancel + Save */}
+            <div
+              className={cn(
+                'flex items-center gap-2',
+                !isEditMode && 'ml-auto'
               )}
-            </Button>
+            >
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isPending}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleSubmit} disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {isEditMode ? 'Salvando...' : 'Criando...'}
+                  </>
+                ) : isEditMode ? (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar Alterações
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Variante
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
-      }
-    >
-      {activeSection === 'basic' && (
-        <BasicSection
-          formData={formData}
-          updateField={updateField}
-          isPending={isPending}
-          isEditMode={isEditMode}
-          fieldErrors={fieldErrors}
-        />
-      )}
-      {activeSection === 'appearance' && (
-        <AppearanceSection
-          formData={formData}
-          updateField={updateField}
-          isPending={isPending}
-        />
-      )}
-      {activeSection === 'pricing' && (
-        <PricingSection
-          formData={formData}
-          updateField={updateField}
-          calculatedCostPrice={calculatedCostPrice}
-          calculatedSalePrice={calculatedSalePrice}
-          calculatedProfitMargin={calculatedProfitMargin}
-          isPending={isPending}
-        />
-      )}
-      {activeSection === 'stock' && (
-        <StockSection
-          formData={formData}
-          updateField={updateField}
-          isPending={isPending}
-        />
-      )}
-      {activeSection === 'attributes' && (
-        <AttributesSection
-          formData={formData}
-          variantAttributes={variantAttributes}
-          hasAttributes={hasAttributes}
-          updateAttribute={updateAttribute}
-          isPending={isPending}
-        />
-      )}
-    </NavigationWizardDialog>
+        }
+      >
+        {activeSection === 'basic' && (
+          <BasicSection
+            formData={formData}
+            updateField={updateField}
+            isPending={isPending}
+            isEditMode={isEditMode}
+            fieldErrors={fieldErrors}
+          />
+        )}
+        {activeSection === 'appearance' && (
+          <AppearanceSection
+            formData={formData}
+            updateField={updateField}
+            isPending={isPending}
+          />
+        )}
+        {activeSection === 'pricing' && (
+          <PricingSection
+            formData={formData}
+            updateField={updateField}
+            calculatedCostPrice={calculatedCostPrice}
+            calculatedSalePrice={calculatedSalePrice}
+            calculatedProfitMargin={calculatedProfitMargin}
+            isPending={isPending}
+          />
+        )}
+        {activeSection === 'stock' && (
+          <StockSection
+            formData={formData}
+            updateField={updateField}
+            isPending={isPending}
+          />
+        )}
+        {activeSection === 'attributes' && (
+          <AttributesSection
+            formData={formData}
+            variantAttributes={variantAttributes}
+            hasAttributes={hasAttributes}
+            updateAttribute={updateAttribute}
+            isPending={isPending}
+          />
+        )}
+      </NavigationWizardDialog>
 
-    <VerifyActionPinModal
-      isOpen={showDeletePin}
-      onClose={() => setShowDeletePin(false)}
-      onSuccess={handleDeleteConfirm}
-      title="Confirmar Exclusão"
-      description={`Digite seu PIN de ação para excluir a variante "${variant?.name}".`}
-    />
+      <VerifyActionPinModal
+        isOpen={showDeletePin}
+        onClose={() => setShowDeletePin(false)}
+        onSuccess={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        description={`Digite seu PIN de ação para excluir a variante "${variant?.name}".`}
+      />
     </>
   );
 }
@@ -671,9 +693,7 @@ function BasicSection({
               aria-invalid={!!fieldErrors.name}
               className={cn(fieldErrors.name && 'border-rose-500')}
             />
-            {fieldErrors.name && (
-              <FormErrorIcon message={fieldErrors.name} />
-            )}
+            {fieldErrors.name && <FormErrorIcon message={fieldErrors.name} />}
           </div>
         </div>
 
@@ -690,9 +710,7 @@ function BasicSection({
               aria-invalid={!!fieldErrors.sku}
               className={cn(fieldErrors.sku && 'border-rose-500')}
             />
-            {fieldErrors.sku && (
-              <FormErrorIcon message={fieldErrors.sku} />
-            )}
+            {fieldErrors.sku && <FormErrorIcon message={fieldErrors.sku} />}
           </div>
         </div>
       </div>
@@ -1383,7 +1401,10 @@ function AttributesSection({
                         inputMode="decimal"
                         value={currentValue}
                         onChange={e =>
-                          updateAttribute(key, e.target.value.replace(/[^0-9.,]/g, ''))
+                          updateAttribute(
+                            key,
+                            e.target.value.replace(/[^0-9.,]/g, '')
+                          )
                         }
                         placeholder={config.placeholder || '0'}
                         disabled={isPending}

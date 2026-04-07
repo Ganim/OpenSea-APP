@@ -78,8 +78,15 @@ export function CreateModal({
       await onSubmit(data);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('already') || msg.includes('exists') || msg.includes('já existe')) {
-        setFieldErrors(prev => ({ ...prev, referenceMonth: translateError(msg) }));
+      if (
+        msg.includes('already') ||
+        msg.includes('exists') ||
+        msg.includes('já existe')
+      ) {
+        setFieldErrors(prev => ({
+          ...prev,
+          referenceMonth: translateError(msg),
+        }));
       } else {
         toast.error(translateError(msg));
       }
@@ -169,7 +176,11 @@ export function CreateModal({
                     value={referenceYear}
                     onChange={e => {
                       setReferenceYear(e.target.value);
-                      if (fieldErrors.referenceYear) setFieldErrors(prev => ({ ...prev, referenceYear: '' }));
+                      if (fieldErrors.referenceYear)
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          referenceYear: '',
+                        }));
                     }}
                     placeholder="Ex.: 2026"
                     required

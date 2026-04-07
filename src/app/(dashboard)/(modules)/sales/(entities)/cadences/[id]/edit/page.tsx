@@ -27,10 +27,7 @@ import {
   useUpdateCadence,
   useDeleteCadence,
 } from '@/hooks/sales/use-cadences';
-import type {
-  CadenceStepType,
-  CreateCadenceStepInput,
-} from '@/types/sales';
+import type { CadenceStepType, CreateCadenceStepInput } from '@/types/sales';
 import { CADENCE_STEP_TYPE_LABELS } from '@/types/sales';
 import {
   Check,
@@ -121,7 +118,10 @@ export default function CadenceEditPage() {
     setSteps(prev => prev.filter((_, i) => i !== index));
   };
 
-  const updateStep = (index: number, updates: Partial<CreateCadenceStepInput>) => {
+  const updateStep = (
+    index: number,
+    updates: Partial<CreateCadenceStepInput>
+  ) => {
     setSteps(prev => {
       const newSteps = [...prev];
       newSteps[index] = { ...newSteps[index], ...updates };
@@ -134,7 +134,10 @@ export default function CadenceEditPage() {
       const newSteps = [...prev];
       const targetIndex = direction === 'up' ? index - 1 : index + 1;
       if (targetIndex < 0 || targetIndex >= newSteps.length) return prev;
-      [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
+      [newSteps[index], newSteps[targetIndex]] = [
+        newSteps[targetIndex],
+        newSteps[index],
+      ];
       return newSteps;
     });
   };
@@ -177,7 +180,12 @@ export default function CadenceEditPage() {
             type="server"
             title="Erro ao carregar cadência"
             message="Não foi possível carregar os dados da cadência."
-            action={{ label: 'Tentar Novamente', onClick: () => { refetch(); } }}
+            action={{
+              label: 'Tentar Novamente',
+              onClick: () => {
+                refetch();
+              },
+            }}
           />
         </PageBody>
       </PageLayout>
@@ -269,9 +277,7 @@ export default function CadenceEditPage() {
         {/* Steps Editor */}
         <Card className="bg-white dark:bg-slate-800/60 border border-border p-5 mt-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold">
-              Etapas ({steps.length})
-            </h3>
+            <h3 className="text-sm font-semibold">Etapas ({steps.length})</h3>
             <Button type="button" variant="outline" size="sm" onClick={addStep}>
               <Plus className="h-4 w-4 mr-1" />
               Adicionar
@@ -317,10 +323,16 @@ export default function CadenceEditPage() {
                         className="flex h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
                         value={step.type}
                         onChange={e =>
-                          updateStep(index, { type: e.target.value as CadenceStepType })
+                          updateStep(index, {
+                            type: e.target.value as CadenceStepType,
+                          })
                         }
                       >
-                        {(Object.keys(CADENCE_STEP_TYPE_LABELS) as CadenceStepType[]).map(type => (
+                        {(
+                          Object.keys(
+                            CADENCE_STEP_TYPE_LABELS
+                          ) as CadenceStepType[]
+                        ).map(type => (
                           <option key={type} value={type}>
                             {CADENCE_STEP_TYPE_LABELS[type]}
                           </option>
@@ -334,17 +346,23 @@ export default function CadenceEditPage() {
                           className="w-16 h-9"
                           value={step.delayDays}
                           onChange={e =>
-                            updateStep(index, { delayDays: parseInt(e.target.value) || 0 })
+                            updateStep(index, {
+                              delayDays: parseInt(e.target.value) || 0,
+                            })
                           }
                         />
-                        <span className="text-xs text-muted-foreground">dias</span>
+                        <span className="text-xs text-muted-foreground">
+                          dias
+                        </span>
                       </div>
                     </div>
                     {step.type !== 'WAIT' && (
                       <Input
                         placeholder="Observações (opcional)"
                         value={step.notes || ''}
-                        onChange={e => updateStep(index, { notes: e.target.value })}
+                        onChange={e =>
+                          updateStep(index, { notes: e.target.value })
+                        }
                         className="h-8 text-sm"
                       />
                     )}

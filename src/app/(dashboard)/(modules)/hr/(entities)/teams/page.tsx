@@ -170,8 +170,11 @@ function HRTeamsPageContent() {
       showSuccessToast('Equipe(s) excluída(s) com sucesso');
       setItemsToDelete([]);
     },
-    onError: (err) => {
-      logger.error('Erro ao excluir equipe(s)', err instanceof Error ? err : undefined);
+    onError: err => {
+      logger.error(
+        'Erro ao excluir equipe(s)',
+        err instanceof Error ? err : undefined
+      );
       showErrorToast({
         title: 'Erro ao excluir',
         description: err instanceof Error ? err.message : 'Erro desconhecido',

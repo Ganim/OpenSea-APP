@@ -23,10 +23,7 @@ import {
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { translateError } from '@/lib/errors';
-import {
-  dependantsApi,
-  dependantKeys,
-} from '../api/dependants.api';
+import { dependantsApi, dependantKeys } from '../api/dependants.api';
 import { DependantModal } from '../modals/dependant-modal';
 
 interface DependantsSectionProps {
@@ -83,13 +80,8 @@ export function DependantsSection({ employeeId }: DependantsSectionProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateDependantData;
-    }) => dependantsApi.update(employeeId, id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateDependantData }) =>
+      dependantsApi.update(employeeId, id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: dependantKeys.list(employeeId),
@@ -207,7 +199,8 @@ export function DependantsSection({ employeeId }: DependantsSectionProps) {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium text-sm truncate">{dep.name}</p>
                     <Badge variant="secondary" className="text-xs">
-                      {RELATIONSHIP_LABELS[dep.relationship] || dep.relationship}
+                      {RELATIONSHIP_LABELS[dep.relationship] ||
+                        dep.relationship}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">

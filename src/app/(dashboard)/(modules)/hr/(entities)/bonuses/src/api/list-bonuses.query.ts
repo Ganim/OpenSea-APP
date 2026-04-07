@@ -35,9 +35,19 @@ export function useListBonuses(params?: ListBonusesParams) {
       });
 
       const bonuses = (response as { bonuses?: Bonus[] }).bonuses ?? [];
-      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const meta = (
+        response as {
+          meta?: {
+            total?: number;
+            page?: number;
+            perPage?: number;
+            totalPages?: number;
+          };
+        }
+      ).meta;
       const total = meta?.total ?? bonuses.length;
-      const totalPages = meta?.totalPages ?? (bonuses.length < PAGE_SIZE ? page : page + 1);
+      const totalPages =
+        meta?.totalPages ?? (bonuses.length < PAGE_SIZE ? page : page + 1);
 
       return {
         bonuses,
@@ -49,7 +59,7 @@ export function useListBonuses(params?: ListBonusesParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 5 * 60 * 1000,

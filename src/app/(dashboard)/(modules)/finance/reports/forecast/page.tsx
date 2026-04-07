@@ -34,8 +34,18 @@ function formatDate(dateStr: string): string {
 function formatMonth(monthStr: string): string {
   const [y, m] = monthStr.split('-');
   const months = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
   ];
   const monthIndex = parseInt(m, 10) - 1;
   return `${months[monthIndex]} ${y}`;
@@ -51,15 +61,18 @@ function DataQualityBadge({ quality }: { quality: 'HIGH' | 'MEDIUM' | 'LOW' }) {
   const config = {
     HIGH: {
       label: 'Alta Confiança',
-      className: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/8 dark:text-emerald-300 dark:border-emerald-800/30',
+      className:
+        'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/8 dark:text-emerald-300 dark:border-emerald-800/30',
     },
     MEDIUM: {
       label: 'Confiança Moderada',
-      className: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/8 dark:text-amber-300 dark:border-amber-800/30',
+      className:
+        'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/8 dark:text-amber-300 dark:border-amber-800/30',
     },
     LOW: {
       label: 'Baixa Confiança',
-      className: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/8 dark:text-rose-300 dark:border-rose-800/30',
+      className:
+        'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/8 dark:text-rose-300 dark:border-rose-800/30',
     },
   };
 
@@ -78,7 +91,8 @@ export default function PredictiveForecastPage() {
 
   const dangerDays = data?.dangerZones.length ?? 0;
   const lastProjectedBalance =
-    data?.projectedMonths[data.projectedMonths.length - 1]?.projectedBalance ?? 0;
+    data?.projectedMonths[data.projectedMonths.length - 1]?.projectedBalance ??
+    0;
 
   return (
     <div className="space-y-6">
@@ -99,7 +113,7 @@ export default function PredictiveForecastPage() {
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Período:</span>
           <div className="flex gap-1.5">
-            {periodOptions.map((opt) => (
+            {periodOptions.map(opt => (
               <button
                 key={opt.value}
                 onClick={() => setMonths(opt.value)}
@@ -229,9 +243,7 @@ export default function PredictiveForecastPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                <CardTitle className="text-base">
-                  Detalhamento Mensal
-                </CardTitle>
+                <CardTitle className="text-base">Detalhamento Mensal</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -257,7 +269,7 @@ export default function PredictiveForecastPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.projectedMonths.map((month) => (
+                    {data.projectedMonths.map(month => (
                       <tr
                         key={month.month}
                         className="border-b last:border-0 hover:bg-muted/30 transition-colors"
@@ -297,9 +309,7 @@ export default function PredictiveForecastPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-5 w-5 text-amber-500" />
-                  <CardTitle className="text-base">
-                    Recomendações
-                  </CardTitle>
+                  <CardTitle className="text-base">Recomendações</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -332,9 +342,7 @@ export default function PredictiveForecastPage() {
                         ) : (
                           <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                         )}
-                        <p className="text-sm leading-relaxed">
-                          {suggestion}
-                        </p>
+                        <p className="text-sm leading-relaxed">{suggestion}</p>
                       </div>
                     );
                   })}
@@ -362,7 +370,7 @@ export default function PredictiveForecastPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {data.dangerZones.slice(0, 10).map((zone) => (
+                  {data.dangerZones.slice(0, 10).map(zone => (
                     <div
                       key={zone.date}
                       className="flex items-center justify-between p-3 rounded-lg bg-rose-50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-800/20"

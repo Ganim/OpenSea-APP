@@ -72,15 +72,14 @@ export const terminationsService = {
   },
 
   async markAsPaid(id: string): Promise<TerminationResponse> {
-    return apiClient.patch<TerminationResponse>(
-      `/v1/hr/terminations/${id}`,
-      { markAsPaid: true }
-    );
+    return apiClient.patch<TerminationResponse>(`/v1/hr/terminations/${id}`, {
+      markAsPaid: true,
+    });
   },
 
-  async downloadTrctPdf(terminationId: string): Promise<{ blob: Blob; filename: string; contentType: string }> {
-    return apiClient.getBlob(
-      `/v1/hr/terminations/${terminationId}/trct`
-    );
+  async downloadTrctPdf(
+    terminationId: string
+  ): Promise<{ blob: Blob; filename: string; contentType: string }> {
+    return apiClient.getBlob(`/v1/hr/terminations/${terminationId}/trct`);
   },
 };

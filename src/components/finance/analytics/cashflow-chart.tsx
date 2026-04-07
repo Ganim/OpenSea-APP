@@ -85,7 +85,7 @@ function formatCurrency(value: number): string {
 }
 
 function getAccuracyVariant(
-  accuracy: number,
+  accuracy: number
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (accuracy >= 80) return 'default';
   if (accuracy >= 50) return 'secondary';
@@ -150,7 +150,7 @@ export function CashflowChart({
   if (projectedData) {
     for (const point of projectedData) {
       const existing = combinedData.find(
-        (dataPoint) => dataPoint.date === point.date,
+        dataPoint => dataPoint.date === point.date
       );
       if (existing) {
         existing.projected = point.cumulativeNet;
@@ -167,7 +167,7 @@ export function CashflowChart({
   if (showComparisonBars) {
     for (const accuracyPoint of accuracyData.dataPoints) {
       const existing = combinedData.find(
-        (dataPoint) => dataPoint.date === accuracyPoint.date,
+        dataPoint => dataPoint.date === accuracyPoint.date
       );
       if (existing) {
         existing.predictedInflow = accuracyPoint.predictedInflow;
@@ -186,9 +186,7 @@ export function CashflowChart({
     }
   }
 
-  combinedData.sort((a, b) =>
-    String(a.date).localeCompare(String(b.date)),
-  );
+  combinedData.sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
   if (combinedData.length === 0) {
     return (
@@ -230,7 +228,10 @@ export function CashflowChart({
               checked={showProjectedComparison}
               onCheckedChange={setShowProjectedComparison}
             />
-            <Label htmlFor="show-projected" className="text-sm whitespace-nowrap">
+            <Label
+              htmlFor="show-projected"
+              className="text-sm whitespace-nowrap"
+            >
               Mostrar Projetado
             </Label>
           </div>
@@ -238,10 +239,7 @@ export function CashflowChart({
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="h-[300px] w-full"
-        >
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ComposedChart data={combinedData} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis

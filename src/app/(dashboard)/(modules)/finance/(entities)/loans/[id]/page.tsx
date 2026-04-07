@@ -342,7 +342,8 @@ export default function LoanDetailPage({
 
   // Build action buttons for PageActionBar
   const actionBarButtons = [
-    ...(loan.status === 'ACTIVE' && loan.installments?.some(i => i.status !== 'PAID')
+    ...(loan.status === 'ACTIVE' &&
+    loan.installments?.some(i => i.status !== 'PAID')
       ? [
           {
             id: 'register-payment',
@@ -427,9 +428,7 @@ export default function LoanDetailPage({
                 <Badge variant={getStatusVariant(loan.status)}>
                   {LOAN_STATUS_LABELS[loan.status]}
                 </Badge>
-                <Badge variant="outline">
-                  {LOAN_TYPE_LABELS[loan.type]}
-                </Badge>
+                <Badge variant="outline">{LOAN_TYPE_LABELS[loan.type]}</Badge>
               </div>
             </div>
           </div>
@@ -531,9 +530,7 @@ export default function LoanDetailPage({
               {loan.bankAccountName && (
                 <InfoRow label="Conta Bancária" value={loan.bankAccountName} />
               )}
-              {loan.notes && (
-                <InfoRow label="Observações" value={loan.notes} />
-              )}
+              {loan.notes && <InfoRow label="Observações" value={loan.notes} />}
             </CardContent>
           </Card>
 

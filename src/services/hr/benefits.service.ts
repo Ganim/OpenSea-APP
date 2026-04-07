@@ -204,9 +204,7 @@ export const benefitsService = {
   },
 
   async getFlexHistory(): Promise<FlexHistoryResponse> {
-    return apiClient.get<FlexHistoryResponse>(
-      '/v1/hr/flex-benefits/history'
-    );
+    return apiClient.get<FlexHistoryResponse>('/v1/hr/flex-benefits/history');
   },
 
   // ========== DEDUCTIONS ==========

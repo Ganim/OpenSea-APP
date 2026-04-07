@@ -93,7 +93,8 @@ export function CreditModal({
                 value={hours}
                 onChange={e => {
                   setHours(e.target.value);
-                  if (fieldErrors.hours) setFieldErrors(prev => ({ ...prev, hours: '' }));
+                  if (fieldErrors.hours)
+                    setFieldErrors(prev => ({ ...prev, hours: '' }));
                 }}
                 required
                 aria-invalid={!!fieldErrors.hours}

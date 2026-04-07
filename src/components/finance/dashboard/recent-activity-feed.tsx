@@ -131,7 +131,7 @@ export function RecentActivityFeed() {
           </div>
         ) : (
           <div className="space-y-1">
-            {activities.map((item) => (
+            {activities.map(item => (
               <Link key={item.id} href={item.href}>
                 <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                   <div

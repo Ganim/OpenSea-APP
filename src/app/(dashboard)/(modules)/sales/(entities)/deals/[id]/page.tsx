@@ -413,13 +413,14 @@ function DealDetailContent() {
                 {/* Estimated Close Date */}
                 <div className="border border-border rounded-lg p-4 text-center">
                   <div className="text-lg font-bold">
-                    {new Date(
-                      prediction.estimatedCloseDate
-                    ).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    {new Date(prediction.estimatedCloseDate).toLocaleDateString(
+                      'pt-BR',
+                      {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      }
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
                     Previsão de Fechamento
@@ -482,16 +483,13 @@ function DealDetailContent() {
 
               <p className="text-[10px] text-muted-foreground">
                 Gerado em{' '}
-                {new Date(prediction.generatedAt).toLocaleDateString(
-                  'pt-BR',
-                  {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  }
-                )}
+                {new Date(prediction.generatedAt).toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </p>
             </div>
           ) : null}

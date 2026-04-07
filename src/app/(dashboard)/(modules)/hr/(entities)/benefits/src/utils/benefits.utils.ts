@@ -3,7 +3,11 @@
  * Funções utilitárias para benefícios
  */
 
-import type { BenefitType, BenefitPlan, BenefitEnrollmentStatus } from '@/types/hr';
+import type {
+  BenefitType,
+  BenefitPlan,
+  BenefitEnrollmentStatus,
+} from '@/types/hr';
 
 /**
  * Labels em português para cada tipo de benefício
@@ -116,11 +120,12 @@ export const BENEFIT_TYPE_COLORS: Record<
 /**
  * Labels para status de inscrição
  */
-export const ENROLLMENT_STATUS_LABELS: Record<BenefitEnrollmentStatus, string> = {
-  ACTIVE: 'Ativo',
-  SUSPENDED: 'Suspenso',
-  CANCELLED: 'Cancelado',
-};
+export const ENROLLMENT_STATUS_LABELS: Record<BenefitEnrollmentStatus, string> =
+  {
+    ACTIVE: 'Ativo',
+    SUSPENDED: 'Suspenso',
+    CANCELLED: 'Cancelado',
+  };
 
 /**
  * Cores para status de inscrição
@@ -199,7 +204,8 @@ export function getBenefitRuleDescription(type: BenefitType): string {
     VT: 'Desconto de 6% do salário base, empresa cobre o excedente',
     VR: 'Valor fixo por dia útil trabalhado',
     VA: 'Valor fixo mensal',
-    HEALTH: 'Faixas etárias da ANS, coparticipação configurável, titulares + dependentes',
+    HEALTH:
+      'Faixas etárias da ANS, coparticipação configurável, titulares + dependentes',
     DENTAL: 'Valor fixo, titulares + dependentes',
     LIFE_INSURANCE: 'Valor por faixa salarial ou fixo',
     DAYCARE: 'Valor fixo para filhos até 5 anos e 11 meses',

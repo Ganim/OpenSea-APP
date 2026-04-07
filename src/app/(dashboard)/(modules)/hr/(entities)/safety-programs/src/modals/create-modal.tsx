@@ -38,7 +38,10 @@ interface CreateModalProps {
 }
 
 const TYPE_OPTIONS: { value: SafetyProgramType; label: string }[] = [
-  { value: 'PCMSO', label: 'PCMSO — Prog. Controle Medico de Saude Ocupacional' },
+  {
+    value: 'PCMSO',
+    label: 'PCMSO — Prog. Controle Medico de Saude Ocupacional',
+  },
   { value: 'PGR', label: 'PGR — Programa de Gerenciamento de Riscos' },
   { value: 'LTCAT', label: 'LTCAT — Laudo Tecnico das Condicoes Ambientais' },
   { value: 'PPRA', label: 'PPRA — Prog. Prevencao de Riscos Ambientais' },
@@ -120,9 +123,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       {
         title: 'Novo Programa de Seguranca',
         description: 'Cadastre um novo programa de seguranca do trabalho.',
-        icon: (
-          <ShieldCheck className="h-16 w-16 text-emerald-400 opacity-50" />
-        ),
+        icon: <ShieldCheck className="h-16 w-16 text-emerald-400 opacity-50" />,
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
@@ -233,7 +234,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                     onChange={e => {
                       setResponsibleName(e.target.value);
                       if (fieldErrors.responsibleName)
-                        setFieldErrors(prev => ({ ...prev, responsibleName: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          responsibleName: '',
+                        }));
                     }}
                     placeholder="Nome completo"
                     className="h-9"
@@ -253,12 +257,17 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                     onChange={e => {
                       setResponsibleRegistration(e.target.value);
                       if (fieldErrors.responsibleRegistration)
-                        setFieldErrors(prev => ({ ...prev, responsibleRegistration: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          responsibleRegistration: '',
+                        }));
                     }}
                     placeholder="CRM/CREA/etc."
                     className="h-9"
                   />
-                  <FormErrorIcon message={fieldErrors.responsibleRegistration} />
+                  <FormErrorIcon
+                    message={fieldErrors.responsibleRegistration}
+                  />
                 </div>
               </div>
             </div>
@@ -315,7 +324,21 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         ),
       },
     ],
-    [type, name, validFrom, validUntil, responsibleName, responsibleRegistration, status, documentUrl, notes, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      type,
+      name,
+      validFrom,
+      validUntil,
+      responsibleName,
+      responsibleRegistration,
+      status,
+      documentUrl,
+      notes,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

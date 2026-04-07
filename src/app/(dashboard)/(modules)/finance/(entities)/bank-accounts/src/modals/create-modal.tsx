@@ -10,7 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { StepWizardDialog, type WizardStep } from '@/components/ui/step-wizard-dialog';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { companiesService } from '@/services/admin/companies.service';
 import type { CreateBankAccountData, PixKeyType } from '@/types/finance';
 import { BANK_ACCOUNT_TYPE_LABELS, PIX_KEY_TYPE_LABELS } from '@/types/finance';
@@ -311,7 +314,11 @@ export function CreateBankAccountModal({
       ),
       footer: (
         <div className="flex items-center gap-2 w-full">
-          <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCurrentStep(1)}
+          >
             ← Voltar
           </Button>
           <div className="flex-1" />

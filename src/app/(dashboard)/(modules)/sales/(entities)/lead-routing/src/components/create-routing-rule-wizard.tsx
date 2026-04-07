@@ -16,12 +16,7 @@ import type {
   LeadRoutingStrategy,
 } from '@/types/sales';
 import { LEAD_ROUTING_STRATEGY_LABELS } from '@/types/sales';
-import {
-  Check,
-  Loader2,
-  Shuffle,
-  Users,
-} from 'lucide-react';
+import { Check, Loader2, Shuffle, Users } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -130,8 +125,8 @@ function StepUsers({
           onChange={e => onUserIdsTextChange(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
-          Informe os IDs dos vendedores que receberão os leads nesta regra.
-          Um ID por linha.
+          Informe os IDs dos vendedores que receberão os leads nesta regra. Um
+          ID por linha.
         </p>
       </div>
     </div>
@@ -259,4 +254,3 @@ export function CreateRoutingRuleWizard({
     />
   );
 }
-

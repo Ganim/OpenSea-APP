@@ -40,7 +40,10 @@ export const couponsService = {
     id: string,
     data: Partial<CreateCouponRequest>
   ): Promise<CouponResponse> {
-    return apiClient.put<CouponResponse>(API_ENDPOINTS.COUPONS.UPDATE(id), data);
+    return apiClient.put<CouponResponse>(
+      API_ENDPOINTS.COUPONS.UPDATE(id),
+      data
+    );
   },
 
   async validate(data: ValidateCouponRequest): Promise<ValidateCouponResponse> {

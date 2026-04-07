@@ -19,13 +19,7 @@ import { useGoalProgress } from '@/hooks/sales/use-analytics';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { GoalStatus } from '@/types/sales';
 import { cn } from '@/lib/utils';
-import {
-  Calendar,
-  Edit,
-  Target,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
+import { Calendar, Edit, Target, TrendingUp, Users } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 
 // ============================================================================

@@ -109,7 +109,7 @@ export function useChargeStatus(chargeId: string | null) {
 
     intervalRef.current = setTimeout(() => {
       query.refetch().then(() => {
-        setPollIndex((prev) => prev + 1);
+        setPollIndex(prev => prev + 1);
       });
     }, interval);
   }, [chargeId, pollIndex, query]);

@@ -326,7 +326,10 @@ export default function PCMSODashboardPage() {
   }, [deleteReqTarget, deleteRequirementMutation]);
 
   const isLoading =
-    isLoadingExpiring || isLoadingOverdue || isLoadingRequirements || isLoadingAll;
+    isLoadingExpiring ||
+    isLoadingOverdue ||
+    isLoadingRequirements ||
+    isLoadingAll;
 
   // ============================================================================
   // TABS
@@ -484,9 +487,7 @@ export default function PCMSODashboardPage() {
             <Button
               type="button"
               onClick={handleCreateRequirement}
-              disabled={
-                createRequirementMutation.isPending || !canSubmitReq
-              }
+              disabled={createRequirementMutation.isPending || !canSubmitReq}
             >
               {createRequirementMutation.isPending ? (
                 <>
@@ -537,7 +538,10 @@ export default function PCMSODashboardPage() {
             <span className="text-sm font-medium truncate">
               {getExamTypeLabel(exam.type)}
             </span>
-            <Badge variant={getExamResultVariant(exam.result)} className="text-[10px]">
+            <Badge
+              variant={getExamResultVariant(exam.result)}
+              className="text-[10px]"
+            >
               {getExamResultLabel(exam.result)}
             </Badge>
             <span
@@ -599,9 +603,7 @@ export default function PCMSODashboardPage() {
             <span>A cada {req.frequencyMonths} meses</span>
             {positionName && <span>Cargo: {positionName}</span>}
             {req.description && (
-              <span className="truncate max-w-[200px]">
-                {req.description}
-              </span>
+              <span className="truncate max-w-[200px]">{req.description}</span>
             )}
           </div>
         </div>
@@ -869,9 +871,7 @@ export default function PCMSODashboardPage() {
                     </p>
                   </Card>
                 ) : (
-                  overdueExams.map(exam =>
-                    renderExamRow(exam, getOverdueName)
-                  )
+                  overdueExams.map(exam => renderExamRow(exam, getOverdueName))
                 )}
               </div>
             )}

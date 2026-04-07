@@ -153,10 +153,7 @@ export default function EditProposalPage() {
   // ============================================================================
 
   const addItem = () => {
-    setItems(prev => [
-      ...prev,
-      { description: '', quantity: 1, unitPrice: 0 },
-    ]);
+    setItems(prev => [...prev, { description: '', quantity: 1, unitPrice: 0 }]);
   };
 
   const removeItem = (index: number) => {
@@ -352,9 +349,7 @@ export default function EditProposalPage() {
               <FileCheck className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Editando proposta
-              </p>
+              <p className="text-sm text-muted-foreground">Editando proposta</p>
               <h1 className="text-xl font-bold truncate">{proposal.title}</h1>
             </div>
           </div>

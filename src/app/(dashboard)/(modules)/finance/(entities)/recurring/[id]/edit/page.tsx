@@ -389,7 +389,8 @@ export default function EditRecurringPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="expectedAmount">
-                          Valor Base (R$) <span className="text-rose-500">*</span>
+                          Valor Base (R$){' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="expectedAmount"
@@ -408,7 +409,9 @@ export default function EditRecurringPage({
                         <Label htmlFor="frequencyUnit">Frequência</Label>
                         <Select
                           value={frequencyUnit}
-                          onValueChange={v => setFrequencyUnit(v as RecurrenceUnit)}
+                          onValueChange={v =>
+                            setFrequencyUnit(v as RecurrenceUnit)
+                          }
                         >
                           <SelectTrigger id="frequencyUnit">
                             <SelectValue />
@@ -462,7 +465,9 @@ export default function EditRecurringPage({
                           id="startDate"
                           type="date"
                           value={
-                            config.startDate ? config.startDate.split('T')[0] : ''
+                            config.startDate
+                              ? config.startDate.split('T')[0]
+                              : ''
                           }
                           disabled
                         />

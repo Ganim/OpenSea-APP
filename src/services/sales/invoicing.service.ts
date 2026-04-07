@@ -1,15 +1,15 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-    CancelInvoiceRequest,
-    CancelInvoiceResponse,
-    ConfigureFocusNfeRequest,
-    ConfigureFocusNfeResponse,
-    InvoiceDetail,
-    IssueInvoiceRequest,
-    IssueInvoiceResponse,
-    ListInvoicesQuery,
-    ListInvoicesResponse,
+  CancelInvoiceRequest,
+  CancelInvoiceResponse,
+  ConfigureFocusNfeRequest,
+  ConfigureFocusNfeResponse,
+  InvoiceDetail,
+  IssueInvoiceRequest,
+  IssueInvoiceResponse,
+  ListInvoicesQuery,
+  ListInvoicesResponse,
 } from '@/types/sales';
 
 export const invoicingService = {

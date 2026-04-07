@@ -151,8 +151,7 @@ function ItemReservationDetailContent() {
   const statusStyle =
     STATUS_STYLES[reservation.status] || STATUS_STYLES.PENDING;
   const StatusIcon = statusStyle.icon;
-  const productName =
-    reservation.item?.product?.name || 'Item sem nome';
+  const productName = reservation.item?.product?.name || 'Item sem nome';
   const expired =
     reservation.status === 'PENDING' && isExpired(reservation.expiresAt);
 
@@ -239,11 +238,7 @@ function ItemReservationDetailContent() {
             value={String(reservation.quantity)}
           />
 
-          <DetailRow
-            icon={Package}
-            label="Item"
-            value={productName}
-          />
+          <DetailRow icon={Package} label="Item" value={productName} />
 
           <DetailRow
             icon={ShoppingCart}

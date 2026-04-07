@@ -34,14 +34,16 @@ const PRIORITY_CONFIG: Record<
     label: 'Urgente',
     icon: <AlertTriangle className="h-4 w-4" />,
     borderClass: 'border-rose-300 dark:border-rose-500/40',
-    badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
+    badgeClass:
+      'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
     bgClass: 'bg-rose-50/50 dark:bg-rose-500/5',
   },
   IMPORTANT: {
     label: 'Importante',
     icon: <Info className="h-4 w-4" />,
     borderClass: 'border-amber-300 dark:border-amber-500/40',
-    badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+    badgeClass:
+      'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
     bgClass: 'bg-amber-50/50 dark:bg-amber-500/5',
   },
   NORMAL: {
@@ -77,7 +79,9 @@ export function AnnouncementsTab() {
     };
     const pDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
     if (pDiff !== 0) return pDiff;
-    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    return (
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
   });
 
   if (isLoading) {
@@ -182,9 +186,7 @@ export function AnnouncementsTab() {
                       )}
                     </span>
                     {announcement.authorEmployee && (
-                      <span>
-                        por {announcement.authorEmployee.fullName}
-                      </span>
+                      <span>por {announcement.authorEmployee.fullName}</span>
                     )}
                   </div>
                 </div>

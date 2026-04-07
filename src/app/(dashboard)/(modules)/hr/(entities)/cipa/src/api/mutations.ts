@@ -102,7 +102,10 @@ export interface AddCipaMemberOptions {
   onError?: (error: Error) => void;
 }
 
-export function useAddCipaMember(mandateId: string, options: AddCipaMemberOptions = {}) {
+export function useAddCipaMember(
+  mandateId: string,
+  options: AddCipaMemberOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 
@@ -132,7 +135,10 @@ export interface UpdateCipaMemberOptions {
   onError?: (error: Error) => void;
 }
 
-export function useUpdateCipaMember(mandateId: string, options: UpdateCipaMemberOptions = {}) {
+export function useUpdateCipaMember(
+  mandateId: string,
+  options: UpdateCipaMemberOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 
@@ -144,7 +150,11 @@ export function useUpdateCipaMember(mandateId: string, options: UpdateCipaMember
       memberId: string;
       data: UpdateCipaMemberData;
     }): Promise<CipaMember> => {
-      const response = await cipaService.updateMember(mandateId, memberId, data);
+      const response = await cipaService.updateMember(
+        mandateId,
+        memberId,
+        data
+      );
       return response.member;
     },
     onSuccess: member => {
@@ -168,7 +178,10 @@ export interface RemoveCipaMemberOptions {
   onError?: (error: Error) => void;
 }
 
-export function useRemoveCipaMember(mandateId: string, options: RemoveCipaMemberOptions = {}) {
+export function useRemoveCipaMember(
+  mandateId: string,
+  options: RemoveCipaMemberOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 

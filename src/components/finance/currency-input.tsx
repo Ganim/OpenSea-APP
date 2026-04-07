@@ -91,7 +91,7 @@ export function CurrencyInput({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {CURRENCIES.map((c) => (
+          {CURRENCIES.map(c => (
             <SelectItem key={c.code} value={c.code}>
               <span className="flex items-center gap-2">
                 <span>{c.flag}</span>

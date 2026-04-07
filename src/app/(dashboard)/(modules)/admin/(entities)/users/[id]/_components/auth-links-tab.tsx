@@ -538,9 +538,7 @@ function AdminLinkDialog({
           </Button>
           <Button
             onClick={() => linkMutation.mutate()}
-            disabled={
-              !provider || !identifier.trim() || linkMutation.isPending
-            }
+            disabled={!provider || !identifier.trim() || linkMutation.isPending}
           >
             {linkMutation.isPending ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

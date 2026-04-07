@@ -50,7 +50,8 @@ const statusConfig: Record<
 > = {
   ACTIVE: {
     label: 'Conectado',
-    color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+    color:
+      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
     icon: Wifi,
   },
   EXPIRED: {
@@ -84,7 +85,8 @@ export default function BankConnectionsPage() {
   const canAdmin = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.ADMIN);
   const queryClient = useQueryClient();
 
-  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('');
+  const [selectedBankAccountId, setSelectedBankAccountId] =
+    useState<string>('');
   const [disconnectId, setDisconnectId] = useState<string | null>(null);
 
   // Fetch bank accounts for the selector
@@ -113,7 +115,7 @@ export default function BankConnectionsPage() {
   const syncMutation = useMutation({
     mutationFn: (connectionId: string) =>
       bankConnectionsService.sync(connectionId),
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast.success(
         `Sincronização concluída: ${result.transactionsImported} transações importadas, ${result.matchedCount} conciliadas`
       );
@@ -182,7 +184,7 @@ export default function BankConnectionsPage() {
                     <SelectValue placeholder="Selecionar conta" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map((account) => (
+                    {bankAccounts.map(account => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.name}
                       </SelectItem>
@@ -191,7 +193,7 @@ export default function BankConnectionsPage() {
                 </Select>
                 <PluggyConnect
                   onSuccess={handlePluggySuccess}
-                  onError={(msg) => toast.error(msg)}
+                  onError={msg => toast.error(msg)}
                 />
               </div>
             ) : undefined
@@ -222,15 +224,12 @@ export default function BankConnectionsPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {connections.map((connection) => {
+            {connections.map(connection => {
               const status = statusConfig[connection.status];
               const StatusIcon = status.icon;
 
               return (
-                <Card
-                  key={connection.id}
-                  className="p-5 flex flex-col gap-4"
-                >
+                <Card key={connection.id} className="p-5 flex flex-col gap-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-sky-50 dark:bg-sky-500/8">

@@ -56,7 +56,11 @@ export function SellDaysModal({
       resetForm();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('days') || msg.includes('dias') || msg.includes('exceed')) {
+      if (
+        msg.includes('days') ||
+        msg.includes('dias') ||
+        msg.includes('exceed')
+      ) {
         setFieldErrors(prev => ({ ...prev, daysToSell: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -103,7 +107,8 @@ export function SellDaysModal({
                 value={daysToSell}
                 onChange={e => {
                   setDaysToSell(Number(e.target.value));
-                  if (fieldErrors.daysToSell) setFieldErrors(prev => ({ ...prev, daysToSell: '' }));
+                  if (fieldErrors.daysToSell)
+                    setFieldErrors(prev => ({ ...prev, daysToSell: '' }));
                 }}
                 required
                 aria-invalid={!!fieldErrors.daysToSell}
@@ -123,10 +128,7 @@ export function SellDaysModal({
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={!isValid || isSubmitting}
-            >
+            <Button type="submit" disabled={!isValid || isSubmitting}>
               <DollarSign className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Vendendo...' : 'Vender Dias'}
             </Button>

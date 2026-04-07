@@ -19,12 +19,7 @@ import {
   LEAD_SCORE_FIELD_LABELS,
   LEAD_SCORE_CONDITION_LABELS,
 } from '@/types/sales';
-import {
-  Check,
-  Loader2,
-  Star,
-  Target,
-} from 'lucide-react';
+import { Check, Loader2, Star, Target } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -174,9 +169,7 @@ function StepPointsReview({
           )}
           , atribuir{' '}
           <strong
-            className={
-              points >= 0 ? 'text-emerald-600' : 'text-rose-600'
-            }
+            className={points >= 0 ? 'text-emerald-600' : 'text-rose-600'}
           >
             {points > 0 ? '+' : ''}
             {points} ponto{Math.abs(points) !== 1 ? 's' : ''}
@@ -220,7 +213,10 @@ export function CreateScoringRuleWizard({
       name: name.trim(),
       field,
       condition,
-      value: (condition === 'is_true' || condition === 'is_false') ? 'true' : value.trim(),
+      value:
+        condition === 'is_true' || condition === 'is_false'
+          ? 'true'
+          : value.trim(),
       points,
       isActive: true,
     };

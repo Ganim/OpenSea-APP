@@ -44,13 +44,8 @@ function getDefaultDateRange() {
   };
 }
 
-function isParentAccount(
-  code: string,
-  allCodes: string[]
-): boolean {
-  return allCodes.some(
-    c => c !== code && c.startsWith(code + '.')
-  );
+function isParentAccount(code: string, allCodes: string[]): boolean {
+  return allCodes.some(c => c !== code && c.startsWith(code + '.'));
 }
 
 function getParentCode(code: string): string | null {
@@ -63,7 +58,10 @@ function getParentCode(code: string): string | null {
 // EXPORT CSV
 // =============================================================================
 
-function exportCsv(accounts: TrialBalanceAccount[], period: { from: string; to: string }) {
+function exportCsv(
+  accounts: TrialBalanceAccount[],
+  period: { from: string; to: string }
+) {
   const header = ['Código', 'Conta', 'Nível', 'Débito', 'Crédito', 'Saldo'];
   const rows = accounts.map(acc => [
     acc.code,
@@ -217,7 +215,12 @@ function TrialBalanceRow({
 
       {/* Saldo */}
       <td className="px-4 py-2.5 text-right whitespace-nowrap">
-        <span className={cn('font-mono text-sm tabular-nums font-medium', balanceColor)}>
+        <span
+          className={cn(
+            'font-mono text-sm tabular-nums font-medium',
+            balanceColor
+          )}
+        >
           {formatCurrency(account.balance)}
         </span>
       </td>
@@ -235,7 +238,10 @@ export default function TrialBalancePage() {
   const defaults = useMemo(() => getDefaultDateRange(), []);
   const [dateFrom, setDateFrom] = useState(defaults.from);
   const [dateTo, setDateTo] = useState(defaults.to);
-  const [queryParams, setQueryParams] = useState<{ dateFrom: string; dateTo: string }>({
+  const [queryParams, setQueryParams] = useState<{
+    dateFrom: string;
+    dateTo: string;
+  }>({
     dateFrom: defaults.from,
     dateTo: defaults.to,
   });
@@ -304,10 +310,14 @@ export default function TrialBalancePage() {
     data && Math.abs(data.totals.debit - data.totals.credit) < 0.01;
 
   const formattedFrom = dateFrom
-    ? format(new Date(dateFrom + 'T00:00:00'), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    ? format(new Date(dateFrom + 'T00:00:00'), "dd 'de' MMMM 'de' yyyy", {
+        locale: ptBR,
+      })
     : '';
   const formattedTo = dateTo
-    ? format(new Date(dateTo + 'T00:00:00'), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    ? format(new Date(dateTo + 'T00:00:00'), "dd 'de' MMMM 'de' yyyy", {
+        locale: ptBR,
+      })
     : '';
 
   return (
@@ -327,7 +337,10 @@ export default function TrialBalancePage() {
         <CardContent className="py-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="date-from" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Label
+                htmlFor="date-from"
+                className="text-xs font-medium text-muted-foreground uppercase tracking-wide"
+              >
                 Período — De
               </Label>
               <Input
@@ -340,7 +353,10 @@ export default function TrialBalancePage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="date-to" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Label
+                htmlFor="date-to"
+                className="text-xs font-medium text-muted-foreground uppercase tracking-wide"
+              >
                 Até
               </Label>
               <Input
@@ -456,7 +472,10 @@ export default function TrialBalancePage() {
                 {/* Footer total row */}
                 <tfoot>
                   <tr className="bg-slate-100 dark:bg-slate-700/50 border-t-2 border-border font-bold">
-                    <td className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-foreground" colSpan={2}>
+                    <td
+                      className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-foreground"
+                      colSpan={2}
+                    >
                       TOTAL
                     </td>
                     <td className="px-4 py-3 text-right whitespace-nowrap">

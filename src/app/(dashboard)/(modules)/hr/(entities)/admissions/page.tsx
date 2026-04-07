@@ -103,7 +103,7 @@ export default function AdmissionsPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -119,8 +119,12 @@ export default function AdmissionsPage() {
   // ============================================================================
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [cancelTarget, setCancelTarget] = useState<AdmissionInvite | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<AdmissionInvite | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<AdmissionInvite | null>(
+    null
+  );
+  const [rejectTarget, setRejectTarget] = useState<AdmissionInvite | null>(
+    null
+  );
 
   // ============================================================================
   // MUTATIONS
@@ -263,7 +267,11 @@ export default function AdmissionsPage() {
           hasPermission={hasPermission}
           actions={
             canCreate ? (
-              <Button size="sm" className="gap-2" onClick={() => setIsCreateOpen(true)}>
+              <Button
+                size="sm"
+                className="gap-2"
+                onClick={() => setIsCreateOpen(true)}
+              >
                 <Plus className="h-4 w-4" />
                 <span className="hidden md:inline">Nova Admissão</span>
               </Button>
@@ -271,10 +279,10 @@ export default function AdmissionsPage() {
           }
         />
 
-          <Header
-            title="Admissões"
-            description="Gerencie os convites de admissão digital"
-          />
+        <Header
+          title="Admissões"
+          description="Gerencie os convites de admissão digital"
+        />
       </PageHeader>
 
       <PageBody>
@@ -290,7 +298,9 @@ export default function AdmissionsPage() {
           <GridError
             type="server"
             title="Erro ao carregar admissões"
-            message={error instanceof Error ? error.message : 'Erro desconhecido'}
+            message={
+              error instanceof Error ? error.message : 'Erro desconhecido'
+            }
           />
         ) : (
           <CoreProvider>
@@ -300,7 +310,10 @@ export default function AdmissionsPage() {
               toolbarStart={
                 <FilterDropdown
                   label="Status"
-                  options={STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label }))}
+                  options={STATUS_OPTIONS.map(o => ({
+                    id: o.value,
+                    label: o.label,
+                  }))}
                   selected={filterStatus ? [filterStatus] : []}
                   onSelectionChange={ids => setFilterStatus(ids[0] ?? '')}
                   activeColor="blue"
@@ -309,14 +322,21 @@ export default function AdmissionsPage() {
               renderGridItem={(item, isSelected) => (
                 <EntityContextMenu
                   itemId={item.id}
-                  onView={canView ? (ids: string[]) => handleView({ id: ids[0] } as AdmissionInvite) : undefined}
+                  onView={
+                    canView
+                      ? (ids: string[]) =>
+                          handleView({ id: ids[0] } as AdmissionInvite)
+                      : undefined
+                  }
                   actions={getActions(item)}
                 >
                   <EntityCard
                     id={item.id}
                     variant="grid"
                     title={item.fullName}
-                    subtitle={[item.position?.name, item.email].filter(Boolean).join(' \u2022 ')}
+                    subtitle={[item.position?.name, item.email]
+                      .filter(Boolean)
+                      .join(' \u2022 ')}
                     icon={UserPlus}
                     iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
                     badges={[
@@ -335,14 +355,21 @@ export default function AdmissionsPage() {
               renderListItem={(item, isSelected) => (
                 <EntityContextMenu
                   itemId={item.id}
-                  onView={canView ? (ids: string[]) => handleView({ id: ids[0] } as AdmissionInvite) : undefined}
+                  onView={
+                    canView
+                      ? (ids: string[]) =>
+                          handleView({ id: ids[0] } as AdmissionInvite)
+                      : undefined
+                  }
                   actions={getActions(item)}
                 >
                   <EntityCard
                     id={item.id}
                     variant="list"
                     title={item.fullName}
-                    subtitle={[item.position?.name, item.email].filter(Boolean).join(' \u2022 ')}
+                    subtitle={[item.position?.name, item.email]
+                      .filter(Boolean)
+                      .join(' \u2022 ')}
                     icon={UserPlus}
                     iconBgColor="bg-linear-to-br from-blue-500 to-blue-600"
                     badges={[
@@ -358,7 +385,7 @@ export default function AdmissionsPage() {
                   />
                 </EntityContextMenu>
               )}
-              onItemClick={(item) => canView && handleView(item)}
+              onItemClick={item => canView && handleView(item)}
               emptyMessage={
                 canCreate
                   ? 'Nenhuma admissão encontrada. Crie um novo convite de admissão digital.'

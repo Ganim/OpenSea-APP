@@ -104,8 +104,15 @@ export default function SafetyProgramsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useListSafetyPrograms(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListSafetyPrograms(queryParams);
   const createMutation = useCreateSafetyProgram();
   const deleteMutation = useDeleteSafetyProgram();
 
@@ -120,7 +127,7 @@ export default function SafetyProgramsPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }

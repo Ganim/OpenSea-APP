@@ -118,7 +118,11 @@ export function CreateModal({
         handleClose();
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+        if (
+          msg.includes('name already') ||
+          msg.includes('already exists') ||
+          msg.includes('nome')
+        ) {
           setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
         } else if (msg.includes('code') || msg.includes('código')) {
           setFieldErrors(prev => ({ ...prev, code: translateError(msg) }));
@@ -251,7 +255,8 @@ export function CreateModal({
                     value={name}
                     onChange={e => {
                       setName(e.target.value);
-                      if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                      if (fieldErrors.name)
+                        setFieldErrors(prev => ({ ...prev, name: '' }));
                     }}
                     placeholder="Ex: Gerente de Vendas, Analista de TI"
                     autoFocus
@@ -271,7 +276,8 @@ export function CreateModal({
                     value={code}
                     onChange={e => {
                       setCode(e.target.value);
-                      if (fieldErrors.code) setFieldErrors(prev => ({ ...prev, code: '' }));
+                      if (fieldErrors.code)
+                        setFieldErrors(prev => ({ ...prev, code: '' }));
                     }}
                     placeholder="Ex: GER-VEN, ANA-TI"
                     aria-invalid={!!fieldErrors.code}

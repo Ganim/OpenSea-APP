@@ -53,9 +53,7 @@ export const requestsConfig = defineEntityConfig<EmployeeRequest>()({
       { field: 'type', label: 'Tipo' },
       { field: 'status', label: 'Status' },
     ],
-    metaFields: [
-      { field: 'createdAt', label: 'Criada em', format: 'date' },
-    ],
+    metaFields: [{ field: 'createdAt', label: 'Criada em', format: 'date' }],
   },
 
   grid: {

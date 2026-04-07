@@ -217,8 +217,10 @@ export default function EditFinanceCategoryPage({
   // Chart of accounts filtered by category type
   const availableChartAccounts = useMemo(() => {
     const all = chartOfAccountsData?.chartOfAccounts ?? [];
-    if (formData.type === 'EXPENSE') return all.filter(a => a.type === 'EXPENSE');
-    if (formData.type === 'REVENUE') return all.filter(a => a.type === 'REVENUE');
+    if (formData.type === 'EXPENSE')
+      return all.filter(a => a.type === 'EXPENSE');
+    if (formData.type === 'REVENUE')
+      return all.filter(a => a.type === 'REVENUE');
     // BOTH — show EXPENSE and REVENUE
     return all.filter(a => a.type === 'EXPENSE' || a.type === 'REVENUE');
   }, [chartOfAccountsData, formData.type]);
@@ -442,7 +444,10 @@ export default function EditFinanceCategoryPage({
                             id="name"
                             value={formData.name}
                             onChange={e => {
-                              setFormData({ ...formData, name: e.target.value });
+                              setFormData({
+                                ...formData,
+                                name: e.target.value,
+                              });
                               if (fieldErrors.name)
                                 setFieldErrors(prev => ({ ...prev, name: '' }));
                             }}
@@ -503,7 +508,9 @@ export default function EditFinanceCategoryPage({
                         {isChild ? (
                           <div className="flex items-center h-9 px-3 rounded-md border bg-muted text-sm text-muted-foreground">
                             {FINANCE_CATEGORY_TYPE_LABELS[formData.type]}
-                            <span className="ml-2 text-xs">(herdado do pai)</span>
+                            <span className="ml-2 text-xs">
+                              (herdado do pai)
+                            </span>
                           </div>
                         ) : (
                           <Select
@@ -531,7 +538,8 @@ export default function EditFinanceCategoryPage({
                         )}
                         {hasChildren && !isChild && (
                           <p className="text-xs text-amber-500">
-                            Alterar o tipo irá propagar para todas as subcategorias.
+                            Alterar o tipo irá propagar para todas as
+                            subcategorias.
                           </p>
                         )}
                       </div>
@@ -657,7 +665,9 @@ export default function EditFinanceCategoryPage({
                           <SelectValue placeholder="Sem vínculo contábil" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          <SelectItem value="none">
+                            Sem vínculo contábil
+                          </SelectItem>
                           {availableChartAccounts.map(acc => (
                             <SelectItem key={acc.id} value={acc.id}>
                               {acc.code} — {acc.name}
@@ -666,7 +676,9 @@ export default function EditFinanceCategoryPage({
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Opcional. Quando vinculada, os lançamentos desta categoria serão contabilizados automaticamente nesta conta.
+                        Opcional. Quando vinculada, os lançamentos desta
+                        categoria serão contabilizados automaticamente nesta
+                        conta.
                       </p>
                     </div>
                   </div>

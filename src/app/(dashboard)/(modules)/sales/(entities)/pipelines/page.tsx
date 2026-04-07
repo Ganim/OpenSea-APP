@@ -281,10 +281,7 @@ export default function PipelinesListPage() {
       />
 
       {/* Create Pipeline Wizard */}
-      <CreatePipelineWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-      />
+      <CreatePipelineWizard open={wizardOpen} onOpenChange={setWizardOpen} />
     </div>
   );
 }

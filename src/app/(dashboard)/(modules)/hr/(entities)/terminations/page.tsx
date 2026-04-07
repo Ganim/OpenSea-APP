@@ -113,7 +113,15 @@ export default function TerminationsPage() {
   // DATA
   // ============================================================================
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useListTerminations(queryParams);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListTerminations(queryParams);
   const createMutation = useCreateTermination();
   const deleteMutation = useDeleteTermination();
 
@@ -128,7 +136,7 @@ export default function TerminationsPage() {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }

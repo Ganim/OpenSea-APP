@@ -17,13 +17,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import type { DelegationScope } from '@/types/hr';
 import type { Employee } from '@/types/hr';
-import {
-  Calendar,
-  Loader2,
-  Shield,
-  UserCheck,
-  Users,
-} from 'lucide-react';
+import { Calendar, Loader2, Shield, UserCheck, Users } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 // ============================================================================
@@ -128,8 +122,8 @@ export function CreateDelegationModal({
   // ============================================================================
 
   const selectedEmployee = useMemo(
-    () => employees.find((emp) => emp.id === delegateId),
-    [employees, delegateId],
+    () => employees.find(emp => emp.id === delegateId),
+    [employees, delegateId]
   );
 
   // ============================================================================
@@ -167,12 +161,10 @@ export function CreateDelegationModal({
                     <SelectValue placeholder="Selecione um colaborador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {employees.map((emp) => (
+                    {employees.map(emp => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.fullName}
-                        {emp.position?.name
-                          ? ` - ${emp.position.name}`
-                          : ''}
+                        {emp.position?.name ? ` - ${emp.position.name}` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -187,13 +179,13 @@ export function CreateDelegationModal({
               <Label htmlFor="scope">Escopo da Delegação</Label>
               <Select
                 value={scope}
-                onValueChange={(val) => setScope(val as DelegationScope)}
+                onValueChange={val => setScope(val as DelegationScope)}
               >
                 <SelectTrigger id="scope">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {SCOPE_OPTIONS.map((opt) => (
+                  {SCOPE_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -230,7 +222,7 @@ export function CreateDelegationModal({
                 id="startDate"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
 
@@ -243,7 +235,7 @@ export function CreateDelegationModal({
                 id="endDate"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={startDate || undefined}
               />
               <p className="text-xs text-muted-foreground">
@@ -253,13 +245,12 @@ export function CreateDelegationModal({
 
             <div className="space-y-2">
               <Label htmlFor="reason">
-                Motivo{' '}
-                <span className="text-muted-foreground">(opcional)</span>
+                Motivo <span className="text-muted-foreground">(opcional)</span>
               </Label>
               <Textarea
                 id="reason"
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={e => setReason(e.target.value)}
                 placeholder="Ex: Férias, viagem, licença..."
                 rows={3}
                 maxLength={500}
@@ -278,16 +269,13 @@ export function CreateDelegationModal({
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Escopo:</span>{' '}
-                  {SCOPE_OPTIONS.find((o) => o.value === scope)?.label}
+                  {SCOPE_OPTIONS.find(o => o.value === scope)?.label}
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Início:</span>{' '}
                   {new Date(startDate).toLocaleDateString('pt-BR')}
                   {endDate && (
-                    <>
-                      {' '}
-                      até {new Date(endDate).toLocaleDateString('pt-BR')}
-                    </>
+                    <> até {new Date(endDate).toLocaleDateString('pt-BR')}</>
                   )}
                 </p>
               </div>
@@ -329,13 +317,13 @@ export function CreateDelegationModal({
       isLoadingEmployees,
       selectedEmployee,
       handleSubmit,
-    ],
+    ]
   );
 
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(val) => {
+      onOpenChange={val => {
         if (!val) handleClose();
       }}
       steps={steps}

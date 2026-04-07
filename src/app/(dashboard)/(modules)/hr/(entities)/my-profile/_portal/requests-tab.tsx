@@ -46,12 +46,42 @@ import { toast } from 'sonner';
 // CONSTANTS
 // ============================================================================
 
-const REQUEST_TYPE_OPTIONS: { value: RequestType; label: string; icon: React.ReactNode; description: string }[] = [
-  { value: 'VACATION', label: 'Férias', icon: <PalmtreeIcon className="h-5 w-5" />, description: 'Solicitar período de férias' },
-  { value: 'ABSENCE', label: 'Ausência', icon: <Calendar className="h-5 w-5" />, description: 'Registrar ausência ou atestado médico' },
-  { value: 'ADVANCE', label: 'Adiantamento', icon: <FileText className="h-5 w-5" />, description: 'Solicitar adiantamento salarial' },
-  { value: 'DATA_CHANGE', label: 'Alteração de Dados', icon: <UserCog className="h-5 w-5" />, description: 'Solicitar atualização de dados cadastrais' },
-  { value: 'SUPPORT', label: 'Suporte', icon: <Send className="h-5 w-5" />, description: 'Abrir chamado para o RH' },
+const REQUEST_TYPE_OPTIONS: {
+  value: RequestType;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}[] = [
+  {
+    value: 'VACATION',
+    label: 'Férias',
+    icon: <PalmtreeIcon className="h-5 w-5" />,
+    description: 'Solicitar período de férias',
+  },
+  {
+    value: 'ABSENCE',
+    label: 'Ausência',
+    icon: <Calendar className="h-5 w-5" />,
+    description: 'Registrar ausência ou atestado médico',
+  },
+  {
+    value: 'ADVANCE',
+    label: 'Adiantamento',
+    icon: <FileText className="h-5 w-5" />,
+    description: 'Solicitar adiantamento salarial',
+  },
+  {
+    value: 'DATA_CHANGE',
+    label: 'Alteração de Dados',
+    icon: <UserCog className="h-5 w-5" />,
+    description: 'Solicitar atualização de dados cadastrais',
+  },
+  {
+    value: 'SUPPORT',
+    label: 'Suporte',
+    icon: <Send className="h-5 w-5" />,
+    description: 'Abrir chamado para o RH',
+  },
 ];
 
 const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
@@ -62,11 +92,34 @@ const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
   SUPPORT: 'Suporte',
 };
 
-const REQUEST_STATUS_CONFIG: Record<RequestStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
-  PENDING: { label: 'Pendente', variant: 'outline', icon: <Clock className="h-3 w-3" /> },
-  APPROVED: { label: 'Aprovada', variant: 'default', icon: <CheckCircle2 className="h-3 w-3" /> },
-  REJECTED: { label: 'Rejeitada', variant: 'destructive', icon: <XCircle className="h-3 w-3" /> },
-  CANCELLED: { label: 'Cancelada', variant: 'secondary', icon: <AlertCircle className="h-3 w-3" /> },
+const REQUEST_STATUS_CONFIG: Record<
+  RequestStatus,
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    icon: React.ReactNode;
+  }
+> = {
+  PENDING: {
+    label: 'Pendente',
+    variant: 'outline',
+    icon: <Clock className="h-3 w-3" />,
+  },
+  APPROVED: {
+    label: 'Aprovada',
+    variant: 'default',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  REJECTED: {
+    label: 'Rejeitada',
+    variant: 'destructive',
+    icon: <XCircle className="h-3 w-3" />,
+  },
+  CANCELLED: {
+    label: 'Cancelada',
+    variant: 'secondary',
+    icon: <AlertCircle className="h-3 w-3" />,
+  },
 };
 
 // ============================================================================
@@ -138,9 +191,7 @@ export function RequestsTab() {
 
   const step1Content = (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">
-        Tipo de Solicitação
-      </Label>
+      <Label className="text-sm font-medium">Tipo de Solicitação</Label>
       <div className="grid gap-2">
         {REQUEST_TYPE_OPTIONS.map(option => (
           <button
@@ -237,9 +288,7 @@ export function RequestsTab() {
             <Label>Motivo</Label>
             <Select
               value={formData.reason || ''}
-              onValueChange={v =>
-                setFormData(prev => ({ ...prev, reason: v }))
-              }
+              onValueChange={v => setFormData(prev => ({ ...prev, reason: v }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o motivo" />
@@ -306,9 +355,7 @@ export function RequestsTab() {
             <Label>Campo a Alterar</Label>
             <Select
               value={formData.field || ''}
-              onValueChange={v =>
-                setFormData(prev => ({ ...prev, field: v }))
-              }
+              onValueChange={v => setFormData(prev => ({ ...prev, field: v }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o campo" />
@@ -318,7 +365,9 @@ export function RequestsTab() {
                 <SelectItem value="PHONE">Telefone</SelectItem>
                 <SelectItem value="EMAIL">E-mail</SelectItem>
                 <SelectItem value="BANK_ACCOUNT">Dados Bancários</SelectItem>
-                <SelectItem value="EMERGENCY_CONTACT">Contato de Emergência</SelectItem>
+                <SelectItem value="EMERGENCY_CONTACT">
+                  Contato de Emergência
+                </SelectItem>
                 <SelectItem value="OTHER">Outro</SelectItem>
               </SelectContent>
             </Select>
@@ -417,7 +466,9 @@ export function RequestsTab() {
       footer: (
         <Button
           onClick={handleSubmit}
-          disabled={createMutation.isPending || Object.keys(formData).length === 0}
+          disabled={
+            createMutation.isPending || Object.keys(formData).length === 0
+          }
         >
           {createMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin mr-1.5" />

@@ -25,10 +25,16 @@ declare global {
   }
 }
 
-export function PluggyConnect({ onSuccess, onError, onClose }: PluggyConnectProps) {
+export function PluggyConnect({
+  onSuccess,
+  onError,
+  onClose,
+}: PluggyConnectProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
-  const pluggyRef = useRef<{ open: () => void; close: () => void } | null>(null);
+  const pluggyRef = useRef<{ open: () => void; close: () => void } | null>(
+    null
+  );
 
   // Load Pluggy Connect SDK
   useEffect(() => {
@@ -62,10 +68,10 @@ export function PluggyConnect({ onSuccess, onError, onClose }: PluggyConnectProp
 
       pluggyRef.current = window.PluggyConnect.init({
         connectToken: accessToken,
-        onSuccess: (data) => {
+        onSuccess: data => {
           onSuccess(data.item.id);
         },
-        onError: (error) => {
+        onError: error => {
           onError?.(error.message || 'Erro na conexão bancária');
         },
         onClose: () => {

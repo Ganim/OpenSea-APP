@@ -157,16 +157,10 @@ export default function EditPaymentConditionPage() {
       setDownPaymentPercent(
         pc.downPaymentPercent != null ? String(pc.downPaymentPercent) : ''
       );
-      setInterestRate(
-        pc.interestRate != null ? String(pc.interestRate) : ''
-      );
+      setInterestRate(pc.interestRate != null ? String(pc.interestRate) : '');
       setInterestType(pc.interestType || 'SIMPLE');
-      setPenaltyRate(
-        pc.penaltyRate != null ? String(pc.penaltyRate) : ''
-      );
-      setDiscountCash(
-        pc.discountCash != null ? String(pc.discountCash) : ''
-      );
+      setPenaltyRate(pc.penaltyRate != null ? String(pc.penaltyRate) : '');
+      setDiscountCash(pc.discountCash != null ? String(pc.discountCash) : '');
       setApplicableTo(pc.applicableTo || 'ALL');
       setMinOrderValue(
         pc.minOrderValue != null ? String(pc.minOrderValue) : ''
@@ -405,9 +399,7 @@ export default function EditPaymentConditionPage() {
                     </Label>
                     <Select
                       value={type}
-                      onValueChange={v =>
-                        setType(v as PaymentConditionType)
-                      }
+                      onValueChange={v => setType(v as PaymentConditionType)}
                     >
                       <SelectTrigger id="type">
                         <SelectValue placeholder="Selecione o tipo..." />
@@ -515,10 +507,7 @@ export default function EditPaymentConditionPage() {
                         {isActive ? 'Ativo' : 'Inativo'}
                       </p>
                     </div>
-                    <Switch
-                      checked={isActive}
-                      onCheckedChange={setIsActive}
-                    />
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
                   </div>
                 </div>
 
@@ -532,10 +521,7 @@ export default function EditPaymentConditionPage() {
                       Usar como condicao padrao para novos pedidos
                     </p>
                   </div>
-                  <Switch
-                    checked={isDefault}
-                    onCheckedChange={setIsDefault}
-                  />
+                  <Switch checked={isDefault} onCheckedChange={setIsDefault} />
                 </div>
               </div>
             </div>
@@ -568,9 +554,7 @@ export default function EditPaymentConditionPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="discountCash">
-                      Desconto a Vista (%)
-                    </Label>
+                    <Label htmlFor="discountCash">Desconto a Vista (%)</Label>
                     <Input
                       id="discountCash"
                       type="number"
@@ -602,9 +586,7 @@ export default function EditPaymentConditionPage() {
                     <Label htmlFor="interestType">Tipo de Juros</Label>
                     <Select
                       value={interestType}
-                      onValueChange={v =>
-                        setInterestType(v as InterestType)
-                      }
+                      onValueChange={v => setInterestType(v as InterestType)}
                     >
                       <SelectTrigger id="interestType">
                         <SelectValue placeholder="Selecione..." />
@@ -625,9 +607,7 @@ export default function EditPaymentConditionPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="penaltyRate">
-                      Multa por Atraso (%)
-                    </Label>
+                    <Label htmlFor="penaltyRate">Multa por Atraso (%)</Label>
                     <Input
                       id="penaltyRate"
                       type="number"
@@ -702,27 +682,23 @@ export default function EditPaymentConditionPage() {
                 />
                 <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {Array.from(
-                      { length: Number(installments) },
-                      (_, i) => {
-                        const daysFromNow =
-                          Number(firstDueDays) +
-                          i * Number(intervalDays);
-                        return (
-                          <div
-                            key={i}
-                            className="rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 p-3 space-y-1"
-                          >
-                            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                              Parcela {i + 1}
-                            </span>
-                            <p className="text-sm font-semibold">
-                              {daysFromNow} dias apos o pedido
-                            </p>
-                          </div>
-                        );
-                      }
-                    )}
+                    {Array.from({ length: Number(installments) }, (_, i) => {
+                      const daysFromNow =
+                        Number(firstDueDays) + i * Number(intervalDays);
+                      return (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-border bg-gray-50 dark:bg-slate-700/40 p-3 space-y-1"
+                        >
+                          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            Parcela {i + 1}
+                          </span>
+                          <p className="text-sm font-semibold">
+                            {daysFromNow} dias apos o pedido
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

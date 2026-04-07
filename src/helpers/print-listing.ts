@@ -149,20 +149,20 @@ export function printListing(options: PrintListingOptions): void {
           Impresso em<br><strong>${now}</strong>
         </div>
       </div>
-      ${chips && chips.length > 0 ? `<div class="meta">${chips.map((c) => `<span class="chip${c.mono ? ' mono' : ''}">${c.colorDot ? `<span class="color-dot" style="background:${c.colorDot}"></span>` : ''}${c.label}</span>`).join('')}</div>` : ''}
+      ${chips && chips.length > 0 ? `<div class="meta">${chips.map(c => `<span class="chip${c.mono ? ' mono' : ''}">${c.colorDot ? `<span class="color-dot" style="background:${c.colorDot}"></span>` : ''}${c.label}</span>`).join('')}</div>` : ''}
     </div>
   `;
 
   // Summary cards
   const summaryHtml =
     summary && summary.length > 0
-      ? `<div class="summary">${summary.map((s) => `<div class="summary-card"><div class="summary-label">${s.label}</div><div class="summary-value">${s.value}${s.unit ? `<span class="unit">${s.unit}</span>` : ''}</div></div>`).join('')}</div>`
+      ? `<div class="summary">${summary.map(s => `<div class="summary-card"><div class="summary-label">${s.label}</div><div class="summary-value">${s.value}${s.unit ? `<span class="unit">${s.unit}</span>` : ''}</div></div>`).join('')}</div>`
       : '';
 
   // Table headers
   const theadHtml = columns
     .map(
-      (col) =>
+      col =>
         `<th class="${col.align ?? 'left'}"${col.width ? ` style="width:${col.width}"` : ''}>${col.label}</th>`
     )
     .join('');
@@ -171,7 +171,7 @@ export function printListing(options: PrintListingOptions): void {
   const tbodyHtml = rows
     .map((row, idx) => {
       const cells = columns
-        .map((col) => {
+        .map(col => {
           const classes: string[] = [];
           if (col.mono) classes.push('mono');
           if (col.align === 'right') classes.push('right');
@@ -188,7 +188,7 @@ export function printListing(options: PrintListingOptions): void {
   let tfootHtml = '';
   if (footerLabel || footerValue) {
     const valueColKey = footerValueColumn ?? columns[columns.length - 1]?.key;
-    const valueColIdx = columns.findIndex((c) => c.key === valueColKey);
+    const valueColIdx = columns.findIndex(c => c.key === valueColKey);
     const spanBefore = valueColIdx > 0 ? valueColIdx : columns.length - 1;
     const spanAfter = columns.length - spanBefore - 1;
 

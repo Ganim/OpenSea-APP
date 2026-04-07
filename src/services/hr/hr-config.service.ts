@@ -1,8 +1,5 @@
 import { apiClient } from '@/lib/api-client';
-import type {
-  HrTenantConfig,
-  UpdateHrTenantConfigData,
-} from '@/types/hr';
+import type { HrTenantConfig, UpdateHrTenantConfigData } from '@/types/hr';
 
 export interface HrConfigResponse {
   hrConfig: HrTenantConfig;
@@ -13,7 +10,9 @@ export const hrConfigService = {
     return apiClient.get<HrConfigResponse>('/v1/hr/config');
   },
 
-  async updateConfig(data: UpdateHrTenantConfigData): Promise<HrConfigResponse> {
+  async updateConfig(
+    data: UpdateHrTenantConfigData
+  ): Promise<HrConfigResponse> {
     return apiClient.patch<HrConfigResponse>('/v1/hr/config', data);
   },
 };

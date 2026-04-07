@@ -67,7 +67,7 @@ export function ReturnPPEModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Devolver EPI</DialogTitle>
@@ -81,7 +81,7 @@ export function ReturnPPEModal({
             <Label htmlFor="return-condition">Condição de Devolução *</Label>
             <Select
               value={returnCondition}
-              onValueChange={(val) => setReturnCondition(val as PPECondition)}
+              onValueChange={val => setReturnCondition(val as PPECondition)}
             >
               <SelectTrigger id="return-condition">
                 <SelectValue />
@@ -105,7 +105,7 @@ export function ReturnPPEModal({
             <Textarea
               id="return-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Observações sobre a devolução..."
               rows={3}
             />
@@ -116,10 +116,7 @@ export function ReturnPPEModal({
           <Button variant="outline" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={returnMutation.isPending}
-          >
+          <Button onClick={handleSubmit} disabled={returnMutation.isPending}>
             {returnMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}

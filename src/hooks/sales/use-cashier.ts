@@ -1,13 +1,13 @@
 import { cashierService } from '@/services/sales';
 import type {
-    CashierSessionsQuery,
-    CashierTransactionsQuery,
+  CashierSessionsQuery,
+  CashierTransactionsQuery,
 } from '@/services/sales/cashier.service';
 import {
-    useInfiniteQuery,
-    useMutation,
-    useQuery,
-    useQueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from '@tanstack/react-query';
 
 export type CashierSessionsFilters = Omit<

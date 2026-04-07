@@ -60,9 +60,9 @@ test.describe('Login Page', () => {
     await continueBtn.click();
 
     // Should show error message
-    await expect(
-      page.getByText('Digite um identificador válido')
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Digite um identificador válido')).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test('should navigate back from password step to identifier step', async ({
@@ -86,9 +86,9 @@ test.describe('Login Page', () => {
     await backBtn.click();
 
     // Should be back on identifier step — "Continuar" button visible again
-    await expect(
-      page.getByRole('button', { name: 'Continuar' })
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('button', { name: 'Continuar' })).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   // ─── MAGIC LINK ────────────────────────────────────────────────────

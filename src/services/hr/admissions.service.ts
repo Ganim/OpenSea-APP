@@ -60,19 +60,25 @@ export const admissionsService = {
     if (params?.page) query.append('page', String(params.page));
     if (params?.perPage) query.append('perPage', String(params.perPage));
     const qs = query.toString();
-    const res = await apiClient.get<{ invites: AdmissionInvite[]; meta?: AdmissionsResponse['meta'] }>(
-      `/v1/hr/admissions${qs ? `?${qs}` : ''}`
-    );
+    const res = await apiClient.get<{
+      invites: AdmissionInvite[];
+      meta?: AdmissionsResponse['meta'];
+    }>(`/v1/hr/admissions${qs ? `?${qs}` : ''}`);
     return { admissions: res.invites, meta: res.meta };
   },
 
   async get(id: string): Promise<AdmissionResponse> {
-    const res = await apiClient.get<{ invite: AdmissionInvite }>(`/v1/hr/admissions/${id}`);
+    const res = await apiClient.get<{ invite: AdmissionInvite }>(
+      `/v1/hr/admissions/${id}`
+    );
     return { admission: res.invite };
   },
 
   async create(data: CreateAdmissionData): Promise<AdmissionResponse> {
-    const res = await apiClient.post<{ invite: AdmissionInvite }>('/v1/hr/admissions', data);
+    const res = await apiClient.post<{ invite: AdmissionInvite }>(
+      '/v1/hr/admissions',
+      data
+    );
     return { admission: res.invite };
   },
 
@@ -80,10 +86,7 @@ export const admissionsService = {
     id: string,
     data: UpdateAdmissionData
   ): Promise<AdmissionResponse> {
-    return apiClient.patch<AdmissionResponse>(
-      `/v1/hr/admissions/${id}`,
-      data
-    );
+    return apiClient.patch<AdmissionResponse>(`/v1/hr/admissions/${id}`, data);
   },
 
   async cancel(id: string): Promise<AdmissionResponse> {
@@ -91,25 +94,17 @@ export const admissionsService = {
   },
 
   async approve(id: string): Promise<AdmissionResponse> {
-    return apiClient.post<AdmissionResponse>(
-      `/v1/hr/admissions/${id}/approve`
-    );
+    return apiClient.post<AdmissionResponse>(`/v1/hr/admissions/${id}/approve`);
   },
 
-  async reject(
-    id: string,
-    reason: string
-  ): Promise<AdmissionResponse> {
-    return apiClient.post<AdmissionResponse>(
-      `/v1/hr/admissions/${id}/reject`,
-      { reason }
-    );
+  async reject(id: string, reason: string): Promise<AdmissionResponse> {
+    return apiClient.post<AdmissionResponse>(`/v1/hr/admissions/${id}/reject`, {
+      reason,
+    });
   },
 
   async resend(id: string): Promise<AdmissionResponse> {
-    return apiClient.post<AdmissionResponse>(
-      `/v1/hr/admissions/${id}/resend`
-    );
+    return apiClient.post<AdmissionResponse>(`/v1/hr/admissions/${id}/resend`);
   },
 };
 

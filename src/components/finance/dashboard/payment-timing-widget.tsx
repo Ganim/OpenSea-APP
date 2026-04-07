@@ -30,13 +30,15 @@ const PRIORITY_STYLES = {
   MEDIUM: {
     border: 'border-l-emerald-500',
     bg: 'bg-emerald-50 dark:bg-emerald-500/8',
-    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+    badge:
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
     icon: TrendingDown,
   },
   LOW: {
     border: 'border-l-amber-500',
     bg: 'bg-amber-50 dark:bg-amber-500/8',
-    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+    badge:
+      'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
     icon: Clock,
   },
 } as const;
@@ -47,7 +49,11 @@ const TYPE_LABELS = {
   PENALTY_RISK: 'Risco de Multa',
 } as const;
 
-function SuggestionItem({ suggestion }: { suggestion: PaymentTimingSuggestion }) {
+function SuggestionItem({
+  suggestion,
+}: {
+  suggestion: PaymentTimingSuggestion;
+}) {
   const style = PRIORITY_STYLES[suggestion.priority];
   const Icon = style.icon;
 
@@ -114,7 +120,9 @@ export function PaymentTimingWidget() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            <CardTitle className="text-base">Otimizacao de Pagamentos</CardTitle>
+            <CardTitle className="text-base">
+              Otimizacao de Pagamentos
+            </CardTitle>
           </div>
           {data && data.totalPotentialSavings > 0 && (
             <Badge
@@ -144,9 +152,14 @@ export function PaymentTimingWidget() {
             </p>
           </div>
         ) : (
-          data.suggestions.slice(0, 5).map((suggestion) => (
-            <SuggestionItem key={suggestion.entryId} suggestion={suggestion} />
-          ))
+          data.suggestions
+            .slice(0, 5)
+            .map(suggestion => (
+              <SuggestionItem
+                key={suggestion.entryId}
+                suggestion={suggestion}
+              />
+            ))
         )}
       </CardContent>
     </Card>

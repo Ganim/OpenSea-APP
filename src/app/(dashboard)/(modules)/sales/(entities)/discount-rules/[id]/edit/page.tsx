@@ -150,9 +150,7 @@ export default function EditDiscountRulePage() {
           : ''
       );
       setEndDate(
-        rule.endDate
-          ? new Date(rule.endDate).toISOString().split('T')[0]
-          : ''
+        rule.endDate ? new Date(rule.endDate).toISOString().split('T')[0] : ''
       );
       setIsActive(rule.isActive ?? true);
       setPriority(rule.priority || 0);
@@ -183,9 +181,7 @@ export default function EditDiscountRulePage() {
           description: description.trim() || undefined,
           type,
           value,
-          minOrderValue: minOrderValue
-            ? parseFloat(minOrderValue)
-            : undefined,
+          minOrderValue: minOrderValue ? parseFloat(minOrderValue) : undefined,
           minQuantity: minQuantity ? parseInt(minQuantity) : undefined,
           categoryId: categoryId.trim() || undefined,
           productId: productId.trim() || undefined,
@@ -391,9 +387,7 @@ export default function EditDiscountRulePage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="PERCENTAGE">Percentual</SelectItem>
-                        <SelectItem value="FIXED_AMOUNT">
-                          Valor Fixo
-                        </SelectItem>
+                        <SelectItem value="FIXED_AMOUNT">Valor Fixo</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -408,9 +402,7 @@ export default function EditDiscountRulePage() {
                       min={0}
                       step={type === 'PERCENTAGE' ? '1' : '0.01'}
                       value={value}
-                      onChange={e =>
-                        setValue(parseFloat(e.target.value) || 0)
-                      }
+                      onChange={e => setValue(parseFloat(e.target.value) || 0)}
                       placeholder={type === 'PERCENTAGE' ? '10' : '50.00'}
                     />
                   </div>
@@ -436,10 +428,7 @@ export default function EditDiscountRulePage() {
                         {isActive ? 'Ativa' : 'Inativa'}
                       </p>
                     </div>
-                    <Switch
-                      checked={isActive}
-                      onCheckedChange={setIsActive}
-                    />
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
                   </div>
                 </div>
               </div>
@@ -491,9 +480,7 @@ export default function EditDiscountRulePage() {
                       type="number"
                       min={0}
                       value={priority}
-                      onChange={e =>
-                        setPriority(parseInt(e.target.value) || 0)
-                      }
+                      onChange={e => setPriority(parseInt(e.target.value) || 0)}
                       placeholder="0"
                     />
                   </div>

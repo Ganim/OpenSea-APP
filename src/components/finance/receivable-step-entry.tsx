@@ -39,9 +39,7 @@ export function ReceivableStepEntry({
   data,
   onChange,
 }: ReceivableStepEntryProps) {
-  const [entryMode, setEntryMode] = useState<EntryMode>(
-    data.entryMode ?? null
-  );
+  const [entryMode, setEntryMode] = useState<EntryMode>(data.entryMode ?? null);
   const [ocrResult, setOcrResult] = useState<OcrExtractResult | null>(null);
 
   // --------------------------------------------------------------------------

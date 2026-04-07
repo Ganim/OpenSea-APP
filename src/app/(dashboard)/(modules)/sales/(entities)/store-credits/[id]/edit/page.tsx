@@ -101,11 +101,7 @@ export default function EditStoreCreditPage() {
   // DATA FETCHING
   // ============================================================================
 
-  const {
-    data: creditData,
-    isLoading,
-    error,
-  } = useStoreCredit(id);
+  const { data: creditData, isLoading, error } = useStoreCredit(id);
 
   const storeCredit = creditData?.storeCredit as StoreCreditDTO | undefined;
 
@@ -268,10 +264,7 @@ export default function EditStoreCreditPage() {
                     {storeCredit.isActive ? 'Ativo' : 'Inativo'}
                   </p>
                 </div>
-                <Switch
-                  checked={storeCredit.isActive}
-                  disabled
-                />
+                <Switch checked={storeCredit.isActive} disabled />
               </div>
             </div>
           </div>

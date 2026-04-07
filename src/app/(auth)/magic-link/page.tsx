@@ -15,7 +15,9 @@ function MagicLinkContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -27,7 +29,7 @@ function MagicLinkContent() {
 
     authService
       .verifyMagicLink(token)
-      .then((response) => {
+      .then(response => {
         setStatus('success');
 
         // Save tokens to localStorage (authService already called setToken/setRefreshToken)
@@ -35,7 +37,10 @@ function MagicLinkContent() {
           localStorage.setItem(authConfig.tokenKey, response.token);
         }
         if (response.refreshToken) {
-          localStorage.setItem(authConfig.refreshTokenKey, response.refreshToken);
+          localStorage.setItem(
+            authConfig.refreshTokenKey,
+            response.refreshToken
+          );
         }
         if (response.sessionId) {
           localStorage.setItem('session_id', response.sessionId);
@@ -54,7 +59,7 @@ function MagicLinkContent() {
           setTimeout(() => router.push('/select-tenant'), 1500);
         }
       })
-      .catch((err) => {
+      .catch(err => {
         setStatus('error');
         const message =
           err?.message || err?.data?.message || 'Link inválido ou expirado.';
@@ -76,9 +81,7 @@ function MagicLinkContent() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               OpenSea
             </h1>
-            <p className="text-gray-600 dark:text-white/60">
-              Link mágico
-            </p>
+            <p className="text-gray-600 dark:text-white/60">Link mágico</p>
           </div>
 
           {/* Status Card */}

@@ -22,9 +22,7 @@ function formatDate(dateStr: string): string {
   return `${d}/${m}/${y}`;
 }
 
-export function PredictiveChart({
-  dailyProjection,
-}: PredictiveChartProps) {
+export function PredictiveChart({ dailyProjection }: PredictiveChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const { maxBalance, minBalance, zeroLinePercent, bars } = useMemo(() => {
@@ -32,7 +30,7 @@ export function PredictiveChart({
       return { maxBalance: 0, minBalance: 0, zeroLinePercent: 50, bars: [] };
     }
 
-    const balances = dailyProjection.map((d) => d.balance);
+    const balances = dailyProjection.map(d => d.balance);
     const max = Math.max(...balances, 0);
     const min = Math.min(...balances, 0);
     const range = max - min || 1;
@@ -40,7 +38,7 @@ export function PredictiveChart({
     // Zero line position from bottom
     const zeroFromBottom = ((0 - min) / range) * 100;
 
-    const computed = dailyProjection.map((dp) => {
+    const computed = dailyProjection.map(dp => {
       const heightPercent = (Math.abs(dp.balance) / range) * 100;
       const isPositive = dp.balance >= 0;
 
@@ -65,7 +63,9 @@ export function PredictiveChart({
         <CardHeader>
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            <CardTitle className="text-base">Projeção Diária de Saldo</CardTitle>
+            <CardTitle className="text-base">
+              Projeção Diária de Saldo
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
@@ -85,7 +85,9 @@ export function PredictiveChart({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            <CardTitle className="text-base">Projeção Diária de Saldo</CardTitle>
+            <CardTitle className="text-base">
+              Projeção Diária de Saldo
+            </CardTitle>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">

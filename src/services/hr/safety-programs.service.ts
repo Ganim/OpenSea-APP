@@ -32,7 +32,9 @@ export interface ListSafetyProgramsParams {
 }
 
 export const safetyProgramsService = {
-  async list(params?: ListSafetyProgramsParams): Promise<SafetyProgramsResponse> {
+  async list(
+    params?: ListSafetyProgramsParams
+  ): Promise<SafetyProgramsResponse> {
     const query = new URLSearchParams();
     if (params?.type) query.append('type', params.type);
     if (params?.status) query.append('status', params.status);
@@ -49,7 +51,10 @@ export const safetyProgramsService = {
   },
 
   async create(data: CreateSafetyProgramData): Promise<SafetyProgramResponse> {
-    return apiClient.post<SafetyProgramResponse>('/v1/hr/safety-programs', data);
+    return apiClient.post<SafetyProgramResponse>(
+      '/v1/hr/safety-programs',
+      data
+    );
   },
 
   async update(

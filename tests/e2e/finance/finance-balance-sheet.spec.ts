@@ -65,9 +65,9 @@ test.describe('Finance - Balanco Patrimonial', () => {
     await page.goto('/finance/reports/balance-sheet');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Balanco Patrimonial').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Balanco Patrimonial').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for data to load
     await page.waitForTimeout(3_000);
@@ -127,9 +127,9 @@ test.describe('Finance - Balanco Patrimonial', () => {
     await page.goto('/finance/reports/balance-sheet');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Balanco Patrimonial').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Balanco Patrimonial').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for data to load
     await page.waitForTimeout(3_000);
@@ -199,9 +199,7 @@ test.describe('Finance - Balanco Patrimonial', () => {
       .catch(() => false);
 
     // Look for any Card elements that represent dashboard widgets
-    const cards = page.locator(
-      '[class*="Card"], [class*="card"]'
-    );
+    const cards = page.locator('[class*="Card"], [class*="card"]');
     const cardCount = await cards.count();
 
     // Dashboard should have at least some cards/widgets rendered

@@ -251,7 +251,10 @@ export default function EsocialEventDetailPage() {
   const StatusIcon = statusConfig.icon;
 
   // Static color map to avoid dynamic Tailwind class purging
-  const statusColorMap: Record<string, { iconWrapper: string; iconText: string }> = {
+  const statusColorMap: Record<
+    string,
+    { iconWrapper: string; iconText: string }
+  > = {
     slate: {
       iconWrapper: 'bg-slate-50 dark:bg-slate-500/8',
       iconText: 'text-slate-600 dark:text-slate-400',
@@ -273,7 +276,8 @@ export default function EsocialEventDetailPage() {
       iconText: 'text-violet-600 dark:text-violet-400',
     },
   };
-  const statusColors = statusColorMap[statusConfig.color] || statusColorMap.slate;
+  const statusColors =
+    statusColorMap[statusConfig.color] || statusColorMap.slate;
 
   // Available actions based on status
   const canReview = event.status === 'DRAFT';
@@ -369,9 +373,7 @@ export default function EsocialEventDetailPage() {
               <div
                 className={`flex h-12 w-12 items-center justify-center rounded-xl ${statusColors.iconWrapper}`}
               >
-                <StatusIcon
-                  className={`h-6 w-6 ${statusColors.iconText}`}
-                />
+                <StatusIcon className={`h-6 w-6 ${statusColors.iconText}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">

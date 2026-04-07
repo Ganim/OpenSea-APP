@@ -30,10 +30,7 @@ export const benefitPlansApi = {
     return benefitPlan;
   },
 
-  async update(
-    id: string,
-    data: UpdateBenefitPlanData
-  ): Promise<BenefitPlan> {
+  async update(id: string, data: UpdateBenefitPlanData): Promise<BenefitPlan> {
     const { benefitPlan } = await benefitsService.updatePlan(id, data);
     return benefitPlan;
   },

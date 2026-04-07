@@ -105,11 +105,12 @@ export default function PaymentConfigPage() {
   const [primaryFields, setPrimaryFields] = useState<Record<string, string>>(
     {}
   );
-  const [fallbackProvider, setFallbackProvider] =
-    useState<PaymentProviderName | ''>('');
-  const [fallbackFields, setFallbackFields] = useState<
-    Record<string, string>
-  >({});
+  const [fallbackProvider, setFallbackProvider] = useState<
+    PaymentProviderName | ''
+  >('');
+  const [fallbackFields, setFallbackFields] = useState<Record<string, string>>(
+    {}
+  );
 
   // Password visibility toggles
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(
@@ -138,7 +139,7 @@ export default function PaymentConfigPage() {
 
   const providerMap = useMemo(() => {
     if (!providers) return new Map<PaymentProviderName, ProviderInfo>();
-    return new Map(providers.map((p) => [p.name, p]));
+    return new Map(providers.map(p => [p.name, p]));
   }, [providers]);
 
   const selectedPrimary = providerMap.get(primaryProvider);
@@ -147,7 +148,7 @@ export default function PaymentConfigPage() {
     : null;
 
   const togglePasswordVisibility = useCallback((fieldKey: string) => {
-    setVisiblePasswords((prev) => {
+    setVisiblePasswords(prev => {
       const next = new Set(prev);
       if (next.has(fieldKey)) {
         next.delete(fieldKey);
@@ -185,7 +186,8 @@ export default function PaymentConfigPage() {
         result.push({
           method,
           provider: fallbackProvider as string,
-          displayName: selectedFallback?.displayName ?? (fallbackProvider as string),
+          displayName:
+            selectedFallback?.displayName ?? (fallbackProvider as string),
         });
       } else {
         result.push({ method, provider: 'manual', displayName: 'Manual' });
@@ -193,12 +195,7 @@ export default function PaymentConfigPage() {
     }
 
     return result;
-  }, [
-    primaryProvider,
-    fallbackProvider,
-    selectedPrimary,
-    selectedFallback,
-  ]);
+  }, [primaryProvider, fallbackProvider, selectedPrimary, selectedFallback]);
 
   async function handleTestConnection(target: 'primary' | 'fallback') {
     const setResult =
@@ -292,7 +289,7 @@ export default function PaymentConfigPage() {
             label: 'Resumo',
             icon: LayoutGrid,
           },
-        ].map((tab) => (
+        ].map(tab => (
           <button
             key={tab.id}
             type="button"
@@ -316,7 +313,7 @@ export default function PaymentConfigPage() {
           title="Gateway Primário"
           description="Selecione o gateway principal para processar pagamentos automaticamente."
           provider={primaryProvider}
-          onProviderChange={(v) => {
+          onProviderChange={v => {
             setPrimaryProvider(v);
             setPrimaryFields({});
             setPrimaryTestResult(null);
@@ -342,7 +339,7 @@ export default function PaymentConfigPage() {
           title="Gateway Secundário (Fallback)"
           description="Quando o primário não suportar um método, o secundário será usado automaticamente."
           provider={fallbackProvider as PaymentProviderName}
-          onProviderChange={(v) => {
+          onProviderChange={v => {
             setFallbackProvider(v);
             setFallbackFields({});
             setFallbackTestResult(null);
@@ -363,7 +360,7 @@ export default function PaymentConfigPage() {
           uncoveredMethods={
             selectedPrimary
               ? ALL_METHODS.filter(
-                  (m) =>
+                  m =>
                     m !== 'CASH' &&
                     !selectedPrimary.supportedMethods.includes(m)
                 )
@@ -383,7 +380,7 @@ export default function PaymentConfigPage() {
           </p>
 
           <div className="space-y-2">
-            {methodResolution.map((item) => {
+            {methodResolution.map(item => {
               const Icon = METHOD_ICONS[item.method] ?? Banknote;
               return (
                 <div
@@ -421,9 +418,7 @@ export default function PaymentConfigPage() {
           disabled={saveConfig.isPending}
           className="h-10 gap-2 bg-violet-600 px-6 text-white hover:bg-violet-700"
         >
-          {saveConfig.isPending && (
-            <Loader2 className="size-4 animate-spin" />
-          )}
+          {saveConfig.isPending && <Loader2 className="size-4 animate-spin" />}
           Salvar Configuração
         </Button>
       </div>
@@ -498,7 +493,7 @@ function GatewaySection({
               Métodos não cobertos pelo gateway primário:
             </p>
             <div className="mt-1 flex flex-wrap gap-1">
-              {uncoveredMethods.map((m) => (
+              {uncoveredMethods.map(m => (
                 <Badge
                   key={m}
                   variant="outline"
@@ -518,9 +513,7 @@ function GatewaySection({
           <Label className="text-sm font-medium">Gateway</Label>
           <Select
             value={provider || ''}
-            onValueChange={(v) =>
-              onProviderChange(v as PaymentProviderName)
-            }
+            onValueChange={v => onProviderChange(v as PaymentProviderName)}
           >
             <SelectTrigger className="h-11">
               <SelectValue placeholder="Selecione o gateway" />
@@ -529,7 +522,7 @@ function GatewaySection({
               {optional && (
                 <SelectItem value="none">Nenhum (desativado)</SelectItem>
               )}
-              {providers.map((p) => (
+              {providers.map(p => (
                 <SelectItem key={p.name} value={p.name}>
                   {p.displayName}
                 </SelectItem>
@@ -545,7 +538,7 @@ function GatewaySection({
               Métodos suportados
             </Label>
             <div className="flex flex-wrap gap-2">
-              {providerInfo.supportedMethods.map((m) => {
+              {providerInfo.supportedMethods.map(m => {
                 const Icon = METHOD_ICONS[m] ?? Banknote;
                 return (
                   <Badge
@@ -600,14 +593,12 @@ function GatewaySection({
                 </span>
               )}
             </p>
-            {configFields.map((field) => (
+            {configFields.map(field => (
               <DynamicField
                 key={field.key}
                 field={field}
                 value={fields[field.key] ?? ''}
-                onChange={(v) =>
-                  onFieldsChange({ ...fields, [field.key]: v })
-                }
+                onChange={v => onFieldsChange({ ...fields, [field.key]: v })}
                 isVisible={visiblePasswords.has(field.key)}
                 onToggleVisibility={() => onTogglePassword(field.key)}
               />
@@ -685,7 +676,7 @@ function DynamicField({
             <SelectValue placeholder={field.placeholder ?? 'Selecione...'} />
           </SelectTrigger>
           <SelectContent>
-            {field.options.map((opt) => (
+            {field.options.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
@@ -711,7 +702,7 @@ function DynamicField({
         <Input
           type={field.type === 'password' && !isVisible ? 'password' : 'text'}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           placeholder={field.placeholder ?? ''}
           className="h-11 pr-10"
         />

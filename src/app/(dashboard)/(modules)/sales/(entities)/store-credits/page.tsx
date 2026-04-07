@@ -28,14 +28,7 @@ import { STORE_CREDIT_SOURCE_LABELS } from '@/types/sales';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
-import {
-  CreditCard,
-  Filter,
-  Plus,
-  Trash2,
-  User,
-  Wallet,
-} from 'lucide-react';
+import { CreditCard, Filter, Plus, Trash2, User, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';

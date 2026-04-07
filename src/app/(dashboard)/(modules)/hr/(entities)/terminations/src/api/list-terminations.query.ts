@@ -46,7 +46,7 @@ export function useListTerminations(params?: TerminationFilters) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       return lastPage.hasMore ? lastPage.page + 1 : undefined;
     },
     staleTime: 5 * 60 * 1000,

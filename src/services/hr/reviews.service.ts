@@ -63,7 +63,9 @@ export interface ListPerformanceReviewsParams {
 // HELPERS
 // ============================================================================
 
-function buildQuery(params?: ListReviewCyclesParams | ListPerformanceReviewsParams): string {
+function buildQuery(
+  params?: ListReviewCyclesParams | ListPerformanceReviewsParams
+): string {
   if (!params) return '';
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -90,9 +92,10 @@ class ReviewsService {
   async listCycles(
     params?: ListReviewCyclesParams
   ): Promise<ReviewCyclesResponse> {
-    const response = await apiClient.get<{ reviewCycles: ReviewCycle[]; total: number }>(
-      `${this.cyclesUrl}${buildQuery(params)}`
-    );
+    const response = await apiClient.get<{
+      reviewCycles: ReviewCycle[];
+      total: number;
+    }>(`${this.cyclesUrl}${buildQuery(params)}`);
     const total = response.total;
     const perPage = params?.perPage ?? 20;
     return {
@@ -104,18 +107,13 @@ class ReviewsService {
   }
 
   async getCycle(id: string): Promise<ReviewCycleResponse> {
-    return apiClient.get<ReviewCycleResponse>(
-      `${this.cyclesUrl}/${id}`
-    );
+    return apiClient.get<ReviewCycleResponse>(`${this.cyclesUrl}/${id}`);
   }
 
   async createCycle(
     cycleData: CreateReviewCycleData
   ): Promise<ReviewCycleResponse> {
-    return apiClient.post<ReviewCycleResponse>(
-      this.cyclesUrl,
-      cycleData
-    );
+    return apiClient.post<ReviewCycleResponse>(this.cyclesUrl, cycleData);
   }
 
   async updateCycle(
@@ -133,9 +131,7 @@ class ReviewsService {
   }
 
   async openCycle(id: string): Promise<ReviewCycleResponse> {
-    return apiClient.patch<ReviewCycleResponse>(
-      `${this.cyclesUrl}/${id}/open`
-    );
+    return apiClient.patch<ReviewCycleResponse>(`${this.cyclesUrl}/${id}/open`);
   }
 
   async closeCycle(id: string): Promise<ReviewCycleResponse> {
@@ -151,9 +147,10 @@ class ReviewsService {
   async listReviews(
     params?: ListPerformanceReviewsParams
   ): Promise<PerformanceReviewsResponse> {
-    const response = await apiClient.get<{ reviews: PerformanceReview[]; total: number }>(
-      `${this.reviewsUrl}${buildQuery(params)}`
-    );
+    const response = await apiClient.get<{
+      reviews: PerformanceReview[];
+      total: number;
+    }>(`${this.reviewsUrl}${buildQuery(params)}`);
     const total = response.total;
     const perPage = params?.perPage ?? 20;
     return {
@@ -165,9 +162,7 @@ class ReviewsService {
   }
 
   async getReview(id: string): Promise<PerformanceReviewResponse> {
-    return apiClient.get<PerformanceReviewResponse>(
-      `${this.reviewsUrl}/${id}`
-    );
+    return apiClient.get<PerformanceReviewResponse>(`${this.reviewsUrl}/${id}`);
   }
 
   async createBulkReviews(

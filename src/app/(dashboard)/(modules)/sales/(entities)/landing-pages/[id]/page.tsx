@@ -36,8 +36,7 @@ import {
 } from '@/types/sales';
 
 const STATUS_COLORS: Record<LandingPageStatus, string> = {
-  DRAFT:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  DRAFT: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
   PUBLISHED:
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   ARCHIVED:
@@ -67,8 +66,7 @@ function LandingPageDetailContent() {
 
   function handleUnpublish() {
     unpublishPage.mutate(pageId, {
-      onSuccess: () =>
-        toast.success('Página despublicada com sucesso.'),
+      onSuccess: () => toast.success('Página despublicada com sucesso.'),
       onError: () => toast.error('Erro ao despublicar página.'),
     });
   }
@@ -171,10 +169,7 @@ function LandingPageDetailContent() {
           <div className="flex items-center gap-3 flex-wrap">
             <Badge
               variant="secondary"
-              className={cn(
-                'text-xs',
-                STATUS_COLORS[landingPage.status]
-              )}
+              className={cn('text-xs', STATUS_COLORS[landingPage.status])}
             >
               {LANDING_PAGE_STATUS_LABELS[landingPage.status]}
             </Badge>
@@ -242,10 +237,7 @@ function LandingPageDetailContent() {
                 )}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px]"
-                  >
+                  <Badge variant="secondary" className="text-[10px]">
                     {section.type}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
@@ -253,9 +245,7 @@ function LandingPageDetailContent() {
                   </span>
                 </div>
                 {section.title && (
-                  <h3 className="text-lg font-bold mb-1">
-                    {section.title}
-                  </h3>
+                  <h3 className="text-lg font-bold mb-1">{section.title}</h3>
                 )}
                 {section.subtitle && (
                   <p className="text-sm text-muted-foreground mb-2">
@@ -269,9 +259,7 @@ function LandingPageDetailContent() {
                   <div className="mt-3">
                     <Button size="sm" className="gap-1.5">
                       {section.ctaText}
-                      {section.ctaLink && (
-                        <ExternalLink className="h-3 w-3" />
-                      )}
+                      {section.ctaLink && <ExternalLink className="h-3 w-3" />}
                     </Button>
                   </div>
                 )}

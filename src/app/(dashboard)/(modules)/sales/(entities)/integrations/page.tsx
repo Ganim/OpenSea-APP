@@ -42,20 +42,14 @@ import { IntegrationConfigModal } from './src/components/integration-config-moda
 
 const CATEGORY_COLORS: Record<IntegrationCategory, string> = {
   CRM: 'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
-  MARKETING:
-    'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
+  MARKETING: 'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
   MESSAGING:
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
-  PAYMENT:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
-  ECOMMERCE:
-    'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
-  ANALYTICS:
-    'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300',
-  SOCIAL:
-    'bg-pink-50 text-pink-700 dark:bg-pink-500/8 dark:text-pink-300',
-  OTHER:
-    'bg-slate-100 text-slate-500 dark:bg-slate-500/10 dark:text-slate-400',
+  PAYMENT: 'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+  ECOMMERCE: 'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
+  ANALYTICS: 'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300',
+  SOCIAL: 'bg-pink-50 text-pink-700 dark:bg-pink-500/8 dark:text-pink-300',
+  OTHER: 'bg-slate-100 text-slate-500 dark:bg-slate-500/10 dark:text-slate-400',
 };
 
 const STATUS_ICONS: Record<IntegrationStatus, React.ElementType> = {
@@ -303,8 +297,7 @@ function IntegrationCard({
         'relative p-5 transition-all',
         'bg-white dark:bg-slate-800/60 border border-border',
         'hover:shadow-md',
-        isConnected &&
-          'border-emerald-200 dark:border-emerald-500/20'
+        isConnected && 'border-emerald-200 dark:border-emerald-500/20'
       )}
     >
       {/* Header */}
@@ -325,10 +318,7 @@ function IntegrationCard({
             <h3 className="text-sm font-semibold">{integration.name}</h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               <StatusIcon
-                className={cn(
-                  'h-3.5 w-3.5',
-                  STATUS_COLORS[integration.status]
-                )}
+                className={cn('h-3.5 w-3.5', STATUS_COLORS[integration.status])}
               />
               <span className="text-xs text-muted-foreground">
                 {INTEGRATION_STATUS_LABELS[integration.status]}
@@ -339,10 +329,7 @@ function IntegrationCard({
 
         <Badge
           variant="secondary"
-          className={cn(
-            'text-xs',
-            CATEGORY_COLORS[integration.category]
-          )}
+          className={cn('text-xs', CATEGORY_COLORS[integration.category])}
         >
           {INTEGRATION_CATEGORY_LABELS[integration.category]}
         </Badge>

@@ -37,9 +37,19 @@ export function useListDeductions(params?: ListDeductionsParams) {
 
       const deductions =
         (response as { deductions?: Deduction[] }).deductions ?? [];
-      const meta = (response as { meta?: { total?: number; page?: number; perPage?: number; totalPages?: number } }).meta;
+      const meta = (
+        response as {
+          meta?: {
+            total?: number;
+            page?: number;
+            perPage?: number;
+            totalPages?: number;
+          };
+        }
+      ).meta;
       const total = meta?.total ?? deductions.length;
-      const totalPages = meta?.totalPages ?? (deductions.length < PAGE_SIZE ? page : page + 1);
+      const totalPages =
+        meta?.totalPages ?? (deductions.length < PAGE_SIZE ? page : page + 1);
 
       return {
         deductions,
@@ -51,7 +61,7 @@ export function useListDeductions(params?: ListDeductionsParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 5 * 60 * 1000,

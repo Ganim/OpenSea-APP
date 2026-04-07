@@ -68,7 +68,11 @@ const DOCUMENT_CATEGORIES: DocumentCategory[] = [
       { type: 'RG', label: 'RG (Identidade)', required: true },
       { type: 'CPF', label: 'CPF', required: true },
       { type: 'CNH', label: 'CNH (Carteira de Motorista)', required: false },
-      { type: 'TITULO_ELEITOR', label: 'T\u00edtulo de Eleitor', required: true },
+      {
+        type: 'TITULO_ELEITOR',
+        label: 'T\u00edtulo de Eleitor',
+        required: true,
+      },
       {
         type: 'RESERVISTA',
         label: 'Certificado de Reservista',
@@ -221,25 +225,33 @@ export function EmployeeDocumentsChecklist({
 
         if (created.length > 0) {
           // Newly created — find "Documentos Pessoais" by path suffix
-          const docsFolder = created.find(f => f.path?.endsWith('/documentos-pessoais'));
+          const docsFolder = created.find(f =>
+            f.path?.endsWith('/documentos-pessoais')
+          );
           setDocsFolderId(docsFolder?.id ?? created[0].id);
           return;
         }
 
         // Step 2: Already exists — find entity folder, then find "Documentos Pessoais" child
-        const searchRes = await storageFoldersService.searchFolders(employeeName);
-        const searchFolders = (searchRes as { folders?: StorageFolder[] })?.folders ?? [];
+        const searchRes =
+          await storageFoldersService.searchFolders(employeeName);
+        const searchFolders =
+          (searchRes as { folders?: StorageFolder[] })?.folders ?? [];
         const entityFolder = searchFolders.find(f => f.entityId === employeeId);
 
         if (!entityFolder) return;
 
         // Step 3: Get children of entity folder
-        const contents = await storageFoldersService.getFolderContents(entityFolder.id);
+        const contents = await storageFoldersService.getFolderContents(
+          entityFolder.id
+        );
         const children = contents.folders ?? [];
 
         // Find "Documentos Pessoais" by path suffix (language-independent via slug)
-        const docsChild = children.find(f =>
-          f.path?.endsWith('/documentos-pessoais') || f.slug === 'documentos-pessoais'
+        const docsChild = children.find(
+          f =>
+            f.path?.endsWith('/documentos-pessoais') ||
+            f.slug === 'documentos-pessoais'
         );
 
         setDocsFolderId(docsChild?.id ?? entityFolder.id);
@@ -319,7 +331,9 @@ export function EmployeeDocumentsChecklist({
   }, [filesByDocType, gender]);
 
   const progressPercent =
-    requiredCount > 0 ? Math.round((completedRequired / requiredCount) * 100) : 100;
+    requiredCount > 0
+      ? Math.round((completedRequired / requiredCount) * 100)
+      : 100;
 
   // ============================================================================
   // MUTATIONS
@@ -344,7 +358,7 @@ export function EmployeeDocumentsChecklist({
   // ============================================================================
 
   const toggleCategory = useCallback((title: string) => {
-    setCollapsedCategories((prev) => {
+    setCollapsedCategories(prev => {
       const next = new Set(prev);
       if (next.has(title)) {
         next.delete(title);
@@ -386,7 +400,9 @@ export function EmployeeDocumentsChecklist({
       // The prefix before __ is used by extractDocType() to identify the document type
       // The part after __ is the human-readable name shown in the file manager
       const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
-      const sanitizedName = employeeName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\u00C0-\u024F]/g, '');
+      const sanitizedName = employeeName
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_\u00C0-\u024F]/g, '');
       const timestamp = Date.now();
       const renamedFile = new File(
         [file],
@@ -401,7 +417,7 @@ export function EmployeeDocumentsChecklist({
         await storageFilesService.uploadFileWithProgress(
           docsFolderId,
           renamedFile,
-          (percent) => setUploadProgress(percent),
+          percent => setUploadProgress(percent),
           { entityType: 'employee', entityId: employeeId }
         );
         queryClient.invalidateQueries({ queryKey });
@@ -418,13 +434,16 @@ export function EmployeeDocumentsChecklist({
     [employeeId, filesByDocType, queryClient, queryKey]
   );
 
-  const handleView = useCallback((fileId: string) => {
-    // Find the StorageFile object to open in the preview modal
-    const file = files.find(f => f.id === fileId);
-    if (file) {
-      setPreviewFile(file);
-    }
-  }, [files]);
+  const handleView = useCallback(
+    (fileId: string) => {
+      // Find the StorageFile object to open in the preview modal
+      const file = files.find(f => f.id === fileId);
+      if (file) {
+        setPreviewFile(file);
+      }
+    },
+    [files]
+  );
 
   const handleDownload = useCallback(async (fileId: string) => {
     try {
@@ -561,11 +580,11 @@ export function EmployeeDocumentsChecklist({
       {/* ================================================================== */}
       {/* Document Categories                                                 */}
       {/* ================================================================== */}
-      {DOCUMENT_CATEGORIES.map((category) => {
+      {DOCUMENT_CATEGORIES.map(category => {
         const CategoryIcon = category.icon;
         const isCollapsed = collapsedCategories.has(category.title);
         const categoryDocs = category.documents;
-        const uploadedCount = categoryDocs.filter((d) =>
+        const uploadedCount = categoryDocs.filter(d =>
           filesByDocType.has(d.type)
         ).length;
 
@@ -604,7 +623,7 @@ export function EmployeeDocumentsChecklist({
             {/* Document Rows */}
             {!isCollapsed && (
               <div className="border-t border-border">
-                {categoryDocs.map((doc) => {
+                {categoryDocs.map(doc => {
                   const status = getDocStatus(doc.type);
                   const required = isDocRequired(doc);
                   const file = filesByDocType.get(doc.type);
@@ -679,17 +698,19 @@ export function EmployeeDocumentsChecklist({
                           )}
 
                           {/* Action buttons */}
-                          {!readOnly && status === 'PENDENTE' && !isUploading && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 text-xs"
-                              onClick={() => handleUploadClick(doc.type)}
-                            >
-                              <Upload className="h-3 w-3 mr-1" />
-                              Enviar
-                            </Button>
-                          )}
+                          {!readOnly &&
+                            status === 'PENDENTE' &&
+                            !isUploading && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => handleUploadClick(doc.type)}
+                              >
+                                <Upload className="h-3 w-3 mr-1" />
+                                Enviar
+                              </Button>
+                            )}
 
                           {file && !isUploading && (
                             <>
@@ -808,7 +829,9 @@ export function EmployeeDocumentsChecklist({
         file={previewFile}
         files={files}
         open={!!previewFile}
-        onOpenChange={(open) => { if (!open) setPreviewFile(null); }}
+        onOpenChange={open => {
+          if (!open) setPreviewFile(null);
+        }}
         onNavigate={setPreviewFile}
         canDownload
       />

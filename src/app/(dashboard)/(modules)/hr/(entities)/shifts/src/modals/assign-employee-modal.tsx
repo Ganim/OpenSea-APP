@@ -51,13 +51,13 @@ export function AssignEmployeeModal({
   const filteredEmployees = useMemo(() => {
     const employees = employeesData ?? [];
     const excludeSet = new Set(excludeEmployeeIds);
-    const available = employees.filter((e) => !excludeSet.has(e.id));
+    const available = employees.filter(e => !excludeSet.has(e.id));
 
     if (!employeeSearch.trim()) return available;
 
     const q = employeeSearch.toLowerCase();
     return available.filter(
-      (e) =>
+      e =>
         e.fullName.toLowerCase().includes(q) ||
         (e.position?.name && e.position.name.toLowerCase().includes(q)) ||
         (e.department?.name && e.department.name.toLowerCase().includes(q))
@@ -113,7 +113,7 @@ export function AssignEmployeeModal({
               <Input
                 placeholder="Buscar funcionário..."
                 value={employeeSearch}
-                onChange={(e) => setEmployeeSearch(e.target.value)}
+                onChange={e => setEmployeeSearch(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -129,7 +129,7 @@ export function AssignEmployeeModal({
                   Nenhum funcionário disponível
                 </div>
               ) : (
-                filteredEmployees.map((employee) => (
+                filteredEmployees.map(employee => (
                   <button
                     key={employee.id}
                     type="button"
@@ -147,12 +147,14 @@ export function AssignEmployeeModal({
                       {employee.fullName
                         .split(' ')
                         .slice(0, 2)
-                        .map((n) => n[0])
+                        .map(n => n[0])
                         .join('')
                         .toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{employee.fullName}</p>
+                      <p className="truncate font-medium">
+                        {employee.fullName}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {[employee.position?.name, employee.department?.name]
                           .filter(Boolean)
@@ -216,7 +218,7 @@ export function AssignEmployeeModal({
               <Input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
 
@@ -228,7 +230,7 @@ export function AssignEmployeeModal({
               <Input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={startDate}
               />
             </div>
@@ -238,7 +240,7 @@ export function AssignEmployeeModal({
               <Input
                 placeholder="Observações sobre a atribuição..."
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={e => setNotes(e.target.value)}
                 maxLength={500}
               />
             </div>
@@ -263,7 +265,7 @@ export function AssignEmployeeModal({
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={open => !open && onClose()}
       steps={steps}
       currentStep={currentStep}
       onStepChange={setCurrentStep}

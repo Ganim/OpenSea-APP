@@ -294,7 +294,11 @@ export function ItemEntryFormModal({
       onOpenChange(false);
     },
     onError: (error: Error) => {
-      toast.error(translateError(error instanceof Error ? error.message : 'Erro ao registrar entrada'));
+      toast.error(
+        translateError(
+          error instanceof Error ? error.message : 'Erro ao registrar entrada'
+        )
+      );
     },
   });
 
@@ -318,7 +322,11 @@ export function ItemEntryFormModal({
       setFieldErrors({});
     },
     onError: (error: Error) => {
-      toast.error(translateError(error instanceof Error ? error.message : 'Erro ao registrar entrada'));
+      toast.error(
+        translateError(
+          error instanceof Error ? error.message : 'Erro ao registrar entrada'
+        )
+      );
     },
   });
 
@@ -1115,7 +1123,8 @@ function VariantSearchSection({
   const [search, setSearch] = useState('');
   // Keep the rich VariantSearchOption locally so the trigger can display
   // the same fields shown in the list (color, fullLabel, manufacturer, reference)
-  const [selectedOption, setSelectedOption] = useState<VariantSearchOption | null>(null);
+  const [selectedOption, setSelectedOption] =
+    useState<VariantSearchOption | null>(null);
 
   // Clear local selection if parent clears the variant
   useEffect(() => {
@@ -1189,7 +1198,10 @@ function VariantSearchSection({
     if (!options) return { filteredOptions: [], totalMatches: 0 };
     const query = search.trim().toLowerCase();
     if (!query) {
-      return { filteredOptions: options.slice(0, 50), totalMatches: options.length };
+      return {
+        filteredOptions: options.slice(0, 50),
+        totalMatches: options.length,
+      };
     }
     const words = query.split(/\s+/).filter(Boolean);
     const matches: VariantSearchOption[] = [];
@@ -1250,7 +1262,13 @@ function VariantSearchSection({
 
         onSelect(variant, product);
       } catch (err) {
-        toast.error(translateError(err instanceof Error ? err.message : 'Erro ao carregar dados do produto'));
+        toast.error(
+          translateError(
+            err instanceof Error
+              ? err.message
+              : 'Erro ao carregar dados do produto'
+          )
+        );
       } finally {
         setIsResolving(false);
       }
@@ -1276,137 +1294,138 @@ function VariantSearchSection({
               error && 'border-rose-500'
             )}
           >
-              {selectedOption ? (
-                <div className="flex items-center gap-2.5 w-full min-w-0">
-                  {selectedOption.colorHex || selectedOption.pattern ? (
-                    <div
-                      className="h-7 w-10 rounded-md shrink-0 border border-black/10"
-                      style={getSearchPatternStyle(
-                        selectedOption.colorHex,
-                        selectedOption.secondaryColorHex,
-                        selectedOption.pattern
-                      )}
-                    />
-                  ) : (
-                    <div className="h-7 w-10 rounded-md shrink-0 bg-muted flex items-center justify-center">
-                      <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium truncate">
-                      {selectedOption.fullLabel}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {selectedOption.manufacturerName && (
-                        <span>{selectedOption.manufacturerName}</span>
-                      )}
-                      {selectedOption.manufacturerName &&
-                        selectedOption.reference &&
-                        ' · '}
-                      {selectedOption.reference && (
-                        <span className="font-mono">
-                          Ref: {selectedOption.reference}
-                        </span>
-                      )}
-                      {!selectedOption.manufacturerName &&
-                        !selectedOption.reference &&
-                        '\u00A0'}
-                    </p>
+            {selectedOption ? (
+              <div className="flex items-center gap-2.5 w-full min-w-0">
+                {selectedOption.colorHex || selectedOption.pattern ? (
+                  <div
+                    className="h-7 w-10 rounded-md shrink-0 border border-black/10"
+                    style={getSearchPatternStyle(
+                      selectedOption.colorHex,
+                      selectedOption.secondaryColorHex,
+                      selectedOption.pattern
+                    )}
+                  />
+                ) : (
+                  <div className="h-7 w-10 rounded-md shrink-0 bg-muted flex items-center justify-center">
+                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
+                )}
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium truncate">
+                    {selectedOption.fullLabel}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {selectedOption.manufacturerName && (
+                      <span>{selectedOption.manufacturerName}</span>
+                    )}
+                    {selectedOption.manufacturerName &&
+                      selectedOption.reference &&
+                      ' · '}
+                    {selectedOption.reference && (
+                      <span className="font-mono">
+                        Ref: {selectedOption.reference}
+                      </span>
+                    )}
+                    {!selectedOption.manufacturerName &&
+                      !selectedOption.reference &&
+                      '\u00A0'}
+                  </p>
                 </div>
-              ) : (
-                <span className="text-muted-foreground">
-                  Buscar variante por nome, produto ou referência...
-                </span>
-              )}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-[var(--radix-popover-trigger-width)] p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 shadow-2xl"
-            align="start"
-            sideOffset={6}
-          >
-            <Command shouldFilter={false}>
-              <CommandInput
-                placeholder="Buscar por nome, fabricante ou referência..."
-                className="h-10"
-                value={search}
-                onValueChange={setSearch}
-              />
-              <CommandList>
-                <CommandEmpty>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center gap-2 py-4">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">Carregando variantes...</span>
-                    </div>
-                  ) : (
-                    'Nenhuma variante encontrada.'
-                  )}
-                </CommandEmpty>
-                <CommandGroup>
-                  <ScrollArea className="max-h-[320px]">
-                    {filteredOptions.map(option => (
-                      <CommandItem
-                        key={option.id}
-                        value={option.id}
-                        onSelect={() => handleSelect(option)}
-                        className="cursor-pointer py-2.5 px-2"
-                      >
-                        <div className="flex items-center gap-2.5 w-full min-w-0">
-                          {hasColor(option) ? (
-                            <div
-                              className="h-7 w-10 rounded-md shrink-0 border border-black/10"
-                              style={getSearchPatternStyle(
-                                option.colorHex,
-                                option.secondaryColorHex,
-                                option.pattern
-                              )}
-                            />
-                          ) : (
-                            <div className="h-7 w-10 rounded-md shrink-0 bg-muted flex items-center justify-center">
-                              <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {option.fullLabel}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground truncate">
-                              {option.manufacturerName && (
-                                <span>{option.manufacturerName}</span>
-                              )}
-                              {option.manufacturerName &&
-                                option.reference &&
-                                ' · '}
-                              {option.reference && (
-                                <span className="font-mono">
-                                  Ref: {option.reference}
-                                </span>
-                              )}
-                              {!option.manufacturerName &&
-                                !option.reference &&
-                                '\u00A0'}
-                            </p>
+              </div>
+            ) : (
+              <span className="text-muted-foreground">
+                Buscar variante por nome, produto ou referência...
+              </span>
+            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 shadow-2xl"
+          align="start"
+          sideOffset={6}
+        >
+          <Command shouldFilter={false}>
+            <CommandInput
+              placeholder="Buscar por nome, fabricante ou referência..."
+              className="h-10"
+              value={search}
+              onValueChange={setSearch}
+            />
+            <CommandList>
+              <CommandEmpty>
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Carregando variantes...</span>
+                  </div>
+                ) : (
+                  'Nenhuma variante encontrada.'
+                )}
+              </CommandEmpty>
+              <CommandGroup>
+                <ScrollArea className="max-h-[320px]">
+                  {filteredOptions.map(option => (
+                    <CommandItem
+                      key={option.id}
+                      value={option.id}
+                      onSelect={() => handleSelect(option)}
+                      className="cursor-pointer py-2.5 px-2"
+                    >
+                      <div className="flex items-center gap-2.5 w-full min-w-0">
+                        {hasColor(option) ? (
+                          <div
+                            className="h-7 w-10 rounded-md shrink-0 border border-black/10"
+                            style={getSearchPatternStyle(
+                              option.colorHex,
+                              option.secondaryColorHex,
+                              option.pattern
+                            )}
+                          />
+                        ) : (
+                          <div className="h-7 w-10 rounded-md shrink-0 bg-muted flex items-center justify-center">
+                            <Package className="h-3.5 w-3.5 text-muted-foreground" />
                           </div>
-                          {selectedVariant?.id === option.id && (
-                            <Check className="h-4 w-4 shrink-0 text-emerald-600" />
-                          )}
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {option.fullLabel}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {option.manufacturerName && (
+                              <span>{option.manufacturerName}</span>
+                            )}
+                            {option.manufacturerName &&
+                              option.reference &&
+                              ' · '}
+                            {option.reference && (
+                              <span className="font-mono">
+                                Ref: {option.reference}
+                              </span>
+                            )}
+                            {!option.manufacturerName &&
+                              !option.reference &&
+                              '\u00A0'}
+                          </p>
                         </div>
-                      </CommandItem>
-                    ))}
-                  </ScrollArea>
-                </CommandGroup>
-              </CommandList>
-              {totalMatches > 50 && (
-                <div className="border-t border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-muted-foreground bg-slate-50 dark:bg-slate-800/50">
-                  Mostrando 50 de {totalMatches} resultados — refine a busca para ver mais.
-                </div>
-              )}
-            </Command>
-          </PopoverContent>
-        </Popover>
+                        {selectedVariant?.id === option.id && (
+                          <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </ScrollArea>
+              </CommandGroup>
+            </CommandList>
+            {totalMatches > 50 && (
+              <div className="border-t border-slate-200 dark:border-slate-700 px-3 py-2 text-[11px] text-muted-foreground bg-slate-50 dark:bg-slate-800/50">
+                Mostrando 50 de {totalMatches} resultados — refine a busca para
+                ver mais.
+              </div>
+            )}
+          </Command>
+        </PopoverContent>
+      </Popover>
       {error && <p className="text-xs text-rose-500">{error}</p>}
       {isResolving && (
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">

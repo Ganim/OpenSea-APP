@@ -67,9 +67,7 @@ export function CreateModal({
   };
 
   const step1Valid =
-    name.trim().length > 0 &&
-    category.length > 0 &&
-    format.length > 0;
+    name.trim().length > 0 && category.length > 0 && format.length > 0;
 
   const step2Valid = Number(durationHours) > 0;
 
@@ -241,10 +239,7 @@ export function CreateModal({
           <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!step2Valid || isSubmitting}
-          >
+          <Button onClick={handleSubmit} disabled={!step2Valid || isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

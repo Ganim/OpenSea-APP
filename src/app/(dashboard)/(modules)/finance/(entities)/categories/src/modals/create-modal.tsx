@@ -11,7 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { StepWizardDialog, type WizardStep } from '@/components/ui/step-wizard-dialog';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { FINANCE_CATEGORY_TYPE_LABELS } from '@/types/finance';
 import type { FinanceCategory, FinanceCategoryType } from '@/types/finance';
 import { translateError } from '@/lib/error-messages';
@@ -158,9 +161,7 @@ export function CreateCategoryModal({
                 autoFocus
                 aria-invalid={!!fieldErrors.name}
               />
-              {fieldErrors.name && (
-                <FormErrorIcon message={fieldErrors.name} />
-              )}
+              {fieldErrors.name && <FormErrorIcon message={fieldErrors.name} />}
             </div>
           </div>
 
@@ -204,11 +205,20 @@ export function CreateCategoryModal({
       ),
       footer: (
         <div className="flex items-center gap-2 w-full">
-          <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCurrentStep(1)}
+          >
             ← Voltar
           </Button>
           <div className="flex-1" />
-          <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
           <Button

@@ -105,7 +105,9 @@ function SummaryCard({
         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
           {label}
         </p>
-        <p className={cn('text-xl font-bold font-mono tabular-nums', valueClass)}>
+        <p
+          className={cn('text-xl font-bold font-mono tabular-nums', valueClass)}
+        >
           {formatCurrency(value)}
         </p>
       </CardContent>
@@ -122,7 +124,10 @@ function LedgerSkeleton() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="bg-white dark:bg-slate-800/60 border border-border">
+          <Card
+            key={i}
+            className="bg-white dark:bg-slate-800/60 border border-border"
+          >
             <CardContent className="p-4 space-y-2">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-7 w-32" />
@@ -133,7 +138,10 @@ function LedgerSkeleton() {
       <Card className="bg-white dark:bg-slate-800/60 border border-border">
         <CardContent className="p-0">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex gap-4 px-4 py-3 border-b border-border/30">
+            <div
+              key={i}
+              className="flex gap-4 px-4 py-3 border-b border-border/30"
+            >
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 flex-1" />
@@ -198,7 +206,14 @@ function downloadCsv(
   accountCode: string,
   _accountName: string
 ) {
-  const header = ['Data', 'Lançamento', 'Descrição', 'Débito', 'Crédito', 'Saldo'];
+  const header = [
+    'Data',
+    'Lançamento',
+    'Descrição',
+    'Débito',
+    'Crédito',
+    'Saldo',
+  ];
   const rows = entries.map(e => [
     formatDate(e.date),
     e.journalCode,
@@ -231,7 +246,9 @@ export default function LedgerPage() {
   const { hasPermission } = usePermissions();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
-  const [startDate, setStartDate] = useState<Date>(() => startOfMonth(new Date()));
+  const [startDate, setStartDate] = useState<Date>(() =>
+    startOfMonth(new Date())
+  );
   const [endDate, setEndDate] = useState<Date>(() => new Date());
   // queried tracks committed query params (set when user clicks "Consultar")
   const [queriedParams, setQueriedParams] = useState<{
@@ -241,10 +258,12 @@ export default function LedgerPage() {
   } | null>(null);
 
   // Load chart of accounts for the combobox
-  const { data: accountsData, isLoading: accountsLoading } = useChartOfAccounts({
-    isActive: true,
-    perPage: 500,
-  });
+  const { data: accountsData, isLoading: accountsLoading } = useChartOfAccounts(
+    {
+      isActive: true,
+      perPage: 500,
+    }
+  );
 
   const accountOptions: ComboboxOption[] = useMemo(() => {
     const accounts = accountsData?.chartOfAccounts ?? [];
@@ -268,11 +287,7 @@ export default function LedgerPage() {
 
   const handleExportCsv = useCallback(() => {
     if (!data) return;
-    downloadCsv(
-      data.entries,
-      data.account.code,
-      data.account.name
-    );
+    downloadCsv(data.entries, data.account.code, data.account.name);
   }, [data]);
 
   return (
@@ -307,7 +322,9 @@ export default function LedgerPage() {
                 value={selectedAccountId}
                 onValueChange={setSelectedAccountId}
                 placeholder={
-                  accountsLoading ? 'Carregando contas...' : 'Selecione uma conta...'
+                  accountsLoading
+                    ? 'Carregando contas...'
+                    : 'Selecione uma conta...'
                 }
                 searchPlaceholder="Buscar por código ou nome..."
                 emptyText="Nenhuma conta encontrada."
@@ -321,7 +338,11 @@ export default function LedgerPage() {
                 Período
               </label>
               <div className="flex items-center gap-2">
-                <DatePicker label="De" value={startDate} onChange={setStartDate} />
+                <DatePicker
+                  label="De"
+                  value={startDate}
+                  onChange={setStartDate}
+                />
                 <span className="text-muted-foreground text-sm">até</span>
                 <DatePicker label="Até" value={endDate} onChange={setEndDate} />
               </div>
@@ -457,7 +478,10 @@ export default function LedgerPage() {
                   </thead>
                   <tbody>
                     {data.entries.map((entry: LedgerEntry, idx: number) => (
-                      <LedgerRow key={`${entry.journalEntryId}-${idx}`} entry={entry} />
+                      <LedgerRow
+                        key={`${entry.journalEntryId}-${idx}`}
+                        entry={entry}
+                      />
                     ))}
                   </tbody>
                   {/* Footer totals row */}

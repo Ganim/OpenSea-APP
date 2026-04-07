@@ -331,7 +331,7 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
     } catch (err) {
       const apiError = ApiError.from(err);
       const fieldMap: Record<string, string> = {
-        'edital': 'editalNumber',
+        edital: 'editalNumber',
         'Edital number already': 'editalNumber',
       };
       let mapped = false;
@@ -341,7 +341,10 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -377,7 +380,13 @@ export function CreateBidWizard({ open, onOpenChange }: CreateBidWizardProps) {
       content: (
         <StepBasicInfo
           editalNumber={editalNumber}
-          onEditalNumberChange={(v) => { setEditalNumber(v); setFieldErrors(prev => { const { editalNumber: _, ...rest } = prev; return rest; }); }}
+          onEditalNumberChange={v => {
+            setEditalNumber(v);
+            setFieldErrors(prev => {
+              const { editalNumber: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           modality={modality}
           onModalityChange={setModality}
           criterionType={criterionType}

@@ -111,7 +111,8 @@ export default function HRSettingsPage() {
   const [paternityLeaveDays, setPaternityLeaveDays] = useState(5);
 
   // Contribuição Sindical
-  const [unionContributionEnabled, setUnionContributionEnabled] = useState(false);
+  const [unionContributionEnabled, setUnionContributionEnabled] =
+    useState(false);
   const [unionContributionRate, setUnionContributionRate] = useState(100);
 
   // PAT
@@ -266,10 +267,10 @@ export default function HRSettingsPage() {
               <Settings className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">
-                Recursos Humanos
-              </p>
-              <h1 className="text-xl font-bold truncate">Configurações Gerais</h1>
+              <p className="text-sm text-muted-foreground">Recursos Humanos</p>
+              <h1 className="text-xl font-bold truncate">
+                Configurações Gerais
+              </h1>
             </div>
           </div>
         </Card>
@@ -308,7 +309,9 @@ export default function HRSettingsPage() {
                       min={120}
                       max={180}
                       value={maternityLeaveDays}
-                      onChange={e => setMaternityLeaveDays(Number(e.target.value))}
+                      onChange={e =>
+                        setMaternityLeaveDays(Number(e.target.value))
+                      }
                       className="w-24 h-9 text-sm text-center"
                     />
                   </ConfigRow>
@@ -322,7 +325,9 @@ export default function HRSettingsPage() {
                       min={5}
                       max={20}
                       value={paternityLeaveDays}
-                      onChange={e => setPaternityLeaveDays(Number(e.target.value))}
+                      onChange={e =>
+                        setPaternityLeaveDays(Number(e.target.value))
+                      }
                       className="w-24 h-9 text-sm text-center"
                     />
                   </ConfigRow>

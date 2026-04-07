@@ -9,10 +9,21 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
-import { useCreatePipeline, useCreatePipelineStage } from '@/hooks/sales/use-pipelines';
+import {
+  useCreatePipeline,
+  useCreatePipelineStage,
+} from '@/hooks/sales/use-pipelines';
 import { ApiError } from '@/lib/errors/api-error';
 import { translateError } from '@/lib/error-messages';
-import { Check, GitBranch, Layers, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
+import {
+  Check,
+  GitBranch,
+  Layers,
+  Loader2,
+  Plus,
+  Trash2,
+  GripVertical,
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -265,15 +276,18 @@ export function CreatePipelineWizard({
       title: 'Novo Pipeline',
       description: 'Defina o nome e a descricao do pipeline.',
       icon: (
-        <GitBranch
-          className="h-16 w-16 text-violet-400"
-          strokeWidth={1.2}
-        />
+        <GitBranch className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
       ),
       content: (
         <StepPipelineInfo
           name={name}
-          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+          onNameChange={v => {
+            setName(v);
+            setFieldErrors(prev => {
+              const { name: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           description={description}
           onDescriptionChange={setDescription}
           fieldErrors={fieldErrors}
@@ -284,12 +298,7 @@ export function CreatePipelineWizard({
     {
       title: 'Etapas Iniciais',
       description: 'Configure as etapas do funil.',
-      icon: (
-        <Layers
-          className="h-16 w-16 text-sky-400"
-          strokeWidth={1.2}
-        />
-      ),
+      icon: <Layers className="h-16 w-16 text-sky-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
       content: (
         <StepInitialStages

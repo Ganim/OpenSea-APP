@@ -1,7 +1,7 @@
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { defineEntityConfig } from '@/core/types';
 import type { LeadRoutingRule } from '@/types/sales';
-import { Eye, Edit, Shuffle, Plus, Trash2 } from 'lucide-react';
+import { Edit, Eye, Plus, Shuffle, Trash2 } from 'lucide-react';
 
 export const leadRoutingConfig = defineEntityConfig<LeadRoutingRule>()({
   name: 'Regra de Roteamento',

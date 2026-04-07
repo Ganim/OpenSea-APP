@@ -44,10 +44,26 @@ interface PaymentOrderModalProps {
 
 type PaymentMethod = 'PIX' | 'TED' | 'BOLETO';
 
-const METHOD_OPTIONS: { value: PaymentMethod; label: string; description: string }[] = [
-  { value: 'PIX', label: 'PIX', description: 'Transferência instantânea via chave PIX' },
-  { value: 'TED', label: 'TED', description: 'Transferência eletrônica disponível (D+1)' },
-  { value: 'BOLETO', label: 'Boleto', description: 'Pagamento via código de barras' },
+const METHOD_OPTIONS: {
+  value: PaymentMethod;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: 'PIX',
+    label: 'PIX',
+    description: 'Transferência instantânea via chave PIX',
+  },
+  {
+    value: 'TED',
+    label: 'TED',
+    description: 'Transferência eletrônica disponível (D+1)',
+  },
+  {
+    value: 'BOLETO',
+    label: 'Boleto',
+    description: 'Pagamento via código de barras',
+  },
 ];
 
 // ============================================================================

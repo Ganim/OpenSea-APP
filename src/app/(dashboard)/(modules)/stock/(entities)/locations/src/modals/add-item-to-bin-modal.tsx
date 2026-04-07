@@ -17,7 +17,10 @@ import {
   formatUnitAbbreviation,
   sanitizeQuantityInput,
 } from '@/helpers/formatters';
-import type { RegisterItemEntryRequest, TemplateAttribute } from '@/types/stock';
+import type {
+  RegisterItemEntryRequest,
+  TemplateAttribute,
+} from '@/types/stock';
 import {
   MapPin,
   Plus,
@@ -195,8 +198,9 @@ function MobileAddItemSheet({
   binId,
 }: AddItemToBinModalProps) {
   const queryClient = useQueryClient();
-  const [selectedVariant, setSelectedVariant] =
-    useState<VariantOption | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<VariantOption | null>(
+    null
+  );
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
   const [addedCount, setAddedCount] = useState(0);
 

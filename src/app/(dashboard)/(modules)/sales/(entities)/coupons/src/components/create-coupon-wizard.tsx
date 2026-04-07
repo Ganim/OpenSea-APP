@@ -94,7 +94,10 @@ export function CreateCouponWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -128,7 +131,13 @@ export function CreateCouponWizard({
               <Input
                 placeholder="Ex: DESCONTO10"
                 value={code}
-                onChange={e => { setCode(e.target.value.toUpperCase()); setFieldErrors(prev => { const { code: _, ...rest } = prev; return rest; }); }}
+                onChange={e => {
+                  setCode(e.target.value.toUpperCase());
+                  setFieldErrors(prev => {
+                    const { code: _, ...rest } = prev;
+                    return rest;
+                  });
+                }}
                 className="font-mono"
                 aria-invalid={!!fieldErrors.code}
               />

@@ -30,10 +30,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { useBudgetReport } from '@/hooks/finance/use-budgets';
 import { BudgetConfigModal } from '@/components/finance/budget-config-modal';
 import type { BudgetReportRow, BudgetStatus } from '@/types/finance';
-import {
-  BUDGET_STATUS_LABELS,
-  BUDGET_STATUS_COLORS,
-} from '@/types/finance';
+import { BUDGET_STATUS_LABELS, BUDGET_STATUS_COLORS } from '@/types/finance';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
@@ -217,8 +214,12 @@ function BudgetTableRow({
       </tr>
       {hasChildren &&
         expanded &&
-        row.children!.map((child) => (
-          <BudgetTableRow key={child.categoryId} row={child} depth={depth + 1} />
+        row.children!.map(child => (
+          <BudgetTableRow
+            key={child.categoryId}
+            row={child}
+            depth={depth + 1}
+          />
         ))}
     </>
   );
@@ -309,15 +310,12 @@ export default function BudgetVsActualPage() {
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Select
-            value={String(year)}
-            onValueChange={(v) => setYear(Number(v))}
-          >
+          <Select value={String(year)} onValueChange={v => setYear(Number(v))}>
             <SelectTrigger className="w-28 h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {YEARS.map((y) => (
+              {YEARS.map(y => (
                 <SelectItem key={y} value={String(y)}>
                   {y}
                 </SelectItem>
@@ -326,13 +324,13 @@ export default function BudgetVsActualPage() {
           </Select>
           <Select
             value={String(month)}
-            onValueChange={(v) => setMonth(Number(v))}
+            onValueChange={v => setMonth(Number(v))}
           >
             <SelectTrigger className="w-40 h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {MONTHS.map((m) => (
+              {MONTHS.map(m => (
                 <SelectItem key={m.value} value={m.value}>
                   {m.label}
                 </SelectItem>
@@ -413,7 +411,9 @@ export default function BudgetVsActualPage() {
       ) : (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Detalhamento por Categoria</CardTitle>
+            <CardTitle className="text-base">
+              Detalhamento por Categoria
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -441,7 +441,7 @@ export default function BudgetVsActualPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row) => (
+                  {rows.map(row => (
                     <BudgetTableRow key={row.categoryId} row={row} />
                   ))}
                   {/* Totals row */}

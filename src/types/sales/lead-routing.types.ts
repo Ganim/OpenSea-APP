@@ -6,12 +6,13 @@ export type LeadRoutingStrategy =
   | 'SEGMENT'
   | 'LOAD_BALANCE';
 
-export const LEAD_ROUTING_STRATEGY_LABELS: Record<LeadRoutingStrategy, string> = {
-  ROUND_ROBIN: 'Round Robin',
-  TERRITORY: 'Território',
-  SEGMENT: 'Segmento',
-  LOAD_BALANCE: 'Balanceamento',
-};
+export const LEAD_ROUTING_STRATEGY_LABELS: Record<LeadRoutingStrategy, string> =
+  {
+    ROUND_ROBIN: 'Round Robin',
+    TERRITORY: 'Território',
+    SEGMENT: 'Segmento',
+    LOAD_BALANCE: 'Balanceamento',
+  };
 
 export interface LeadRoutingAssignment {
   id: string;

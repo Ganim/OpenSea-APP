@@ -165,7 +165,8 @@ export function OnboardingTab() {
 
       {/* Checklist by Category */}
       {Object.entries(groupedItems).map(([categoryKey, items]) => {
-        const config = CATEGORY_CONFIG[categoryKey] || CATEGORY_CONFIG.DOCUMENTATION;
+        const config =
+          CATEGORY_CONFIG[categoryKey] || CATEGORY_CONFIG.DOCUMENTATION;
         const completedCount = items.filter(i => i.completed).length;
 
         return (

@@ -130,9 +130,9 @@ function PaymentOverlay({
   const [error, setError] = React.useState<string | null>(null);
 
   // Gateway mode state
-  const [gatewayMode, setGatewayMode] = React.useState<
-    'gateway' | 'manual'
-  >('manual');
+  const [gatewayMode, setGatewayMode] = React.useState<'gateway' | 'manual'>(
+    'manual'
+  );
   const [activeCharge, setActiveCharge] = React.useState<PaymentCharge | null>(
     null
   );
@@ -183,7 +183,7 @@ function PaymentOverlay({
         chargeId: chargeStatus.id,
         chargeStatus: 'PAID',
       };
-      setPayments((prev) => [...prev, entry]);
+      setPayments(prev => [...prev, entry]);
       setActiveCharge(null);
       setSelectedMethod(null);
       resetFormFields();
@@ -310,14 +310,14 @@ function PaymentOverlay({
     if (amount <= 0) return;
 
     entry.amount = amount;
-    setPayments((prev) => [...prev, entry as PaymentEntry]);
+    setPayments(prev => [...prev, entry as PaymentEntry]);
     setSelectedMethod(null);
     setActiveCharge(null);
     resetFormFields();
   }
 
   function removePayment(id: string) {
-    setPayments((prev) => prev.filter((p) => p.id !== id));
+    setPayments(prev => prev.filter(p => p.id !== id));
   }
 
   async function handleConfirm() {
@@ -334,7 +334,7 @@ function PaymentOverlay({
     }
 
     try {
-      const apiPayments = payments.map((p) => ({
+      const apiPayments = payments.map(p => ({
         method: p.method,
         amount: p.amount,
         receivedAmount: p.method === 'CASH' ? p.amount : undefined,
@@ -413,7 +413,7 @@ function PaymentOverlay({
             <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
               Pagamentos adicionados
             </h2>
-            {payments.map((payment) => (
+            {payments.map(payment => (
               <div
                 key={payment.id}
                 className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900"
@@ -504,13 +504,11 @@ function PaymentOverlay({
             {isGatewayAvailable(selectedMethod) && (
               <GatewayManualToggle
                 mode={gatewayMode}
-                onModeChange={(mode) => {
+                onModeChange={mode => {
                   setGatewayMode(mode);
                   setActiveCharge(null);
                 }}
-                providerName={
-                  paymentConfig?.primaryProvider ?? 'Gateway'
-                }
+                providerName={paymentConfig?.primaryProvider ?? 'Gateway'}
               />
             )}
 
@@ -750,7 +748,7 @@ function PixGatewayPanel({
             step="0.01"
             min="0"
             value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
+            onChange={e => onAmountChange(e.target.value)}
             className={inputClassName}
             placeholder="0,00"
           />
@@ -758,9 +756,7 @@ function PixGatewayPanel({
 
         <Button
           onClick={onCreateCharge}
-          disabled={
-            isCreating || !amount || parseFloat(amount) <= 0
-          }
+          disabled={isCreating || !amount || parseFloat(amount) <= 0}
           className="h-14 w-full rounded-xl bg-violet-600 text-base font-bold text-white hover:bg-violet-700"
         >
           {isCreating ? (
@@ -873,9 +869,7 @@ function PixGatewayPanel({
         )}
       </div>
 
-      {charge.expiresAt && (
-        <ExpirationTimer expiresAt={charge.expiresAt} />
-      )}
+      {charge.expiresAt && <ExpirationTimer expiresAt={charge.expiresAt} />}
     </div>
   );
 }
@@ -923,7 +917,7 @@ function CardGatewayPanel({
             step="0.01"
             min="0"
             value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
+            onChange={e => onAmountChange(e.target.value)}
             className={inputClassName}
             placeholder="0,00"
           />
@@ -933,10 +927,10 @@ function CardGatewayPanel({
           <FormField label="Parcelas">
             <select
               value={installments}
-              onChange={(e) => onInstallmentsChange(e.target.value)}
+              onChange={e => onInstallmentsChange(e.target.value)}
               className={inputClassName}
             >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
                 <option key={n} value={n}>
                   {n}x {n === 1 ? '(à vista)' : ''}
                 </option>
@@ -947,9 +941,7 @@ function CardGatewayPanel({
 
         <Button
           onClick={onCreateCharge}
-          disabled={
-            isCreating || !amount || parseFloat(amount) <= 0
-          }
+          disabled={isCreating || !amount || parseFloat(amount) <= 0}
           className="h-14 w-full rounded-xl bg-violet-600 text-base font-bold text-white hover:bg-violet-700"
         >
           {isCreating ? (
@@ -1039,9 +1031,7 @@ function CardGatewayPanel({
         )}
       </div>
 
-      {charge.expiresAt && (
-        <ExpirationTimer expiresAt={charge.expiresAt} />
-      )}
+      {charge.expiresAt && <ExpirationTimer expiresAt={charge.expiresAt} />}
     </div>
   );
 }
@@ -1167,7 +1157,7 @@ function CardPanel({
           step="0.01"
           min="0"
           value={amount}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={e => onAmountChange(e.target.value)}
           className={inputClassName}
           placeholder="0,00"
         />
@@ -1177,7 +1167,7 @@ function CardPanel({
         <input
           type="text"
           value={nsu}
-          onChange={(e) => onNsuChange(e.target.value)}
+          onChange={e => onNsuChange(e.target.value)}
           className={inputClassName}
           placeholder="Número Sequencial Único"
         />
@@ -1187,7 +1177,7 @@ function CardPanel({
         <input
           type="text"
           value={authCode}
-          onChange={(e) => onAuthCodeChange(e.target.value)}
+          onChange={e => onAuthCodeChange(e.target.value)}
           className={inputClassName}
           placeholder="Código da operadora"
         />
@@ -1197,10 +1187,10 @@ function CardPanel({
         <FormField label="Parcelas">
           <select
             value={installments}
-            onChange={(e) => onInstallmentsChange(e.target.value)}
+            onChange={e => onInstallmentsChange(e.target.value)}
             className={inputClassName}
           >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
               <option key={n} value={n}>
                 {n}x {n === 1 ? '(à vista)' : ''}
               </option>
@@ -1244,7 +1234,7 @@ function PixPanel({
           step="0.01"
           min="0"
           value={amount}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={e => onAmountChange(e.target.value)}
           className={inputClassName}
           placeholder="0,00"
         />
@@ -1282,7 +1272,7 @@ function OtherPanel({
           step="0.01"
           min="0"
           value={amount}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={e => onAmountChange(e.target.value)}
           className={inputClassName}
           placeholder="0,00"
         />
@@ -1291,7 +1281,7 @@ function OtherPanel({
       <FormField label="Observações">
         <textarea
           value={notes}
-          onChange={(e) => onNotesChange(e.target.value)}
+          onChange={e => onNotesChange(e.target.value)}
           className={cn(inputClassName, 'h-24 resize-none py-3')}
           placeholder="Detalhes do pagamento..."
         />

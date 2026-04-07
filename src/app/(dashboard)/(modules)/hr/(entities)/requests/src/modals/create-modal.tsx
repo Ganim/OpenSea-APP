@@ -188,7 +188,7 @@ export function CreateRequestModal({
         Selecione o tipo de solicitação que deseja criar.
       </p>
       <div className="grid gap-3">
-        {REQUEST_TYPES.map((rt) => {
+        {REQUEST_TYPES.map(rt => {
           const Icon = rt.icon;
           const isSelected = selectedType === rt.type;
 
@@ -240,7 +240,7 @@ export function CreateRequestModal({
                   id="start-date"
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={e => setStartDate(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -249,7 +249,7 @@ export function CreateRequestModal({
                   id="end-date"
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={e => setEndDate(e.target.value)}
                 />
               </div>
             </div>
@@ -262,7 +262,7 @@ export function CreateRequestModal({
               <Textarea
                 id="description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder={
                   selectedType === 'VACATION'
                     ? 'Informações adicionais sobre as férias...'
@@ -285,7 +285,7 @@ export function CreateRequestModal({
                 min="0"
                 step="0.01"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={e => setAmount(e.target.value)}
                 placeholder="0,00"
               />
             </div>
@@ -294,7 +294,7 @@ export function CreateRequestModal({
               <Textarea
                 id="reason"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="Descreva o motivo do adiantamento..."
                 rows={3}
               />
@@ -310,7 +310,7 @@ export function CreateRequestModal({
               <Input
                 id="field"
                 value={fieldToChange}
-                onChange={(e) => setFieldToChange(e.target.value)}
+                onChange={e => setFieldToChange(e.target.value)}
                 placeholder="Ex: Endereço, Telefone, Conta Bancária..."
               />
             </div>
@@ -319,7 +319,7 @@ export function CreateRequestModal({
               <Input
                 id="new-value"
                 value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
+                onChange={e => setNewValue(e.target.value)}
                 placeholder="Informe o novo valor..."
               />
             </div>
@@ -328,7 +328,7 @@ export function CreateRequestModal({
               <Textarea
                 id="obs"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="Informações adicionais..."
                 rows={2}
               />
@@ -344,7 +344,7 @@ export function CreateRequestModal({
               <Input
                 id="subject"
                 value={fieldToChange}
-                onChange={(e) => setFieldToChange(e.target.value)}
+                onChange={e => setFieldToChange(e.target.value)}
                 placeholder="Assunto da solicitação..."
               />
             </div>
@@ -353,7 +353,7 @@ export function CreateRequestModal({
               <Textarea
                 id="message"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="Descreva sua solicitação de suporte... (min. 10 caracteres)"
                 rows={4}
               />
@@ -386,9 +386,9 @@ export function CreateRequestModal({
      =========================================== */
 
   const TypeIcon =
-    REQUEST_TYPES.find((rt) => rt.type === selectedType)?.icon || ClipboardList;
+    REQUEST_TYPES.find(rt => rt.type === selectedType)?.icon || ClipboardList;
   const typeGradient =
-    REQUEST_TYPES.find((rt) => rt.type === selectedType)?.gradient ||
+    REQUEST_TYPES.find(rt => rt.type === selectedType)?.gradient ||
     'from-blue-500 to-blue-600';
 
   const steps = [
@@ -444,7 +444,7 @@ export function CreateRequestModal({
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(open) => {
+      onOpenChange={open => {
         if (!open) handleClose();
       }}
       steps={steps}

@@ -27,7 +27,9 @@ export interface CreateSafetyProgramOptions {
   showErrorToast?: boolean;
 }
 
-export function useCreateSafetyProgram(options: CreateSafetyProgramOptions = {}) {
+export function useCreateSafetyProgram(
+  options: CreateSafetyProgramOptions = {}
+) {
   const queryClient = useQueryClient();
   const {
     onSuccess,
@@ -37,7 +39,9 @@ export function useCreateSafetyProgram(options: CreateSafetyProgramOptions = {})
   } = options;
 
   return useMutation({
-    mutationFn: async (data: CreateSafetyProgramData): Promise<SafetyProgram> => {
+    mutationFn: async (
+      data: CreateSafetyProgramData
+    ): Promise<SafetyProgram> => {
       const response = await safetyProgramsService.create(data);
       return response.safetyProgram;
     },
@@ -66,7 +70,9 @@ export interface UpdateSafetyProgramOptions {
   showErrorToast?: boolean;
 }
 
-export function useUpdateSafetyProgram(options: UpdateSafetyProgramOptions = {}) {
+export function useUpdateSafetyProgram(
+  options: UpdateSafetyProgramOptions = {}
+) {
   const queryClient = useQueryClient();
   const {
     onSuccess,
@@ -112,7 +118,9 @@ export interface DeleteSafetyProgramOptions {
   showErrorToast?: boolean;
 }
 
-export function useDeleteSafetyProgram(options: DeleteSafetyProgramOptions = {}) {
+export function useDeleteSafetyProgram(
+  options: DeleteSafetyProgramOptions = {}
+) {
   const queryClient = useQueryClient();
   const {
     onSuccess,
@@ -149,17 +157,24 @@ export interface CreateRiskOptions {
   onError?: (error: Error) => void;
 }
 
-export function useCreateWorkplaceRisk(programId: string, options: CreateRiskOptions = {}) {
+export function useCreateWorkplaceRisk(
+  programId: string,
+  options: CreateRiskOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 
   return useMutation({
-    mutationFn: async (data: CreateWorkplaceRiskData): Promise<WorkplaceRisk> => {
+    mutationFn: async (
+      data: CreateWorkplaceRiskData
+    ): Promise<WorkplaceRisk> => {
       const response = await safetyProgramsService.createRisk(programId, data);
       return response.risk;
     },
     onSuccess: risk => {
-      queryClient.invalidateQueries({ queryKey: safetyProgramKeys.risks(programId) });
+      queryClient.invalidateQueries({
+        queryKey: safetyProgramKeys.risks(programId),
+      });
       toast.success('Risco adicionado com sucesso!');
       onSuccess?.(risk);
     },
@@ -179,7 +194,10 @@ export interface UpdateRiskOptions {
   onError?: (error: Error) => void;
 }
 
-export function useUpdateWorkplaceRisk(programId: string, options: UpdateRiskOptions = {}) {
+export function useUpdateWorkplaceRisk(
+  programId: string,
+  options: UpdateRiskOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 
@@ -191,11 +209,17 @@ export function useUpdateWorkplaceRisk(programId: string, options: UpdateRiskOpt
       riskId: string;
       data: UpdateWorkplaceRiskData;
     }): Promise<WorkplaceRisk> => {
-      const response = await safetyProgramsService.updateRisk(programId, riskId, data);
+      const response = await safetyProgramsService.updateRisk(
+        programId,
+        riskId,
+        data
+      );
       return response.risk;
     },
     onSuccess: risk => {
-      queryClient.invalidateQueries({ queryKey: safetyProgramKeys.risks(programId) });
+      queryClient.invalidateQueries({
+        queryKey: safetyProgramKeys.risks(programId),
+      });
       toast.success('Risco atualizado com sucesso!');
       onSuccess?.(risk);
     },
@@ -215,7 +239,10 @@ export interface DeleteRiskOptions {
   onError?: (error: Error) => void;
 }
 
-export function useDeleteWorkplaceRisk(programId: string, options: DeleteRiskOptions = {}) {
+export function useDeleteWorkplaceRisk(
+  programId: string,
+  options: DeleteRiskOptions = {}
+) {
   const queryClient = useQueryClient();
   const { onSuccess, onError } = options;
 
@@ -224,7 +251,9 @@ export function useDeleteWorkplaceRisk(programId: string, options: DeleteRiskOpt
       await safetyProgramsService.deleteRisk(programId, riskId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: safetyProgramKeys.risks(programId) });
+      queryClient.invalidateQueries({
+        queryKey: safetyProgramKeys.risks(programId),
+      });
       toast.success('Risco excluído com sucesso!');
       onSuccess?.();
     },

@@ -44,16 +44,27 @@ test.describe('Finance - Plano de Contas', () => {
     const table = page.locator('table').first();
     const emptyState = page.locator('text=Nenhuma conta encontrada').first();
 
-    const hasTable = await table.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasEmpty = await emptyState.isVisible({ timeout: 2_000 }).catch(() => false);
+    const hasTable = await table
+      .isVisible({ timeout: 5_000 })
+      .catch(() => false);
+    const hasEmpty = await emptyState
+      .isVisible({ timeout: 2_000 })
+      .catch(() => false);
 
     // One of them must be visible (data loaded or empty state rendered)
     expect(hasTable || hasEmpty).toBeTruthy();
 
     // If table exists, verify column headers
     if (hasTable) {
-      await expect(page.locator('th').filter({ hasText: /Codigo/i }).first()).toBeVisible();
-      await expect(page.locator('th').filter({ hasText: /Tipo/i }).first()).toBeVisible();
+      await expect(
+        page
+          .locator('th')
+          .filter({ hasText: /Codigo/i })
+          .first()
+      ).toBeVisible();
+      await expect(
+        page.locator('th').filter({ hasText: /Tipo/i }).first()
+      ).toBeVisible();
     }
   });
 
@@ -62,9 +73,9 @@ test.describe('Finance - Plano de Contas', () => {
     await page.goto('/finance/chart-of-accounts');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Plano de Contas').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Plano de Contas').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Find the search bar
     const searchInput = page.getByPlaceholder(/Buscar/i).first();
@@ -95,9 +106,9 @@ test.describe('Finance - Plano de Contas', () => {
     await page.goto('/finance/chart-of-accounts');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Plano de Contas').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Plano de Contas').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Look for the "Tipo" filter dropdown button
     const typeFilter = page
@@ -111,13 +122,13 @@ test.describe('Finance - Plano de Contas', () => {
 
       // Should show filter options (Ativo, Passivo, etc.)
       const activeOption = page
-        .locator('[role="option"], [role="menuitemcheckbox"], [role="menuitem"]')
+        .locator(
+          '[role="option"], [role="menuitemcheckbox"], [role="menuitem"]'
+        )
         .filter({ hasText: 'Ativo' })
         .first();
 
-      if (
-        await activeOption.isVisible({ timeout: 3_000 }).catch(() => false)
-      ) {
+      if (await activeOption.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await activeOption.click();
         await page.waitForTimeout(1_000);
 
@@ -140,9 +151,9 @@ test.describe('Finance - Plano de Contas', () => {
     await page.goto('/finance/chart-of-accounts');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Plano de Contas').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Plano de Contas').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Click the "Nova Conta" button
     const newBtn = page
@@ -166,8 +177,12 @@ test.describe('Finance - Plano de Contas', () => {
         const nameInput = dialog.getByLabel(/Nome|Name/i).first();
 
         // At least one form field should be visible
-        const hasCodeField = await codeInput.isVisible({ timeout: 3_000 }).catch(() => false);
-        const hasNameField = await nameInput.isVisible({ timeout: 3_000 }).catch(() => false);
+        const hasCodeField = await codeInput
+          .isVisible({ timeout: 3_000 })
+          .catch(() => false);
+        const hasNameField = await nameInput
+          .isVisible({ timeout: 3_000 })
+          .catch(() => false);
 
         // Verify wizard has some input fields
         const inputFields = dialog.locator('input, select, [role="combobox"]');
@@ -188,7 +203,8 @@ test.describe('Finance - Plano de Contas', () => {
     } else {
       test.info().annotations.push({
         type: 'skip-reason',
-        description: 'Nova Conta button not found — user may lack create permission',
+        description:
+          'Nova Conta button not found — user may lack create permission',
       });
     }
   });
@@ -198,9 +214,9 @@ test.describe('Finance - Plano de Contas', () => {
     await page.goto('/finance/chart-of-accounts');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Plano de Contas').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Plano de Contas').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for content to load
     await page.waitForTimeout(3_000);
@@ -210,9 +226,7 @@ test.describe('Finance - Plano de Contas', () => {
 
     if (await accountRow.isVisible({ timeout: 5_000 }).catch(() => false)) {
       // Find the actions dropdown (3-dot menu) for the first row
-      const actionsBtn = accountRow
-        .locator('button')
-        .first();
+      const actionsBtn = accountRow.locator('button').first();
 
       if (await actionsBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await actionsBtn.click();

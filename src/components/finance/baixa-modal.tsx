@@ -248,10 +248,7 @@ export function BaixaModal({
         title: 'Valor e Data',
         description: `Pagamento do lançamento ${entry.code}`,
         icon: (
-          <DollarSign
-            className="h-16 w-16 text-violet-400"
-            strokeWidth={1.2}
-          />
+          <DollarSign className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
         ),
         content: (
           <div className="space-y-4 py-1">
@@ -378,10 +375,7 @@ export function BaixaModal({
         title: 'Método',
         description: 'Selecione a conta e o método de pagamento',
         icon: (
-          <CreditCard
-            className="h-16 w-16 text-sky-400"
-            strokeWidth={1.2}
-          />
+          <CreditCard className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
         ),
         content: (
           <div className="space-y-4 py-2">
@@ -471,7 +465,9 @@ export function BaixaModal({
                 </span>
               </div>
               <div className="border-t border-border/50 pt-3 flex justify-between text-sm">
-                <span className="text-muted-foreground">Valor do pagamento</span>
+                <span className="text-muted-foreground">
+                  Valor do pagamento
+                </span>
                 <span className="font-medium">
                   {formatCurrency(parseCurrencyInput(amount))}
                 </span>
@@ -554,10 +550,7 @@ export function BaixaModal({
             >
               ← Voltar
             </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={registerPayment.isPending}
-            >
+            <Button onClick={handleSubmit} disabled={registerPayment.isPending}>
               {registerPayment.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (

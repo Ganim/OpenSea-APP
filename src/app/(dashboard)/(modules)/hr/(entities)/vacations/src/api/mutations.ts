@@ -246,7 +246,7 @@ export function useUpdateVacation() {
       return response.vacationPeriod;
     },
 
-    onSuccess: (vacation) => {
+    onSuccess: vacation => {
       queryClient.invalidateQueries({ queryKey: vacationKeys.all });
       queryClient.invalidateQueries({
         queryKey: vacationKeys.detail(vacation.id),

@@ -9,12 +9,15 @@ import type {
 } from '@/types/sales';
 
 export const leadRoutingService = {
-  async list(query?: LeadRoutingQuery): Promise<PaginatedLeadRoutingRulesResponse> {
+  async list(
+    query?: LeadRoutingQuery
+  ): Promise<PaginatedLeadRoutingRulesResponse> {
     const params = new URLSearchParams();
     if (query?.page) params.append('page', query.page.toString());
     if (query?.limit) params.append('perPage', query.limit.toString());
     if (query?.search) params.append('search', query.search);
-    if (query?.isActive !== undefined) params.append('isActive', String(query.isActive));
+    if (query?.isActive !== undefined)
+      params.append('isActive', String(query.isActive));
     if (query?.strategy) params.append('strategy', query.strategy);
     if (query?.sortBy) params.append('sortBy', query.sortBy);
     if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
@@ -37,15 +40,28 @@ export const leadRoutingService = {
   },
 
   async get(id: string): Promise<LeadRoutingRuleResponse> {
-    return apiClient.get<LeadRoutingRuleResponse>(API_ENDPOINTS.LEAD_ROUTING.GET(id));
+    return apiClient.get<LeadRoutingRuleResponse>(
+      API_ENDPOINTS.LEAD_ROUTING.GET(id)
+    );
   },
 
-  async create(data: CreateLeadRoutingRuleRequest): Promise<LeadRoutingRuleResponse> {
-    return apiClient.post<LeadRoutingRuleResponse>(API_ENDPOINTS.LEAD_ROUTING.CREATE, data);
+  async create(
+    data: CreateLeadRoutingRuleRequest
+  ): Promise<LeadRoutingRuleResponse> {
+    return apiClient.post<LeadRoutingRuleResponse>(
+      API_ENDPOINTS.LEAD_ROUTING.CREATE,
+      data
+    );
   },
 
-  async update(id: string, data: UpdateLeadRoutingRuleRequest): Promise<LeadRoutingRuleResponse> {
-    return apiClient.put<LeadRoutingRuleResponse>(API_ENDPOINTS.LEAD_ROUTING.UPDATE(id), data);
+  async update(
+    id: string,
+    data: UpdateLeadRoutingRuleRequest
+  ): Promise<LeadRoutingRuleResponse> {
+    return apiClient.put<LeadRoutingRuleResponse>(
+      API_ENDPOINTS.LEAD_ROUTING.UPDATE(id),
+      data
+    );
   },
 
   async delete(id: string): Promise<void> {

@@ -16,7 +16,10 @@ export const workplaceRiskKeys = {
   lists: () => [...workplaceRiskKeys.all, 'list'] as const,
   list: (filters?: WorkplaceRiskFilters) =>
     [...workplaceRiskKeys.lists(), filters ?? {}] as const,
-  byProgram: (programId: string, filters?: Omit<WorkplaceRiskFilters, 'programId'>) =>
+  byProgram: (
+    programId: string,
+    filters?: Omit<WorkplaceRiskFilters, 'programId'>
+  ) =>
     [...workplaceRiskKeys.all, 'by-program', programId, filters ?? {}] as const,
   details: () => [...workplaceRiskKeys.all, 'detail'] as const,
   detail: (id: string) => [...workplaceRiskKeys.details(), id] as const,

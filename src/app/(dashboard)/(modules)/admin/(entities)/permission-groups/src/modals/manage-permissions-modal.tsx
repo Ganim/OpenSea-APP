@@ -13,12 +13,7 @@ import type {
   PermissionGroup,
   PermissionWithEffect,
 } from '@/types/rbac';
-import {
-  ChevronsDownUp,
-  ChevronsUpDown,
-  Loader2,
-  Search,
-} from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, Loader2, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
@@ -520,10 +515,7 @@ export function ManagePermissionsModal({
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-12 rounded-xl bg-muted animate-pulse"
-              />
+              <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />
             ))}
           </div>
         ) : (
@@ -561,9 +553,7 @@ export function ManagePermissionsModal({
                 variant="outline"
                 size="sm"
                 className="h-9 px-2.5 text-xs"
-                onClick={() =>
-                  handleBulkToggle(getTabCodes(activeTab), false)
-                }
+                onClick={() => handleBulkToggle(getTabCodes(activeTab), false)}
                 disabled={isSaving}
               >
                 Limpar
@@ -572,9 +562,7 @@ export function ManagePermissionsModal({
                 variant="outline"
                 size="sm"
                 className="h-9 px-2.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
-                onClick={() =>
-                  handleBulkToggle(getTabCodes(activeTab), true)
-                }
+                onClick={() => handleBulkToggle(getTabCodes(activeTab), true)}
                 disabled={isSaving}
               >
                 Ativar tudo
@@ -634,7 +622,6 @@ export function ManagePermissionsModal({
                 </div>
               );
             })}
-
           </div>
         )}
       </TooltipProvider>

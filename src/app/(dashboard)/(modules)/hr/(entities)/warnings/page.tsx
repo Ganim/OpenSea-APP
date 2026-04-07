@@ -514,7 +514,9 @@ export default function WarningsPage() {
               message="Ocorreu um erro ao tentar carregar as advertências. Por favor, tente novamente."
               action={{
                 label: 'Tentar Novamente',
-                onClick: () => { refetch(); },
+                onClick: () => {
+                  refetch();
+                },
               }}
             />
           ) : (

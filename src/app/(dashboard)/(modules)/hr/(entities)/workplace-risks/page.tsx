@@ -280,7 +280,8 @@ export default function WorkplaceRisksPage() {
         onView={
           canView
             ? (ids: string[]) => {
-                if (ids.length > 0) router.push(`/hr/workplace-risks/${ids[0]}`);
+                if (ids.length > 0)
+                  router.push(`/hr/workplace-risks/${ids[0]}`);
               }
             : undefined
         }
@@ -355,7 +356,8 @@ export default function WorkplaceRisksPage() {
         onView={
           canView
             ? (ids: string[]) => {
-                if (ids.length > 0) router.push(`/hr/workplace-risks/${ids[0]}`);
+                if (ids.length > 0)
+                  router.push(`/hr/workplace-risks/${ids[0]}`);
               }
             : undefined
         }

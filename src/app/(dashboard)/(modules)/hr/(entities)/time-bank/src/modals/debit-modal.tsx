@@ -53,7 +53,12 @@ export function DebitModal({
       setFieldErrors({});
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('hours') || msg.includes('horas') || msg.includes('insufficient') || msg.includes('insuficiente')) {
+      if (
+        msg.includes('hours') ||
+        msg.includes('horas') ||
+        msg.includes('insufficient') ||
+        msg.includes('insuficiente')
+      ) {
         setFieldErrors(prev => ({ ...prev, hours: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -93,7 +98,8 @@ export function DebitModal({
                 value={hours}
                 onChange={e => {
                   setHours(e.target.value);
-                  if (fieldErrors.hours) setFieldErrors(prev => ({ ...prev, hours: '' }));
+                  if (fieldErrors.hours)
+                    setFieldErrors(prev => ({ ...prev, hours: '' }));
                 }}
                 required
                 aria-invalid={!!fieldErrors.hours}

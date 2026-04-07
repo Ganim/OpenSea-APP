@@ -13,13 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import type { EmployeeDependant } from '@/types/hr';
-import {
-  Calendar,
-  CreditCard,
-  Heart,
-  Shield,
-  User,
-} from 'lucide-react';
+import { Calendar, CreditCard, Heart, Shield, User } from 'lucide-react';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import {
   formatDate,

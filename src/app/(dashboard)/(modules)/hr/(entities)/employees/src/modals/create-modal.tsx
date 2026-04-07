@@ -76,7 +76,8 @@ export function CreateModal({
   const [passwordError, setPasswordError] = useState<string>('');
   const [enableEmailLogin, setEnableEmailLogin] = useState<boolean>(false);
   const [enableCpfLogin, setEnableCpfLogin] = useState<boolean>(true);
-  const [enableEnrollmentLogin, setEnableEnrollmentLogin] = useState<boolean>(false);
+  const [enableEnrollmentLogin, setEnableEnrollmentLogin] =
+    useState<boolean>(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Fetch departments
@@ -295,7 +296,8 @@ export function CreateModal({
       try {
         await onSubmit({
           fullName,
-          companyId: selectedCompany?.id || selectedDepartment?.companyId || null,
+          companyId:
+            selectedCompany?.id || selectedDepartment?.companyId || null,
           departmentId: selectedDepartment?.id || null,
           positionId: positionId || null,
           registrationNumber,
@@ -349,8 +351,10 @@ export function CreateModal({
   const canProceedStep1 = positionId !== '';
   const canProceedStep2 =
     fullName !== '' && cpf.replace(/\D/g, '').length === 11 && !cpfError;
-  const hasAtLeastOneLoginMethod = enableEmailLogin || enableCpfLogin || enableEnrollmentLogin;
-  const emailFieldValid = !enableEmailLogin || (userEmail !== '' && !emailError);
+  const hasAtLeastOneLoginMethod =
+    enableEmailLogin || enableCpfLogin || enableEnrollmentLogin;
+  const emailFieldValid =
+    !enableEmailLogin || (userEmail !== '' && !emailError);
   const canSubmit =
     !createUser ||
     (createUser &&
@@ -552,15 +556,23 @@ export function CreateModal({
             <div className="space-y-2">
               {/* CPF Login */}
               {cpf && cpf.replace(/\D/g, '').length === 11 && !cpfError && (
-                <div className={`rounded-lg border p-3 transition-colors ${enableCpfLogin ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5' : 'border-border'}`}>
+                <div
+                  className={`rounded-lg border p-3 transition-colors ${enableCpfLogin ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5' : 'border-border'}`}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableCpfLogin ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-muted'}`}>
-                        <CreditCard className={`h-4 w-4 ${enableCpfLogin ? 'text-emerald-700 dark:text-emerald-300' : 'text-muted-foreground'}`} />
+                      <div
+                        className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableCpfLogin ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-muted'}`}
+                      >
+                        <CreditCard
+                          className={`h-4 w-4 ${enableCpfLogin ? 'text-emerald-700 dark:text-emerald-300' : 'text-muted-foreground'}`}
+                        />
                       </div>
                       <div>
                         <p className="text-sm font-medium">Login por CPF</p>
-                        <p className="text-xs text-muted-foreground">Acessar usando o CPF cadastrado</p>
+                        <p className="text-xs text-muted-foreground">
+                          Acessar usando o CPF cadastrado
+                        </p>
                       </div>
                     </div>
                     <Switch
@@ -576,7 +588,9 @@ export function CreateModal({
                         variant="ghost"
                         size="sm"
                         className="h-7 w-7 p-0"
-                        onClick={() => copyToClipboard(cpf.replace(/\D/g, ''), 'cpf')}
+                        onClick={() =>
+                          copyToClipboard(cpf.replace(/\D/g, ''), 'cpf')
+                        }
                       >
                         {copiedField === 'cpf' ? (
                           <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -590,15 +604,23 @@ export function CreateModal({
               )}
 
               {/* Email Login */}
-              <div className={`rounded-lg border p-3 transition-colors ${enableEmailLogin ? 'border-sky-200 dark:border-sky-500/20 bg-sky-50/50 dark:bg-sky-500/5' : 'border-border'}`}>
+              <div
+                className={`rounded-lg border p-3 transition-colors ${enableEmailLogin ? 'border-sky-200 dark:border-sky-500/20 bg-sky-50/50 dark:bg-sky-500/5' : 'border-border'}`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEmailLogin ? 'bg-sky-100 dark:bg-sky-500/10' : 'bg-muted'}`}>
-                      <Mail className={`h-4 w-4 ${enableEmailLogin ? 'text-sky-700 dark:text-sky-300' : 'text-muted-foreground'}`} />
+                    <div
+                      className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEmailLogin ? 'bg-sky-100 dark:bg-sky-500/10' : 'bg-muted'}`}
+                    >
+                      <Mail
+                        className={`h-4 w-4 ${enableEmailLogin ? 'text-sky-700 dark:text-sky-300' : 'text-muted-foreground'}`}
+                      />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Login por Email</p>
-                      <p className="text-xs text-muted-foreground">Acessar usando email e senha</p>
+                      <p className="text-xs text-muted-foreground">
+                        Acessar usando email e senha
+                      </p>
                     </div>
                   </div>
                   <Switch
@@ -626,15 +648,23 @@ export function CreateModal({
               </div>
 
               {/* Enrollment Login */}
-              <div className={`rounded-lg border p-3 transition-colors ${enableEnrollmentLogin ? 'border-violet-200 dark:border-violet-500/20 bg-violet-50/50 dark:bg-violet-500/5' : 'border-border'}`}>
+              <div
+                className={`rounded-lg border p-3 transition-colors ${enableEnrollmentLogin ? 'border-violet-200 dark:border-violet-500/20 bg-violet-50/50 dark:bg-violet-500/5' : 'border-border'}`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEnrollmentLogin ? 'bg-violet-100 dark:bg-violet-500/10' : 'bg-muted'}`}>
-                      <Hash className={`h-4 w-4 ${enableEnrollmentLogin ? 'text-violet-700 dark:text-violet-300' : 'text-muted-foreground'}`} />
+                    <div
+                      className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEnrollmentLogin ? 'bg-violet-100 dark:bg-violet-500/10' : 'bg-muted'}`}
+                    >
+                      <Hash
+                        className={`h-4 w-4 ${enableEnrollmentLogin ? 'text-violet-700 dark:text-violet-300' : 'text-muted-foreground'}`}
+                      />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Login por Matrícula</p>
-                      <p className="text-xs text-muted-foreground">Acessar usando o número de matrícula</p>
+                      <p className="text-xs text-muted-foreground">
+                        Acessar usando o número de matrícula
+                      </p>
                     </div>
                   </div>
                   <Switch
@@ -644,13 +674,17 @@ export function CreateModal({
                 </div>
                 {enableEnrollmentLogin && (
                   <div className="mt-2.5 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-violet-100 dark:border-violet-500/10 px-3 py-2">
-                    <span className="text-sm font-mono flex-1">{registrationNumber}</span>
+                    <span className="text-sm font-mono flex-1">
+                      {registrationNumber}
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="h-7 w-7 p-0"
-                      onClick={() => copyToClipboard(registrationNumber, 'enrollment')}
+                      onClick={() =>
+                        copyToClipboard(registrationNumber, 'enrollment')
+                      }
                     >
                       {copiedField === 'enrollment' ? (
                         <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -699,7 +733,9 @@ export function CreateModal({
                     size="sm"
                     className={`absolute top-1/2 -translate-y-1/2 h-7 w-7 p-0 ${passwordError ? 'right-8' : 'right-1'}`}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-muted-foreground" />

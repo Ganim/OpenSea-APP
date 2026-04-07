@@ -86,7 +86,11 @@ export default function ReportsPage() {
             { label: 'Relatórios' },
           ]}
         >
-          <Button size="sm" className="h-9 px-2.5" onClick={() => setWizardOpen(true)}>
+          <Button
+            size="sm"
+            className="h-9 px-2.5"
+            onClick={() => setWizardOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-1" />
             Novo Relatório
           </Button>

@@ -126,9 +126,7 @@ function StepItems({
     value: string | number
   ) => {
     onItemsChange(
-      items.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
+      items.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
 
@@ -173,11 +171,7 @@ function StepItems({
                 min={1}
                 value={item.quantity}
                 onChange={e =>
-                  updateItem(
-                    index,
-                    'quantity',
-                    parseInt(e.target.value) || 1
-                  )
+                  updateItem(index, 'quantity', parseInt(e.target.value) || 1)
                 }
               />
             </div>
@@ -205,11 +199,7 @@ function StepItems({
                 step="0.01"
                 value={item.discount}
                 onChange={e =>
-                  updateItem(
-                    index,
-                    'discount',
-                    parseFloat(e.target.value) || 0
-                  )
+                  updateItem(index, 'discount', parseFloat(e.target.value) || 0)
                 }
               />
             </div>
@@ -407,7 +397,9 @@ export function CreateQuoteWizard({
     {
       title: 'Adicionar Itens',
       description: 'Adicione os produtos e serviços ao orçamento.',
-      icon: <Package className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
+      icon: (
+        <Package className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+      ),
       onBack: () => setCurrentStep(1),
       content: <StepItems items={items} onItemsChange={setItems} />,
       isValid: hasValidItems,
@@ -416,10 +408,7 @@ export function CreateQuoteWizard({
       title: 'Revisão',
       description: 'Revise os dados e finalize o orçamento.',
       icon: (
-        <NotebookText
-          className="h-16 w-16 text-violet-400"
-          strokeWidth={1.2}
-        />
+        <NotebookText className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
       ),
       onBack: () => setCurrentStep(2),
       content: (

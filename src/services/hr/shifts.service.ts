@@ -36,9 +36,7 @@ export const shiftsService = {
       query.append('activeOnly', String(params.activeOnly));
 
     const qs = query.toString();
-    return apiClient.get<ShiftsResponse>(
-      `/v1/hr/shifts${qs ? `?${qs}` : ''}`
-    );
+    return apiClient.get<ShiftsResponse>(`/v1/hr/shifts${qs ? `?${qs}` : ''}`);
   },
 
   async getShift(id: string): Promise<ShiftResponse> {
@@ -49,10 +47,7 @@ export const shiftsService = {
     return apiClient.post<ShiftResponse>('/v1/hr/shifts', data);
   },
 
-  async updateShift(
-    id: string,
-    data: UpdateShiftData
-  ): Promise<ShiftResponse> {
+  async updateShift(id: string, data: UpdateShiftData): Promise<ShiftResponse> {
     return apiClient.put<ShiftResponse>(`/v1/hr/shifts/${id}`, data);
   },
 
@@ -81,9 +76,7 @@ export const shiftsService = {
   },
 
   async unassignEmployee(assignmentId: string): Promise<void> {
-    return apiClient.delete<void>(
-      `/v1/hr/shift-assignments/${assignmentId}`
-    );
+    return apiClient.delete<void>(`/v1/hr/shift-assignments/${assignmentId}`);
   },
 
   async transferEmployee(

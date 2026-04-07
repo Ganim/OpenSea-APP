@@ -1,12 +1,12 @@
 import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 import type {
-    ListPrintersResponse,
-    PreviewReceiptResponse,
-    QueueReceiptRequest,
-    QueueReceiptResponse,
-    RegisterPrinterRequest,
-    RegisterPrinterResponse,
+  ListPrintersResponse,
+  PreviewReceiptResponse,
+  QueueReceiptRequest,
+  QueueReceiptResponse,
+  RegisterPrinterRequest,
+  RegisterPrinterResponse,
 } from '@/types/sales';
 
 export const printingService = {

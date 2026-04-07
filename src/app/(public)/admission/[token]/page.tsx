@@ -62,13 +62,14 @@ const BANK_ACCOUNT_TYPE_OPTIONS: { value: BankAccountType; label: string }[] = [
   { value: 'SAVINGS', label: 'Poupança' },
 ];
 
-const RELATIONSHIP_OPTIONS: { value: DependantRelationship; label: string }[] = [
-  { value: 'SPOUSE', label: 'Cônjuge' },
-  { value: 'CHILD', label: 'Filho(a)' },
-  { value: 'STEPCHILD', label: 'Enteado(a)' },
-  { value: 'PARENT', label: 'Pai/Mãe' },
-  { value: 'OTHER', label: 'Outro' },
-];
+const RELATIONSHIP_OPTIONS: { value: DependantRelationship; label: string }[] =
+  [
+    { value: 'SPOUSE', label: 'Cônjuge' },
+    { value: 'CHILD', label: 'Filho(a)' },
+    { value: 'STEPCHILD', label: 'Enteado(a)' },
+    { value: 'PARENT', label: 'Pai/Mãe' },
+    { value: 'OTHER', label: 'Outro' },
+  ];
 
 const REQUIRED_DOCUMENTS: { type: AdmissionDocumentType; label: string }[] = [
   { type: 'RG', label: 'RG (Identidade)' },
@@ -237,7 +238,11 @@ export default function AdmissionWizardPage() {
             setAccountType(cd.bankData.accountType);
           if (cd.bankData.pixKey) setPixKey(cd.bankData.pixKey);
         }
-        if (cd.dependants && cd.dependants.length > 0 && dependants.length === 0) {
+        if (
+          cd.dependants &&
+          cd.dependants.length > 0 &&
+          dependants.length === 0
+        ) {
           setDependants(cd.dependants);
         }
       }
@@ -381,10 +386,7 @@ export default function AdmissionWizardPage() {
     );
   }
 
-  if (
-    inviteData.status === 'EXPIRED' ||
-    inviteData.status === 'CANCELLED'
-  ) {
+  if (inviteData.status === 'EXPIRED' || inviteData.status === 'CANCELLED') {
     return (
       <div className="flex flex-col items-center justify-center py-16 space-y-4">
         <XCircle className="h-12 w-12 text-rose-500" />
@@ -663,8 +665,8 @@ export default function AdmissionWizardPage() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Envie fotos ou PDFs dos documentos solicitados. Pelo menos RG e CPF
-              são obrigatórios.
+              Envie fotos ou PDFs dos documentos solicitados. Pelo menos RG e
+              CPF são obrigatórios.
             </p>
 
             <div className="space-y-3">
@@ -748,8 +750,8 @@ export default function AdmissionWizardPage() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Informe os dados da sua conta para recebimento do salário.
-              Este passo é opcional e pode ser preenchido depois.
+              Informe os dados da sua conta para recebimento do salário. Este
+              passo é opcional e pode ser preenchido depois.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -995,17 +997,17 @@ export default function AdmissionWizardPage() {
                   <ShieldAlert className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                   <div className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Declaro que todas as informações fornecidas neste formulário
-                      são verdadeiras e completas. Autorizo a empresa a verificar
-                      os dados apresentados e estou ciente de que informações
-                      falsas podem resultar em cancelamento do processo de
-                      admissão.
+                      Declaro que todas as informações fornecidas neste
+                      formulário são verdadeiras e completas. Autorizo a empresa
+                      a verificar os dados apresentados e estou ciente de que
+                      informações falsas podem resultar em cancelamento do
+                      processo de admissão.
                     </p>
                     <p>
                       Ao assinar eletronicamente, concordo com os termos do
                       contrato de trabalho e com a política de privacidade da
-                      empresa. A assinatura digital tem validade jurídica conforme
-                      a legislação vigente.
+                      empresa. A assinatura digital tem validade jurídica
+                      conforme a legislação vigente.
                     </p>
                   </div>
                 </div>

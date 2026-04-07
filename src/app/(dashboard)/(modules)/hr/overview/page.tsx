@@ -48,10 +48,7 @@ import type {
   BirthdayEmployee,
   ProbationEnding,
 } from '../_shared/hooks/use-hr-analytics';
-import {
-  CHART_COLORS,
-  CHART_COLOR_SCALE,
-} from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_COLOR_SCALE } from '@/lib/chart-colors';
 import React from 'react';
 
 // ============================================================================
@@ -80,7 +77,9 @@ function StatCard({
   href,
 }: StatCardProps) {
   const content = (
-    <Card className={href ? 'transition-shadow hover:shadow-md cursor-pointer' : ''}>
+    <Card
+      className={href ? 'transition-shadow hover:shadow-md cursor-pointer' : ''}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
@@ -407,7 +406,9 @@ function BirthdaysWidget({
                   className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Avatar className="h-9 w-9">
-                    {emp.photoUrl && <AvatarImage src={emp.photoUrl} alt={emp.fullName} />}
+                    {emp.photoUrl && (
+                      <AvatarImage src={emp.photoUrl} alt={emp.fullName} />
+                    )}
                     <AvatarFallback className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
                       {initials}
                     </AvatarFallback>
@@ -728,7 +729,10 @@ export default function HROverviewPage() {
         {/* Row 4: Payroll Trend + Overtime Trend */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <WidgetErrorBoundary fallbackMessage="Erro ao carregar folha de pagamento">
-            <ChartCard title="Folha de Pagamento (6 meses)" isLoading={isLoading}>
+            <ChartCard
+              title="Folha de Pagamento (6 meses)"
+              isLoading={isLoading}
+            >
               {data && data.payrollTrend.some(p => p.bruto > 0) ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={data.payrollTrend}>

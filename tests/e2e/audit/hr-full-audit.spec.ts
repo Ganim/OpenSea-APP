@@ -684,7 +684,7 @@ async function loginAndGetToken(page: Page): Promise<string> {
     }
   );
   const body = await response.json();
-  let token = body.token;
+  const token = body.token;
 
   // If backend auto-selected tenant, token is already scoped
   if (body.tenant) {

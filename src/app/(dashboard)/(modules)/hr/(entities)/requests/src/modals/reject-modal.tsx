@@ -49,7 +49,7 @@ export function RejectModal({ isOpen, onClose, requestId }: RejectModalProps) {
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(open) => {
+      onOpenChange={open => {
         if (!open) {
           setReason('');
           onClose();
@@ -75,7 +75,7 @@ export function RejectModal({ isOpen, onClose, requestId }: RejectModalProps) {
             <Textarea
               id="reject-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               placeholder="Descreva o motivo da rejeição..."
               rows={4}
               required

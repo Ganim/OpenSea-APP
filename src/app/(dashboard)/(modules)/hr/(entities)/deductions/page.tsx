@@ -146,7 +146,8 @@ export default function DeductionsPage() {
   // Employee options for filter dropdown
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'filter-options'],
-    queryFn: () => employeesService.listEmployees({ perPage: 100, status: 'ACTIVE' }),
+    queryFn: () =>
+      employeesService.listEmployees({ perPage: 100, status: 'ACTIVE' }),
     staleTime: 60_000,
   });
 
@@ -564,9 +565,7 @@ export default function DeductionsPage() {
                           : 'false'
                     }
                     onChange={v =>
-                      setFilterIsApplied(
-                        v === '' ? undefined : v === 'true'
-                      )
+                      setFilterIsApplied(v === '' ? undefined : v === 'true')
                     }
                     activeColor="emerald"
                   />
@@ -582,9 +581,7 @@ export default function DeductionsPage() {
                           : 'false'
                     }
                     onChange={v =>
-                      setFilterIsRecurring(
-                        v === '' ? undefined : v === 'true'
-                      )
+                      setFilterIsRecurring(v === '' ? undefined : v === 'true')
                     }
                     activeColor="cyan"
                   />

@@ -162,7 +162,11 @@ export default function EditQuotePage() {
     setItems(prev => prev.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof ItemRow, value: string | number) => {
+  const updateItem = (
+    index: number,
+    field: keyof ItemRow,
+    value: string | number
+  ) => {
     setItems(prev =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );

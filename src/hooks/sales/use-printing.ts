@@ -1,7 +1,7 @@
 import { printingService } from '@/services/sales';
 import type {
-    QueueReceiptRequest,
-    RegisterPrinterRequest,
+  QueueReceiptRequest,
+  RegisterPrinterRequest,
 } from '@/types/sales';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';

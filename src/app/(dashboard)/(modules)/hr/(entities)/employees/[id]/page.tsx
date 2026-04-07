@@ -234,10 +234,11 @@ export default function EmployeeDetailPage() {
   });
 
   // Dependants (read-only in details tab)
-  const { data: dependantsData = [], isLoading: isLoadingDependants } = useQuery<EmployeeDependant[]>({
-    queryKey: dependantKeys.list(employeeId),
-    queryFn: () => dependantsApi.list(employeeId),
-  });
+  const { data: dependantsData = [], isLoading: isLoadingDependants } =
+    useQuery<EmployeeDependant[]>({
+      queryKey: dependantKeys.list(employeeId),
+      queryFn: () => dependantsApi.list(employeeId),
+    });
 
   // Medical exams
   const { data: medicalExamsData, isLoading: isLoadingExams } = useQuery({
@@ -700,7 +701,12 @@ export default function EmployeeDetailPage() {
 
   // Medical exam expiration status
   const getExamExpirationStatus = (expirationDate?: string) => {
-    if (!expirationDate) return { label: 'Sem validade', color: 'text-muted-foreground', icon: null };
+    if (!expirationDate)
+      return {
+        label: 'Sem validade',
+        color: 'text-muted-foreground',
+        icon: null,
+      };
     const expDate = new Date(expirationDate);
     const now = new Date();
     const daysUntilExpiration = Math.ceil(
@@ -710,9 +716,17 @@ export default function EmployeeDetailPage() {
       return { label: 'Vencido', color: 'text-rose-500', icon: XCircle };
     }
     if (daysUntilExpiration <= 30) {
-      return { label: `Vence em ${daysUntilExpiration} dias`, color: 'text-amber-500', icon: AlertTriangle };
+      return {
+        label: `Vence em ${daysUntilExpiration} dias`,
+        color: 'text-amber-500',
+        icon: AlertTriangle,
+      };
     }
-    return { label: `Válido até ${new Date(expirationDate).toLocaleDateString('pt-BR')}`, color: 'text-emerald-500', icon: CheckCircle2 };
+    return {
+      label: `Válido até ${new Date(expirationDate).toLocaleDateString('pt-BR')}`,
+      color: 'text-emerald-500',
+      icon: CheckCircle2,
+    };
   };
 
   // Time entry type labels
@@ -916,8 +930,12 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <User className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Informações Pessoais</h3>
-                  <p className="text-sm text-muted-foreground">Dados pessoais e identificação do funcionário</p>
+                  <h3 className="text-base font-semibold">
+                    Informações Pessoais
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Dados pessoais e identificação do funcionário
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
@@ -993,8 +1011,12 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Briefcase className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Informações Profissionais</h3>
-                  <p className="text-sm text-muted-foreground">Cargo, departamento e dados da contratação</p>
+                  <h3 className="text-base font-semibold">
+                    Informações Profissionais
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Cargo, departamento e dados da contratação
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
@@ -1040,8 +1062,12 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <FileText className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Informações Contratuais</h3>
-                  <p className="text-sm text-muted-foreground">Tipo de contrato, regime e jornada de trabalho</p>
+                  <h3 className="text-base font-semibold">
+                    Informações Contratuais
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Tipo de contrato, regime e jornada de trabalho
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
@@ -1085,8 +1111,12 @@ export default function EmployeeDetailPage() {
                 <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                   <Phone className="h-5 w-5 text-foreground" />
                   <div className="flex-1">
-                    <h3 className="text-base font-semibold">Contato de Emergência</h3>
-                    <p className="text-sm text-muted-foreground">Pessoa para contato em caso de emergência</p>
+                    <h3 className="text-base font-semibold">
+                      Contato de Emergência
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Pessoa para contato em caso de emergência
+                    </p>
                   </div>
                 </div>
                 <div className="border-b border-border" />
@@ -1130,7 +1160,9 @@ export default function EmployeeDetailPage() {
                       label="Telefone Alternativo"
                       value={
                         employee.emergencyContactInfo?.alternativePhone
-                          ? formatPhone(employee.emergencyContactInfo.alternativePhone)
+                          ? formatPhone(
+                              employee.emergencyContactInfo.alternativePhone
+                            )
                           : null
                       }
                     />
@@ -1145,11 +1177,17 @@ export default function EmployeeDetailPage() {
                 <Users className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Dependentes</h3>
-                  <p className="text-sm text-muted-foreground">Dependentes cadastrados do funcionário</p>
+                  <p className="text-sm text-muted-foreground">
+                    Dependentes cadastrados do funcionário
+                  </p>
                 </div>
                 {canEdit && (
                   <Link href={`/hr/employees/${employeeId}/edit`}>
-                    <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 h-9 px-2.5"
+                    >
                       <Edit className="h-4 w-4" />
                       Gerenciar
                     </Button>
@@ -1187,22 +1225,28 @@ export default function EmployeeDetailPage() {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-medium text-sm truncate">{dep.name}</p>
+                              <p className="font-medium text-sm truncate">
+                                {dep.name}
+                              </p>
                               <Badge variant="secondary" className="text-xs">
-                                {({
-                                  SPOUSE: 'Cônjuge',
-                                  CHILD: 'Filho(a)',
-                                  STEPCHILD: 'Enteado(a)',
-                                  PARENT: 'Pai/Mãe',
-                                  OTHER: 'Outro',
-                                } as Record<string, string>)[dep.relationship] || dep.relationship}
+                                {(
+                                  {
+                                    SPOUSE: 'Cônjuge',
+                                    CHILD: 'Filho(a)',
+                                    STEPCHILD: 'Enteado(a)',
+                                    PARENT: 'Pai/Mãe',
+                                    OTHER: 'Outro',
+                                  } as Record<string, string>
+                                )[dep.relationship] || dep.relationship}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                               {dep.birthDate && (
                                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Calendar className="h-3 w-3" />
-                                  {new Date(dep.birthDate).toLocaleDateString('pt-BR')}
+                                  {new Date(dep.birthDate).toLocaleDateString(
+                                    'pt-BR'
+                                  )}
                                 </span>
                               )}
                               {dep.isIrrfDependant && (
@@ -1244,8 +1288,12 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <UserCircle className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Usuário do Sistema</h3>
-                  <p className="text-sm text-muted-foreground">Conta de acesso vinculada ao funcionário</p>
+                  <h3 className="text-base font-semibold">
+                    Usuário do Sistema
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Conta de acesso vinculada ao funcionário
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
@@ -1326,11 +1374,19 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Gift className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Benefícios Inscritos</h3>
-                  <p className="text-sm text-muted-foreground">Planos de benefícios ativos do funcionário</p>
+                  <h3 className="text-base font-semibold">
+                    Benefícios Inscritos
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Planos de benefícios ativos do funcionário
+                  </p>
                 </div>
                 <Link href="/hr/benefits">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     <Plus className="h-4 w-4" />
                     Inscrever em Plano
                   </Button>
@@ -1338,66 +1394,76 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingEnrollments ? (
-                <GridLoading count={3} layout="list" size="sm" />
-              ) : !enrollmentsData || enrollmentsData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Gift className="h-12 w-12 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhum benefício encontrado
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Inscreva o funcionário em um plano de benefícios
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {enrollmentsData.map((enrollment: BenefitEnrollment) => (
-                    <div
-                      key={enrollment.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 shrink-0">
-                          <Heart className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium truncate">
-                            {enrollment.benefitPlan?.name || 'Plano'}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <Badge variant="outline" className="text-xs">
-                              {getBenefitTypeLabel(enrollment.benefitPlan?.type || '')}
-                            </Badge>
-                            <Badge variant={getEnrollmentStatusVariant(enrollment.status)} className="text-xs">
-                              {getEnrollmentStatusLabel(enrollment.status)}
-                            </Badge>
+                {isLoadingEnrollments ? (
+                  <GridLoading count={3} layout="list" size="sm" />
+                ) : !enrollmentsData || enrollmentsData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Gift className="h-12 w-12 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhum benefício encontrado
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Inscreva o funcionário em um plano de benefícios
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {enrollmentsData.map((enrollment: BenefitEnrollment) => (
+                      <div
+                        key={enrollment.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 shrink-0">
+                            <Heart className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">
+                              {enrollment.benefitPlan?.name || 'Plano'}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <Badge variant="outline" className="text-xs">
+                                {getBenefitTypeLabel(
+                                  enrollment.benefitPlan?.type || ''
+                                )}
+                              </Badge>
+                              <Badge
+                                variant={getEnrollmentStatusVariant(
+                                  enrollment.status
+                                )}
+                                className="text-xs"
+                              >
+                                {getEnrollmentStatusLabel(enrollment.status)}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0 text-sm">
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(enrollment.employeeContribution)}
+                            <span className="text-muted-foreground font-normal">
+                              {' '}
+                              / mês
+                            </span>
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Desde {formatDateShort(enrollment.startDate)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0 text-sm">
-                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                          {formatCurrency(enrollment.employeeContribution)}
-                          <span className="text-muted-foreground font-normal"> / mês</span>
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Desde {formatDateShort(enrollment.startDate)}
-                        </span>
+                    ))}
+                    {enrollmentsData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/benefits">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todos os benefícios
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
                       </div>
-                    </div>
-                  ))}
-                  {enrollmentsData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/benefits">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todos os benefícios
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -1411,10 +1477,16 @@ export default function EmployeeDetailPage() {
                 <Palmtree className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Férias</h3>
-                  <p className="text-sm text-muted-foreground">Períodos aquisitivos e saldo de férias</p>
+                  <p className="text-sm text-muted-foreground">
+                    Períodos aquisitivos e saldo de férias
+                  </p>
                 </div>
                 <Link href="/hr/vacations">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1422,68 +1494,86 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {/* Vacation balance summary */}
-              {vacationBalance && (
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="flex flex-col items-center p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-                    <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                      {vacationBalance.totalAvailableDays}
-                    </span>
-                    <span className="text-xs text-muted-foreground">Dias Disponíveis</span>
-                  </div>
-                  <div className="flex flex-col items-center p-3 rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800">
-                    <span className="text-2xl font-bold text-sky-600 dark:text-sky-400">
-                      {vacationBalance.totalUsedDays}
-                    </span>
-                    <span className="text-xs text-muted-foreground">Dias Usados</span>
-                  </div>
-                  <div className="flex flex-col items-center p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
-                    <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-                      {vacationBalance.totalSoldDays}
-                    </span>
-                    <span className="text-xs text-muted-foreground">Dias Vendidos</span>
-                  </div>
-                </div>
-              )}
-
-              {isLoadingVacations ? (
-                <GridLoading count={2} layout="list" size="sm" />
-              ) : !vacationsData || vacationsData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Palmtree className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhum período de férias registrado
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {vacationsData.map((vacation: VacationPeriod) => (
-                    <div
-                      key={vacation.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {formatDateShort(vacation.acquisitionStart)} — {formatDateShort(vacation.acquisitionEnd)}
-                          </p>
-                          <Badge variant={getVacationStatusVariant(vacation.status)} className="text-xs">
-                            {getVacationStatusLabel(vacation.status)}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {vacation.totalDays} dias totais · {vacation.usedDays} usados · {vacation.remainingDays} restantes
-                        </p>
-                        {vacation.scheduledStart && (
-                          <p className="text-xs text-sky-500 mt-1">
-                            Agendado: {formatDateShort(vacation.scheduledStart)} — {vacation.scheduledEnd ? formatDateShort(vacation.scheduledEnd) : '...'}
-                          </p>
-                        )}
-                      </div>
+                {/* Vacation balance summary */}
+                {vacationBalance && (
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="flex flex-col items-center p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                      <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        {vacationBalance.totalAvailableDays}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Dias Disponíveis
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div className="flex flex-col items-center p-3 rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800">
+                      <span className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+                        {vacationBalance.totalUsedDays}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Dias Usados
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
+                      <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                        {vacationBalance.totalSoldDays}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Dias Vendidos
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {isLoadingVacations ? (
+                  <GridLoading count={2} layout="list" size="sm" />
+                ) : !vacationsData || vacationsData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Palmtree className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhum período de férias registrado
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {vacationsData.map((vacation: VacationPeriod) => (
+                      <div
+                        key={vacation.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {formatDateShort(vacation.acquisitionStart)} —{' '}
+                              {formatDateShort(vacation.acquisitionEnd)}
+                            </p>
+                            <Badge
+                              variant={getVacationStatusVariant(
+                                vacation.status
+                              )}
+                              className="text-xs"
+                            >
+                              {getVacationStatusLabel(vacation.status)}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {vacation.totalDays} dias totais ·{' '}
+                            {vacation.usedDays} usados ·{' '}
+                            {vacation.remainingDays} restantes
+                          </p>
+                          {vacation.scheduledStart && (
+                            <p className="text-xs text-sky-500 mt-1">
+                              Agendado:{' '}
+                              {formatDateShort(vacation.scheduledStart)} —{' '}
+                              {vacation.scheduledEnd
+                                ? formatDateShort(vacation.scheduledEnd)
+                                : '...'}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -1497,10 +1587,16 @@ export default function EmployeeDetailPage() {
                 <Calendar className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Ausências</h3>
-                  <p className="text-sm text-muted-foreground">Licenças, faltas e afastamentos registrados</p>
+                  <p className="text-sm text-muted-foreground">
+                    Licenças, faltas e afastamentos registrados
+                  </p>
                 </div>
                 <Link href="/hr/absences">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1508,65 +1604,77 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingAbsences ? (
-                <GridLoading count={2} layout="list" size="sm" />
-              ) : !absencesData || absencesData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Calendar className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhuma ausência registrada
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {absencesData.map((absence: Absence) => (
-                    <div
-                      key={absence.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {getAbsenceTypeLabel(absence.type)}
+                {isLoadingAbsences ? (
+                  <GridLoading count={2} layout="list" size="sm" />
+                ) : !absencesData || absencesData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Calendar className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhuma ausência registrada
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {absencesData.map((absence: Absence) => (
+                      <div
+                        key={absence.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {getAbsenceTypeLabel(absence.type)}
+                            </p>
+                            <Badge
+                              variant={getAbsenceStatusVariant(absence.status)}
+                              className="text-xs"
+                            >
+                              {getAbsenceStatusLabel(absence.status)}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {formatDateShort(absence.startDate)} —{' '}
+                            {formatDateShort(absence.endDate)} ·{' '}
+                            {absence.totalDays} dia
+                            {absence.totalDays !== 1 ? 's' : ''}
                           </p>
-                          <Badge variant={getAbsenceStatusVariant(absence.status)} className="text-xs">
-                            {getAbsenceStatusLabel(absence.status)}
-                          </Badge>
+                          {absence.reason && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">
+                              {absence.reason}
+                            </p>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {formatDateShort(absence.startDate)} — {formatDateShort(absence.endDate)} · {absence.totalDays} dia{absence.totalDays !== 1 ? 's' : ''}
-                        </p>
-                        {absence.reason && (
-                          <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">
-                            {absence.reason}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {absence.isPaid ? (
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-emerald-600 border-emerald-300"
+                            >
+                              Remunerada
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-muted-foreground"
+                            >
+                              Não Remunerada
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {absence.isPaid ? (
-                          <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300">
-                            Remunerada
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs text-muted-foreground">
-                            Não Remunerada
-                          </Badge>
-                        )}
+                    ))}
+                    {absencesData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/absences">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todas as ausências
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
                       </div>
-                    </div>
-                  ))}
-                  {absencesData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/absences">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todas as ausências
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -1579,11 +1687,19 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Stethoscope className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Exames Médicos Ocupacionais</h3>
-                  <p className="text-sm text-muted-foreground">Histórico de exames admissionais, periódicos e demissionais</p>
+                  <h3 className="text-base font-semibold">
+                    Exames Médicos Ocupacionais
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Histórico de exames admissionais, periódicos e demissionais
+                  </p>
                 </div>
                 <Link href="/hr/medical-exams">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     <Plus className="h-4 w-4" />
                     Novo Exame
                   </Button>
@@ -1591,67 +1707,77 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingExams ? (
-                <GridLoading count={3} layout="list" size="sm" />
-              ) : !medicalExamsData || medicalExamsData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Stethoscope className="h-12 w-12 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhum exame registrado
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Registre os exames médicos ocupacionais do funcionário
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {medicalExamsData.map((exam: MedicalExam) => {
-                    const expStatus = getExamExpirationStatus(exam.expirationDate);
-                    const ExpIcon = expStatus.icon;
-                    return (
-                      <div
-                        key={exam.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 shrink-0">
-                            <HeartPulse className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">
-                                {getExamTypeLabel(exam.type)}
-                              </p>
-                              <Badge variant={getExamResultVariant(exam.result)} className="text-xs">
-                                {getExamResultLabel(exam.result)}
-                              </Badge>
+                {isLoadingExams ? (
+                  <GridLoading count={3} layout="list" size="sm" />
+                ) : !medicalExamsData || medicalExamsData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Stethoscope className="h-12 w-12 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhum exame registrado
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Registre os exames médicos ocupacionais do funcionário
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {medicalExamsData.map((exam: MedicalExam) => {
+                      const expStatus = getExamExpirationStatus(
+                        exam.expirationDate
+                      );
+                      const ExpIcon = expStatus.icon;
+                      return (
+                        <div
+                          key={exam.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 shrink-0">
+                              <HeartPulse className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                             </div>
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                              Realizado em {formatDateShort(exam.examDate)} · Dr(a). {exam.doctorName} (CRM: {exam.doctorCrm})
-                            </p>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">
+                                  {getExamTypeLabel(exam.type)}
+                                </p>
+                                <Badge
+                                  variant={getExamResultVariant(exam.result)}
+                                  className="text-xs"
+                                >
+                                  {getExamResultLabel(exam.result)}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                Realizado em {formatDateShort(exam.examDate)} ·
+                                Dr(a). {exam.doctorName} (CRM: {exam.doctorCrm})
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {ExpIcon && (
+                              <ExpIcon
+                                className={`h-4 w-4 ${expStatus.color}`}
+                              />
+                            )}
+                            <span className={`text-sm ${expStatus.color}`}>
+                              {expStatus.label}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {ExpIcon && <ExpIcon className={`h-4 w-4 ${expStatus.color}`} />}
-                          <span className={`text-sm ${expStatus.color}`}>
-                            {expStatus.label}
-                          </span>
-                        </div>
+                      );
+                    })}
+                    {medicalExamsData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/medical-exams">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todos os exames
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
                       </div>
-                    );
-                  })}
-                  {medicalExamsData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/medical-exams">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todos os exames
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -1666,10 +1792,16 @@ export default function EmployeeDetailPage() {
                 <TrendingUp className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Bonificações</h3>
-                  <p className="text-sm text-muted-foreground">Bônus e gratificações concedidos</p>
+                  <p className="text-sm text-muted-foreground">
+                    Bônus e gratificações concedidos
+                  </p>
                 </div>
                 <Link href="/hr/bonuses">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1677,52 +1809,56 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingBonuses ? (
-                <GridLoading count={2} layout="list" size="sm" />
-              ) : !bonusesData || bonusesData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Banknote className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhuma bonificação encontrada
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {bonusesData.map((bonus: Bonus) => (
-                    <div
-                      key={bonus.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{bonus.name}</p>
-                          {bonus.isPaid ? (
-                            <Badge variant="success" className="text-xs">Pago</Badge>
-                          ) : (
-                            <Badge variant="warning" className="text-xs">Pendente</Badge>
-                          )}
+                {isLoadingBonuses ? (
+                  <GridLoading count={2} layout="list" size="sm" />
+                ) : !bonusesData || bonusesData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Banknote className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhuma bonificação encontrada
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {bonusesData.map((bonus: Bonus) => (
+                      <div
+                        key={bonus.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{bonus.name}</p>
+                            {bonus.isPaid ? (
+                              <Badge variant="success" className="text-xs">
+                                Pago
+                              </Badge>
+                            ) : (
+                              <Badge variant="warning" className="text-xs">
+                                Pendente
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {bonus.reason} · {formatDateShort(bonus.date)}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {bonus.reason} · {formatDateShort(bonus.date)}
-                        </p>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                          + {formatCurrency(bonus.amount)}
+                        </span>
                       </div>
-                      <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-                        + {formatCurrency(bonus.amount)}
-                      </span>
-                    </div>
-                  ))}
-                  {bonusesData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/bonuses">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todas as bonificações
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ))}
+                    {bonusesData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/bonuses">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todas as bonificações
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -1732,10 +1868,16 @@ export default function EmployeeDetailPage() {
                 <TrendingDown className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold">Deduções</h3>
-                  <p className="text-sm text-muted-foreground">Descontos e deduções aplicados na folha</p>
+                  <p className="text-sm text-muted-foreground">
+                    Descontos e deduções aplicados na folha
+                  </p>
                 </div>
                 <Link href="/hr/deductions">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1743,58 +1885,64 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingDeductions ? (
-                <GridLoading count={2} layout="list" size="sm" />
-              ) : !deductionsData || deductionsData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Minus className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhuma dedução encontrada
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {deductionsData.map((deduction: Deduction) => (
-                    <div
-                      key={deduction.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{deduction.name}</p>
-                          {deduction.isRecurring && (
-                            <Badge variant="outline" className="text-xs">
-                              Recorrente
-                              {deduction.installments && ` (${deduction.currentInstallment || 1}/${deduction.installments})`}
-                            </Badge>
-                          )}
-                          {deduction.isApplied ? (
-                            <Badge variant="secondary" className="text-xs">Aplicada</Badge>
-                          ) : (
-                            <Badge variant="warning" className="text-xs">Pendente</Badge>
-                          )}
+                {isLoadingDeductions ? (
+                  <GridLoading count={2} layout="list" size="sm" />
+                ) : !deductionsData || deductionsData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Minus className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhuma dedução encontrada
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {deductionsData.map((deduction: Deduction) => (
+                      <div
+                        key={deduction.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{deduction.name}</p>
+                            {deduction.isRecurring && (
+                              <Badge variant="outline" className="text-xs">
+                                Recorrente
+                                {deduction.installments &&
+                                  ` (${deduction.currentInstallment || 1}/${deduction.installments})`}
+                              </Badge>
+                            )}
+                            {deduction.isApplied ? (
+                              <Badge variant="secondary" className="text-xs">
+                                Aplicada
+                              </Badge>
+                            ) : (
+                              <Badge variant="warning" className="text-xs">
+                                Pendente
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {deduction.reason} ·{' '}
+                            {formatDateShort(deduction.date)}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {deduction.reason} · {formatDateShort(deduction.date)}
-                        </p>
+                        <span className="font-semibold text-rose-600 dark:text-rose-400 shrink-0">
+                          - {formatCurrency(deduction.amount)}
+                        </span>
                       </div>
-                      <span className="font-semibold text-rose-600 dark:text-rose-400 shrink-0">
-                        - {formatCurrency(deduction.amount)}
-                      </span>
-                    </div>
-                  ))}
-                  {deductionsData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/deductions">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todas as deduções
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ))}
+                    {deductionsData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/deductions">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todas as deduções
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>
@@ -1808,48 +1956,61 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Activity className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Banco de Horas ({new Date().getFullYear()})</h3>
-                  <p className="text-sm text-muted-foreground">Saldo acumulado de horas no ano corrente</p>
+                  <h3 className="text-base font-semibold">
+                    Banco de Horas ({new Date().getFullYear()})
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Saldo acumulado de horas no ano corrente
+                  </p>
                 </div>
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingTimeBank ? (
-                <GridLoading count={1} layout="list" size="sm" />
-              ) : !timeBankData ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Clock className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Sem registro de banco de horas para este ano
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex flex-col items-center p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-                    <TrendingUp className="h-5 w-5 text-emerald-500 mb-1" />
-                    <span className={`text-2xl font-bold ${
-                      timeBankData.balance >= 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-rose-600 dark:text-rose-400'
-                    }`}>
-                      {timeBankData.balance > 0 ? '+' : ''}{timeBankData.balance}h
-                    </span>
-                    <span className="text-xs text-muted-foreground">Saldo Atual</span>
+                {isLoadingTimeBank ? (
+                  <GridLoading count={1} layout="list" size="sm" />
+                ) : !timeBankData ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Clock className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Sem registro de banco de horas para este ano
+                    </p>
                   </div>
-                  <div className="flex flex-col items-center p-4 rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800">
-                    <span className="text-sm font-medium text-sky-600 dark:text-sky-400">
-                      {timeBankData.hasPositiveBalance ? 'Sim' : 'Não'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">Saldo Positivo</span>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                      <TrendingUp className="h-5 w-5 text-emerald-500 mb-1" />
+                      <span
+                        className={`text-2xl font-bold ${
+                          timeBankData.balance >= 0
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        }`}
+                      >
+                        {timeBankData.balance > 0 ? '+' : ''}
+                        {timeBankData.balance}h
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Saldo Atual
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800">
+                      <span className="text-sm font-medium text-sky-600 dark:text-sky-400">
+                        {timeBankData.hasPositiveBalance ? 'Sim' : 'Não'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Saldo Positivo
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+                      <span className="text-sm font-medium text-rose-600 dark:text-rose-400">
+                        {timeBankData.hasNegativeBalance ? 'Sim' : 'Não'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Saldo Negativo
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center p-4 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
-                    <span className="text-sm font-medium text-rose-600 dark:text-rose-400">
-                      {timeBankData.hasNegativeBalance ? 'Sim' : 'Não'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">Saldo Negativo</span>
-                  </div>
-                </div>
-              )}
+                )}
               </div>
             </Card>
 
@@ -1858,11 +2019,19 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Timer className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Registros de Ponto Recentes</h3>
-                  <p className="text-sm text-muted-foreground">Últimas entradas e saídas registradas</p>
+                  <h3 className="text-base font-semibold">
+                    Registros de Ponto Recentes
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Últimas entradas e saídas registradas
+                  </p>
                 </div>
                 <Link href="/hr/time-control">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1870,68 +2039,71 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingTimeEntries ? (
-                <GridLoading count={3} layout="list" size="sm" />
-              ) : !timeEntriesData || timeEntriesData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Timer className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhum registro de ponto encontrado
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="py-2 pr-4 font-medium">Data</th>
-                        <th className="py-2 pr-4 font-medium">Horário</th>
-                        <th className="py-2 pr-4 font-medium">Tipo</th>
-                        <th className="py-2 font-medium">Observações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {timeEntriesData.map((entry: TimeEntry) => (
-                        <tr key={entry.id} className="border-b last:border-0 hover:bg-muted/50">
-                          <td className="py-2.5 pr-4">
-                            {formatDateShort(entry.timestamp)}
-                          </td>
-                          <td className="py-2.5 pr-4 font-medium">
-                            {formatTime(entry.timestamp)}
-                          </td>
-                          <td className="py-2.5 pr-4">
-                            <Badge
-                              variant={
-                                entry.entryType === 'CLOCK_IN'
-                                  ? 'success'
-                                  : entry.entryType === 'CLOCK_OUT'
-                                    ? 'destructive'
-                                    : 'secondary'
-                              }
-                              className="text-xs"
-                            >
-                              {getTimeEntryTypeLabel(entry.entryType)}
-                            </Badge>
-                          </td>
-                          <td className="py-2.5 text-muted-foreground truncate max-w-[200px]">
-                            {entry.notes || '—'}
-                          </td>
+                {isLoadingTimeEntries ? (
+                  <GridLoading count={3} layout="list" size="sm" />
+                ) : !timeEntriesData || timeEntriesData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Timer className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhum registro de ponto encontrado
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left text-muted-foreground">
+                          <th className="py-2 pr-4 font-medium">Data</th>
+                          <th className="py-2 pr-4 font-medium">Horário</th>
+                          <th className="py-2 pr-4 font-medium">Tipo</th>
+                          <th className="py-2 font-medium">Observações</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {timeEntriesData.length >= 10 && (
-                    <div className="text-center pt-3">
-                      <Link href="/hr/time-control">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todos os registros
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                      </thead>
+                      <tbody>
+                        {timeEntriesData.map((entry: TimeEntry) => (
+                          <tr
+                            key={entry.id}
+                            className="border-b last:border-0 hover:bg-muted/50"
+                          >
+                            <td className="py-2.5 pr-4">
+                              {formatDateShort(entry.timestamp)}
+                            </td>
+                            <td className="py-2.5 pr-4 font-medium">
+                              {formatTime(entry.timestamp)}
+                            </td>
+                            <td className="py-2.5 pr-4">
+                              <Badge
+                                variant={
+                                  entry.entryType === 'CLOCK_IN'
+                                    ? 'success'
+                                    : entry.entryType === 'CLOCK_OUT'
+                                      ? 'destructive'
+                                      : 'secondary'
+                                }
+                                className="text-xs"
+                              >
+                                {getTimeEntryTypeLabel(entry.entryType)}
+                              </Badge>
+                            </td>
+                            <td className="py-2.5 text-muted-foreground truncate max-w-[200px]">
+                              {entry.notes || '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {timeEntriesData.length >= 10 && (
+                      <div className="text-center pt-3">
+                        <Link href="/hr/time-control">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todos os registros
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -1940,11 +2112,19 @@ export default function EmployeeDetailPage() {
               <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                 <Clock className="h-5 w-5 text-foreground" />
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold">Horas Extras Recentes</h3>
-                  <p className="text-sm text-muted-foreground">Registros de horas extras e aprovações</p>
+                  <h3 className="text-base font-semibold">
+                    Horas Extras Recentes
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Registros de horas extras e aprovações
+                  </p>
                 </div>
                 <Link href="/hr/overtime">
-                  <Button size="sm" variant="outline" className="gap-2 h-9 px-2.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
                     Ver todos
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -1952,56 +2132,63 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-              {isLoadingOvertime ? (
-                <GridLoading count={2} layout="list" size="sm" />
-              ) : !overtimeData || overtimeData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Clock className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Nenhuma hora extra registrada
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {overtimeData.map((ot: Overtime) => (
-                    <div
-                      key={ot.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {formatDateShort(ot.date)} — {ot.hours}h extra{ot.hours !== 1 ? 's' : ''}
+                {isLoadingOvertime ? (
+                  <GridLoading count={2} layout="list" size="sm" />
+                ) : !overtimeData || overtimeData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Clock className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhuma hora extra registrada
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {overtimeData.map((ot: Overtime) => (
+                      <div
+                        key={ot.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {formatDateShort(ot.date)} — {ot.hours}h extra
+                              {ot.hours !== 1 ? 's' : ''}
+                            </p>
+                            {ot.approved === true ? (
+                              <Badge variant="success" className="text-xs">
+                                Aprovada
+                              </Badge>
+                            ) : ot.approved === false ? (
+                              <Badge variant="destructive" className="text-xs">
+                                Rejeitada
+                              </Badge>
+                            ) : (
+                              <Badge variant="warning" className="text-xs">
+                                Pendente
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5 truncate max-w-md">
+                            {ot.reason}
                           </p>
-                          {ot.approved === true ? (
-                            <Badge variant="success" className="text-xs">Aprovada</Badge>
-                          ) : ot.approved === false ? (
-                            <Badge variant="destructive" className="text-xs">Rejeitada</Badge>
-                          ) : (
-                            <Badge variant="warning" className="text-xs">Pendente</Badge>
-                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-0.5 truncate max-w-md">
-                          {ot.reason}
-                        </p>
+                        <span className="font-semibold text-amber-600 dark:text-amber-400 shrink-0">
+                          +{ot.hours}h
+                        </span>
                       </div>
-                      <span className="font-semibold text-amber-600 dark:text-amber-400 shrink-0">
-                        +{ot.hours}h
-                      </span>
-                    </div>
-                  ))}
-                  {overtimeData.length >= 10 && (
-                    <div className="text-center pt-2">
-                      <Link href="/hr/overtime">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          Ver todas as horas extras
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ))}
+                    {overtimeData.length >= 10 && (
+                      <div className="text-center pt-2">
+                        <Link href="/hr/overtime">
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            Ver todas as horas extras
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>

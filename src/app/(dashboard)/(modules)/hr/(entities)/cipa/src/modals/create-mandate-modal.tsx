@@ -97,10 +97,9 @@ export function CreateMandateModal({
     () => [
       {
         title: 'Novo Mandato CIPA',
-        description: 'Cadastre um novo mandato da Comissao Interna de Prevencao de Acidentes.',
-        icon: (
-          <Shield className="h-16 w-16 text-amber-400 opacity-50" />
-        ),
+        description:
+          'Cadastre um novo mandato da Comissao Interna de Prevencao de Acidentes.',
+        icon: <Shield className="h-16 w-16 text-amber-400 opacity-50" />,
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
@@ -227,7 +226,18 @@ export function CreateMandateModal({
         ),
       },
     ],
-    [name, startDate, endDate, status, electionDate, notes, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      name,
+      startDate,
+      endDate,
+      status,
+      electionDate,
+      notes,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

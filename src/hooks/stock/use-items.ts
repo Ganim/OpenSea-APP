@@ -150,7 +150,7 @@ export function useItemsInfinite(filters?: ItemsInfiniteFilters) {
       return response;
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const meta = lastPage.meta;
       if (meta.page < meta.pages) {
         return meta.page + 1;
@@ -160,7 +160,7 @@ export function useItemsInfinite(filters?: ItemsInfiniteFilters) {
     staleTime: 30_000,
   });
 
-  const items = result.data?.pages.flatMap((p) => p.items) ?? [];
+  const items = result.data?.pages.flatMap(p => p.items) ?? [];
   const total = result.data?.pages[0]?.meta.total ?? 0;
 
   return {

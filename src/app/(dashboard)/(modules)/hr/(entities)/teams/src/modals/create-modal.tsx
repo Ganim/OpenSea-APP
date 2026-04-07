@@ -124,9 +124,7 @@ export function CreateModal({
               aria-invalid={!!nameError}
               className={nameError ? 'border-rose-500' : ''}
             />
-            {nameError && (
-              <p className="text-sm text-rose-500">{nameError}</p>
-            )}
+            {nameError && <p className="text-sm text-rose-500">{nameError}</p>}
           </div>
 
           {/* Descrição */}
@@ -192,17 +190,13 @@ export function CreateModal({
               )}
               <div>
                 <p className="font-medium text-sm">{name || '—'}</p>
-                <p className="text-xs text-muted-foreground">
-                  Nome da equipe
-                </p>
+                <p className="text-xs text-muted-foreground">Nome da equipe</p>
               </div>
             </div>
 
             {description.trim() && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">
-                  Descrição
-                </p>
+                <p className="text-xs text-muted-foreground mb-1">Descrição</p>
                 <p className="text-sm">{description}</p>
               </div>
             )}
@@ -239,10 +233,7 @@ export function CreateModal({
           <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!step1Valid || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={!step1Valid || isLoading}>
             {isLoading ? 'Criando...' : 'Criar Equipe'}
           </Button>
         </div>

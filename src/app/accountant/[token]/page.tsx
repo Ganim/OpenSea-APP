@@ -96,13 +96,18 @@ function getStatusLabel(status: string): string {
 
 function getStatusColor(status: string): string {
   const map: Record<string, string> = {
-    PENDING: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+    PENDING:
+      'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
     OVERDUE: 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400',
     PAID: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
-    RECEIVED: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
-    PARTIALLY_PAID: 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400',
-    CANCELLED: 'bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400',
-    SCHEDULED: 'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400',
+    RECEIVED:
+      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+    PARTIALLY_PAID:
+      'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400',
+    CANCELLED:
+      'bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400',
+    SCHEDULED:
+      'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400',
   };
   return map[status] ?? '';
 }
@@ -225,7 +230,7 @@ function EntriesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries.map((entry) => (
+              {entries.map(entry => (
                 <TableRow key={entry.id}>
                   <TableCell className="font-mono text-xs">
                     {entry.code}
@@ -252,7 +257,10 @@ function EntriesTable({
                     {formatDate(entry.dueDate)}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(entry.status)} variant="secondary">
+                    <Badge
+                      className={getStatusColor(entry.status)}
+                      variant="secondary"
+                    >
                       {getStatusLabel(entry.status)}
                     </Badge>
                   </TableCell>
@@ -299,7 +307,7 @@ function CategoriesTab({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <TableRow key={cat.id}>
                 <TableCell>{cat.name}</TableCell>
                 <TableCell>
@@ -390,7 +398,7 @@ function DreTab({ dre }: { dre: AccountantDreReport | null }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dre.monthly.map((m) => (
+              {dre.monthly.map(m => (
                 <TableRow key={m.month}>
                   <TableCell>{MONTHS[m.month - 1]}</TableCell>
                   <TableCell className="text-right font-mono text-sm text-emerald-600 dark:text-emerald-400">
@@ -456,10 +464,7 @@ export default function AccountantPortalPage() {
   const [error, setError] = useState<string | null>(null);
   const [exportingSpEd, setExportingSped] = useState(false);
 
-  const service = useMemo(
-    () => new AccountantPortalService(token),
-    [token],
-  );
+  const service = useMemo(() => new AccountantPortalService(token), [token]);
 
   // Load data
   useEffect(() => {
@@ -480,9 +485,7 @@ export default function AccountantPortalPage() {
       } catch (err) {
         if (cancelled) return;
         setError(
-          err instanceof Error
-            ? err.message
-            : 'Token inválido ou expirado.',
+          err instanceof Error ? err.message : 'Token inválido ou expirado.'
         );
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -562,7 +565,7 @@ export default function AccountantPortalPage() {
             <div className="flex items-center gap-2">
               <Select
                 value={String(month)}
-                onValueChange={(v) => setMonth(Number(v))}
+                onValueChange={v => setMonth(Number(v))}
               >
                 <SelectTrigger className="w-[130px] h-9">
                   <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -579,19 +582,20 @@ export default function AccountantPortalPage() {
 
               <Select
                 value={String(year)}
-                onValueChange={(v) => setYear(Number(v))}
+                onValueChange={v => setYear(Number(v))}
               >
                 <SelectTrigger className="w-[90px] h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 5 }, (_, i) => now.getFullYear() - i).map(
-                    (y) => (
-                      <SelectItem key={y} value={String(y)}>
-                        {y}
-                      </SelectItem>
-                    ),
-                  )}
+                  {Array.from(
+                    { length: 5 },
+                    (_, i) => now.getFullYear() - i
+                  ).map(y => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -1,5 +1,8 @@
 import { journalEntriesService } from '@/services/finance';
-import type { CreateJournalEntryData, JournalEntriesQuery } from '@/types/finance';
+import type {
+  CreateJournalEntryData,
+  JournalEntriesQuery,
+} from '@/types/finance';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const QUERY_KEYS = {
@@ -57,4 +60,3 @@ export function useReverseJournalEntry() {
     },
   });
 }
-

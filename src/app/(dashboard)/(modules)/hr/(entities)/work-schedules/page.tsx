@@ -23,10 +23,25 @@ import {
 } from '@/core';
 import { usePermissions } from '@/hooks/use-permissions';
 import type { WorkSchedule } from '@/types/hr';
-import { Clock, Coffee, Loader2, Pencil, Plus, Timer, Trash2 } from 'lucide-react';
+import {
+  Clock,
+  Coffee,
+  Loader2,
+  Pencil,
+  Plus,
+  Timer,
+  Trash2,
+} from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   createWorkSchedule,
   deleteWorkSchedule,
@@ -98,7 +113,7 @@ function WorkSchedulesPageContent() {
       return workSchedulesApi.list({ page: pageParam, perPage: PAGE_SIZE });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
       const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
       return currentPage < total ? currentPage + 1 : undefined;

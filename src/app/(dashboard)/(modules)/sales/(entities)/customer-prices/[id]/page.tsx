@@ -273,9 +273,7 @@ export default function CustomerPriceDetailPage() {
             </h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-muted-foreground">
-                  Preco Negociado
-                </p>
+                <p className="text-xs text-muted-foreground">Preco Negociado</p>
                 <p className="font-mono font-bold text-lg text-gray-900 dark:text-white">
                   {formatPrice(customerPrice.price)}
                 </p>
@@ -297,9 +295,7 @@ export default function CustomerPriceDetailPage() {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">
-                  ID da Variante
-                </p>
+                <p className="text-xs text-muted-foreground">ID da Variante</p>
                 <p className="text-sm font-mono text-gray-700 dark:text-gray-300">
                   {customerPrice.variantId}
                 </p>
@@ -315,7 +311,9 @@ export default function CustomerPriceDetailPage() {
             </h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-muted-foreground">Valido a Partir de</p>
+                <p className="text-xs text-muted-foreground">
+                  Valido a Partir de
+                </p>
                 <p className="text-sm text-gray-900 dark:text-white">
                   {formatDate(customerPrice.validFrom)}
                 </p>

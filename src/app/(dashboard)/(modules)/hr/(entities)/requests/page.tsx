@@ -73,14 +73,14 @@ import {
 
 const CreateRequestModal = dynamic(
   () =>
-    import('./src/modals/create-modal').then((m) => ({
+    import('./src/modals/create-modal').then(m => ({
       default: m.CreateRequestModal,
     })),
   { ssr: false }
 );
 const RejectModal = dynamic(
   () =>
-    import('./src/modals/reject-modal').then((m) => ({
+    import('./src/modals/reject-modal').then(m => ({
       default: m.RejectModal,
     })),
   { ssr: false }
@@ -179,7 +179,7 @@ function RequestsPageContent() {
   const cancelRequest = useCancelRequest();
 
   const requests = useMemo(
-    () => data?.pages.flatMap((p) => p.requests ?? []) ?? [],
+    () => data?.pages.flatMap(p => p.requests ?? []) ?? [],
     [data]
   );
 
@@ -188,7 +188,7 @@ function RequestsPageContent() {
     if (!searchQuery) return requests;
     const q = searchQuery.toLowerCase();
     return requests.filter(
-      (item) =>
+      item =>
         getRequestTypeLabel(item.type).toLowerCase().includes(q) ||
         getRequestStatusLabel(item.status).toLowerCase().includes(q) ||
         item.employee?.fullName?.toLowerCase().includes(q)
@@ -206,7 +206,7 @@ function RequestsPageContent() {
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -240,7 +240,7 @@ function RequestsPageContent() {
   // ============================================================================
 
   const initialIds = useMemo(
-    () => filteredRequests.map((i) => i.id),
+    () => filteredRequests.map(i => i.id),
     [filteredRequests]
   );
 
@@ -279,8 +279,8 @@ function RequestsPageContent() {
 
   const handleBulkApproveOpen = useCallback(
     (ids: string[]) => {
-      const pendingIds = ids.filter((id) => {
-        const item = filteredRequests.find((r) => r.id === id);
+      const pendingIds = ids.filter(id => {
+        const item = filteredRequests.find(r => r.id === id);
         return item && item.status === 'PENDING';
       });
       if (pendingIds.length === 0) {
@@ -443,7 +443,7 @@ function RequestsPageContent() {
           {item.status === 'PENDING' && canApprove && (
             <div
               className="flex gap-2 pt-2 border-t"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <Button
                 size="sm"
@@ -469,7 +469,7 @@ function RequestsPageContent() {
           {item.status === 'PENDING' && viewMode === 'my' && !canApprove && (
             <div
               className="flex gap-2 pt-2 border-t"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <Button
                 size="sm"
@@ -615,7 +615,7 @@ function RequestsPageContent() {
           <SearchBar
             value={searchQuery}
             placeholder="Buscar solicitações..."
-            onSearch={(value) => setSearchQuery(value)}
+            onSearch={value => setSearchQuery(value)}
             onClear={() => setSearchQuery('')}
             showClear={true}
             size="md"
@@ -674,7 +674,7 @@ function RequestsPageContent() {
                     icon={ClipboardList}
                     options={TYPE_FILTER_OPTIONS}
                     value={filterType}
-                    onChange={(v) => setFilterType(v as RequestType | '')}
+                    onChange={v => setFilterType(v as RequestType | '')}
                     activeColor="blue"
                   />
                   <FilterDropdown
@@ -682,7 +682,7 @@ function RequestsPageContent() {
                     icon={CircleCheck}
                     options={STATUS_FILTER_OPTIONS}
                     value={filterStatus}
-                    onChange={(v) => setFilterStatus(v as RequestStatus | '')}
+                    onChange={v => setFilterStatus(v as RequestStatus | '')}
                     activeColor="emerald"
                   />
                 </>
@@ -691,8 +691,8 @@ function RequestsPageContent() {
               renderListItem={renderListCard}
               isLoading={isLoading}
               isSearching={!!searchQuery}
-              onItemClick={(item) => router.push(`/hr/requests/${item.id}`)}
-              onItemDoubleClick={(item) => router.push(`/hr/requests/${item.id}`)}
+              onItemClick={item => router.push(`/hr/requests/${item.id}`)}
+              onItemDoubleClick={item => router.push(`/hr/requests/${item.id}`)}
               showSorting={true}
               defaultSortField="createdAt"
               defaultSortDirection="desc"

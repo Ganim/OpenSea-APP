@@ -190,7 +190,7 @@ function AnnouncementsPageContent() {
       return response;
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? 1;
       const totalPages = lastPage.meta?.totalPages ?? 1;
       if (currentPage < totalPages) {

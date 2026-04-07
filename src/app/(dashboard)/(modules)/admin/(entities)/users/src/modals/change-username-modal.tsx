@@ -98,7 +98,10 @@ export function ChangeUsernameModal({
           </Button>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-2">
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4 pt-2"
+        >
           <div className="space-y-2">
             <Label htmlFor="new-username">Novo Username</Label>
             <div className="relative">

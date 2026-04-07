@@ -51,7 +51,11 @@ export function RenameModal({
       onClose();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+      if (
+        msg.includes('name already') ||
+        msg.includes('already exists') ||
+        msg.includes('nome')
+      ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -85,7 +89,8 @@ export function RenameModal({
                 value={name}
                 onChange={e => {
                   setName(e.target.value);
-                  if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                  if (fieldErrors.name)
+                    setFieldErrors(prev => ({ ...prev, name: '' }));
                 }}
                 placeholder="Digite o nome da escala"
                 autoFocus

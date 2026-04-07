@@ -148,7 +148,9 @@ export default function EditComboPage() {
   const [items, setItems] = useState<ComboItemRow[]>([]);
   const [variantSearchQuery, setVariantSearchQuery] = useState('');
   const [showVariantSearch, setShowVariantSearch] = useState(false);
-  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
+  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(
+    null
+  );
 
   // Variant search
   const variantSearchParams = useMemo(
@@ -171,7 +173,7 @@ export default function EditComboPage() {
 
   // Item management callbacks
   const addItem = useCallback(() => {
-    setItems((prev) => [
+    setItems(prev => [
       ...prev,
       {
         localId: crypto.randomUUID(),
@@ -185,17 +187,17 @@ export default function EditComboPage() {
   }, []);
 
   const removeItem = useCallback((localId: string) => {
-    setItems((prev) =>
+    setItems(prev =>
       prev
-        .filter((item) => item.localId !== localId)
+        .filter(item => item.localId !== localId)
         .map((item, idx) => ({ ...item, position: idx }))
     );
   }, []);
 
   const updateItem = useCallback(
     (localId: string, updates: Partial<ComboItemRow>) => {
-      setItems((prev) =>
-        prev.map((item) =>
+      setItems(prev =>
+        prev.map(item =>
           item.localId === localId ? { ...item, ...updates } : item
         )
       );
@@ -207,7 +209,9 @@ export default function EditComboPage() {
     (localId: string, variant: { id: string; name: string; sku?: string }) => {
       updateItem(localId, {
         variantId: variant.id,
-        variantName: variant.sku ? `${variant.name} (${variant.sku})` : variant.name,
+        variantName: variant.sku
+          ? `${variant.name} (${variant.sku})`
+          : variant.name,
       });
       setShowVariantSearch(false);
       setVariantSearchQuery('');
@@ -233,12 +237,8 @@ export default function EditComboPage() {
       setMinItems(combo.minItems != null ? String(combo.minItems) : '');
       setMaxItems(combo.maxItems != null ? String(combo.maxItems) : '');
       setIsActive(combo.isActive ?? true);
-      setValidFrom(
-        combo.validFrom ? combo.validFrom.substring(0, 10) : ''
-      );
-      setValidUntil(
-        combo.validUntil ? combo.validUntil.substring(0, 10) : ''
-      );
+      setValidFrom(combo.validFrom ? combo.validFrom.substring(0, 10) : '');
+      setValidUntil(combo.validUntil ? combo.validUntil.substring(0, 10) : '');
     }
   }, [combo]);
 
@@ -257,7 +257,7 @@ export default function EditComboPage() {
 
       // Build items payload (only items with a variant selected)
       const validItems = items
-        .filter((item) => item.variantId)
+        .filter(item => item.variantId)
         .map((item, idx) => ({
           variantId: item.variantId,
           quantity: item.quantity,
@@ -697,8 +697,12 @@ export default function EditComboPage() {
                                 <Input
                                   placeholder="Buscar variante por nome ou SKU..."
                                   className="pl-9"
-                                  value={activeSearchIndex === index ? variantSearchQuery : ''}
-                                  onChange={(e) => {
+                                  value={
+                                    activeSearchIndex === index
+                                      ? variantSearchQuery
+                                      : ''
+                                  }
+                                  onChange={e => {
                                     setVariantSearchQuery(e.target.value);
                                     setShowVariantSearch(true);
                                     setActiveSearchIndex(index);
@@ -727,12 +731,12 @@ export default function EditComboPage() {
                                         Nenhuma variante encontrada
                                       </div>
                                     ) : (
-                                      searchResults.map((variant) => (
+                                      searchResults.map(variant => (
                                         <button
                                           key={variant.id}
                                           type="button"
                                           className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                                          onMouseDown={(e) => e.preventDefault()}
+                                          onMouseDown={e => e.preventDefault()}
                                           onClick={() =>
                                             selectVariant(item.localId, variant)
                                           }
@@ -741,7 +745,9 @@ export default function EditComboPage() {
                                             {variant.name}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
-                                            {variant.sku ? `SKU: ${variant.sku}` : ''}{' '}
+                                            {variant.sku
+                                              ? `SKU: ${variant.sku}`
+                                              : ''}{' '}
                                             {variant.price != null
                                               ? `| R$ ${Number(variant.price).toFixed(2)}`
                                               : ''}
@@ -765,9 +771,12 @@ export default function EditComboPage() {
                             min="1"
                             step="1"
                             value={item.quantity}
-                            onChange={(e) =>
+                            onChange={e =>
                               updateItem(item.localId, {
-                                quantity: Math.max(1, Number(e.target.value) || 1),
+                                quantity: Math.max(
+                                  1,
+                                  Number(e.target.value) || 1
+                                ),
                               })
                             }
                             className="text-center"
@@ -781,7 +790,7 @@ export default function EditComboPage() {
                           </Label>
                           <Switch
                             checked={item.isRequired}
-                            onCheckedChange={(checked) =>
+                            onCheckedChange={checked =>
                               updateItem(item.localId, { isRequired: checked })
                             }
                           />

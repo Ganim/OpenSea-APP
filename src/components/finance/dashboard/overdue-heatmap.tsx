@@ -110,7 +110,7 @@ export function OverdueHeatmap() {
   );
 
   const maxTotal = useMemo(
-    () => Math.max(...segments.map((s) => s.total), 1),
+    () => Math.max(...segments.map(s => s.total), 1),
     [segments]
   );
 
@@ -163,7 +163,7 @@ export function OverdueHeatmap() {
           </div>
         ) : (
           <div className="space-y-3">
-            {segments.map((segment) => {
+            {segments.map(segment => {
               const barWidth =
                 segment.total > 0
                   ? Math.max((segment.total / maxTotal) * 100, 8)
@@ -198,7 +198,9 @@ export function OverdueHeatmap() {
                     </div>
 
                     <div className="mt-1.5 text-right">
-                      <span className={`text-sm font-bold ${segment.colorText}`}>
+                      <span
+                        className={`text-sm font-bold ${segment.colorText}`}
+                      >
                         {formatCurrency(segment.total)}
                       </span>
                     </div>

@@ -270,8 +270,7 @@ export function ExitItemsModal({
     : null;
 
   /** Header icon color: sky for step 1, type color for step 2 */
-  const headerColor =
-    step === 1 ? 'sky' : (selectedConfig?.color ?? 'sky');
+  const headerColor = step === 1 ? 'sky' : (selectedConfig?.color ?? 'sky');
   const headerColors = COLOR_CLASSES[headerColor];
 
   return (

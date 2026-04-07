@@ -109,9 +109,12 @@ function EmptyState() {
       <div className="p-3 rounded-full bg-muted mb-4">
         <FileX2 className="h-8 w-8 text-muted-foreground" />
       </div>
-      <h3 className="font-semibold text-lg mb-1">Nenhum lançamento encontrado</h3>
+      <h3 className="font-semibold text-lg mb-1">
+        Nenhum lançamento encontrado
+      </h3>
       <p className="text-muted-foreground text-sm max-w-xs">
-        Não há lançamentos pagos ou recebidos para esta categoria no período selecionado.
+        Não há lançamentos pagos ou recebidos para esta categoria no período
+        selecionado.
       </p>
     </div>
   );
@@ -130,7 +133,10 @@ function EntryRow({ entry }: { entry: FinanceEntry }) {
         <div className="truncate font-medium" title={entry.description}>
           {entry.description}
         </div>
-        <div className="truncate text-xs text-muted-foreground" title={counterparty}>
+        <div
+          className="truncate text-xs text-muted-foreground"
+          title={counterparty}
+        >
           {counterparty}
         </div>
       </TableCell>
@@ -206,7 +212,10 @@ export function DreEntryDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-lg w-full flex flex-col p-0">
+      <SheetContent
+        side="right"
+        className="sm:max-w-lg w-full flex flex-col p-0"
+      >
         {/* Header */}
         <SheetHeader className="px-6 pt-6 pb-4 border-b space-y-3">
           <div className="flex items-center gap-3">
@@ -214,7 +223,9 @@ export function DreEntryDrawer({
               <Receipt className="h-5 w-5 text-teal-600 dark:text-teal-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <SheetTitle className="text-lg truncate">{categoryName}</SheetTitle>
+              <SheetTitle className="text-lg truncate">
+                {categoryName}
+              </SheetTitle>
               <SheetDescription className="text-sm">
                 {formatPeriod(startDate, endDate)}
               </SheetDescription>

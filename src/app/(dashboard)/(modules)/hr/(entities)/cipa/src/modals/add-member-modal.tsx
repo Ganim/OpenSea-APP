@@ -92,7 +92,11 @@ export function AddMemberModal({
       await onSubmit(data);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('already') || msg.includes('exists') || msg.includes('member')) {
+      if (
+        msg.includes('already') ||
+        msg.includes('exists') ||
+        msg.includes('member')
+      ) {
         setFieldErrors(prev => ({ ...prev, employeeId: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -107,9 +111,7 @@ export function AddMemberModal({
       {
         title: 'Adicionar Membro',
         description: 'Selecione o funcionário e defina seu cargo na CIPA.',
-        icon: (
-          <UserPlus className="h-16 w-16 text-amber-400 opacity-50" />
-        ),
+        icon: <UserPlus className="h-16 w-16 text-amber-400 opacity-50" />,
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
@@ -179,10 +181,7 @@ export function AddMemberModal({
             {/* Estabilidade */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Switch
-                  checked={isStable}
-                  onCheckedChange={setIsStable}
-                />
+                <Switch checked={isStable} onCheckedChange={setIsStable} />
                 <Label className="text-xs">
                   Possui estabilidade provisoria
                 </Label>
@@ -227,7 +226,17 @@ export function AddMemberModal({
         ),
       },
     ],
-    [employeeId, role, type, isStable, stableUntil, isSubmitting, canSubmit, onClose, fieldErrors]
+    [
+      employeeId,
+      role,
+      type,
+      isStable,
+      stableUntil,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+    ]
   );
 
   return (

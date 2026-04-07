@@ -33,6 +33,7 @@ export function RenameModal({
   onSubmit,
 }: RenameModalProps) {
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (team) {
@@ -41,8 +42,6 @@ export function RenameModal({
   }, [team]);
 
   if (!team) return null;
-
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +57,10 @@ export function RenameModal({
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : 'Erro ao renomear equipe';
-      if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('já existe')) {
+      if (
+        msg.toLowerCase().includes('already exists') ||
+        msg.toLowerCase().includes('já existe')
+      ) {
         setError('Este nome já está em uso');
       } else {
         setError(msg);

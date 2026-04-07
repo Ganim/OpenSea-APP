@@ -43,7 +43,10 @@ export const admissionsApi = {
     return admission;
   },
 
-  async update(id: string, data: UpdateAdmissionData): Promise<AdmissionInvite> {
+  async update(
+    id: string,
+    data: UpdateAdmissionData
+  ): Promise<AdmissionInvite> {
     const { admission } = await admissionsService.update(id, data);
     return admission;
   },

@@ -38,10 +38,7 @@ import {
   Plus,
   GitBranch,
 } from 'lucide-react';
-import type {
-  BlueprintStatus,
-  BlueprintStageFieldRule,
-} from '@/types/sales';
+import type { BlueprintStatus, BlueprintStageFieldRule } from '@/types/sales';
 import { BLUEPRINT_STATUS_LABELS } from '@/types/sales';
 
 function BlueprintEditContent() {
@@ -161,9 +158,7 @@ function BlueprintEditContent() {
         rule.stageId === stageId
           ? {
               ...rule,
-              requiredFields: rule.requiredFields.filter(
-                (_, i) => i !== index
-              ),
+              requiredFields: rule.requiredFields.filter((_, i) => i !== index),
             }
           : rule
       )

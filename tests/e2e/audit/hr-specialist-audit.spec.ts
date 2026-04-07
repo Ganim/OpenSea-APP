@@ -24,52 +24,89 @@ const SCREENSHOTS_DIR = 'tests/e2e/audit/specialist-screenshots';
 
 interface SpecialistIssue {
   severity: 'critical' | 'major' | 'minor' | 'suggestion';
-  category: 'structure' | 'flow' | 'i18n' | 'ux' | 'business-logic' | 'a11y' | 'design';
+  category:
+    | 'structure'
+    | 'flow'
+    | 'i18n'
+    | 'ux'
+    | 'business-logic'
+    | 'a11y'
+    | 'design';
   description: string;
 }
 
-async function auditPageStructure(page: Page, pagePath: string): Promise<SpecialistIssue[]> {
+async function auditPageStructure(
+  page: Page,
+  pagePath: string
+): Promise<SpecialistIssue[]> {
   const issues: SpecialistIssue[] = [];
-  const bodyText = await page.textContent('body') || '';
+  const bodyText = (await page.textContent('body')) || '';
 
   // === STRUCTURAL CHECKS ===
 
   // 1. Must have PageActionBar with breadcrumb
-  const hasBreadcrumb = await page.locator('[aria-label*="breadcrumb"], nav:has(a), [class*="Breadcrumb"]').count();
+  const hasBreadcrumb = await page
+    .locator('[aria-label*="breadcrumb"], nav:has(a), [class*="Breadcrumb"]')
+    .count();
   if (hasBreadcrumb === 0 && pagePath !== '/hr') {
-    issues.push({ severity: 'major', category: 'structure', description: 'Sem breadcrumb de navegação' });
+    issues.push({
+      severity: 'major',
+      category: 'structure',
+      description: 'Sem breadcrumb de navegação',
+    });
   }
 
   // 2. Must have page title (h1 or Header component)
   const hasTitle = await page.locator('h1').count();
   if (hasTitle === 0 && pagePath !== '/hr' && pagePath !== '/hr/my-profile') {
-    issues.push({ severity: 'major', category: 'structure', description: 'Sem título (h1) na página' });
+    issues.push({
+      severity: 'major',
+      category: 'structure',
+      description: 'Sem título (h1) na página',
+    });
   }
 
   // 3. Must have subtitle/description
   const titleEl = page.locator('h1').first();
   if (hasTitle > 0) {
     const titleParent = titleEl.locator('..');
-    const hasSubtitle = await titleParent.locator('p, span.text-muted-foreground').count();
+    const hasSubtitle = await titleParent
+      .locator('p, span.text-muted-foreground')
+      .count();
     if (hasSubtitle === 0) {
       // Check sibling
       const nextSibling = page.locator('h1 + p, h1 ~ p.text-muted-foreground');
-      if (await nextSibling.count() === 0) {
-        issues.push({ severity: 'minor', category: 'structure', description: 'Título sem subtítulo descritivo' });
+      if ((await nextSibling.count()) === 0) {
+        issues.push({
+          severity: 'minor',
+          category: 'structure',
+          description: 'Título sem subtítulo descritivo',
+        });
       }
     }
   }
 
   // 4. Search bar should be full-width on its own line
-  const searchBars = page.locator('input[placeholder*="Buscar"], input[placeholder*="buscar"], input[type="search"]');
-  if (await searchBars.count() > 0) {
+  const searchBars = page.locator(
+    'input[placeholder*="Buscar"], input[placeholder*="buscar"], input[type="search"]'
+  );
+  if ((await searchBars.count()) > 0) {
     const searchParent = searchBars.first().locator('..');
-    const parentClass = await searchParent.getAttribute('class') || '';
+    const parentClass = (await searchParent.getAttribute('class')) || '';
     // Check if search is in a flex row with other elements (bad pattern)
-    if (parentClass.includes('flex') && parentClass.includes('items-center') && parentClass.includes('gap')) {
+    if (
+      parentClass.includes('flex') &&
+      parentClass.includes('items-center') &&
+      parentClass.includes('gap')
+    ) {
       const siblings = await searchParent.locator('> *').count();
       if (siblings > 2) {
-        issues.push({ severity: 'minor', category: 'ux', description: 'SearchBar dividindo linha com filtros — deveria ser full-width' });
+        issues.push({
+          severity: 'minor',
+          category: 'ux',
+          description:
+            'SearchBar dividindo linha com filtros — deveria ser full-width',
+        });
       }
     }
   }
@@ -80,27 +117,44 @@ async function auditPageStructure(page: Page, pagePath: string): Promise<Special
   const emptyText = await page.locator('text=/Nenhum.*encontrad/i').count();
   if (emptyText > 0) {
     // Check for CTA button in empty state
-    const emptyContainer = page.locator(':has(> :text-matches("Nenhum.*encontrad", "i"))').first();
+    const emptyContainer = page
+      .locator(':has(> :text-matches("Nenhum.*encontrad", "i"))')
+      .first();
     const hasCTA = await emptyContainer.locator('button, a').count();
     // Not a critical issue since some empty states are expected
   }
 
   // 6. Oversized empty state icons
-  const emptyIcons = await page.locator('.text-muted-foreground svg[class*="h-12"], .opacity-40 svg[class*="h-12"]').count();
+  const emptyIcons = await page
+    .locator(
+      '.text-muted-foreground svg[class*="h-12"], .opacity-40 svg[class*="h-12"]'
+    )
+    .count();
   if (emptyIcons > 0) {
-    issues.push({ severity: 'minor', category: 'design', description: 'Ícone de empty state muito grande (h-12+) — usar h-8' });
+    issues.push({
+      severity: 'minor',
+      category: 'design',
+      description: 'Ícone de empty state muito grande (h-12+) — usar h-8',
+    });
   }
 
   // === BUTTON PATTERN CHECKS ===
 
   // 7. Create button should be in header area
-  const createBtn = page.locator('button:has-text("Nov"), button:has-text("Criar"), button:has-text("Registrar"), button:has-text("Adicionar")');
-  if (await createBtn.count() > 0) {
+  const createBtn = page.locator(
+    'button:has-text("Nov"), button:has-text("Criar"), button:has-text("Registrar"), button:has-text("Adicionar")'
+  );
+  if ((await createBtn.count()) > 0) {
     // Should be near the top of the page
     const firstCreate = createBtn.first();
     const box = await firstCreate.boundingBox();
     if (box && box.y > 200) {
-      issues.push({ severity: 'minor', category: 'ux', description: 'Botão de criação muito abaixo na página — deveria estar no header' });
+      issues.push({
+        severity: 'minor',
+        category: 'ux',
+        description:
+          'Botão de criação muito abaixo na página — deveria estar no header',
+      });
     }
   }
 
@@ -120,27 +174,65 @@ async function auditPageStructure(page: Page, pagePath: string): Promise<Special
 
   for (const { pattern, fix } of criticalEnglish) {
     if (pattern.test(bodyText)) {
-      issues.push({ severity: 'major', category: 'i18n', description: `Texto em inglês: "${bodyText.match(pattern)?.[0]}" → "${fix}"` });
+      issues.push({
+        severity: 'major',
+        category: 'i18n',
+        description: `Texto em inglês: "${bodyText.match(pattern)?.[0]}" → "${fix}"`,
+      });
     }
   }
 
   // 9. Missing accents in visible text
   const accentChecks = [
-    { wrong: /(?<![a-záéíóúâêôãõç])\bHorario(?![a-záéíóúâêôãõç])/g, fix: 'Horário' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bSalario(?![a-záéíóúâêôãõç])/g, fix: 'Salário' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bFuncionario(?![a-záéíóúâêôãõç])/g, fix: 'Funcionário' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bAdmissao(?![a-záéíóúâêôãõç])/g, fix: 'Admissão' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bAvaliacao(?![a-záéíóúâêôãõç])/g, fix: 'Avaliação' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bInicio(?![a-záéíóúâêôãõç])/g, fix: 'Início' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bTermino(?![a-záéíóúâêôãõç])/g, fix: 'Término' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bBonificacao(?![a-záéíóúâêôãõç])/g, fix: 'Bonificação' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bRemuneracao(?![a-záéíóúâêôãõç])/g, fix: 'Remuneração' },
-    { wrong: /(?<![a-záéíóúâêôãõç])\bRescisao(?![a-záéíóúâêôãõç])/g, fix: 'Rescisão' },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bHorario(?![a-záéíóúâêôãõç])/g,
+      fix: 'Horário',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bSalario(?![a-záéíóúâêôãõç])/g,
+      fix: 'Salário',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bFuncionario(?![a-záéíóúâêôãõç])/g,
+      fix: 'Funcionário',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bAdmissao(?![a-záéíóúâêôãõç])/g,
+      fix: 'Admissão',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bAvaliacao(?![a-záéíóúâêôãõç])/g,
+      fix: 'Avaliação',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bInicio(?![a-záéíóúâêôãõç])/g,
+      fix: 'Início',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bTermino(?![a-záéíóúâêôãõç])/g,
+      fix: 'Término',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bBonificacao(?![a-záéíóúâêôãõç])/g,
+      fix: 'Bonificação',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bRemuneracao(?![a-záéíóúâêôãõç])/g,
+      fix: 'Remuneração',
+    },
+    {
+      wrong: /(?<![a-záéíóúâêôãõç])\bRescisao(?![a-záéíóúâêôãõç])/g,
+      fix: 'Rescisão',
+    },
   ];
 
   for (const { wrong, fix } of accentChecks) {
     if (wrong.test(bodyText)) {
-      issues.push({ severity: 'major', category: 'i18n', description: `Acento faltando: deveria ser "${fix}"` });
+      issues.push({
+        severity: 'major',
+        category: 'i18n',
+        description: `Acento faltando: deveria ser "${fix}"`,
+      });
     }
   }
 
@@ -159,7 +251,11 @@ async function auditPageStructure(page: Page, pagePath: string): Promise<Special
   });
 
   if (a11yIssues.iconOnlyBtns > 2) {
-    issues.push({ severity: 'minor', category: 'a11y', description: `${a11yIssues.iconOnlyBtns} botões sem texto ou aria-label` });
+    issues.push({
+      severity: 'minor',
+      category: 'a11y',
+      description: `${a11yIssues.iconOnlyBtns} botões sem texto ou aria-label`,
+    });
   }
 
   return issues;
@@ -226,28 +322,45 @@ test.describe('HR Specialist Audit', () => {
     const identifierInput = page.locator('input').first();
     await identifierInput.waitFor({ timeout: 10000 });
     await identifierInput.fill('admin@teste.com');
-    await page.locator('button:has-text("Continuar"), button[type="submit"]').first().click();
+    await page
+      .locator('button:has-text("Continuar"), button[type="submit"]')
+      .first()
+      .click();
     const passwordInput = page.locator('input[type="password"]').first();
     await passwordInput.waitFor({ timeout: 10000 });
     await passwordInput.fill('Teste@123');
-    await page.locator('button:has-text("Entrar"), button[type="submit"]').first().click();
-    await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 15000 });
+    await page
+      .locator('button:has-text("Entrar"), button[type="submit"]')
+      .first()
+      .click();
+    await page.waitForURL(url => !url.toString().includes('/login'), {
+      timeout: 15000,
+    });
 
     if (page.url().includes('select-tenant')) {
       await page.waitForTimeout(1000);
-      const tenantCard = page.locator('.cursor-pointer, [role="button"]').first();
+      const tenantCard = page
+        .locator('.cursor-pointer, [role="button"]')
+        .first();
       if (await tenantCard.isVisible({ timeout: 5000 })) {
         await tenantCard.click();
-        await page.waitForURL(url => !url.toString().includes('select-tenant'), { timeout: 10000 });
+        await page.waitForURL(
+          url => !url.toString().includes('select-tenant'),
+          { timeout: 10000 }
+        );
       }
     }
 
-    await context.storageState({ path: 'tests/e2e/audit/.specialist-auth-state.json' });
+    await context.storageState({
+      path: 'tests/e2e/audit/.specialist-auth-state.json',
+    });
     await context.close();
   });
 
   for (const pageInfo of HR_PAGES) {
-    test(`Specialist: ${pageInfo.label} (${pageInfo.path})`, async ({ browser }) => {
+    test(`Specialist: ${pageInfo.label} (${pageInfo.path})`, async ({
+      browser,
+    }) => {
       const context = await browser.newContext({
         storageState: 'tests/e2e/audit/.specialist-auth-state.json',
         viewport: { width: 1440, height: 900 },
@@ -259,7 +372,10 @@ test.describe('HR Specialist Audit', () => {
       page.on('console', msg => {
         if (msg.type() === 'error') {
           const text = msg.text();
-          if (!text.includes('favicon') && !text.includes('Download the React DevTools')) {
+          if (
+            !text.includes('favicon') &&
+            !text.includes('Download the React DevTools')
+          ) {
             consoleErrors.push(text.substring(0, 200));
           }
         }
@@ -277,21 +393,35 @@ test.describe('HR Specialist Audit', () => {
 
         // Check if redirected to login/fast-login (session expired)
         const currentUrl = page.url();
-        if (currentUrl.includes('/login') || currentUrl.includes('/fast-login')) {
+        if (
+          currentUrl.includes('/login') ||
+          currentUrl.includes('/fast-login')
+        ) {
           // Re-login
           if (currentUrl.includes('/fast-login')) {
-            await page.locator('text=Entrar com outra conta').click().catch(() => {});
+            await page
+              .locator('text=Entrar com outra conta')
+              .click()
+              .catch(() => {});
             await page.waitForTimeout(1000);
           }
           const idInput = page.locator('input').first();
           await idInput.waitFor({ timeout: 5000 });
           await idInput.fill('admin@teste.com');
-          await page.locator('button:has-text("Continuar"), button[type="submit"]').first().click();
+          await page
+            .locator('button:has-text("Continuar"), button[type="submit"]')
+            .first()
+            .click();
           const pwInput = page.locator('input[type="password"]').first();
           await pwInput.waitFor({ timeout: 5000 });
           await pwInput.fill('Teste@123');
-          await page.locator('button:has-text("Entrar"), button[type="submit"]').first().click();
-          await page.waitForURL(url => !url.toString().includes('/login'), { timeout: 10000 });
+          await page
+            .locator('button:has-text("Entrar"), button[type="submit"]')
+            .first()
+            .click();
+          await page.waitForURL(url => !url.toString().includes('/login'), {
+            timeout: 10000,
+          });
           // Navigate to target page again
           await page.goto(`${BASE_URL}${pageInfo.path}`, {
             waitUntil: 'domcontentloaded',
@@ -299,11 +429,14 @@ test.describe('HR Specialist Audit', () => {
           });
           await page.waitForTimeout(4000);
           // Save refreshed auth state
-          await page.context().storageState({ path: 'tests/e2e/audit/.specialist-auth-state.json' });
+          await page.context().storageState({
+            path: 'tests/e2e/audit/.specialist-auth-state.json',
+          });
         }
 
         // Screenshot
-        const name = pageInfo.path.replace(/\//g, '_').replace(/^_/, '') || 'hr_root';
+        const name =
+          pageInfo.path.replace(/\//g, '_').replace(/^_/, '') || 'hr_root';
         await page.screenshot({
           path: `${SCREENSHOTS_DIR}/${name}.png`,
           fullPage: true,
@@ -315,18 +448,37 @@ test.describe('HR Specialist Audit', () => {
         // Add console errors as issues
         for (const err of consoleErrors) {
           if (err.includes('403')) {
-            issues.push({ severity: 'critical', category: 'business-logic', description: `Permissão negada (403): ${err.substring(0, 100)}` });
+            issues.push({
+              severity: 'critical',
+              category: 'business-logic',
+              description: `Permissão negada (403): ${err.substring(0, 100)}`,
+            });
           } else if (err.includes('404')) {
-            issues.push({ severity: 'major', category: 'flow', description: `Endpoint não encontrado (404): ${err.substring(0, 100)}` });
-          } else if (err.includes('CRASH') || err.includes('Objects are not valid')) {
-            issues.push({ severity: 'critical', category: 'structure', description: err });
+            issues.push({
+              severity: 'major',
+              category: 'flow',
+              description: `Endpoint não encontrado (404): ${err.substring(0, 100)}`,
+            });
+          } else if (
+            err.includes('CRASH') ||
+            err.includes('Objects are not valid')
+          ) {
+            issues.push({
+              severity: 'critical',
+              category: 'structure',
+              description: err,
+            });
           }
         }
 
         // Check for error state on page
         const hasError = await page.locator('text=/Erro ao carregar/i').count();
         if (hasError > 0) {
-          issues.push({ severity: 'critical', category: 'flow', description: 'Página mostra estado de erro — API falhando' });
+          issues.push({
+            severity: 'critical',
+            category: 'flow',
+            description: 'Página mostra estado de erro — API falhando',
+          });
         }
 
         allIssues.set(pageInfo.path, issues);
@@ -334,20 +486,35 @@ test.describe('HR Specialist Audit', () => {
         // Log
         const criticals = issues.filter(i => i.severity === 'critical').length;
         const majors = issues.filter(i => i.severity === 'major').length;
-        const icon = criticals > 0 ? '🔴' : majors > 0 ? '🟠' : issues.length > 0 ? '🟡' : '✅';
-        console.log(`${icon} ${pageInfo.label} (${pageInfo.path}) — ${issues.length} issue(s)`);
+        const icon =
+          criticals > 0
+            ? '🔴'
+            : majors > 0
+              ? '🟠'
+              : issues.length > 0
+                ? '🟡'
+                : '✅';
+        console.log(
+          `${icon} ${pageInfo.label} (${pageInfo.path}) — ${issues.length} issue(s)`
+        );
         for (const issue of issues) {
-          const sev = { critical: '🔴', major: '🟠', minor: '🟡', suggestion: '💡' }[issue.severity];
+          const sev = {
+            critical: '🔴',
+            major: '🟠',
+            minor: '🟡',
+            suggestion: '💡',
+          }[issue.severity];
           console.log(`   ${sev} [${issue.category}] ${issue.description}`);
         }
-
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        allIssues.set(pageInfo.path, [{
-          severity: 'critical',
-          category: 'structure',
-          description: `Página não carregou: ${msg.substring(0, 150)}`,
-        }]);
+        allIssues.set(pageInfo.path, [
+          {
+            severity: 'critical',
+            category: 'structure',
+            description: `Página não carregou: ${msg.substring(0, 150)}`,
+          },
+        ]);
         console.log(`🔴 ${pageInfo.label} (${pageInfo.path}) — FAILED TO LOAD`);
       }
 
@@ -360,7 +527,10 @@ test.describe('HR Specialist Audit', () => {
     console.log('HR SPECIALIST AUDIT REPORT');
     console.log('='.repeat(80));
 
-    let totalCritical = 0, totalMajor = 0, totalMinor = 0, totalSuggestion = 0;
+    let totalCritical = 0,
+      totalMajor = 0,
+      totalMinor = 0,
+      totalSuggestion = 0;
     const cleanPages: string[] = [];
 
     for (const [pagePath, issues] of allIssues) {
@@ -379,7 +549,12 @@ test.describe('HR Specialist Audit', () => {
     console.log(`✅ Clean: ${cleanPages.length}`);
 
     // Group by severity
-    for (const severity of ['critical', 'major', 'minor', 'suggestion'] as const) {
+    for (const severity of [
+      'critical',
+      'major',
+      'minor',
+      'suggestion',
+    ] as const) {
       const items: { path: string; issue: SpecialistIssue }[] = [];
       for (const [p, issues] of allIssues) {
         for (const issue of issues) {
@@ -387,7 +562,12 @@ test.describe('HR Specialist Audit', () => {
         }
       }
       if (items.length > 0) {
-        const sev = { critical: '🔴 CRITICAL', major: '🟠 MAJOR', minor: '🟡 MINOR', suggestion: '💡 SUGGESTION' }[severity];
+        const sev = {
+          critical: '🔴 CRITICAL',
+          major: '🟠 MAJOR',
+          minor: '🟡 MINOR',
+          suggestion: '💡 SUGGESTION',
+        }[severity];
         console.log(`\n--- ${sev} ---`);
         for (const { path: p, issue } of items) {
           console.log(`  ${p} — [${issue.category}] ${issue.description}`);

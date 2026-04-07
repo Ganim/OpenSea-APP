@@ -60,7 +60,11 @@ export function ScheduleModal({
       resetForm();
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('date') || msg.includes('overlap') || msg.includes('data')) {
+      if (
+        msg.includes('date') ||
+        msg.includes('overlap') ||
+        msg.includes('data')
+      ) {
         setFieldErrors(prev => ({ ...prev, startDate: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -101,7 +105,8 @@ export function ScheduleModal({
                   value={startDate}
                   onChange={e => {
                     setStartDate(e.target.value);
-                    if (fieldErrors.startDate) setFieldErrors(prev => ({ ...prev, startDate: '' }));
+                    if (fieldErrors.startDate)
+                      setFieldErrors(prev => ({ ...prev, startDate: '' }));
                   }}
                   required
                   aria-invalid={!!fieldErrors.startDate}
@@ -145,10 +150,7 @@ export function ScheduleModal({
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={!isValid || isSubmitting}
-            >
+            <Button type="submit" disabled={!isValid || isSubmitting}>
               <CalendarDays className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Agendando...' : 'Agendar'}
             </Button>

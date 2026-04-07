@@ -119,7 +119,7 @@ function EscalationCard({
               </span>
               <span className="text-border">|</span>
               <div className="flex items-center gap-1.5">
-                {channels.map((ch) => {
+                {channels.map(ch => {
                   const Icon = CHANNEL_ICONS[ch];
                   return (
                     <Icon
@@ -212,10 +212,7 @@ export default function EscalationsPage() {
   const duplicateMutation = useDuplicateEscalation();
   const toggleActiveMutation = useToggleEscalationActive();
 
-  const escalations = useMemo(
-    () => data?.escalations ?? [],
-    [data]
-  );
+  const escalations = useMemo(() => data?.escalations ?? [], [data]);
 
   const handleDuplicate = async (id: string) => {
     try {
@@ -311,7 +308,7 @@ export default function EscalationsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {escalations.map((config) => (
+          {escalations.map(config => (
             <EscalationCard
               key={config.id}
               config={config}
@@ -338,7 +335,7 @@ export default function EscalationsPage() {
       {editId && (
         <EscalationConfigModal
           open={!!editId}
-          onOpenChange={(open) => !open && setEditId(null)}
+          onOpenChange={open => !open && setEditId(null)}
           escalationId={editId}
           onSaved={() => {
             refetch();

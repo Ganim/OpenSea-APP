@@ -58,10 +58,10 @@ import { toast } from 'sonner';
 
 const CreateDelegationModal = dynamic(
   () =>
-    import('./src/modals/create-delegation-modal').then((m) => ({
+    import('./src/modals/create-delegation-modal').then(m => ({
       default: m.CreateDelegationModal,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 // ============================================================================
@@ -80,14 +80,12 @@ const SCOPE_LABELS: Record<DelegationScope, string> = {
 
 const SCOPE_BADGE_CLASSES: Record<DelegationScope, string> = {
   ALL: 'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
-  ABSENCES:
-    'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
+  ABSENCES: 'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
   VACATIONS:
     'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   OVERTIME:
     'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
-  REQUESTS:
-    'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
+  REQUESTS: 'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
 };
 
 // ============================================================================
@@ -133,12 +131,10 @@ function DelegationsPageContent() {
   const setActiveTab = useCallback(
     (tab: TabValue) => {
       const url =
-        tab === 'outgoing'
-          ? '/hr/delegations'
-          : '/hr/delegations?tab=incoming';
+        tab === 'outgoing' ? '/hr/delegations' : '/hr/delegations?tab=incoming';
       router.push(url);
     },
-    [router],
+    [router]
   );
 
   // ============================================================================
@@ -155,12 +151,13 @@ function DelegationsPageContent() {
       }
       return approvalDelegationsService.listOutgoing(params);
     },
-    [activeTab],
+    [activeTab]
   );
 
-  const queryKey = activeTab === 'outgoing'
-    ? 'hr-delegations-outgoing'
-    : 'hr-delegations-incoming';
+  const queryKey =
+    activeTab === 'outgoing'
+      ? 'hr-delegations-outgoing'
+      : 'hr-delegations-incoming';
 
   const {
     data: infiniteData,
@@ -174,7 +171,7 @@ function DelegationsPageContent() {
     queryKey: [queryKey],
     queryFn: async ({ pageParam = 1 }) => fetchFn(pageParam),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? 1;
       const totalPages = lastPage.meta?.pages ?? 1;
       if (currentPage < totalPages) {
@@ -185,7 +182,7 @@ function DelegationsPageContent() {
   });
 
   const delegationsData =
-    infiniteData?.pages.flatMap((p) => p.delegations ?? []) ?? [];
+    infiniteData?.pages.flatMap(p => p.delegations ?? []) ?? [];
 
   // ============================================================================
   // EMPLOYEES FOR CREATE MODAL
@@ -215,12 +212,12 @@ function DelegationsPageContent() {
     if (!el) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { rootMargin: '300px' },
+      { rootMargin: '300px' }
     );
 
     observer.observe(el);
@@ -279,7 +276,11 @@ function DelegationsPageContent() {
   // TAB LABELS
   // ============================================================================
 
-  const tabLabels: { value: TabValue; label: string; icon: typeof ArrowUpRight }[] = [
+  const tabLabels: {
+    value: TabValue;
+    label: string;
+    icon: typeof ArrowUpRight;
+  }[] = [
     { value: 'outgoing', label: 'Minhas Delegações', icon: ArrowUpRight },
     { value: 'incoming', label: 'Delegações Recebidas', icon: ArrowDownLeft },
   ];
@@ -307,9 +308,13 @@ function DelegationsPageContent() {
 
       <PageBody>
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={v => setActiveTab(v as TabValue)}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
-            {tabLabels.map((tab) => {
+            {tabLabels.map(tab => {
               const Icon = tab.icon;
               return (
                 <TabsTrigger
@@ -365,7 +370,7 @@ function DelegationsPageContent() {
           </div>
         ) : (
           <div className="space-y-3">
-            {delegationsData.map((delegation) => (
+            {delegationsData.map(delegation => (
               <DelegationCard
                 key={delegation.id}
                 delegation={delegation}
@@ -390,7 +395,7 @@ function DelegationsPageContent() {
           isOpen={isCreateOpen}
           onClose={() => setIsCreateOpen(false)}
           isSubmitting={createMutation.isPending}
-          onSubmit={async (data) => {
+          onSubmit={async data => {
             await createMutation.mutateAsync(data);
           }}
           employees={employeesData ?? []}
@@ -431,8 +436,10 @@ function DelegationCard({
   canRevoke,
   onRevoke,
 }: DelegationCardProps) {
-  const scopeLabel = SCOPE_LABELS[delegation.scope as DelegationScope] ?? delegation.scope;
-  const scopeBadge = SCOPE_BADGE_CLASSES[delegation.scope as DelegationScope] ?? '';
+  const scopeLabel =
+    SCOPE_LABELS[delegation.scope as DelegationScope] ?? delegation.scope;
+  const scopeBadge =
+    SCOPE_BADGE_CLASSES[delegation.scope as DelegationScope] ?? '';
 
   // Determine precise status
   const isExpired =
@@ -443,7 +450,7 @@ function DelegationCard({
 
   const startFormatted = new Date(delegation.startDate).toLocaleDateString(
     'pt-BR',
-    { day: '2-digit', month: 'short', year: 'numeric' },
+    { day: '2-digit', month: 'short', year: 'numeric' }
   );
 
   const endFormatted = delegation.endDate
@@ -457,8 +464,8 @@ function DelegationCard({
   const otherPartyLabel = activeTab === 'outgoing' ? 'Delegado' : 'Delegante';
   const otherPartyName =
     activeTab === 'outgoing'
-      ? delegation.delegateName ?? delegation.delegateId
-      : delegation.delegatorName ?? delegation.delegatorId;
+      ? (delegation.delegateName ?? delegation.delegateId)
+      : (delegation.delegatorName ?? delegation.delegatorId);
 
   return (
     <div className="rounded-lg border bg-white dark:bg-slate-800/60 border-border p-4 transition-all hover:shadow-sm">
@@ -497,7 +504,9 @@ function DelegationCard({
 
           {/* Scope + Period */}
           <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${scopeBadge}`}>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${scopeBadge}`}
+            >
               <Shield className="h-3 w-3" />
               {scopeLabel}
             </span>

@@ -237,11 +237,13 @@ export function PixChargeModal({
             </div>
           )}
 
-          {pollCount >= MAX_POLLS && !paymentConfirmed && !timeRemaining.expired && (
-            <p className="text-sm text-muted-foreground text-center">
-              Tempo de espera expirado. Verifique o status manualmente.
-            </p>
-          )}
+          {pollCount >= MAX_POLLS &&
+            !paymentConfirmed &&
+            !timeRemaining.expired && (
+              <p className="text-sm text-muted-foreground text-center">
+                Tempo de espera expirado. Verifique o status manualmente.
+              </p>
+            )}
 
           {/* QR Code */}
           {(pixCharge.pixCopiaECola || pixCharge.qrCodeUrl) && (

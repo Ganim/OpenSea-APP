@@ -12,9 +12,13 @@ export function useListTimeEntries(params?: ListTimeEntriesParams) {
   return useInfiniteQuery<ListTimeEntriesResponse>({
     queryKey: timeEntryKeys.list(params),
     queryFn: ({ pageParam }) =>
-      timeControlApi.list({ ...params, page: pageParam as number, perPage: PAGE_SIZE }),
+      timeControlApi.list({
+        ...params,
+        page: pageParam as number,
+        perPage: PAGE_SIZE,
+      }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const page = lastPage.page ?? 1;
       const totalPages = lastPage.totalPages ?? 1;
       return page < totalPages ? page + 1 : undefined;

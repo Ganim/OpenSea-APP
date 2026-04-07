@@ -283,7 +283,9 @@ export function CommentsSection({
           setNewContent('');
         },
         onError: () => {
-          toast.error('Nao foi possivel adicionar o comentario. Tente novamente.');
+          toast.error(
+            'Nao foi possivel adicionar o comentario. Tente novamente.'
+          );
         },
       }
     );
@@ -306,7 +308,9 @@ export function CommentsSection({
         {
           onSuccess: () => toast.success('Comentario atualizado.'),
           onError: () =>
-            toast.error('Nao foi possivel atualizar o comentario. Tente novamente.'),
+            toast.error(
+              'Nao foi possivel atualizar o comentario. Tente novamente.'
+            ),
         }
       );
     },
@@ -442,7 +446,12 @@ export function CommentsSection({
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Comentarios e discussoes sobre este {entityType === 'order' ? 'pedido' : entityType === 'deal' ? 'negocio' : 'registro'}
+                Comentarios e discussoes sobre este{' '}
+                {entityType === 'order'
+                  ? 'pedido'
+                  : entityType === 'deal'
+                    ? 'negocio'
+                    : 'registro'}
               </p>
             </div>
             {isOpen ? (
@@ -504,9 +513,7 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
       <MessageSquare className="h-8 w-8 mb-2 opacity-30" />
       <p className="text-sm">Nenhum comentario ainda</p>
-      <p className="text-xs mt-1 opacity-60">
-        Seja o primeiro a comentar
-      </p>
+      <p className="text-xs mt-1 opacity-60">Seja o primeiro a comentar</p>
     </div>
   );
 }

@@ -10,7 +10,9 @@ import type {
 } from '@/types/sales';
 
 export const storeCreditsService = {
-  async list(query?: StoreCreditsQuery): Promise<PaginatedStoreCreditsResponse> {
+  async list(
+    query?: StoreCreditsQuery
+  ): Promise<PaginatedStoreCreditsResponse> {
     const params = new URLSearchParams();
     if (query?.page) params.append('page', query.page.toString());
     if (query?.limit) params.append('limit', query.limit.toString());
@@ -28,7 +30,9 @@ export const storeCreditsService = {
   },
 
   async get(id: string): Promise<StoreCreditResponse> {
-    return apiClient.get<StoreCreditResponse>(API_ENDPOINTS.STORE_CREDITS.GET(id));
+    return apiClient.get<StoreCreditResponse>(
+      API_ENDPOINTS.STORE_CREDITS.GET(id)
+    );
   },
 
   async getBalance(customerId: string): Promise<StoreCreditBalanceResponse> {

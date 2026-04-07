@@ -303,9 +303,7 @@ export default function AdminAuthSettingsPage() {
                       <div
                         className={`flex items-center justify-center h-9 w-9 rounded-lg ${provider.colorBg}`}
                       >
-                        <Icon
-                          className={`h-4 w-4 ${provider.colorIcon}`}
-                        />
+                        <Icon className={`h-4 w-4 ${provider.colorIcon}`} />
                       </div>
                       <div>
                         <p className="font-medium">{provider.label}</p>
@@ -402,7 +400,10 @@ export default function AdminAuthSettingsPage() {
             </div>
 
             <div className="p-4 rounded-lg bg-muted/40 border">
-              <Label htmlFor="default-method" className="font-medium mb-3 block">
+              <Label
+                htmlFor="default-method"
+                className="font-medium mb-3 block"
+              >
                 Método sugerido por padrão
               </Label>
               <Select

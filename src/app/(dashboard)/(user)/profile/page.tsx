@@ -7,7 +7,14 @@ import { useAuth } from '@/contexts/auth-context';
 import { useMyEmployee } from '@/hooks/use-me';
 import { cn } from '@/lib/utils';
 
-import { Activity, Briefcase, ChevronRight, Link, Shield, User } from 'lucide-react';
+import {
+  Activity,
+  Briefcase,
+  ChevronRight,
+  Link,
+  Shield,
+  User,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { ActivityTab } from './_components/activity-tab';
@@ -16,7 +23,12 @@ import { EmployeeTab } from './_components/employee-tab';
 import { ProfileTab } from './_components/profile-tab';
 import { SecurityTab } from './_components/security-tab';
 
-type TabId = 'profile' | 'security' | 'connected-accounts' | 'employee' | 'activity';
+type TabId =
+  | 'profile'
+  | 'security'
+  | 'connected-accounts'
+  | 'employee'
+  | 'activity';
 
 interface TabItem {
   id: TabId;

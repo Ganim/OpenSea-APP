@@ -67,7 +67,10 @@ export function CreateCycleModal({
   };
 
   const step1Valid = name.trim().length > 0 && type !== '';
-  const step2Valid = startDate !== '' && endDate !== '' && new Date(endDate) > new Date(startDate);
+  const step2Valid =
+    startDate !== '' &&
+    endDate !== '' &&
+    new Date(endDate) > new Date(startDate);
 
   const steps: WizardStep[] = [
     {
@@ -167,10 +170,7 @@ export function CreateCycleModal({
           <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!step2Valid || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={!step2Valid || isLoading}>
             {isLoading ? 'Criando...' : 'Criar ciclo'}
           </Button>
         </div>

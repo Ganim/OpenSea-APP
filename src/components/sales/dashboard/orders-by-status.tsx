@@ -36,8 +36,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   PROCESSING: {
     label: 'Processando',
-    badge:
-      'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300',
+    badge: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300',
     bar: 'bg-blue-400 dark:bg-blue-500',
   },
   SHIPPED: {
@@ -48,22 +47,19 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   DELIVERED: {
     label: 'Entregue',
-    badge:
-      'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300',
+    badge: 'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300',
     bar: 'bg-teal-400 dark:bg-teal-500',
   },
   CANCELLED: {
     label: 'Cancelado',
-    badge:
-      'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300',
+    badge: 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300',
     bar: 'bg-rose-400 dark:bg-rose-500',
   },
 };
 
 const FALLBACK_CONFIG: StatusConfig = {
   label: 'Outro',
-  badge:
-    'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-300',
+  badge: 'bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-300',
   bar: 'bg-slate-400 dark:bg-slate-500',
 };
 
@@ -129,8 +125,7 @@ export function OrdersByStatus({ data, isLoading }: OrdersByStatusProps) {
               ...FALLBACK_CONFIG,
               label: status,
             };
-            const percent =
-              totalOrders > 0 ? (count / totalOrders) * 100 : 0;
+            const percent = totalOrders > 0 ? (count / totalOrders) * 100 : 0;
 
             return (
               <div key={status} className="space-y-1">

@@ -155,10 +155,7 @@ export function BulkPayModal({
         title: 'Confirmar Seleção',
         description: 'Revise os lançamentos selecionados para pagamento',
         icon: (
-          <ListChecks
-            className="h-16 w-16 text-violet-400"
-            strokeWidth={1.2}
-          />
+          <ListChecks className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
         ),
         content: (
           <div className="space-y-6 py-2">
@@ -167,9 +164,7 @@ export function BulkPayModal({
                 <span className="text-sm text-muted-foreground">
                   Lançamentos selecionados
                 </span>
-                <span className="text-2xl font-bold">
-                  {selectedIds.length}
-                </span>
+                <span className="text-2xl font-bold">{selectedIds.length}</span>
               </div>
               <div className="border-t border-border/50 pt-4">
                 <div className="flex items-center justify-between">
@@ -194,10 +189,7 @@ export function BulkPayModal({
         title: 'Método de Pagamento',
         description: 'Selecione a conta e a forma de pagamento',
         icon: (
-          <CreditCard
-            className="h-16 w-16 text-sky-400"
-            strokeWidth={1.2}
-          />
+          <CreditCard className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
         ),
         content: (
           <div className="space-y-4 py-2">

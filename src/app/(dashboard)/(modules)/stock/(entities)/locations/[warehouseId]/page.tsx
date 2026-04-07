@@ -480,143 +480,145 @@ export default function WarehouseDetailPage({ params }: PageProps) {
               </div>
 
               {/* Selected zone detail */}
-              {selectedZone && (() => {
-                const zoneDropdown = (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        aria-label="Ações da zona"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {canConfigureZone && (
-                        <DropdownMenuItem
-                          onClick={() => setConfiguringZone(selectedZone)}
+              {selectedZone &&
+                (() => {
+                  const zoneDropdown = (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          aria-label="Ações da zona"
                         >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Reconfigurar
-                        </DropdownMenuItem>
-                      )}
-                      {canEditZone && (
-                        <DropdownMenuItem
-                          onClick={() => setEditingZone(selectedZone)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Renomear
-                        </DropdownMenuItem>
-                      )}
-                      {canDeleteZone && (
-                        <>
-                          <DropdownMenuSeparator className="!bg-gray-200 dark:!bg-gray-600" />
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {canConfigureZone && (
                           <DropdownMenuItem
-                            onClick={() => setDeletingZone(selectedZone)}
+                            onClick={() => setConfiguringZone(selectedZone)}
                           >
-                            <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
-                            Excluir
+                            <Settings className="mr-2 h-4 w-4" />
+                            Reconfigurar
                           </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                );
-                return (
-                <div className="border border-border rounded-lg overflow-hidden bg-white dark:bg-slate-800/60">
-                  {/* Zone detail header */}
-                  <div className="p-4 border-b border-border space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
-                    {/* Title row: icon + name + (mobile-only) dropdown */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
-                        <MapPin className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-foreground block truncate">
-                          {selectedZone.name}
-                        </span>
-                        <p className="text-xs font-mono text-muted-foreground truncate">
-                          {selectedZone.code}
-                        </p>
-                      </div>
-                      {/* Mobile-only dropdown (next to title) */}
-                      <div className="sm:hidden">{zoneDropdown}</div>
-                    </div>
-
-                    {/* Spacer (desktop only) */}
-                    <div className="hidden sm:block sm:flex-1" />
-
-                    {/* Filter row (mobile) / right group (desktop) */}
-                    <div className="flex items-center gap-2">
-                      {/* Toggle group — full-width with equal items on mobile, fixed on desktop */}
-                      <div className="flex items-stretch rounded-lg border border-border bg-muted/30 p-0.5 w-full sm:w-auto">
-                        {(
-                          [
-                            'all',
-                            'empty',
-                            'occupied',
-                            'full',
-                            'blocked',
-                          ] as const
-                        ).map(opt => (
-                          <button
-                            key={opt}
-                            onClick={() => setBinFilter(opt)}
-                            className={cn(
-                              'flex-1 sm:flex-none px-2.5 py-1 text-xs font-medium rounded-md transition-colors text-center',
-                              binFilter === opt
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
-                            )}
+                        )}
+                        {canEditZone && (
+                          <DropdownMenuItem
+                            onClick={() => setEditingZone(selectedZone)}
                           >
-                            {
-                              {
-                                all: 'Todos',
-                                empty: 'Vazios',
-                                occupied: 'Ocupados',
-                                full: 'Cheios',
-                                blocked: 'Bloqueados',
-                              }[opt]
-                            }
-                          </button>
-                        ))}
+                            <Edit className="mr-2 h-4 w-4" />
+                            Renomear
+                          </DropdownMenuItem>
+                        )}
+                        {canDeleteZone && (
+                          <>
+                            <DropdownMenuSeparator className="!bg-gray-200 dark:!bg-gray-600" />
+                            <DropdownMenuItem
+                              onClick={() => setDeletingZone(selectedZone)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  );
+                  return (
+                    <div className="border border-border rounded-lg overflow-hidden bg-white dark:bg-slate-800/60">
+                      {/* Zone detail header */}
+                      <div className="p-4 border-b border-border space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
+                        {/* Title row: icon + name + (mobile-only) dropdown */}
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-semibold text-foreground block truncate">
+                              {selectedZone.name}
+                            </span>
+                            <p className="text-xs font-mono text-muted-foreground truncate">
+                              {selectedZone.code}
+                            </p>
+                          </div>
+                          {/* Mobile-only dropdown (next to title) */}
+                          <div className="sm:hidden">{zoneDropdown}</div>
+                        </div>
+
+                        {/* Spacer (desktop only) */}
+                        <div className="hidden sm:block sm:flex-1" />
+
+                        {/* Filter row (mobile) / right group (desktop) */}
+                        <div className="flex items-center gap-2">
+                          {/* Toggle group — full-width with equal items on mobile, fixed on desktop */}
+                          <div className="flex items-stretch rounded-lg border border-border bg-muted/30 p-0.5 w-full sm:w-auto">
+                            {(
+                              [
+                                'all',
+                                'empty',
+                                'occupied',
+                                'full',
+                                'blocked',
+                              ] as const
+                            ).map(opt => (
+                              <button
+                                key={opt}
+                                onClick={() => setBinFilter(opt)}
+                                className={cn(
+                                  'flex-1 sm:flex-none px-2.5 py-1 text-xs font-medium rounded-md transition-colors text-center',
+                                  binFilter === opt
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                )}
+                              >
+                                {
+                                  {
+                                    all: 'Todos',
+                                    empty: 'Vazios',
+                                    occupied: 'Ocupados',
+                                    full: 'Cheios',
+                                    blocked: 'Bloqueados',
+                                  }[opt]
+                                }
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Desktop-only dropdown (next to filter) */}
+                          <div className="hidden sm:block">{zoneDropdown}</div>
+                        </div>
                       </div>
 
-                      {/* Desktop-only dropdown (next to filter) */}
-                      <div className="hidden sm:block">{zoneDropdown}</div>
+                      {/* Bin content */}
+                      <div className="p-4">
+                        {isLoadingBins ? (
+                          <div className="space-y-3">
+                            <Skeleton className="h-8 w-full rounded" />
+                            <Skeleton className="h-24 w-full rounded" />
+                            <Skeleton className="h-24 w-full rounded" />
+                          </div>
+                        ) : occupancyData?.bins &&
+                          occupancyData.bins.length > 0 ? (
+                          <AisleBinGrid
+                            bins={occupancyData.bins}
+                            zoneId={selectedZone.id}
+                            highlightBinId={activeBinHighlight ?? undefined}
+                            onBinClick={binId => setSelectedBinId(binId)}
+                            filter={binFilter}
+                          />
+                        ) : (
+                          <div className="text-center py-8 text-sm text-muted-foreground">
+                            {selectedZone.structure &&
+                            selectedZone.structure.aisles > 0
+                              ? 'Nenhum nicho encontrado nesta zona.'
+                              : 'Configure a estrutura da zona para visualizar os nichos.'}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Bin content */}
-                  <div className="p-4">
-                    {isLoadingBins ? (
-                      <div className="space-y-3">
-                        <Skeleton className="h-8 w-full rounded" />
-                        <Skeleton className="h-24 w-full rounded" />
-                        <Skeleton className="h-24 w-full rounded" />
-                      </div>
-                    ) : occupancyData?.bins && occupancyData.bins.length > 0 ? (
-                      <AisleBinGrid
-                        bins={occupancyData.bins}
-                        zoneId={selectedZone.id}
-                        highlightBinId={activeBinHighlight ?? undefined}
-                        onBinClick={binId => setSelectedBinId(binId)}
-                        filter={binFilter}
-                      />
-                    ) : (
-                      <div className="text-center py-8 text-sm text-muted-foreground">
-                        {selectedZone.structure &&
-                        selectedZone.structure.aisles > 0
-                          ? 'Nenhum nicho encontrado nesta zona.'
-                          : 'Configure a estrutura da zona para visualizar os nichos.'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                );
-              })()}
+                  );
+                })()}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center min-h-[200px] rounded-lg border border-dashed">

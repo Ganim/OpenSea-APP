@@ -98,12 +98,7 @@ function AccountantCard({
   const StatusIcon = status.icon;
 
   return (
-    <Card
-      className={cn(
-        'transition-colors',
-        !access.isActive && 'opacity-60',
-      )}
-    >
+    <Card className={cn('transition-colors', !access.isActive && 'opacity-60')}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -127,9 +122,7 @@ function AccountantCard({
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                 {access.crc && <span>CRC: {access.crc}</span>}
                 {access.cpfCnpj && <span>CPF/CNPJ: {access.cpfCnpj}</span>}
-                <span>
-                  Último acesso: {formatDate(access.lastAccessAt)}
-                </span>
+                <span>Último acesso: {formatDate(access.lastAccessAt)}</span>
                 {access.expiresAt && (
                   <span>Expira em: {formatDate(access.expiresAt)}</span>
                 )}
@@ -175,7 +168,7 @@ function AccountantCard({
 function LoadingSkeleton() {
   return (
     <div className="space-y-3">
-      {[1, 2, 3].map((i) => (
+      {[1, 2, 3].map(i => (
         <Card key={i}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
@@ -230,7 +223,7 @@ export default function AccountantPortalPage() {
   const { hasPermission } = usePermissions();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<AccountantAccess | null>(
-    null,
+    null
   );
 
   const { data, isLoading, error } = useAccountantAccesses();
@@ -286,7 +279,7 @@ export default function AccountantPortalPage() {
         <EmptyState onInvite={() => setInviteOpen(true)} />
       ) : (
         <div className="space-y-3">
-          {accesses.map((access) => (
+          {accesses.map(access => (
             <AccountantCard
               key={access.id}
               access={access}
@@ -298,10 +291,7 @@ export default function AccountantPortalPage() {
       )}
 
       {/* Invite Modal */}
-      <InviteAccountantModal
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-      />
+      <InviteAccountantModal open={inviteOpen} onOpenChange={setInviteOpen} />
 
       {/* Revoke PIN Confirmation */}
       <VerifyActionPinModal

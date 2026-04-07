@@ -30,7 +30,11 @@ import {
   useCreateItemReservation,
   useReleaseItemReservation,
 } from '@/hooks/sales/use-sales-other';
-import type { ItemReservation, ItemReservationStatus, CreateItemReservationRequest } from '@/types/sales';
+import type {
+  ItemReservation,
+  ItemReservationStatus,
+  CreateItemReservationRequest,
+} from '@/types/sales';
 import { ITEM_RESERVATION_STATUS_LABELS } from '@/types/sales';
 import {
   AlertCircle,
@@ -316,8 +320,7 @@ function ItemReservationsPageContent() {
     const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING;
     const StatusIcon = statusStyle.icon;
     const productName = item.item?.product?.name || 'Item sem nome';
-    const expired =
-      item.status === 'PENDING' && isExpired(item.expiresAt);
+    const expired = item.status === 'PENDING' && isExpired(item.expiresAt);
 
     return (
       <EntityContextMenu
@@ -382,8 +385,7 @@ function ItemReservationsPageContent() {
     const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING;
     const StatusIcon = statusStyle.icon;
     const productName = item.item?.product?.name || 'Item sem nome';
-    const expired =
-      item.status === 'PENDING' && isExpired(item.expiresAt);
+    const expired = item.status === 'PENDING' && isExpired(item.expiresAt);
 
     const listBadges: {
       label: string;
@@ -503,10 +505,7 @@ function ItemReservationsPageContent() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const initialIds = useMemo(
-    () => reservations.map(i => i.id),
-    [reservations]
-  );
+  const initialIds = useMemo(() => reservations.map(i => i.id), [reservations]);
 
   // ============================================================================
   // RENDER
@@ -597,8 +596,7 @@ function ItemReservationsPageContent() {
                       emptyText="Nenhum status encontrado."
                     />
                     <p className="text-sm text-muted-foreground whitespace-nowrap">
-                      {total}{' '}
-                      {total === 1 ? 'reserva' : 'reservas'}
+                      {total} {total === 1 ? 'reserva' : 'reservas'}
                     </p>
                   </>
                 }
@@ -614,9 +612,7 @@ function ItemReservationsPageContent() {
                 defaultSortDirection="desc"
                 onSortChange={(field, direction) => {
                   if (field !== 'custom') {
-                    setSortBy(
-                      field as 'name' | 'createdAt' | 'updatedAt'
-                    );
+                    setSortBy(field as 'name' | 'createdAt' | 'updatedAt');
                     setSortOrder(direction);
                   }
                 }}

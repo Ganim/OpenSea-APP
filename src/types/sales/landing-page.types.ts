@@ -15,13 +15,14 @@ export type LandingPageTemplate =
   | 'WEBINAR'
   | 'THANK_YOU';
 
-export const LANDING_PAGE_TEMPLATE_LABELS: Record<LandingPageTemplate, string> = {
-  BLANK: 'Em Branco',
-  LEAD_CAPTURE: 'Captura de Leads',
-  PRODUCT_LAUNCH: 'Lançamento de Produto',
-  WEBINAR: 'Webinar',
-  THANK_YOU: 'Página de Agradecimento',
-};
+export const LANDING_PAGE_TEMPLATE_LABELS: Record<LandingPageTemplate, string> =
+  {
+    BLANK: 'Em Branco',
+    LEAD_CAPTURE: 'Captura de Leads',
+    PRODUCT_LAUNCH: 'Lançamento de Produto',
+    WEBINAR: 'Webinar',
+    THANK_YOU: 'Página de Agradecimento',
+  };
 
 export interface LandingPageSection {
   id: string;

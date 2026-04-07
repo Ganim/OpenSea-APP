@@ -81,7 +81,10 @@ function SuccessScreen({
                 delay: 0.3,
               }}
             >
-              <Check className="size-12 text-emerald-600 dark:text-emerald-400" strokeWidth={3} />
+              <Check
+                className="size-12 text-emerald-600 dark:text-emerald-400"
+                strokeWidth={3}
+              />
             </motion.div>
           </motion.div>
 
@@ -145,7 +148,10 @@ function SuccessScreen({
                   Pagamentos
                 </span>
                 {payments.map((payment, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm text-zinc-700 dark:text-zinc-300">
                       {PAYMENT_METHOD_LABELS[payment.method] ?? payment.method}
                     </span>

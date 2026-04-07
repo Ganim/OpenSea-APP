@@ -16,12 +16,7 @@ import {
 import type { CreateBulkReviewsData, ReviewAssignment } from '@/types/hr';
 import { employeesService } from '@/services/hr/employees.service';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Plus,
-  Trash2,
-  UserCheck,
-  Users,
-} from 'lucide-react';
+import { Plus, Trash2, UserCheck, Users } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 interface CreateReviewsModalProps {
@@ -219,7 +214,9 @@ export function CreateReviewsModal({
                         {getEmployeeName(assignment.employeeId)}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">&rarr;</span>
+                    <span className="text-xs text-muted-foreground">
+                      &rarr;
+                    </span>
                     <span className="text-xs truncate text-muted-foreground">
                       {getEmployeeName(assignment.reviewerId)}
                     </span>
@@ -245,11 +242,10 @@ export function CreateReviewsModal({
           <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!step1Valid || isLoading}
-          >
-            {isLoading ? 'Criando...' : `Criar ${assignments.length} avaliação(ões)`}
+          <Button onClick={handleSubmit} disabled={!step1Valid || isLoading}>
+            {isLoading
+              ? 'Criando...'
+              : `Criar ${assignments.length} avaliação(ões)`}
           </Button>
         </div>
       ),

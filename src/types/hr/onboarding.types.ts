@@ -5,7 +5,10 @@
 
 import type { OnboardingChecklist } from './portal.types';
 
-export type { OnboardingChecklist, OnboardingChecklistItem } from './portal.types';
+export type {
+  OnboardingChecklist,
+  OnboardingChecklistItem,
+} from './portal.types';
 
 export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED';
 

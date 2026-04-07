@@ -138,7 +138,7 @@ function DepartmentsPageContent() {
       return departmentsApi.list({ page: pageParam, perPage: PAGE_SIZE });
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       const currentPage = lastPage.meta?.page ?? lastPage.page ?? 1;
       const total = lastPage.meta?.totalPages ?? lastPage.totalPages ?? 1;
       return currentPage < total ? currentPage + 1 : undefined;

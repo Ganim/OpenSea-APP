@@ -148,8 +148,7 @@ function BatchRow({ batch, onCheckStatus, isChecking }: BatchRowProps) {
           )}
           {!batch.transmittedAt && (
             <span>
-              Criado em{' '}
-              {new Date(batch.createdAt).toLocaleDateString('pt-BR')}
+              Criado em {new Date(batch.createdAt).toLocaleDateString('pt-BR')}
             </span>
           )}
         </div>

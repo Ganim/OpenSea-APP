@@ -63,14 +63,18 @@ export function getWarningSeverityColor(severity: WarningSeverity): string {
   return colors[severity] ?? 'slate';
 }
 
-export function getWarningSeverityBadgeClass(severity: WarningSeverity): string {
+export function getWarningSeverityBadgeClass(
+  severity: WarningSeverity
+): string {
   const classes: Record<WarningSeverity, string> = {
     LOW: 'border-emerald-500 text-emerald-700 dark:text-emerald-300',
     MEDIUM: 'border-amber-500 text-amber-700 dark:text-amber-300',
     HIGH: 'border-orange-500 text-orange-700 dark:text-orange-300',
     CRITICAL: 'border-rose-500 text-rose-700 dark:text-rose-300',
   };
-  return classes[severity] ?? 'border-slate-500 text-slate-700 dark:text-slate-300';
+  return (
+    classes[severity] ?? 'border-slate-500 text-slate-700 dark:text-slate-300'
+  );
 }
 
 export function getWarningStatusColor(status: WarningStatus): string {
@@ -88,5 +92,7 @@ export function getWarningStatusBadgeClass(status: WarningStatus): string {
     REVOKED: 'border-rose-500 text-rose-700 dark:text-rose-300',
     EXPIRED: 'border-slate-500 text-slate-700 dark:text-slate-300',
   };
-  return classes[status] ?? 'border-slate-500 text-slate-700 dark:text-slate-300';
+  return (
+    classes[status] ?? 'border-slate-500 text-slate-700 dark:text-slate-300'
+  );
 }

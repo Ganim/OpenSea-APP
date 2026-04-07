@@ -56,8 +56,7 @@ export interface UpdateGeofenceZoneData {
 // =============================================================================
 
 export const punchConfigApi = {
-  getConfig: () =>
-    apiClient.get<PunchConfiguration>('/v1/hr/punch-config'),
+  getConfig: () => apiClient.get<PunchConfiguration>('/v1/hr/punch-config'),
 
   updateConfig: (data: Partial<PunchConfiguration>) =>
     apiClient.patch<PunchConfiguration>('/v1/hr/punch-config', data),
@@ -71,6 +70,5 @@ export const punchConfigApi = {
   updateZone: (id: string, data: UpdateGeofenceZoneData) =>
     apiClient.patch<GeofenceZone>(`/v1/hr/geofence-zones/${id}`, data),
 
-  deleteZone: (id: string) =>
-    apiClient.delete(`/v1/hr/geofence-zones/${id}`),
+  deleteZone: (id: string) => apiClient.delete(`/v1/hr/geofence-zones/${id}`),
 };

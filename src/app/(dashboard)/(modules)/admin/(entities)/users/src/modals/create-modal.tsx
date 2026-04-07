@@ -38,7 +38,9 @@ const createUserSchema = z.object({
     .min(3, t('validation.minLength', { field: 'Username', min: 3 }))
     .max(30, t('validation.maxLength', { field: 'Username', max: 30 })),
   email: z.string().email(t('validation.email')),
-  password: z.string().min(8, t('validation.minLength', { field: 'Senha', min: 8 })),
+  password: z
+    .string()
+    .min(8, t('validation.minLength', { field: 'Senha', min: 8 })),
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;

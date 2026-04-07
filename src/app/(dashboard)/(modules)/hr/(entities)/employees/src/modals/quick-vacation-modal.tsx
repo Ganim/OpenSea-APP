@@ -89,9 +89,10 @@ export function QuickVacationModal({
     onClose();
   }
 
-  const days = startDate && endDate && startDate <= endDate
-    ? calculateDays(startDate, endDate)
-    : 0;
+  const days =
+    startDate && endDate && startDate <= endDate
+      ? calculateDays(startDate, endDate)
+      : 0;
 
   const scheduleMutation = useMutation({
     mutationFn: async () => {
@@ -111,9 +112,12 @@ export function QuickVacationModal({
     },
     onSuccess: () => {
       if (vacationType === 'SELL') {
-        toast.success(`Abono pecuniário registrado para ${employee?.fullName}`, {
-          description: `${daysToSell} dia(s) convertido(s) em abono`,
-        });
+        toast.success(
+          `Abono pecuniário registrado para ${employee?.fullName}`,
+          {
+            description: `${daysToSell} dia(s) convertido(s) em abono`,
+          }
+        );
       } else {
         toast.success(`Férias agendadas para ${employee?.fullName}`, {
           description: `${days} dia(s) de ${formatDate(startDate)} a ${formatDate(endDate)}`,
@@ -150,7 +154,7 @@ export function QuickVacationModal({
   const isValid = isValidRegular || isValidSell;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -174,7 +178,7 @@ export function QuickVacationModal({
             <Label>Tipo *</Label>
             <Select
               value={vacationType}
-              onValueChange={(v) => setVacationType(v as VacationType)}
+              onValueChange={v => setVacationType(v as VacationType)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
@@ -205,10 +209,11 @@ export function QuickVacationModal({
                   <SelectValue placeholder="Selecione o período" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availablePeriods.map((period) => (
+                  {availablePeriods.map(period => (
                     <SelectItem key={period.id} value={period.id}>
                       {formatDate(period.acquisitionStart)} a{' '}
-                      {formatDate(period.acquisitionEnd)} ({period.remainingDays} dias restantes)
+                      {formatDate(period.acquisitionEnd)} (
+                      {period.remainingDays} dias restantes)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -226,7 +231,7 @@ export function QuickVacationModal({
                     id="vacation-start"
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={e => setStartDate(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -235,7 +240,7 @@ export function QuickVacationModal({
                     id="vacation-end"
                     type="date"
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={e => setEndDate(e.target.value)}
                     min={startDate || undefined}
                   />
                 </div>
@@ -271,7 +276,7 @@ export function QuickVacationModal({
                   min={1}
                   max={selectedPeriod?.remainingDays ?? 10}
                   value={daysToSell}
-                  onChange={(e) => setDaysToSell(e.target.value)}
+                  onChange={e => setDaysToSell(e.target.value)}
                   placeholder="Quantidade de dias"
                 />
                 {selectedPeriod && (
@@ -290,7 +295,7 @@ export function QuickVacationModal({
             <Textarea
               id="vacation-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Informações adicionais (opcional)"
               rows={3}
             />

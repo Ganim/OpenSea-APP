@@ -95,9 +95,7 @@ export function PermissionResourceCard({
           <span
             className={cn(
               'text-sm font-semibold',
-              hasActive
-                ? 'text-foreground'
-                : 'text-muted-foreground'
+              hasActive ? 'text-foreground' : 'text-muted-foreground'
             )}
           >
             {label}

@@ -190,14 +190,8 @@ export default function OrgChartPage() {
   }, [departmentsData]);
 
   // Zoom controls
-  const zoomIn = useCallback(
-    () => setZoom(z => Math.min(z + 0.15, 2)),
-    []
-  );
-  const zoomOut = useCallback(
-    () => setZoom(z => Math.max(z - 0.15, 0.3)),
-    []
-  );
+  const zoomIn = useCallback(() => setZoom(z => Math.min(z + 0.15, 2)), []);
+  const zoomOut = useCallback(() => setZoom(z => Math.max(z - 0.15, 0.3)), []);
   const resetZoom = useCallback(() => setZoom(1), []);
 
   // Navigation
@@ -399,11 +393,12 @@ function OrgNode({
           <div
             className={`
               w-9 h-9 rounded-lg flex items-center justify-center shrink-0
-              ${level === 0
-                ? 'bg-gradient-to-br from-violet-500 to-violet-600'
-                : level === 1
-                  ? 'bg-gradient-to-br from-sky-500 to-sky-600'
-                  : 'bg-gradient-to-br from-emerald-500 to-emerald-600'
+              ${
+                level === 0
+                  ? 'bg-gradient-to-br from-violet-500 to-violet-600'
+                  : level === 1
+                    ? 'bg-gradient-to-br from-sky-500 to-sky-600'
+                    : 'bg-gradient-to-br from-emerald-500 to-emerald-600'
               }
             `}
           >
@@ -448,7 +443,9 @@ function OrgNode({
             <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
               <Crown className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <span className="text-xs truncate">{department.manager.fullName}</span>
+            <span className="text-xs truncate">
+              {department.manager.fullName}
+            </span>
           </div>
         )}
 

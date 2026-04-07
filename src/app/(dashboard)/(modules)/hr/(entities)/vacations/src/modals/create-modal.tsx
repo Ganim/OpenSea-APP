@@ -64,11 +64,9 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
     }
   }, [isOpen]);
 
-  const isStep1Valid =
-    !!employeeId && !!acquisitionStart && !!acquisitionEnd;
+  const isStep1Valid = !!employeeId && !!acquisitionStart && !!acquisitionEnd;
 
-  const isStep2Valid =
-    !!concessionStart && !!concessionEnd && totalDays > 0;
+  const isStep2Valid = !!concessionStart && !!concessionEnd && totalDays > 0;
 
   const handleSubmit = async () => {
     if (!isStep1Valid || !isStep2Valid) return;
@@ -93,7 +91,11 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
       });
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('already') || msg.includes('exists') || msg.includes('overlap')) {
+      if (
+        msg.includes('already') ||
+        msg.includes('exists') ||
+        msg.includes('overlap')
+      ) {
         setFieldErrors(prev => ({
           ...prev,
           acquisitionStart: translateError(msg),
@@ -125,7 +127,10 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
         title: 'Funcionário e Período Aquisitivo',
         description: 'Selecione o funcionário e defina o período aquisitivo.',
         icon: (
-          <CalendarHeart className="h-16 w-16 text-emerald-400 opacity-50" strokeWidth={1.2} />
+          <CalendarHeart
+            className="h-16 w-16 text-emerald-400 opacity-50"
+            strokeWidth={1.2}
+          />
         ),
         isValid: isStep1Valid,
         content: (
@@ -153,7 +158,9 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className="space-y-2">
                 <Label htmlFor="vacation-acq-start">
                   Início Aquisitivo{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -164,7 +171,10 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     onChange={e => {
                       setAcquisitionStart(e.target.value);
                       if (fieldErrors.acquisitionStart)
-                        setFieldErrors(prev => ({ ...prev, acquisitionStart: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          acquisitionStart: '',
+                        }));
                     }}
                     className="h-11"
                   />
@@ -174,7 +184,9 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className="space-y-2">
                 <Label htmlFor="vacation-acq-end">
                   Fim Aquisitivo{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -185,7 +197,10 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     onChange={e => {
                       setAcquisitionEnd(e.target.value);
                       if (fieldErrors.acquisitionEnd)
-                        setFieldErrors(prev => ({ ...prev, acquisitionEnd: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          acquisitionEnd: '',
+                        }));
                     }}
                     className="h-11"
                   />
@@ -212,9 +227,13 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
       },
       {
         title: 'Período Concessivo e Detalhes',
-        description: 'Configure o período concessivo, total de dias e observações.',
+        description:
+          'Configure o período concessivo, total de dias e observações.',
         icon: (
-          <CalendarHeart className="h-16 w-16 text-emerald-400 opacity-50" strokeWidth={1.2} />
+          <CalendarHeart
+            className="h-16 w-16 text-emerald-400 opacity-50"
+            strokeWidth={1.2}
+          />
         ),
         isValid: isStep2Valid,
         content: (
@@ -223,7 +242,9 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className="space-y-2">
                 <Label htmlFor="vacation-con-start">
                   Início Concessivo{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -234,7 +255,10 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     onChange={e => {
                       setConcessionStart(e.target.value);
                       if (fieldErrors.concessionStart)
-                        setFieldErrors(prev => ({ ...prev, concessionStart: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          concessionStart: '',
+                        }));
                     }}
                     className="h-11"
                   />
@@ -244,7 +268,9 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className="space-y-2">
                 <Label htmlFor="vacation-con-end">
                   Fim Concessivo{' '}
-                  <span className="text-[rgb(var(--color-destructive))]">*</span>
+                  <span className="text-[rgb(var(--color-destructive))]">
+                    *
+                  </span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -255,7 +281,10 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     onChange={e => {
                       setConcessionEnd(e.target.value);
                       if (fieldErrors.concessionEnd)
-                        setFieldErrors(prev => ({ ...prev, concessionEnd: '' }));
+                        setFieldErrors(prev => ({
+                          ...prev,
+                          concessionEnd: '',
+                        }));
                     }}
                     className="h-11"
                   />
@@ -289,9 +318,7 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="vacation-notes">
-                Observações (opcional)
-              </Label>
+              <Label htmlFor="vacation-notes">Observações (opcional)</Label>
               <Textarea
                 id="vacation-notes"
                 value={notes}

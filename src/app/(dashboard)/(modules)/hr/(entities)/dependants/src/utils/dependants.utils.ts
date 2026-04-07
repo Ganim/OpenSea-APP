@@ -80,9 +80,10 @@ export function calculateAge(birthDate: string | undefined): number | null {
 /**
  * Retorna badges descritivos para um dependente
  */
-export function getDependantBadges(
-  dependant: EmployeeDependant
-): Array<{ label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> {
+export function getDependantBadges(dependant: EmployeeDependant): Array<{
+  label: string;
+  variant: 'default' | 'secondary' | 'outline' | 'destructive';
+}> {
   const badges: Array<{
     label: string;
     variant: 'default' | 'secondary' | 'outline' | 'destructive';

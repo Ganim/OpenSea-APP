@@ -607,7 +607,10 @@ function FiscalPageContent() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const initialIds = useMemo(() => documents.filter(Boolean).map(d => d.id), [documents]);
+  const initialIds = useMemo(
+    () => documents.filter(Boolean).map(d => d.id),
+    [documents]
+  );
 
   // ============================================================================
   // HEADER BUTTONS CONFIGURATION (permission-aware)

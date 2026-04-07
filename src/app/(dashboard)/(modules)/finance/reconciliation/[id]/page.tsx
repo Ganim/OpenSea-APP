@@ -476,10 +476,7 @@ export default function ReconciliationDetailPage({
               <Eye className="h-4 w-4" />
               Pendentes ({pendingItems.length})
             </TabsTrigger>
-            <TabsTrigger
-              value="reconciled"
-              className="flex items-center gap-2"
-            >
+            <TabsTrigger value="reconciled" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
               Conciliados ({reconciledItems.length})
             </TabsTrigger>
@@ -527,11 +524,7 @@ export default function ReconciliationDetailPage({
               </div>
             ) : (
               reconciledItems.map(item => (
-                <TransactionRow
-                  key={item.id}
-                  item={item}
-                  isEditable={false}
-                />
+                <TransactionRow key={item.id} item={item} isEditable={false} />
               ))
             )}
           </TabsContent>
@@ -691,9 +684,7 @@ function TransactionRow({
                 {Math.round(item.matchConfidence!)}% {confidenceBadge.label}
               </span>
             )}
-            {item.memo && (
-              <span className="truncate">{item.memo}</span>
-            )}
+            {item.memo && <span className="truncate">{item.memo}</span>}
           </div>
         </div>
 

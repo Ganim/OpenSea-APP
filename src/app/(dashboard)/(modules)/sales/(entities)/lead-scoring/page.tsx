@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { leadScoringConfig } from '@/config/entities/lead-scoring.config';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
@@ -25,18 +26,18 @@ import {
   EntityContextMenu,
   EntityGrid,
 } from '@/core';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import { usePermissions } from '@/hooks/use-permissions';
 import {
   useCreateLeadScoringRule,
-  useLeadScoringRulesInfinite,
   useDeleteLeadScoringRule,
+  useLeadScoringRulesInfinite,
 } from '@/hooks/sales/use-lead-scoring';
-import { CreateScoringRuleWizard } from './src/components/create-scoring-rule-wizard';
+import { useDebounce } from '@/hooks/use-debounce';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
 import type { LeadScoringRule } from '@/types/sales';
 import {
-  LEAD_SCORE_FIELD_LABELS,
   LEAD_SCORE_CONDITION_LABELS,
+  LEAD_SCORE_FIELD_LABELS,
 } from '@/types/sales';
 import {
   Activity,
@@ -48,7 +49,6 @@ import {
   Target,
   Trash2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Suspense,
@@ -59,7 +59,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { useDebounce } from '@/hooks/use-debounce';
+import { CreateScoringRuleWizard } from './src/components/create-scoring-rule-wizard';
 
 // ============================================================================
 // TYPES
@@ -184,7 +184,9 @@ function LeadScoringPageContent() {
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(() => {}, { rootMargin: '300px' });
+    const observer = new IntersectionObserver(() => {}, {
+      rootMargin: '300px',
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -245,10 +247,11 @@ function LeadScoringPageContent() {
   // ============================================================================
 
   const renderGridCard = (item: LeadScoringRule, isSelected: boolean) => {
-    const pointsLabel =
-      item.points > 0 ? `+${item.points}` : `${item.points}`;
+    const pointsLabel = item.points > 0 ? `+${item.points}` : `${item.points}`;
     const pointsColor =
-      item.points > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
+      item.points > 0
+        ? 'text-emerald-600 dark:text-emerald-400'
+        : 'text-rose-600 dark:text-rose-400';
 
     return (
       <EntityContextMenu
@@ -301,8 +304,7 @@ function LeadScoringPageContent() {
   };
 
   const renderListCard = (item: LeadScoringRule, isSelected: boolean) => {
-    const pointsLabel =
-      item.points > 0 ? `+${item.points}` : `${item.points}`;
+    const pointsLabel = item.points > 0 ? `+${item.points}` : `${item.points}`;
 
     const listBadges: {
       label: string;

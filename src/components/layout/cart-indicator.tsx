@@ -15,8 +15,9 @@ import { CartSheet } from '@/components/sales/cart-sheet';
 // Safe import with fallback for when provider is not yet mounted
 function useCartDataSafe() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, react-hooks/rules-of-hooks
     const { useCartData } = require('@/providers/cart-provider');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useCartData();
   } catch {
     return { itemCount: 0 };

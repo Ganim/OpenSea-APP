@@ -123,7 +123,11 @@ function OnboardingPageContent() {
           hasPermission={hasPermission}
           actions={
             canCreate ? (
-              <Button size="sm" className="gap-2" onClick={() => setCreateModalOpen(true)}>
+              <Button
+                size="sm"
+                className="gap-2"
+                onClick={() => setCreateModalOpen(true)}
+              >
                 <Plus className="h-4 w-4" />
                 <span className="hidden md:inline">Novo Checklist</span>
               </Button>
@@ -131,10 +135,10 @@ function OnboardingPageContent() {
           }
         />
 
-          <Header
-            title="Onboarding"
-            description="Checklists de integração para novos colaboradores"
-          />
+        <Header
+          title="Onboarding"
+          description="Checklists de integração para novos colaboradores"
+        />
       </PageHeader>
 
       <PageBody>
@@ -161,7 +165,11 @@ function OnboardingPageContent() {
           {isLoading ? (
             <GridLoading />
           ) : error ? (
-            <GridError type="server" title="Erro ao carregar" message={error?.message} />
+            <GridError
+              type="server"
+              title="Erro ao carregar"
+              message={error?.message}
+            />
           ) : checklists.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <ClipboardList className="h-8 w-8 mb-3 opacity-40" />
@@ -190,7 +198,8 @@ function OnboardingPageContent() {
                       {checklist.employee ? (
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {checklist.employee.fullName}
-                          {checklist.employee.position && ` \u2022 ${checklist.employee.position.name}`}
+                          {checklist.employee.position &&
+                            ` \u2022 ${checklist.employee.position.name}`}
                         </p>
                       ) : (
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -254,7 +263,6 @@ function OnboardingPageContent() {
           onClose={() => setCreateModalOpen(false)}
         />
       )}
-
     </PageLayout>
   );
 }

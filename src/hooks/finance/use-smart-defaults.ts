@@ -40,10 +40,7 @@ export function useSmartDefaults(
   const categories = useMemo(() => {
     const primary = categoriesData?.categories ?? [];
     const both = bothCategoriesData?.categories ?? [];
-    return [
-      ...primary,
-      ...both.filter(b => !primary.some(p => p.id === b.id)),
-    ];
+    return [...primary, ...both.filter(b => !primary.some(p => p.id === b.id))];
   }, [categoriesData, bothCategoriesData]);
 
   // 3. Get cost centers to resolve name
@@ -97,9 +94,7 @@ export function useSmartDefaults(
     const monthYear = format(now, 'MMMM/yyyy', { locale: ptBR });
     const capitalizedMonth =
       monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
-    const description = entityName
-      ? `${entityName} - ${capitalizedMonth}`
-      : '';
+    const description = entityName ? `${entityName} - ${capitalizedMonth}` : '';
 
     return {
       categoryId,

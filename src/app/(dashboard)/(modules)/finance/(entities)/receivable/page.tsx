@@ -376,19 +376,16 @@ function ReceivablePageContent() {
 
   const MAX_BULK = 50;
 
-  const handleBulkAction = useCallback(
-    (ids: string[], action: () => void) => {
-      if (ids.length > MAX_BULK) {
-        toast.warning(
-          `Selecione no máximo ${MAX_BULK} lançamentos por operação em lote.`
-        );
-        return;
-      }
-      setBulkSelectedIds(ids);
-      action();
-    },
-    []
-  );
+  const handleBulkAction = useCallback((ids: string[], action: () => void) => {
+    if (ids.length > MAX_BULK) {
+      toast.warning(
+        `Selecione no máximo ${MAX_BULK} lançamentos por operação em lote.`
+      );
+      return;
+    }
+    setBulkSelectedIds(ids);
+    action();
+  }, []);
 
   const handleBulkCancelConfirm = useCallback(async () => {
     try {
@@ -967,9 +964,7 @@ function ReceivablePageContent() {
             totalItems={total}
             canEdit={canEdit}
             canDelete={canDelete}
-            onBulkPay={ids =>
-              handleBulkAction(ids, () => setBulkPayOpen(true))
-            }
+            onBulkPay={ids => handleBulkAction(ids, () => setBulkPayOpen(true))}
             onBulkCategorize={ids =>
               handleBulkAction(ids, () => setBulkCategorizeOpen(true))
             }
@@ -1050,7 +1045,14 @@ function ReceivableSelectionToolbar({
     }
 
     return acts;
-  }, [canEdit, canDelete, onBulkPay, onBulkCategorize, onBulkCancel, onBulkDelete]);
+  }, [
+    canEdit,
+    canDelete,
+    onBulkPay,
+    onBulkCategorize,
+    onBulkCancel,
+    onBulkDelete,
+  ]);
 
   return (
     <SelectionToolbar

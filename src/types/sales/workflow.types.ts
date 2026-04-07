@@ -66,7 +66,7 @@ export interface CreateWorkflowRequest {
   }>;
 }
 
-export interface UpdateWorkflowRequest extends Partial<CreateWorkflowRequest> {}
+export type UpdateWorkflowRequest = Partial<CreateWorkflowRequest>;
 
 export interface WorkflowsQuery extends PaginatedQuery {
   trigger?: WorkflowTrigger;

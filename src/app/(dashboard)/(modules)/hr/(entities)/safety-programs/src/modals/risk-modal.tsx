@@ -114,7 +114,11 @@ export function RiskModal({
       await onSubmit(data);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('name already') || msg.includes('already exists') || msg.includes('nome')) {
+      if (
+        msg.includes('name already') ||
+        msg.includes('already exists') ||
+        msg.includes('nome')
+      ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
       } else {
         toast.error(translateError(msg));
@@ -138,9 +142,7 @@ export function RiskModal({
         className="sm:max-w-[700px] max-w-[700px] h-[520px] p-0 gap-0 overflow-hidden flex flex-row"
       >
         <VisuallyHidden>
-          <DialogTitle>
-            {isEditing ? 'Editar Risco' : 'Novo Risco'}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar Risco' : 'Novo Risco'}</DialogTitle>
         </VisuallyHidden>
 
         {/* Left icon column */}
@@ -195,7 +197,8 @@ export function RiskModal({
                     value={name}
                     onChange={e => {
                       setName(e.target.value);
-                      if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                      if (fieldErrors.name)
+                        setFieldErrors(prev => ({ ...prev, name: '' }));
                     }}
                     placeholder="Ex: Ruído contínuo acima de 85 dB"
                     className="h-9"
@@ -307,10 +310,7 @@ export function RiskModal({
 
               {/* Ativo */}
               <div className="flex items-center gap-3">
-                <Switch
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
                 <Label className="text-xs">Risco ativo</Label>
               </div>
             </div>

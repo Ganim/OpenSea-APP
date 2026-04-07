@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { leadRoutingConfig } from '@/config/entities/lead-routing.config';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
@@ -25,16 +26,17 @@ import {
   EntityContextMenu,
   EntityGrid,
 } from '@/core';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import { usePermissions } from '@/hooks/use-permissions';
 import {
   useCreateLeadRoutingRule,
-  useLeadRoutingRulesInfinite,
   useDeleteLeadRoutingRule,
+  useLeadRoutingRulesInfinite,
 } from '@/hooks/sales/use-lead-routing';
-import { CreateRoutingRuleWizard } from './src/components/create-routing-rule-wizard';
-import type { LeadRoutingRule } from '@/types/sales';
+import { useDebounce } from '@/hooks/use-debounce';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
+import type { LeadRoutingRule, LeadRoutingStrategy } from '@/types/sales';
 import { LEAD_ROUTING_STRATEGY_LABELS } from '@/types/sales';
+import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   GitBranch,
@@ -48,8 +50,6 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Suspense,
@@ -60,8 +60,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { useDebounce } from '@/hooks/use-debounce';
-import type { LeadRoutingStrategy } from '@/types/sales';
+import { CreateRoutingRuleWizard } from './src/components/create-routing-rule-wizard';
 
 // ============================================================================
 // TYPES
@@ -86,10 +85,14 @@ const STRATEGY_ICONS: Record<LeadRoutingStrategy, LucideIcon> = {
 };
 
 const STRATEGY_COLORS: Record<LeadRoutingStrategy, string> = {
-  ROUND_ROBIN: 'border-teal-600/25 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/8 text-teal-700 dark:text-teal-300',
-  TERRITORY: 'border-blue-600/25 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/8 text-blue-700 dark:text-blue-300',
-  SEGMENT: 'border-violet-600/25 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300',
-  LOAD_BALANCE: 'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
+  ROUND_ROBIN:
+    'border-teal-600/25 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/8 text-teal-700 dark:text-teal-300',
+  TERRITORY:
+    'border-blue-600/25 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/8 text-blue-700 dark:text-blue-300',
+  SEGMENT:
+    'border-violet-600/25 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/8 text-violet-700 dark:text-violet-300',
+  LOAD_BALANCE:
+    'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
 };
 
 // ============================================================================
@@ -196,7 +199,14 @@ function LeadRoutingPageContent() {
     });
 
     return list;
-  }, [rulesData, debouncedSearch, statusFilter, strategyFilter, sortBy, sortOrder]);
+  }, [
+    rulesData,
+    debouncedSearch,
+    statusFilter,
+    strategyFilter,
+    sortBy,
+    sortOrder,
+  ]);
 
   const total = rules.length;
 
@@ -209,7 +219,9 @@ function LeadRoutingPageContent() {
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(() => {}, { rootMargin: '300px' });
+    const observer = new IntersectionObserver(() => {}, {
+      rootMargin: '300px',
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -223,7 +235,8 @@ function LeadRoutingPageContent() {
       const parts: string[] = [];
       const s = params.status !== undefined ? params.status : statusFilter;
       if (s.length > 0) parts.push(`status=${s.join(',')}`);
-      const st = params.strategy !== undefined ? params.strategy : strategyFilter;
+      const st =
+        params.strategy !== undefined ? params.strategy : strategyFilter;
       if (st.length > 0) parts.push(`strategy=${st.join(',')}`);
       return parts.length > 0
         ? `/sales/lead-routing?${parts.join('&')}`
@@ -319,8 +332,7 @@ function LeadRoutingPageContent() {
           variant="grid"
           title={item.name}
           subtitle={
-            item.description ||
-            LEAD_ROUTING_STRATEGY_LABELS[item.strategy]
+            item.description || LEAD_ROUTING_STRATEGY_LABELS[item.strategy]
           }
           icon={Shuffle}
           iconBgColor="bg-linear-to-br from-teal-500 to-emerald-600"

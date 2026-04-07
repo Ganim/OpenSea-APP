@@ -13,10 +13,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCustomerScore } from '@/hooks/finance/use-customer-score';
-import {
-  CUSTOMER_SCORE_COLORS,
-  CUSTOMER_SCORE_LABELS,
-} from '@/types/finance';
+import { CUSTOMER_SCORE_COLORS, CUSTOMER_SCORE_LABELS } from '@/types/finance';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 

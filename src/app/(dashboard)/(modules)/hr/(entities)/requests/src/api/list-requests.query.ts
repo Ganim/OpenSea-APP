@@ -57,7 +57,7 @@ export function useListMyRequests(params?: ListRequestsParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 2 * 60 * 1000,
@@ -94,7 +94,7 @@ export function useListPendingRequests(params?: ListRequestsParams) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
+    getNextPageParam: lastPage =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
 
     staleTime: 2 * 60 * 1000,

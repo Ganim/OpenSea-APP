@@ -89,10 +89,7 @@ export function ManualMatchModal({
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
   const { data: suggestionsData, isLoading: isLoadingSuggestions } =
-    useReconciliationSuggestions(
-      reconciliationId,
-      item?.id ?? ''
-    );
+    useReconciliationSuggestions(reconciliationId, item?.id ?? '');
 
   const suggestions = suggestionsData?.suggestions ?? [];
 
@@ -247,9 +244,7 @@ function SuggestionRow({
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-2">
-            {isSelected && (
-              <Check className="h-4 w-4 text-sky-500 shrink-0" />
-            )}
+            {isSelected && <Check className="h-4 w-4 text-sky-500 shrink-0" />}
             <span className="text-sm font-medium truncate">
               {suggestion.entryDescription}
             </span>

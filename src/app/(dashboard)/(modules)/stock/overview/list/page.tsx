@@ -191,7 +191,7 @@ function formatItemQuantity(qty: number, unit?: string): string {
 }
 
 function toTitleCase(str: string): string {
-  return str.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function resolveItemName(item: Item): string {
@@ -286,10 +286,11 @@ function getPrintableFields(item: Item): ViewableField[] {
 // =============================================================================
 
 function printItems(itemsToPrint: Item[]) {
-  const totalQty = Math.round(
-    itemsToPrint.reduce((s, i) => s + i.currentQuantity, 0) * 1000
-  ) / 1000;
-  const unit = getUnitAbbreviation(itemsToPrint[0]?.templateUnitOfMeasure || '') || 'un';
+  const totalQty =
+    Math.round(itemsToPrint.reduce((s, i) => s + i.currentQuantity, 0) * 1000) /
+    1000;
+  const unit =
+    getUnitAbbreviation(itemsToPrint[0]?.templateUnitOfMeasure || '') || 'un';
 
   // Collect dynamic printable columns
   const dynamicColMap = new Map<string, string>();
@@ -301,9 +302,9 @@ function printItems(itemsToPrint: Item[]) {
     }
   }
 
-  const dynamicColumns: import('@/helpers/print-listing').PrintColumn[] = [...dynamicColMap.entries()].map(
-    ([key, label]) => ({ key, label })
-  );
+  const dynamicColumns: import('@/helpers/print-listing').PrintColumn[] = [
+    ...dynamicColMap.entries(),
+  ].map(([key, label]) => ({ key, label }));
 
   const columns: import('@/helpers/print-listing').PrintColumn[] = [
     { key: 'name', label: 'Item' },
@@ -315,15 +316,19 @@ function printItems(itemsToPrint: Item[]) {
     { key: 'qty', label: 'Quantidade', align: 'right', bold: true },
   ];
 
-  const rows = itemsToPrint.map((item) => {
+  const rows = itemsToPrint.map(item => {
     const printFields = getPrintableFields(item);
-    const fieldMap = Object.fromEntries(printFields.map((f) => [f.key, f.value]));
+    const fieldMap = Object.fromEntries(printFields.map(f => [f.key, f.value]));
     return {
       name: resolveItemName(item),
       code: item.fullCode || item.uniqueCode || '',
       ref: item.variantReference || '',
       manufacturer: toTitleCase(item.manufacturerName || ''),
-      location: item.bin?.address || item.resolvedAddress || item.lastKnownAddress || '',
+      location:
+        item.bin?.address ||
+        item.resolvedAddress ||
+        item.lastKnownAddress ||
+        '',
       qty: formatItemQuantity(item.currentQuantity, item.templateUnitOfMeasure),
       ...fieldMap,
     };
@@ -336,7 +341,11 @@ function printItems(itemsToPrint: Item[]) {
     rows,
     summary: [
       { label: 'Itens', value: String(itemsToPrint.length) },
-      { label: 'Quantidade total', value: totalQty.toLocaleString('pt-BR', { maximumFractionDigits: 3 }), unit },
+      {
+        label: 'Quantidade total',
+        value: totalQty.toLocaleString('pt-BR', { maximumFractionDigits: 3 }),
+        unit,
+      },
     ],
     footerLabel: `Total — ${itemsToPrint.length} ${itemsToPrint.length === 1 ? 'item' : 'itens'}`,
     footerValue: `${totalQty.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} ${unit}`,
@@ -420,7 +429,7 @@ function StockOverviewListPageContent() {
 
   const manufacturerOptions = useMemo(
     () =>
-      (manufacturersData?.manufacturers ?? []).map((m) => ({
+      (manufacturersData?.manufacturers ?? []).map(m => ({
         id: m.id,
         label: m.name,
       })),
@@ -488,7 +497,7 @@ function StockOverviewListPageContent() {
     if (!el) return;
 
     const observer = new IntersectionObserver(
-      (observerEntries) => {
+      observerEntries => {
         if (
           observerEntries[0].isIntersecting &&
           hasNextPage &&
@@ -515,14 +524,12 @@ function StockOverviewListPageContent() {
       zoneId?: string[];
     }) => {
       const parts: string[] = [];
-      const sts =
-        params.status !== undefined ? params.status : statusFromUrl;
+      const sts = params.status !== undefined ? params.status : statusFromUrl;
       const mfr =
         params.manufacturerId !== undefined
           ? params.manufacturerId
           : manufacturerIdFromUrl;
-      const zn =
-        params.zoneId !== undefined ? params.zoneId : zoneIdFromUrl;
+      const zn = params.zoneId !== undefined ? params.zoneId : zoneIdFromUrl;
       if (sts.length > 0) parts.push(`status=${sts[0]}`);
       if (mfr.length > 0) parts.push(`manufacturerId=${mfr[0]}`);
       if (zn.length > 0) parts.push(`zoneId=${zn[0]}`);
@@ -539,8 +546,7 @@ function StockOverviewListPageContent() {
   );
 
   const setManufacturerFilter = useCallback(
-    (ids: string[]) =>
-      router.push(buildFilterUrl({ manufacturerId: ids })),
+    (ids: string[]) => router.push(buildFilterUrl({ manufacturerId: ids })),
     [router, buildFilterUrl]
   );
 
@@ -557,7 +563,7 @@ function StockOverviewListPageContent() {
     (ids: string[]) => {
       if (ids.length === 1) {
         // Open history modal for the item
-        const item = items.find((i) => i.id === ids[0]);
+        const item = items.find(i => i.id === ids[0]);
         if (item) {
           setHistoryItem(item);
           setHistoryModalOpen(true);
@@ -589,7 +595,7 @@ function StockOverviewListPageContent() {
   const handleHistory = useCallback(
     (ids: string[]) => {
       if (ids.length === 1) {
-        const item = items.find((i) => i.id === ids[0]);
+        const item = items.find(i => i.id === ids[0]);
         if (item) {
           setHistoryItem(item);
           setHistoryModalOpen(true);
@@ -604,7 +610,7 @@ function StockOverviewListPageContent() {
 
   const handleTransfer = useCallback(
     (ids: string[]) => {
-      const selected = items.filter((i) => ids.includes(i.id));
+      const selected = items.filter(i => ids.includes(i.id));
       if (selected.length > 0) {
         setActionItems(selected);
         setTransferModalOpen(true);
@@ -615,7 +621,7 @@ function StockOverviewListPageContent() {
 
   const handleExit = useCallback(
     (ids: string[]) => {
-      const selected = items.filter((i) => ids.includes(i.id));
+      const selected = items.filter(i => ids.includes(i.id));
       if (selected.length > 0) {
         setActionItems(selected);
         setExitModalOpen(true);
@@ -624,18 +630,15 @@ function StockOverviewListPageContent() {
     [items]
   );
 
-  const handleOpenActionSelector = useCallback(
-    (item: Item) => {
-      setActionItems([item]);
-      setActionSelectorOpen(true);
-    },
-    []
-  );
+  const handleOpenActionSelector = useCallback((item: Item) => {
+    setActionItems([item]);
+    setActionSelectorOpen(true);
+  }, []);
 
   const handleTransferConfirm = useCallback(
     async (newBinId: string, reason: string) => {
       if (actionItems.length === 0) return;
-      const toTransfer = actionItems.filter((item) => item.binId !== newBinId);
+      const toTransfer = actionItems.filter(item => item.binId !== newBinId);
       const skipped = actionItems.length - toTransfer.length;
       if (toTransfer.length === 0) {
         toast.info(
@@ -730,11 +733,9 @@ function StockOverviewListPageContent() {
             label: 'Gerar etiqueta',
             icon: Printer,
             onClick: (ids: string[]) => {
-              const selected = items.filter((i) => ids.includes(i.id));
+              const selected = items.filter(i => ids.includes(i.id));
               if (selected.length > 0) {
-                printQueueActions.addToQueue(
-                  selected.map((item) => ({ item }))
-                );
+                printQueueActions.addToQueue(selected.map(item => ({ item })));
                 toast.success(
                   selected.length === 1
                     ? 'Etiqueta adicionada à fila de impressão'
@@ -818,9 +819,11 @@ function StockOverviewListPageContent() {
                   <button
                     type="button"
                     className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
-                      navigator.clipboard.writeText(item.fullCode || item.uniqueCode || '');
+                      navigator.clipboard.writeText(
+                        item.fullCode || item.uniqueCode || ''
+                      );
                       toast.success('Código copiado!');
                     }}
                   >
@@ -912,11 +915,9 @@ function StockOverviewListPageContent() {
             label: 'Gerar etiqueta',
             icon: Printer,
             onClick: (ids: string[]) => {
-              const selected = items.filter((i) => ids.includes(i.id));
+              const selected = items.filter(i => ids.includes(i.id));
               if (selected.length > 0) {
-                printQueueActions.addToQueue(
-                  selected.map((item) => ({ item }))
-                );
+                printQueueActions.addToQueue(selected.map(item => ({ item })));
                 toast.success(
                   selected.length === 1
                     ? 'Etiqueta adicionada à fila de impressão'
@@ -968,7 +969,7 @@ function StockOverviewListPageContent() {
                     <button
                       type="button"
                       className="text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         const code = item.fullCode || item.uniqueCode || '';
                         navigator.clipboard.writeText(code);
@@ -1045,7 +1046,7 @@ function StockOverviewListPageContent() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const initialIds = useMemo(() => items.map((a) => a.id), [items]);
+  const initialIds = useMemo(() => items.map(a => a.id), [items]);
 
   // ============================================================================
   // RENDER
@@ -1099,7 +1100,8 @@ function StockOverviewListPageContent() {
                       Consulta de Estoque
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-white/60">
-                      Visão consolidada de todos os itens com localização, quantidades e atributos
+                      Visão consolidada de todos os itens com localização,
+                      quantidades e atributos
                     </p>
                   </div>
                 </div>
@@ -1113,7 +1115,7 @@ function StockOverviewListPageContent() {
                     <Input
                       placeholder="Buscar por código, produto, fabricante, lote..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="pl-9 h-9 text-sm bg-white dark:bg-white/5"
                     />
                     {searchQuery && (
@@ -1175,7 +1177,6 @@ function StockOverviewListPageContent() {
         </PageHeader>
 
         <PageBody>
-
           {/* Grid */}
           {isLoading ? (
             <GridLoading count={9} layout="list" size="md" gap="gap-4" />
@@ -1239,7 +1240,7 @@ function StockOverviewListPageContent() {
                 renderListItem={renderListCard}
                 isLoading={isLoading}
                 isSearching={!!debouncedSearch}
-                onItemDoubleClick={(item) => {
+                onItemDoubleClick={item => {
                   setHistoryItem(item);
                   setHistoryModalOpen(true);
                 }}
@@ -1286,16 +1287,20 @@ function StockOverviewListPageContent() {
             onOpenChange={setHistoryModalOpen}
             item={historyItem}
             productId={historyItem?.productId}
-            onBack={actionItems.length > 0 ? () => {
-              setHistoryModalOpen(false);
-              setActionSelectorOpen(true);
-            } : undefined}
+            onBack={
+              actionItems.length > 0
+                ? () => {
+                    setHistoryModalOpen(false);
+                    setActionSelectorOpen(true);
+                  }
+                : undefined
+            }
           />
 
           {/* Action Selector Modal */}
           <Dialog
             open={actionSelectorOpen}
-            onOpenChange={(open) => {
+            onOpenChange={open => {
               setActionSelectorOpen(open);
               if (!open) setActionItems([]);
             }}
@@ -1376,31 +1381,39 @@ function StockOverviewListPageContent() {
           {/* Transfer Modal */}
           <ChangeLocationModal
             open={transferModalOpen}
-            onOpenChange={(open) => {
+            onOpenChange={open => {
               setTransferModalOpen(open);
               if (!open) setActionItems([]);
             }}
             selectedItems={actionItems}
             onConfirm={handleTransferConfirm}
-            onBack={actionItems.length === 1 ? () => {
-              setTransferModalOpen(false);
-              setActionSelectorOpen(true);
-            } : undefined}
+            onBack={
+              actionItems.length === 1
+                ? () => {
+                    setTransferModalOpen(false);
+                    setActionSelectorOpen(true);
+                  }
+                : undefined
+            }
           />
 
           {/* Exit Modal */}
           <ExitItemsModal
             open={exitModalOpen}
-            onOpenChange={(open) => {
+            onOpenChange={open => {
               setExitModalOpen(open);
               if (!open) setActionItems([]);
             }}
             selectedItems={actionItems}
             onConfirm={handleExitConfirm}
-            onTransfer={actionItems.length === 1 ? () => {
-              setExitModalOpen(false);
-              setTransferModalOpen(true);
-            } : undefined}
+            onTransfer={
+              actionItems.length === 1
+                ? () => {
+                    setExitModalOpen(false);
+                    setTransferModalOpen(true);
+                  }
+                : undefined
+            }
           />
 
           {/* Bulk Selection Toolbar */}
@@ -1409,16 +1422,14 @@ function StockOverviewListPageContent() {
             total={total}
             onBulkTransfer={handleTransfer}
             onBulkExit={handleExit}
-            onBulkPrint={(ids) => {
-              const selected = items.filter((i) => ids.includes(i.id));
+            onBulkPrint={ids => {
+              const selected = items.filter(i => ids.includes(i.id));
               if (selected.length > 0) printItems(selected);
             }}
-            onBulkLabel={(ids) => {
-              const selected = items.filter((i) => ids.includes(i.id));
+            onBulkLabel={ids => {
+              const selected = items.filter(i => ids.includes(i.id));
               if (selected.length > 0) {
-                printQueueActions.addToQueue(
-                  selected.map((item) => ({ item }))
-                );
+                printQueueActions.addToQueue(selected.map(item => ({ item })));
                 toast.success(
                   selected.length === 1
                     ? 'Etiqueta adicionada à fila de impressão'
@@ -1459,7 +1470,10 @@ function StockSelectionToolbar({
   canPrint: boolean;
 }) {
   const { state, actions } = useSelectionContext();
-  const selectedIds = useMemo(() => [...state.selectedIds], [state.selectedIds]);
+  const selectedIds = useMemo(
+    () => [...state.selectedIds],
+    [state.selectedIds]
+  );
 
   const selectionActions = useMemo<SelectionAction[]>(() => {
     const acts: SelectionAction[] = [];

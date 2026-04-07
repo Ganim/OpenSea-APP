@@ -43,7 +43,11 @@ function StepBasicInfo({
   onPipelineChange: (v: string) => void;
   stageId: string;
   onStageChange: (v: string) => void;
-  pipelines: { id: string; name: string; stages: { id: string; name: string }[] }[];
+  pipelines: {
+    id: string;
+    name: string;
+    stages: { id: string; name: string }[];
+  }[];
   fieldErrors: Record<string, string>;
 }) {
   const selectedPipeline = pipelines.find(p => p.id === pipelineId);
@@ -219,7 +223,10 @@ export function CreateDealWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -235,17 +242,34 @@ export function CreateDealWizard({
         toast.error(translateError(apiError.message));
       }
     }
-  }, [title, pipelineId, stageId, value, expectedCloseDate, probability, onSubmit, handleClose]);
+  }, [
+    title,
+    pipelineId,
+    stageId,
+    value,
+    expectedCloseDate,
+    probability,
+    onSubmit,
+    handleClose,
+  ]);
 
   const steps: WizardStep[] = [
     {
       title: 'Informacoes Basicas',
       description: 'Defina o titulo, pipeline e etapa do negocio.',
-      icon: <Handshake className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
+      icon: (
+        <Handshake className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+      ),
       content: (
         <StepBasicInfo
           title={title}
-          onTitleChange={(v) => { setTitle(v); setFieldErrors(prev => { const { title: _, ...rest } = prev; return rest; }); }}
+          onTitleChange={v => {
+            setTitle(v);
+            setFieldErrors(prev => {
+              const { title: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           pipelineId={pipelineId}
           onPipelineChange={setPipelineId}
           stageId={stageId}

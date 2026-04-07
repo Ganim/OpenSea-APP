@@ -129,7 +129,10 @@ export default function EditPayablePage({
   const { data: categoriesData } = useFinanceCategories({ type: 'EXPENSE' });
   const { data: costCentersData } = useCostCenters();
   const { data: bankAccountsData } = useBankAccounts();
-  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true, type: 'EXPENSE' });
+  const { data: chartOfAccountsData } = useChartOfAccounts({
+    isActive: true,
+    type: 'EXPENSE',
+  });
 
   const categories = categoriesData?.categories ?? [];
   const costCenters = costCentersData?.costCenters ?? [];
@@ -911,7 +914,9 @@ export default function EditPayablePage({
                           <SelectValue placeholder="Sem vínculo contábil" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          <SelectItem value="none">
+                            Sem vínculo contábil
+                          </SelectItem>
                           {chartOfAccounts.map(acc => (
                             <SelectItem key={acc.id} value={acc.id}>
                               {acc.code} — {acc.name}
@@ -920,7 +925,8 @@ export default function EditPayablePage({
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Opcional. Quando preenchido, substitui a conta contábil definida na categoria para este lançamento específico.
+                        Opcional. Quando preenchido, substitui a conta contábil
+                        definida na categoria para este lançamento específico.
                       </p>
                     </div>
                   </div>

@@ -61,12 +61,14 @@ const KUDOS_CATEGORY_CONFIG: Record<
   LEADERSHIP: {
     label: 'Liderança',
     icon: <Medal className="h-3.5 w-3.5" />,
-    color: 'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
+    color:
+      'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
   },
   EXCELLENCE: {
     label: 'Excelência',
     icon: <Trophy className="h-3.5 w-3.5" />,
-    color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+    color:
+      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
   },
   HELPFULNESS: {
     label: 'Colaboração',
@@ -294,7 +296,12 @@ interface KudosListProps {
   direction: 'received' | 'sent';
 }
 
-function KudosList({ kudos, isLoading, emptyMessage, direction }: KudosListProps) {
+function KudosList({
+  kudos,
+  isLoading,
+  emptyMessage,
+  direction,
+}: KudosListProps) {
   if (isLoading) {
     return (
       <div className="space-y-3">

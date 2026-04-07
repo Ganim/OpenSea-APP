@@ -36,8 +36,7 @@ export function useListCipaMandates(params?: CipaMandateFilters) {
           perPage: 100,
         });
 
-        allMandates =
-          (response as { mandates?: CipaMandate[] }).mandates ?? [];
+        allMandates = (response as { mandates?: CipaMandate[] }).mandates ?? [];
 
         _cachedKey = cacheKey;
         _cachedMandates = allMandates;
@@ -57,7 +56,7 @@ export function useListCipaMandates(params?: CipaMandateFilters) {
     },
 
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.page < lastPage.totalPages) {
         return lastPage.page + 1;
       }

@@ -51,7 +51,8 @@ function StepItemAndQuantity({
           <option value="">Selecione um item</option>
           {variants.map(v => (
             <option key={v.id} value={v.id}>
-              {v.name}{v.sku ? ` (${v.sku})` : ''}
+              {v.name}
+              {v.sku ? ` (${v.sku})` : ''}
             </option>
           ))}
         </select>
@@ -132,11 +133,13 @@ export function CreateItemReservationWizard({
 
   const variantsList = useMemo(
     () =>
-      (variantsData?.variants ?? []).map((v: { id: string; name: string; sku?: string }) => ({
-        id: v.id,
-        name: v.name,
-        sku: v.sku,
-      })),
+      (variantsData?.variants ?? []).map(
+        (v: { id: string; name: string; sku?: string }) => ({
+          id: v.id,
+          name: v.name,
+          sku: v.sku,
+        })
+      ),
     [variantsData]
   );
 
@@ -204,7 +207,11 @@ export function CreateItemReservationWizard({
       ),
       isValid: !!expiresAt,
       footer: (
-        <Button type="button" onClick={handleSubmit} disabled={isSubmitting || !expiresAt}>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !expiresAt}
+        >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

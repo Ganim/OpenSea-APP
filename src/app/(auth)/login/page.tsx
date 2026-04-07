@@ -12,7 +12,14 @@ import { translateError } from '@/lib/error-messages';
 import { logger } from '@/lib/logger';
 import { authService } from '@/services';
 import { useForm } from '@tanstack/react-form';
-import { ChevronLeft, ChevronRight, Lock, Mail, Sparkles, User } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Lock,
+  Mail,
+  Sparkles,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -100,7 +107,10 @@ export default function LoginPage() {
     } catch (err: unknown) {
       // Always show success message to prevent user enumeration
       setMagicLinkSent(true);
-      logger.error('Erro ao solicitar magic link', err instanceof Error ? err : undefined);
+      logger.error(
+        'Erro ao solicitar magic link',
+        err instanceof Error ? err : undefined
+      );
     } finally {
       setIsSendingMagicLink(false);
     }
@@ -181,8 +191,9 @@ export default function LoginPage() {
                         </p>
                       </div>
                       <p className="text-sm text-violet-600 dark:text-violet-400">
-                        Se o identificador estiver cadastrado, um email foi enviado com o link de acesso.
-                        Verifique sua caixa de entrada.
+                        Se o identificador estiver cadastrado, um email foi
+                        enviado com o link de acesso. Verifique sua caixa de
+                        entrada.
                       </p>
                     </div>
 
@@ -225,9 +236,7 @@ export default function LoginPage() {
                         <form.Field name="identifier">
                           {field => (
                             <div className="space-y-2">
-                              <Label htmlFor="identifier">
-                                Identificador
-                              </Label>
+                              <Label htmlFor="identifier">Identificador</Label>
                               <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-white/40 z-10 pointer-events-none" />
                                 <Input
@@ -235,7 +244,9 @@ export default function LoginPage() {
                                   type="text"
                                   placeholder="Email, CPF ou Matrícula"
                                   value={field.state.value}
-                                  onChange={e => field.handleChange(e.target.value)}
+                                  onChange={e =>
+                                    field.handleChange(e.target.value)
+                                  }
                                   onBlur={field.handleBlur}
                                   autoFocus
                                   className="pl-12"
@@ -319,7 +330,9 @@ export default function LoginPage() {
                                 id="password"
                                 placeholder="••••••••"
                                 value={field.state.value}
-                                onChange={e => field.handleChange(e.target.value)}
+                                onChange={e =>
+                                  field.handleChange(e.target.value)
+                                }
                                 onBlur={field.handleBlur}
                                 autoFocus
                                 iconLeft={

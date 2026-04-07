@@ -28,7 +28,7 @@ export function getLocale(): Locale {
  */
 export function t(
   key: string,
-  params?: Record<string, string | number>,
+  params?: Record<string, string | number>
 ): string {
   const messages = locales[currentLocale] ?? locales['pt-BR'];
 

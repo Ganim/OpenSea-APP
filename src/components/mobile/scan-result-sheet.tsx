@@ -47,7 +47,8 @@ function luminance(hex: string): number {
   const r = parseInt(h.substring(0, 2), 16) / 255;
   const g = parseInt(h.substring(2, 4), 16) / 255;
   const b = parseInt(h.substring(4, 6), 16) / 255;
-  const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
@@ -56,7 +57,6 @@ function get(result: LookupResult, key: string): string | undefined {
   if (value == null) return undefined;
   return String(value);
 }
-
 
 const UOM_ABBREV: Record<string, string> = {
   UNITS: 'un',
@@ -145,25 +145,44 @@ function HeroBanner({ result, line1, line2, quantityLabel }: HeroBannerProps) {
   const isBusyPattern = ['STRIPED', 'PLAID', 'JACQUARD'].includes(pattern);
 
   const pillColor = isBusyPattern
-    ? (isLight ? 'bg-black/70' : 'bg-white/70')
-    : (isLight ? 'bg-black/40' : 'bg-white/40');
+    ? isLight
+      ? 'bg-black/70'
+      : 'bg-white/70'
+    : isLight
+      ? 'bg-black/40'
+      : 'bg-white/40';
   const bgPanel = isBusyPattern
     ? 'bg-slate-900 border border-white/10'
-    : (isLight ? 'bg-black/40 backdrop-blur-sm' : 'bg-white/15 backdrop-blur-sm');
+    : isLight
+      ? 'bg-black/40 backdrop-blur-sm'
+      : 'bg-white/15 backdrop-blur-sm';
   const shadow = '0 1px 4px rgb(0 0 0 / 0.6)';
 
   return (
-    <div className="relative overflow-hidden rounded-t-lg border-b border-white/10" style={{ minHeight: 128 }}>
+    <div
+      className="relative overflow-hidden rounded-t-lg border-b border-white/10"
+      style={{ minHeight: 128 }}
+    >
       {/* Pattern/color layer */}
       <div className="absolute inset-0" style={bannerStyle} />
 
       {/* Custom drag handle pill */}
-      <div className={cn('relative mx-auto mt-4 h-1.5 w-12 rounded-full', pillColor)} />
+      <div
+        className={cn(
+          'relative mx-auto mt-4 h-1.5 w-12 rounded-full',
+          pillColor
+        )}
+      />
 
       {/* Content overlay */}
       <div className="absolute inset-x-0 bottom-0 flex items-stretch gap-3 px-4 pb-3">
         {/* Text panel */}
-        <div className={cn('flex min-w-0 flex-1 flex-col justify-center rounded-xl px-3 py-2', bgPanel)}>
+        <div
+          className={cn(
+            'flex min-w-0 flex-1 flex-col justify-center rounded-xl px-3 py-2',
+            bgPanel
+          )}
+        >
           <p
             className="truncate text-lg font-bold text-white leading-tight"
             style={{ textShadow: shadow }}
@@ -253,9 +272,7 @@ function DetailCell({
           <p className="truncate text-sm font-medium text-slate-200">{value}</p>
         )}
       </div>
-      {copyable && (
-        <Copy className="mt-0.5 h-3 w-3 shrink-0 text-slate-600" />
-      )}
+      {copyable && <Copy className="mt-0.5 h-3 w-3 shrink-0 text-slate-600" />}
     </div>
   );
 }
@@ -352,9 +369,7 @@ function ScanResultBody({ result, onClose, variant }: ScanResultBodyProps) {
   const uomAbbr =
     UOM_ABBREV[unitOfMeasure] || unitOfMeasure.toLowerCase().slice(0, 3);
   const quantityLabel =
-    quantity != null
-      ? `${quantity}${uomAbbr ? ` ${uomAbbr}` : ''}`
-      : undefined;
+    quantity != null ? `${quantity}${uomAbbr ? ` ${uomAbbr}` : ''}` : undefined;
 
   const isItem = result.entityType === 'ITEM';
 
@@ -369,7 +384,11 @@ function ScanResultBody({ result, onClose, variant }: ScanResultBodyProps) {
   }
   if (showExit && isItem) {
     return (
-      <ExitFlow item={result} onClose={resetSubFlow} onSuccess={handleSuccess} />
+      <ExitFlow
+        item={result}
+        onClose={resetSubFlow}
+        onSuccess={handleSuccess}
+      />
     );
   }
 
@@ -480,11 +499,7 @@ export function ScanResultSheet({
 }: ScanResultSheetProps) {
   if (!result) return null;
   return (
-    <Drawer
-      open={open}
-      onOpenChange={onOpenChange}
-      direction="bottom"
-    >
+    <Drawer open={open} onOpenChange={onOpenChange} direction="bottom">
       <DrawerContent className="bg-slate-900 border-slate-700 [&>div:first-child]:hidden max-h-[85vh]">
         <VisuallyHidden>
           <DrawerTitle>Resultado da leitura</DrawerTitle>

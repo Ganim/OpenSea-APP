@@ -13,15 +13,17 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
-import { usePermissions } from '@/hooks/use-permissions';
 import {
-  useLeadRoutingRule,
   useDeleteLeadRoutingRule,
+  useLeadRoutingRule,
 } from '@/hooks/sales/use-lead-routing';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
+import type { LeadRoutingStrategy } from '@/types/sales';
 import { LEAD_ROUTING_STRATEGY_LABELS } from '@/types/sales';
 import {
   GitBranch,
@@ -33,11 +35,9 @@ import {
   User,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import type { LeadRoutingStrategy } from '@/types/sales';
 
 const STRATEGY_ICONS: Record<LeadRoutingStrategy, React.ElementType> = {
   ROUND_ROBIN: RefreshCcw,
@@ -207,7 +207,7 @@ export default function LeadRoutingDetailPage() {
             Vendedores Atribuídos ({rule.assignments?.length ?? 0})
           </h3>
 
-          {(!rule.assignments || rule.assignments.length === 0) ? (
+          {!rule.assignments || rule.assignments.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
               Nenhum vendedor atribuído a esta regra.
             </p>

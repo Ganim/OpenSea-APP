@@ -1,10 +1,10 @@
 import { invoicingService } from '@/services/sales';
 import type {
-    CancelInvoiceRequest,
-    ConfigureFocusNfeRequest,
-    InvoiceStatus,
-    IssueInvoiceRequest,
-    ListInvoicesQuery,
+  CancelInvoiceRequest,
+  ConfigureFocusNfeRequest,
+  InvoiceStatus,
+  IssueInvoiceRequest,
+  ListInvoicesQuery,
 } from '@/types/sales';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';

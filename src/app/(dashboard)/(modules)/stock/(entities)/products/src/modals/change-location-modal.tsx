@@ -91,19 +91,33 @@ export function ChangeLocationModal({
     (sum, item) => sum + item.currentQuantity,
     0
   );
-  const unitAbbr = getUnitAbbreviation(selectedItems[0]?.templateUnitOfMeasure) || 'un';
-  const formattedTotal = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 }).format(totalQuantity);
+  const unitAbbr =
+    getUnitAbbreviation(selectedItems[0]?.templateUnitOfMeasure) || 'un';
+  const formattedTotal = new Intl.NumberFormat('pt-BR', {
+    maximumFractionDigits: 3,
+  }).format(totalQuantity);
 
-  const itemName = selectedItems.length === 1
-    ? [selectedItems[0].templateName, selectedItems[0].productName, selectedItems[0].variantName].filter(Boolean).join(' ') || 'Item selecionado'
-    : `${selectedItems.length} itens selecionados`;
-  const itemCode = selectedItems.length === 1
-    ? selectedItems[0].fullCode || selectedItems[0].uniqueCode || ''
-    : '';
+  const itemName =
+    selectedItems.length === 1
+      ? [
+          selectedItems[0].templateName,
+          selectedItems[0].productName,
+          selectedItems[0].variantName,
+        ]
+          .filter(Boolean)
+          .join(' ') || 'Item selecionado'
+      : `${selectedItems.length} itens selecionados`;
+  const itemCode =
+    selectedItems.length === 1
+      ? selectedItems[0].fullCode || selectedItems[0].uniqueCode || ''
+      : '';
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden" showCloseButton={false}>
+      <DialogContent
+        className="sm:max-w-lg p-0 gap-0 overflow-hidden"
+        showCloseButton={false}
+      >
         {/* Hero header */}
         <div className="bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5 border-b border-border px-6 pt-6 pb-5">
           <DialogHeader>
@@ -142,7 +156,9 @@ export function ChangeLocationModal({
               )}
             </div>
             <div className="bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1 text-center shrink-0 self-center">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium leading-tight">Quantidade</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium leading-tight">
+                Quantidade
+              </div>
               <div className="text-sm font-semibold text-foreground leading-tight">
                 {formattedTotal} {unitAbbr}
               </div>
@@ -168,7 +184,9 @@ export function ChangeLocationModal({
                   : 'border-dashed border-border'
               )}
             >
-              <p className="text-[10px] text-muted-foreground mb-0.5">Destino</p>
+              <p className="text-[10px] text-muted-foreground mb-0.5">
+                Destino
+              </p>
               <p className="font-mono font-semibold text-sm">
                 {newBinAddress || '—'}
               </p>
@@ -190,9 +208,7 @@ export function ChangeLocationModal({
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">
-              Observação (opcional)
-            </Label>
+            <Label htmlFor="reason">Observação (opcional)</Label>
             <Textarea
               id="reason"
               placeholder="Digite uma observação..."
@@ -219,8 +235,16 @@ export function ChangeLocationModal({
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Button>
-          <Button onClick={handleSubmit} disabled={!newBinId || isSubmitting} className="gap-1.5">
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRightLeft className="h-4 w-4" />}
+          <Button
+            onClick={handleSubmit}
+            disabled={!newBinId || isSubmitting}
+            className="gap-1.5"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowRightLeft className="h-4 w-4" />
+            )}
             Confirmar Transferência
           </Button>
         </div>

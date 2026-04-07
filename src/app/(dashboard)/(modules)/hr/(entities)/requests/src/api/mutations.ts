@@ -29,7 +29,7 @@ export function useCreateRequest(options?: {
       return response.employeeRequest;
     },
 
-    onSuccess: (request) => {
+    onSuccess: request => {
       queryClient.invalidateQueries({ queryKey: requestKeys.all });
       toast.success('Solicitação criada com sucesso!');
       options?.onSuccess?.(request);
@@ -58,7 +58,7 @@ export function useApproveRequest(options?: {
       return response.employeeRequest;
     },
 
-    onSuccess: (request) => {
+    onSuccess: request => {
       queryClient.invalidateQueries({ queryKey: requestKeys.all });
       queryClient.invalidateQueries({
         queryKey: requestKeys.detail(request.id),
@@ -96,7 +96,7 @@ export function useRejectRequest(options?: {
       return response.employeeRequest;
     },
 
-    onSuccess: (request) => {
+    onSuccess: request => {
       queryClient.invalidateQueries({ queryKey: requestKeys.all });
       queryClient.invalidateQueries({
         queryKey: requestKeys.detail(request.id),
@@ -128,7 +128,7 @@ export function useCancelRequest(options?: {
       return response.employeeRequest;
     },
 
-    onSuccess: (request) => {
+    onSuccess: request => {
       queryClient.invalidateQueries({ queryKey: requestKeys.all });
       queryClient.invalidateQueries({
         queryKey: requestKeys.detail(request.id),

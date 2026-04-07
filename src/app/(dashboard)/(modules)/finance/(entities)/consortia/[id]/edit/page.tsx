@@ -365,7 +365,8 @@ export default function EditConsortiumPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="sm:col-span-2 grid gap-2">
                         <Label htmlFor="name">
-                          Nome / Descrição <span className="text-rose-500">*</span>
+                          Nome / Descrição{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="name"
@@ -378,7 +379,8 @@ export default function EditConsortiumPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="administrator">
-                          Administradora <span className="text-rose-500">*</span>
+                          Administradora{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           id="administrator"
@@ -390,7 +392,9 @@ export default function EditConsortiumPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="contractNumber">Número do Contrato</Label>
+                        <Label htmlFor="contractNumber">
+                          Número do Contrato
+                        </Label>
                         <Input
                           id="contractNumber"
                           value={contractNumber}
@@ -436,7 +440,9 @@ export default function EditConsortiumPage({
                   <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="monthlyPayment">Parcela Mensal (R$)</Label>
+                        <Label htmlFor="monthlyPayment">
+                          Parcela Mensal (R$)
+                        </Label>
                         <Input
                           id="monthlyPayment"
                           type="number"
@@ -451,7 +457,9 @@ export default function EditConsortiumPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="totalInstallments">Total de Parcelas</Label>
+                        <Label htmlFor="totalInstallments">
+                          Total de Parcelas
+                        </Label>
                         <Input
                           id="totalInstallments"
                           type="number"
@@ -474,7 +482,9 @@ export default function EditConsortiumPage({
                           value={paymentDay ?? ''}
                           onChange={e =>
                             setPaymentDay(
-                              e.target.value ? parseInt(e.target.value) : undefined
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
                             )
                           }
                           placeholder="Ex: 15"
@@ -505,7 +515,8 @@ export default function EditConsortiumPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="bankAccountId">
-                          Conta Bancária <span className="text-rose-500">*</span>
+                          Conta Bancária{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Select
                           value={bankAccountId}
@@ -527,7 +538,8 @@ export default function EditConsortiumPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="costCenterId">
-                          Centro de Custo <span className="text-rose-500">*</span>
+                          Centro de Custo{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Select
                           value={costCenterId}

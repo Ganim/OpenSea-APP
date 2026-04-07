@@ -186,7 +186,8 @@ export const admissionsConfig = defineEntityConfig<AdmissionInvite>()({
         permission: HR_PERMISSIONS.EMPLOYEES.DELETE,
         confirm: true,
         confirmTitle: 'Cancelar Admissão',
-        confirmMessage: 'Tem certeza que deseja cancelar este convite de admissão?',
+        confirmMessage:
+          'Tem certeza que deseja cancelar este convite de admissão?',
       },
     ],
     batch: [],

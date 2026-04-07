@@ -129,7 +129,10 @@ export default function EditReceivablePage({
   const { data: categoriesData } = useFinanceCategories({ type: 'REVENUE' });
   const { data: costCentersData } = useCostCenters();
   const { data: bankAccountsData } = useBankAccounts();
-  const { data: chartOfAccountsData } = useChartOfAccounts({ isActive: true, type: 'REVENUE' });
+  const { data: chartOfAccountsData } = useChartOfAccounts({
+    isActive: true,
+    type: 'REVENUE',
+  });
 
   const categories = categoriesData?.categories ?? [];
   const costCenters = costCentersData?.costCenters ?? [];
@@ -911,7 +914,9 @@ export default function EditReceivablePage({
                           <SelectValue placeholder="Sem vínculo contábil" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Sem vínculo contábil</SelectItem>
+                          <SelectItem value="none">
+                            Sem vínculo contábil
+                          </SelectItem>
                           {chartOfAccounts.map(acc => (
                             <SelectItem key={acc.id} value={acc.id}>
                               {acc.code} — {acc.name}
@@ -920,7 +925,8 @@ export default function EditReceivablePage({
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Opcional. Quando preenchido, substitui a conta contábil definida na categoria para este recebimento específico.
+                        Opcional. Quando preenchido, substitui a conta contábil
+                        definida na categoria para este recebimento específico.
                       </p>
                     </div>
                   </div>

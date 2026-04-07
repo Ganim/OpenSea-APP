@@ -497,9 +497,7 @@ export default function EditTeamPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-muted-foreground">Editando equipe</p>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {team.name}
-              </h1>
+              <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
             </div>
           </div>
         </Card>
@@ -648,9 +646,7 @@ export default function EditTeamPage() {
                                     <UserMinus className="w-4 h-4 text-destructive" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  Remover membro
-                                </TooltipContent>
+                                <TooltipContent>Remover membro</TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                           </>
@@ -732,9 +728,7 @@ export default function EditTeamPage() {
                                   <Settings className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>
-                                Editar permissões
-                              </TooltipContent>
+                              <TooltipContent>Editar permissões</TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         )}
@@ -1033,7 +1027,8 @@ export default function EditTeamPage() {
           <DialogHeader>
             <DialogTitle>Alterar Papel do Membro</DialogTitle>
             <DialogDescription>
-              Altere o papel de {selectedMember?.userName ?? 'membro'} na equipe.
+              Altere o papel de {selectedMember?.userName ?? 'membro'} na
+              equipe.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -1381,9 +1376,7 @@ export default function EditTeamPage() {
             },
             onError: err =>
               toast.error(
-                err instanceof Error
-                  ? err.message
-                  : 'Erro ao excluir quadro'
+                err instanceof Error ? err.message : 'Erro ao excluir quadro'
               ),
           });
         }}

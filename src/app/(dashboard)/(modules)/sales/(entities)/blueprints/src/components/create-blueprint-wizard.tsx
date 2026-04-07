@@ -20,7 +20,15 @@ import { useCreateBlueprint } from '@/hooks/sales/use-blueprints';
 import { usePipelines } from '@/hooks/sales/use-pipelines';
 import { ApiError } from '@/lib/errors/api-error';
 import { translateError } from '@/lib/error-messages';
-import { Check, FileCode2, GitBranch, Layers, Loader2, Plus, Trash2 } from 'lucide-react';
+import {
+  Check,
+  FileCode2,
+  GitBranch,
+  Layers,
+  Loader2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -119,8 +127,8 @@ function StepStageRules({
       <div className="flex flex-col items-center justify-center py-8 gap-3">
         <Layers className="h-8 w-8 text-muted-foreground" />
         <p className="text-sm text-muted-foreground text-center">
-          Selecione um pipeline na etapa anterior para configurar as regras
-          por etapa.
+          Selecione um pipeline na etapa anterior para configurar as regras por
+          etapa.
         </p>
       </div>
     );
@@ -254,23 +262,18 @@ export function CreateBlueprintWizard({
     );
   }, []);
 
-  const handleRemoveField = useCallback(
-    (stageId: string, index: number) => {
-      setStageRules(prev =>
-        prev.map(rule =>
-          rule.stageId === stageId
-            ? {
-                ...rule,
-                requiredFields: rule.requiredFields.filter(
-                  (_, i) => i !== index
-                ),
-              }
-            : rule
-        )
-      );
-    },
-    []
-  );
+  const handleRemoveField = useCallback((stageId: string, index: number) => {
+    setStageRules(prev =>
+      prev.map(rule =>
+        rule.stageId === stageId
+          ? {
+              ...rule,
+              requiredFields: rule.requiredFields.filter((_, i) => i !== index),
+            }
+          : rule
+      )
+    );
+  }, []);
 
   const handleChangeFieldName = useCallback(
     (stageId: string, index: number, newName: string) => {
@@ -290,23 +293,20 @@ export function CreateBlueprintWizard({
     []
   );
 
-  const handleToggleRequired = useCallback(
-    (stageId: string, index: number) => {
-      setStageRules(prev =>
-        prev.map(rule =>
-          rule.stageId === stageId
-            ? {
-                ...rule,
-                requiredFields: rule.requiredFields.map((f, i) =>
-                  i === index ? { ...f, isRequired: !f.isRequired } : f
-                ),
-              }
-            : rule
-        )
-      );
-    },
-    []
-  );
+  const handleToggleRequired = useCallback((stageId: string, index: number) => {
+    setStageRules(prev =>
+      prev.map(rule =>
+        rule.stageId === stageId
+          ? {
+              ...rule,
+              requiredFields: rule.requiredFields.map((f, i) =>
+                i === index ? { ...f, isRequired: !f.isRequired } : f
+              ),
+            }
+          : rule
+      )
+    );
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
@@ -387,9 +387,7 @@ export function CreateBlueprintWizard({
     {
       title: 'Regras por Etapa',
       description: 'Configure campos obrigatórios e validações.',
-      icon: (
-        <Layers className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
-      ),
+      icon: <Layers className="h-16 w-16 text-sky-400" strokeWidth={1.2} />,
       onBack: () => setCurrentStep(1),
       content: (
         <StepStageRules
@@ -402,11 +400,7 @@ export function CreateBlueprintWizard({
       ),
       isValid: true,
       footer: (
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

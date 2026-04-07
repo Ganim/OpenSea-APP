@@ -446,10 +446,7 @@ export function CommandBar() {
         </CommandList>
       </CommandDialog>
 
-      <QuickEntryModal
-        open={quickEntryOpen}
-        onOpenChange={setQuickEntryOpen}
-      />
+      <QuickEntryModal open={quickEntryOpen} onOpenChange={setQuickEntryOpen} />
     </>
   );
 }

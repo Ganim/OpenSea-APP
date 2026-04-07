@@ -96,11 +96,7 @@ export function ConnectedAccountsTab() {
   const [unlinkTarget, setUnlinkTarget] = useState<AuthLinkDTO | null>(null);
 
   // Fetch auth links
-  const {
-    data,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['my-auth-links'],
     queryFn: async () => {
       const response = await authLinksService.listMine();
@@ -354,10 +350,7 @@ function AuthLinkItem({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={onToggleStatus}
-            disabled={isToggling}
-          >
+          <DropdownMenuItem onClick={onToggleStatus} disabled={isToggling}>
             {isActive ? (
               <>
                 <PowerOff className="w-4 h-4 mr-2" />
@@ -507,9 +500,7 @@ function LinkAuthMethodWizard({
             {provider ? (
               (() => {
                 const ProviderIcon = getProviderConfig(provider).icon;
-                return (
-                  <ProviderIcon className="w-12 h-12 text-blue-500" />
-                );
+                return <ProviderIcon className="w-12 h-12 text-blue-500" />;
               })()
             ) : (
               <Mail className="w-12 h-12 text-blue-500" />

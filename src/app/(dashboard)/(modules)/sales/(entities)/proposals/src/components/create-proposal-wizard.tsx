@@ -114,10 +114,7 @@ function StepItemsAndTerms({
   onTermsChange: (v: string) => void;
 }) {
   const addItem = () => {
-    onItemsChange([
-      ...items,
-      { description: '', quantity: 1, unitPrice: 0 },
-    ]);
+    onItemsChange([...items, { description: '', quantity: 1, unitPrice: 0 }]);
   };
 
   const removeItem = (index: number) => {
@@ -130,9 +127,7 @@ function StepItemsAndTerms({
     value: string | number
   ) => {
     onItemsChange(
-      items.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
+      items.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
 
@@ -171,9 +166,7 @@ function StepItemsAndTerms({
               <Input
                 placeholder="Descrição do item"
                 value={item.description}
-                onChange={e =>
-                  updateItem(index, 'description', e.target.value)
-                }
+                onChange={e => updateItem(index, 'description', e.target.value)}
               />
             </div>
 
@@ -185,11 +178,7 @@ function StepItemsAndTerms({
                   min={1}
                   value={item.quantity}
                   onChange={e =>
-                    updateItem(
-                      index,
-                      'quantity',
-                      parseInt(e.target.value) || 1
-                    )
+                    updateItem(index, 'quantity', parseInt(e.target.value) || 1)
                   }
                 />
               </div>
@@ -453,10 +442,7 @@ export function CreateProposalWizard({
       title: 'Revisão',
       description: 'Revise os dados e finalize a proposta.',
       icon: (
-        <NotebookText
-          className="h-16 w-16 text-sky-400"
-          strokeWidth={1.2}
-        />
+        <NotebookText className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
       ),
       onBack: () => setCurrentStep(2),
       content: (

@@ -84,7 +84,10 @@ export function CreateComboWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -117,7 +120,13 @@ export function CreateComboWizard({
               <Input
                 placeholder="Ex: Combo Verão"
                 value={name}
-                onChange={e => { setName(e.target.value); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+                onChange={e => {
+                  setName(e.target.value);
+                  setFieldErrors(prev => {
+                    const { name: _, ...rest } = prev;
+                    return rest;
+                  });
+                }}
                 aria-invalid={!!fieldErrors.name}
               />
               <FormErrorIcon message={fieldErrors.name} />

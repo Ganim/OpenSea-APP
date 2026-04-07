@@ -207,12 +207,17 @@ export default function AbsencesPage() {
   );
 
   const typeOptions = useMemo(
-    () => ABSENCE_TYPE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label })),
+    () =>
+      ABSENCE_TYPE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label })),
     []
   );
 
   const statusOptions = useMemo(
-    () => ABSENCE_STATUS_OPTIONS.map(opt => ({ value: opt.value, label: opt.label })),
+    () =>
+      ABSENCE_STATUS_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+      })),
     []
   );
 

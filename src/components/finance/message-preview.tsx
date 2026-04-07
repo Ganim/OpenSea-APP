@@ -125,11 +125,11 @@ export function MessagePreview({
 
   const renderedMessage = useMemo(
     () => replacePlaceholders(message || ''),
-    [message],
+    [message]
   );
   const renderedSubject = useMemo(
     () => (subject ? replacePlaceholders(subject) : ''),
-    [subject],
+    [subject]
   );
 
   const colors = CHANNEL_COLORS[activeChannel];
@@ -139,7 +139,7 @@ export function MessagePreview({
       className={cn(
         'rounded-xl border overflow-hidden',
         colors.border,
-        className,
+        className
       )}
     >
       {/* Header */}
@@ -147,10 +147,15 @@ export function MessagePreview({
         className={cn(
           'flex items-center justify-between px-4 py-2.5 border-b',
           colors.bg,
-          colors.border,
+          colors.border
         )}
       >
-        <div className={cn('flex items-center gap-2 text-sm font-medium', colors.accent)}>
+        <div
+          className={cn(
+            'flex items-center gap-2 text-sm font-medium',
+            colors.accent
+          )}
+        >
           {CHANNEL_ICON[activeChannel]}
           <span>Pré-visualização — {CHANNEL_LABEL[activeChannel]}</span>
         </div>
@@ -169,9 +174,7 @@ export function MessagePreview({
       {/* Channel Toggle */}
       {showChannelToggle && (
         <div className={cn('flex gap-1 px-4 py-2 border-b', colors.border)}>
-          {(
-            Object.keys(CHANNEL_LABEL) as EscalationChannel[]
-          ).map((ch) => (
+          {(Object.keys(CHANNEL_LABEL) as EscalationChannel[]).map(ch => (
             <Button
               key={ch}
               variant={activeChannel === ch ? 'default' : 'ghost'}
@@ -209,7 +212,7 @@ export function MessagePreview({
       <div
         className={cn(
           'px-4 py-2 text-[11px] text-muted-foreground border-t',
-          colors.border,
+          colors.border
         )}
       >
         Dados de exemplo: {EXAMPLE_DATA.customerName} &bull;{' '}
@@ -274,9 +277,7 @@ function EmailPreview({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Assunto:</span>
-          <span className="text-xs font-semibold">
-            {subject || 'Cobrança'}
-          </span>
+          <span className="text-xs font-semibold">{subject || 'Cobrança'}</span>
         </div>
       </div>
       {/* Email body */}

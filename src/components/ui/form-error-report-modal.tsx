@@ -49,7 +49,8 @@ export function FormErrorReportModal({
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgb(var(--color-destructive)/0.1)]">
               <AlertCircle className="h-4 w-4 text-[rgb(var(--color-destructive))]" />
             </div>
-            {totalErrors} erro{totalErrors > 1 ? 's' : ''} encontrado{totalErrors > 1 ? 's' : ''}
+            {totalErrors} erro{totalErrors > 1 ? 's' : ''} encontrado
+            {totalErrors > 1 ? 's' : ''}
           </DialogTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -88,8 +89,12 @@ export function FormErrorReportModal({
                     >
                       <AlertCircle className="h-3.5 w-3.5 text-[rgb(var(--color-destructive))] shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{error.fieldLabel}</p>
-                        <p className="text-xs text-muted-foreground truncate">{error.message}</p>
+                        <p className="text-sm font-medium truncate">
+                          {error.fieldLabel}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {error.message}
+                        </p>
                       </div>
                       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                     </button>

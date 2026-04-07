@@ -34,11 +34,7 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { logger } from '@/lib/logger';
-import type {
-  Coupon,
-  CouponType,
-  CouponApplicableTo,
-} from '@/types/sales';
+import type { Coupon, CouponType, CouponApplicableTo } from '@/types/sales';
 import {
   COUPON_TYPE_LABELS,
   COUPON_APPLICABLE_LABELS,

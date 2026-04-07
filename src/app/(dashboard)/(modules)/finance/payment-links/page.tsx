@@ -42,12 +42,14 @@ const statusConfig: Record<
 > = {
   ACTIVE: {
     label: 'Ativo',
-    color: 'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
+    color:
+      'bg-violet-50 text-violet-700 dark:bg-violet-500/8 dark:text-violet-300',
     icon: Clock,
   },
   PAID: {
     label: 'Pago',
-    color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+    color:
+      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
     icon: CheckCircle,
   },
   EXPIRED: {
@@ -89,7 +91,9 @@ export default function PaymentLinksPage() {
   const canAdmin = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.ADMIN);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(
+    undefined
+  );
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +114,7 @@ export default function PaymentLinksPage() {
       });
       return response;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.meta.page < lastPage.meta.totalPages) {
         return lastPage.meta.page + 1;
       }
@@ -120,7 +124,7 @@ export default function PaymentLinksPage() {
   });
 
   const links = useMemo(
-    () => data?.pages.flatMap((page) => page.paymentLinks) ?? [],
+    () => data?.pages.flatMap(page => page.paymentLinks) ?? [],
     [data]
   );
 
@@ -129,7 +133,7 @@ export default function PaymentLinksPage() {
     if (!sentinelRef.current) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -181,7 +185,7 @@ export default function PaymentLinksPage() {
             label="Status"
             options={STATUS_OPTIONS}
             value={statusFilter}
-            onChange={(v) => setStatusFilter(v || undefined)}
+            onChange={v => setStatusFilter(v || undefined)}
           />
         </div>
 
@@ -202,7 +206,7 @@ export default function PaymentLinksPage() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {links.map((link) => {
+            {links.map(link => {
               const status = statusConfig[link.status];
               const StatusIcon = status.icon;
 

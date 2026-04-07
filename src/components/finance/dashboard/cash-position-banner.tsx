@@ -43,7 +43,10 @@ export function CashPositionBanner() {
   const bankAccounts = bankAccountsData?.bankAccounts ?? [];
 
   const totalBalance = useMemo(() => {
-    return bankAccounts.reduce((sum, acc) => sum + (acc.currentBalance || 0), 0);
+    return bankAccounts.reduce(
+      (sum, acc) => sum + (acc.currentBalance || 0),
+      0
+    );
   }, [bankAccounts]);
 
   const burnRate = useMemo(() => {
@@ -165,7 +168,7 @@ export function CashPositionBanner() {
           {/* Bank account chips */}
           {bankAccounts.length > 0 && (
             <div className="flex flex-wrap gap-2 lg:max-w-sm">
-              {bankAccounts.slice(0, 6).map((account) => (
+              {bankAccounts.slice(0, 6).map(account => (
                 <div
                   key={account.id}
                   className="inline-flex items-center gap-2 rounded-full border bg-white/60 dark:bg-slate-800/60 px-3 py-1.5 text-sm"

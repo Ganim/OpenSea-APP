@@ -408,7 +408,11 @@ export default function OrderDetailPage() {
         <AiContextPanel entityType="order" entityId={orderId} />
 
         {/* Comments */}
-        <CommentsSection entityType="order" entityId={orderId} defaultCollapsed />
+        <CommentsSection
+          entityType="order"
+          entityId={orderId}
+          defaultCollapsed
+        />
 
         <VerifyActionPinModal
           isOpen={deleteModalOpen}

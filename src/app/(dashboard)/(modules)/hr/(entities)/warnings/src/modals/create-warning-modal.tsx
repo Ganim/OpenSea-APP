@@ -377,7 +377,9 @@ export function CreateWarningModal({
       ),
     },
     {
-      icon: <FileText className="h-16 w-16 text-violet-500 dark:text-violet-400" />,
+      icon: (
+        <FileText className="h-16 w-16 text-violet-500 dark:text-violet-400" />
+      ),
       title: 'Detalhes',
       description: 'Informe o motivo, data e detalhes do incidente',
       isValid: !!reason && reason.length >= 10 && !!incidentDate,
@@ -453,12 +455,21 @@ export function CreateWarningModal({
       ),
       footer: (
         <div className="flex justify-end gap-2 p-4 border-t border-border/50">
-          <Button variant="ghost" onClick={handleClose} disabled={createWarning.isPending}>
+          <Button
+            variant="ghost"
+            onClick={handleClose}
+            disabled={createWarning.isPending}
+          >
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!reason || reason.length < 10 || !incidentDate || createWarning.isPending}
+            disabled={
+              !reason ||
+              reason.length < 10 ||
+              !incidentDate ||
+              createWarning.isPending
+            }
           >
             {createWarning.isPending ? (
               <span className="flex items-center gap-2">

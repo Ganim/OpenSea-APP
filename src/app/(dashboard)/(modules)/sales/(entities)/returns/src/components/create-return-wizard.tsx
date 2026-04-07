@@ -221,7 +221,9 @@ export function CreateReturnWizard({
 
   const ordersList = useMemo(() => {
     const pages = ordersData?.pages ?? [];
-    const allOrders = pages.flatMap((p: { data?: { id: string; orderNumber: string }[] }) => p.data ?? []);
+    const allOrders = pages.flatMap(
+      (p: { data?: { id: string; orderNumber: string }[] }) => p.data ?? []
+    );
     return allOrders.map((o: { id: string; orderNumber: string }) => ({
       id: o.id,
       orderNumber: o.orderNumber,
@@ -258,13 +260,25 @@ export function CreateReturnWizard({
       const apiError = ApiError.from(err);
       toast.error(translateError(apiError.message));
     }
-  }, [orderId, type, reason, refundMethod, refundAmount, reasonDetails, notes, onSubmit, handleClose]);
+  }, [
+    orderId,
+    type,
+    reason,
+    refundMethod,
+    refundAmount,
+    reasonDetails,
+    notes,
+    onSubmit,
+    handleClose,
+  ]);
 
   const steps: WizardStep[] = [
     {
       title: 'Pedido e Motivo',
       description: 'Selecione o pedido, tipo e motivo da devolucao.',
-      icon: <RotateCcw className="h-16 w-16 text-violet-400" strokeWidth={1.2} />,
+      icon: (
+        <RotateCcw className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
+      ),
       content: (
         <StepOrderAndReason
           orderId={orderId}
@@ -281,7 +295,9 @@ export function CreateReturnWizard({
     {
       title: 'Reembolso e Detalhes',
       description: 'Defina o metodo de reembolso e observacoes.',
-      icon: <Package className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />,
+      icon: (
+        <Package className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+      ),
       onBack: () => setCurrentStep(1),
       content: (
         <StepRefundDetails

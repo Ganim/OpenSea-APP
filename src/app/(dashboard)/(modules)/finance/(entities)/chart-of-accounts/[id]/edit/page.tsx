@@ -462,7 +462,10 @@ export default function EditChartOfAccountPage({
                             id="code"
                             value={formData.code}
                             onChange={e => {
-                              setFormData({ ...formData, code: e.target.value });
+                              setFormData({
+                                ...formData,
+                                code: e.target.value,
+                              });
                               if (fieldErrors.code)
                                 setFieldErrors(prev => ({ ...prev, code: '' }));
                             }}
@@ -485,7 +488,10 @@ export default function EditChartOfAccountPage({
                             id="name"
                             value={formData.name}
                             onChange={e => {
-                              setFormData({ ...formData, name: e.target.value });
+                              setFormData({
+                                ...formData,
+                                name: e.target.value,
+                              });
                               if (fieldErrors.name)
                                 setFieldErrors(prev => ({ ...prev, name: '' }));
                             }}
@@ -636,7 +642,8 @@ export default function EditChartOfAccountPage({
                       <div className="space-y-0.5">
                         <Label htmlFor="isActive">Conta Ativa</Label>
                         <p className="text-sm text-muted-foreground">
-                          Contas inativas não aparecem nas seleções de lançamentos.
+                          Contas inativas não aparecem nas seleções de
+                          lançamentos.
                         </p>
                       </div>
                       <Switch

@@ -262,7 +262,10 @@ export function CreateContactWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -302,11 +305,23 @@ export function CreateContactWizard({
       content: (
         <StepBasicInfo
           firstName={firstName}
-          onFirstNameChange={(v) => { setFirstName(v); setFieldErrors(prev => { const { firstName: _, ...rest } = prev; return rest; }); }}
+          onFirstNameChange={v => {
+            setFirstName(v);
+            setFieldErrors(prev => {
+              const { firstName: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           lastName={lastName}
           onLastNameChange={setLastName}
           email={email}
-          onEmailChange={(v) => { setEmail(v); setFieldErrors(prev => { const { email: _, ...rest } = prev; return rest; }); }}
+          onEmailChange={v => {
+            setEmail(v);
+            setFieldErrors(prev => {
+              const { email: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           phone={phone}
           onPhoneChange={setPhone}
           role={role}

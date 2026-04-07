@@ -365,9 +365,7 @@ export default function CouponDetailPage() {
               <div className="flex items-center gap-3">
                 <BarChart3 className="h-5 w-5 text-foreground" />
                 <div>
-                  <h3 className="text-base font-semibold">
-                    Historico de Uso
-                  </h3>
+                  <h3 className="text-base font-semibold">Historico de Uso</h3>
                   <p className="text-sm text-muted-foreground">
                     Resumo de utilizacao e progresso do cupom
                   </p>
@@ -409,10 +407,7 @@ export default function CouponDetailPage() {
                       % utilizado
                     </span>
                     <span>
-                      {Math.max(
-                        coupon.maxUsageTotal - coupon.usageCount,
-                        0
-                      )}{' '}
+                      {Math.max(coupon.maxUsageTotal - coupon.usageCount, 0)}{' '}
                       {coupon.maxUsageTotal - coupon.usageCount === 1
                         ? 'uso restante'
                         : 'usos restantes'}

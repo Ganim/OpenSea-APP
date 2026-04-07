@@ -278,7 +278,7 @@ export function CreateGoalWizard({
       const fieldMap: Record<string, string> = {
         'name already': 'name',
         'Goal name already': 'name',
-        'date': 'startDate',
+        date: 'startDate',
       };
       let mapped = false;
       if (apiError.fieldErrors?.length) {
@@ -287,7 +287,10 @@ export function CreateGoalWizard({
           errors[fe.field] = translateError(fe.message);
           mapped = true;
         }
-        if (mapped) { setFieldErrors(errors); setCurrentStep(1); }
+        if (mapped) {
+          setFieldErrors(errors);
+          setCurrentStep(1);
+        }
       }
       if (!mapped) {
         for (const [pattern, field] of Object.entries(fieldMap)) {
@@ -319,7 +322,13 @@ export function CreateGoalWizard({
       content: (
         <StepGoalInfo
           name={name}
-          onNameChange={(v) => { setName(v); setFieldErrors(prev => { const { name: _, ...rest } = prev; return rest; }); }}
+          onNameChange={v => {
+            setName(v);
+            setFieldErrors(prev => {
+              const { name: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           type={type}
           onTypeChange={setType}
           targetValue={targetValue}

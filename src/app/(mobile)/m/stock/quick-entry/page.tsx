@@ -410,7 +410,11 @@ export default function QuickEntryPage() {
     setFormData(prev => {
       const defaults: Record<string, unknown> = {};
       for (const [key, config] of Object.entries(itemAttributes)) {
-        if (config.defaultValue !== undefined && config.defaultValue !== null && config.defaultValue !== '') {
+        if (
+          config.defaultValue !== undefined &&
+          config.defaultValue !== null &&
+          config.defaultValue !== ''
+        ) {
           if (!(key in prev.attributes)) {
             defaults[key] = config.defaultValue;
           }

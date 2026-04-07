@@ -29,7 +29,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   FALL_PROTECTION: 'border-rose-500 bg-rose-50 dark:bg-rose-500/8',
 };
 
-export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps) {
+export function CreatePPEItemModal({
+  isOpen,
+  onClose,
+}: CreatePPEItemModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PPECategory | ''>('');
@@ -76,7 +79,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
         <div className="space-y-4">
           <Label>Categoria do EPI</Label>
           <div className="grid grid-cols-2 gap-3">
-            {PPE_CATEGORIES.map((cat) => (
+            {PPE_CATEGORIES.map(cat => (
               <button
                 key={cat}
                 type="button"
@@ -106,7 +109,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
             <Input
               id="ppe-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               placeholder="Ex: Capacete de Segurança Classe B"
             />
           </div>
@@ -116,7 +119,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
               <Input
                 id="ppe-ca"
                 value={caNumber}
-                onChange={(e) => setCaNumber(e.target.value)}
+                onChange={e => setCaNumber(e.target.value)}
                 placeholder="Ex: CA-12345"
               />
             </div>
@@ -125,7 +128,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
               <Input
                 id="ppe-manufacturer"
                 value={manufacturer}
-                onChange={(e) => setManufacturer(e.target.value)}
+                onChange={e => setManufacturer(e.target.value)}
                 placeholder="Ex: 3M"
               />
             </div>
@@ -136,7 +139,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
               <Input
                 id="ppe-model"
                 value={model}
-                onChange={(e) => setModel(e.target.value)}
+                onChange={e => setModel(e.target.value)}
                 placeholder="Ex: H-700"
               />
             </div>
@@ -147,7 +150,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
                 type="number"
                 min="1"
                 value={expirationMonths}
-                onChange={(e) => setExpirationMonths(e.target.value)}
+                onChange={e => setExpirationMonths(e.target.value)}
                 placeholder="Ex: 12"
               />
             </div>
@@ -170,7 +173,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
                 type="number"
                 min="0"
                 value={currentStock}
-                onChange={(e) => setCurrentStock(e.target.value)}
+                onChange={e => setCurrentStock(e.target.value)}
               />
             </div>
             <div>
@@ -180,7 +183,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
                 type="number"
                 min="0"
                 value={minStock}
-                onChange={(e) => setMinStock(e.target.value)}
+                onChange={e => setMinStock(e.target.value)}
               />
             </div>
           </div>
@@ -189,7 +192,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
             <Textarea
               id="ppe-notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Observações adicionais sobre o EPI..."
               rows={3}
             />
@@ -212,9 +215,13 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
                 name: name.trim(),
                 category: category as PPECategory,
                 ...(caNumber.trim() && { caNumber: caNumber.trim() }),
-                ...(manufacturer.trim() && { manufacturer: manufacturer.trim() }),
+                ...(manufacturer.trim() && {
+                  manufacturer: manufacturer.trim(),
+                }),
                 ...(model.trim() && { model: model.trim() }),
-                ...(expirationMonths && { expirationMonths: Number(expirationMonths) }),
+                ...(expirationMonths && {
+                  expirationMonths: Number(expirationMonths),
+                }),
                 minStock: Number(minStock) || 0,
                 currentStock: Number(currentStock) || 0,
                 ...(notes.trim() && { notes: notes.trim() }),
@@ -234,7 +241,7 @@ export function CreatePPEItemModal({ isOpen, onClose }: CreatePPEItemModalProps)
   return (
     <StepWizardDialog
       open={isOpen}
-      onOpenChange={(open) => !open && handleClose()}
+      onOpenChange={open => !open && handleClose()}
       steps={steps}
       currentStep={currentStep}
       onStepChange={setCurrentStep}

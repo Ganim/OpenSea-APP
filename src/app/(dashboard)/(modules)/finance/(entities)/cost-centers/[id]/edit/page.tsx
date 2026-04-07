@@ -362,7 +362,10 @@ export default function EditCostCenterPage({
                             id="name"
                             value={formData.name}
                             onChange={e => {
-                              setFormData({ ...formData, name: e.target.value });
+                              setFormData({
+                                ...formData,
+                                name: e.target.value,
+                              });
                               if (fieldErrors.name)
                                 setFieldErrors(prev => ({ ...prev, name: '' }));
                             }}
@@ -384,7 +387,10 @@ export default function EditCostCenterPage({
                             id="code"
                             value={formData.code}
                             onChange={e => {
-                              setFormData({ ...formData, code: e.target.value });
+                              setFormData({
+                                ...formData,
+                                code: e.target.value,
+                              });
                               if (fieldErrors.code)
                                 setFieldErrors(prev => ({ ...prev, code: '' }));
                             }}
@@ -414,7 +420,9 @@ export default function EditCostCenterPage({
                   <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="monthlyBudget">Orçamento Mensal (R$)</Label>
+                        <Label htmlFor="monthlyBudget">
+                          Orçamento Mensal (R$)
+                        </Label>
                         <Input
                           id="monthlyBudget"
                           type="number"
@@ -432,7 +440,9 @@ export default function EditCostCenterPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="annualBudget">Orçamento Anual (R$)</Label>
+                        <Label htmlFor="annualBudget">
+                          Orçamento Anual (R$)
+                        </Label>
                         <Input
                           id="annualBudget"
                           type="number"

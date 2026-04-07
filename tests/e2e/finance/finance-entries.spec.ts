@@ -47,9 +47,9 @@ test.describe('Finance - Contas a Pagar', () => {
     await page.waitForLoadState('networkidle');
 
     // Wait for page to be ready
-    await expect(
-      page.locator('text=Contas a Pagar').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Contas a Pagar').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Click the "Nova Conta a Pagar" button
     const newBtn = page
@@ -72,16 +72,18 @@ test.describe('Finance - Contas a Pagar', () => {
     await page.goto('/finance/payable');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Contas a Pagar').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Contas a Pagar').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for grid content to load (entries or empty state)
     await page.waitForTimeout(3_000);
 
     // Look for any entity card in the grid
     const entityCard = page
-      .locator('[data-testid="entity-card"], [class*="EntityCard"], [class*="card"]')
+      .locator(
+        '[data-testid="entity-card"], [class*="EntityCard"], [class*="card"]'
+      )
       .first();
 
     if (await entityCard.isVisible({ timeout: 5_000 }).catch(() => false)) {
@@ -116,9 +118,9 @@ test.describe('Finance - Contas a Pagar', () => {
     await page.goto('/finance/payable');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Contas a Pagar').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Contas a Pagar').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Look for status filter dropdown
     const statusFilter = page
@@ -132,7 +134,9 @@ test.describe('Finance - Contas a Pagar', () => {
 
       // Should show filter options (Pendente, Vencido, Pago, etc.)
       const pendingOption = page
-        .locator('[role="option"], [role="menuitemcheckbox"], [role="menuitem"]')
+        .locator(
+          '[role="option"], [role="menuitemcheckbox"], [role="menuitem"]'
+        )
         .filter({ hasText: 'Pendente' })
         .first();
 
@@ -162,9 +166,9 @@ test.describe('Finance - Contas a Pagar', () => {
     await page.goto('/finance/payable');
     await page.waitForLoadState('networkidle');
 
-    await expect(
-      page.locator('text=Contas a Pagar').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('text=Contas a Pagar').first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Find the search bar
     const searchInput = page.getByPlaceholder(/Buscar/i).first();

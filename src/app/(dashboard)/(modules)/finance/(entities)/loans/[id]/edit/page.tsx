@@ -459,7 +459,9 @@ export default function EditLoanPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="contractNumber">Número do Contrato</Label>
+                        <Label htmlFor="contractNumber">
+                          Número do Contrato
+                        </Label>
                         <Input
                           id="contractNumber"
                           value={contractNumber}
@@ -509,7 +511,9 @@ export default function EditLoanPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="interestRate">Taxa de Juros (% a.m.)</Label>
+                        <Label htmlFor="interestRate">
+                          Taxa de Juros (% a.m.)
+                        </Label>
                         <Input
                           id="interestRate"
                           type="number"
@@ -570,7 +574,9 @@ export default function EditLoanPage({
                   <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="totalInstallments">Total de Parcelas</Label>
+                        <Label htmlFor="totalInstallments">
+                          Total de Parcelas
+                        </Label>
                         <Input
                           id="totalInstallments"
                           type="number"
@@ -595,7 +601,9 @@ export default function EditLoanPage({
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="installmentDay">Dia de Vencimento</Label>
+                        <Label htmlFor="installmentDay">
+                          Dia de Vencimento
+                        </Label>
                         <Input
                           id="installmentDay"
                           type="number"
@@ -649,7 +657,8 @@ export default function EditLoanPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="bankAccountId">
-                          Conta Bancária <span className="text-rose-500">*</span>
+                          Conta Bancária{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Select
                           value={bankAccountId}
@@ -671,7 +680,8 @@ export default function EditLoanPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="costCenterId">
-                          Centro de Custo <span className="text-rose-500">*</span>
+                          Centro de Custo{' '}
+                          <span className="text-rose-500">*</span>
                         </Label>
                         <Select
                           value={costCenterId}

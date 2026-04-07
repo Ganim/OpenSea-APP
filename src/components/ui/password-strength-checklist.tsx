@@ -13,11 +13,27 @@ interface PasswordCriteria {
 
 function getDefaultCriteria(): PasswordCriteria[] {
   return [
-    { key: 'minLength', label: t('password.minLength'), test: (p) => p.length >= 8 },
-    { key: 'uppercase', label: t('password.uppercase'), test: (p) => /[A-Z]/.test(p) },
-    { key: 'lowercase', label: t('password.lowercase'), test: (p) => /[a-z]/.test(p) },
-    { key: 'number', label: t('password.number'), test: (p) => /[0-9]/.test(p) },
-    { key: 'special', label: t('password.special'), test: (p) => /[^A-Za-z0-9]/.test(p) },
+    {
+      key: 'minLength',
+      label: t('password.minLength'),
+      test: p => p.length >= 8,
+    },
+    {
+      key: 'uppercase',
+      label: t('password.uppercase'),
+      test: p => /[A-Z]/.test(p),
+    },
+    {
+      key: 'lowercase',
+      label: t('password.lowercase'),
+      test: p => /[a-z]/.test(p),
+    },
+    { key: 'number', label: t('password.number'), test: p => /[0-9]/.test(p) },
+    {
+      key: 'special',
+      label: t('password.special'),
+      test: p => /[^A-Za-z0-9]/.test(p),
+    },
   ];
 }
 
@@ -67,7 +83,10 @@ export function PasswordStrengthChecklist({
 /**
  * Validates if password meets all criteria
  */
-export function isPasswordStrong(password: string, criteria?: PasswordCriteria[]): boolean {
+export function isPasswordStrong(
+  password: string,
+  criteria?: PasswordCriteria[]
+): boolean {
   if (!criteria) criteria = getDefaultCriteria();
   return criteria.every(c => c.test(password));
 }

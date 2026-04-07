@@ -134,7 +134,11 @@ function OffboardingPageContent() {
           hasPermission={hasPermission}
           actions={
             canCreate ? (
-              <Button size="sm" className="gap-2" onClick={() => setCreateModalOpen(true)}>
+              <Button
+                size="sm"
+                className="gap-2"
+                onClick={() => setCreateModalOpen(true)}
+              >
                 <Plus className="h-4 w-4" />
                 <span className="hidden md:inline">Novo Checklist</span>
               </Button>
@@ -142,10 +146,10 @@ function OffboardingPageContent() {
           }
         />
 
-          <Header
-            title="Offboarding"
-            description="Checklists de desligamento de colaboradores"
-          />
+        <Header
+          title="Offboarding"
+          description="Checklists de desligamento de colaboradores"
+        />
       </PageHeader>
 
       <PageBody>
@@ -172,7 +176,11 @@ function OffboardingPageContent() {
           {isLoading ? (
             <GridLoading />
           ) : error ? (
-            <GridError type="server" title="Erro ao carregar" message={error?.message} />
+            <GridError
+              type="server"
+              title="Erro ao carregar"
+              message={error?.message}
+            />
           ) : checklists.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <UserMinus className="h-12 w-12 mb-3 opacity-40" />

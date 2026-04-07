@@ -19,7 +19,10 @@ export const RISK_SEVERITY_LABELS: Record<string, string> = {
   CRITICO: 'Crítico',
 };
 
-export const RISK_CATEGORY_OPTIONS: { value: WorkplaceRiskCategory; label: string }[] = [
+export const RISK_CATEGORY_OPTIONS: {
+  value: WorkplaceRiskCategory;
+  label: string;
+}[] = [
   { value: 'FISICO', label: 'Físico' },
   { value: 'QUIMICO', label: 'Químico' },
   { value: 'BIOLOGICO', label: 'Biológico' },
@@ -27,7 +30,10 @@ export const RISK_CATEGORY_OPTIONS: { value: WorkplaceRiskCategory; label: strin
   { value: 'ACIDENTE', label: 'Acidente' },
 ];
 
-export const RISK_SEVERITY_OPTIONS: { value: WorkplaceRiskSeverity; label: string }[] = [
+export const RISK_SEVERITY_OPTIONS: {
+  value: WorkplaceRiskSeverity;
+  label: string;
+}[] = [
   { value: 'BAIXO', label: 'Baixo' },
   { value: 'MEDIO', label: 'Médio' },
   { value: 'ALTO', label: 'Alto' },

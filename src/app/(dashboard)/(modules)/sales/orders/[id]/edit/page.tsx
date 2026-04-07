@@ -202,9 +202,7 @@ export default function EditOrderPage() {
 
   const handleSubmit = async () => {
     if (isLocked) {
-      toast.error(
-        'Não é possível editar um pedido confirmado ou cancelado.'
-      );
+      toast.error('Não é possível editar um pedido confirmado ou cancelado.');
       return;
     }
 
@@ -279,8 +277,7 @@ export default function EditOrderPage() {
         'Erro ao atualizar pedido',
         err instanceof Error ? err : undefined
       );
-      const message =
-        err instanceof Error ? err.message : 'Erro desconhecido';
+      const message = err instanceof Error ? err.message : 'Erro desconhecido';
       toast.error('Erro ao atualizar pedido', { description: message });
     } finally {
       setIsSaving(false);
@@ -297,8 +294,7 @@ export default function EditOrderPage() {
         'Erro ao excluir pedido',
         err instanceof Error ? err : undefined
       );
-      const message =
-        err instanceof Error ? err.message : 'Erro desconhecido';
+      const message = err instanceof Error ? err.message : 'Erro desconhecido';
       toast.error('Erro ao excluir pedido', { description: message });
     }
   };
@@ -415,9 +411,7 @@ export default function EditOrderPage() {
                 {order.orderNumber}
               </h1>
               <div className="flex gap-2 mt-2">
-                <Badge variant="outline">
-                  {ORDER_TYPE_LABELS[order.type]}
-                </Badge>
+                <Badge variant="outline">{ORDER_TYPE_LABELS[order.type]}</Badge>
                 <Badge variant="secondary">
                   {CHANNEL_LABELS[order.channel]}
                 </Badge>
@@ -426,9 +420,7 @@ export default function EditOrderPage() {
                     Confirmado
                   </Badge>
                 )}
-                {isCancelled && (
-                  <Badge variant="destructive">Cancelado</Badge>
-                )}
+                {isCancelled && <Badge variant="destructive">Cancelado</Badge>}
               </div>
             </div>
             <div className="hidden sm:block text-right shrink-0">
@@ -446,8 +438,8 @@ export default function EditOrderPage() {
         {isLocked && (
           <Card className="border-amber-500/30 bg-amber-500/5 p-4">
             <p className="text-sm text-amber-600 dark:text-amber-400">
-              Este pedido está {isConfirmed ? 'confirmado' : 'cancelado'} e
-              não pode ser editado. Apenas a exclusão é permitida.
+              Este pedido está {isConfirmed ? 'confirmado' : 'cancelado'} e não
+              pode ser editado. Apenas a exclusão é permitida.
             </p>
           </Card>
         )}
@@ -493,9 +485,7 @@ export default function EditOrderPage() {
                           <td className="py-3 px-4 text-muted-foreground">
                             {index + 1}
                           </td>
-                          <td className="py-3 px-4 font-medium">
-                            {item.name}
-                          </td>
+                          <td className="py-3 px-4 font-medium">{item.name}</td>
                           <td className="py-3 px-4 text-muted-foreground">
                             {item.sku ?? '-'}
                           </td>

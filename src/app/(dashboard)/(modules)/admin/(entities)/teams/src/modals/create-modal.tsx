@@ -143,14 +143,10 @@ export function CreateModal({
                       borderColor:
                         selectedColor === color ? 'white' : 'transparent',
                       boxShadow:
-                        selectedColor === color
-                          ? `0 0 0 2px ${color}`
-                          : 'none',
+                        selectedColor === color ? `0 0 0 2px ${color}` : 'none',
                     }}
                     onClick={() =>
-                      setSelectedColor(
-                        selectedColor === color ? '' : color,
-                      )
+                      setSelectedColor(selectedColor === color ? '' : color)
                     }
                   />
                 ))}

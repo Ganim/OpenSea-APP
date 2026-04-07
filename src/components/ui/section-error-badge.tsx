@@ -8,7 +8,11 @@ interface SectionErrorBadgeProps {
   className?: string;
 }
 
-export function SectionErrorBadge({ count, onClick, className }: SectionErrorBadgeProps) {
+export function SectionErrorBadge({
+  count,
+  onClick,
+  className,
+}: SectionErrorBadgeProps) {
   if (count <= 0) return null;
 
   return (

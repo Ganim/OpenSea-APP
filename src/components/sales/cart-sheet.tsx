@@ -32,8 +32,9 @@ import {
 // Safe imports with fallback for when provider is not yet mounted
 function useCartDataSafe() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, react-hooks/rules-of-hooks
     const { useCartData } = require('@/providers/cart-provider');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useCartData();
   } catch {
     return {
@@ -51,8 +52,9 @@ function useCartDataSafe() {
 
 function useCartActionsSafe() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, react-hooks/rules-of-hooks
     const { useCartActions } = require('@/providers/cart-provider');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useCartActions();
   } catch {
     return {
@@ -123,10 +125,7 @@ export function CartSheet({ isOpen, onClose }: CartSheetProps) {
               </Badge>
             )}
             {draftCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="ml-auto text-xs"
-              >
+              <Badge variant="secondary" className="ml-auto text-xs">
                 Em espera: {draftCount}
               </Badge>
             )}

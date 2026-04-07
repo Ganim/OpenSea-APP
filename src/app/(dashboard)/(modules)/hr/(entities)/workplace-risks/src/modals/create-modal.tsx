@@ -78,11 +78,7 @@ export function CreateModal({
     }
   }, [isOpen, defaultProgramId]);
 
-  const canSubmit =
-    programId &&
-    name.trim() &&
-    category &&
-    severity;
+  const canSubmit = programId && name.trim() && category && severity;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -110,16 +106,17 @@ export function CreateModal({
     }
   };
 
-  const activePrograms = programs.filter(p => p.status === 'ACTIVE' || p.status === 'DRAFT');
+  const activePrograms = programs.filter(
+    p => p.status === 'ACTIVE' || p.status === 'DRAFT'
+  );
 
   const steps: WizardStep[] = useMemo(
     () => [
       {
         title: 'Novo Risco Ocupacional',
-        description: 'Cadastre um novo risco ocupacional vinculado a um programa de segurança.',
-        icon: (
-          <AlertTriangle className="h-16 w-16 text-amber-400 opacity-50" />
-        ),
+        description:
+          'Cadastre um novo risco ocupacional vinculado a um programa de segurança.',
+        icon: <AlertTriangle className="h-16 w-16 text-amber-400 opacity-50" />,
         isValid: !!canSubmit,
         content: (
           <div className="space-y-4 py-2">
@@ -291,9 +288,19 @@ export function CreateModal({
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      programId, name, category, severity, source, affectedArea,
-      controlMeasures, epiRequired, isSubmitting, canSubmit,
-      onClose, fieldErrors, activePrograms,
+      programId,
+      name,
+      category,
+      severity,
+      source,
+      affectedArea,
+      controlMeasures,
+      epiRequired,
+      isSubmitting,
+      canSubmit,
+      onClose,
+      fieldErrors,
+      activePrograms,
     ]
   );
 
