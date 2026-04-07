@@ -501,17 +501,21 @@ export function EntityGrid<T extends BaseEntity>({
     }
   }, [isDragging, isDragStarted, handleMouseMove, handleMouseUp]);
 
-  // Item click handlers
-  const handleItemClick = useCallback(
+  // Manual double-tap detection for mobile (touch devices don't fire dblclick)
+  const tapTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const DOUBLE_TAP_MS = 300;
+
+  // Cleanup pending tap timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(tapTimersRef.current).forEach(clearTimeout);
+      tapTimersRef.current = {};
+    };
+  }, []);
+
+  // Performs the regular single-click logic (selection / shift / ctrl)
+  const performSingleClick = useCallback(
     (item: T, e: React.MouseEvent) => {
-      e.stopPropagation();
-
-      // No mobile, single tap navega diretamente (dblclick não funciona em touch)
-      if (isMobile && onItemDoubleClick) {
-        onItemDoubleClick(item);
-        return;
-      }
-
       // Se tem shift key e selection context, faz range selection
       if (
         e.shiftKey &&
@@ -541,7 +545,43 @@ export function EntityGrid<T extends BaseEntity>({
         onItemClick(item, e);
       }
     },
-    [isMobile, onItemClick, onItemDoubleClick, selectionActions, selectionContext]
+    [onItemClick, selectionActions, selectionContext]
+  );
+
+  // Item click handlers
+  const handleItemClick = useCallback(
+    (item: T, e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      // Mobile: detectar double-tap manualmente (touch devices não disparam dblclick)
+      if (isMobile && onItemDoubleClick) {
+        const key = item.id;
+        const pending = tapTimersRef.current[key];
+        if (pending) {
+          // Segundo tap dentro da janela → navegação
+          clearTimeout(pending);
+          delete tapTimersRef.current[key];
+          onItemDoubleClick(item);
+          return;
+        }
+        // Primeiro tap → agenda single-click ação após janela de double-tap
+        // Captura propriedades necessárias antes do evento ser reciclado pelo React
+        const syntheticSnapshot = {
+          shiftKey: e.shiftKey,
+          ctrlKey: e.ctrlKey,
+          metaKey: e.metaKey,
+        } as React.MouseEvent;
+        tapTimersRef.current[key] = setTimeout(() => {
+          delete tapTimersRef.current[key];
+          performSingleClick(item, syntheticSnapshot);
+        }, DOUBLE_TAP_MS);
+        return;
+      }
+
+      // Desktop: comportamento padrão (single click seleciona, dblclick navega via onDoubleClick)
+      performSingleClick(item, e);
+    },
+    [isMobile, onItemDoubleClick, performSingleClick]
   );
 
   const handleItemDoubleClick = useCallback(
