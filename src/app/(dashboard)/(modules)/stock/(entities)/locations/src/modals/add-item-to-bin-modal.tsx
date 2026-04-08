@@ -5,7 +5,8 @@ import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ItemEntryFormModal } from '@/app/(dashboard)/(modules)/stock/(entities)/products/src/modals/item-entry-form-modal';
 import {
-  MobileVariantSelector,
+  MobileVariantSearchPanel,
+  MobileVariantSelectorTrigger,
   type VariantOption,
 } from '@/components/mobile/mobile-variant-selector';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -192,6 +193,8 @@ function MobileAttributeFields({
 // Mobile Sheet
 // ============================================
 
+type SheetView = 'form' | 'search';
+
 function MobileAddItemSheet({
   open,
   onOpenChange,
@@ -203,6 +206,7 @@ function MobileAddItemSheet({
   );
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
   const [addedCount, setAddedCount] = useState(0);
+  const [view, setView] = useState<SheetView>('form');
 
   const { data: binData } = useBinDetail(binId);
   const binAddress = binData?.bin?.address;
@@ -254,6 +258,7 @@ function MobileAddItemSheet({
       setSelectedVariant(null);
       setFormData(INITIAL_FORM);
       setAddedCount(0);
+      setView('form');
     }
   }, [open]);
 
@@ -314,11 +319,12 @@ function MobileAddItemSheet({
   const canSubmit =
     !!selectedVariant && parsedQuantity > 0 && !registerEntry.isPending;
 
-  // modal={false}: evita focus trap + body pointerEvents lock que entram em
-  // conflito com o portal do MobileVariantSelector (renderizado em document.body).
   // dismissible={false}: previne fechamento por clique externo (drawer só fecha pelo X).
   // noBodyStyles: previne position:fixed no body em iOS Safari (Vaul iOS-specific).
   // repositionInputs={false}: previne jump quando teclado virtual aparece.
+  // O painel de busca de variante agora é renderizado INLINE dentro do
+  // DrawerContent (view-swap), então não há mais conflito com focus scope
+  // de portal em document.body — por isso removemos o antigo modal={false}.
   return (
     <Drawer
       open={open}
@@ -327,150 +333,168 @@ function MobileAddItemSheet({
       repositionInputs={false}
       dismissible={false}
       noBodyStyles
-      modal={false}
     >
-      <DrawerContent className="bg-slate-950 border-slate-700 [&>div:first-child]:hidden max-h-[92vh] flex flex-col">
+      <DrawerContent className="bg-slate-950 border-slate-700 [&>div:first-child]:hidden h-[92vh] max-h-[92vh] flex flex-col">
         <VisuallyHidden>
           <DrawerTitle>Adicionar Item</DrawerTitle>
         </VisuallyHidden>
 
-        {/* Header */}
-        <div
-          data-vaul-no-drag
-          className="flex items-center gap-3 border-b border-slate-800 px-4 py-3 shrink-0"
-        >
-          <button
-            onClick={() => onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 active:bg-slate-800"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-semibold text-slate-100">
-              Adicionar Item
-            </h2>
-            {binAddress && (
-              <p className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="font-mono truncate">{binAddress}</span>
-              </p>
-            )}
-          </div>
-          {addedCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
-              <Check className="h-3 w-3" />
-              {addedCount}
-            </span>
-          )}
-        </div>
-
-        {/* Scrollable body */}
-        <div
-          data-vaul-no-drag
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
-        >
-          {/* Variant selector */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Variante
-            </label>
-            <MobileVariantSelector
-              value={selectedVariant}
-              onChange={setSelectedVariant}
-              disabled={registerEntry.isPending}
-            />
-          </div>
-
-          {/* Quantity */}
-          {selectedVariant && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Quantidade
-              </label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const q = Math.max(1, parsedQuantity - 1);
-                    setFormData(prev => ({ ...prev, quantity: String(q) }));
-                  }}
-                  disabled={registerEntry.isPending || parsedQuantity <= 1}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
-                >
-                  −
-                </button>
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={formData.quantity}
-                    onChange={e => {
-                      const sanitized = sanitizeQuantityInput(e.target.value);
-                      setFormData(prev => ({ ...prev, quantity: sanitized }));
-                    }}
-                    disabled={registerEntry.isPending}
-                    className="w-full rounded-xl border border-slate-700/50 bg-slate-800/60 px-4 py-3 text-center text-lg font-bold tabular-nums text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  {unitOfMeasure && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                      {unitOfMeasure}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const q = parsedQuantity + 1;
-                    setFormData(prev => ({ ...prev, quantity: String(q) }));
-                  }}
-                  disabled={registerEntry.isPending}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
-                >
-                  +
-                </button>
+        {view === 'search' ? (
+          <MobileVariantSearchPanel
+            value={selectedVariant}
+            onSelect={opt => {
+              setSelectedVariant(opt);
+              setView('form');
+            }}
+            onClose={() => setView('form')}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <div
+              data-vaul-no-drag
+              className="flex items-center gap-3 border-b border-slate-800 px-4 py-3 shrink-0"
+            >
+              <button
+                onClick={() => onOpenChange(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 active:bg-slate-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-semibold text-slate-100">
+                  Adicionar Item
+                </h2>
+                {binAddress && (
+                  <p className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="font-mono truncate">{binAddress}</span>
+                  </p>
+                )}
               </div>
+              {addedCount > 0 && (
+                <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+                  <Check className="h-3 w-3" />
+                  {addedCount}
+                </span>
+              )}
             </div>
-          )}
 
-          {/* Template attributes */}
-          {selectedVariant && Object.keys(itemAttributes).length > 0 && (
-            <MobileAttributeFields
-              attributes={itemAttributes}
-              values={formData.attributes}
-              onChange={updateAttribute}
-              disabled={registerEntry.isPending}
-            />
-          )}
-        </div>
+            {/* Scrollable body */}
+            <div
+              data-vaul-no-drag
+              className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+            >
+              {/* Variant selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Variante
+                </label>
+                <MobileVariantSelectorTrigger
+                  value={selectedVariant}
+                  onClick={() => setView('search')}
+                  onClear={() => setSelectedVariant(null)}
+                  disabled={registerEntry.isPending}
+                />
+              </div>
 
-        {/* Submit */}
-        <div
-          data-vaul-no-drag
-          className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm"
-        >
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className={cn(
-              'flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold transition-colors',
-              canSubmit
-                ? 'bg-emerald-600 text-white active:bg-emerald-700'
-                : 'bg-slate-800 text-slate-500'
-            )}
-          >
-            {registerEntry.isPending ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Registrando...
-              </>
-            ) : (
-              <>
-                <Plus className="h-5 w-5" />
-                Adicionar Item
-              </>
-            )}
-          </button>
-        </div>
+              {/* Quantity */}
+              {selectedVariant && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Quantidade
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const q = Math.max(1, parsedQuantity - 1);
+                        setFormData(prev => ({ ...prev, quantity: String(q) }));
+                      }}
+                      disabled={registerEntry.isPending || parsedQuantity <= 1}
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
+                    >
+                      −
+                    </button>
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={formData.quantity}
+                        onChange={e => {
+                          const sanitized = sanitizeQuantityInput(
+                            e.target.value
+                          );
+                          setFormData(prev => ({
+                            ...prev,
+                            quantity: sanitized,
+                          }));
+                        }}
+                        disabled={registerEntry.isPending}
+                        className="w-full rounded-xl border border-slate-700/50 bg-slate-800/60 px-4 py-3 text-center text-lg font-bold tabular-nums text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                      {unitOfMeasure && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                          {unitOfMeasure}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const q = parsedQuantity + 1;
+                        setFormData(prev => ({ ...prev, quantity: String(q) }));
+                      }}
+                      disabled={registerEntry.isPending}
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/60 text-xl font-bold text-slate-300 active:bg-slate-700 disabled:opacity-30"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Template attributes */}
+              {selectedVariant && Object.keys(itemAttributes).length > 0 && (
+                <MobileAttributeFields
+                  attributes={itemAttributes}
+                  values={formData.attributes}
+                  onChange={updateAttribute}
+                  disabled={registerEntry.isPending}
+                />
+              )}
+            </div>
+
+            {/* Submit */}
+            <div
+              data-vaul-no-drag
+              className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm"
+            >
+              <button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className={cn(
+                  'flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold transition-colors',
+                  canSubmit
+                    ? 'bg-emerald-600 text-white active:bg-emerald-700'
+                    : 'bg-slate-800 text-slate-500'
+                )}
+              >
+                {registerEntry.isPending ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Registrando...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-5 w-5" />
+                    Adicionar Item
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </DrawerContent>
     </Drawer>
   );

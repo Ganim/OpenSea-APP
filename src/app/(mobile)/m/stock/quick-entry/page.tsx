@@ -4,7 +4,8 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
 import {
-  MobileVariantSelector,
+  MobileVariantSearchPanel,
+  MobileVariantSelectorTrigger,
   type VariantOption,
 } from '@/components/mobile/mobile-variant-selector';
 import { useAllBins } from '@/app/(dashboard)/(modules)/stock/(entities)/locations/src/api/bins.queries';
@@ -379,6 +380,9 @@ export default function QuickEntryPage() {
   const [addedCount, setAddedCount] = useState(0);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
 
+  // Variant search panel visibility
+  const [showVariantSearch, setShowVariantSearch] = useState(false);
+
   // Fetch template for dynamic attributes when variant changes
   const { data: template } = useTemplate(selectedVariant?.templateId || '');
 
@@ -505,6 +509,21 @@ export default function QuickEntryPage() {
     parsedQuantity > 0 &&
     !registerEntry.isPending;
 
+  if (showVariantSearch) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
+        <MobileVariantSearchPanel
+          value={selectedVariant}
+          onSelect={opt => {
+            setSelectedVariant(opt);
+            setShowVariantSearch(false);
+          }}
+          onClose={() => setShowVariantSearch(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col bg-slate-950">
       <MobileTopBar
@@ -551,9 +570,10 @@ export default function QuickEntryPage() {
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Variante
           </label>
-          <MobileVariantSelector
+          <MobileVariantSelectorTrigger
             value={selectedVariant}
-            onChange={setSelectedVariant}
+            onClick={() => setShowVariantSearch(true)}
+            onClear={() => setSelectedVariant(null)}
             disabled={registerEntry.isPending}
           />
         </div>

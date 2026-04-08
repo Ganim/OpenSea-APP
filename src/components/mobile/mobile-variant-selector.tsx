@@ -1,13 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { useQuery } from '@tanstack/react-query';
-import { MobileTopBar } from '@/components/mobile/mobile-top-bar';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Package, Search, Check, Loader2, ChevronDown, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks/use-debounce';
 import { ColorPatternSwatch } from '@/components/shared/color-pattern-swatch';
+import {
+  ArrowLeft,
+  ChevronDown,
+  Check,
+  Loader2,
+  Search,
+  X,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // ============================================
 // Types
@@ -39,355 +45,282 @@ export interface VariantOption {
   fullLabel: string;
   /** Fabricante · Referência (subtitle) */
   subtitle: string;
-  /** All searchable text concatenated for fast word-by-word filtering */
-  searchText: string;
 }
 
-export interface MobileVariantSelectorProps {
-  value: VariantOption | null;
-  onChange: (v: VariantOption | null) => void;
-  disabled?: boolean;
-  placeholder?: string;
+interface ApiVariantProductInfo {
+  productId: string;
+  productName: string;
+  templateId: string | null;
+  templateName: string | null;
+  manufacturerId: string | null;
+  manufacturerName: string | null;
 }
 
-// ============================================
-// Color Swatch — shows primary + secondary + pattern
-// ============================================
-
-function ColorSwatch({
-  colorHex,
-  secondaryColorHex,
-  pattern,
-  size = 'md',
-}: {
-  colorHex: string | null;
+interface ApiVariantWithProduct {
+  id: string;
+  name: string;
+  productId: string;
+  sku?: string;
+  reference?: string;
+  colorHex?: string;
   secondaryColorHex?: string | null;
-  pattern?: VariantPattern;
-  size?: 'sm' | 'md';
-}) {
-  if (!colorHex) {
-    return (
-      <Package
-        className={cn(
-          'text-slate-400',
-          size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4'
-        )}
-      />
-    );
-  }
+  pattern?: string | null;
+  product?: ApiVariantProductInfo;
+}
 
-  const dim = size === 'sm' ? 'h-8 w-8' : 'h-9 w-9';
-  const secondary = secondaryColorHex || colorHex;
-  const pat = pattern || 'SOLID';
+interface ListVariantsResponse {
+  variants: ApiVariantWithProduct[];
+  meta: { total: number; page: number; limit: number; pages: number };
+}
 
-  const bgStyle = (): React.CSSProperties => {
-    switch (pat) {
-      case 'STRIPED':
-        return {
-          background: `repeating-linear-gradient(
-            135deg,
-            ${colorHex},
-            ${colorHex} 3px,
-            ${secondary} 3px,
-            ${secondary} 6px
-          )`,
-        };
-      case 'PLAID':
-        return {
-          background: `
-            repeating-linear-gradient(0deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 6px),
-            repeating-linear-gradient(90deg, ${secondary}40 0px, ${secondary}40 2px, transparent 2px, transparent 6px),
-            ${colorHex}`,
-        };
-      case 'GRADIENT':
-        return {
-          background: `linear-gradient(135deg, ${colorHex}, ${secondary})`,
-        };
-      case 'PRINTED':
-        return {
-          background: `
-            radial-gradient(circle at 25% 25%, ${secondary} 2px, transparent 2px),
-            radial-gradient(circle at 75% 75%, ${secondary} 2px, transparent 2px),
-            radial-gradient(circle at 50% 50%, ${secondary} 1.5px, transparent 1.5px),
-            ${colorHex}`,
-        };
-      case 'JACQUARD':
-        return {
-          background: `
-            repeating-conic-gradient(${colorHex} 0% 25%, ${secondary} 0% 50%) 50% / 8px 8px`,
-        };
-      case 'SOLID':
-      default:
-        if (secondaryColorHex && secondaryColorHex !== colorHex) {
-          return {
-            background: `linear-gradient(135deg, ${colorHex} 50%, ${secondaryColorHex} 50%)`,
-          };
-        }
-        return { backgroundColor: colorHex };
-    }
+// ============================================
+// API mapping
+// ============================================
+
+function mapApiToVariantOption(v: ApiVariantWithProduct): VariantOption {
+  const templateName = v.product?.templateName ?? null;
+  const templateId = v.product?.templateId ?? null;
+  const productName = v.product?.productName ?? '';
+  const manufacturerName = v.product?.manufacturerName ?? null;
+  const reference = v.reference || null;
+
+  const fullLabel =
+    [templateName, productName, v.name].filter(Boolean).join(' · ') || v.name;
+
+  const subtitle = [manufacturerName, reference ? `Ref: ${reference}` : null]
+    .filter(Boolean)
+    .join(' · ');
+
+  return {
+    id: v.id,
+    name: v.name,
+    productId: v.productId,
+    productName,
+    templateId,
+    templateName,
+    manufacturerName,
+    reference,
+    colorHex: v.colorHex || null,
+    secondaryColorHex: v.secondaryColorHex || null,
+    pattern: (v.pattern as VariantPattern) || null,
+    sku: v.sku || null,
+    fullLabel,
+    subtitle,
   };
-
-  return (
-    <div
-      className={cn(dim, 'shrink-0 rounded-lg border border-white/15')}
-      style={bgStyle()}
-    />
-  );
 }
 
 // ============================================
-// Helper — fetch all paginated pages
+// Hook — server-side debounced search
 // ============================================
 
-async function fetchAllPages<T>(
-  endpoint: string,
-  dataKey: string
-): Promise<T[]> {
-  const allItems: T[] = [];
-  let page = 1;
-  const limit = 100;
-  while (true) {
-    const response = await apiClient.get<Record<string, unknown>>(
-      `${endpoint}?page=${page}&limit=${limit}`
-    );
-    const items = response[dataKey] as T[] | undefined;
-    if (items && items.length > 0) allItems.push(...items);
-    const meta = response.meta as { pages: number } | undefined;
-    if (!meta || page >= meta.pages) break;
-    page++;
-  }
-  return allItems;
-}
+const SEARCH_LIMIT = 50;
 
-// ============================================
-// Hook — variant options with full data
-// ============================================
+export function useVariantSearch(rawSearch: string, enabled: boolean) {
+  const debounced = useDebounce(rawSearch.trim(), 250);
 
-export function useVariantOptions() {
   return useQuery({
-    queryKey: ['mobile', 'variant-options'],
+    queryKey: ['mobile', 'variant-search', debounced],
+    enabled,
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
     queryFn: async (): Promise<VariantOption[]> => {
-      const [variantsRes, productsRes] = await Promise.all([
-        fetchAllPages<{
-          id: string;
-          name: string;
-          productId: string;
-          colorHex?: string;
-          secondaryColorHex?: string;
-          pattern?: string;
-          sku?: string;
-          reference?: string;
-        }>('/v1/variants', 'variants'),
-        fetchAllPages<{
-          id: string;
-          name: string;
-          templateId?: string;
-          template?: { id: string; name: string };
-          manufacturer?: { id: string; name: string } | null;
-        }>('/v1/products', 'products'),
-      ]);
+      const params = new URLSearchParams();
+      params.set('page', '1');
+      params.set('limit', String(SEARCH_LIMIT));
+      params.set('includeProduct', 'true');
+      params.set('onlyActive', 'true');
+      if (debounced) params.set('search', debounced);
 
-      const productMap = new Map(productsRes.map(p => [p.id, p]));
-
-      return variantsRes.map(v => {
-        const prod = productMap.get(v.productId);
-        const templateName = prod?.template?.name ?? null;
-        const templateId = prod?.templateId ?? prod?.template?.id ?? null;
-        const productName = prod?.name ?? '';
-        const manufacturerName = prod?.manufacturer?.name ?? null;
-        const reference = v.reference || null;
-
-        const fullLabel = [templateName, productName, v.name]
-          .filter(Boolean)
-          .join(' · ');
-
-        const subtitleParts = [
-          manufacturerName,
-          reference ? `Ref: ${reference}` : null,
-        ].filter(Boolean);
-        const subtitle = subtitleParts.join(' · ');
-
-        const searchText = [
-          templateName,
-          productName,
-          v.name,
-          manufacturerName,
-          reference,
-          v.sku,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        return {
-          id: v.id,
-          name: v.name,
-          productId: v.productId,
-          productName,
-          templateId,
-          templateName,
-          manufacturerName,
-          reference,
-          colorHex: v.colorHex || null,
-          secondaryColorHex: v.secondaryColorHex || null,
-          pattern: (v.pattern as VariantPattern) || null,
-          sku: v.sku || null,
-          fullLabel,
-          subtitle,
-          searchText,
-        };
-      });
+      const response = await apiClient.get<ListVariantsResponse>(
+        `/v1/variants?${params.toString()}`
+      );
+      return response.variants.map(mapApiToVariantOption);
     },
-    staleTime: 2 * 60 * 1000,
   });
 }
 
 // ============================================
-// Search helper — word-by-word partial matching
+// Trigger (closed state) — used inline in forms
 // ============================================
 
-function matchesSearch(searchText: string, query: string): boolean {
-  if (!query.trim()) return true;
-  const words = query
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(w => w.length > 0);
-  return words.every(word => searchText.includes(word));
+export interface MobileVariantSelectorTriggerProps {
+  value: VariantOption | null;
+  onClick: () => void;
+  onClear?: () => void;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+export function MobileVariantSelectorTrigger({
+  value,
+  onClick,
+  onClear,
+  disabled,
+  placeholder = 'Selecionar variante...',
+}: MobileVariantSelectorTriggerProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => !disabled && onClick()}
+      disabled={disabled}
+      className={cn(
+        'flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors',
+        value
+          ? 'border-indigo-500/30 bg-indigo-500/5'
+          : 'border-slate-700/50 bg-slate-800/60',
+        disabled && 'opacity-50'
+      )}
+    >
+      <ColorPatternSwatch
+        colorHex={value?.colorHex}
+        secondaryColorHex={value?.secondaryColorHex}
+        pattern={value?.pattern}
+        size="md"
+      />
+      <div className="min-w-0 flex-1">
+        {value ? (
+          <>
+            <p className="truncate text-sm font-medium text-slate-100">
+              {value.fullLabel}
+            </p>
+            {value.subtitle && (
+              <p className="truncate text-[11px] text-slate-500">
+                {value.subtitle}
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-slate-400">{placeholder}</p>
+        )}
+      </div>
+      {value && onClear ? (
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+            onClear();
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation();
+              e.preventDefault();
+              onClear();
+            }
+          }}
+          className="shrink-0 p-1 text-slate-500 active:text-slate-300"
+        >
+          <X className="h-4 w-4" />
+        </span>
+      ) : (
+        <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" />
+      )}
+    </button>
+  );
 }
 
 // ============================================
-// Component
+// Search panel — rendered INSIDE the parent
+// drawer to avoid portal + focus-trap conflicts
 // ============================================
 
-export function MobileVariantSelector({
+export interface MobileVariantSearchPanelProps {
+  value: VariantOption | null;
+  onSelect: (option: VariantOption) => void;
+  onClose: () => void;
+}
+
+export function MobileVariantSearchPanel({
   value,
-  onChange,
-  disabled,
-  placeholder = 'Selecionar variante...',
-}: MobileVariantSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  onSelect,
+  onClose,
+}: MobileVariantSearchPanelProps) {
   const [search, setSearch] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: options, isLoading } = useVariantOptions();
+  const { data, isLoading, isFetching } = useVariantSearch(search, true);
 
-  const filtered = useMemo(() => {
-    if (!options) return [];
-    if (!search.trim()) return options;
-    return options.filter(o => matchesSearch(o.searchText, search));
-  }, [options, search]);
+  const options = useMemo(() => data ?? [], [data]);
 
-  // Closed state — button trigger
-  if (!isOpen) {
-    return (
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(true)}
-        disabled={disabled}
-        className={cn(
-          'flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors',
-          value
-            ? 'border-indigo-500/30 bg-indigo-500/5'
-            : 'border-slate-700/50 bg-slate-800/60',
-          disabled && 'opacity-50'
-        )}
+  // Auto-focus input when the panel mounts so the user can type
+  // immediately. Small timeout gives the drawer time to finish any
+  // in-flight animation before we steal focus.
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-slate-950">
+      <header
+        data-vaul-no-drag
+        className="flex h-12 shrink-0 items-center gap-3 border-b border-slate-800 bg-slate-900/95 px-4 backdrop-blur-sm"
       >
-        <ColorPatternSwatch
-          colorHex={value?.colorHex}
-          secondaryColorHex={value?.secondaryColorHex}
-          pattern={value?.pattern}
-          size="md"
-        />
-        <div className="min-w-0 flex-1">
-          {value ? (
-            <>
-              <p className="truncate text-sm font-medium text-slate-100">
-                {value.fullLabel}
-              </p>
-              {value.subtitle && (
-                <p className="truncate text-[11px] text-slate-500">
-                  {value.subtitle}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-slate-400">{placeholder}</p>
-          )}
-        </div>
-        {value ? (
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              onChange(null);
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.stopPropagation();
-                e.preventDefault();
-                onChange(null);
-              }
-            }}
-            className="shrink-0 p-1 text-slate-500 active:text-slate-300"
-          >
-            <X className="h-4 w-4" />
-          </span>
-        ) : (
-          <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" />
-        )}
-      </button>
-    );
-  }
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 active:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <h2 className="flex-1 truncate text-sm font-semibold text-slate-100">
+          Selecionar Variante
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-xs text-slate-400 active:text-slate-200"
+        >
+          Fechar
+        </button>
+      </header>
 
-  // Open state — fullscreen search (portal to body to escape transformed Drawer ancestor)
-  if (typeof document === 'undefined') return null;
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950">
-      <MobileTopBar
-        title="Selecionar Variante"
-        showBack
-        rightContent={
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              setSearch('');
-            }}
-            className="text-xs text-slate-400 active:text-slate-200"
-          >
-            Fechar
-          </button>
-        }
-      />
-      <div className="border-b border-slate-800 bg-slate-900 px-4 py-3">
+      <div
+        data-vaul-no-drag
+        className="border-b border-slate-800 bg-slate-900 px-4 py-3"
+      >
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <input
+            ref={inputRef}
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nome, fabricante, referência..."
+            placeholder="Buscar por nome, produto, fabricante..."
             className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-10 pr-4 text-base text-slate-200 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
+          {(isLoading || isFetching) && (
+            <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-500" />
+          )}
         </div>
-        {search.trim() && (
+        {search.trim() && !isLoading && (
           <p className="mt-1.5 text-[11px] text-slate-600">
-            {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+            {options.length} resultado{options.length !== 1 ? 's' : ''}
+            {options.length === SEARCH_LIMIT
+              ? ' · refine a busca para ver mais'
+              : ''}
           </p>
         )}
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-2">
-        {isLoading ? (
+
+      <div
+        data-vaul-no-drag
+        className="flex-1 min-h-0 overflow-y-auto px-4 py-2"
+      >
+        {isLoading && options.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
           </div>
-        ) : filtered.length === 0 ? (
+        ) : options.length === 0 ? (
           <div className="py-12 text-center text-sm text-slate-500">
-            Nenhuma variante encontrada
+            {search.trim()
+              ? 'Nenhuma variante encontrada'
+              : 'Digite para buscar uma variante'}
           </div>
         ) : (
           <div className="space-y-1">
-            {filtered.map(opt => {
+            {options.map(opt => {
               const isSelected = value?.id === opt.id;
               return (
                 <button
@@ -396,9 +329,7 @@ export function MobileVariantSelector({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    onChange(opt);
-                    setIsOpen(false);
-                    setSearch('');
+                    onSelect(opt);
                   }}
                   className={cn(
                     'flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors active:bg-slate-700/60',
@@ -432,7 +363,6 @@ export function MobileVariantSelector({
           </div>
         )}
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }
