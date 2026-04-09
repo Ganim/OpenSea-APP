@@ -276,11 +276,11 @@ export function ExitItemsModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-lg p-0 gap-0 overflow-hidden"
+        className="sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] w-[calc(100vw-1rem)] sm:w-full flex flex-col p-0 gap-0 overflow-hidden"
         showCloseButton={false}
       >
         {/* Hero header */}
-        <div className="bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5 border-b border-border px-6 pt-6 pb-5">
+        <div className="shrink-0 bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5 border-b border-border px-4 sm:px-6 pt-4 sm:pt-6 pb-4 sm:pb-5">
           <DialogHeader>
             <div className="flex items-start gap-3">
               <div
@@ -316,7 +316,7 @@ export function ExitItemsModal({
           </DialogHeader>
         </div>
 
-        <div className="px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
           {/* Item card (always visible) */}
           <div className="flex gap-3 p-3 rounded-lg bg-muted/40 border border-border">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 dark:bg-sky-500/15 mt-0.5">
@@ -354,20 +354,22 @@ export function ExitItemsModal({
                     type="button"
                     onClick={() => handleSelectType(option.type)}
                     className={cn(
-                      'flex flex-col items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-all text-left',
-                      option.fullWidth && 'col-span-2',
-                      colors.hoverBorder
+                      'rounded-lg border border-border cursor-pointer transition-all text-left p-3',
+                      colors.hoverBorder,
+                      option.fullWidth
+                        ? 'col-span-2 flex flex-row items-center gap-3'
+                        : 'flex flex-col items-start gap-3'
                     )}
                   >
                     <div
                       className={cn(
-                        'flex items-center justify-center w-10 h-10 rounded-lg',
+                        'flex items-center justify-center w-10 h-10 rounded-lg shrink-0',
                         colors.iconBg
                       )}
                     >
                       <Icon className={cn('h-5 w-5', colors.iconText)} />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm">{option.label}</p>
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         {option.description}
@@ -395,7 +397,7 @@ export function ExitItemsModal({
           )}
         </div>
 
-        <div className="flex justify-between items-center gap-2 px-6 py-4 border-t">
+        <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-t">
           <Button
             variant="outline"
             onClick={() => {
@@ -406,13 +408,13 @@ export function ExitItemsModal({
               }
             }}
             disabled={isSubmitting}
-            className="gap-1.5"
+            className="gap-1.5 w-full sm:w-auto"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
+            {step === 2 && <ArrowLeft className="h-4 w-4" />}
+            {step === 2 ? 'Voltar' : 'Cancelar'}
           </Button>
           {step === 1 ? (
-            <Button disabled className="gap-1.5">
+            <Button disabled className="gap-1.5 w-full sm:w-auto">
               <ShoppingCart className="h-4 w-4" />
               Adicionar ao Carrinho
             </Button>
@@ -421,7 +423,7 @@ export function ExitItemsModal({
               onClick={handleRequestSubmit}
               disabled={isSubmitting}
               variant="destructive"
-              className="gap-1.5"
+              className="gap-1.5 w-full sm:w-auto"
             >
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

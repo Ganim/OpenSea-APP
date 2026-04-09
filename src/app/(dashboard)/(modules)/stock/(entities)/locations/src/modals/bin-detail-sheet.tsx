@@ -270,6 +270,48 @@ export function BinDetailSheet({
           side="right"
           className="sm:max-w-md w-full flex flex-col p-0 gap-0"
           showCloseButton={false}
+          onPointerDownOutside={e => {
+            // Radix stacking: clicks inside child modals (history/move/exit/
+            // block/add-item/capacity) bubble up as pointer-down-outside here.
+            // Keep the sheet open while any child modal is open.
+            if (
+              !!moveItem ||
+              !!exitItem ||
+              !!historyItem ||
+              showBlockModal ||
+              showAddItemModal ||
+              showCapacityModal ||
+              scanSheetOpen
+            ) {
+              e.preventDefault();
+            }
+          }}
+          onInteractOutside={e => {
+            if (
+              !!moveItem ||
+              !!exitItem ||
+              !!historyItem ||
+              showBlockModal ||
+              showAddItemModal ||
+              showCapacityModal ||
+              scanSheetOpen
+            ) {
+              e.preventDefault();
+            }
+          }}
+          onEscapeKeyDown={e => {
+            if (
+              !!moveItem ||
+              !!exitItem ||
+              !!historyItem ||
+              showBlockModal ||
+              showAddItemModal ||
+              showCapacityModal ||
+              scanSheetOpen
+            ) {
+              e.preventDefault();
+            }
+          }}
         >
           {/* Header */}
           <SheetHeader className="p-5 pb-4 border-b border-border space-y-0">

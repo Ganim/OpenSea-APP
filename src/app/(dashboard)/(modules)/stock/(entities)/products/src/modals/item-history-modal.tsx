@@ -275,36 +275,37 @@ export function ItemHistoryModal({
                 </div>
               </div>
               {/* Stats — full width row, wraps on mobile */}
-              {item && (item.bin?.address || item.currentQuantity !== undefined) && (
-                <div className="flex flex-wrap items-stretch gap-2">
-                  {item.bin?.address && (
-                    <div className="flex-1 min-w-[120px] bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                        Localização
+              {item &&
+                (item.bin?.address || item.currentQuantity !== undefined) && (
+                  <div className="flex flex-wrap items-stretch gap-2">
+                    {item.bin?.address && (
+                      <div className="flex-1 min-w-[120px] bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5">
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                          Localização
+                        </div>
+                        <div className="text-sm font-semibold text-foreground flex items-center gap-1 mt-0.5 break-all">
+                          <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                          {item.bin.address}
+                        </div>
                       </div>
-                      <div className="text-sm font-semibold text-foreground flex items-center gap-1 mt-0.5 break-all">
-                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-                        {item.bin.address}
+                    )}
+                    {item.currentQuantity !== undefined && (
+                      <div className="flex-1 min-w-[120px] bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5">
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                          Quantidade
+                        </div>
+                        <div className="text-sm font-semibold text-foreground mt-0.5">
+                          {new Intl.NumberFormat('pt-BR', {
+                            maximumFractionDigits: 3,
+                          }).format(item.currentQuantity)}{' '}
+                          <span className="text-muted-foreground font-normal">
+                            {formatUnit(item.templateUnitOfMeasure)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {item.currentQuantity !== undefined && (
-                    <div className="flex-1 min-w-[120px] bg-white dark:bg-white/5 border border-border rounded-lg px-3 py-1.5">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                        Quantidade
-                      </div>
-                      <div className="text-sm font-semibold text-foreground mt-0.5">
-                        {new Intl.NumberFormat('pt-BR', {
-                          maximumFractionDigits: 3,
-                        }).format(item.currentQuantity)}{' '}
-                        <span className="text-muted-foreground font-normal">
-                          {formatUnit(item.templateUnitOfMeasure)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
             </div>
           </DialogHeader>
         </div>
@@ -377,7 +378,7 @@ export function ItemHistoryModal({
             onClick={() => onOpenChange(false)}
             className="w-full sm:w-auto"
           >
-            Fechar
+            Cancelar
           </Button>
         </div>
       </DialogContent>
