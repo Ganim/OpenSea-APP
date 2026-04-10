@@ -55,6 +55,7 @@ import {
   Pen,
   Plus,
   Printer,
+  Router,
   Ruler,
   Tag,
   Trash2,
@@ -624,6 +625,13 @@ export default function PrintStudioPage() {
 
   const headerButtons = useMemo<HeaderButton[]>(
     () => [
+      {
+        id: 'agents',
+        title: 'Agentes',
+        icon: Router,
+        onClick: () => router.push('/print/agents'),
+        variant: 'outline',
+      },
       {
         id: 'import-template',
         title: 'Importar',

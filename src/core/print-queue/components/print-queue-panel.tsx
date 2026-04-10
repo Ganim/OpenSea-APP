@@ -29,11 +29,14 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePrintQueue } from '../context/print-queue-context';
+import { useRemotePrinters } from '../hooks/use-remote-printers';
 import type { PrintQueueItem } from '../types';
+import { PrintJobTracker } from './print-job-tracker';
 import { PrintQueueModal } from './print-queue-modal';
 
 export function PrintQueuePanel() {
   const { state, itemCount, totalLabels, hasItems, actions } = usePrintQueue();
+  const { hasOnlinePrinter } = useRemotePrinters();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -55,6 +58,9 @@ export function PrintQueuePanel() {
               >
                 {itemCount > 9 ? '9+' : itemCount}
               </motion.div>
+            )}
+            {hasOnlinePrinter && !hasItems && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full" />
             )}
           </Button>
         </DropdownMenuTrigger>
@@ -184,6 +190,11 @@ export function PrintQueuePanel() {
               </div>
             )}
           </ScrollArea>
+
+          {/* Active Print Jobs */}
+          <div className="px-2">
+            <PrintJobTracker />
+          </div>
 
           {/* Footer */}
           {hasItems && (

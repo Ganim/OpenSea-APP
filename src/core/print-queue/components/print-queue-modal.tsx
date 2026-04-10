@@ -14,15 +14,32 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Download, FileText, Loader2, Printer, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Download,
+  FileText,
+  Loader2,
+  Monitor,
+  Printer,
+  Send,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { usePrintQueue } from '../context/print-queue-context';
 import { useQueuePrinting } from '../hooks/use-queue-printing';
+import { usePrintJobTracker } from '../hooks/use-print-job-tracker';
+import { printJobsService } from '@/services/sales/print-jobs.service';
+import type { RemotePrinter } from '@/types/sales';
 import { LabelPreview } from './label-preview';
 import { PagePreview } from './page-preview';
 import { PageSettingsPanel } from './page-settings-panel';
+import { PrintJobTracker } from './print-job-tracker';
 import { QueueItemList } from './queue-item-list';
+import { RemotePrinterSelector } from './remote-printer-selector';
 import { TemplateSelector } from './template-selector';
+
+type PrintDestination = 'local' | 'remote';
 
 interface PrintQueueModalProps {
   open: boolean;
@@ -31,17 +48,70 @@ interface PrintQueueModalProps {
 
 export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
   const { itemCount, totalLabels, hasItems, actions, state } = usePrintQueue();
-  const { isGenerating, progress, printQueue, downloadPdf } =
+  const { isGenerating, progress, printQueue, downloadPdf, generatePdf } =
     useQueuePrinting();
+  const { addJob } = usePrintJobTracker();
   const [previewMode, setPreviewMode] = useState<'label' | 'page'>('label');
+  const [destination, setDestination] = useState<PrintDestination>('local');
+  const [selectedPrinter, setSelectedPrinter] = useState<RemotePrinter | null>(
+    null
+  );
+  const [isSendingRemote, setIsSendingRemote] = useState(false);
 
   const handlePrint = async () => {
-    await printQueue();
+    if (destination === 'remote') {
+      await handleRemotePrint();
+    } else {
+      await printQueue();
+    }
+  };
+
+  const handleRemotePrint = async () => {
+    if (!selectedPrinter) {
+      toast.error('Selecione uma impressora remota');
+      return;
+    }
+
+    setIsSendingRemote(true);
+    try {
+      const blob = await generatePdf();
+      if (!blob) return;
+
+      // Convert blob to base64
+      const buffer = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64 = btoa(binary);
+
+      const result = await printJobsService.create({
+        printerId: selectedPrinter.id,
+        content: base64,
+        copies: 1,
+      });
+
+      addJob({
+        jobId: result.jobId,
+        printerName: selectedPrinter.name,
+        copies: 1,
+        status: 'QUEUED',
+      });
+
+      toast.success('Impressao enviada');
+    } catch (err) {
+      toast.error('Erro ao enviar impressao');
+    } finally {
+      setIsSendingRemote(false);
+    }
   };
 
   const handleDownload = async () => {
     await downloadPdf(`etiquetas-${new Date().toISOString().slice(0, 10)}.pdf`);
   };
+
+  const isProcessing = isGenerating || isSendingRemote;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,6 +173,63 @@ export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
 
               <Separator />
 
+              {/* Destino da Impressao */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Destino da Impressao
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setDestination('local')}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm transition-all',
+                      destination === 'local'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300'
+                        : 'border-border hover:border-blue-300 dark:hover:border-blue-500/30'
+                    )}
+                  >
+                    <Monitor className="w-4 h-4 shrink-0" />
+                    <div>
+                      <p className="font-medium">Local (PDF)</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Abre dialogo do navegador
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setDestination('remote')}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm transition-all',
+                      destination === 'remote'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300'
+                        : 'border-border hover:border-blue-300 dark:hover:border-blue-500/30'
+                    )}
+                  >
+                    <Send className="w-4 h-4 shrink-0" />
+                    <div>
+                      <p className="font-medium">Impressora remota</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Envia para agente conectado
+                      </p>
+                    </div>
+                  </button>
+                </div>
+
+                {destination === 'remote' && (
+                  <RemotePrinterSelector
+                    selectedPrinterId={selectedPrinter?.id ?? null}
+                    onSelect={setSelectedPrinter}
+                  />
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Active Print Jobs */}
+              <PrintJobTracker />
+
+              <Separator />
+
               {/* Preview */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -161,7 +288,7 @@ export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={isGenerating}
+                disabled={isProcessing}
               >
                 Cancelar
               </Button>
@@ -169,9 +296,9 @@ export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
               <Button
                 variant="outline"
                 onClick={handleDownload}
-                disabled={!hasItems || isGenerating}
+                disabled={!hasItems || isProcessing}
               >
-                {isGenerating ? (
+                {isProcessing ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Download className="w-4 h-4 mr-2" />
@@ -181,15 +308,21 @@ export function PrintQueueModal({ open, onOpenChange }: PrintQueueModalProps) {
 
               <Button
                 onClick={handlePrint}
-                disabled={!hasItems || isGenerating}
+                disabled={
+                  !hasItems ||
+                  isProcessing ||
+                  (destination === 'remote' && !selectedPrinter)
+                }
                 className="bg-blue-500 hover:bg-blue-600"
               >
-                {isGenerating ? (
+                {isProcessing ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : destination === 'remote' ? (
+                  <Send className="w-4 h-4 mr-2" />
                 ) : (
                   <Printer className="w-4 h-4 mr-2" />
                 )}
-                Imprimir
+                {destination === 'remote' ? 'Enviar' : 'Imprimir'}
               </Button>
             </div>
           </div>

@@ -64,3 +64,5 @@ export * from './quote.types';
 export * from './reservation.types';
 export * from './store-credit.types';
 export * from './workflow.types';
+export * from './print-agent.types';
+export * from './print-job.types';

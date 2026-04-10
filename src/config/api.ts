@@ -1409,15 +1409,28 @@ export const API_ENDPOINTS = {
     TERMINALS: {
       LIST: '/v1/pos/terminals',
       CREATE: '/v1/pos/terminals',
+      GET: (id: string) => `/v1/pos/terminals/${id}`,
       UPDATE: (id: string) => `/v1/pos/terminals/${id}`,
       DELETE: (id: string) => `/v1/pos/terminals/${id}`,
+      PAIRING_CODE: (id: string) =>
+        `/v1/pos/terminals/${id}/pairing-code`,
+      PAIR_SELF: (id: string) => `/v1/pos/terminals/${id}/pair-self`,
+      UNPAIR: (id: string) => `/v1/pos/terminals/${id}/pairing`,
+    },
+    DEVICES: {
+      PAIR: '/v1/pos/devices/pair',
+      ME: '/v1/pos/devices/me',
     },
     SESSIONS: {
       LIST: '/v1/pos/sessions',
       OPEN: '/v1/pos/sessions/open',
+      OPEN_TOTEM: '/v1/pos/sessions/open-totem',
       CLOSE: (id: string) => `/v1/pos/sessions/${id}/close`,
+      CLOSE_ORPHAN: (id: string) => `/v1/pos/sessions/${id}/close-orphan`,
+      CURRENT: '/v1/pos/sessions/current',
       GET_ACTIVE: (terminalId: string) =>
         `/v1/pos/terminals/${terminalId}/session`,
+      SUMMARY: (id: string) => `/v1/pos/sessions/${id}/summary`,
     },
     TRANSACTIONS: {
       LIST: '/v1/pos/transactions',
@@ -1561,6 +1574,19 @@ export const API_ENDPOINTS = {
     RECEIPTS: {
       QUEUE: (orderId: string) => `/v1/sales/orders/${orderId}/print`,
       PREVIEW: (orderId: string) => `/v1/sales/orders/${orderId}/print/preview`,
+    },
+    AGENTS: {
+      LIST: '/v1/sales/print-agents',
+      CREATE: '/v1/sales/print-agents',
+      DELETE: (id: string) => `/v1/sales/print-agents/${id}`,
+      REGENERATE_KEY: (id: string) =>
+        `/v1/sales/print-agents/${id}/regenerate-key`,
+    },
+    JOBS: {
+      LIST: '/v1/sales/print-jobs',
+      CREATE: '/v1/sales/print-jobs',
+      RETRY: (id: string) => `/v1/sales/print-jobs/${id}/retry`,
+      CANCEL: (id: string) => `/v1/sales/print-jobs/${id}`,
     },
   },
   // Sales - Cashier (Caixa)
