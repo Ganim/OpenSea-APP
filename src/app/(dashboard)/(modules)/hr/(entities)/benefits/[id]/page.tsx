@@ -146,7 +146,7 @@ export default function BenefitPlanDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Benefícios', href: '/hr/benefits' },
             ]}
           />
@@ -164,7 +164,7 @@ export default function BenefitPlanDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Benefícios', href: '/hr/benefits' },
             ]}
           />
@@ -197,7 +197,7 @@ export default function BenefitPlanDetailPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Benefícios', href: '/hr/benefits' },
             { label: plan.name },
           ]}

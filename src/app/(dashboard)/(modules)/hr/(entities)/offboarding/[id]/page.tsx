@@ -81,7 +81,7 @@ export default function OffboardingDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Offboarding', href: '/hr/offboarding' },
               { label: 'Carregando...' },
             ]}
@@ -101,7 +101,7 @@ export default function OffboardingDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Offboarding', href: '/hr/offboarding' },
               { label: 'Erro' },
             ]}
@@ -127,7 +127,7 @@ export default function OffboardingDetailPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Offboarding', href: '/hr/offboarding' },
             { label: checklist.title },
           ]}

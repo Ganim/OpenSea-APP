@@ -261,7 +261,7 @@ export default function AdmissionsPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Admissões', href: '/hr/admissions' },
           ]}
           hasPermission={hasPermission}

@@ -459,7 +459,7 @@ export default function MyProfilePage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Meu Perfil' },
             ]}
           />
@@ -478,7 +478,7 @@ export default function MyProfilePage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Meu Perfil' },
             ]}
           />
@@ -511,7 +511,7 @@ export default function MyProfilePage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Meu Perfil' },
           ]}
         />

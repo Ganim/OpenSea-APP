@@ -140,7 +140,7 @@ export default function AdmissionDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Admissões', href: '/hr/admissions' },
               { label: 'Carregando...' },
             ]}
@@ -159,7 +159,7 @@ export default function AdmissionDetailPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Admissões', href: '/hr/admissions' },
               { label: 'Não encontrada' },
             ]}
@@ -188,7 +188,7 @@ export default function AdmissionDetailPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Admissões', href: '/hr/admissions' },
             { label: admission.fullName },
           ]}

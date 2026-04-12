@@ -549,7 +549,7 @@ export default function EsocialDashboardPage() {
     <div className="space-y-6">
       <PageActionBar
         breadcrumbItems={[
-          { label: 'Recursos Humanos', href: '/hr' },
+          { label: 'RH', href: '/hr' },
           { label: 'eSocial', href: '/hr/esocial' },
         ]}
         hasPermission={hasPermission}

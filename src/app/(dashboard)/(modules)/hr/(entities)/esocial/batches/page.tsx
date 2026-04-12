@@ -283,7 +283,7 @@ export default function EsocialBatchesPage() {
     <div className="space-y-6">
       <PageActionBar
         breadcrumbItems={[
-          { label: 'Recursos Humanos', href: '/hr' },
+          { label: 'RH', href: '/hr' },
           { label: 'eSocial', href: '/hr/esocial' },
           { label: 'Lotes', href: '/hr/esocial/batches' },
         ]}

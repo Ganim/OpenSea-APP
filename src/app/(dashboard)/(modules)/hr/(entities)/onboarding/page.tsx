@@ -117,7 +117,7 @@ function OnboardingPageContent() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Onboarding', href: '/hr/onboarding' },
           ]}
           hasPermission={hasPermission}

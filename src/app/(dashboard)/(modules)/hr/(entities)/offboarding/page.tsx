@@ -128,7 +128,7 @@ function OffboardingPageContent() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Offboarding', href: '/hr/offboarding' },
           ]}
           hasPermission={hasPermission}

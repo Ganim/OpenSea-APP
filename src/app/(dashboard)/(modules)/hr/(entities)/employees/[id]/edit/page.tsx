@@ -438,7 +438,7 @@ export default function EmployeeEditPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Funcionários', href: '/hr/employees' },
             ]}
           />
@@ -456,7 +456,7 @@ export default function EmployeeEditPage() {
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
-              { label: 'Recursos Humanos', href: '/hr' },
+              { label: 'RH', href: '/hr' },
               { label: 'Funcionários', href: '/hr/employees' },
             ]}
           />
@@ -489,7 +489,7 @@ export default function EmployeeEditPage() {
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'Funcionários', href: '/hr/employees' },
             {
               label: employee.fullName,

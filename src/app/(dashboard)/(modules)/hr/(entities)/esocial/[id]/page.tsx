@@ -202,7 +202,7 @@ export default function EsocialEventDetailPage() {
       <div className="space-y-6">
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'eSocial', href: '/hr/esocial' },
             { label: 'Carregando...' },
           ]}
@@ -222,7 +222,7 @@ export default function EsocialEventDetailPage() {
       <div className="space-y-6">
         <PageActionBar
           breadcrumbItems={[
-            { label: 'Recursos Humanos', href: '/hr' },
+            { label: 'RH', href: '/hr' },
             { label: 'eSocial', href: '/hr/esocial' },
             { label: 'Erro' },
           ]}
@@ -289,7 +289,7 @@ export default function EsocialEventDetailPage() {
     <div className="space-y-6">
       <PageActionBar
         breadcrumbItems={[
-          { label: 'Recursos Humanos', href: '/hr' },
+          { label: 'RH', href: '/hr' },
           { label: 'eSocial', href: '/hr/esocial' },
           { label: event.eventType },
         ]}
