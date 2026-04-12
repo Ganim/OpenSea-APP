@@ -160,7 +160,7 @@ export const dependantsConfig = defineEntityConfig<EmployeeDependant>()({
   // ======================== FEATURES ========================
   features: {
     create: true,
-    edit: false,
+    edit: true,
     delete: true,
     duplicate: false,
     softDelete: false,

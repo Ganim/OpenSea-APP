@@ -280,9 +280,7 @@ export default function DependantEditPage() {
             title: 'Excluir',
             icon: Trash2,
             onClick: () => setDeleteModalOpen(true),
-            variant: 'default' as const,
-            className:
-              'bg-slate-200 text-slate-700 border-transparent hover:bg-rose-600 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600',
+            variant: 'destructive' as const,
           },
         ]
       : []),
@@ -391,7 +389,7 @@ export default function DependantEditPage() {
                 title="Dados Pessoais"
                 subtitle="Nome, CPF, data de nascimento e parentesco"
               />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+              <div className="w-full rounded-xl border border-border bg-white/5 p-6 dark:bg-slate-800/60 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Nome */}
                   <div className="grid gap-2">
@@ -510,7 +508,7 @@ export default function DependantEditPage() {
                 title="Benefícios Fiscais"
                 subtitle="Configurações de IRRF, Salário Família e deficiência"
               />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
+              <div className="w-full rounded-xl border border-border bg-white/5 p-6 dark:bg-slate-800/60 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Dependente IRRF */}
                   <div className="flex items-center gap-3">
@@ -586,7 +584,7 @@ export default function DependantEditPage() {
                 title="Funcionário Vinculado"
                 subtitle="Informações do funcionário ao qual o dependente está vinculado"
               />
-              <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
+              <div className="w-full rounded-xl border border-border bg-white/5 p-6 dark:bg-slate-800/60">
                 <p className="text-sm text-muted-foreground">
                   Funcionário:{' '}
                   <span className="font-medium text-foreground">

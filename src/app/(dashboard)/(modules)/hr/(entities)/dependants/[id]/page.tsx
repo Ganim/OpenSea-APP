@@ -19,6 +19,7 @@ import {
   Clock,
   CreditCard,
   Heart,
+  Pencil,
   Shield,
   Trash,
   User,
@@ -46,6 +47,7 @@ export default function DependantDetailPage() {
   const dependantId = params.id as string;
   const { hasPermission } = usePermissions();
 
+  const canEdit = hasPermission(HR_PERMISSIONS.DEPENDANTS.UPDATE);
   const canDelete = hasPermission(HR_PERMISSIONS.DEPENDANTS.DELETE);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -170,19 +172,30 @@ export default function DependantDetailPage() {
             { label: 'Dependentes', href: '/hr/dependants' },
             { label: dependant.name },
           ]}
-          buttons={
-            canDelete
+          buttons={[
+            ...(canEdit
+              ? [
+                  {
+                    id: 'edit',
+                    title: 'Editar',
+                    icon: Pencil,
+                    onClick: () => router.push(`/hr/dependants/${dependantId}/edit`),
+                    variant: 'outline' as const,
+                  },
+                ]
+              : []),
+            ...(canDelete
               ? [
                   {
                     id: 'delete',
                     title: 'Excluir',
                     icon: Trash,
                     onClick: () => setIsDeleteModalOpen(true),
-                    variant: 'outline',
+                    variant: 'outline' as const,
                   },
                 ]
-              : []
-          }
+              : []),
+          ]}
         />
 
         {/* Identity Card */}
@@ -226,7 +239,7 @@ export default function DependantDetailPage() {
 
       <PageBody className="space-y-6">
         {/* Dados Pessoais */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-4 sm:p-6 bg-white/5 border border-border">
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
             <User className="h-5 w-5" />
             Dados Pessoais
@@ -259,7 +272,7 @@ export default function DependantDetailPage() {
         </Card>
 
         {/* Benefícios Fiscais */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-4 sm:p-6 bg-white/5 border border-border">
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
             <Shield className="h-5 w-5" />
             Benefícios Fiscais
@@ -302,7 +315,7 @@ export default function DependantDetailPage() {
         </Card>
 
         {/* Funcionário Vinculado */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-4 sm:p-6 bg-white/5 border border-border">
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
             <User className="h-5 w-5" />
             Funcionário Vinculado
@@ -327,7 +340,7 @@ export default function DependantDetailPage() {
         </Card>
 
         {/* Metadados */}
-        <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+        <Card className="p-4 sm:p-6 bg-white/5 border border-border">
           <h3 className="text-lg items-center flex uppercase font-semibold gap-2 mb-4">
             <Clock className="h-5 w-5" />
             Metadados
