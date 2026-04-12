@@ -117,7 +117,7 @@ export default function HRSettingsPage() {
 
   // PAT
   const [patEnabled, setPatEnabled] = useState(false);
-  const [patMonthlyValue, setPatMonthlyValue] = useState(0);
+  const [patMonthlyValue, setPatMonthlyValue] = useState<number>(0);
 
   // Banco de Horas
   const [timeBankIndividualMonths, setTimeBankIndividualMonths] = useState(6);
@@ -149,9 +149,9 @@ export default function HRSettingsPage() {
       setMaternityLeaveDays(configData.maternityLeaveDays);
       setPaternityLeaveDays(configData.paternityLeaveDays);
       setUnionContributionEnabled(configData.unionContributionEnabled);
-      setUnionContributionRate(configData.unionContributionRate);
+      setUnionContributionRate(configData.unionContributionRate ?? 0);
       setPatEnabled(configData.patEnabled);
-      setPatMonthlyValue(configData.patMonthlyValue);
+      setPatMonthlyValue(configData.patMonthlyValuePerEmployee ?? 0);
       setTimeBankIndividualMonths(configData.timeBankIndividualMonths);
       setTimeBankCollectiveMonths(configData.timeBankCollectiveMonths);
       setRatPercent(configData.ratPercent);
@@ -174,7 +174,7 @@ export default function HRSettingsPage() {
         unionContributionEnabled,
         unionContributionRate,
         patEnabled,
-        patMonthlyValue,
+        patMonthlyValuePerEmployee: patMonthlyValue,
         timeBankIndividualMonths,
         timeBankCollectiveMonths,
         ratPercent,

@@ -1,55 +1,8 @@
 import { apiClient } from '@/lib/api-client';
+import type { PunchConfiguration, UpdatePunchConfigData } from '@/types/hr';
+import type { GeofenceZone, CreateGeofenceZoneData, UpdateGeofenceZoneData } from '@/types/hr';
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-export interface PunchConfiguration {
-  id: string;
-  tenantId: string;
-  selfieRequired: boolean;
-  gpsRequired: boolean;
-  geofenceEnabled: boolean;
-  qrCodeEnabled: boolean;
-  directLoginEnabled: boolean;
-  kioskModeEnabled: boolean;
-  pwaEnabled: boolean;
-  offlineAllowed: boolean;
-  maxOfflineHours: number;
-  toleranceMinutes: number;
-  autoClockOutHours: number | null;
-  pdfReceiptEnabled: boolean;
-  defaultRadiusMeters: number;
-}
-
-export interface GeofenceZone {
-  id: string;
-  tenantId: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  radiusMeters: number;
-  isActive: boolean;
-  address: string | null;
-}
-
-export interface CreateGeofenceZoneData {
-  name: string;
-  latitude: number;
-  longitude: number;
-  radiusMeters: number;
-  isActive: boolean;
-  address?: string | null;
-}
-
-export interface UpdateGeofenceZoneData {
-  name?: string;
-  latitude?: number;
-  longitude?: number;
-  radiusMeters?: number;
-  isActive?: boolean;
-  address?: string | null;
-}
+export type { PunchConfiguration, UpdatePunchConfigData, GeofenceZone, CreateGeofenceZoneData, UpdateGeofenceZoneData };
 
 // =============================================================================
 // API
@@ -58,7 +11,7 @@ export interface UpdateGeofenceZoneData {
 export const punchConfigApi = {
   getConfig: () => apiClient.get<PunchConfiguration>('/v1/hr/punch-config'),
 
-  updateConfig: (data: Partial<PunchConfiguration>) =>
+  updateConfig: (data: UpdatePunchConfigData) =>
     apiClient.patch<PunchConfiguration>('/v1/hr/punch-config', data),
 
   listZones: () =>

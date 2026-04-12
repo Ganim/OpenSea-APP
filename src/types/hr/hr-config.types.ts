@@ -14,11 +14,11 @@ export interface HrTenantConfig {
 
   // Contribuição Sindical
   unionContributionEnabled: boolean;
-  unionContributionRate: number;
+  unionContributionRate: number | null;
 
   // PAT
   patEnabled: boolean;
-  patMonthlyValue: number;
+  patMonthlyValuePerEmployee: number | null;
 
   // Banco de Horas
   timeBankIndividualMonths: number;
@@ -38,9 +38,9 @@ export interface UpdateHrTenantConfigData {
   maternityLeaveDays?: number;
   paternityLeaveDays?: number;
   unionContributionEnabled?: boolean;
-  unionContributionRate?: number;
+  unionContributionRate?: number | null;
   patEnabled?: boolean;
-  patMonthlyValue?: number;
+  patMonthlyValuePerEmployee?: number | null;
   timeBankIndividualMonths?: number;
   timeBankCollectiveMonths?: number;
   ratPercent?: number;
