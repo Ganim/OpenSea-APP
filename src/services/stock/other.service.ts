@@ -3,22 +3,24 @@ import { apiClient } from '@/lib/api-client';
 import { logger } from '@/lib/logger';
 import type {
   CreateManufacturerRequest,
-  CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
   ManufacturerResponse,
   ManufacturersResponse,
-  SupplierResponse,
-  SuppliersResponse,
   TagResponse,
   TagsResponse,
   TemplateResponse,
   TemplatesResponse,
   UpdateManufacturerRequest,
-  UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
 } from '@/types/stock';
+import type {
+  CreateSupplierRequest,
+  SupplierResponse,
+  SuppliersResponse,
+  UpdateSupplierRequest,
+} from '@/types/finance';
 
 /** Shared paginated query params for list endpoints */
 interface PaginatedListQuery {

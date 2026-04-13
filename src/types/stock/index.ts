@@ -3,7 +3,6 @@ export * from './product.types';
 export * from './variant.types';
 export * from './item.types';
 export * from './warehouse.types';
-export * from './supplier.types';
 export * from './manufacturer.types';
 export * from './category.types';
 export * from './template.types';

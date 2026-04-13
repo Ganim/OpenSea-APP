@@ -1,4 +1,4 @@
-// Supplier Types
+// Supplier Types (moved from stock to finance)
 
 export interface Supplier {
   id: string;

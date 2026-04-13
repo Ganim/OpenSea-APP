@@ -82,7 +82,6 @@ import {
 import {
   useCategories,
   useManufacturers,
-  useSuppliers,
   useTemplates,
   useTemplateDetails,
 } from '../../_shared/hooks/use-reference-data';
@@ -341,7 +340,6 @@ export default function ProductsSheetsPage() {
   const { data: templateDetails } = useTemplateDetails(
     selectedTemplateId || undefined
   );
-  const { data: suppliers } = useSuppliers();
   const { data: manufacturers } = useManufacturers();
   const { data: categories } = useCategories();
 
@@ -496,9 +494,6 @@ export default function ProductsSheetsPage() {
     enabledFields.forEach(field => {
       if (field.type === 'reference' && field.referenceEntity) {
         switch (field.referenceEntity) {
-          case 'suppliers':
-            map[field.key] = suppliers || [];
-            break;
           case 'manufacturers':
             map[field.key] = manufacturers || [];
             break;
@@ -511,7 +506,7 @@ export default function ProductsSheetsPage() {
       }
     });
     return map;
-  }, [enabledFields, suppliers, manufacturers, categories]);
+  }, [enabledFields, manufacturers, categories]);
 
   // Spreadsheet hook — initialized with empty headers to avoid re-creation loops.
   // Headers are updated imperatively via updateHeaders() when enabledFields change.

@@ -8,7 +8,6 @@ import {
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import {
   ADMIN_PERMISSIONS,
-  FINANCE_PERMISSIONS,
   HR_PERMISSIONS,
   STOCK_PERMISSIONS,
 } from '@/config/rbac/permission-codes';
@@ -23,7 +22,6 @@ import {
   LayoutTemplate,
   Network,
   Package,
-  Truck,
   Upload,
   UserCheck,
   Users,
@@ -62,16 +60,6 @@ const sections: DashboardSection[] = [
         gradient: 'from-green-500 to-green-600',
         hoverBg: 'hover:bg-green-50 dark:hover:bg-green-500/10',
         permission: STOCK_PERMISSIONS.ITEMS.IMPORT,
-      },
-      {
-        id: 'suppliers',
-        title: 'Fornecedores',
-        description: 'Importar fornecedores e contatos',
-        icon: Truck,
-        href: '/import/stock/suppliers',
-        gradient: 'from-orange-500 to-orange-600',
-        hoverBg: 'hover:bg-orange-50 dark:hover:bg-orange-500/10',
-        permission: FINANCE_PERMISSIONS.SUPPLIERS.IMPORT,
       },
       {
         id: 'categories',

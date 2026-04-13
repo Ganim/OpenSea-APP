@@ -9,18 +9,20 @@ import { apiClient } from '@/lib/api-client';
 import type {
   CreateManufacturerRequest,
   CreatePurchaseOrderRequest,
-  CreateSupplierRequest,
   CreateTagRequest,
   CreateTemplateRequest,
   Manufacturer,
   Tag,
   Template,
   UpdateManufacturerRequest,
-  UpdateSupplierRequest,
   UpdateTagRequest,
   UpdateTemplateRequest,
   LocationsResponse,
 } from '@/types/stock';
+import type {
+  CreateSupplierRequest,
+  UpdateSupplierRequest,
+} from '@/types/finance';
 import {
   useInfiniteQuery,
   useMutation,

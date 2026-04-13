@@ -35,3 +35,4 @@ export {
 } from './compliance.types';
 export * from './payment-order.types';
 export * from './journal-entry.types';
+export * from './supplier.types';

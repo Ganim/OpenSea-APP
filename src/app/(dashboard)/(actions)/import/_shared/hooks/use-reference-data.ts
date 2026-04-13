@@ -60,17 +60,6 @@ async function fetchTemplates(): Promise<FieldOption[]> {
   }));
 }
 
-async function fetchSuppliers(): Promise<FieldOption[]> {
-  const suppliers = await fetchAllPages<BaseEntity>(
-    '/v1/suppliers',
-    'suppliers'
-  );
-  return suppliers.map(s => ({
-    value: s.id,
-    label: s.name,
-  }));
-}
-
 async function fetchManufacturers(): Promise<FieldOption[]> {
   const manufacturers = await fetchAllPages<BaseEntity>(
     '/v1/manufacturers',
@@ -164,14 +153,6 @@ export function useTemplates() {
     queryKey: ['import-reference', 'templates'],
     queryFn: fetchTemplates,
     staleTime: 5 * 60 * 1000, // 5 minutos
-  });
-}
-
-export function useSuppliers() {
-  return useQuery({
-    queryKey: ['import-reference', 'suppliers'],
-    queryFn: fetchSuppliers,
-    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -363,7 +344,6 @@ export type { TemplateWithAttributes, TemplateAttributeConfig };
 
 type ReferenceType =
   | 'templates'
-  | 'suppliers'
   | 'manufacturers'
   | 'categories'
   | 'products'
@@ -372,7 +352,6 @@ type ReferenceType =
 
 const FETCHERS: Record<ReferenceType, () => Promise<FieldOption[]>> = {
   templates: fetchTemplates,
-  suppliers: fetchSuppliers,
   manufacturers: fetchManufacturers,
   categories: fetchCategories,
   products: fetchProducts,
@@ -395,7 +374,6 @@ export function useReferenceData(type: ReferenceType) {
 
 export function useAllReferenceData(requiredTypes: ReferenceType[]) {
   const templates = useTemplates();
-  const suppliers = useSuppliers();
   const manufacturers = useManufacturers();
   const categories = useCategories();
   const products = useProducts();
@@ -404,7 +382,6 @@ export function useAllReferenceData(requiredTypes: ReferenceType[]) {
 
   const data: Record<ReferenceType, FieldOption[]> = {
     templates: templates.data || [],
-    suppliers: suppliers.data || [],
     manufacturers: manufacturers.data || [],
     categories: categories.data || [],
     products: products.data || [],
@@ -416,8 +393,6 @@ export function useAllReferenceData(requiredTypes: ReferenceType[]) {
     switch (type) {
       case 'templates':
         return templates.isLoading;
-      case 'suppliers':
-        return suppliers.isLoading;
       case 'manufacturers':
         return manufacturers.isLoading;
       case 'categories':

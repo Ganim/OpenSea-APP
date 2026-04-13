@@ -12,7 +12,6 @@ export type ImportEntityType =
   | 'products'
   | 'variants'
   | 'items'
-  | 'suppliers'
   | 'categories'
   | 'product-categories'
   | 'users'

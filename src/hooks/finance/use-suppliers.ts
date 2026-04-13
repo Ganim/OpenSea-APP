@@ -3,7 +3,7 @@ import type {
   CreateSupplierRequest,
   Supplier,
   SuppliersResponse,
-} from '@/types/stock';
+} from '@/types/finance';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const QUERY_KEYS = {

@@ -17,7 +17,6 @@ import {
   manufacturersService,
   productsService,
   purchaseOrdersService,
-  suppliersService,
   templatesService,
 } from '@/services/stock';
 
@@ -197,7 +196,6 @@ export default function StockLandingPage() {
         purchaseOrders,
         templates,
         manufacturers,
-        suppliers,
         categories,
       ] = await Promise.allSettled([
         productsService.listProducts(),
@@ -205,7 +203,6 @@ export default function StockLandingPage() {
         purchaseOrdersService.list({ page: 1, limit: 1 }),
         templatesService.listTemplates(),
         manufacturersService.listManufacturers(),
-        suppliersService.listSuppliers(),
         categoriesService.listCategories(),
       ]);
 
@@ -227,10 +224,6 @@ export default function StockLandingPage() {
         manufacturers:
           manufacturers.status === 'fulfilled'
             ? manufacturers.value.manufacturers.length
-            : null,
-        suppliers:
-          suppliers.status === 'fulfilled'
-            ? suppliers.value.suppliers.length
             : null,
         categories:
           categories.status === 'fulfilled'

@@ -2,7 +2,7 @@
 
 import type { PaginationMeta, PaginatedQuery } from '../pagination';
 import type { TemplateAttributes } from './template.types';
-import type { Supplier } from './supplier.types';
+import type { Supplier } from '../finance/supplier.types';
 import type { Manufacturer } from './manufacturer.types';
 import type { ProductCategory, ProductTag } from './category.types';
 

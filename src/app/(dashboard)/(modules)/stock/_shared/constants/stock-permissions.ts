@@ -6,10 +6,7 @@
  * mapeando para as novas ações (ACCESS, REGISTER, MODIFY, REMOVE, ADMIN, EXPORT, IMPORT).
  */
 
-import {
-  STOCK_PERMISSIONS as STOCK_CODES,
-  FINANCE_PERMISSIONS as FINANCE_CODES,
-} from '@/config/rbac/permission-codes';
+import { STOCK_PERMISSIONS as STOCK_CODES } from '@/config/rbac/permission-codes';
 
 export const STOCK_PERMISSIONS = {
   PRODUCTS: {
@@ -73,17 +70,6 @@ export const STOCK_PERMISSIONS = {
     IMPORT: STOCK_CODES.MANUFACTURERS.IMPORT,
     EXPORT: STOCK_CODES.MANUFACTURERS.EXPORT,
     MANAGE: STOCK_CODES.MANUFACTURERS.REMOVE,
-  },
-
-  SUPPLIERS: {
-    LIST: FINANCE_CODES.SUPPLIERS.ACCESS,
-    VIEW: FINANCE_CODES.SUPPLIERS.ACCESS,
-    CREATE: FINANCE_CODES.SUPPLIERS.REGISTER,
-    UPDATE: FINANCE_CODES.SUPPLIERS.MODIFY,
-    DELETE: FINANCE_CODES.SUPPLIERS.REMOVE,
-    EXPORT: FINANCE_CODES.SUPPLIERS.EXPORT,
-    IMPORT: FINANCE_CODES.SUPPLIERS.IMPORT,
-    MANAGE: FINANCE_CODES.SUPPLIERS.REMOVE,
   },
 
   LOCATIONS: {
@@ -172,9 +158,6 @@ export type StockCategoriesPermission =
 export type StockManufacturersPermission =
   (typeof STOCK_PERMISSIONS.MANUFACTURERS)[keyof typeof STOCK_PERMISSIONS.MANUFACTURERS];
 
-export type StockSuppliersPermission =
-  (typeof STOCK_PERMISSIONS.SUPPLIERS)[keyof typeof STOCK_PERMISSIONS.SUPPLIERS];
-
 export type StockTagsPermission =
   (typeof STOCK_PERMISSIONS.TAGS)[keyof typeof STOCK_PERMISSIONS.TAGS];
 
@@ -191,7 +174,6 @@ export type StockPermission =
   | StockTemplatesPermission
   | StockCategoriesPermission
   | StockManufacturersPermission
-  | StockSuppliersPermission
   | StockTagsPermission
   | StockPurchaseOrdersPermission;
 

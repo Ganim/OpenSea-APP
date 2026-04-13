@@ -5,7 +5,6 @@ export {
   useReferenceData,
   useAllReferenceData,
   useTemplates,
-  useSuppliers,
   useManufacturers,
   useCategories,
   useProducts,

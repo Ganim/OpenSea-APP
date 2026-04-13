@@ -258,127 +258,6 @@ const itemFields: EntityFieldDefinition[] = [
 ];
 
 // ============================================
-// SUPPLIERS FIELDS
-// ============================================
-
-const supplierFields: EntityFieldDefinition[] = [
-  {
-    key: 'name',
-    label: 'Nome do Fornecedor',
-    type: 'text',
-    required: true,
-    description: 'Nome ou razão social do fornecedor',
-    validation: { minLength: 1, maxLength: 255 },
-  },
-  {
-    key: 'cnpj',
-    label: 'CNPJ',
-    type: 'text',
-    required: false,
-    description: 'CNPJ do fornecedor (apenas números)',
-    validation: {
-      pattern: '^[0-9]{14}$',
-      patternMessage: 'CNPJ deve ter 14 dígitos',
-    },
-  },
-  {
-    key: 'taxId',
-    label: 'Tax ID',
-    type: 'text',
-    required: false,
-    description: 'Identificador fiscal internacional',
-  },
-  {
-    key: 'email',
-    label: 'Email',
-    type: 'email',
-    required: false,
-    description: 'Email de contato',
-  },
-  {
-    key: 'phone',
-    label: 'Telefone',
-    type: 'text',
-    required: false,
-    description: 'Telefone de contato',
-    validation: { maxLength: 20 },
-  },
-  {
-    key: 'website',
-    label: 'Website',
-    type: 'text',
-    required: false,
-    description: 'URL do site do fornecedor',
-  },
-  {
-    key: 'addressLine1',
-    label: 'Endereço',
-    type: 'text',
-    required: false,
-    description: 'Endereço principal',
-  },
-  {
-    key: 'addressLine2',
-    label: 'Complemento',
-    type: 'text',
-    required: false,
-    description: 'Complemento do endereço',
-  },
-  {
-    key: 'city',
-    label: 'Cidade',
-    type: 'text',
-    required: false,
-    description: 'Cidade',
-  },
-  {
-    key: 'state',
-    label: 'Estado',
-    type: 'text',
-    required: false,
-    description: 'Estado/Província',
-  },
-  {
-    key: 'postalCode',
-    label: 'CEP',
-    type: 'text',
-    required: false,
-    description: 'Código postal',
-  },
-  {
-    key: 'country',
-    label: 'País',
-    type: 'text',
-    required: false,
-    description: 'País',
-    defaultValue: 'Brasil',
-  },
-  {
-    key: 'isActive',
-    label: 'Ativo',
-    type: 'boolean',
-    required: false,
-    description: 'Se o fornecedor está ativo',
-    defaultValue: true,
-  },
-  {
-    key: 'rating',
-    label: 'Avaliação',
-    type: 'number',
-    required: false,
-    description: 'Avaliação de 1 a 5',
-    validation: { min: 1, max: 5 },
-  },
-  {
-    key: 'notes',
-    label: 'Observações',
-    type: 'text',
-    required: false,
-    description: 'Notas sobre o fornecedor',
-  },
-];
-
-// ============================================
 // CATEGORIES FIELDS
 // ============================================
 
@@ -860,7 +739,7 @@ export const ENTITY_DEFINITIONS: Record<string, EntityImportDefinition> = {
     entityType: 'products',
     label: 'Produto',
     labelPlural: 'Produtos',
-    description: 'Importar produtos com templates, fornecedores e categorias',
+    description: 'Importar produtos com templates e categorias',
     icon: 'Package',
     color: 'blue',
     fields: productFields,
@@ -897,20 +776,6 @@ export const ENTITY_DEFINITIONS: Record<string, EntityImportDefinition> = {
     basePath: '/import/stock/items',
     module: 'stock',
     permission: 'stock.items.import',
-  },
-  suppliers: {
-    entityType: 'suppliers',
-    label: 'Fornecedor',
-    labelPlural: 'Fornecedores',
-    description: 'Importar fornecedores e seus dados de contato',
-    icon: 'Truck',
-    color: 'orange',
-    fields: supplierFields,
-    apiEndpoint: '/v1/suppliers',
-    batchEndpoint: '/v1/suppliers/batch',
-    basePath: '/import/stock/suppliers',
-    module: 'stock',
-    permission: 'finance.suppliers.import',
   },
   'product-categories': {
     entityType: 'product-categories',
