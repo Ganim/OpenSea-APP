@@ -1,54 +1,31 @@
-/**
- * OpenSea OS - Delete Tag Confirmation Modal
- */
-
 'use client';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onSuccess: () => void;
   count: number;
 }
 
 export function DeleteConfirmModal({
   isOpen,
   onClose,
-  onConfirm,
+  onSuccess,
   count,
 }: DeleteConfirmModalProps) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-          <AlertDialogDescription>
-            {count === 1
-              ? 'Tem certeza que deseja excluir esta tag? Esta ação não pode ser desfeita.'
-              : `Tem certeza que deseja excluir ${count} tags? Esta ação não pode ser desfeita.`}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            Excluir
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <VerifyActionPinModal
+      isOpen={isOpen}
+      onClose={onClose}
+      onSuccess={onSuccess}
+      title="Confirmar Exclusão"
+      description={
+        count === 1
+          ? 'Digite seu PIN de ação para excluir esta tag.'
+          : `Digite seu PIN de ação para excluir ${count} tags.`
+      }
+    />
   );
 }

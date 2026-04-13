@@ -429,7 +429,7 @@ export default function TagsPage() {
           <DeleteConfirmModal
             isOpen={deleteOpen}
             onClose={() => setDeleteOpen(false)}
-            onConfirm={handleDeleteConfirm}
+            onSuccess={handleDeleteConfirm}
             count={itemsToDelete.length}
           />
         </PageBody>
