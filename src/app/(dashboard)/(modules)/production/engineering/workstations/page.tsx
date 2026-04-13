@@ -52,7 +52,7 @@ import type {
   WorkCenter,
   CreateWorkstationRequest,
 } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Cog, Hash, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
@@ -93,16 +93,18 @@ export default function WorkstationsPage() {
 
   // Data
   const {
-    data: wsData,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['workstations'],
     queryFn: async () => {
       const res = await workstationsService.list();
       return res.workstations;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
   const { data: types } = useQuery({
@@ -121,7 +123,7 @@ export default function WorkstationsPage() {
     },
   });
 
-  const allItems = wsData ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     let filtered = allItems;
     if (debouncedSearch) {

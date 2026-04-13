@@ -46,7 +46,7 @@ import type {
   DowntimeCategory,
   CreateDowntimeReasonRequest,
 } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -119,19 +119,21 @@ export default function DowntimeReasonsPage() {
   const [newCategory, setNewCategory] = useState<DowntimeCategory>('OTHER');
 
   const {
-    data: response,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['downtime-reasons'],
     queryFn: async () => {
       const res = await downtimeReasonsService.list();
       return res.downtimeReasons;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
-  const allItems = response ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     let filtered = allItems;
     if (debouncedSearch) {

@@ -47,7 +47,7 @@ import type {
   DefectSeverity,
   CreateDefectTypeRequest,
 } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bug, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -101,19 +101,21 @@ export default function DefectTypesPage() {
   const [newSeverity, setNewSeverity] = useState<DefectSeverity>('MINOR');
 
   const {
-    data: response,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['defect-types'],
     queryFn: async () => {
       const res = await defectTypesService.list();
       return res.defectTypes;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
-  const allItems = response ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     let filtered = allItems;
     if (debouncedSearch) {

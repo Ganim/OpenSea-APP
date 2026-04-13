@@ -39,7 +39,7 @@ import type {
   WorkstationType,
   CreateWorkstationTypeRequest,
 } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Plus, Settings, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
@@ -78,19 +78,21 @@ export default function WorkstationTypesPage() {
   const [newDescription, setNewDescription] = useState('');
 
   const {
-    data: response,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['workstation-types'],
     queryFn: async () => {
       const res = await workstationTypesService.list();
       return res.workstationTypes;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
-  const allItems = response ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     if (!debouncedSearch) return allItems;
     const q = debouncedSearch.toLowerCase();

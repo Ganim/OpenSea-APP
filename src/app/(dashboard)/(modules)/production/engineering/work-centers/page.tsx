@@ -36,7 +36,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { workCentersService } from '@/services/production';
 import type { WorkCenter, CreateWorkCenterRequest } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Factory, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -69,19 +69,21 @@ export default function WorkCentersPage() {
   const [newDescription, setNewDescription] = useState('');
 
   const {
-    data: response,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['work-centers'],
     queryFn: async () => {
       const res = await workCentersService.list();
       return res.workCenters;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
-  const allItems = response ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     if (!debouncedSearch) return allItems;
     const q = debouncedSearch.toLowerCase();

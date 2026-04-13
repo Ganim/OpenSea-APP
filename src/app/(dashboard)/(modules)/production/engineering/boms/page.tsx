@@ -43,7 +43,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { bomsService } from '@/services/production';
 import type { Bom, BomStatus, CreateBomRequest } from '@/types/production';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LayoutList, Loader2, Plus, Star, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
@@ -97,19 +97,21 @@ export default function BomsPage() {
   const [newDescription, setNewDescription] = useState('');
 
   const {
-    data: response,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ['boms'],
     queryFn: async () => {
       const res = await bomsService.list();
       return res.boms;
     },
+    getNextPageParam: () => undefined,
+    initialPageParam: 1,
   });
 
-  const allItems = response ?? [];
+  const allItems = data?.pages.flatMap((p) => p) ?? [];
   const items = useMemo(() => {
     let filtered = allItems;
     if (debouncedSearch) {
