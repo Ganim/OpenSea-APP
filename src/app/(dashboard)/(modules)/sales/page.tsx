@@ -90,7 +90,7 @@ export default function SalesDashboardPage() {
   const { data, isLoading } = useSalesDashboard();
 
   return (
-    <div className="space-y-6">
+    <div data-testid="sales-dashboard" className="space-y-6">
       {/* Breadcrumb */}
       <PageActionBar breadcrumbItems={[{ label: 'Vendas', href: '/sales' }]} />
 

@@ -26,7 +26,7 @@ function formatPercent(value: number): string {
 
 function KPICardSkeleton() {
   return (
-    <Card className="p-4">
+    <Card data-testid="sales-kpi-cards" className="p-4">
       <div className="flex items-start justify-between">
         <div className="space-y-2 flex-1">
           <Skeleton className="h-3.5 w-24" />
