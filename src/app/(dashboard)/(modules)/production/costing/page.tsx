@@ -6,12 +6,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   DollarSign,
   Search,
-  Calculator,
   TrendingUp,
   TrendingDown,
   Loader2,
@@ -28,11 +27,17 @@ import { Badge } from '@/components/ui/badge';
 
 import { PRODUCTION_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { costingService } from '@/services/production';
-import type { OrderCostSummary, ProductionCost } from '@/services/production/costing.service';
+import type { ProductionCost } from '@/services/production/costing.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+const COST_TYPE_LABELS: Record<string, string> = {
+  MATERIAL: 'Material',
+  LABOR: 'Mão de Obra',
+  OVERHEAD: 'Overhead',
+};
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
@@ -62,7 +67,7 @@ export default function CostingPage() {
 
   const canAccess = hasPermission(PRODUCTION_PERMISSIONS.COSTING.ACCESS);
 
-  // ---- Data query -----------------------------------------------------------
+  // ---- Data queries ----------------------------------------------------------
 
   const {
     data: costsData,
@@ -77,17 +82,16 @@ export default function CostingPage() {
     enabled: !!searchedOrderId,
   });
 
-  // ---- Calculate mutation ---------------------------------------------------
-
-  const calculateMutation = useMutation({
-    mutationFn: (id: string) => costingService.calculateOrderCost(id),
-    onSuccess: () => {
-      toast.success('Custo total calculado com sucesso');
+  const {
+    data: summaryData,
+    isLoading: isLoadingSummary,
+  } = useQuery({
+    queryKey: ['production', 'costs', 'summary', searchedOrderId],
+    queryFn: async () => {
+      return costingService.getSummary(searchedOrderId);
     },
-    onError: () => toast.error('Erro ao calcular custo total'),
+    enabled: !!searchedOrderId,
   });
-
-  const summary: OrderCostSummary | null = calculateMutation.data ?? null;
 
   // ---- Handlers -------------------------------------------------------------
 
@@ -98,46 +102,38 @@ export default function CostingPage() {
       return;
     }
     setSearchedOrderId(trimmed);
-    calculateMutation.reset();
-  }
-
-  function handleCalculate() {
-    if (!searchedOrderId) {
-      toast.error('Busque uma ordem de produção primeiro');
-      return;
-    }
-    calculateMutation.mutate(searchedOrderId);
   }
 
   // ---- Stats cards ----------------------------------------------------------
 
-  const statsCards = summary
+  const statsCards = summaryData
     ? [
         {
           label: 'Planejado',
-          value: formatCurrency(summary.totalPlanned),
+          value: formatCurrency(summaryData.totalPlanned),
           icon: TrendingUp,
           from: 'from-sky-500',
           to: 'to-sky-600',
         },
         {
           label: 'Realizado',
-          value: formatCurrency(summary.totalActual),
+          value: formatCurrency(summaryData.totalActual),
           icon: DollarSign,
           from: 'from-emerald-500',
           to: 'to-emerald-600',
         },
         {
           label: 'Variação',
-          value: formatCurrency(summary.totalVariance),
-          icon: summary.totalVariance > 0 ? TrendingDown : ArrowUpDown,
-          from: summary.totalVariance > 0 ? 'from-rose-500' : 'from-violet-500',
-          to: summary.totalVariance > 0 ? 'to-rose-600' : 'to-violet-600',
+          value: formatCurrency(summaryData.totalVariance),
+          icon: summaryData.totalVariance > 0 ? TrendingDown : ArrowUpDown,
+          from: summaryData.totalVariance > 0 ? 'from-rose-500' : 'from-violet-500',
+          to: summaryData.totalVariance > 0 ? 'to-rose-600' : 'to-violet-600',
         },
       ]
     : [];
 
   const costs: ProductionCost[] = costsData ?? [];
+  const isLoading = isLoadingCosts || isLoadingSummary;
 
   // ---- Render ---------------------------------------------------------------
 
@@ -183,22 +179,15 @@ export default function CostingPage() {
             <Search className="h-4 w-4" />
             Buscar
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-9 px-2.5 gap-1"
-            onClick={handleCalculate}
-            disabled={!searchedOrderId || calculateMutation.isPending}
-          >
-            {calculateMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Calculator className="h-4 w-4" />
-            )}
-            Calcular Custo Total
-          </Button>
         </div>
       </Card>
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      )}
 
       {/* Summary stats */}
       {statsCards.length > 0 && (
@@ -228,13 +217,7 @@ export default function CostingPage() {
         </div>
       )}
 
-      {/* Cost breakdown table */}
-      {isLoadingCosts && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-        </div>
-      )}
-
+      {/* Error */}
       {costsError && (
         <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <p className="text-sm text-rose-600 dark:text-rose-400">
@@ -243,7 +226,8 @@ export default function CostingPage() {
         </Card>
       )}
 
-      {searchedOrderId && !isLoadingCosts && !costsError && costs.length === 0 && (
+      {/* Empty state */}
+      {searchedOrderId && !isLoading && !costsError && costs.length === 0 && (
         <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <p className="text-sm text-gray-500 dark:text-white/60">
             Nenhum custo registrado para esta ordem de produção.
@@ -251,6 +235,7 @@ export default function CostingPage() {
         </Card>
       )}
 
+      {/* Cost breakdown table */}
       {costs.length > 0 && (
         <Card className="bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 overflow-hidden">
           <div className="overflow-x-auto">
@@ -281,7 +266,7 @@ export default function CostingPage() {
                     className="border-b border-gray-100 dark:border-white/5 last:border-0"
                   >
                     <td className="p-4 font-medium text-gray-900 dark:text-white">
-                      {cost.costType}
+                      {COST_TYPE_LABELS[cost.costType] ?? cost.costType}
                     </td>
                     <td className="p-4 text-gray-500 dark:text-white/60">
                       {cost.description ?? '—'}
@@ -295,9 +280,9 @@ export default function CostingPage() {
                     <td className="p-4 text-right">
                       <Badge
                         variant="outline"
-                        className={varianceBadgeClass(cost.variance)}
+                        className={varianceBadgeClass(cost.varianceAmount)}
                       >
-                        {formatCurrency(cost.variance)}
+                        {formatCurrency(cost.varianceAmount)}
                       </Badge>
                     </td>
                   </tr>

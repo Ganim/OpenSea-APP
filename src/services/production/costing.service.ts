@@ -4,52 +4,53 @@ import { apiClient } from '@/lib/api-client';
 export interface ProductionCost {
   id: string;
   productionOrderId: string;
-  costType: string;
+  costType: 'MATERIAL' | 'LABOR' | 'OVERHEAD';
   description: string | null;
   plannedAmount: number;
   actualAmount: number;
-  variance: number;
+  varianceAmount: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface OrderCostSummary {
+export interface CostSummary {
   totalPlanned: number;
   totalActual: number;
   totalVariance: number;
-  costs: ProductionCost[];
+  details: ProductionCost[];
 }
 
 export const costingService = {
-  async list(productionOrderId: string) {
+  async list(orderId: string) {
     return apiClient.get<{ costs: ProductionCost[] }>(
-      `${API_ENDPOINTS.PRODUCTION.COSTING.LIST}?productionOrderId=${productionOrderId}`,
+      API_ENDPOINTS.PRODUCTION.COSTING.LIST(orderId),
     );
   },
-  async create(data: {
-    productionOrderId: string;
-    costType: string;
+  async create(orderId: string, data: {
+    costType: 'MATERIAL' | 'LABOR' | 'OVERHEAD';
     description?: string;
     plannedAmount: number;
     actualAmount: number;
   }) {
     return apiClient.post<{ cost: ProductionCost }>(
-      API_ENDPOINTS.PRODUCTION.COSTING.CREATE,
+      API_ENDPOINTS.PRODUCTION.COSTING.CREATE(orderId),
       data,
     );
   },
-  async update(
-    id: string,
-    data: { actualAmount?: number; description?: string },
-  ) {
+  async update(orderId: string, id: string, data: {
+    costType?: 'MATERIAL' | 'LABOR' | 'OVERHEAD';
+    description?: string | null;
+    plannedAmount?: number;
+    actualAmount?: number;
+  }) {
     return apiClient.patch<{ cost: ProductionCost }>(
-      API_ENDPOINTS.PRODUCTION.COSTING.UPDATE(id),
+      API_ENDPOINTS.PRODUCTION.COSTING.UPDATE(orderId, id),
       data,
     );
   },
-  async calculateOrderCost(orderId: string) {
-    return apiClient.post<OrderCostSummary>(
-      API_ENDPOINTS.PRODUCTION.COSTING.CALCULATE(orderId),
+  async getSummary(orderId: string) {
+    return apiClient.get<CostSummary>(
+      API_ENDPOINTS.PRODUCTION.COSTING.SUMMARY(orderId),
     );
   },
 };

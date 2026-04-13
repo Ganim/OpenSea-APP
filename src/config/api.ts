@@ -1822,16 +1822,16 @@ export const API_ENDPOINTS = {
     },
     // Costing
     COSTING: {
-      LIST: '/v1/production/costs',
-      CREATE: '/v1/production/costs',
-      UPDATE: (id: string) => `/v1/production/costs/${id}`,
-      CALCULATE: (orderId: string) => `/v1/production/costs/calculate/${orderId}`,
+      LIST: (orderId: string) => `/v1/production/orders/${orderId}/costs`,
+      CREATE: (orderId: string) => `/v1/production/orders/${orderId}/costs`,
+      UPDATE: (orderId: string, id: string) => `/v1/production/orders/${orderId}/costs/${id}`,
+      SUMMARY: (orderId: string) => `/v1/production/orders/${orderId}/costs/summary`,
     },
     // Textile
     TEXTILE: {
       CONFIG: '/v1/production/textile/config',
-      CUT_PLAN: '/v1/production/textile/cut-plan',
-      BUNDLE_TICKETS: '/v1/production/textile/bundle-tickets',
+      CUT_PLAN: (orderId: string) => `/v1/production/orders/${orderId}/cut-plan`,
+      BUNDLE_TICKETS: (orderId: string) => `/v1/production/orders/${orderId}/bundle-tickets`,
     },
   },
   // Health
