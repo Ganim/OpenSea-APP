@@ -245,7 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       activeOrder,
       items: activeOrder?.items ?? [],
       itemCount:
-        activeOrder?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0,
+        activeOrder?.items?.reduce((sum, i) => sum + i.quantity, 0) ?? 0,
       isLoading,
     }),
     [activeOrder, isLoading]
