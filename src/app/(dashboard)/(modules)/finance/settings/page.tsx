@@ -285,34 +285,10 @@ export default function FinanceSettingsPage() {
   const saveMutation = useMutation({
     mutationFn: (data: UpsertEmailToEntryConfigData) =>
       emailToEntryService.upsertConfig(data),
-    onSuccess: async () => {
-      toast.success('Configuração salva com sucesso');
-      await queryClient.invalidateQueries({
-        queryKey: ['finance', 'email-to-entry', 'config'],
-      });
-    },
-    onError: () => toast.error('Erro ao salvar configuração'),
   });
 
   const processMutation = useMutation({
     mutationFn: () => emailToEntryService.processEmails(),
-    onSuccess: async result => {
-      if (result.created > 0) {
-        toast.success(
-          `${result.created} lançamento(s) criado(s) de ${result.processed} e-mail(s) processado(s)`
-        );
-      } else if (result.processed === 0) {
-        toast.info('Nenhum e-mail pendente encontrado');
-      } else {
-        toast.info(
-          `${result.processed} e-mail(s) processado(s), nenhum lançamento criado`
-        );
-      }
-      await queryClient.invalidateQueries({
-        queryKey: ['finance', 'email-to-entry', 'config'],
-      });
-    },
-    onError: () => toast.error('Erro ao processar e-mails'),
   });
 
   // ============================================================================
@@ -332,13 +308,21 @@ export default function FinanceSettingsPage() {
     );
   }, [exportPrefs, taxDefaults, notifPrefs, approvalPrefs]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Always save local preferences
     saveLocalPreferences();
 
     // Save email-to-entry config only if an account is selected
     if (form.emailAccountId) {
-      saveMutation.mutate(form);
+      try {
+        await saveMutation.mutateAsync(form);
+        toast.success('Configuração salva com sucesso');
+        await queryClient.invalidateQueries({
+          queryKey: ['finance', 'email-to-entry', 'config'],
+        });
+      } catch {
+        toast.error('Erro ao salvar configuração');
+      }
     } else {
       toast.success('Preferências salvas com sucesso');
     }
@@ -613,7 +597,27 @@ export default function FinanceSettingsPage() {
                   size="sm"
                   variant="outline"
                   className="gap-1.5 h-9 px-2.5"
-                  onClick={() => processMutation.mutate()}
+                  onClick={async () => {
+                    try {
+                      const result = await processMutation.mutateAsync();
+                      if (result.created > 0) {
+                        toast.success(
+                          `${result.created} lançamento(s) criado(s) de ${result.processed} e-mail(s) processado(s)`,
+                        );
+                      } else if (result.processed === 0) {
+                        toast.info('Nenhum e-mail pendente encontrado');
+                      } else {
+                        toast.info(
+                          `${result.processed} e-mail(s) processado(s), nenhum lançamento criado`,
+                        );
+                      }
+                      await queryClient.invalidateQueries({
+                        queryKey: ['finance', 'email-to-entry', 'config'],
+                      });
+                    } catch {
+                      toast.error('Erro ao processar e-mails');
+                    }
+                  }}
                   disabled={
                     processMutation.isPending ||
                     !form.emailAccountId ||

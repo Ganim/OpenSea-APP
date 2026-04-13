@@ -112,29 +112,28 @@ export default function BankConnectionsPage() {
   const syncMutation = useMutation({
     mutationFn: (connectionId: string) =>
       bankConnectionsService.sync(connectionId),
-    onSuccess: result => {
-      toast.success(
-        `Sincronização concluída: ${result.transactionsImported} transações importadas, ${result.matchedCount} conciliadas`
-      );
-      queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
-    },
-    onError: () => {
-      toast.error('Erro ao sincronizar transações');
-    },
   });
 
   // Disconnect mutation
   const disconnectMutation = useMutation({
     mutationFn: (connectionId: string) =>
       bankConnectionsService.disconnect(connectionId),
-    onSuccess: () => {
-      toast.success('Conexão bancária revogada');
-      queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
-    },
-    onError: () => {
-      toast.error('Erro ao desconectar banco');
-    },
   });
+
+  const handleSync = useCallback(
+    async (connectionId: string) => {
+      try {
+        const result = await syncMutation.mutateAsync(connectionId);
+        toast.success(
+          `Sincronização concluída: ${result.transactionsImported} transações importadas, ${result.matchedCount} conciliadas`,
+        );
+        queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
+      } catch {
+        toast.error('Erro ao sincronizar transações');
+      }
+    },
+    [syncMutation, queryClient],
+  );
 
   // Pluggy widget success callback
   const handlePluggySuccess = useCallback(
@@ -152,15 +151,21 @@ export default function BankConnectionsPage() {
         toast.error('Erro ao salvar conexão');
       }
     },
-    [selectedBankAccountId, queryClient]
+    [selectedBankAccountId, queryClient],
   );
 
-  const handleDisconnectConfirm = useCallback(() => {
-    if (disconnectId) {
-      disconnectMutation.mutate(disconnectId);
+  const handleDisconnectConfirm = useCallback(async () => {
+    if (!disconnectId) return;
+    try {
+      await disconnectMutation.mutateAsync(disconnectId);
+      toast.success('Conexão bancária revogada');
+      queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
+    } catch {
+      toast.error('Erro ao desconectar banco');
+    } finally {
       setDisconnectId(null);
     }
-  }, [disconnectId, disconnectMutation]);
+  }, [disconnectId, disconnectMutation, queryClient]);
 
   return (
     <PageLayout>
@@ -266,7 +271,7 @@ export default function BankConnectionsPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1 gap-1.5"
-                        onClick={() => syncMutation.mutate(connection.id)}
+                        onClick={() => handleSync(connection.id)}
                         disabled={syncMutation.isPending}
                       >
                         {syncMutation.isPending ? (

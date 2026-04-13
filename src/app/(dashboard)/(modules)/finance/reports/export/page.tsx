@@ -71,11 +71,12 @@ export default function ExportPage() {
   const [efdCompanyId, setEfdCompanyId] = useState<string>('');
   const [efdExpanded, setEfdExpanded] = useState(false);
 
-  const { mutate: exportAccounting, isPending } = useExportAccounting();
-  const { mutate: exportSpedEfd, isPending: efdPending } = useExportSpedEfd();
+  const { mutateAsync: exportAccounting, isPending } = useExportAccounting();
+  const { mutateAsync: exportSpedEfd, isPending: efdPending } =
+    useExportSpedEfd();
   const { data: companiesData } = useListCompanies();
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!startDate || !endDate) {
       setMessage({
         type: 'error',
@@ -85,54 +86,44 @@ export default function ExportPage() {
     }
 
     setMessage(null);
-    exportAccounting(
-      { startDate, endDate, format, reportType },
-      {
-        onSuccess: () => {
-          setMessage({
-            type: 'success',
-            text: 'Exportação realizada com sucesso.',
-          });
-        },
-        onError: error => {
-          setMessage({
-            type: 'error',
-            text:
-              error instanceof Error
-                ? error.message
-                : 'Não foi possível exportar os dados.',
-          });
-        },
-      }
-    );
+    try {
+      await exportAccounting({ startDate, endDate, format, reportType });
+      setMessage({
+        type: 'success',
+        text: 'Exportação realizada com sucesso.',
+      });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível exportar os dados.',
+      });
+    }
   };
 
-  const handleExportSpedEfd = () => {
+  const handleExportSpedEfd = async () => {
     setMessage(null);
-    exportSpedEfd(
-      {
+    try {
+      await exportSpedEfd({
         year: Number(efdYear),
         month: Number(efdMonth),
         companyId: efdCompanyId || undefined,
-      },
-      {
-        onSuccess: () => {
-          setMessage({
-            type: 'success',
-            text: 'SPED EFD-Contribuições exportado com sucesso.',
-          });
-        },
-        onError: error => {
-          setMessage({
-            type: 'error',
-            text:
-              error instanceof Error
-                ? error.message
-                : 'Não foi possível exportar o SPED EFD.',
-          });
-        },
-      }
-    );
+      });
+      setMessage({
+        type: 'success',
+        text: 'SPED EFD-Contribuições exportado com sucesso.',
+      });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível exportar o SPED EFD.',
+      });
+    }
   };
 
   return (
