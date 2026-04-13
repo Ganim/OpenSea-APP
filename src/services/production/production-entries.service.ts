@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 
 export interface ProductionEntryData {
@@ -14,7 +15,7 @@ export interface ProductionEntryData {
 export const productionEntriesService = {
   async list(jobCardId: string) {
     return apiClient.get<{ productionEntries: ProductionEntryData[] }>(
-      `/v1/production/production-entries?jobCardId=${jobCardId}`,
+      `${API_ENDPOINTS.PRODUCTION.PRODUCTION_ENTRIES.LIST}?jobCardId=${jobCardId}`,
     );
   },
   async create(data: {
@@ -25,7 +26,7 @@ export const productionEntriesService = {
     notes?: string;
   }) {
     return apiClient.post<{ productionEntry: ProductionEntryData }>(
-      '/v1/production/production-entries',
+      API_ENDPOINTS.PRODUCTION.PRODUCTION_ENTRIES.CREATE,
       data,
     );
   },

@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 
 export interface InspectionResult {
@@ -16,7 +17,7 @@ export interface InspectionResult {
 export const inspectionResultsService = {
   async list(productionOrderId: string) {
     return apiClient.get<{ inspectionResults: InspectionResult[] }>(
-      `/v1/production/inspection-results?productionOrderId=${productionOrderId}`,
+      `${API_ENDPOINTS.PRODUCTION.INSPECTION_RESULTS.LIST}?productionOrderId=${productionOrderId}`,
     );
   },
   async create(data: {
@@ -28,7 +29,7 @@ export const inspectionResultsService = {
     notes?: string;
   }) {
     return apiClient.post<{ inspectionResult: InspectionResult }>(
-      '/v1/production/inspection-results',
+      API_ENDPOINTS.PRODUCTION.INSPECTION_RESULTS.CREATE,
       data,
     );
   },
@@ -37,7 +38,7 @@ export const inspectionResultsService = {
     data: { status: string; defectsFound?: number; notes?: string },
   ) {
     return apiClient.patch<{ inspectionResult: InspectionResult }>(
-      `/v1/production/inspection-results/${id}/status`,
+      API_ENDPOINTS.PRODUCTION.INSPECTION_RESULTS.UPDATE_STATUS(id),
       data,
     );
   },

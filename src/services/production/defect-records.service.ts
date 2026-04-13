@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 import { apiClient } from '@/lib/api-client';
 
 export interface DefectRecord {
@@ -15,7 +16,7 @@ export interface DefectRecord {
 export const defectRecordsService = {
   async list(inspectionResultId: string) {
     return apiClient.get<{ defectRecords: DefectRecord[] }>(
-      `/v1/production/defect-records?inspectionResultId=${inspectionResultId}`,
+      `${API_ENDPOINTS.PRODUCTION.DEFECT_RECORDS.LIST}?inspectionResultId=${inspectionResultId}`,
     );
   },
   async create(data: {
@@ -28,7 +29,7 @@ export const defectRecordsService = {
     imageUrl?: string;
   }) {
     return apiClient.post<{ defectRecord: DefectRecord }>(
-      '/v1/production/defect-records',
+      API_ENDPOINTS.PRODUCTION.DEFECT_RECORDS.CREATE,
       data,
     );
   },

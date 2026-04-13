@@ -1782,6 +1782,57 @@ export const API_ENDPOINTS = {
     ANALYTICS: {
       DASHBOARD: '/v1/production/analytics/dashboard',
     },
+    // Material Reservations
+    MATERIAL_RESERVATIONS: {
+      LIST: '/v1/production/material-reservations',
+      CREATE: '/v1/production/material-reservations',
+      CANCEL: (id: string) => `/v1/production/material-reservations/${id}/cancel`,
+    },
+    // Material Issues
+    MATERIAL_ISSUES: {
+      LIST: '/v1/production/material-issues',
+      CREATE: '/v1/production/material-issues',
+    },
+    // Material Returns
+    MATERIAL_RETURNS: {
+      LIST: '/v1/production/material-returns',
+      CREATE: '/v1/production/material-returns',
+    },
+    // Time Entries
+    TIME_ENTRIES: {
+      LIST: '/v1/production/time-entries',
+      CREATE: '/v1/production/time-entries',
+      END: (id: string) => `/v1/production/time-entries/${id}/end`,
+    },
+    // Production Entries
+    PRODUCTION_ENTRIES: {
+      LIST: '/v1/production/production-entries',
+      CREATE: '/v1/production/production-entries',
+    },
+    // Inspection Results
+    INSPECTION_RESULTS: {
+      LIST: '/v1/production/inspection-results',
+      CREATE: '/v1/production/inspection-results',
+      UPDATE_STATUS: (id: string) => `/v1/production/inspection-results/${id}/status`,
+    },
+    // Defect Records
+    DEFECT_RECORDS: {
+      LIST: '/v1/production/defect-records',
+      CREATE: '/v1/production/defect-records',
+    },
+    // Costing
+    COSTING: {
+      LIST: '/v1/production/costs',
+      CREATE: '/v1/production/costs',
+      UPDATE: (id: string) => `/v1/production/costs/${id}`,
+      CALCULATE: (orderId: string) => `/v1/production/costs/calculate/${orderId}`,
+    },
+    // Textile
+    TEXTILE: {
+      CONFIG: '/v1/production/textile/config',
+      CUT_PLAN: '/v1/production/textile/cut-plan',
+      BUNDLE_TICKETS: '/v1/production/textile/bundle-tickets',
+    },
   },
   // Health
   HEALTH: '/health',
