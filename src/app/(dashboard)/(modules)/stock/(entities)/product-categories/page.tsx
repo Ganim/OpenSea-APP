@@ -539,7 +539,7 @@ export default function ProductCategoriesPage() {
             onClose={() => page.modals.close('delete')}
             onSuccess={page.handlers.handleDeleteConfirm}
             title="Excluir Categoria"
-            description={`Digite seu PIN de acao para excluir ${page.modals.itemsToDelete.length} item(ns).`}
+            description={`Digite seu PIN de ação para excluir ${page.modals.itemsToDelete.length} item(ns).`}
           />
         </PageBody>
       </PageLayout>
