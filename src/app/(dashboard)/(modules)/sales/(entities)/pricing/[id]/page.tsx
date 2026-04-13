@@ -5,6 +5,7 @@
 
 'use client';
 
+import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
@@ -42,7 +43,7 @@ function PriceTableDetailContent() {
   const { hasPermission } = usePermissions();
   const id = params.id as string;
 
-  const { data, isLoading } = usePriceTable(id);
+  const { data, isLoading, error } = usePriceTable(id);
   const { data: itemsData } = usePriceTableItems(id);
   const deleteMutation = useDeletePriceTable();
 
@@ -51,6 +52,12 @@ function PriceTableDetailContent() {
   const priceTable = data?.priceTable;
   const items = itemsData?.items ?? [];
 
+  const breadcrumbItems = [
+    { label: 'Vendas', href: '/sales' },
+    { label: 'Tabelas de Preço', href: '/sales/pricing' },
+    { label: priceTable?.name ?? 'Tabela de Preço' },
+  ];
+
   const handleDeleteConfirm = useCallback(async () => {
     await deleteMutation.mutateAsync(id);
     setDeleteModalOpen(false);
@@ -58,19 +65,45 @@ function PriceTableDetailContent() {
     router.push('/sales/pricing');
   }, [id, deleteMutation, router]);
 
-  if (isLoading || !priceTable) {
-    return <GridLoading count={1} layout="grid" size="lg" />;
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+        </PageHeader>
+        <PageBody>
+          <GridLoading count={3} layout="list" size="md" />
+        </PageBody>
+      </PageLayout>
+    );
+  }
+
+  if (error || !priceTable) {
+    return (
+      <PageLayout>
+        <PageHeader>
+          <PageActionBar breadcrumbItems={breadcrumbItems} />
+        </PageHeader>
+        <PageBody>
+          <GridError
+            type="not-found"
+            title="Tabela de preço não encontrada"
+            message="A tabela de preço que você está procurando não existe ou foi removida."
+            action={{
+              label: 'Voltar para Tabelas de Preço',
+              onClick: () => router.push('/sales/pricing'),
+            }}
+          />
+        </PageBody>
+      </PageLayout>
+    );
   }
 
   return (
     <PageLayout data-testid="price-table-detail">
       <PageHeader>
         <PageActionBar
-          breadcrumbItems={[
-            { label: 'Vendas', href: '/sales' },
-            { label: 'Tabelas de Preco', href: '/sales/pricing' },
-            { label: priceTable.name },
-          ]}
+          breadcrumbItems={breadcrumbItems}
           buttons={[
             ...(hasPermission(SALES_PERMISSIONS.PRICE_TABLES.MODIFY)
               ? [
