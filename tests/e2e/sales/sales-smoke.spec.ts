@@ -16,50 +16,75 @@ import {
 
 // ─── All Sales Routes ──────────────────────────────────────────
 const SALES_ROUTES = [
-  // Dashboard
+  // Dashboard & Settings
   { path: '/sales', name: 'Sales Dashboard' },
+  { path: '/sales/settings', name: 'Sales Settings' },
 
-  // Customers
+  // Core Entities
   { path: '/sales/customers', name: 'Customers List' },
-
-  // Contacts
   { path: '/sales/contacts', name: 'Contacts List' },
-
-  // Pipelines
-  { path: '/sales/pipelines', name: 'Pipelines List' },
-
-  // Orders
   { path: '/sales/orders', name: 'Orders List' },
 
-  // Catalogs
-  { path: '/sales/catalogs', name: 'Catalogs List' },
+  // Pipeline & CRM
+  { path: '/sales/pipelines', name: 'Pipelines List' },
+  { path: '/sales/deals', name: 'Deals List' },
+  { path: '/sales/quotes', name: 'Quotes List' },
+  { path: '/sales/proposals', name: 'Proposals List' },
 
-  // Content
+  // Catalog & Pricing
+  { path: '/sales/catalogs', name: 'Catalogs List' },
+  { path: '/sales/pricing', name: 'Pricing / Price Tables' },
+  { path: '/sales/combos', name: 'Combos List' },
+  { path: '/sales/coupons', name: 'Coupons List' },
+  { path: '/sales/customer-prices', name: 'Customer Prices' },
+  { path: '/sales/discount-rules', name: 'Discount Rules' },
+  { path: '/sales/variant-promotions', name: 'Variant Promotions' },
+  { path: '/sales/item-reservations', name: 'Item Reservations' },
+  { path: '/sales/payment-conditions', name: 'Payment Conditions' },
+
+  // Marketing & Automation
+  { path: '/sales/campaigns', name: 'Campaigns List' },
+  { path: '/sales/cadences', name: 'Cadences List' },
+  { path: '/sales/workflows', name: 'Workflows List' },
+  { path: '/sales/forms', name: 'Forms List' },
+  { path: '/sales/msg-templates', name: 'Message Templates' },
+  { path: '/sales/landing-pages', name: 'Landing Pages' },
+  { path: '/sales/blueprints', name: 'Blueprints List' },
+  { path: '/sales/lead-routing', name: 'Lead Routing' },
+  { path: '/sales/lead-scoring', name: 'Lead Scoring' },
+
+  // Communication
+  { path: '/sales/conversations', name: 'Conversations List' },
   { path: '/sales/content', name: 'Content List' },
 
-  // Returns
+  // Returns & Cashier
   { path: '/sales/returns', name: 'Returns List' },
+  { path: '/sales/cashier', name: 'Cashier Sessions' },
+  { path: '/sales/cashier/reports', name: 'Cashier Reports' },
 
-  // Campaigns
-  { path: '/sales/campaigns', name: 'Campaigns List' },
+  // Invoicing
+  { path: '/sales/invoicing', name: 'Invoicing List' },
 
-  // Coupons
-  { path: '/sales/coupons', name: 'Coupons List' },
-
-  // Combos
-  { path: '/sales/combos', name: 'Combos List' },
-
-  // Pricing / Price Tables
-  { path: '/sales/pricing', name: 'Pricing / Price Tables' },
+  // Configuration Pages
+  { path: '/sales/brand', name: 'Brand Identity' },
+  { path: '/sales/chatbot', name: 'Chatbot Config' },
+  { path: '/sales/integrations', name: 'Integrations' },
+  { path: '/sales/printers', name: 'Printers' },
+  { path: '/sales/notification-preferences', name: 'Notification Preferences' },
+  { path: '/sales/payment-config', name: 'Payment Gateway Config' },
 
   // Bids (Licitações)
   { path: '/sales/bids', name: 'Bids List' },
   { path: '/sales/bids/contracts', name: 'Bid Contracts' },
   { path: '/sales/bids/documents', name: 'Bid Documents' },
 
-  // POS
-  { path: '/sales/pos', name: 'POS Terminal Selector' },
-  { path: '/sales/pos/terminals', name: 'POS Terminals Management' },
+  // POS v2
+  { path: '/sales/pos', name: 'POS Entry (redirect)' },
+  { path: '/sales/pos/pair', name: 'POS Pair Device' },
+  { path: '/sales/pos/session/open', name: 'POS Open Session' },
+  { path: '/sales/pos/operator', name: 'POS Operator' },
+  { path: '/sales/pos/totem', name: 'POS Totem' },
+  { path: '/sales/pos/terminals', name: 'POS Terminals Admin' },
 
   // Marketplace
   { path: '/sales/marketplaces', name: 'Marketplaces' },
@@ -67,7 +92,7 @@ const SALES_ROUTES = [
   // Analytics
   { path: '/sales/analytics', name: 'Analytics Dashboard' },
   { path: '/sales/analytics/goals', name: 'Analytics Goals' },
-  { path: '/sales/analytics/reports', name: 'Analytics Reports' },
+  { path: '/sales/analytics/dashboards', name: 'Analytics Dashboards' },
   { path: '/sales/analytics/rankings', name: 'Analytics Rankings' },
 ];
 
