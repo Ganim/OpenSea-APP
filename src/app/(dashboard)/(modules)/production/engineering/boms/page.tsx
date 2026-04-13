@@ -297,37 +297,52 @@ export default function BomsPage() {
   const wizardSteps: WizardStep[] = [
     {
       title: 'Nova Lista de Materiais',
-      description: 'Defina nome, produto e descrição',
+      description: 'Defina nome, produto, versão e descrição',
       icon: <LayoutList className="h-12 w-12 text-blue-500" />,
       isValid: !!newName.trim() && !!newProductId.trim(),
       content: (
-        <div className="space-y-4 p-1">
-          <div className="grid gap-2">
-            <Label htmlFor="bom-name">
-              Nome <span className="text-rose-500">*</span>
-            </Label>
-            <Input
-              id="bom-name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Nome da lista de materiais"
-            />
-          </div>
+        <div className="space-y-4 p-1" data-testid="bom-create-form">
           <div className="grid gap-2">
             <Label htmlFor="bom-product">
               ID do Produto <span className="text-rose-500">*</span>
             </Label>
             <Input
               id="bom-product"
+              data-testid="bom-product-input"
               value={newProductId}
               onChange={(e) => setNewProductId(e.target.value)}
               placeholder="ID do produto"
             />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="bom-name">
+              Nome <span className="text-rose-500">*</span>
+            </Label>
+            <Input
+              id="bom-name"
+              data-testid="bom-name-input"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Nome da lista de materiais"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="bom-version">Versão</Label>
+            <Input
+              id="bom-version"
+              data-testid="bom-version-input"
+              type="number"
+              min={1}
+              value={newVersion}
+              onChange={(e) => setNewVersion(Number(e.target.value) || 1)}
+              placeholder="1"
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="bom-desc">Descrição</Label>
             <Textarea
               id="bom-desc"
+              data-testid="bom-description-input"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="Descrição da BOM"
@@ -339,6 +354,7 @@ export default function BomsPage() {
       footer: (
         <div className="flex justify-end w-full">
           <Button
+            data-testid="bom-create-submit"
             onClick={handleCreateSubmit}
             disabled={
               !newName.trim() ||
