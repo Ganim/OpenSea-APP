@@ -18,3 +18,5 @@ export { timeEntriesService } from './time-entries.service';
 export { productionEntriesService } from './production-entries.service';
 export { inspectionResultsService } from './inspection-results.service';
 export { defectRecordsService } from './defect-records.service';
+export { costingService } from './costing.service';
+export { textileService } from './textile.service';
