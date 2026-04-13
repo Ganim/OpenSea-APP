@@ -32,7 +32,6 @@ import {
 } from '@/hooks/stock/use-stock-other';
 import { useDebounce } from '@/hooks/use-debounce';
 import { cn } from '@/lib/utils';
-import { productsService } from '@/services/stock';
 import type {
   CreateTemplateRequest,
   Template,
@@ -100,9 +99,6 @@ export default function TemplatesPage() {
   const [renameTemplateItem, setRenameTemplateItem] = useState<Template | null>(
     null
   );
-  const [productsCountByTemplateId, setProductsCountByTemplateId] = useState<
-    Record<string, number>
-  >({});
 
   // ============================================================================
   // DATA: Infinite scroll templates
@@ -166,54 +162,6 @@ export default function TemplatesPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  // ==========================================================================
-  // LOAD PRODUCTS COUNT FOR EACH TEMPLATE (guarded by stable id key)
-  // ==========================================================================
-  const templateIdsKey = useMemo(
-    () =>
-      items
-        .map(item => item.id)
-        .sort()
-        .join('|'),
-    [items]
-  );
-
-  useEffect(() => {
-    let isMounted = true;
-    async function loadCounts() {
-      const entries = await Promise.all(
-        items.map(async t => {
-          try {
-            const resp = await productsService.listProducts(t.id);
-            return [t.id, resp.products?.length || 0] as const;
-          } catch {
-            return [t.id, 0] as const;
-          }
-        })
-      );
-      if (isMounted) {
-        setProductsCountByTemplateId(prev => {
-          const next = Object.fromEntries(entries);
-          const same =
-            Object.keys(next).length === Object.keys(prev).length &&
-            Object.entries(next).every(([k, v]) => prev[k] === v);
-          return same ? prev : next;
-        });
-      }
-    }
-
-    if (templateIdsKey) {
-      loadCounts();
-    } else {
-      setProductsCountByTemplateId({});
-    }
-
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateIdsKey]);
 
   // ============================================================================
   // HANDLERS
@@ -371,7 +319,7 @@ export default function TemplatesPage() {
   };
 
   const renderGridCard = (item: Template, isSelected: boolean) => {
-    const productsCount = productsCountByTemplateId[item.id] ?? 0;
+    const productsCount = item.productCount ?? 0;
 
     return (
       <EntityContextMenu
@@ -410,7 +358,7 @@ export default function TemplatesPage() {
   };
 
   const renderListCard = (item: Template, isSelected: boolean) => {
-    const productsCount = productsCountByTemplateId[item.id] ?? 0;
+    const productsCount = item.productCount ?? 0;
     const listBadges = getTemplateBadges(item);
 
     return (

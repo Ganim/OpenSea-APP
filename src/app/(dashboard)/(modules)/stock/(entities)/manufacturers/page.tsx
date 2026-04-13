@@ -33,13 +33,10 @@ import {
 } from '@/hooks/stock/use-stock-other';
 import { useDebounce } from '@/hooks/use-debounce';
 import { cn } from '@/lib/utils';
-import { productsService } from '@/services/stock';
 import type {
   Manufacturer,
-  Product,
   UpdateManufacturerRequest,
 } from '@/types/stock';
-import { useQuery } from '@tanstack/react-query';
 import { COUNTRIES } from '@/components/ui/country-select';
 import { formatCNPJ } from '@/lib/masks';
 import {
@@ -129,32 +126,6 @@ export default function ManufacturersPage() {
   const createMutation = useCreateManufacturer();
   const updateMutation = useUpdateManufacturer();
   const deleteMutation = useDeleteManufacturer();
-
-  // ============================================================================
-  // PRODUCT COUNTS
-  // ============================================================================
-
-  const { data: products } = useQuery<Product[]>({
-    queryKey: ['products-for-manufacturer-counts'],
-    queryFn: async () => {
-      const response = await productsService.listProducts();
-      return response.products;
-    },
-  });
-
-  const productCountMap = useMemo(() => {
-    const map = new Map<string, number>();
-    if (!products) return map;
-    for (const product of products) {
-      if (product.manufacturerId) {
-        map.set(
-          product.manufacturerId,
-          (map.get(product.manufacturerId) || 0) + 1
-        );
-      }
-    }
-    return map;
-  }, [products]);
 
   // ============================================================================
   // INFINITE SCROLL SENTINEL
@@ -415,7 +386,7 @@ export default function ManufacturersPage() {
   );
 
   const renderGridCard = (item: Manufacturer, isSelected: boolean) => {
-    const productCount = productCountMap.get(item.id) || 0;
+    const productCount = item.productCount ?? 0;
 
     return (
       <EntityContextMenu
@@ -453,7 +424,7 @@ export default function ManufacturersPage() {
   };
 
   const renderListCard = (item: Manufacturer, isSelected: boolean) => {
-    const productCount = productCountMap.get(item.id) || 0;
+    const productCount = item.productCount ?? 0;
     const listBadges = getManufacturerBadges(item);
 
     return (

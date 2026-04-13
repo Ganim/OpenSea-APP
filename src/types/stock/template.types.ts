@@ -86,6 +86,7 @@ export interface Template {
   itemAttributes?: TemplateAttributes;
   specialModules: string[];
   isActive: boolean;
+  productCount?: number;
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;

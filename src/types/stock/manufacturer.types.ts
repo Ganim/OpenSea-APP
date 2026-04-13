@@ -19,6 +19,7 @@ export interface Manufacturer {
   isActive: boolean;
   rating?: number | null;
   notes?: string | null;
+  productCount?: number;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
