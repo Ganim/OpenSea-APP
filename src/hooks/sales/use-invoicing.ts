@@ -6,12 +6,19 @@ import type {
   IssueInvoiceRequest,
   ListInvoicesQuery,
 } from '@/types/sales';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+export type InvoicesFilters = Omit<ListInvoicesQuery, 'page' | 'limit'>;
 
 export const INVOICING_KEYS = {
   all: ['invoicing'] as const,
-  list: (params?: ListInvoicesQuery) => ['invoicing', 'list', params] as const,
+  list: (params?: InvoicesFilters) => ['invoicing', 'list', params] as const,
   detail: (invoiceId: string) => ['invoicing', 'detail', invoiceId] as const,
 } as const;
 
@@ -19,6 +26,22 @@ export function useInvoices(params?: ListInvoicesQuery) {
   return useQuery({
     queryKey: INVOICING_KEYS.list(params),
     queryFn: () => invoicingService.listInvoices(params),
+  });
+}
+
+export function useInvoicesInfinite(filters?: InvoicesFilters, limit = 20) {
+  return useInfiniteQuery({
+    queryKey: INVOICING_KEYS.list(filters),
+    queryFn: async ({ pageParam = 1 }) => {
+      return await invoicingService.listInvoices({
+        ...filters,
+        page: pageParam,
+        limit,
+      });
+    },
+    getNextPageParam: lastPage =>
+      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
   });
 }
 

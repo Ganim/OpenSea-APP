@@ -3,12 +3,12 @@
 import {
   invoiceStatusLabel,
   useConfigureFocusNfe,
-  useInvoices,
+  useInvoicesInfinite,
   useIssueInvoice,
 } from '@/hooks/sales/use-invoicing';
 import type { InvoiceStatus } from '@/types/sales';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function toDateTimeIso(value: string, endOfDay = false): string | undefined {
   if (!value) return undefined;
@@ -21,7 +21,6 @@ export default function InvoicingPage() {
   const [orderId, setOrderId] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
-  const [page, setPage] = useState(1);
 
   const [issueOrderId, setIssueOrderId] = useState('');
   const [focusApiKey, setFocusApiKey] = useState('');
@@ -34,15 +33,38 @@ export default function InvoicingPage() {
       orderId: orderId || undefined,
       fromDate: toDateTimeIso(fromDate),
       toDate: toDateTimeIso(toDate, true),
-      page,
-      limit: 20,
     }),
-    [status, orderId, fromDate, toDate, page]
+    [status, orderId, fromDate, toDate]
   );
 
-  const { data, isLoading } = useInvoices(filters);
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInvoicesInfinite(filters);
   const issueInvoice = useIssueInvoice();
   const configureFocus = useConfigureFocusNfe();
+
+  const invoices = data?.pages.flatMap(page => page.data) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-6 p-6" data-testid="invoicing-page">
@@ -62,7 +84,6 @@ export default function InvoicingPage() {
             className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"
             value={status}
             onChange={e => {
-              setPage(1);
               setStatus(e.target.value as InvoiceStatus | '');
             }}
           >
@@ -78,7 +99,6 @@ export default function InvoicingPage() {
             placeholder="Order ID"
             value={orderId}
             onChange={e => {
-              setPage(1);
               setOrderId(e.target.value);
             }}
           />
@@ -88,7 +108,6 @@ export default function InvoicingPage() {
             className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"
             value={fromDate}
             onChange={e => {
-              setPage(1);
               setFromDate(e.target.value);
             }}
           />
@@ -98,7 +117,6 @@ export default function InvoicingPage() {
             className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-950"
             value={toDate}
             onChange={e => {
-              setPage(1);
               setToDate(e.target.value);
             }}
           />
@@ -112,7 +130,6 @@ export default function InvoicingPage() {
                 setOrderId('');
                 setFromDate('');
                 setToDate('');
-                setPage(1);
               }}
             >
               Limpar
@@ -209,7 +226,7 @@ export default function InvoicingPage() {
                 </tr>
               )}
 
-              {!isLoading && (data?.data.length ?? 0) === 0 && (
+              {!isLoading && invoices.length === 0 && (
                 <tr>
                   <td className="px-4 py-4 text-zinc-500" colSpan={7}>
                     Nenhuma nota encontrada para os filtros atuais.
@@ -217,7 +234,7 @@ export default function InvoicingPage() {
                 </tr>
               )}
 
-              {data?.data.map(invoice => (
+              {invoices.map(invoice => (
                 <tr
                   key={invoice.id}
                   className="border-t border-zinc-100 dark:border-zinc-800"
@@ -245,33 +262,25 @@ export default function InvoicingPage() {
             </tbody>
           </table>
         </div>
+
+        <div ref={sentinelRef} className="h-1" />
+
+        {isFetchingNextPage && (
+          <p className="py-3 text-center text-sm text-zinc-500">
+            Carregando mais notas...
+          </p>
+        )}
       </section>
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Total: {data?.total ?? 0} registro(s)
+          Total: {total} registro(s)
         </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="h-9 rounded-md border border-zinc-300 px-3 text-sm disabled:opacity-50 dark:border-zinc-700"
-            disabled={page <= 1}
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-zinc-600 dark:text-zinc-300">
-            Página {data?.page ?? page} de {data?.pages ?? 1}
-          </span>
-          <button
-            type="button"
-            className="h-9 rounded-md border border-zinc-300 px-3 text-sm disabled:opacity-50 dark:border-zinc-700"
-            disabled={(data?.page ?? page) >= (data?.pages ?? 1)}
-            onClick={() => setPage(p => p + 1)}
-          >
-            Próxima
-          </button>
-        </div>
+        {!hasNextPage && invoices.length > 0 && (
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            Todos os registros carregados
+          </p>
+        )}
       </div>
     </div>
   );
