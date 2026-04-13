@@ -177,7 +177,7 @@ export default function VariantPromotionDetailPage() {
           <GridError
             type="server"
             title="Erro ao carregar promoção"
-            message="Nao foi possivel carregar os detalhes desta promoção."
+            message="Nao foi possível carregar os detalhes desta promoção."
             action={{
               label: 'Tentar Novamente',
               onClick: () => {

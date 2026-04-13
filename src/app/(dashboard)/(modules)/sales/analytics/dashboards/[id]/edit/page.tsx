@@ -318,12 +318,12 @@ export default function EditDashboardPage() {
           </div>
         </Card>
 
-        {/* Section: Configuracoes */}
+        {/* Section: Configurações */}
         <Card className="bg-white/5 py-2 overflow-hidden">
           <div className="px-6 py-4 space-y-8">
             <CollapsibleSection
               icon={Settings}
-              title="Configuracoes"
+              title="Configurações"
               subtitle="Perfil alvo e visibilidade"
             >
               <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
@@ -346,7 +346,7 @@ export default function EditDashboardPage() {
                           Especialista em Licitações
                         </SelectItem>
                         <SelectItem value="MARKETPLACE_OPS">
-                          Operacoes Marketplace
+                          Operações Marketplace
                         </SelectItem>
                         <SelectItem value="CASHIER">Caixa</SelectItem>
                       </SelectContent>
@@ -377,7 +377,7 @@ export default function EditDashboardPage() {
 
                 {dashboard.isSystem && (
                   <div className="rounded-lg bg-blue-50 dark:bg-blue-500/8 p-3 text-sm text-blue-700 dark:text-blue-300">
-                    Este e um dashboard do sistema e possui configuracoes
+                    Este e um dashboard do sistema e possui configurações
                     limitadas de edicao.
                   </div>
                 )}

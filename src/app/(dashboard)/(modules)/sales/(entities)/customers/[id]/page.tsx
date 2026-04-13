@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Customer Detail Page
- * Página de detalhes do cliente com abas: Informações, Contatos, Negociacoes, Timeline
+ * Página de detalhes do cliente com abas: Informações, Contatos, Negociações, Timeline
  */
 
 'use client';
@@ -220,7 +220,7 @@ export default function CustomerDetailPage() {
           <TabsList className="grid w-full grid-cols-4 h-12 mb-4">
             <TabsTrigger value="info">Informações</TabsTrigger>
             <TabsTrigger value="contacts">Contatos</TabsTrigger>
-            <TabsTrigger value="deals">Negociacoes</TabsTrigger>
+            <TabsTrigger value="deals">Negociações</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
           </TabsList>
 
@@ -305,17 +305,17 @@ export default function CustomerDetailPage() {
             </Card>
           </TabsContent>
 
-          {/* TAB: Negociacoes */}
+          {/* TAB: Negociações */}
           <TabsContent value="deals" className="space-y-6">
             <Card className="bg-white/5 py-2 overflow-hidden">
               <div className="px-6 py-4">
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Building2 className="h-12 w-12 text-muted-foreground/30 mb-4" />
                   <h3 className="text-base font-semibold text-muted-foreground">
-                    Negociacoes
+                    Negociações
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    O histórico de negociacoes e oportunidades estara disponivel
+                    O histórico de negociações e oportunidades estara disponivel
                     em breve.
                   </p>
                 </div>
@@ -333,7 +333,7 @@ export default function CustomerDetailPage() {
                     Timeline
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    A timeline de atividades e interacoes estara disponivel em
+                    A timeline de atividades e interações estara disponivel em
                     breve.
                   </p>
                 </div>

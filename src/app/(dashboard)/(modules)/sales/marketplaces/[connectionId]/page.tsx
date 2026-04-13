@@ -343,7 +343,7 @@ export default function ConnectionDetailPage() {
 
           {/* Sync Config */}
           <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
-            <h3 className="font-medium mb-4">Configuracoes de Sincronização</h3>
+            <h3 className="font-medium mb-4">Configurações de Sincronização</h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 text-sm">
               {[
                 { label: 'Produtos', active: connection.syncProducts },

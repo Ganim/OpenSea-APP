@@ -77,7 +77,7 @@ export default function CashierReportsPage() {
             />
             <Card label="Suprimento" value={currency(data.totals.cashIn)} />
             <Card label="Sangria" value={currency(data.totals.cashOut)} />
-            <Card label="Transacoes" value={String(data.totals.transactions)} />
+            <Card label="Transações" value={String(data.totals.transactions)} />
           </section>
 
           <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">

@@ -34,7 +34,7 @@ const ROLE_OPTIONS: { value: DashboardRole | ''; label: string }[] = [
   { value: 'MANAGER', label: 'Gerente' },
   { value: 'DIRECTOR', label: 'Diretor' },
   { value: 'BID_SPECIALIST', label: 'Especialista em Licitações' },
-  { value: 'MARKETPLACE_OPS', label: 'Operacoes Marketplace' },
+  { value: 'MARKETPLACE_OPS', label: 'Operações Marketplace' },
   { value: 'CASHIER', label: 'Caixa' },
 ];
 
@@ -87,7 +87,7 @@ function StepDashboardInfo({
   );
 }
 
-// ─── Step 2: Configuracoes ─────────────────────────────────────
+// ─── Step 2: Configurações ─────────────────────────────────────
 
 function StepConfig({
   role,
@@ -253,7 +253,7 @@ export function CreateDashboardWizard({
       isValid: step1Valid,
     },
     {
-      title: 'Configuracoes',
+      title: 'Configurações',
       description: 'Defina o perfil e visibilidade do dashboard.',
       icon: (
         <Settings className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />

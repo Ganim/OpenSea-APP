@@ -199,7 +199,7 @@ export default function EditConnectionPage() {
   // Handlers
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast.error('Nome da conexao e obrigatório');
+      toast.error('Nome da conexão e obrigatório');
       return;
     }
 
@@ -225,15 +225,15 @@ export default function EditConnectionPage() {
       };
 
       await updateMutation.mutateAsync({ id: connectionId, data });
-      toast.success('Conexao atualizada com sucesso!');
+      toast.success('Conexão atualizada com sucesso!');
       router.push(`/sales/marketplaces/${connectionId}`);
     } catch (err) {
       logger.error(
-        'Erro ao atualizar conexao',
+        'Erro ao atualizar conexão',
         err instanceof Error ? err : undefined
       );
       const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao atualizar conexao', { description: message });
+      toast.error('Erro ao atualizar conexão', { description: message });
     } finally {
       setIsSaving(false);
     }
@@ -242,15 +242,15 @@ export default function EditConnectionPage() {
   const handleDeleteConfirm = async () => {
     try {
       await deleteMutation.mutateAsync(connectionId);
-      toast.success('Conexao excluída com sucesso!');
+      toast.success('Conexão excluída com sucesso!');
       router.push('/sales/marketplaces');
     } catch (err) {
       logger.error(
-        'Erro ao excluir conexao',
+        'Erro ao excluir conexão',
         err instanceof Error ? err : undefined
       );
       const message = err instanceof Error ? err.message : 'Erro desconhecido';
-      toast.error('Erro ao excluir conexao', { description: message });
+      toast.error('Erro ao excluir conexão', { description: message });
     }
   };
 
@@ -312,8 +312,8 @@ export default function EditConnectionPage() {
         <PageBody>
           <GridError
             type="not-found"
-            title="Conexao não encontrada"
-            message="A conexao solicitada não foi encontrada."
+            title="Conexão não encontrada"
+            message="A conexão solicitada não foi encontrada."
             action={{
               label: 'Voltar para Marketplaces',
               onClick: () => router.push('/sales/marketplaces'),
@@ -343,7 +343,7 @@ export default function EditConnectionPage() {
               <ShoppingBag className="h-7 w-7" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">Editando conexao</p>
+              <p className="text-sm text-muted-foreground">Editando conexão</p>
               <h1 className="text-xl font-bold truncate">{connection.name}</h1>
               <p className="text-xs text-muted-foreground">
                 {MARKETPLACE_LABELS[connection.marketplace] ??
@@ -369,19 +369,19 @@ export default function EditConnectionPage() {
             <CollapsibleSection
               icon={Settings}
               title="Informações Gerais"
-              subtitle="Nome, status e identificação da conexao"
+              subtitle="Nome, status e identificação da conexão"
             >
               <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="grid gap-2 sm:col-span-2">
                     <Label htmlFor="name">
-                      Nome da Conexao <span className="text-red-500">*</span>
+                      Nome da Conexão <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="name"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      placeholder="Nome da conexao"
+                      placeholder="Nome da conexão"
                       required
                     />
                   </div>
@@ -587,8 +587,8 @@ export default function EditConnectionPage() {
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onSuccess={handleDeleteConfirm}
-        title="Excluir Conexao"
-        description={`Digite seu PIN de ação para excluir a conexao "${connection.name}". Esta ação não pode ser desfeita.`}
+        title="Excluir Conexão"
+        description={`Digite seu PIN de ação para excluir a conexão "${connection.name}". Esta ação não pode ser desfeita.`}
       />
     </PageLayout>
   );

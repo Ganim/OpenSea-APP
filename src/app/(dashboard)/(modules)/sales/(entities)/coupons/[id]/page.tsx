@@ -420,7 +420,7 @@ export default function CouponDetailPage() {
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-violet-500" />
                       <span className="text-sm font-medium">
-                        Total de Utilizacoes
+                        Total de Utilizações
                       </span>
                     </div>
                     <span className="text-sm font-semibold">
@@ -497,7 +497,7 @@ export default function CouponDetailPage() {
                         Limite de uso atingido
                       </p>
                       <p className="text-xs text-rose-600 dark:text-rose-400">
-                        Este cupom atingiu o número máximo de utilizacoes
+                        Este cupom atingiu o número máximo de utilizações
                         permitidas e não pode mais ser utilizado.
                       </p>
                     </div>

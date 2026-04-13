@@ -1,6 +1,6 @@
 /**
  * OpenSea OS - Contact Detail Page
- * Página de detalhes do contato com abas: Informações, Negociacoes, Timeline
+ * Página de detalhes do contato com abas: Informações, Negociações, Timeline
  */
 
 'use client';
@@ -416,7 +416,7 @@ export default function ContactDetailPage() {
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
             <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="deals">Negociacoes</TabsTrigger>
+            <TabsTrigger value="deals">Negociações</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
           </TabsList>
 
@@ -501,7 +501,7 @@ export default function ContactDetailPage() {
             </Card>
           </TabsContent>
 
-          {/* TAB: Negociacoes */}
+          {/* TAB: Negociações */}
           <TabsContent value="deals" className="space-y-6">
             <Card className="bg-white/5 py-2 overflow-hidden">
               <div className="px-6 py-4 space-y-6">

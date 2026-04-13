@@ -81,7 +81,7 @@ export default function ConnectMarketplacePage() {
 
   const handleConnect = async () => {
     if (!selectedType || !name.trim()) {
-      toast.error('Selecione um marketplace e informe o nome da conexao.');
+      toast.error('Selecione um marketplace e informe o nome da conexão.');
       return;
     }
     try {
@@ -149,10 +149,10 @@ export default function ConnectMarketplacePage() {
 
           {selectedType && (
             <Card className="bg-white dark:bg-slate-800/60 border border-border p-5 space-y-4">
-              <h3 className="font-medium">Configuração da Conexao</h3>
+              <h3 className="font-medium">Configuração da Conexão</h3>
               <div className="space-y-3">
                 <div>
-                  <Label>Nome da conexao *</Label>
+                  <Label>Nome da conexão *</Label>
                   <Input
                     placeholder="Ex: Minha Loja Mercado Livre"
                     value={name}

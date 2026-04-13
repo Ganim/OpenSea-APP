@@ -185,7 +185,7 @@ function CampaignDetailContent() {
             </p>
           </div>
           <div className="rounded-xl border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Utilizacoes</p>
+            <p className="text-sm text-muted-foreground">Utilizações</p>
             <p className="text-2xl font-bold mt-1">
               {campaign.usageCount}
               {campaign.maxUsageTotal && (

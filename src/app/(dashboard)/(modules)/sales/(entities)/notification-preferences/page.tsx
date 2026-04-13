@@ -108,7 +108,7 @@ const CATEGORIES: NotificationCategory[] = [
   {
     id: 'payments',
     title: 'Pagamentos',
-    subtitle: 'Atualizações sobre recebimentos e inadimplencia',
+    subtitle: 'Atualizações sobre recebimentos e inadimplência',
     icon: CreditCard,
     iconColor: 'text-emerald-600 dark:text-emerald-400',
     iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
@@ -191,13 +191,13 @@ const CATEGORIES: NotificationCategory[] = [
     types: [
       {
         id: 'comment_added',
-        label: 'Novo comentario',
+        label: 'Novo comentário',
         description: 'Quando alguem comentar em um pedido ou negócio seu',
       },
       {
         id: 'comment_reply',
-        label: 'Resposta a comentario',
-        description: 'Quando alguem responder a um comentario seu',
+        label: 'Resposta a comentário',
+        description: 'Quando alguem responder a um comentário seu',
       },
     ],
   },
@@ -480,7 +480,7 @@ export default function NotificationPreferencesPage() {
       const failedCount = results.filter(r => r.status === 'rejected').length;
 
       if (failedCount === 0) {
-        toast.success('Preferencias de notificação salvas com sucesso.');
+        toast.success('Preferências de notificação salvas com sucesso.');
       } else {
         toast.error(
           `${failedCount} alteração(oes) nao puderam ser salvas. Tente novamente.`
@@ -491,7 +491,7 @@ export default function NotificationPreferencesPage() {
       setLocalOverrides({});
       await refetch();
     } catch {
-      toast.error('Erro ao salvar preferencias. Tente novamente.');
+      toast.error('Erro ao salvar preferências. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
@@ -505,12 +505,12 @@ export default function NotificationPreferencesPage() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Vendas', href: '/sales' },
-            { label: 'Preferencias de Notificação' },
+            { label: 'Preferências de Notificação' },
           ]}
           buttons={[
             {
               id: 'save',
-              title: 'Salvar alteracoes',
+              title: 'Salvar alterações',
               icon: Save,
               variant: 'default',
               onClick: handleSave,
@@ -532,7 +532,7 @@ export default function NotificationPreferencesPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                Preferencias de Notificação
+                Preferências de Notificação
               </h1>
               <p className="text-sm text-slate-500 dark:text-white/60">
                 Configure quais notificações você deseja receber e por quais
@@ -555,8 +555,8 @@ export default function NotificationPreferencesPage() {
           <GridLoading />
         ) : isError ? (
           <GridError
-            title="Erro ao carregar preferencias"
-            message="Nao foi possivel carregar suas preferencias de notificação."
+            title="Erro ao carregar preferências"
+            message="Nao foi possível carregar suas preferências de notificação."
             action={{
               label: 'Tentar novamente',
               onClick: () => {
@@ -613,7 +613,7 @@ export default function NotificationPreferencesPage() {
                       ) : (
                         <>
                           <Save className="h-4 w-4 mr-1.5" />
-                          Salvar alteracoes
+                          Salvar alterações
                         </>
                       )}
                     </Button>
