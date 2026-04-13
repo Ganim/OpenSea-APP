@@ -218,6 +218,7 @@ export default function EscalationsPage() {
     try {
       await duplicateMutation.mutateAsync(id);
       toast.success('Régua de cobrança duplicada com sucesso!');
+      refetch();
     } catch {
       toast.error('Erro ao duplicar régua de cobrança.');
     }
@@ -227,6 +228,7 @@ export default function EscalationsPage() {
     try {
       await toggleActiveMutation.mutateAsync(id);
       toast.success('Status da régua de cobrança atualizado!');
+      refetch();
     } catch {
       toast.error('Erro ao alterar status.');
     }
@@ -237,6 +239,7 @@ export default function EscalationsPage() {
     try {
       await deleteMutation.mutateAsync(deleteId);
       toast.success('Régua de cobrança excluída com sucesso!');
+      refetch();
       setDeleteId(null);
     } catch {
       toast.error('Erro ao excluir régua de cobrança.');
