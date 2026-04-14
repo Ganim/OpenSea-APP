@@ -513,21 +513,21 @@ export default function PayableDetailPage({
                 <InfoRow
                   label="Desconto"
                   value={`-${formatCurrency(entry.discount)}`}
-                  className="text-green-600"
+                  className="text-emerald-600"
                 />
               )}
               {entry.interest > 0 && (
                 <InfoRow
                   label="Juros"
                   value={`+${formatCurrency(entry.interest)}`}
-                  className="text-red-600"
+                  className="text-rose-600"
                 />
               )}
               {entry.penalty > 0 && (
                 <InfoRow
                   label="Multa"
                   value={`+${formatCurrency(entry.penalty)}`}
-                  className="text-red-600"
+                  className="text-rose-600"
                 />
               )}
               <div className="pt-2 border-t">
@@ -542,8 +542,8 @@ export default function PayableDetailPage({
                 value={formatCurrency(entry.remainingBalance)}
                 className={
                   entry.remainingBalance > 0
-                    ? 'text-red-600 font-semibold'
-                    : 'text-green-600 font-semibold'
+                    ? 'text-rose-600 font-semibold'
+                    : 'text-emerald-600 font-semibold'
                 }
               />
               {entry.totalDue - entry.remainingBalance > 0 && (
@@ -552,7 +552,7 @@ export default function PayableDetailPage({
                   value={formatCurrency(
                     entry.totalDue - entry.remainingBalance
                   )}
-                  className="text-green-600"
+                  className="text-emerald-600"
                 />
               )}
             </CardContent>

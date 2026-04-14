@@ -150,7 +150,7 @@ export default function ExportPage() {
         <div
           className={`p-4 rounded-lg ${
             message.type === 'success'
-              ? 'bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300'
               : 'bg-rose-50 text-rose-800 dark:bg-rose-900/20 dark:text-rose-300'
           }`}
         >

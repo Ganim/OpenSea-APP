@@ -77,8 +77,8 @@ const reportCards = [
     title: 'Balanço Patrimonial',
     description: 'Ativo, passivo e patrimônio líquido',
     icon: Wallet,
-    color: 'text-green-600',
-    bg: 'bg-green-100 dark:bg-green-900/30',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
   },
   {
     id: 'cashflow' as const,

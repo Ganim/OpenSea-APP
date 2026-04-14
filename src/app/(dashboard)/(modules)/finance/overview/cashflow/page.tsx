@@ -254,15 +254,15 @@ export default function CashflowPage() {
                           <td className="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-sm">
                             {entry.period}
                           </td>
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-green-600 font-medium text-xs sm:text-sm">
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-emerald-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.inflow)}
                           </td>
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-red-600 font-medium text-xs sm:text-sm">
+                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-rose-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.outflow)}
                           </td>
                           <td
                             className={`py-2 px-2 sm:py-3 sm:px-4 text-right font-medium text-xs sm:text-sm ${
-                              isPositiveFlow ? 'text-green-600' : 'text-red-600'
+                              isPositiveFlow ? 'text-emerald-600' : 'text-rose-600'
                             }`}
                           >
                             {formatCurrency(entry.netFlow)}
@@ -296,7 +296,7 @@ export default function CashflowPage() {
                     <TrendingUp className="h-4 w-4" />
                     <span>Total Entradas</span>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-emerald-600">
                     {formatCurrency(data.summary.totalInflow)}
                   </p>
                 </div>
@@ -305,7 +305,7 @@ export default function CashflowPage() {
                     <TrendingDown className="h-4 w-4" />
                     <span>Total Saídas</span>
                   </div>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-rose-600">
                     {formatCurrency(data.summary.totalOutflow)}
                   </p>
                 </div>
@@ -314,8 +314,8 @@ export default function CashflowPage() {
                   <p
                     className={`text-2xl font-bold ${
                       data.summary.netFlow >= 0
-                        ? 'text-green-600'
-                        : 'text-red-600'
+                        ? 'text-emerald-600'
+                        : 'text-rose-600'
                     }`}
                   >
                     {formatCurrency(data.summary.netFlow)}
