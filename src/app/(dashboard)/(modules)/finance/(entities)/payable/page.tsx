@@ -53,8 +53,10 @@ import { cn } from '@/lib/utils';
 import type { FinanceEntry, FinanceEntryStatus } from '@/types/finance';
 import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
 import {
+  AlertTriangle,
   ArrowDownCircle,
   CalendarDays,
+  CheckCheck,
   DollarSign,
   FolderTree,
   Loader2,
@@ -437,9 +439,41 @@ function PayablePageContent() {
   // RENDER FUNCTIONS
   // ============================================================================
 
+  const getThreeWayMatchBadge = (item: FinanceEntry) => {
+    switch (item.threeWayMatchStatus) {
+      case 'FULL_MATCH':
+        return {
+          label: '3-way match',
+          variant: 'outline' as const,
+          icon: CheckCheck,
+          color:
+            'border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
+        };
+      case 'PARTIAL_MATCH':
+        return {
+          label: 'Match parcial',
+          variant: 'outline' as const,
+          icon: AlertTriangle,
+          color:
+            'border-amber-600/25 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/8 text-amber-700 dark:text-amber-300',
+        };
+      case 'NO_MATCH':
+        return {
+          label: 'Sem match',
+          variant: 'outline' as const,
+          icon: XCircle,
+          color:
+            'border-rose-600/25 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/8 text-rose-700 dark:text-rose-300',
+        };
+      default:
+        return null;
+    }
+  };
+
   const renderGridCard = (item: FinanceEntry, isSelected: boolean) => {
     const isOverdue =
       item.isOverdue && item.status !== 'PAID' && item.status !== 'CANCELLED';
+    const matchBadge = getThreeWayMatchBadge(item);
 
     return (
       <EntityContextMenu
@@ -510,6 +544,7 @@ function PayablePageContent() {
                   },
                 ]
               : []),
+            ...(matchBadge ? [matchBadge] : []),
           ]}
           footer={{
             type: 'single',
@@ -534,6 +569,7 @@ function PayablePageContent() {
   const renderListCard = (item: FinanceEntry, isSelected: boolean) => {
     const isOverdue =
       item.isOverdue && item.status !== 'PAID' && item.status !== 'CANCELLED';
+    const matchBadge = getThreeWayMatchBadge(item);
 
     const installmentLabel =
       item.currentInstallment != null &&
@@ -574,6 +610,7 @@ function PayablePageContent() {
             },
           ]
         : []),
+      ...(matchBadge ? [matchBadge] : []),
     ];
 
     return (

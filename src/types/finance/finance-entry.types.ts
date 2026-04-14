@@ -91,6 +91,9 @@ export interface FinanceEntry {
   currency?: string;
   exchangeRate?: number | null;
   originalAmount?: number | null;
+  // Three-way match (PO / Recebimento / Nota)
+  threeWayMatchStatus?: 'FULL_MATCH' | 'PARTIAL_MATCH' | 'NO_MATCH' | null;
+  threeWayMatchedAt?: string | null;
   isOverdue: boolean;
   tags: string[];
   chartOfAccountId?: string | null;
