@@ -832,7 +832,10 @@ function ReceivablePageContent() {
                         emptyText="Nenhuma categoria encontrada."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="receivable-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="receivable-count"
+                    >
                       {total} {total === 1 ? 'recebimento' : 'recebimentos'}
                       {entries.length < total &&
                         ` (${entries.length} carregados)`}

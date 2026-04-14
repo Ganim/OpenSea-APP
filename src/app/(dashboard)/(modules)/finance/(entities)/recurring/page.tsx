@@ -692,7 +692,10 @@ function RecurringPageContent() {
                         emptyText="Nenhum tipo encontrado."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="recurring-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="recurring-count"
+                    >
                       {total} {total === 1 ? 'recorrência' : 'recorrências'}
                       {configs.length < total &&
                         ` (${configs.length} carregadas)`}

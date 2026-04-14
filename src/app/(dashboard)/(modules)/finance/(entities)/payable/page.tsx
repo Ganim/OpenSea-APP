@@ -857,7 +857,10 @@ function PayablePageContent() {
                         emptyText="Nenhuma categoria encontrada."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="payable-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="payable-count"
+                    >
                       {total} {total === 1 ? 'lançamento' : 'lançamentos'}
                       {entries.length < total &&
                         ` (${entries.length} carregados)`}

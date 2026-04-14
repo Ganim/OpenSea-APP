@@ -663,7 +663,10 @@ function LoansPageContent() {
                         emptyText="Nenhum tipo encontrado."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="loans-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="loans-count"
+                    >
                       {total} {total === 1 ? 'empréstimo' : 'empréstimos'}
                       {loans.length < total && ` (${loans.length} carregados)`}
                     </p>

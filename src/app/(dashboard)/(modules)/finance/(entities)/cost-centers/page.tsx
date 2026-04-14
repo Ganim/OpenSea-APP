@@ -784,7 +784,10 @@ function CostCentersPageContent() {
                         emptyText="Nenhum status encontrado."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="cost-centers-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="cost-centers-count"
+                    >
                       {total}{' '}
                       {total === 1 ? 'centro de custo' : 'centros de custo'}
                       {costCenters.length < total &&

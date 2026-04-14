@@ -644,7 +644,10 @@ function ConsortiaPageContent() {
                         emptyText="Nenhuma opção encontrada."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="consortia-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="consortia-count"
+                    >
                       {total} {total === 1 ? 'consórcio' : 'consórcios'}
                       {consortia.length < total &&
                         ` (${consortia.length} carregados)`}

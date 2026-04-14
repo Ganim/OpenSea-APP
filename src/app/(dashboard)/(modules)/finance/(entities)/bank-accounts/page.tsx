@@ -748,7 +748,10 @@ function BankAccountsPageContent() {
                         emptyText="Nenhum tipo encontrado."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="bank-accounts-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="bank-accounts-count"
+                    >
                       {total} {total === 1 ? 'conta' : 'contas'}
                       {bankAccounts.length < total &&
                         ` (${bankAccounts.length} carregadas)`}

@@ -77,7 +77,7 @@ export function BulkPayDrawer({
       entries
         .filter(e => selectedIds.includes(e.id))
         .reduce((sum, e) => sum + (e.remainingBalance || e.expectedAmount), 0),
-    [entries, selectedIds],
+    [entries, selectedIds]
   );
 
   const handleClose = useCallback(() => {
@@ -108,11 +108,11 @@ export function BulkPayDrawer({
               .map(e => e.error)
               .slice(0, 3)
               .join('; '),
-          },
+          }
         );
       } else {
         toast.success(
-          `${result.success} ${result.success === 1 ? 'lançamento atualizado' : 'lançamentos atualizados'} com sucesso.`,
+          `${result.success} ${result.success === 1 ? 'lançamento atualizado' : 'lançamentos atualizados'} com sucesso.`
         );
       }
 

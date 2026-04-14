@@ -262,7 +262,9 @@ export default function CashflowPage() {
                           </td>
                           <td
                             className={`py-2 px-2 sm:py-3 sm:px-4 text-right font-medium text-xs sm:text-sm ${
-                              isPositiveFlow ? 'text-emerald-600' : 'text-rose-600'
+                              isPositiveFlow
+                                ? 'text-emerald-600'
+                                : 'text-rose-600'
                             }`}
                           >
                             {formatCurrency(entry.netFlow)}

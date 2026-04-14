@@ -645,7 +645,10 @@ function ContractsPageContent() {
                         emptyText="Nenhum status encontrado."
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="contracts-count">
+                    <p
+                      className="text-sm text-muted-foreground whitespace-nowrap"
+                      data-testid="contracts-count"
+                    >
                       {total} {total === 1 ? 'contrato' : 'contratos'}
                       {contracts.length < total &&
                         ` (${contracts.length} carregados)`}

@@ -531,7 +531,10 @@ function ChartOfAccountsPageContent() {
               emptyText="Nenhum tipo encontrado."
             />
           </div>
-          <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="chart-of-accounts-count">
+          <p
+            className="text-sm text-muted-foreground whitespace-nowrap"
+            data-testid="chart-of-accounts-count"
+          >
             {total} {total === 1 ? 'conta' : 'contas'}
             {accounts.length < total && ` (${accounts.length} carregadas)`}
           </p>
