@@ -243,3 +243,113 @@ Ask the user before coding. A 30-second question saves a half-day rework. Never 
 ### Escalation
 
 If a PR ships UI that violates these rules without justification, it's a **blocker** — fix before merge, don't patch after.
+
+---
+
+## UI Quality Bar — HR Module (mandatory on top of global rules)
+
+HR has domain-specific interactions that need dedicated widgets — generic form fields are never enough. Before building any HR page, cite the reference product.
+
+### Reference products for HR
+
+- **BambooHR** — HRIS profile, PTO requests, org directory
+- **Rippling** — admissions/onboarding, document collection, signature flows
+- **Gusto** — payroll, benefits, holerite download UX
+- **Lattice / 15Five** — performance reviews, 1:1s, OKR tracking, kudos feed
+- **Deel** — contract management, multi-country payroll
+- **Humaans** — employee directory, time-off calendar
+- **Gupy** — recruitment pipeline (BR benchmark)
+- **Solides** — performance + engagement (BR)
+- **Convenia / Sólides Ponto** — eSocial, point clock (BR)
+- **Slack / Notion** — kudos, internal feed, announcement boards
+
+### HR-specific widget pairings
+
+| Interaction | ❌ Never ship | ✅ Ship instead (reference) |
+|---|---|---|
+| Employee list | Plain table with name only | Directory cards: avatar + role + dept + manager + status (BambooHR, Humaans) |
+| Employee profile | Single-page form | Tabbed profile: Overview / Documents / History / Performance / Time-off (BambooHR) |
+| Avatar / photo | Initials only | Photo upload with crop + fallback initials colored by name hash (Gusto) |
+| Org chart | Flat employee list | Interactive tree with zoom/pan + team filter (Rippling, Deel) |
+| Vacation request | Date range inputs | Calendar picker with team overlay (see conflicts) + balance sidebar (BambooHR PTO) |
+| Vacation approval | Plain list | Timeline view: who's out each month + color per type (sick/vacation/parental) |
+| Time tracking / ponto | Plain buttons | Big "Bater ponto" CTA + current session timer + location/geo badge + streak (Sólides Ponto) |
+| Work schedule / escala | Text description | Weekly grid with colored shifts (Humaans, When I Work) |
+| Admission flow | Single giant form | Multi-step wizard with progress bar + saved progress + document uploads per step (Rippling) |
+| Document collection | Raw file inputs | Checklist with state per doc: pending / uploaded / approved / rejected (Rippling) |
+| Signature | Type-your-name field | Canvas signature or DocuSign-style embedded sign (Rippling, Deel) |
+| Holerite / contracheque | Table of numbers | Downloadable PDF card + preview modal + history list by month (Gusto) |
+| Payroll run | Plain form | Step-by-step "run" with pre-flight checks, diffs vs last run, approval (Gusto) |
+| Performance review | Plain text inputs | Scale inputs (1–5) + radar chart + self/manager split view (Lattice) |
+| OKR / goals | Flat task list | Nested hierarchy: company → team → individual, with progress bars (15Five) |
+| Kudos / recognition | Comment box | Social feed: sender + receiver avatars + reaction emojis + replies (Slack, Lattice) |
+| Employee request (férias, reembolso, atestado) | Generic form | Typed request form per kind + state machine visible (pending → approved → processed) |
+| Absence calendar | Date list | Month grid view with colored bands per absence type + filters (BambooHR) |
+| Announcement / mural | Text block | Card feed with pinned items + read receipts + target audience badges (Notion, Slack) |
+| Onboarding progress | Checklist | Journey-style progress with milestone unlocks + mentor assigned + day counter (Rippling) |
+| Birthday / anniversary | List | Social feed card with CTA "parabenizar" + auto-notification (BambooHR) |
+| Salary history | Number column | Timeline with promotion markers + % increase per change + currency badges |
+| eSocial event status | Plain badge | Colored chip + tooltip with event code + SEFAZ-style status icon + retry button on failure |
+| Workforce analytics | Single KPI | Dashboard with headcount trend, turnover, time-to-hire, gender/race split (BambooHR Insights) |
+| Recruitment pipeline | Table of candidates | Kanban: Triagem → Entrevista → Oferta → Contratado, drag-and-drop (Gupy) |
+| Interview scheduling | Date text | Calendar picker with interviewer availability + timezone + integrations (Gupy, Calendly) |
+| 1:1 meeting | Generic note | Talking-points template + shared agenda + action items (Lattice, 15Five) |
+
+### Every HR employee card MUST have
+
+- **Avatar** with photo or name-initialed colored circle (hash name → hue)
+- **Status chip**: Active / On leave / Terminated / Onboarding (color-coded)
+- **Role + department** visible without click
+- **Manager** (with small avatar + link to their profile)
+- **Quick actions** via context menu: Ver / Editar / Férias / Ponto / Mensagem
+
+### Every HR form MUST
+
+- Ask only what's legally needed at that step (LGPD) — do not request SSN/CPF on first form if unnecessary
+- Group by legal/fiscal/personal/contractual sections via `CollapsibleSection`
+- Support **saved drafts** on long admission forms (resume where you left off)
+- Show **required docs checklist** upfront, not surprise at step 4
+- Validate CPF/CNPJ/PIS/CTPS with proper check digits (not just regex)
+- Show **labor-law hints** inline when relevant (ex: "Férias: 30 dias ao completar 1 ano")
+
+### HR-specific states
+
+- **On leave** — profile must show a banner "Em férias até DD/MM/AAAA" with link to approval
+- **Onboarding in progress** — progress bar + next step visible from anywhere in profile
+- **Terminated** — profile is read-only, with termination date + reason, no edit actions
+- **Pending eSocial event** — amber badge on affected records until event is accepted by government
+
+### Sensitive operations (PIN required)
+
+Beyond the global PIN rule, these HR actions REQUIRE `VerifyActionPinModal`:
+
+- Terminate employee
+- Edit salary / benefit value
+- Delete employee record (soft delete)
+- Send eSocial event
+- Bulk payroll run
+- Approve/reject vacation request
+- Change manager or department
+
+### HR pre-flight checklist
+
+Before building any HR page, confirm:
+
+1. Is there a **recognized HR SaaS** solving this? Cite which product + which screen.
+2. Does the data have **legal/compliance implications** (LGPD, CLT, eSocial)? If yes, audit log + PIN + masked display of sensitive fields.
+3. Is there a **mobile use case** (punch clock, vacation request, holerite)? Then design mobile-first.
+4. Does the user **experience a workflow** (admission, termination, performance cycle)? Then multi-step wizard, not giant form.
+5. Is there **data about people** being shown? Use avatars, not text-only.
+6. Does an action **affect paycheck, labor record, or compliance**? Require PIN + audit + confirm modal.
+
+### HR interactions that must feel delightful
+
+- Punching the clock → haptic feedback feel (animation + toast + streak shown)
+- Requesting vacation → see who's already out that week before submitting
+- Reading a kudos → slight confetti or emoji burst
+- Completing onboarding step → milestone unlocked, progress grows
+- Receiving a review → calm, not transactional (soft background, real names, no scores upfront)
+
+### When unsure
+
+Pergunte ao usuário antes de codar qualquer UI HR que toque **dados sensíveis** (salário, documentos, dependentes, avaliações). Um erro de UX em HR não é só feio — pode ser **violação de LGPD ou CLT**.
