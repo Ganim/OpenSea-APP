@@ -597,15 +597,18 @@ function ContractsPageContent() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="contracts-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            placeholder={contractConfig.display.labels.searchPlaceholder}
-            value={searchQuery}
-            onSearch={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="contracts-search">
+            <SearchBar
+              placeholder={contractConfig.display.labels.searchPlaceholder}
+              value={searchQuery}
+              onSearch={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -630,17 +633,19 @@ function ContractsPageContent() {
                 showItemCount={false}
                 toolbarStart={
                   <>
-                    <FilterDropdown
-                      label="Status"
-                      icon={FileText}
-                      options={STATUS_OPTIONS}
-                      selected={statusIds}
-                      onSelectionChange={setStatusFilter}
-                      activeColor="cyan"
-                      searchPlaceholder="Buscar status..."
-                      emptyText="Nenhum status encontrado."
-                    />
-                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    <div data-testid="contracts-filter-status">
+                      <FilterDropdown
+                        label="Status"
+                        icon={FileText}
+                        options={STATUS_OPTIONS}
+                        selected={statusIds}
+                        onSelectionChange={setStatusFilter}
+                        activeColor="cyan"
+                        searchPlaceholder="Buscar status..."
+                        emptyText="Nenhum status encontrado."
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="contracts-count">
                       {total} {total === 1 ? 'contrato' : 'contratos'}
                       {contracts.length < total &&
                         ` (${contracts.length} carregados)`}
