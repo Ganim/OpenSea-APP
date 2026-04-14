@@ -632,15 +632,18 @@ function RecurringPageContent() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="recurring-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            placeholder={recurringConfig.display.labels.searchPlaceholder}
-            value={searchQuery}
-            onSearch={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="recurring-search">
+            <SearchBar
+              placeholder={recurringConfig.display.labels.searchPlaceholder}
+              value={searchQuery}
+              onSearch={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -665,27 +668,31 @@ function RecurringPageContent() {
                 showItemCount={false}
                 toolbarStart={
                   <>
-                    <FilterDropdown
-                      label="Status"
-                      icon={RefreshCw}
-                      options={STATUS_OPTIONS}
-                      selected={statusIds}
-                      onSelectionChange={setStatusFilter}
-                      activeColor="violet"
-                      searchPlaceholder="Buscar status..."
-                      emptyText="Nenhum status encontrado."
-                    />
-                    <FilterDropdown
-                      label="Tipo"
-                      icon={DollarSign}
-                      options={TYPE_OPTIONS}
-                      selected={typeIds}
-                      onSelectionChange={setTypeFilter}
-                      activeColor="blue"
-                      searchPlaceholder="Buscar tipo..."
-                      emptyText="Nenhum tipo encontrado."
-                    />
-                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    <div data-testid="recurring-filter-status">
+                      <FilterDropdown
+                        label="Status"
+                        icon={RefreshCw}
+                        options={STATUS_OPTIONS}
+                        selected={statusIds}
+                        onSelectionChange={setStatusFilter}
+                        activeColor="violet"
+                        searchPlaceholder="Buscar status..."
+                        emptyText="Nenhum status encontrado."
+                      />
+                    </div>
+                    <div data-testid="recurring-filter-type">
+                      <FilterDropdown
+                        label="Tipo"
+                        icon={DollarSign}
+                        options={TYPE_OPTIONS}
+                        selected={typeIds}
+                        onSelectionChange={setTypeFilter}
+                        activeColor="blue"
+                        searchPlaceholder="Buscar tipo..."
+                        emptyText="Nenhum tipo encontrado."
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="recurring-count">
                       {total} {total === 1 ? 'recorrência' : 'recorrências'}
                       {configs.length < total &&
                         ` (${configs.length} carregadas)`}
