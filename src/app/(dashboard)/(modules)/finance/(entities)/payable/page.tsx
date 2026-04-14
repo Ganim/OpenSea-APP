@@ -760,15 +760,18 @@ function PayablePageContent() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="payable-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            placeholder={financeEntryConfig.display.labels.searchPlaceholder}
-            value={searchQuery}
-            onSearch={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="payable-search">
+            <SearchBar
+              placeholder={financeEntryConfig.display.labels.searchPlaceholder}
+              value={searchQuery}
+              onSearch={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -793,27 +796,31 @@ function PayablePageContent() {
                 showItemCount={false}
                 toolbarStart={
                   <>
-                    <FilterDropdown
-                      label="Status"
-                      icon={ArrowDownCircle}
-                      options={STATUS_OPTIONS}
-                      selected={statusIds}
-                      onSelectionChange={setStatusFilter}
-                      activeColor="violet"
-                      searchPlaceholder="Buscar status..."
-                      emptyText="Nenhum status encontrado."
-                    />
-                    <FilterDropdown
-                      label="Categoria"
-                      icon={Tag}
-                      options={categoryOptions}
-                      selected={categoryIds}
-                      onSelectionChange={setCategoryFilter}
-                      activeColor="cyan"
-                      searchPlaceholder="Buscar categoria..."
-                      emptyText="Nenhuma categoria encontrada."
-                    />
-                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    <div data-testid="payable-filter-status">
+                      <FilterDropdown
+                        label="Status"
+                        icon={ArrowDownCircle}
+                        options={STATUS_OPTIONS}
+                        selected={statusIds}
+                        onSelectionChange={setStatusFilter}
+                        activeColor="violet"
+                        searchPlaceholder="Buscar status..."
+                        emptyText="Nenhum status encontrado."
+                      />
+                    </div>
+                    <div data-testid="payable-filter-category">
+                      <FilterDropdown
+                        label="Categoria"
+                        icon={Tag}
+                        options={categoryOptions}
+                        selected={categoryIds}
+                        onSelectionChange={setCategoryFilter}
+                        activeColor="cyan"
+                        searchPlaceholder="Buscar categoria..."
+                        emptyText="Nenhuma categoria encontrada."
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="payable-count">
                       {total} {total === 1 ? 'lançamento' : 'lançamentos'}
                       {entries.length < total &&
                         ` (${entries.length} carregados)`}
