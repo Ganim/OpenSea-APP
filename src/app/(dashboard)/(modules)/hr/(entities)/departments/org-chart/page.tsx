@@ -216,7 +216,7 @@ export default function OrgChartPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="departments-org-chart-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

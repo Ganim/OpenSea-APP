@@ -90,7 +90,7 @@ export default function WorkScheduleDetailPage() {
   // Loading
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="work-schedules-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -108,7 +108,7 @@ export default function WorkScheduleDetailPage() {
 
   if (!schedule) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="work-schedules-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -135,7 +135,7 @@ export default function WorkScheduleDetailPage() {
   const workDaysCount = dayData.filter(d => d.isWorking).length;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="work-schedules-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

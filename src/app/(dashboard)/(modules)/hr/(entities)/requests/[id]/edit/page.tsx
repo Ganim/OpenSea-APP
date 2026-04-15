@@ -138,7 +138,7 @@ export default function RequestEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="requests-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -157,7 +157,7 @@ export default function RequestEditPage() {
 
   if (error || !requestData) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="requests-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -208,7 +208,7 @@ export default function RequestEditPage() {
   );
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="requests-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

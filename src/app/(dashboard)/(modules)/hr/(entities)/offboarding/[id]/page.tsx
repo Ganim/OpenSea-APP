@@ -77,7 +77,7 @@ export default function OffboardingDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="offboarding-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -97,7 +97,7 @@ export default function OffboardingDetailPage() {
 
   if (error || !checklist) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="offboarding-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -123,7 +123,7 @@ export default function OffboardingDetailPage() {
   const totalCount = checklist.items.length;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="offboarding-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

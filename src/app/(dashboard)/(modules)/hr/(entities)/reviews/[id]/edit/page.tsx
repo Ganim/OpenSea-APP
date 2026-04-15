@@ -147,7 +147,7 @@ export default function ReviewCycleEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="reviews-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -166,7 +166,7 @@ export default function ReviewCycleEditPage() {
 
   if (error || !cycle) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="reviews-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -200,7 +200,7 @@ export default function ReviewCycleEditPage() {
   const isClosed = cycle.status === 'CLOSED';
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="reviews-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

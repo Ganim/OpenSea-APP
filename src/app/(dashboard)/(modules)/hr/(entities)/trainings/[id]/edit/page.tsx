@@ -130,7 +130,7 @@ export default function EditTrainingProgramPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="trainings-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -149,7 +149,7 @@ export default function EditTrainingProgramPage() {
 
   if (error || !program) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="trainings-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -175,7 +175,7 @@ export default function EditTrainingProgramPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="trainings-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

@@ -90,7 +90,7 @@ export default function OvertimeDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="overtime-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -112,7 +112,7 @@ export default function OvertimeDetailPage() {
 
   if (!overtime) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="overtime-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -147,7 +147,7 @@ export default function OvertimeDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="overtime-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

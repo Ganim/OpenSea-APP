@@ -234,7 +234,7 @@ export default function MedicalExamEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="medical-exams-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -252,7 +252,7 @@ export default function MedicalExamEditPage() {
 
   if (!exam) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="medical-exams-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -283,7 +283,7 @@ export default function MedicalExamEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="medical-exams-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

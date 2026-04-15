@@ -90,7 +90,7 @@ export default function TrainingProgramDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="trainings-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -109,7 +109,7 @@ export default function TrainingProgramDetailPage() {
 
   if (error || !program) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="trainings-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -143,7 +143,7 @@ export default function TrainingProgramDetailPage() {
   const enrollments = enrollmentsData?.enrollments ?? [];
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="trainings-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

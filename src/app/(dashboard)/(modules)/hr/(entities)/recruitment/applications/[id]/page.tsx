@@ -189,7 +189,7 @@ export default function ApplicationDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-application-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -209,7 +209,7 @@ export default function ApplicationDetailPage() {
 
   if (error || !application) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-application-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -287,7 +287,7 @@ export default function ApplicationDetailPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="recruitment-application-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

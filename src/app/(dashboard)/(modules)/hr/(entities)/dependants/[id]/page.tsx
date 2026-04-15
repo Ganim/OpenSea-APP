@@ -114,7 +114,7 @@ export default function DependantDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="dependants-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -132,7 +132,7 @@ export default function DependantDetailPage() {
 
   if (!dependant) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="dependants-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -164,7 +164,7 @@ export default function DependantDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="dependants-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

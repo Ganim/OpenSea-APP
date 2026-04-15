@@ -136,7 +136,7 @@ export default function AdmissionDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="admissions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -155,7 +155,7 @@ export default function AdmissionDetailPage() {
 
   if (!admission) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="admissions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -184,7 +184,7 @@ export default function AdmissionDetailPage() {
     admission.status === 'COMPLETED';
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="admissions-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

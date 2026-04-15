@@ -181,7 +181,7 @@ export default function PayrollDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="payroll-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -199,7 +199,7 @@ export default function PayrollDetailPage() {
 
   if (!payroll) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="payroll-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -236,7 +236,7 @@ export default function PayrollDetailPage() {
     payroll.paidAt;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="payroll-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

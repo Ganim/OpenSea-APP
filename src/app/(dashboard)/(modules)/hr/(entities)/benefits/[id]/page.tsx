@@ -142,7 +142,7 @@ export default function BenefitPlanDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="benefits-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -160,7 +160,7 @@ export default function BenefitPlanDetailPage() {
 
   if (!plan) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="benefits-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -193,7 +193,7 @@ export default function BenefitPlanDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="benefits-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

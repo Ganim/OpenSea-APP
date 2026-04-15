@@ -340,7 +340,7 @@ function CandidatesContent() {
         initialIds,
       }}
     >
-      <PageLayout>
+      <PageLayout data-testid="recruitment-candidates-page-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[

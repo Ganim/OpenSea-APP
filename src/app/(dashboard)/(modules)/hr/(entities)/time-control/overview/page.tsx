@@ -317,7 +317,7 @@ function AttendanceOverviewContent() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="time-control-overview-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

@@ -124,7 +124,7 @@ export default function EditCandidatePage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-candidate-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -144,7 +144,7 @@ export default function EditCandidatePage() {
 
   if (error || !candidate) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-candidate-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -171,7 +171,7 @@ export default function EditCandidatePage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="recruitment-candidate-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

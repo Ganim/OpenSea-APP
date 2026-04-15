@@ -85,7 +85,7 @@ export default function CandidateDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-candidate-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -105,7 +105,7 @@ export default function CandidateDetailPage() {
 
   if (error || !candidate) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-candidate-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -134,7 +134,7 @@ export default function CandidateDetailPage() {
   const applications = applicationsData?.applications ?? [];
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="recruitment-candidate-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

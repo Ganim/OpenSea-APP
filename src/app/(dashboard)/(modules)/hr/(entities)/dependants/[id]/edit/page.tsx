@@ -314,7 +314,7 @@ export default function DependantEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="dependants-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -327,7 +327,7 @@ export default function DependantEditPage() {
 
   if (!dependant) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="dependants-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -351,7 +351,7 @@ export default function DependantEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="dependants-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

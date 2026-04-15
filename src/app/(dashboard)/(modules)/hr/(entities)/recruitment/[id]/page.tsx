@@ -147,7 +147,7 @@ export default function JobPostingDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -166,7 +166,7 @@ export default function JobPostingDetailPage() {
 
   if (error || !jobPosting) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -252,7 +252,7 @@ export default function JobPostingDetailPage() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="recruitment-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

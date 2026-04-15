@@ -145,7 +145,7 @@ export default function TerminationDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="terminations-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -163,7 +163,7 @@ export default function TerminationDetailPage() {
 
   if (!termination) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="terminations-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -222,7 +222,7 @@ export default function TerminationDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="terminations-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

@@ -276,7 +276,7 @@ export default function DeductionEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="deductions-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -289,7 +289,7 @@ export default function DeductionEditPage() {
 
   if (!deduction) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="deductions-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -313,7 +313,7 @@ export default function DeductionEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="deductions-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

@@ -81,7 +81,7 @@ export default function TimeControlDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="time-control-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -103,7 +103,7 @@ export default function TimeControlDetailPage() {
 
   if (!entry) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="time-control-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -134,7 +134,7 @@ export default function TimeControlDetailPage() {
   const hasLocation = entry.latitude != null && entry.longitude != null;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="time-control-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

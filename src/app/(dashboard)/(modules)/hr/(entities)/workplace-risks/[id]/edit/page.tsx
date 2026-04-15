@@ -324,7 +324,7 @@ export default function WorkplaceRiskEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="workplace-risks-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -337,7 +337,7 @@ export default function WorkplaceRiskEditPage() {
 
   if (!risk || !program) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="workplace-risks-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -361,7 +361,7 @@ export default function WorkplaceRiskEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="workplace-risks-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

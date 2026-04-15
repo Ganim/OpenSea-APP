@@ -247,7 +247,7 @@ export default function BonusEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="bonuses-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -260,7 +260,7 @@ export default function BonusEditPage() {
 
   if (!bonus) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="bonuses-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -284,7 +284,7 @@ export default function BonusEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="bonuses-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

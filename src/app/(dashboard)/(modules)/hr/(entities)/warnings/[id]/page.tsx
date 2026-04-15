@@ -134,7 +134,7 @@ export default function WarningDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="warnings-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -153,7 +153,7 @@ export default function WarningDetailPage() {
 
   if (error || !warning) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="warnings-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -181,7 +181,7 @@ export default function WarningDetailPage() {
   const isActive = warning.status === 'ACTIVE';
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="warnings-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

@@ -140,7 +140,7 @@ export default function SurveyDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="surveys-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -159,7 +159,7 @@ export default function SurveyDetailPage() {
 
   if (error || !surveyData) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="surveys-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -246,7 +246,7 @@ export default function SurveyDetailPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="surveys-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

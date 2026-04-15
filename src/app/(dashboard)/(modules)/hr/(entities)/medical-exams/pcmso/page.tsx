@@ -630,7 +630,7 @@ export default function PCMSODashboardPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="medical-exams-pcmso-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

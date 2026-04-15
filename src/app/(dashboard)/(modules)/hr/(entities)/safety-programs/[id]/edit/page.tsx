@@ -190,7 +190,7 @@ export default function SafetyProgramEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="safety-programs-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -211,7 +211,7 @@ export default function SafetyProgramEditPage() {
 
   if (!program) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="safety-programs-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -245,7 +245,7 @@ export default function SafetyProgramEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="safety-programs-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

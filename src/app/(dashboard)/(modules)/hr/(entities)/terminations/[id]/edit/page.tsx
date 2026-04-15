@@ -312,7 +312,7 @@ export default function TerminationEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="terminations-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -325,7 +325,7 @@ export default function TerminationEditPage() {
 
   if (error || !termination) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="terminations-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -349,7 +349,7 @@ export default function TerminationEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="terminations-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

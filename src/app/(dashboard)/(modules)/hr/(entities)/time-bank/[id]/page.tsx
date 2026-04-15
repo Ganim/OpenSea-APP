@@ -91,7 +91,7 @@ export default function TimeBankDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="time-bank-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -109,7 +109,7 @@ export default function TimeBankDetailPage() {
 
   if (!timeBank) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="time-bank-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -153,7 +153,7 @@ export default function TimeBankDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="time-bank-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

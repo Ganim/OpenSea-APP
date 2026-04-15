@@ -302,7 +302,7 @@ export default function OKREditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="okrs-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -321,7 +321,7 @@ export default function OKREditPage() {
 
   if (error || !objective) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="okrs-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -347,7 +347,7 @@ export default function OKREditPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="okrs-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

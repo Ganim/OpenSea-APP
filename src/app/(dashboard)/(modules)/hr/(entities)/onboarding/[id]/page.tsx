@@ -86,7 +86,7 @@ export default function OnboardingDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="onboarding-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -106,7 +106,7 @@ export default function OnboardingDetailPage() {
 
   if (error || !checklist) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="onboarding-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -132,7 +132,7 @@ export default function OnboardingDetailPage() {
   const totalCount = checklist.items.length;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="onboarding-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

@@ -145,7 +145,7 @@ export default function RequestDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="requests-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -163,7 +163,7 @@ export default function RequestDetailPage() {
 
   if (error || !requestData) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="requests-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -237,7 +237,7 @@ export default function RequestDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="requests-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

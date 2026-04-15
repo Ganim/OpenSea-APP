@@ -245,7 +245,7 @@ export default function EditShiftPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="shifts-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -264,7 +264,7 @@ export default function EditShiftPage() {
 
   if (error || !shift) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="shifts-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -292,7 +292,7 @@ export default function EditShiftPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="shifts-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

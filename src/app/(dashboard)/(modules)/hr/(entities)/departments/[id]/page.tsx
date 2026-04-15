@@ -112,7 +112,7 @@ export default function DepartmentDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="departments-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -130,7 +130,7 @@ export default function DepartmentDetailPage() {
 
   if (!department) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="departments-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -162,7 +162,7 @@ export default function DepartmentDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="departments-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

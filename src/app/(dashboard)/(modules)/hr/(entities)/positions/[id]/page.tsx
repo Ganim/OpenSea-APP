@@ -83,7 +83,7 @@ export default function PositionDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="positions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -101,7 +101,7 @@ export default function PositionDetailPage() {
 
   if (!position) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="positions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -130,7 +130,7 @@ export default function PositionDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="positions-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

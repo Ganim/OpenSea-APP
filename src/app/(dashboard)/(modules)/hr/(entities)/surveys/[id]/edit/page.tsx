@@ -157,7 +157,7 @@ export default function EditSurveyPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="surveys-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -176,7 +176,7 @@ export default function EditSurveyPage() {
 
   if (error || !surveyData) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="surveys-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -210,7 +210,7 @@ export default function EditSurveyPage() {
   const questions = surveyData.questions ?? [];
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="surveys-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

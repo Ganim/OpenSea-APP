@@ -261,7 +261,7 @@ export default function ShiftDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="shifts-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -280,7 +280,7 @@ export default function ShiftDetailPage() {
 
   if (error || !shift) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="shifts-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -310,7 +310,7 @@ export default function ShiftDetailPage() {
   const typeBadgeClass = SHIFT_TYPE_COLORS[shift.type] || '';
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="shifts-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

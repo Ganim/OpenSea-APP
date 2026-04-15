@@ -63,7 +63,7 @@ export default function DeductionDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="deductions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -85,7 +85,7 @@ export default function DeductionDetailPage() {
 
   if (!deduction) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="deductions-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -136,7 +136,7 @@ export default function DeductionDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="deductions-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

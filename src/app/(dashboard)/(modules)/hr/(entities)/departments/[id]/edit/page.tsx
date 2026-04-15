@@ -187,7 +187,7 @@ export default function DepartmentEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="departments-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -205,7 +205,7 @@ export default function DepartmentEditPage() {
 
   if (!department) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="departments-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -237,7 +237,7 @@ export default function DepartmentEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="departments-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

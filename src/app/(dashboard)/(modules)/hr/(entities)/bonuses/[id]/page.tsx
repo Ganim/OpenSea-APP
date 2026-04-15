@@ -59,7 +59,7 @@ export default function BonusDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="bonuses-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -77,7 +77,7 @@ export default function BonusDetailPage() {
 
   if (!bonus) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="bonuses-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -106,7 +106,7 @@ export default function BonusDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="bonuses-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

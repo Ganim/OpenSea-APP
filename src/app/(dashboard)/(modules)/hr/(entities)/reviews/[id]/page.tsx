@@ -350,7 +350,7 @@ export default function ReviewCycleDetailPage() {
 
   if (cycleLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="reviews-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -369,7 +369,7 @@ export default function ReviewCycleDetailPage() {
 
   if (cycleError || !cycleData) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="reviews-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -394,7 +394,7 @@ export default function ReviewCycleDetailPage() {
     cycleData.status !== 'CLOSED' && cycleData.status !== 'DRAFT';
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="reviews-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

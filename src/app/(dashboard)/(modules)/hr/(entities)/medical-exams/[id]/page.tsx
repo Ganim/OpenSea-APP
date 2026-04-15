@@ -100,7 +100,7 @@ export default function MedicalExamDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="medical-exams-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -118,7 +118,7 @@ export default function MedicalExamDetailPage() {
 
   if (!exam) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="medical-exams-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -154,7 +154,7 @@ export default function MedicalExamDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="medical-exams-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

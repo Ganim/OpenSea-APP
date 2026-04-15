@@ -138,7 +138,7 @@ export default function CipaMandateDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="cipa-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -156,7 +156,7 @@ export default function CipaMandateDetailPage() {
 
   if (!mandate) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="cipa-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -185,7 +185,7 @@ export default function CipaMandateDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="cipa-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

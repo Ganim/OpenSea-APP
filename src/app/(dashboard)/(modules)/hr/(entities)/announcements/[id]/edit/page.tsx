@@ -116,7 +116,7 @@ export default function AnnouncementEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="announcements-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -134,7 +134,7 @@ export default function AnnouncementEditPage() {
 
   if (!announcement) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="announcements-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -163,7 +163,7 @@ export default function AnnouncementEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="announcements-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

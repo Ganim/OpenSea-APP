@@ -112,7 +112,7 @@ export default function OvertimeEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="overtime-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -131,7 +131,7 @@ export default function OvertimeEditPage() {
 
   if (error || !overtime) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="overtime-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -163,7 +163,7 @@ export default function OvertimeEditPage() {
   const isPending = overtime.approved === null;
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="overtime-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

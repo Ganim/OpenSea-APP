@@ -119,7 +119,7 @@ export default function AnnouncementDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="announcements-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -137,7 +137,7 @@ export default function AnnouncementDetailPage() {
 
   if (!announcement) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="announcements-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -187,7 +187,7 @@ export default function AnnouncementDetailPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="announcements-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

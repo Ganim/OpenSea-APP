@@ -189,7 +189,7 @@ export default function PPEDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="ppe-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -208,7 +208,7 @@ export default function PPEDetailPage() {
 
   if (error || !ppeItem) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="ppe-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -243,7 +243,7 @@ export default function PPEDetailPage() {
   );
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="ppe-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

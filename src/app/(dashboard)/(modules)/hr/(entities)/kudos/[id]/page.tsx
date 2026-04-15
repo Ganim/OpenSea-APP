@@ -143,7 +143,7 @@ export default function KudosDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="kudos-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -162,7 +162,7 @@ export default function KudosDetailPage() {
 
   if (error || !kudos) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="kudos-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -209,7 +209,7 @@ export default function KudosDetailPage() {
   });
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="kudos-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

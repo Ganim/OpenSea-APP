@@ -163,7 +163,7 @@ export default function PPEEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="ppe-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -182,7 +182,7 @@ export default function PPEEditPage() {
 
   if (error || !ppeItem) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="ppe-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -212,7 +212,7 @@ export default function PPEEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="ppe-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

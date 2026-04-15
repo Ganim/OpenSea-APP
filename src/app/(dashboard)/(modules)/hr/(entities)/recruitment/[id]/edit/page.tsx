@@ -157,7 +157,7 @@ export default function EditJobPostingPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -176,7 +176,7 @@ export default function EditJobPostingPage() {
 
   if (error || !jobPosting) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="recruitment-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -202,7 +202,7 @@ export default function EditJobPostingPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="recruitment-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

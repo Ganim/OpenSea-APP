@@ -107,7 +107,7 @@ export default function OKRDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="okrs-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -126,7 +126,7 @@ export default function OKRDetailPage() {
 
   if (error || !objective) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="okrs-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -154,7 +154,7 @@ export default function OKRDetailPage() {
   const keyResults = objective.keyResults ?? [];
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="okrs-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

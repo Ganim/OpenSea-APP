@@ -107,7 +107,7 @@ export default function WorkplaceRiskDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="workplace-risks-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -125,7 +125,7 @@ export default function WorkplaceRiskDetailPage() {
 
   if (!risk || !program) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="workplace-risks-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -154,7 +154,7 @@ export default function WorkplaceRiskDetailPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="workplace-risks-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

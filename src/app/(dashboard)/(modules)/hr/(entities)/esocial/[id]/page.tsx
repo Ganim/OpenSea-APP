@@ -199,7 +199,7 @@ export default function EsocialEventDetailPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6" data-testid="esocial-detail-page">
         <PageActionBar
           breadcrumbItems={[
             { label: 'RH', href: '/hr' },
@@ -219,7 +219,7 @@ export default function EsocialEventDetailPage() {
   // Error state
   if (error || !event) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6" data-testid="esocial-detail-page">
         <PageActionBar
           breadcrumbItems={[
             { label: 'RH', href: '/hr' },
@@ -286,7 +286,7 @@ export default function EsocialEventDetailPage() {
   const canRectify = event.status === 'REJECTED' || event.status === 'ACCEPTED';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="esocial-detail-page">
       <PageActionBar
         breadcrumbItems={[
           { label: 'RH', href: '/hr' },
@@ -482,7 +482,7 @@ export default function EsocialEventDetailPage() {
         </div>
 
         {/* Right column: Timeline */}
-        <div className="space-y-6">
+        <div className="space-y-6" data-testid="esocial-detail-page">
           <Card className="bg-white dark:bg-slate-800/60 border border-border p-5">
             <h3 className="text-sm font-semibold mb-4">Histórico</h3>
             <div className="space-y-0">

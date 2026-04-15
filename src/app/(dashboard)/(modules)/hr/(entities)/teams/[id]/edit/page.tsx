@@ -278,7 +278,7 @@ export default function HREditTeamPage() {
   // Loading state
   if (isLoadingTeam) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="teams-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -301,7 +301,7 @@ export default function HREditTeamPage() {
   // Not found state
   if (!team) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="teams-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -330,7 +330,7 @@ export default function HREditTeamPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="teams-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

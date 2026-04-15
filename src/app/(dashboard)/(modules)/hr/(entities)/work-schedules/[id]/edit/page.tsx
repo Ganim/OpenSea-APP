@@ -340,7 +340,7 @@ export default function WorkScheduleEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="work-schedules-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -358,7 +358,7 @@ export default function WorkScheduleEditPage() {
 
   if (!schedule) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="work-schedules-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -387,7 +387,7 @@ export default function WorkScheduleEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="work-schedules-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

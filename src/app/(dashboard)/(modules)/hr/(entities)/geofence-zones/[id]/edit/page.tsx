@@ -276,7 +276,7 @@ export default function GeofenceZoneEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="geofence-zones-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -289,7 +289,7 @@ export default function GeofenceZoneEditPage() {
 
   if (!zone) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="geofence-zones-edit-page">
         <PageHeader>
           <PageActionBar breadcrumbItems={breadcrumbItems} />
         </PageHeader>
@@ -313,7 +313,7 @@ export default function GeofenceZoneEditPage() {
   // ==========================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="geofence-zones-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={breadcrumbItems}

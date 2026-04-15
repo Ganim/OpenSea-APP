@@ -101,7 +101,7 @@ export default function GeofenceZoneDetailPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="geofence-zones-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -119,7 +119,7 @@ export default function GeofenceZoneDetailPage() {
 
   if (!zone) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="geofence-zones-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -150,7 +150,7 @@ export default function GeofenceZoneDetailPage() {
   const mapsUrl = getGoogleMapsUrl(zone.latitude, zone.longitude);
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="geofence-zones-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

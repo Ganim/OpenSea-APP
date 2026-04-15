@@ -280,7 +280,7 @@ export default function EsocialBatchesPage() {
   const totalCount = data?.pages[0]?.meta.total ?? 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="esocial-batches-page">
       <PageActionBar
         breadcrumbItems={[
           { label: 'RH', href: '/hr' },

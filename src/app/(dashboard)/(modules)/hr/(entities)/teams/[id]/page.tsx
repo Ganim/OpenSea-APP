@@ -135,7 +135,7 @@ export default function HRTeamDetailPage() {
   // Loading state
   if (isLoadingTeam) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="teams-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -158,7 +158,7 @@ export default function HRTeamDetailPage() {
   // Not found state
   if (!team) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="teams-detail-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -187,7 +187,7 @@ export default function HRTeamDetailPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="teams-detail-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[

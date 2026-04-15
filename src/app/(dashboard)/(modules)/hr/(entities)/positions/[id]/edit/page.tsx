@@ -216,7 +216,7 @@ export default function PositionEditPage() {
 
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="positions-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -234,7 +234,7 @@ export default function PositionEditPage() {
 
   if (!position) {
     return (
-      <PageLayout>
+      <PageLayout data-testid="positions-edit-page">
         <PageHeader>
           <PageActionBar
             breadcrumbItems={[
@@ -267,7 +267,7 @@ export default function PositionEditPage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="positions-edit-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
