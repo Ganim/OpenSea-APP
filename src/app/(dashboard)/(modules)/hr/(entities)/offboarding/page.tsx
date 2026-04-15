@@ -153,22 +153,26 @@ function OffboardingPageContent() {
       </PageHeader>
 
       <PageBody>
-        <div className="space-y-4">
-          <SearchBar
-            value={search}
-            onSearch={setSearch}
-            placeholder="Buscar checklists de offboarding..."
-          />
+        <div className="space-y-4" data-testid="offboarding-page">
+          <div data-testid="offboarding-search">
+            <SearchBar
+              value={search}
+              onSearch={setSearch}
+              placeholder="Buscar checklists de offboarding..."
+            />
+          </div>
 
           <div className="flex items-center gap-2">
-            <FilterDropdown
-              label="Status"
-              value={statusFilter}
-              options={statusOptions}
-              onChange={val => setStatusFilter(val as OffboardingStatus | '')}
-              activeColor="violet"
-            />
-            <span className="text-xs text-muted-foreground">
+            <div data-testid="offboarding-filter-status">
+              <FilterDropdown
+                label="Status"
+                value={statusFilter}
+                options={statusOptions}
+                onChange={val => setStatusFilter(val as OffboardingStatus | '')}
+                activeColor="violet"
+              />
+            </div>
+            <span className="text-xs text-muted-foreground" data-testid="offboarding-count">
               {checklists.length} checklist(s)
             </span>
           </div>
