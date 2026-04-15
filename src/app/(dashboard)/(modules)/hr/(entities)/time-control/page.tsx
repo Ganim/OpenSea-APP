@@ -215,9 +215,10 @@ function TimeControlPageContent() {
       </PageHeader>
 
       <PageBody>
+        <div data-testid="time-control-page" className="contents" />
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="w-full sm:w-64">
+          <div className="w-full sm:w-64" data-testid="time-control-filter-employee">
             <EmployeeSelector
               value={employeeFilter}
               onChange={id => setEmployeeFilter(id)}
@@ -231,6 +232,7 @@ function TimeControlPageContent() {
             onChange={e => setStartDate(e.target.value)}
             className="w-40"
             placeholder="Data início"
+            data-testid="time-control-filter-start-date"
           />
           <Input
             type="date"
@@ -238,6 +240,7 @@ function TimeControlPageContent() {
             onChange={e => setEndDate(e.target.value)}
             className="w-40"
             placeholder="Data fim"
+            data-testid="time-control-filter-end-date"
           />
 
           {hasActiveFilters && (
