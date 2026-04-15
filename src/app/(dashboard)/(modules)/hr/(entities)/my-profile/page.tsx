@@ -507,7 +507,7 @@ export default function MyProfilePage() {
   // ============================================================================
 
   return (
-    <PageLayout>
+    <PageLayout data-testid="my-profile-page">
       <PageHeader>
         <PageActionBar
           breadcrumbItems={[
