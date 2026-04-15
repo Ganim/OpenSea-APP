@@ -612,14 +612,17 @@ function RequestsPageContent() {
         </PageHeader>
 
         <PageBody>
-          <SearchBar
-            value={searchQuery}
-            placeholder="Buscar solicitações..."
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="requests-page" className="contents" />
+          <div data-testid="requests-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder="Buscar solicitações..."
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -669,22 +672,26 @@ function RequestsPageContent() {
                     )}
                   </div>
 
-                  <FilterDropdown
-                    label="Tipo"
-                    icon={ClipboardList}
-                    options={TYPE_FILTER_OPTIONS}
-                    value={filterType}
-                    onChange={v => setFilterType(v as RequestType | '')}
-                    activeColor="blue"
-                  />
-                  <FilterDropdown
-                    label="Status"
-                    icon={CircleCheck}
-                    options={STATUS_FILTER_OPTIONS}
-                    value={filterStatus}
-                    onChange={v => setFilterStatus(v as RequestStatus | '')}
-                    activeColor="emerald"
-                  />
+                  <div data-testid="requests-filter-type">
+                    <FilterDropdown
+                      label="Tipo"
+                      icon={ClipboardList}
+                      options={TYPE_FILTER_OPTIONS}
+                      value={filterType}
+                      onChange={v => setFilterType(v as RequestType | '')}
+                      activeColor="blue"
+                    />
+                  </div>
+                  <div data-testid="requests-filter-status">
+                    <FilterDropdown
+                      label="Status"
+                      icon={CircleCheck}
+                      options={STATUS_FILTER_OPTIONS}
+                      value={filterStatus}
+                      onChange={v => setFilterStatus(v as RequestStatus | '')}
+                      activeColor="emerald"
+                    />
+                  </div>
                 </>
               }
               renderGridItem={renderGridCard}
