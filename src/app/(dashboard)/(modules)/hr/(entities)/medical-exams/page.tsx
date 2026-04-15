@@ -605,15 +605,18 @@ export default function MedicalExamsPage() {
             </div>
           )}
 
+          <div data-testid="medical-exams-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            placeholder={medicalExamsConfig.display.labels.searchPlaceholder}
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="medical-exams-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder={medicalExamsConfig.display.labels.searchPlaceholder}
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -637,40 +640,48 @@ export default function MedicalExamsPage() {
                 items={filteredItems}
                 toolbarStart={
                   <>
-                    <FilterDropdown
-                      label="Funcionário"
-                      icon={User}
-                      options={employeeOptions}
-                      value={filterEmployeeId}
-                      onChange={v => setFilterEmployeeId(v)}
-                      activeColor="violet"
-                      searchPlaceholder="Buscar funcionário..."
-                      emptyText="Nenhum funcionário encontrado."
-                    />
-                    <FilterDropdown
-                      label="Tipo"
-                      icon={FileText}
-                      options={EXAM_TYPE_OPTIONS}
-                      value={filterType}
-                      onChange={v => setFilterType(v)}
-                      activeColor="cyan"
-                    />
-                    <FilterDropdown
-                      label="Resultado"
-                      icon={CircleCheck}
-                      options={EXAM_RESULT_OPTIONS}
-                      value={filterResult}
-                      onChange={v => setFilterResult(v)}
-                      activeColor="emerald"
-                    />
-                    <FilterDropdown
-                      label="Situação"
-                      icon={ShieldCheck}
-                      options={EXAM_STATUS_OPTIONS}
-                      value={filterStatus}
-                      onChange={v => setFilterStatus(v)}
-                      activeColor="blue"
-                    />
+                    <div data-testid="medical-exams-filter-employee">
+                      <FilterDropdown
+                        label="Funcionário"
+                        icon={User}
+                        options={employeeOptions}
+                        value={filterEmployeeId}
+                        onChange={v => setFilterEmployeeId(v)}
+                        activeColor="violet"
+                        searchPlaceholder="Buscar funcionário..."
+                        emptyText="Nenhum funcionário encontrado."
+                      />
+                    </div>
+                    <div data-testid="medical-exams-filter-type">
+                      <FilterDropdown
+                        label="Tipo"
+                        icon={FileText}
+                        options={EXAM_TYPE_OPTIONS}
+                        value={filterType}
+                        onChange={v => setFilterType(v)}
+                        activeColor="cyan"
+                      />
+                    </div>
+                    <div data-testid="medical-exams-filter-result">
+                      <FilterDropdown
+                        label="Resultado"
+                        icon={CircleCheck}
+                        options={EXAM_RESULT_OPTIONS}
+                        value={filterResult}
+                        onChange={v => setFilterResult(v)}
+                        activeColor="emerald"
+                      />
+                    </div>
+                    <div data-testid="medical-exams-filter-status">
+                      <FilterDropdown
+                        label="Situação"
+                        icon={ShieldCheck}
+                        options={EXAM_STATUS_OPTIONS}
+                        value={filterStatus}
+                        onChange={v => setFilterStatus(v)}
+                        activeColor="blue"
+                      />
+                    </div>
                     <DateRangeFilter
                       startDate={filterStartDate}
                       endDate={filterEndDate}
