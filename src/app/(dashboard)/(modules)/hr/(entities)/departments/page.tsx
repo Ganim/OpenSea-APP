@@ -506,15 +506,18 @@ function DepartmentsPageContent() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="departments-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            placeholder={departmentsConfig.display.labels.searchPlaceholder}
-            value={page.searchQuery}
-            onSearch={value => page.handlers.handleSearch(value)}
-            onClear={() => page.handlers.handleSearch('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="departments-search">
+            <SearchBar
+              placeholder={departmentsConfig.display.labels.searchPlaceholder}
+              value={page.searchQuery}
+              onSearch={value => page.handlers.handleSearch(value)}
+              onClear={() => page.handlers.handleSearch('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {infiniteIsLoading ? (
@@ -534,7 +537,8 @@ function DepartmentsPageContent() {
               config={departmentsConfig}
               items={displayedDepartments}
               toolbarStart={
-                <FilterDropdown
+                <div data-testid="departments-filter-company">
+                  <FilterDropdown
                   label="Empresa"
                   icon={Building2}
                   options={availableCompanies.map(c => ({
@@ -553,6 +557,7 @@ function DepartmentsPageContent() {
                     color: 'emerald',
                   }}
                 />
+                </div>
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
