@@ -493,14 +493,17 @@ function RecruitmentJobPostingsContent() {
         </PageHeader>
 
         <PageBody>
-          <SearchBar
-            placeholder="Buscar vagas..."
-            value={searchQuery}
-            onSearch={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="recruitment-page" className="contents" />
+          <div data-testid="recruitment-search">
+            <SearchBar
+              placeholder="Buscar vagas..."
+              value={searchQuery}
+              onSearch={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -523,36 +526,40 @@ function RecruitmentJobPostingsContent() {
               items={allItems}
               toolbarStart={
                 <>
-                  <FilterDropdown
-                    label="Status"
-                    icon={Briefcase}
-                    options={JOB_POSTING_STATUS_OPTIONS.map(o => ({
-                      id: o.value,
-                      label: o.label,
-                    }))}
-                    selected={statusFilter ? [statusFilter] : []}
-                    onSelectionChange={ids =>
-                      router.push(buildFilterUrl({ status: ids[0] ?? '' }))
-                    }
-                    activeColor="emerald"
-                    searchPlaceholder="Buscar status..."
-                    emptyText="Nenhum status encontrado."
-                  />
-                  <FilterDropdown
-                    label="Tipo"
-                    icon={Briefcase}
-                    options={JOB_POSTING_TYPE_OPTIONS.map(o => ({
-                      id: o.value,
-                      label: o.label,
-                    }))}
-                    selected={typeFilter ? [typeFilter] : []}
-                    onSelectionChange={ids =>
-                      router.push(buildFilterUrl({ type: ids[0] ?? '' }))
-                    }
-                    activeColor="violet"
+                  <div data-testid="recruitment-filter-status">
+                    <FilterDropdown
+                      label="Status"
+                      icon={Briefcase}
+                      options={JOB_POSTING_STATUS_OPTIONS.map(o => ({
+                        id: o.value,
+                        label: o.label,
+                      }))}
+                      selected={statusFilter ? [statusFilter] : []}
+                      onSelectionChange={ids =>
+                        router.push(buildFilterUrl({ status: ids[0] ?? '' }))
+                      }
+                      activeColor="emerald"
+                      searchPlaceholder="Buscar status..."
+                      emptyText="Nenhum status encontrado."
+                    />
+                  </div>
+                  <div data-testid="recruitment-filter-type">
+                    <FilterDropdown
+                      label="Tipo"
+                      icon={Briefcase}
+                      options={JOB_POSTING_TYPE_OPTIONS.map(o => ({
+                        id: o.value,
+                        label: o.label,
+                      }))}
+                      selected={typeFilter ? [typeFilter] : []}
+                      onSelectionChange={ids =>
+                        router.push(buildFilterUrl({ type: ids[0] ?? '' }))
+                      }
+                      activeColor="violet"
                     searchPlaceholder="Buscar tipo..."
                     emptyText="Nenhum tipo encontrado."
                   />
+                  </div>
                 </>
               }
               renderGridItem={renderGridCard}
