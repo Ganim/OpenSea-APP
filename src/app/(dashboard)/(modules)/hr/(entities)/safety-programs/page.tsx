@@ -405,15 +405,18 @@ export default function SafetyProgramsPage() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="safety-programs-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            placeholder={safetyProgramsConfig.display.labels.searchPlaceholder}
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="safety-programs-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder={safetyProgramsConfig.display.labels.searchPlaceholder}
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
