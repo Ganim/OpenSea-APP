@@ -307,11 +307,13 @@ function DelegationsPageContent() {
       </PageHeader>
 
       <PageBody>
+        <div data-testid="delegations-page" className="contents" />
         {/* Tabs */}
         <Tabs
           value={activeTab}
           onValueChange={v => setActiveTab(v as TabValue)}
           className="w-full"
+          data-testid="delegations-tabs"
         >
           <TabsList className="grid w-full grid-cols-2 h-12 mb-4">
             {tabLabels.map(tab => {
@@ -321,6 +323,7 @@ function DelegationsPageContent() {
                   key={tab.value}
                   value={tab.value}
                   className="flex items-center gap-2"
+                  data-testid={`delegations-tab-${tab.value}`}
                 >
                   <Icon className="h-4 w-4" />
                   {tab.label}
