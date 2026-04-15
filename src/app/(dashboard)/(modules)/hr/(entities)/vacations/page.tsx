@@ -561,15 +561,18 @@ export default function VacationsPage() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="vacations-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            placeholder="Buscar férias..."
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="vacations-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder="Buscar férias..."
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -592,32 +595,38 @@ export default function VacationsPage() {
               items={vacations}
               toolbarStart={
                 <>
-                  <FilterDropdown
-                    label="Funcionário"
-                    icon={User}
-                    options={employeeOptions}
-                    value={filterEmployeeId}
-                    onChange={v => setFilterEmployeeId(v)}
-                    activeColor="violet"
-                    searchPlaceholder="Buscar funcionário..."
-                    emptyText="Nenhum funcionário encontrado."
-                  />
-                  <FilterDropdown
-                    label="Status"
-                    icon={CircleCheck}
-                    options={VACATION_STATUS_OPTIONS}
-                    value={filterStatus}
-                    onChange={v => setFilterStatus(v as VacationStatus | '')}
-                    activeColor="emerald"
-                  />
-                  <FilterDropdown
-                    label="Ano"
-                    icon={Calendar}
-                    options={YEAR_OPTIONS}
-                    value={filterYear}
-                    onChange={v => setFilterYear(v)}
-                    activeColor="blue"
-                  />
+                  <div data-testid="vacations-filter-employee">
+                    <FilterDropdown
+                      label="Funcionário"
+                      icon={User}
+                      options={employeeOptions}
+                      value={filterEmployeeId}
+                      onChange={v => setFilterEmployeeId(v)}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar funcionário..."
+                      emptyText="Nenhum funcionário encontrado."
+                    />
+                  </div>
+                  <div data-testid="vacations-filter-status">
+                    <FilterDropdown
+                      label="Status"
+                      icon={CircleCheck}
+                      options={VACATION_STATUS_OPTIONS}
+                      value={filterStatus}
+                      onChange={v => setFilterStatus(v as VacationStatus | '')}
+                      activeColor="emerald"
+                    />
+                  </div>
+                  <div data-testid="vacations-filter-year">
+                    <FilterDropdown
+                      label="Ano"
+                      icon={Calendar}
+                      options={YEAR_OPTIONS}
+                      value={filterYear}
+                      onChange={v => setFilterYear(v)}
+                      activeColor="blue"
+                    />
+                  </div>
                 </>
               }
               renderGridItem={renderGridCard}
