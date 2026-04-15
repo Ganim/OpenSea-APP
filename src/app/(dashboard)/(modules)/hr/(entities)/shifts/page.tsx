@@ -459,15 +459,18 @@ export default function ShiftsPage() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="shifts-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            placeholder={shiftsConfig.display.labels.searchPlaceholder}
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="shifts-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder={shiftsConfig.display.labels.searchPlaceholder}
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {isLoading ? (
@@ -507,26 +510,30 @@ export default function ShiftsPage() {
                 defaultSortDirection="asc"
                 toolbarStart={
                   <>
-                    <FilterDropdown
-                      label="Tipo"
-                      icon={Layers}
-                      options={SHIFT_TYPE_OPTIONS}
-                      selected={selectedTypes}
-                      onSelectionChange={setSelectedTypes}
-                      activeColor="cyan"
-                      searchPlaceholder="Buscar tipo..."
-                      emptyText="Nenhum tipo encontrado."
-                    />
-                    <FilterDropdown
-                      label="Status"
-                      icon={Power}
-                      options={STATUS_OPTIONS}
-                      selected={selectedStatuses}
-                      onSelectionChange={setSelectedStatuses}
-                      activeColor="emerald"
-                      searchPlaceholder="Buscar status..."
-                      emptyText="Nenhum status encontrado."
-                    />
+                    <div data-testid="shifts-filter-type">
+                      <FilterDropdown
+                        label="Tipo"
+                        icon={Layers}
+                        options={SHIFT_TYPE_OPTIONS}
+                        selected={selectedTypes}
+                        onSelectionChange={setSelectedTypes}
+                        activeColor="cyan"
+                        searchPlaceholder="Buscar tipo..."
+                        emptyText="Nenhum tipo encontrado."
+                      />
+                    </div>
+                    <div data-testid="shifts-filter-status">
+                      <FilterDropdown
+                        label="Status"
+                        icon={Power}
+                        options={STATUS_OPTIONS}
+                        selected={selectedStatuses}
+                        onSelectionChange={setSelectedStatuses}
+                        activeColor="emerald"
+                        searchPlaceholder="Buscar status..."
+                        emptyText="Nenhum status encontrado."
+                      />
+                    </div>
                   </>
                 }
               />
