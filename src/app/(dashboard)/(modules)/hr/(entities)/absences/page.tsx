@@ -621,14 +621,17 @@ export default function AbsencesPage() {
         </PageHeader>
 
         <PageBody>
-          <SearchBar
-            value={searchQuery}
-            placeholder="Buscar ausências..."
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="absences-page" className="contents" />
+          <div data-testid="absences-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder="Buscar ausências..."
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {isLoading ? (
             <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -650,32 +653,38 @@ export default function AbsencesPage() {
               items={absences}
               toolbarStart={
                 <>
-                  <FilterDropdown
-                    label="Funcionário"
-                    icon={User}
-                    options={employeeOptions}
-                    value={filterEmployeeId}
-                    onChange={v => setFilterEmployeeId(v)}
-                    activeColor="violet"
-                    searchPlaceholder="Buscar funcionário..."
-                    emptyText="Nenhum funcionário encontrado."
-                  />
-                  <FilterDropdown
-                    label="Tipo"
-                    icon={FileText}
-                    options={typeOptions}
-                    value={filterType}
-                    onChange={v => setFilterType(v as AbsenceType | '')}
-                    activeColor="emerald"
-                  />
-                  <FilterDropdown
-                    label="Status"
-                    icon={CircleCheck}
-                    options={statusOptions}
-                    value={filterStatus}
-                    onChange={v => setFilterStatus(v as AbsenceStatus | '')}
-                    activeColor="cyan"
-                  />
+                  <div data-testid="absences-filter-employee">
+                    <FilterDropdown
+                      label="Funcionário"
+                      icon={User}
+                      options={employeeOptions}
+                      value={filterEmployeeId}
+                      onChange={v => setFilterEmployeeId(v)}
+                      activeColor="violet"
+                      searchPlaceholder="Buscar funcionário..."
+                      emptyText="Nenhum funcionário encontrado."
+                    />
+                  </div>
+                  <div data-testid="absences-filter-type">
+                    <FilterDropdown
+                      label="Tipo"
+                      icon={FileText}
+                      options={typeOptions}
+                      value={filterType}
+                      onChange={v => setFilterType(v as AbsenceType | '')}
+                      activeColor="emerald"
+                    />
+                  </div>
+                  <div data-testid="absences-filter-status">
+                    <FilterDropdown
+                      label="Status"
+                      icon={CircleCheck}
+                      options={statusOptions}
+                      value={filterStatus}
+                      onChange={v => setFilterStatus(v as AbsenceStatus | '')}
+                      activeColor="cyan"
+                    />
+                  </div>
                 </>
               }
               renderGridItem={renderGridCard}
