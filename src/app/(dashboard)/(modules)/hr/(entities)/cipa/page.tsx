@@ -399,15 +399,18 @@ export default function CipaPage() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="cipa-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            placeholder={cipaConfig.display.labels.searchPlaceholder}
-            onSearch={value => setSearchQuery(value)}
-            onClear={() => setSearchQuery('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="cipa-search">
+            <SearchBar
+              value={searchQuery}
+              placeholder={cipaConfig.display.labels.searchPlaceholder}
+              onSearch={value => setSearchQuery(value)}
+              onClear={() => setSearchQuery('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
