@@ -384,8 +384,9 @@ function KudosPageContent() {
       </PageHeader>
 
       <PageBody>
+        <div data-testid="kudos-page" className="contents" />
         {/* Tabs */}
-        <Tabs value={activeTab} className="w-full">
+        <Tabs value={activeTab} className="w-full" data-testid="kudos-tabs">
           <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
             {tabLabels.map(tab => {
               const Icon = tab.icon;
@@ -395,6 +396,7 @@ function KudosPageContent() {
                   value={tab.value}
                   onClick={() => setActiveTab(tab.value)}
                   className="flex items-center gap-2"
+                  data-testid={`kudos-tab-${tab.value}`}
                 >
                   <Icon className="h-4 w-4" />
                   {tab.label}
@@ -406,7 +408,7 @@ function KudosPageContent() {
 
         {/* Search + Filter */}
         <div className="flex items-center gap-3">
-          <div className="flex-1">
+          <div className="flex-1" data-testid="kudos-search">
             <SearchBar
               placeholder="Buscar por nome ou mensagem..."
               value={searchQuery}
@@ -416,16 +418,18 @@ function KudosPageContent() {
               size="md"
             />
           </div>
-          <FilterDropdown
-            label="Categoria"
-            icon={Award}
-            options={CATEGORY_FILTER_OPTIONS}
-            selected={categoryFilter}
-            onSelectionChange={setCategoryFilter}
-            activeColor="violet"
-            searchPlaceholder="Buscar categoria..."
-            emptyText="Nenhuma categoria encontrada."
-          />
+          <div data-testid="kudos-filter-category">
+            <FilterDropdown
+              label="Categoria"
+              icon={Award}
+              options={CATEGORY_FILTER_OPTIONS}
+              selected={categoryFilter}
+              onSelectionChange={setCategoryFilter}
+              activeColor="violet"
+              searchPlaceholder="Buscar categoria..."
+              emptyText="Nenhuma categoria encontrada."
+            />
+          </div>
         </div>
 
         {/* Content */}
