@@ -514,15 +514,18 @@ function GeofenceZonesPageContent() {
         </PageHeader>
 
         <PageBody>
+          <div data-testid="geofence-zones-page" className="contents" />
           {/* Search Bar */}
-          <SearchBar
-            placeholder={geofenceZonesConfig.display.labels.searchPlaceholder}
-            value={page.searchQuery}
-            onSearch={value => page.handlers.handleSearch(value)}
-            onClear={() => page.handlers.handleSearch('')}
-            showClear={true}
-            size="md"
-          />
+          <div data-testid="geofence-zones-search">
+            <SearchBar
+              placeholder={geofenceZonesConfig.display.labels.searchPlaceholder}
+              value={page.searchQuery}
+              onSearch={value => page.handlers.handleSearch(value)}
+              onClear={() => page.handlers.handleSearch('')}
+              showClear={true}
+              size="md"
+            />
+          </div>
 
           {/* Grid */}
           {infiniteIsLoading ? (
@@ -542,19 +545,21 @@ function GeofenceZonesPageContent() {
               config={geofenceZonesConfig}
               items={displayedZones}
               toolbarStart={
-                <FilterDropdown
-                  label="Status"
-                  icon={MapPin}
-                  options={[
-                    { id: 'active', label: 'Ativa' },
-                    { id: 'inactive', label: 'Inativa' },
-                  ]}
-                  selected={statusFilter}
-                  onSelectionChange={setStatusFilter}
-                  activeColor="emerald"
-                  searchPlaceholder="Filtrar status..."
-                  emptyText="Nenhum status disponível."
-                />
+                <div data-testid="geofence-zones-filter-status">
+                  <FilterDropdown
+                    label="Status"
+                    icon={MapPin}
+                    options={[
+                      { id: 'active', label: 'Ativa' },
+                      { id: 'inactive', label: 'Inativa' },
+                    ]}
+                    selected={statusFilter}
+                    onSelectionChange={setStatusFilter}
+                    activeColor="emerald"
+                    searchPlaceholder="Filtrar status..."
+                    emptyText="Nenhum status disponível."
+                  />
+                </div>
               }
               renderGridItem={renderGridCard}
               renderListItem={renderListCard}
