@@ -284,6 +284,14 @@ export const FINANCE_PERMISSIONS = {
     'admin'
   ),
   ACCOUNTANT: perm('finance', 'accountant', 'access', 'register', 'admin'),
+  PERIOD_LOCKS: perm(
+    'finance',
+    'period-locks',
+    'access',
+    'register',
+    'remove',
+    'admin'
+  ),
 } as const;
 
 // =============================================================================
