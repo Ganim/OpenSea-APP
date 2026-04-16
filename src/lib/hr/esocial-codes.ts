@@ -60,7 +60,8 @@ const ESOCIAL_CODE_CATALOG: Record<string, EsocialCodeInfo> = {
     severity: 'error',
   },
   '1103': {
-    message: 'CPF do trabalhador inválido ou em situação irregular na Receita Federal.',
+    message:
+      'CPF do trabalhador inválido ou em situação irregular na Receita Federal.',
     hint: 'Verifique a situação cadastral do CPF e atualize os dados do funcionário.',
     severity: 'error',
   },
@@ -152,7 +153,9 @@ const ESOCIAL_CODE_CATALOG: Record<string, EsocialCodeInfo> = {
  * Retorna informações detalhadas sobre um código de retorno do eSocial.
  * Caso o código não esteja catalogado, devolve um fallback genérico.
  */
-export function getEsocialCodeInfo(code: string | null | undefined): EsocialCodeInfo {
+export function getEsocialCodeInfo(
+  code: string | null | undefined
+): EsocialCodeInfo {
   if (!code) {
     return {
       message: 'Código não informado pelo eSocial.',
@@ -185,14 +188,18 @@ export function getEsocialErrorHint(code: string | null | undefined): string {
 /**
  * Atalho para obter apenas a mensagem traduzida do código.
  */
-export function getEsocialErrorMessage(code: string | null | undefined): string {
+export function getEsocialErrorMessage(
+  code: string | null | undefined
+): string {
   return getEsocialCodeInfo(code).message;
 }
 
 /**
  * Lista todos os códigos catalogados (útil para help/tooltip de referência).
  */
-export function listKnownEsocialCodes(): Array<{ code: string } & EsocialCodeInfo> {
+export function listKnownEsocialCodes(): Array<
+  { code: string } & EsocialCodeInfo
+> {
   return Object.entries(ESOCIAL_CODE_CATALOG).map(([code, info]) => ({
     code,
     ...info,

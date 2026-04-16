@@ -246,9 +246,7 @@ export function KeyResultCheckinModal({
                     data-testid={`checkin-status-${option.value.toLowerCase()}`}
                     className={cn(
                       'w-full rounded-lg border p-2.5 text-left text-sm transition-colors',
-                      isSelected
-                        ? accentClass
-                        : 'border-border hover:bg-accent'
+                      isSelected ? accentClass : 'border-border hover:bg-accent'
                     )}
                   >
                     <div className="font-medium">{option.label}</div>

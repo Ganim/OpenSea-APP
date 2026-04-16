@@ -504,7 +504,9 @@ export default function WorkplaceRisksPage() {
           <div data-testid="workplace-risks-search">
             <SearchBar
               value={searchQuery}
-              placeholder={workplaceRisksConfig.display.labels.searchPlaceholder}
+              placeholder={
+                workplaceRisksConfig.display.labels.searchPlaceholder
+              }
               onSearch={value => setSearchQuery(value)}
               onClear={() => setSearchQuery('')}
               showClear={true}

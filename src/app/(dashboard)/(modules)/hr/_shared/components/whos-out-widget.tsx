@@ -13,12 +13,7 @@ import { useEmployeeMap } from '@/hooks/use-employee-map';
 import { absencesService } from '@/services/hr/absences.service';
 import { vacationsService } from '@/services/hr/vacations.service';
 import { useQuery } from '@tanstack/react-query';
-import {
-  CalendarDays,
-  CalendarOff,
-  PalmtreeIcon,
-  UserX,
-} from 'lucide-react';
+import { CalendarDays, CalendarOff, PalmtreeIcon, UserX } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -114,7 +109,8 @@ export function WhosOutWidget() {
   const employeeIds = useMemo(() => {
     const ids: string[] = [];
     for (const a of absencesData?.absences ?? []) ids.push(a.employeeId);
-    for (const v of vacationsData?.vacationPeriods ?? []) ids.push(v.employeeId);
+    for (const v of vacationsData?.vacationPeriods ?? [])
+      ids.push(v.employeeId);
     return ids;
   }, [absencesData, vacationsData]);
 
@@ -157,7 +153,7 @@ export function WhosOutWidget() {
     return list
       .sort(
         (a, b) =>
-          new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       )
       .slice(0, 8);
   }, [absencesData, vacationsData, today, horizon, getName]);
@@ -165,10 +161,7 @@ export function WhosOutWidget() {
   const isLoading = absLoading || vacLoading;
 
   return (
-    <Card
-      className="bg-white/5 p-5 space-y-4"
-      data-testid="hr-whos-out-widget"
-    >
+    <Card className="bg-white/5 p-5 space-y-4" data-testid="hr-whos-out-widget">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-amber-500 to-rose-500 text-white">
@@ -203,10 +196,7 @@ export function WhosOutWidget() {
           </p>
         </div>
       ) : (
-        <ul
-          className="space-y-2"
-          data-testid="hr-whos-out-list"
-        >
+        <ul className="space-y-2" data-testid="hr-whos-out-list">
           {items.map(item => {
             const tone =
               item.type === 'VACATION'
@@ -221,7 +211,8 @@ export function WhosOutWidget() {
             const label =
               item.type === 'VACATION'
                 ? 'Férias'
-                : ABSENCE_TYPE_LABEL[item.subtype ?? 'OTHER'] ?? 'Afastamento';
+                : (ABSENCE_TYPE_LABEL[item.subtype ?? 'OTHER'] ??
+                  'Afastamento');
 
             return (
               <li

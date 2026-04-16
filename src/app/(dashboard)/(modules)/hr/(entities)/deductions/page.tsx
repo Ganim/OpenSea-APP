@@ -572,12 +572,17 @@ export default function DeductionsPage() {
                             : 'false'
                       }
                       onChange={v =>
-                        setFilterIsRecurring(v === '' ? undefined : v === 'true')
+                        setFilterIsRecurring(
+                          v === '' ? undefined : v === 'true'
+                        )
                       }
                       activeColor="cyan"
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="deductions-count">
+                  <p
+                    className="text-sm text-muted-foreground whitespace-nowrap"
+                    data-testid="deductions-count"
+                  >
                     {filteredItems.length}{' '}
                     {filteredItems.length === 1 ? 'dedução' : 'deduções'}
                   </p>

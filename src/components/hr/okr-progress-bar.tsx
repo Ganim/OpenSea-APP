@@ -6,7 +6,11 @@
 
 'use client';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
   getHealthBarClass,
@@ -66,7 +70,9 @@ export function OkrProgressBar({
     <div className={cn('w-full space-y-1', className)}>
       {showLabel && (
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">{getHealthLabel(health)}</span>
+          <span className="text-muted-foreground">
+            {getHealthLabel(health)}
+          </span>
           <span className="font-medium">{clamped}%</span>
         </div>
       )}

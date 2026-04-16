@@ -69,14 +69,13 @@ import {
 // CONSTANTS
 // ============================================================================
 
-type Recurrence =
-  | 'ONCE'
-  | 'WEEKLY'
-  | 'BIWEEKLY'
-  | 'MONTHLY'
-  | 'QUARTERLY';
+type Recurrence = 'ONCE' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY';
 
-const RECURRENCE_OPTIONS: { value: Recurrence; label: string; subtitle: string }[] = [
+const RECURRENCE_OPTIONS: {
+  value: Recurrence;
+  label: string;
+  subtitle: string;
+}[] = [
   {
     value: 'ONCE',
     label: 'Único',
@@ -110,8 +109,7 @@ const SURVEY_TYPE_DESCRIPTIONS: Record<SurveyType, string> = {
   ENGAGEMENT:
     'Pesquisa profunda de engajamento com várias dimensões (cultura, liderança, crescimento).',
   SATISFACTION: 'Pesquisa de satisfação geral com a empresa ou um processo.',
-  EXIT:
-    'Pesquisa de desligamento aplicada quando um colaborador deixa a empresa.',
+  EXIT: 'Pesquisa de desligamento aplicada quando um colaborador deixa a empresa.',
   CUSTOM: 'Pesquisa personalizada para necessidades específicas.',
 };
 
@@ -299,9 +297,7 @@ export function CreateSurveyModal({
   // HELPERS
   // ============================================================================
 
-  const makeDraftQuestion = (
-    template?: QuestionTemplate
-  ): DraftQuestion => ({
+  const makeDraftQuestion = (template?: QuestionTemplate): DraftQuestion => ({
     id: `draft-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     text: template?.text ?? '',
     type: template?.type ?? '',
@@ -688,7 +684,10 @@ export function CreateSurveyModal({
                   {SURVEY_TYPE_LABELS[type]}
                 </Badge>
               )}
-              <Badge variant="outline" className="bg-slate-100 dark:bg-slate-500/8 border-0">
+              <Badge
+                variant="outline"
+                className="bg-slate-100 dark:bg-slate-500/8 border-0"
+              >
                 {questions.length}{' '}
                 {questions.length === 1 ? 'pergunta' : 'perguntas'}
               </Badge>
@@ -813,8 +812,7 @@ function DraftQuestionEditor({
               onValueChange={value =>
                 onUpdate({
                   type: value as SurveyQuestionType,
-                  options:
-                    value === 'MULTIPLE_CHOICE' ? question.options : [],
+                  options: value === 'MULTIPLE_CHOICE' ? question.options : [],
                 })
               }
             >
@@ -886,9 +884,7 @@ function DraftQuestionEditor({
                 variant="ghost"
                 size="sm"
                 className="h-8"
-                onClick={() =>
-                  onUpdate({ options: [...visibleOptions, ''] })
-                }
+                onClick={() => onUpdate({ options: [...visibleOptions, ''] })}
               >
                 <Plus className="h-3.5 w-3.5 mr-1" />
                 Adicionar opção

@@ -161,11 +161,14 @@ export function EsocialStatusChip({
       className={cn(
         'inline-flex items-center gap-1 px-2 py-0.5 font-medium text-xs',
         visual.className,
-        className,
+        className
       )}
     >
       {showIcon && (
-        <Icon className={cn('h-3 w-3', visual.iconAnimation)} aria-hidden="true" />
+        <Icon
+          className={cn('h-3 w-3', visual.iconAnimation)}
+          aria-hidden="true"
+        />
       )}
       <span>{visual.label}</span>
     </Badge>

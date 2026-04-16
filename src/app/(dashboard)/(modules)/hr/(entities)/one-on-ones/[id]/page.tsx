@@ -393,10 +393,7 @@ export default function OneOnOneDetailPage() {
                 >
                   {STATUS_LABEL[meeting.status]}
                 </Badge>
-                <Badge
-                  variant="outline"
-                  className={ROLE_BADGE_CLASSES.manager}
-                >
+                <Badge variant="outline" className={ROLE_BADGE_CLASSES.manager}>
                   Gestor: {meeting.manager?.fullName ?? '—'}
                 </Badge>
                 <Badge variant="outline" className={ROLE_BADGE_CLASSES.report}>
@@ -586,10 +583,7 @@ function TalkingPointsColumn({
         <span className="text-xs text-muted-foreground">({points.length})</span>
       </header>
 
-      <ul
-        className="flex flex-col gap-2"
-        data-testid="talking-points-list"
-      >
+      <ul className="flex flex-col gap-2" data-testid="talking-points-list">
         {points.length === 0 ? (
           <li className="rounded-md border border-dashed border-border bg-white/40 px-3 py-6 text-center text-xs text-muted-foreground dark:bg-slate-900/20">
             Nenhuma pauta cadastrada ainda.
@@ -887,7 +881,14 @@ function NoteEditor({
           ),
       }
     );
-  }, [debouncedDraft, isDirty, existingNote?.content, isPrivate, isReadOnly, upsertMutation]);
+  }, [
+    debouncedDraft,
+    isDirty,
+    existingNote?.content,
+    isPrivate,
+    isReadOnly,
+    upsertMutation,
+  ]);
 
   return (
     <div className="flex flex-col gap-2" data-testid={dataTestId}>
@@ -944,7 +945,10 @@ function ActionItemsColumn({
   // Default owner = current user if participant, else manager
   useEffect(() => {
     if (ownerId) return;
-    if (myEmployeeId === meeting.managerId || myEmployeeId === meeting.reportId) {
+    if (
+      myEmployeeId === meeting.managerId ||
+      myEmployeeId === meeting.reportId
+    ) {
       setOwnerId(myEmployeeId as string);
     } else {
       setOwnerId(meeting.managerId);

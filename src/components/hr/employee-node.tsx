@@ -126,8 +126,9 @@ export function EmployeeNode({ data }: NodeProps) {
 
   const positionName = employee.position?.name ?? null;
   const departmentName = employee.department?.name ?? null;
-  const supervisorName = (employee as Employee & { supervisor?: Employee | null })
-    .supervisor?.fullName;
+  const supervisorName = (
+    employee as Employee & { supervisor?: Employee | null }
+  ).supervisor?.fullName;
 
   const handleNavigateToEmployee = useCallback(() => {
     router.push(`/hr/employees/${employee.id}`);

@@ -91,9 +91,7 @@ export function NPSScoreCard({
       data-testid={testId}
     >
       <div className="flex items-baseline justify-between mb-1">
-        <h3 className="text-sm font-semibold text-muted-foreground">
-          {title}
-        </h3>
+        <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
         {stats.total > 0 && (
           <span className="text-xs text-muted-foreground">
             {stats.total} {stats.total === 1 ? 'resposta' : 'respostas'}

@@ -565,7 +565,10 @@ export default function DependantsPage() {
                       activeColor="cyan"
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-nowrap" data-testid="dependants-count">
+                  <p
+                    className="text-sm text-muted-foreground whitespace-nowrap"
+                    data-testid="dependants-count"
+                  >
                     {filteredItems.length}{' '}
                     {filteredItems.length === 1 ? 'dependente' : 'dependentes'}
                   </p>

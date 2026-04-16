@@ -168,10 +168,7 @@ export function SurveyAnswerInput({
                   : 'border-border hover:border-violet-300 hover:bg-accent'
               }`}
             >
-              <Checkbox
-                checked={isChecked}
-                className="pointer-events-none"
-              />
+              <Checkbox checked={isChecked} className="pointer-events-none" />
               <span className="text-sm font-medium">{option}</span>
             </button>
           );

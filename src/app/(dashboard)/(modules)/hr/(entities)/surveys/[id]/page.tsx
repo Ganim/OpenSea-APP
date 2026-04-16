@@ -204,7 +204,9 @@ export default function SurveyDetailPage() {
   }
 
   const survey = surveyData;
-  const questions = (survey.questions ?? []).slice().sort((a, b) => a.order - b.order);
+  const questions = (survey.questions ?? [])
+    .slice()
+    .sort((a, b) => a.order - b.order);
   const typeColors =
     SURVEY_TYPE_COLORS[survey.type as SurveyType] ?? SURVEY_TYPE_COLORS.CUSTOM;
   const statusColors =
@@ -218,9 +220,10 @@ export default function SurveyDetailPage() {
   const responsesCount = survey._count?.responses ?? 0;
   // Audience size é desconhecido sem suporte do backend; usa um proxy razoável.
   const audienceSize = Math.max(responsesCount, 1);
-  const responseRate = audienceSize > 0
-    ? Math.min(100, Math.round((responsesCount / audienceSize) * 100))
-    : 0;
+  const responseRate =
+    audienceSize > 0
+      ? Math.min(100, Math.round((responsesCount / audienceSize) * 100))
+      : 0;
 
   const hasNpsQuestion = questions.some(question => question.type === 'NPS');
 
@@ -554,7 +557,9 @@ function OverviewTab({
           <div className="flex items-start gap-3">
             <Calendar className="h-5 w-5 text-violet-500 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium">Aguardando primeiras respostas</p>
+              <p className="text-sm font-medium">
+                Aguardando primeiras respostas
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 As métricas detalhadas (por pergunta, por departamento e
                 tendência) aparecerão automaticamente conforme o time responder.
@@ -592,11 +597,7 @@ function QuestionsTab({
             <p className="text-xs text-muted-foreground mt-1 mb-4">
               Adicione pelo menos uma pergunta antes de ativar a pesquisa.
             </p>
-            <Button
-              size="sm"
-              className="h-9 px-2.5"
-              onClick={onAddQuestion}
-            >
+            <Button size="sm" className="h-9 px-2.5" onClick={onAddQuestion}>
               <Plus className="h-4 w-4 mr-1" />
               Adicionar pergunta
             </Button>
@@ -610,8 +611,7 @@ function QuestionsTab({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {questions.length}{' '}
-          {questions.length === 1 ? 'pergunta' : 'perguntas'}
+          {questions.length} {questions.length === 1 ? 'pergunta' : 'perguntas'}
         </p>
         {isDraft && canModify && (
           <Button size="sm" className="h-9 px-2.5" onClick={onAddQuestion}>
@@ -747,12 +747,22 @@ function QuestionChartByType({
 
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={distribution} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
+      <BarChart
+        data={distribution}
+        margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="rgba(148, 163, 184, 0.25)"
+        />
         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
         <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
         <Tooltip />
-        <Bar dataKey="count" fill="oklch(0.61 0.22 293)" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="count"
+          fill="oklch(0.61 0.22 293)"
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -768,8 +778,8 @@ function DepartmentsTab({ questions }: { questions: SurveyQuestion[] }) {
       <Building2 className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
       <p className="text-sm font-semibold">Análise por Departamento</p>
       <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-        O cruzamento das respostas por departamento estará disponível assim
-        que o backend expor os dados agregados de respondentes. Por enquanto,
+        O cruzamento das respostas por departamento estará disponível assim que
+        o backend expor os dados agregados de respondentes. Por enquanto,
         analise as métricas individualmente em &ldquo;Por Pergunta&rdquo;.
       </p>
       {questions.length > 0 && (

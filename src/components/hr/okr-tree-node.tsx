@@ -12,10 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { OkrTreeNode as OkrTreeNodeData } from '@/lib/hr/okr-rollup';
-import {
-  getHealthBadgeClass,
-  getHealthLabel,
-} from '@/lib/hr/okr-rollup';
+import { getHealthBadgeClass, getHealthLabel } from '@/lib/hr/okr-rollup';
 import {
   getObjectiveLevelBadgeClass,
   getObjectiveLevelLabel,
@@ -76,7 +73,8 @@ export function OkrTreeNode({
         className={cn(
           'group relative flex items-start gap-3 rounded-lg border bg-white dark:bg-slate-800/60 p-3 transition-colors',
           'hover:border-violet-300 dark:hover:border-violet-700',
-          isSelected && 'border-violet-500 ring-2 ring-violet-200 dark:ring-violet-900'
+          isSelected &&
+            'border-violet-500 ring-2 ring-violet-200 dark:ring-violet-900'
         )}
       >
         <Button
@@ -164,9 +162,7 @@ export function OkrTreeNode({
             </div>
 
             <div className="flex flex-col items-end gap-1 min-w-[140px]">
-              <div className="text-xs font-medium">
-                {node.rollupProgress}%
-              </div>
+              <div className="text-xs font-medium">{node.rollupProgress}%</div>
               <OkrProgressBar
                 progress={node.rollupProgress}
                 health={node.health}

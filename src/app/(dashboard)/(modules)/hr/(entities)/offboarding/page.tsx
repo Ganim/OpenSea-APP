@@ -172,7 +172,10 @@ function OffboardingPageContent() {
                 activeColor="violet"
               />
             </div>
-            <span className="text-xs text-muted-foreground" data-testid="offboarding-count">
+            <span
+              className="text-xs text-muted-foreground"
+              data-testid="offboarding-count"
+            >
               {checklists.length} checklist(s)
             </span>
           </div>

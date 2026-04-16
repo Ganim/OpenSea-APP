@@ -19,11 +19,7 @@
  * The backend re-resolves the audience precisely on create/update.
  */
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -233,9 +229,7 @@ function MultiPicker({
                         </Avatar>
                       )}
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="truncate text-sm">
-                          {option.label}
-                        </span>
+                        <span className="truncate text-sm">{option.label}</span>
                         {option.caption && (
                           <span className="truncate text-[0.6875rem] text-muted-foreground">
                             {option.caption}
@@ -499,9 +493,7 @@ export function AudienceSelector({
           icon={Building2}
           options={departmentOptions}
           selected={safeValue.departments}
-          onChange={departments =>
-            onChange({ ...safeValue, departments })
-          }
+          onChange={departments => onChange({ ...safeValue, departments })}
           isLoading={departmentsQuery.isLoading}
           disabled={broadcastToAll}
           emptyText="Nenhum departamento ativo."

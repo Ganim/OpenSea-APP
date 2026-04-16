@@ -40,9 +40,7 @@ export function KanbanJobSelector({
 
   const filteredJobs = (openJobPostings ?? []).filter(jobPosting => {
     if (!searchInput.trim()) return true;
-    return jobPosting.title
-      .toLowerCase()
-      .includes(searchInput.toLowerCase());
+    return jobPosting.title.toLowerCase().includes(searchInput.toLowerCase());
   });
 
   const handleSelectJob = (jobPostingId: string) => {

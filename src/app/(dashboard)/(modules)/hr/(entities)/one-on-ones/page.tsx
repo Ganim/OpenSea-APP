@@ -23,10 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
-import {
-  useOneOnOnes,
-  useScheduleOneOnOne,
-} from '@/hooks/hr/use-one-on-ones';
+import { useOneOnOnes, useScheduleOneOnOne } from '@/hooks/hr/use-one-on-ones';
 import { useMyEmployee } from '@/hooks/use-me';
 import { usePermissions } from '@/hooks/use-permissions';
 import { translateError } from '@/lib/error-messages';
@@ -150,7 +147,9 @@ function OneOnOnesPageContent() {
 
   const setActiveTab = useCallback(
     (tab: TabValue) => {
-      router.push(tab === 'upcoming' ? '/hr/one-on-ones' : `/hr/one-on-ones?tab=${tab}`);
+      router.push(
+        tab === 'upcoming' ? '/hr/one-on-ones' : `/hr/one-on-ones?tab=${tab}`
+      );
     },
     [router]
   );
@@ -238,8 +237,7 @@ function OneOnOnesPageContent() {
         await scheduleMutation.mutateAsync(payload);
         toast.success('Reunião 1:1 agendada com sucesso.');
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         toast.error(translateError(message));
         throw error;
       }
@@ -555,7 +553,8 @@ function EmptyState({ tab, canCreate, onCreate }: EmptyStateProps) {
   const descriptionByTab: Record<TabValue, string> = {
     upcoming: 'Que tal agendar uma conversa com seu time?',
     completed: 'Reuniões concluídas aparecerão por aqui.',
-    'as-manager': 'Quando você agendar 1:1 com seus liderados, eles aparecem nesta aba.',
+    'as-manager':
+      'Quando você agendar 1:1 com seus liderados, eles aparecem nesta aba.',
     'as-report': 'Quando seu gestor agendar uma reunião, ela aparece aqui.',
     'pending-actions': 'Você está em dia com seus compromissos. Bom trabalho.',
   };

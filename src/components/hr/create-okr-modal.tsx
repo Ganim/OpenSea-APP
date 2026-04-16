@@ -748,23 +748,25 @@ export function CreateOKRModal({
           <div className="space-y-2">
             <Label>Visibilidade</Label>
             <div className="grid grid-cols-3 gap-2">
-              {([
-                {
-                  value: 'PUBLIC',
-                  label: 'Pública',
-                  description: 'Toda a empresa vê',
-                },
-                {
-                  value: 'TEAM',
-                  label: 'Equipe',
-                  description: 'Apenas a equipe',
-                },
-                {
-                  value: 'PRIVATE',
-                  label: 'Privada',
-                  description: 'Apenas responsável e gestor',
-                },
-              ] as const).map(option => {
+              {(
+                [
+                  {
+                    value: 'PUBLIC',
+                    label: 'Pública',
+                    description: 'Toda a empresa vê',
+                  },
+                  {
+                    value: 'TEAM',
+                    label: 'Equipe',
+                    description: 'Apenas a equipe',
+                  },
+                  {
+                    value: 'PRIVATE',
+                    label: 'Privada',
+                    description: 'Apenas responsável e gestor',
+                  },
+                ] as const
+              ).map(option => {
                 const isSelected = visibility === option.value;
                 return (
                   <button
@@ -816,9 +818,7 @@ export function CreateOKRModal({
                 <input
                   type="checkbox"
                   checked={notifyParentOwner}
-                  onChange={event =>
-                    setNotifyParentOwner(event.target.checked)
-                  }
+                  onChange={event => setNotifyParentOwner(event.target.checked)}
                   className="mt-0.5"
                 />
                 <div className="flex-1">

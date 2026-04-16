@@ -161,7 +161,10 @@ function OnboardingPageContent() {
                 activeColor="emerald"
               />
             </div>
-            <span className="text-xs text-muted-foreground" data-testid="onboarding-count">
+            <span
+              className="text-xs text-muted-foreground"
+              data-testid="onboarding-count"
+            >
               {checklists.length} checklist(s)
             </span>
           </div>

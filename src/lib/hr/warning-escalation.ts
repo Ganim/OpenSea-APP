@@ -17,10 +17,7 @@
  * com efeitos jurídicos previstos na CLT.
  */
 
-import type {
-  EmployeeWarning,
-  WarningType,
-} from '@/types/hr';
+import type { EmployeeWarning, WarningType } from '@/types/hr';
 
 /**
  * Ordem oficial da escala disciplinar progressiva. A posição na ordem
@@ -152,10 +149,7 @@ export function calculateSeverityScore(warnings: EmployeeWarning[]): number {
       0,
       Math.floor((now - incidentTime) / (1000 * 60 * 60 * 24))
     );
-    const recencyFactor = Math.max(
-      0,
-      1 - ageDays / RECENCY_WINDOW_DAYS
-    );
+    const recencyFactor = Math.max(0, 1 - ageDays / RECENCY_WINDOW_DAYS);
     return accumulatedScore + baseWeight * recencyFactor;
   }, 0);
 }

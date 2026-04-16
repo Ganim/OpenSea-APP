@@ -22,12 +22,7 @@ import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import { portalService } from '@/services/hr';
@@ -82,10 +77,7 @@ const PRIORITY_FILTER_OPTIONS = [
 
 type AnnouncementTab = 'for-me' | 'all' | 'unread' | 'pinned';
 
-const TAB_CONFIG: Record<
-  AnnouncementTab,
-  { label: string; testId: string }
-> = {
+const TAB_CONFIG: Record<AnnouncementTab, { label: string; testId: string }> = {
   'for-me': { label: 'Para mim', testId: 'announcements-tab-for-me' },
   all: { label: 'Todos', testId: 'announcements-tab-all' },
   unread: { label: 'Nao lidos', testId: 'announcements-tab-unread' },
@@ -94,9 +86,10 @@ const TAB_CONFIG: Record<
 
 const PAGE_SIZE = 20;
 
-function getMetaPages(
-  meta: AnnouncementsResponse['meta'] | undefined
-): { current: number; total: number } {
+function getMetaPages(meta: AnnouncementsResponse['meta'] | undefined): {
+  current: number;
+  total: number;
+} {
   if (!meta) return { current: 1, total: 1 };
   if ('totalPages' in meta) {
     return { current: meta.page, total: meta.totalPages };

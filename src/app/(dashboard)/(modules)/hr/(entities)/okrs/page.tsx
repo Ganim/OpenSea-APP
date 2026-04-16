@@ -181,10 +181,7 @@ export default function OKRsPage() {
 
   // Tree must be built from full set so children with non-matching parents
   // still cascade up properly; then we filter the tree post-build.
-  const tree = useMemo(
-    () => buildOkrTree(allObjectives),
-    [allObjectives]
-  );
+  const tree = useMemo(() => buildOkrTree(allObjectives), [allObjectives]);
 
   const filteredTree = useMemo(() => {
     if (!searchQuery.trim()) return tree;

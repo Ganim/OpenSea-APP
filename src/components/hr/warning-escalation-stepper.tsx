@@ -27,13 +27,7 @@ import {
   getHighestEscalationReached,
 } from '@/lib/hr/warning-escalation';
 import type { EmployeeWarning, WarningType } from '@/types/hr';
-import {
-  Check,
-  FileText,
-  MessageCircle,
-  Pause,
-  XOctagon,
-} from 'lucide-react';
+import { Check, FileText, MessageCircle, Pause, XOctagon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -109,10 +103,7 @@ export function WarningEscalationStepper({
       let status: StepStatus;
       if (stepIndex === currentIndex) {
         status = 'current';
-      } else if (
-        stepIndex < currentIndex ||
-        stepIndex <= highestReachedIndex
-      ) {
+      } else if (stepIndex < currentIndex || stepIndex <= highestReachedIndex) {
         status = 'completed';
       } else {
         status = 'pending';
@@ -207,9 +198,7 @@ function StepNode({ step }: StepNodeProps) {
             'text-sm font-semibold',
             isCurrent && 'text-violet-700 dark:text-violet-300',
             isCompleted && 'text-emerald-700 dark:text-emerald-300',
-            !isCurrent &&
-              !isCompleted &&
-              'text-slate-500 dark:text-slate-400'
+            !isCurrent && !isCompleted && 'text-slate-500 dark:text-slate-400'
           )}
         >
           {step.label}

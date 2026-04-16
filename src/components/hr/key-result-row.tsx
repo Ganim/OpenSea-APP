@@ -84,12 +84,9 @@ export function KeyResultRow({
 
   const lastTwo = checkInsSorted.slice(0, 2);
   const trend =
-    lastTwo.length === 2
-      ? lastTwo[0].newValue - lastTwo[1].newValue
-      : null;
+    lastTwo.length === 2 ? lastTwo[0].newValue - lastTwo[1].newValue : null;
 
-  const ownerName =
-    checkInsSorted[0]?.employee?.fullName ?? null;
+  const ownerName = checkInsSorted[0]?.employee?.fullName ?? null;
 
   const health = useMemo(() => {
     if (keyResult.status === 'COMPLETED') return 'COMPLETED' as const;
@@ -197,7 +194,9 @@ export function KeyResultRow({
             size="sm"
             className="h-9 w-9 p-0"
             onClick={() => setIsExpanded(prev => !prev)}
-            aria-label={isExpanded ? 'Recolher histórico' : 'Expandir histórico'}
+            aria-label={
+              isExpanded ? 'Recolher histórico' : 'Expandir histórico'
+            }
           >
             {isExpanded ? (
               <ChevronUp className="h-4 w-4" />
@@ -228,8 +227,7 @@ export function KeyResultRow({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">
                         {formatValue(checkIn.previousValue, keyResult.unit)}{' '}
-                        &rarr;{' '}
-                        {formatValue(checkIn.newValue, keyResult.unit)}
+                        &rarr; {formatValue(checkIn.newValue, keyResult.unit)}
                       </span>
                       <Badge
                         variant="outline"

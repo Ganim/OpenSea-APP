@@ -568,9 +568,9 @@ function RecruitmentJobPostingsContent() {
                         router.push(buildFilterUrl({ type: ids[0] ?? '' }))
                       }
                       activeColor="violet"
-                    searchPlaceholder="Buscar tipo..."
-                    emptyText="Nenhum tipo encontrado."
-                  />
+                      searchPlaceholder="Buscar tipo..."
+                      emptyText="Nenhum tipo encontrado."
+                    />
                   </div>
                 </>
               }

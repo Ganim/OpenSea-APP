@@ -127,7 +127,9 @@ function SurveysPageContent() {
 
   const setTab = useCallback(
     (next: StatusTab) => {
-      router.push(next === 'active' ? '/hr/surveys' : `/hr/surveys?tab=${next}`);
+      router.push(
+        next === 'active' ? '/hr/surveys' : `/hr/surveys?tab=${next}`
+      );
     },
     [router]
   );
@@ -315,22 +317,22 @@ function SurveysPageContent() {
           onValueChange={value => setTab(value as StatusTab)}
         >
           <TabsList className="grid w-full grid-cols-5 h-12 mb-4">
-            {(['active', 'pending', 'results', 'drafts', 'all'] as StatusTab[]).map(
-              tab => (
-                <TabsTrigger
-                  key={tab}
-                  value={tab}
-                  data-testid={`surveys-tab-${tab}`}
-                >
-                  {TAB_CONFIG[tab].label}
-                  {tabCounts[tab] > 0 && (
-                    <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">
-                      {tabCounts[tab]}
-                    </span>
-                  )}
-                </TabsTrigger>
-              )
-            )}
+            {(
+              ['active', 'pending', 'results', 'drafts', 'all'] as StatusTab[]
+            ).map(tab => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                data-testid={`surveys-tab-${tab}`}
+              >
+                {TAB_CONFIG[tab].label}
+                {tabCounts[tab] > 0 && (
+                  <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">
+                    {tabCounts[tab]}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
 

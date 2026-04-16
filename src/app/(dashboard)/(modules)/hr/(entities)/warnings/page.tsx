@@ -556,7 +556,9 @@ export default function WarningsPage() {
                       icon={ShieldAlert}
                       options={WARNING_SEVERITY_OPTIONS}
                       value={filterSeverity}
-                      onChange={v => setFilterSeverity(v as WarningSeverity | '')}
+                      onChange={v =>
+                        setFilterSeverity(v as WarningSeverity | '')
+                      }
                       activeColor="emerald"
                     />
                   </div>

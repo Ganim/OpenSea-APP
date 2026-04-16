@@ -213,7 +213,12 @@ const APPLICATIONS_QUERY_KEY = (jobPostingId: string): QueryKey => [
   { jobPostingId },
 ];
 
-const CANDIDATES_QUERY_KEY: QueryKey = ['hr', 'recruitment', 'candidates', 'all'];
+const CANDIDATES_QUERY_KEY: QueryKey = [
+  'hr',
+  'recruitment',
+  'candidates',
+  'all',
+];
 
 const JOB_POSTING_QUERY_KEY = (jobPostingId: string): QueryKey => [
   'hr',
@@ -250,7 +255,8 @@ function useApplicationsByJob(jobPostingId: string | null) {
           perPage,
         });
         allApplications.push(...response.applications);
-        const totalPages = response.meta?.totalPages ?? response.totalPages ?? 1;
+        const totalPages =
+          response.meta?.totalPages ?? response.totalPages ?? 1;
         if (page >= totalPages) break;
         page += 1;
       }
@@ -280,7 +286,8 @@ function useCandidatesByIds(candidateIds: string[]) {
           perPage,
         });
         allCandidates.push(...response.candidates);
-        const totalPages = response.meta?.totalPages ?? response.totalPages ?? 1;
+        const totalPages =
+          response.meta?.totalPages ?? response.totalPages ?? 1;
         if (page >= totalPages) break;
         page += 1;
       }
@@ -526,9 +533,7 @@ export function getInitialsFromName(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '?';
   if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (
-    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
-  ).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
 /**
@@ -581,7 +586,9 @@ export function useGroupedFilteredCards(
 /**
  * Helper de safety: evita erros quando jobPostingId vem vazio.
  */
-export function useSafeJobPostingId(rawId: string | null | undefined): string | null {
+export function useSafeJobPostingId(
+  rawId: string | null | undefined
+): string | null {
   return useCallback(() => {
     if (!rawId || typeof rawId !== 'string' || rawId.trim() === '') return null;
     return rawId.trim();

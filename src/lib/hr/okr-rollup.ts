@@ -115,7 +115,9 @@ export function calculateOwnProgress(objective: OKRObjective): number {
   return calculateWeightedKrProgress(keyResults);
 }
 
-export function calculateWeightedKrProgress(keyResults: OKRKeyResult[]): number {
+export function calculateWeightedKrProgress(
+  keyResults: OKRKeyResult[]
+): number {
   if (keyResults.length === 0) return 0;
 
   let totalWeight = 0;
@@ -241,10 +243,7 @@ export function calculateDaysToDeadline(endDate: string): number {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export function calculateTotalDays(
-  startDate: string,
-  endDate: string
-): number {
+export function calculateTotalDays(startDate: string, endDate: string): number {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const diff = end.getTime() - start.getTime();
@@ -308,7 +307,10 @@ function computeNodeMetrics(node: OkrTreeNode): void {
     : null;
   node.expectedProgress =
     node.objective.startDate && node.objective.endDate
-      ? calculateExpectedProgress(node.objective.startDate, node.objective.endDate)
+      ? calculateExpectedProgress(
+          node.objective.startDate,
+          node.objective.endDate
+        )
       : null;
 
   const totalDays =

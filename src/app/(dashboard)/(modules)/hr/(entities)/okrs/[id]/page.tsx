@@ -134,10 +134,7 @@ export default function OKRDetailPage() {
   const rollupProgress = useMemo(() => {
     if (!objective) return 0;
     if (childObjectives.length === 0) return ownProgress;
-    return calculateRollupProgress(objective, [
-      objective,
-      ...childObjectives,
-    ]);
+    return calculateRollupProgress(objective, [objective, ...childObjectives]);
   }, [objective, childObjectives, ownProgress]);
 
   const totalDays = useMemo(() => {
@@ -178,8 +175,7 @@ export default function OKRDetailPage() {
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       const delta = sorted[0].newValue - sorted[1].newValue;
-      const range =
-        keyResult.targetValue - keyResult.startValue || 1;
+      const range = keyResult.targetValue - keyResult.startValue || 1;
       mostRecentDelta += (delta / range) * 100;
       hasData = true;
     }
@@ -362,8 +358,8 @@ export default function OKRDetailPage() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Próprio: {ownProgress}% &middot; Esperado:{' '}
-                {expectedProgress}% &middot;{' '}
+                Próprio: {ownProgress}% &middot; Esperado: {expectedProgress}%
+                &middot;{' '}
                 {daysToDeadline > 0
                   ? `${daysToDeadline} dia(s) até o prazo`
                   : daysToDeadline === 0

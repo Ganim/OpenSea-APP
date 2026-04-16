@@ -110,7 +110,10 @@ export function absenceIntersectsWeek(
   return (
     isSameDay(absenceStart, intervalEnd) ||
     isSameDay(absenceEnd, intervalStart) ||
-    isWithinInterval(absenceStart, { start: intervalStart, end: intervalEnd }) ||
+    isWithinInterval(absenceStart, {
+      start: intervalStart,
+      end: intervalEnd,
+    }) ||
     isWithinInterval(absenceEnd, { start: intervalStart, end: intervalEnd }) ||
     (isBefore(absenceStart, intervalStart) && isAfter(absenceEnd, intervalEnd))
   );

@@ -180,7 +180,9 @@ function RecruitmentKanbanContent() {
       );
       if (!fromColumn || !toColumn) return;
 
-      const draggedCard = cards.find(card => card.applicationId === draggableId);
+      const draggedCard = cards.find(
+        card => card.applicationId === draggableId
+      );
       if (!draggedCard) return;
 
       const verdict = evaluateKanbanTransition({
@@ -320,7 +322,10 @@ function RecruitmentKanbanContent() {
           breadcrumbItems={[
             { label: 'RH', href: '/hr' },
             { label: 'Recrutamento', href: '/hr/recruitment' },
-            { label: jobPosting.title, href: `/hr/recruitment/${jobPosting.id}` },
+            {
+              label: jobPosting.title,
+              href: `/hr/recruitment/${jobPosting.id}`,
+            },
             { label: 'Kanban' },
           ]}
           buttons={[
@@ -354,8 +359,8 @@ function RecruitmentKanbanContent() {
                     {jobPosting.title}
                   </h1>
                   <p className="text-sm text-slate-500 dark:text-white/60">
-                    Pipeline de candidatos — arraste entre colunas para mudar
-                    de etapa
+                    Pipeline de candidatos — arraste entre colunas para mudar de
+                    etapa
                   </p>
                 </div>
               </div>
@@ -499,7 +504,10 @@ function RecruitmentKanbanContent() {
 
         {/* Confirm modal (warn dialog) */}
         {pendingTransition && pendingTransition.verdict.kind === 'confirm' && (
-          <AlertDialog open onOpenChange={open => !open && closePendingTransition()}>
+          <AlertDialog
+            open
+            onOpenChange={open => !open && closePendingTransition()}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Confirmar movimentação</AlertDialogTitle>

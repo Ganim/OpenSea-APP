@@ -218,7 +218,10 @@ function TimeControlPageContent() {
         <div data-testid="time-control-page" className="contents" />
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="w-full sm:w-64" data-testid="time-control-filter-employee">
+          <div
+            className="w-full sm:w-64"
+            data-testid="time-control-filter-employee"
+          >
             <EmployeeSelector
               value={employeeFilter}
               onChange={id => setEmployeeFilter(id)}

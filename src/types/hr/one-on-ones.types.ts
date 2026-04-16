@@ -11,11 +11,7 @@ export type OneOnOneStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 
 export type OneOnOneRole = 'manager' | 'report';
 
-export type OneOnOneRecurrence =
-  | 'ONE_TIME'
-  | 'WEEKLY'
-  | 'BIWEEKLY'
-  | 'MONTHLY';
+export type OneOnOneRecurrence = 'ONE_TIME' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
 
 // ============================================================================
 // ENTITIES

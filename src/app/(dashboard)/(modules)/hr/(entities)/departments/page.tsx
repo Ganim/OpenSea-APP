@@ -539,24 +539,24 @@ function DepartmentsPageContent() {
               toolbarStart={
                 <div data-testid="departments-filter-company">
                   <FilterDropdown
-                  label="Empresa"
-                  icon={Building2}
-                  options={availableCompanies.map(c => ({
-                    id: c.id,
-                    label: c.name,
-                  }))}
-                  selected={companyIds}
-                  onSelectionChange={setCompanyFilter}
-                  activeColor="emerald"
-                  searchPlaceholder="Buscar empresa..."
-                  emptyText="Nenhuma empresa encontrada."
-                  footerAction={{
-                    icon: ExternalLink,
-                    label: 'Ver todas as empresas',
-                    onClick: () => router.push('/admin/companies'),
-                    color: 'emerald',
-                  }}
-                />
+                    label="Empresa"
+                    icon={Building2}
+                    options={availableCompanies.map(c => ({
+                      id: c.id,
+                      label: c.name,
+                    }))}
+                    selected={companyIds}
+                    onSelectionChange={setCompanyFilter}
+                    activeColor="emerald"
+                    searchPlaceholder="Buscar empresa..."
+                    emptyText="Nenhuma empresa encontrada."
+                    footerAction={{
+                      icon: ExternalLink,
+                      label: 'Ver todas as empresas',
+                      onClick: () => router.push('/admin/companies'),
+                      color: 'emerald',
+                    }}
+                  />
                 </div>
               }
               renderGridItem={renderGridCard}

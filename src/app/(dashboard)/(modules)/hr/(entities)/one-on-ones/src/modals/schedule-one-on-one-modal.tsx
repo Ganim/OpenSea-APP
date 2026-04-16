@@ -18,10 +18,7 @@ import {
 import { useMyEmployee } from '@/hooks/use-me';
 import { translateError } from '@/lib/error-messages';
 import { employeesService } from '@/services/hr';
-import type {
-  OneOnOneRecurrence,
-  ScheduleOneOnOneData,
-} from '@/types/hr';
+import type { OneOnOneRecurrence, ScheduleOneOnOneData } from '@/types/hr';
 import { useQuery } from '@tanstack/react-query';
 import {
   CalendarClock,
@@ -172,8 +169,7 @@ export function ScheduleOneOnOneModal({
       });
       onClose();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       toast.error(translateError(message));
     }
   };
@@ -258,7 +254,8 @@ export function ScheduleOneOnOneModal({
       },
       {
         title: 'Data, duração e recorrência',
-        description: 'Defina quando e com qual frequência a reunião acontecerá.',
+        description:
+          'Defina quando e com qual frequência a reunião acontecerá.',
         icon: <CalendarClock className="h-16 w-16 text-violet-500/60" />,
         isValid:
           !!scheduledAt &&
@@ -372,10 +369,7 @@ export function ScheduleOneOnOneModal({
           <Button
             type="button"
             disabled={
-              isSubmitting ||
-              !reportId ||
-              !scheduledAt ||
-              durationMinutes <= 0
+              isSubmitting || !reportId || !scheduledAt || durationMinutes <= 0
             }
             onClick={handleSubmit}
             data-testid="schedule-one-on-one-submit"

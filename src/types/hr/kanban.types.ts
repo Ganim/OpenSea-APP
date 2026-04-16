@@ -36,11 +36,7 @@ export interface KanbanColumnDefinition {
   isTerminal?: boolean;
 }
 
-export type KanbanColumnId =
-  | 'TRIAGE'
-  | 'INTERVIEW'
-  | 'OFFER'
-  | 'HIRED';
+export type KanbanColumnId = 'TRIAGE' | 'INTERVIEW' | 'OFFER' | 'HIRED';
 
 export type KanbanColumnAccent =
   | 'slate'

@@ -65,7 +65,7 @@ export function EsocialRetryButton({
     mutationFn: () => esocialService.updateEventStatus(eventId, 'rectify'),
     onSuccess: () => {
       toast.success(
-        'Evento de retificação criado em rascunho. Revise e aprove para reenvio.',
+        'Evento de retificação criado em rascunho. Revise e aprove para reenvio.'
       );
       queryClient.invalidateQueries({ queryKey: ['esocial'] });
       onSuccess?.();
@@ -104,7 +104,7 @@ export function EsocialRetryButton({
           'gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800',
           'dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/8 dark:hover:text-rose-200',
           size === 'sm' && 'h-8 px-2.5',
-          className,
+          className
         )}
         aria-label="Reenviar evento eSocial"
       >

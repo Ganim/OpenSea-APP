@@ -152,7 +152,9 @@ export function SurveyTrendChart({
                 type="monotone"
                 dataKey={entry.key}
                 name={entry.label}
-                stroke={entry.color || SERIES_PALETTE[index % SERIES_PALETTE.length]}
+                stroke={
+                  entry.color || SERIES_PALETTE[index % SERIES_PALETTE.length]
+                }
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}

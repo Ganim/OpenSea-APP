@@ -11,11 +11,7 @@
  * - When the count exceeds `limit`, an extra `+N` chip is appended.
  */
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
@@ -100,10 +96,7 @@ export function ReadersAvatarStack({
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div
-        data-testid={testId}
-        className={cn('flex items-center', className)}
-      >
+      <div data-testid={testId} className={cn('flex items-center', className)}>
         {visibleReaders.map((reader, index) => {
           const hue = hashHue(reader.fullName);
           const formattedReadAt = formatReadAt(reader.readAt);

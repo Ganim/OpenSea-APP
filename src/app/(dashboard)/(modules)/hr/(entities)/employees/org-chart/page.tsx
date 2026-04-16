@@ -104,11 +104,14 @@ export default function EmployeesOrgChartPage() {
   const buildFilterUrl = useCallback(
     (overrides: { department?: string[]; depth?: number }) => {
       const department =
-        overrides.department !== undefined ? overrides.department : departmentIds;
+        overrides.department !== undefined
+          ? overrides.department
+          : departmentIds;
       const depth = overrides.depth !== undefined ? overrides.depth : maxDepth;
 
       const parts: string[] = [];
-      if (department.length > 0) parts.push(`department=${department.join(',')}`);
+      if (department.length > 0)
+        parts.push(`department=${department.join(',')}`);
       if (depth !== DEFAULT_MAX_DEPTH) parts.push(`depth=${depth}`);
 
       return parts.length > 0
@@ -204,7 +207,8 @@ export default function EmployeesOrgChartPage() {
 
     return buildOrgTree(allEmployees, {
       maxDepth: maxDepth - 1,
-      departmentIds: departmentIds.length > 0 ? new Set(departmentIds) : undefined,
+      departmentIds:
+        departmentIds.length > 0 ? new Set(departmentIds) : undefined,
     });
   }, [allEmployees, maxDepth, departmentIds]);
 
@@ -424,8 +428,8 @@ function OrgChartEmptyState() {
         Nenhum funcionário cadastrado
       </h2>
       <p className="mb-6 text-muted-foreground">
-        Cadastre o primeiro colaborador para começar a visualizar o
-        organograma da organização.
+        Cadastre o primeiro colaborador para começar a visualizar o organograma
+        da organização.
       </p>
       <Button asChild>
         <Link href="/hr/employees">

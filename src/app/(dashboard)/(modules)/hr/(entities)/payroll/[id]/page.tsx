@@ -131,7 +131,9 @@ export default function PayrollDetailPage() {
     queryClient.invalidateQueries({ queryKey: payrollKeys.detail(payrollId) });
   };
 
-  const calculateMutation = useCalculatePayroll({ onSuccess: invalidateDetail });
+  const calculateMutation = useCalculatePayroll({
+    onSuccess: invalidateDetail,
+  });
   const approveMutation = useApprovePayroll({ onSuccess: invalidateDetail });
   const payMutation = usePayPayroll({ onSuccess: invalidateDetail });
   const cancelMutation = useCancelPayroll({ onSuccess: invalidateDetail });

@@ -22,20 +22,11 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
@@ -121,7 +112,9 @@ function formatDate(value: string | null | undefined): string | null {
   }
 }
 
-function formatDateTime(value: string | Date | null | undefined): string | null {
+function formatDateTime(
+  value: string | Date | null | undefined
+): string | null {
   if (!value) return null;
   try {
     return new Date(value).toLocaleString('pt-BR', {
@@ -145,9 +138,7 @@ export default function AnnouncementDetailPage() {
 
   const canEdit = hasPermission(HR_PERMISSIONS.ANNOUNCEMENTS.UPDATE);
   const canDelete = hasPermission(HR_PERMISSIONS.ANNOUNCEMENTS.DELETE);
-  const canViewReceipts = hasPermission(
-    HR_PERMISSIONS.ANNOUNCEMENTS.UPDATE
-  );
+  const canViewReceipts = hasPermission(HR_PERMISSIONS.ANNOUNCEMENTS.UPDATE);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'read' | 'unread'>(
@@ -313,9 +304,10 @@ export default function AnnouncementDetailPage() {
       id: reader.employeeId,
       fullName: reader.fullName,
       photoUrl: reader.photoUrl,
-      readAt: typeof reader.readAt === 'string'
-        ? reader.readAt
-        : new Date(reader.readAt).toISOString(),
+      readAt:
+        typeof reader.readAt === 'string'
+          ? reader.readAt
+          : new Date(reader.readAt).toISOString(),
     })) ?? [];
 
   // ============================================================================
@@ -714,7 +706,13 @@ interface StatTileProps {
   accent: 'violet' | 'emerald' | 'amber';
 }
 
-function StatTile({ icon: Icon, label, value, caption, accent }: StatTileProps) {
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  caption,
+  accent,
+}: StatTileProps) {
   const accentClasses: Record<StatTileProps['accent'], string> = {
     violet:
       'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300',

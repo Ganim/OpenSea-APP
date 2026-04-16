@@ -28,11 +28,7 @@ import { Card } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/use-permissions';
 import { HR_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { surveysService } from '@/services/hr/surveys.service';
-import type {
-  SurveyAnswer,
-  SurveyQuestion,
-  SurveyType,
-} from '@/types/hr';
+import type { SurveyAnswer, SurveyQuestion, SurveyType } from '@/types/hr';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -97,10 +93,7 @@ export default function SurveyRespondPage() {
     },
   });
 
-  const updateAnswer = (
-    questionId: string,
-    partial: Partial<SurveyAnswer>
-  ) => {
+  const updateAnswer = (questionId: string, partial: Partial<SurveyAnswer>) => {
     setAnswers(previous => {
       const existing = previous[questionId] ?? {
         questionId,
@@ -363,9 +356,7 @@ export default function SurveyRespondPage() {
                 question={currentQuestion}
                 index={activeIndex}
                 answer={answers[currentQuestion.id]}
-                onChange={partial =>
-                  updateAnswer(currentQuestion.id, partial)
-                }
+                onChange={partial => updateAnswer(currentQuestion.id, partial)}
               />
             </Card>
           )
@@ -395,7 +386,9 @@ export default function SurveyRespondPage() {
               variant="outline"
               size="sm"
               className="h-9 px-2.5"
-              onClick={() => setActiveIndex(previous => Math.max(0, previous - 1))}
+              onClick={() =>
+                setActiveIndex(previous => Math.max(0, previous - 1))
+              }
               disabled={activeIndex === 0 || submitMutation.isPending}
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -503,9 +496,7 @@ function QuestionBlock({
         </div>
         <h2 className="text-base font-semibold">
           {question.text}
-          {question.isRequired && (
-            <span className="text-rose-500 ml-1">*</span>
-          )}
+          {question.isRequired && <span className="text-rose-500 ml-1">*</span>}
         </h2>
       </div>
 
@@ -539,7 +530,9 @@ function useMemoRequiredAnswered(
           question.type === 'YES_NO' ||
           question.type === 'NPS'
         ) {
-          return answer.ratingValue !== null && answer.ratingValue !== undefined;
+          return (
+            answer.ratingValue !== null && answer.ratingValue !== undefined
+          );
         }
         if (question.type === 'TEXT') {
           return !!answer.textValue && answer.textValue.trim().length > 0;

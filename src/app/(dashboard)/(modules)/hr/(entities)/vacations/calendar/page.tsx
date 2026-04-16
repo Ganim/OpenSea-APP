@@ -34,13 +34,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
@@ -77,7 +71,10 @@ import type { AbsenceType } from '@/types/hr';
    CONSTANTS
    =========================================== */
 
-const TYPE_OPTIONS: { value: 'ALL' | 'VACATION' | 'SICK' | 'PARENTAL' | 'OTHER'; label: string }[] = [
+const TYPE_OPTIONS: {
+  value: 'ALL' | 'VACATION' | 'SICK' | 'PARENTAL' | 'OTHER';
+  label: string;
+}[] = [
   { value: 'ALL', label: 'Todos os tipos' },
   { value: 'VACATION', label: 'Férias' },
   { value: 'SICK', label: 'Atestado' },
@@ -583,9 +580,7 @@ export default function VacationsCalendarPage() {
             </Button>
             <div className="ml-3 hidden lg:flex items-center gap-2 text-sm font-medium">
               <CalendarRange className="h-4 w-4 text-muted-foreground" />
-              <span data-testid="vacations-calendar-title">
-                {currentTitle}
-              </span>
+              <span data-testid="vacations-calendar-title">{currentTitle}</span>
             </div>
             <div className="ml-3 inline-flex items-center rounded-md border border-border bg-white p-0.5 dark:bg-slate-800/60">
               {(
@@ -847,9 +842,8 @@ export default function VacationsCalendarPage() {
                       className="rounded-lg border border-rose-200/70 bg-rose-50/40 p-3 dark:border-rose-400/30 dark:bg-rose-500/5"
                     >
                       <p className="text-xs font-semibold text-rose-800 dark:text-rose-300">
-                        Semana de{' '}
-                        {dayMonthFormatter.format(report.week.start)} a{' '}
-                        {dayMonthFormatter.format(report.week.end)}
+                        Semana de {dayMonthFormatter.format(report.week.start)}{' '}
+                        a {dayMonthFormatter.format(report.week.end)}
                       </p>
                       <ul className="mt-2 flex flex-col gap-1.5">
                         {report.conflictingDepartments.map(conflict => (

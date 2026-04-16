@@ -105,16 +105,18 @@ export function useScheduleOneOnOne() {
     mutationFn: async (payload: ScheduleOneOnOneData) => {
       const recurrence = payload.recurrence ?? 'ONE_TIME';
       const occurrences =
-        recurrence === 'ONE_TIME'
-          ? 1
-          : Math.max(1, payload.occurrences ?? 1);
+        recurrence === 'ONE_TIME' ? 1 : Math.max(1, payload.occurrences ?? 1);
       const offset = RECURRENCE_DAY_OFFSET[recurrence];
       const baseDate = new Date(payload.scheduledAt);
 
       const created = [] as Awaited<
         ReturnType<typeof oneOnOnesService.scheduleMeeting>
       >[];
-      for (let occurrenceIndex = 0; occurrenceIndex < occurrences; occurrenceIndex++) {
+      for (
+        let occurrenceIndex = 0;
+        occurrenceIndex < occurrences;
+        occurrenceIndex++
+      ) {
         const scheduledAt = new Date(baseDate);
         scheduledAt.setDate(scheduledAt.getDate() + occurrenceIndex * offset);
         const single = await oneOnOnesService.scheduleMeeting({

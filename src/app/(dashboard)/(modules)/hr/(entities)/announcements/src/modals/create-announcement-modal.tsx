@@ -33,10 +33,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { translateError } from '@/lib/error-messages';
 import { cn } from '@/lib/utils';
-import type {
-  AnnouncementPriority,
-  CreateAnnouncementData,
-} from '@/types/hr';
+import type { AnnouncementPriority, CreateAnnouncementData } from '@/types/hr';
 import {
   AlertTriangle,
   Bell,
@@ -317,7 +314,8 @@ export function CreateAnnouncementModal({
         icon: <CalendarClock className="h-16 w-16 text-violet-500/60" />,
         isValid:
           !isSubmitting &&
-          (scheduleMode === 'now' || (scheduleMode === 'later' && !!publishedAt)),
+          (scheduleMode === 'now' ||
+            (scheduleMode === 'later' && !!publishedAt)),
         onBack: () => setCurrentStep(2),
         content: (
           <div className="flex flex-col h-full space-y-4">

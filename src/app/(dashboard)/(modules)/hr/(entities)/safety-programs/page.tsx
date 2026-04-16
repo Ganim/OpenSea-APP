@@ -410,7 +410,9 @@ export default function SafetyProgramsPage() {
           <div data-testid="safety-programs-search">
             <SearchBar
               value={searchQuery}
-              placeholder={safetyProgramsConfig.display.labels.searchPlaceholder}
+              placeholder={
+                safetyProgramsConfig.display.labels.searchPlaceholder
+              }
               onSearch={value => setSearchQuery(value)}
               onClear={() => setSearchQuery('')}
               showClear={true}
