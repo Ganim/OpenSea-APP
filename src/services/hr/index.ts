@@ -75,6 +75,12 @@ export {
   type ListReviewCyclesParams,
   type ListPerformanceReviewsParams,
 } from './reviews.service';
+export {
+  reviewCompetenciesService,
+  type ReviewCompetenciesResponse,
+  type ReviewCompetencyResponse,
+  type SeedDefaultsResponse,
+} from './review-competencies.service';
 export { hrReportsService } from './reports.service';
 export {
   okrsService,

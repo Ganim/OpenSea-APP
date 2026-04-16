@@ -71,6 +71,16 @@ export interface PerformanceReview {
   strengths: string | null;
   improvements: string | null;
   goals: string | null;
+  /**
+   * Media ponderada dos selfScores das competencias (calculada no backend).
+   * Disponivel apenas em GET /v1/hr/performance-reviews/:id (detalhe).
+   */
+  aggregatedSelfScore?: number | null;
+  /**
+   * Media ponderada dos managerScores das competencias (calculada no backend).
+   * Disponivel apenas em GET /v1/hr/performance-reviews/:id (detalhe).
+   */
+  aggregatedManagerScore?: number | null;
   employeeAcknowledged: boolean;
   acknowledgedAt: string | null;
   completedAt: string | null;

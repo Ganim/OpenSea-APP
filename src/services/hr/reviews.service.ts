@@ -2,6 +2,7 @@ import { apiClient } from '@/lib/api-client';
 import type {
   ReviewCycle,
   PerformanceReview,
+  ReviewCompetency,
   CreateReviewCycleData,
   UpdateReviewCycleData,
   CreateBulkReviewsData,
@@ -35,6 +36,11 @@ export interface PerformanceReviewsResponse {
 
 export interface PerformanceReviewResponse {
   review: PerformanceReview;
+  /**
+   * Competencias da review, disponivel apenas no endpoint de detalhe
+   * (GET /v1/hr/performance-reviews/:id). Mutacoes retornam apenas review.
+   */
+  competencies?: ReviewCompetency[];
 }
 
 // ============================================================================
