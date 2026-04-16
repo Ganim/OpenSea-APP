@@ -8,10 +8,12 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  AlertCircle,
   ArrowLeft,
   ChevronDown,
   ChevronRight,
   PieChart,
+  RotateCw,
   Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -259,7 +261,7 @@ export default function BudgetVsActualPage() {
   const [month, setMonth] = useState(0);
   const [configOpen, setConfigOpen] = useState(false);
 
-  const { data, isLoading } = useBudgetReport({
+  const { data, isLoading, error, refetch, isFetching } = useBudgetReport({
     year,
     month: month > 0 ? month : undefined,
   });
@@ -391,6 +393,33 @@ export default function BudgetVsActualPage() {
       {/* Table */}
       {isLoading ? (
         <BudgetLoadingSkeleton />
+      ) : error ? (
+        <Card className="border-rose-200 dark:border-rose-500/20 bg-rose-50/40 dark:bg-rose-500/5">
+          <CardContent className="p-8 text-center space-y-3">
+            <AlertCircle className="h-10 w-10 mx-auto text-rose-600 dark:text-rose-400" />
+            <div className="space-y-1">
+              <p className="font-semibold text-rose-900 dark:text-rose-200">
+                Não foi possível carregar o orçamento
+              </p>
+              <p className="text-sm text-rose-800 dark:text-rose-300">
+                {error instanceof Error
+                  ? error.message
+                  : 'Erro ao consultar o relatório de orçamento.'}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="mt-2"
+            >
+              <RotateCw
+                className={cn('h-4 w-4 mr-2', isFetching && 'animate-spin')}
+              />
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
       ) : rows.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
