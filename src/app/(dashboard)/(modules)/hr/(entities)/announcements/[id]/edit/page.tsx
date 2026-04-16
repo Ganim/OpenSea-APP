@@ -1,11 +1,15 @@
 /**
  * HR Announcement Edit Page
- * Edição de comunicado
+ * Edicao de comunicado com seletor de audiencia (Notion/Slack-style).
  */
 
 'use client';
 
 import { GridLoading } from '@/components/handlers/grid-loading';
+import {
+  AudienceSelector,
+  type AudienceSelection,
+} from '@/components/hr/audience-selector';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -17,7 +21,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -25,14 +28,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { logger } from '@/lib/logger';
-import type { CompanyAnnouncement, AnnouncementPriority } from '@/types/hr';
+import { portalService } from '@/services/hr';
+import type { AnnouncementPriority } from '@/types/hr';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Megaphone, Save, X } from 'lucide-react';
+import { Megaphone, Save, Users, X } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { portalService } from '@/services/hr';
+
+const EMPTY_AUDIENCE: AudienceSelection = {
+  departments: [],
+  teams: [],
+  roles: [],
+  employees: [],
+};
 
 export default function AnnouncementEditPage() {
   const params = useParams();
@@ -46,35 +57,48 @@ export default function AnnouncementEditPage() {
   const [priority, setPriority] = useState<AnnouncementPriority>('NORMAL');
   const [expiresAt, setExpiresAt] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [audience, setAudience] = useState<AudienceSelection>(EMPTY_AUDIENCE);
+  const [broadcastToAll, setBroadcastToAll] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   // ============================================================================
   // DATA FETCHING
   // ============================================================================
 
-  const { data: announcementsData, isLoading } = useQuery({
-    queryKey: ['hr-announcements'],
+  const { data: announcement, isLoading } = useQuery({
+    queryKey: ['hr-announcement', announcementId],
     queryFn: async () => {
-      const response = await portalService.listAnnouncements({ perPage: 100 });
-      return response.announcements;
+      const response = await portalService.getAnnouncement(announcementId);
+      return response.announcement;
     },
   });
 
-  const announcement = announcementsData?.find(
-    (a: CompanyAnnouncement) => a.id === announcementId
-  );
-
-  // Sync form states
+  // Sync form states from server data
   useEffect(() => {
-    if (announcement) {
-      setTitle(announcement.title);
-      setContent(announcement.content);
-      setPriority(announcement.priority);
-      setExpiresAt(
-        announcement.expiresAt ? announcement.expiresAt.split('T')[0] : ''
-      );
-      setIsActive(announcement.isActive);
-    }
+    if (!announcement) return;
+    setTitle(announcement.title);
+    setContent(announcement.content);
+    setPriority(announcement.priority);
+    setExpiresAt(
+      announcement.expiresAt ? announcement.expiresAt.split('T')[0] : ''
+    );
+    setIsActive(announcement.isActive);
+
+    const targets = announcement.audienceTargets ?? {};
+    const nextAudience: AudienceSelection = {
+      departments:
+        targets.departments ?? announcement.targetDepartmentIds ?? [],
+      teams: targets.teams ?? [],
+      roles: targets.roles ?? [],
+      employees: targets.employees ?? [],
+    };
+    setAudience(nextAudience);
+    setBroadcastToAll(
+      nextAudience.departments.length === 0 &&
+        nextAudience.teams.length === 0 &&
+        nextAudience.roles.length === 0 &&
+        nextAudience.employees.length === 0
+    );
   }, [announcement]);
 
   // ============================================================================
@@ -83,7 +107,7 @@ export default function AnnouncementEditPage() {
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
-      toast.error('Título e conteúdo são obrigatórios');
+      toast.error('Titulo e conteudo sao obrigatorios');
       return;
     }
 
@@ -95,8 +119,15 @@ export default function AnnouncementEditPage() {
         priority,
         expiresAt: expiresAt || null,
         isActive,
+        targetDepartmentIds: broadcastToAll ? [] : audience.departments,
+        targetTeamIds: broadcastToAll ? [] : audience.teams,
+        targetRoleIds: broadcastToAll ? [] : audience.roles,
+        targetEmployeeIds: broadcastToAll ? [] : audience.employees,
       });
       await queryClient.invalidateQueries({ queryKey: ['hr-announcements'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['hr-announcement', announcementId],
+      });
       toast.success('Comunicado atualizado com sucesso!');
       router.push(`/hr/announcements/${announcementId}`);
     } catch (error) {
@@ -147,7 +178,7 @@ export default function AnnouncementEditPage() {
           <Card className="bg-white/5 p-12 text-center">
             <Megaphone className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">
-              Comunicado não encontrado
+              Comunicado nao encontrado
             </h2>
             <Button onClick={() => router.push('/hr/announcements')}>
               Voltar para Comunicados
@@ -216,14 +247,15 @@ export default function AnnouncementEditPage() {
       </PageHeader>
 
       <PageBody className="space-y-6">
+        {/* Conteudo */}
         <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
           <h3 className="text-lg font-semibold mb-4">Dados do Comunicado</h3>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Título *</Label>
+              <Label htmlFor="title">Titulo *</Label>
               <Input
                 id="title"
-                placeholder="Título do comunicado"
+                placeholder="Titulo do comunicado"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 required
@@ -231,10 +263,10 @@ export default function AnnouncementEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="content">Conteúdo *</Label>
+              <Label htmlFor="content">Mensagem *</Label>
               <textarea
                 id="content"
-                placeholder="Conteúdo do comunicado..."
+                placeholder="Conteudo do comunicado..."
                 value={content}
                 onChange={e => setContent(e.target.value)}
                 rows={6}
@@ -261,7 +293,7 @@ export default function AnnouncementEditPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="expiresAt">Data de Expiração</Label>
+                <Label htmlFor="expiresAt">Data de expiracao</Label>
                 <Input
                   id="expiresAt"
                   type="date"
@@ -285,6 +317,20 @@ export default function AnnouncementEditPage() {
               />
             </div>
           </div>
+        </Card>
+
+        {/* Audiencia */}
+        <Card className="p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Publico-alvo
+          </h3>
+          <AudienceSelector
+            value={audience}
+            onChange={setAudience}
+            broadcastToAll={broadcastToAll}
+            onBroadcastToAllChange={setBroadcastToAll}
+          />
         </Card>
       </PageBody>
     </PageLayout>
