@@ -35,6 +35,7 @@ import {
   DollarSign,
   Download,
   ExternalLink,
+  LayoutGrid,
   Loader2,
   Palmtree,
   Plus,
@@ -562,6 +563,31 @@ export default function VacationsPage() {
 
         <PageBody>
           <div data-testid="vacations-page" className="contents" />
+
+          {/* View toggle: Lista | Calendário */}
+          <div
+            data-testid="vacations-view-toggle"
+            className="inline-flex items-center self-start rounded-md border border-border bg-white p-0.5 dark:bg-slate-800/60"
+          >
+            <button
+              type="button"
+              data-testid="vacations-view-toggle-list"
+              className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              Lista
+            </button>
+            <button
+              type="button"
+              data-testid="vacations-view-toggle-calendar"
+              onClick={() => router.push('/hr/vacations/calendar')}
+              className="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <CalendarDays className="h-3.5 w-3.5" />
+              Calendário
+            </button>
+          </div>
+
           {/* Search Bar */}
           <div data-testid="vacations-search">
             <SearchBar
