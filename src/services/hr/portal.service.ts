@@ -1,6 +1,8 @@
 import { apiClient } from '@/lib/api-client';
 import type {
+  AnnouncementReceipts,
   AnnouncementResponse,
+  AnnouncementStats,
   AnnouncementsResponse,
   CreateAnnouncementData,
   CreateEmployeeRequestData,
@@ -14,6 +16,7 @@ import type {
   KudosRepliesResponse,
   KudosReplyResponse,
   KudosResponse,
+  MarkAnnouncementReadResponse,
   OnboardingResponse,
   HRPendingApprovalsResponse,
   SendKudosData,
@@ -36,6 +39,8 @@ export interface ListRequestsParams {
 export interface ListAnnouncementsParams {
   page?: number;
   perPage?: number;
+  /** When true, returns only announcements not yet read by the current user. */
+  unreadOnly?: boolean;
 }
 
 export interface ListKudosParams {
@@ -117,9 +122,15 @@ export const portalService = {
   async listAnnouncements(
     params?: ListAnnouncementsParams
   ): Promise<AnnouncementsResponse> {
+    const { perPage, ...rest } = params ?? {};
+    const query = { ...rest, ...(perPage ? { limit: perPage } : {}) };
     return apiClient.get<AnnouncementsResponse>(
-      `/v1/hr/announcements${buildQuery(params)}`
+      `/v1/hr/announcements${buildQuery(query)}`
     );
+  },
+
+  async getAnnouncement(id: string): Promise<AnnouncementResponse> {
+    return apiClient.get<AnnouncementResponse>(`/v1/hr/announcements/${id}`);
   },
 
   async createAnnouncement(
@@ -140,6 +151,43 @@ export const portalService = {
 
   async deleteAnnouncement(id: string): Promise<void> {
     return apiClient.delete<void>(`/v1/hr/announcements/${id}`);
+  },
+
+  /**
+   * Marks the announcement as read by the current authenticated employee.
+   * Idempotent — safe to call repeatedly.
+   */
+  async markAnnouncementRead(
+    announcementId: string
+  ): Promise<MarkAnnouncementReadResponse> {
+    return apiClient.post<MarkAnnouncementReadResponse>(
+      `/v1/hr/announcements/${announcementId}/read`,
+      {}
+    );
+  },
+
+  /**
+   * Returns who has read the announcement and who has not yet.
+   * Requires `hr.announcements.modify` permission.
+   */
+  async getAnnouncementReceipts(
+    announcementId: string
+  ): Promise<AnnouncementReceipts> {
+    return apiClient.get<AnnouncementReceipts>(
+      `/v1/hr/announcements/${announcementId}/receipts`
+    );
+  },
+
+  /**
+   * Returns aggregate read statistics for the announcement.
+   * Requires `hr.announcements.modify` permission.
+   */
+  async getAnnouncementStats(
+    announcementId: string
+  ): Promise<AnnouncementStats> {
+    return apiClient.get<AnnouncementStats>(
+      `/v1/hr/announcements/${announcementId}/stats`
+    );
   },
 
   // --------------------------------------------------------------------------

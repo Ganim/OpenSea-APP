@@ -70,6 +70,18 @@ export interface CreateEmployeeRequestData {
 // Company Announcement
 // ============================================================================
 
+/**
+ * Audience targets for an announcement. Empty/missing arrays in the payload
+ * mean "no specific target of this kind". When all four are empty the
+ * announcement is broadcast to everyone in the tenant.
+ */
+export interface AnnouncementAudienceTargets {
+  departments?: string[];
+  teams?: string[];
+  roles?: string[];
+  employees?: string[];
+}
+
 export interface CompanyAnnouncement {
   id: string;
   tenantId: string;
@@ -83,9 +95,22 @@ export interface CompanyAnnouncement {
     id: string;
     fullName: string;
   };
+  /** @deprecated Use `audienceTargets.departments` instead. Kept for legacy listing payloads. */
   targetDepartmentIds: string[];
+  /** Multi-type audience targets returned by listing/create endpoints. */
+  audienceTargets?: AnnouncementAudienceTargets;
   isActive: boolean;
   createdAt: string;
+
+  // Read receipts metadata (returned by GET /v1/hr/announcements)
+  /** Whether the current authenticated employee has already read this announcement. */
+  isReadByMe?: boolean;
+  /** Number of audience employees that have read this announcement. */
+  readCount?: number;
+  /** Total audience size (resolved from departments/teams/roles/employees, or tenant-wide). */
+  audienceCount?: number;
+  /** Whether the announcement is pinned to the top of the feed. */
+  isPinned?: boolean;
 }
 
 export interface CreateAnnouncementData {
@@ -94,6 +119,11 @@ export interface CreateAnnouncementData {
   priority: AnnouncementPriority;
   expiresAt?: string;
   targetDepartmentIds?: string[];
+  targetTeamIds?: string[];
+  targetRoleIds?: string[];
+  targetEmployeeIds?: string[];
+  publishNow?: boolean;
+  publishedAt?: string;
 }
 
 export interface UpdateAnnouncementData {
@@ -102,7 +132,51 @@ export interface UpdateAnnouncementData {
   priority?: AnnouncementPriority;
   expiresAt?: string | null;
   targetDepartmentIds?: string[];
+  targetTeamIds?: string[];
+  targetRoleIds?: string[];
+  targetEmployeeIds?: string[];
   isActive?: boolean;
+}
+
+// ----------------------------------------------------------------------------
+// Read Receipts & Stats
+// ----------------------------------------------------------------------------
+
+export interface AnnouncementReader {
+  employeeId: string;
+  fullName: string;
+  photoUrl: string | null;
+  readAt: string;
+}
+
+export interface AnnouncementNonReader {
+  employeeId: string;
+  fullName: string;
+  photoUrl: string | null;
+  department?: { id: string; name: string } | null;
+}
+
+export interface AnnouncementReceipts {
+  readers: AnnouncementReader[];
+  nonReaders: AnnouncementNonReader[];
+}
+
+export interface AnnouncementStats {
+  totalAudience: number;
+  readCount: number;
+  unreadCount: number;
+  readPercentage: number;
+  recentReaders: AnnouncementReader[];
+}
+
+export interface AnnouncementReadReceipt {
+  announcementId: string;
+  employeeId: string;
+  readAt: string;
+}
+
+export interface MarkAnnouncementReadResponse {
+  receipt: AnnouncementReadReceipt;
 }
 
 // ============================================================================
@@ -275,11 +349,14 @@ export interface EmployeeRequestsResponse {
 
 export interface AnnouncementResponse {
   announcement: CompanyAnnouncement;
+  notificationsCreated?: number;
 }
 
 export interface AnnouncementsResponse {
   announcements: CompanyAnnouncement[];
-  meta: { total: number; page: number; perPage: number; totalPages: number };
+  meta:
+    | { total: number; page: number; perPage: number; totalPages: number }
+    | { total: number; page: number; limit: number; pages: number };
 }
 
 export interface KudosResponse {
