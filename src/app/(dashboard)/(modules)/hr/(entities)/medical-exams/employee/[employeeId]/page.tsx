@@ -71,10 +71,7 @@ function formatDateLong(value: string | undefined | null): string {
 
 function getInitials(fullName: string | undefined | null): string {
   if (!fullName) return '??';
-  const parts = fullName
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '??';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -93,9 +90,8 @@ export default function EmployeeMedicalExamsTimelinePage() {
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [pendingDeleteExam, setPendingDeleteExam] = useState<MedicalExam | null>(
-    null
-  );
+  const [pendingDeleteExam, setPendingDeleteExam] =
+    useState<MedicalExam | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ============================================================================
@@ -262,8 +258,8 @@ export default function EmployeeMedicalExamsTimelinePage() {
             <ShieldAlert className="h-10 w-10 text-rose-500" />
             <p className="text-base font-semibold">Acesso restrito</p>
             <p className="text-sm text-muted-foreground">
-              Você só pode visualizar seus próprios exames médicos. Solicite
-              ao RH a permissão{' '}
+              Você só pode visualizar seus próprios exames médicos. Solicite ao
+              RH a permissão{' '}
               <code className="rounded bg-muted px-1 py-0.5 text-xs">
                 hr.medical-exams.access
               </code>{' '}
@@ -319,7 +315,10 @@ export default function EmployeeMedicalExamsTimelinePage() {
           className="flex flex-col gap-4 bg-white/5 p-5 sm:flex-row sm:items-center sm:gap-6"
         >
           <Avatar className="h-16 w-16 ring-2 ring-violet-500/20">
-            <AvatarImage src={employee.photoUrl ?? undefined} alt={employee.fullName} />
+            <AvatarImage
+              src={employee.photoUrl ?? undefined}
+              alt={employee.fullName}
+            />
             <AvatarFallback className="bg-violet-500/15 text-violet-700 dark:text-violet-300 text-lg font-semibold">
               {getInitials(employee.fullName)}
             </AvatarFallback>
@@ -330,7 +329,10 @@ export default function EmployeeMedicalExamsTimelinePage() {
                 {employee.fullName}
               </h2>
               {isOwnEmployee && (
-                <Badge variant="outline" className="border-violet-300 text-violet-700 dark:text-violet-300">
+                <Badge
+                  variant="outline"
+                  className="border-violet-300 text-violet-700 dark:text-violet-300"
+                >
                   Meus exames
                 </Badge>
               )}

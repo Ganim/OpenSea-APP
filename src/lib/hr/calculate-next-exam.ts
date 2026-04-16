@@ -19,10 +19,7 @@ import {
   isBefore,
   startOfDay,
 } from 'date-fns';
-import type {
-  MedicalExam,
-  MedicalExamType,
-} from '@/types/hr';
+import type { MedicalExam, MedicalExamType } from '@/types/hr';
 
 /* ===========================================
    CONSTANTS
@@ -64,11 +61,7 @@ const EXAM_TYPES_RESETTING_PERIODIC: ReadonlySet<MedicalExamType> = new Set([
  * - `SCHEDULED`: faltam mais de 30 dias — situação regular.
  * - `UNKNOWN`: sem histórico suficiente para calcular.
  */
-export type NextExamStatus =
-  | 'OVERDUE'
-  | 'DUE_SOON'
-  | 'SCHEDULED'
-  | 'UNKNOWN';
+export type NextExamStatus = 'OVERDUE' | 'DUE_SOON' | 'SCHEDULED' | 'UNKNOWN';
 
 export interface CalculateNextExamParams {
   /** Histórico completo de exames do funcionário (qualquer ordem). */

@@ -141,6 +141,7 @@ import {
   getWorkRegimeLabel,
 } from '../src';
 import { EmployeeDocumentsChecklist } from '../src/components/employee-documents-checklist';
+import { MedicalExamTimeline } from '@/components/hr/medical-exam-timeline';
 import type { EmployeeDependant } from '@/types/hr';
 import { dependantsApi, dependantKeys } from '../src/api/dependants.api';
 
@@ -258,11 +259,11 @@ export default function EmployeeDetailPage() {
 
   // Medical exams
   const { data: medicalExamsData, isLoading: isLoadingExams } = useQuery({
-    queryKey: ['medical-exams', 'employee', employeeId],
+    queryKey: ['medical-exams', 'employee', employeeId, 'timeline'],
     queryFn: async () => {
       const response = await medicalExamsService.list({
         employeeId,
-        perPage: 10,
+        perPage: 100,
       });
       return response.medicalExams;
     },
@@ -1721,9 +1722,23 @@ export default function EmployeeDetailPage() {
                     Exames Médicos Ocupacionais
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Histórico de exames admissionais, periódicos e demissionais
+                    Linha do tempo de admissionais, periódicos, retorno, mudança
+                    de função e demissionais (PCMSO)
                   </p>
                 </div>
+                <Link
+                  href={`/hr/medical-exams/employee/${employeeId}`}
+                  data-testid="employee-medical-exams-open-timeline"
+                >
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir Timeline
+                  </Button>
+                </Link>
                 <Link href="/hr/medical-exams">
                   <Button
                     size="sm"
@@ -1737,77 +1752,13 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="border-b border-border" />
               <div className="p-4 sm:p-6">
-                {isLoadingExams ? (
-                  <GridLoading count={3} layout="list" size="sm" />
-                ) : !medicalExamsData || medicalExamsData.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Stethoscope className="h-12 w-12 text-muted-foreground mb-3" />
-                    <p className="text-muted-foreground">
-                      Nenhum exame registrado
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Registre os exames médicos ocupacionais do funcionário
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {medicalExamsData.map((exam: MedicalExam) => {
-                      const expStatus = getExamExpirationStatus(
-                        exam.expirationDate
-                      );
-                      const ExpIcon = expStatus.icon;
-                      return (
-                        <div
-                          key={exam.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 shrink-0">
-                              <HeartPulse className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium">
-                                  {getExamTypeLabel(exam.type)}
-                                </p>
-                                <Badge
-                                  variant={getExamResultVariant(exam.result)}
-                                  className="text-xs"
-                                >
-                                  {getExamResultLabel(exam.result)}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-0.5">
-                                Realizado em {formatDateShort(exam.examDate)} ·
-                                Dr(a). {exam.doctorName} (CRM: {exam.doctorCrm})
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {ExpIcon && (
-                              <ExpIcon
-                                className={`h-4 w-4 ${expStatus.color}`}
-                              />
-                            )}
-                            <span className={`text-sm ${expStatus.color}`}>
-                              {expStatus.label}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {medicalExamsData.length >= 10 && (
-                      <div className="text-center pt-2">
-                        <Link href="/hr/medical-exams">
-                          <Button variant="ghost" size="sm" className="gap-2">
-                            Ver todos os exames
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <MedicalExamTimeline
+                  exams={medicalExamsData ?? []}
+                  isLoading={isLoadingExams}
+                  onScheduleExam={() =>
+                    router.push(`/hr/medical-exams/employee/${employeeId}`)
+                  }
+                />
               </div>
             </Card>
           </TabsContent>

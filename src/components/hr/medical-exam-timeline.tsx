@@ -285,7 +285,12 @@ interface TimelineItemProps {
   onDeleteExam?: (exam: MedicalExam) => void;
 }
 
-function TimelineItem({ exam, isFirst, isLast, onDeleteExam }: TimelineItemProps) {
+function TimelineItem({
+  exam,
+  isFirst,
+  isLast,
+  onDeleteExam,
+}: TimelineItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const typeStyle = EXAM_TYPE_STYLES[exam.type];
   const resultStyle = EXAM_RESULT_STYLES[exam.result];
@@ -301,10 +306,7 @@ function TimelineItem({ exam, isFirst, isLast, onDeleteExam }: TimelineItemProps
   }, [exam]);
 
   return (
-    <div
-      className="relative flex gap-4"
-      data-testid={`exam-item-${exam.id}`}
-    >
+    <div className="relative flex gap-4" data-testid={`exam-item-${exam.id}`}>
       {/* Coluna do dot + conector */}
       <div className="relative flex flex-col items-center pt-1">
         <div
@@ -553,10 +555,7 @@ export function MedicalExamTimeline({
   onDeleteExam,
   className,
 }: MedicalExamTimelineProps) {
-  const orderedExams = useMemo(
-    () => sortExamsDescByExamDate(exams),
-    [exams]
-  );
+  const orderedExams = useMemo(() => sortExamsDescByExamDate(exams), [exams]);
 
   const computedPlan = useMemo<NextExamPlan>(() => {
     if (nextExamPlan) return nextExamPlan;
