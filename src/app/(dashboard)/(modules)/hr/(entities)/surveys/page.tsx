@@ -415,7 +415,7 @@ function SurveysPageContent() {
           onClose={() => setIsCreateOpen(false)}
           isSubmitting={createMutation.isPending}
           onSubmit={async payload => {
-            await createMutation.mutateAsync(payload);
+            return createMutation.mutateAsync(payload);
           }}
         />
 
