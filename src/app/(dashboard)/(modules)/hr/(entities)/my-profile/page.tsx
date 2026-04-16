@@ -44,6 +44,7 @@ import {
   CalendarDays,
   Clock,
   CreditCard,
+  Eye,
   FileText,
   Hash,
   Heart,
@@ -60,7 +61,16 @@ import {
   ClipboardCheck,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
+
+const PayrollPDFPreviewModal = dynamic(
+  () =>
+    import('@/components/hr/payroll-pdf-preview-modal').then(
+      m => m.PayrollPDFPreviewModal
+    ),
+  { ssr: false }
+);
 
 import {
   RequestsTab,
@@ -277,10 +287,18 @@ const MONTH_NAMES = [
 // MAIN COMPONENT
 // ============================================================================
 
+interface PayslipPreviewTarget {
+  payrollId: string;
+  referenceMonth: number;
+  referenceYear: number;
+}
+
 export default function MyProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('summary');
+  const [payslipPreviewTarget, setPayslipPreviewTarget] =
+    useState<PayslipPreviewTarget | null>(null);
 
   // Fetch employee record linked to the current user
   // Returns null (instead of throwing) when 404 — expected for users without linked employee
@@ -1058,9 +1076,16 @@ export default function MyProfilePage() {
           {/* ============================================================ */}
           <TabsContent value="payslips" className="flex flex-col gap-6">
             <Card className="p-4 sm:p-6 bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10">
-              <h3 className="text-lg uppercase font-semibold mb-4">
-                Folhas de Pagamento
-              </h3>
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <div>
+                  <h3 className="text-lg uppercase font-semibold">
+                    Holerites Recentes
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Histórico dos seus últimos 12 meses de recibos de pagamento.
+                  </p>
+                </div>
+              </div>
               {isLoadingPayrolls ? (
                 <GridLoading count={3} layout="list" size="sm" />
               ) : !payrollsData || payrollsData.length === 0 ? (
@@ -1069,7 +1094,10 @@ export default function MyProfilePage() {
                   <p>Nenhuma folha de pagamento disponível</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <ol
+                  data-testid="payroll-history-list"
+                  className="relative border-l border-border ml-3 space-y-4 pl-6"
+                >
                   {payrollsData
                     .slice()
                     .sort(
@@ -1078,57 +1106,81 @@ export default function MyProfilePage() {
                         b.referenceMonth -
                         (a.referenceYear * 100 + a.referenceMonth)
                     )
-                    .map((payroll: Payroll) => (
-                      <div
-                        key={payroll.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border bg-white dark:bg-slate-800/60 border-border gap-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/30">
-                            <FileText className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                    .slice(0, 12)
+                    .map((payroll: Payroll) => {
+                      const isReady =
+                        payroll.status === 'CALCULATED' ||
+                        payroll.status === 'APPROVED' ||
+                        payroll.status === 'PAID';
+                      return (
+                        <li
+                          key={payroll.id}
+                          data-testid={`payroll-history-item-${payroll.id}`}
+                          className="relative"
+                        >
+                          {/* Timeline dot */}
+                          <span className="absolute -left-[33px] top-4 flex h-4 w-4 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 ring-4 ring-background">
+                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                          </span>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border bg-white dark:bg-slate-800/60 border-border gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/30 shrink-0">
+                                <FileText className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-medium truncate">
+                                  {MONTH_NAMES[payroll.referenceMonth - 1]}{' '}
+                                  {payroll.referenceYear}
+                                </p>
+                                <Badge
+                                  variant={getPayrollStatusVariant(
+                                    payroll.status
+                                  )}
+                                  className="mt-0.5"
+                                >
+                                  {getPayrollStatusLabel(payroll.status)}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-4 text-sm shrink-0">
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">
+                                  Líquido
+                                </p>
+                                <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                  {formatSalary(payroll.totalNet)}
+                                </p>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  setPayslipPreviewTarget({
+                                    payrollId: payroll.id,
+                                    referenceMonth: payroll.referenceMonth,
+                                    referenceYear: payroll.referenceYear,
+                                  })
+                                }
+                                disabled={!isReady}
+                                title={
+                                  isReady
+                                    ? 'Pré-visualizar holerite'
+                                    : 'Holerite ainda não disponível'
+                                }
+                                data-testid={`payroll-history-preview-${payroll.id}`}
+                              >
+                                <Eye className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                  Pré-visualizar
+                                </span>
+                              </Button>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">
-                              {MONTH_NAMES[payroll.referenceMonth - 1]}{' '}
-                              {payroll.referenceYear}
-                            </p>
-                            <Badge
-                              variant={getPayrollStatusVariant(payroll.status)}
-                              className="mt-0.5"
-                            >
-                              {getPayrollStatusLabel(payroll.status)}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-6 text-sm shrink-0">
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">
-                              Bruto
-                            </p>
-                            <p className="font-medium">
-                              {formatSalary(payroll.totalGross)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">
-                              Descontos
-                            </p>
-                            <p className="font-medium text-rose-600 dark:text-rose-400">
-                              {formatSalary(payroll.totalDeductions)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">
-                              Líquido
-                            </p>
-                            <p className="font-semibold text-emerald-600 dark:text-emerald-400">
-                              {formatSalary(payroll.totalNet)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                        </li>
+                      );
+                    })}
+                </ol>
               )}
             </Card>
           </TabsContent>
@@ -1232,6 +1284,22 @@ export default function MyProfilePage() {
           )}
         </Tabs>
       </PageBody>
+
+      {payslipPreviewTarget && (
+        <PayrollPDFPreviewModal
+          isOpen={!!payslipPreviewTarget}
+          onClose={() => setPayslipPreviewTarget(null)}
+          payrollId={payslipPreviewTarget.payrollId}
+          employeeId={employee.id}
+          employeeName={employee.fullName}
+          referenceMonth={payslipPreviewTarget.referenceMonth}
+          referenceYear={payslipPreviewTarget.referenceYear}
+          companyName={
+            employee.company?.tradeName ?? employee.company?.legalName
+          }
+          companyCnpj={employee.company?.cnpj}
+        />
+      )}
     </PageLayout>
   );
 }
