@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import PermissionCodes from '@/config/rbac/permission-codes';
 import {
   useBankAccount,
@@ -140,7 +139,6 @@ export default function EditBankAccountPage({
     pixKey: '',
     color: '',
     isDefault: false,
-    description: '',
     chartOfAccountId: '',
   });
 
@@ -164,7 +162,6 @@ export default function EditBankAccountPage({
         pixKey: account.pixKey || '',
         color: account.color || '',
         isDefault: account.isDefault,
-        description: '',
         chartOfAccountId: account.chartOfAccountId || '',
       });
     }
@@ -744,36 +741,6 @@ export default function EditBankAccountPage({
                         Opcional. Conta de ativo do plano de contas associada a
                         esta conta bancária.
                       </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Section: Observações */}
-            <Card className="bg-white/5 py-2 overflow-hidden">
-              <div className="px-6 py-4 space-y-8">
-                <div className="space-y-5">
-                  <SectionHeader
-                    icon={Settings}
-                    title="Observações"
-                    subtitle="Notas e informações adicionais"
-                  />
-                  <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60">
-                    <div className="grid gap-2">
-                      <Label htmlFor="description">Descrição</Label>
-                      <Textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
-                        placeholder="Observações sobre a conta bancária"
-                        rows={4}
-                      />
                     </div>
                   </div>
                 </div>
