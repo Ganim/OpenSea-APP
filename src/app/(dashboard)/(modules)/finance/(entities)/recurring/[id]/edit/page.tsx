@@ -17,6 +17,8 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -389,19 +391,14 @@ export default function EditRecurringPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="expectedAmount">
-                          Valor Base (R$){' '}
-                          <span className="text-rose-500">*</span>
+                          Valor Base <span className="text-rose-500">*</span>
                         </Label>
-                        <Input
+                        <CurrencyInput
                           id="expectedAmount"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={expectedAmount}
-                          onChange={e =>
-                            setExpectedAmount(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setExpectedAmount(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
@@ -461,15 +458,16 @@ export default function EditRecurringPage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="startDate">Data de Início</Label>
-                        <Input
+                        <DatePicker
                           id="startDate"
-                          type="date"
                           value={
                             config.startDate
                               ? config.startDate.split('T')[0]
                               : ''
                           }
+                          onChange={() => undefined}
                           disabled
+                          hideClear
                         />
                         <p className="text-xs text-muted-foreground">
                           A data de início não pode ser alterada
@@ -478,11 +476,12 @@ export default function EditRecurringPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="endDate">Data de Término</Label>
-                        <Input
+                        <DatePicker
                           id="endDate"
-                          type="date"
                           value={endDate}
-                          onChange={e => setEndDate(e.target.value)}
+                          onChange={v =>
+                            setEndDate(typeof v === 'string' ? v : '')
+                          }
                         />
                         <p className="text-xs text-muted-foreground">
                           Deixe em branco para sem data de término

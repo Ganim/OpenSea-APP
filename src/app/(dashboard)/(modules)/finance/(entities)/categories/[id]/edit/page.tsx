@@ -16,6 +16,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -738,16 +739,11 @@ export default function EditFinanceCategoryPage({
                   />
                   <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="grid gap-2 max-w-[200px]">
+                      <div className="grid gap-2 max-w-[260px]">
                         <Label htmlFor="color">Cor</Label>
-                        <Input
-                          id="color"
-                          type="color"
+                        <ColorPicker
                           value={formData.color || '#8b5cf6'}
-                          onChange={e =>
-                            setFormData({ ...formData, color: e.target.value })
-                          }
-                          className="h-10 cursor-pointer"
+                          onChange={v => setFormData({ ...formData, color: v })}
                         />
                       </div>
                     </div>

@@ -14,6 +14,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { Card } from '@/components/ui/card';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -663,14 +664,9 @@ export default function EditBankAccountPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="color">Cor</Label>
-                        <Input
-                          id="color"
-                          type="color"
+                        <ColorPicker
                           value={formData.color || '#3b82f6'}
-                          onChange={e =>
-                            setFormData({ ...formData, color: e.target.value })
-                          }
-                          className="h-10 cursor-pointer"
+                          onChange={v => setFormData({ ...formData, color: v })}
                         />
                       </div>
 

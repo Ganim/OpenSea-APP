@@ -17,6 +17,8 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -494,16 +496,16 @@ export default function EditContractPage({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="startDate">Data de Início</Label>
-                        <Input
+                        <DatePicker
                           id="startDate"
-                          type="date"
                           value={
                             contract.startDate
                               ? contract.startDate.split('T')[0]
                               : ''
                           }
+                          onChange={() => undefined}
                           disabled
-                          className="opacity-60"
+                          hideClear
                         />
                         <p className="text-xs text-muted-foreground">
                           Não editável após criação
@@ -512,11 +514,12 @@ export default function EditContractPage({
 
                       <div className="grid gap-2">
                         <Label htmlFor="endDate">Data de Término</Label>
-                        <Input
+                        <DatePicker
                           id="endDate"
-                          type="date"
                           value={endDate}
-                          onChange={e => setEndDate(e.target.value)}
+                          onChange={v =>
+                            setEndDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
 
@@ -590,34 +593,24 @@ export default function EditContractPage({
                   <div className="w-full rounded-xl border border-border bg-white p-6 dark:bg-slate-800/60 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="totalValue">Valor Total (R$)</Label>
-                        <Input
+                        <Label htmlFor="totalValue">Valor Total</Label>
+                        <CurrencyInput
                           id="totalValue"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={totalValue}
-                          onChange={e =>
-                            setTotalValue(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setTotalValue(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="paymentAmount">
-                          Valor da Parcela (R$)
-                        </Label>
-                        <Input
+                        <Label htmlFor="paymentAmount">Valor da Parcela</Label>
+                        <CurrencyInput
                           id="paymentAmount"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={paymentAmount}
-                          onChange={e =>
-                            setPaymentAmount(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setPaymentAmount(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
