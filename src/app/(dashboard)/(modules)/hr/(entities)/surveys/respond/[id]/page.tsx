@@ -109,6 +109,17 @@ export default function SurveyRespondPage() {
   };
 
   // ============================================================================
+  // DERIVED STATE (must run on every render — keep above any early return)
+  // ============================================================================
+
+  const questions: SurveyQuestion[] = useMemo(
+    () => (survey?.questions ?? []).slice().sort((a, b) => a.order - b.order),
+    [survey?.questions]
+  );
+
+  const allRequiredAnswered = useMemoRequiredAnswered(questions, answers);
+
+  // ============================================================================
   // EARLY RETURNS
   // ============================================================================
 
@@ -185,10 +196,6 @@ export default function SurveyRespondPage() {
   // RENDER PREP
   // ============================================================================
 
-  const questions: SurveyQuestion[] = (survey.questions ?? [])
-    .slice()
-    .sort((a, b) => a.order - b.order);
-
   const typeColors =
     SURVEY_TYPE_COLORS[survey.type as SurveyType] ?? SURVEY_TYPE_COLORS.CUSTOM;
 
@@ -220,8 +227,6 @@ export default function SurveyRespondPage() {
     }
     return false;
   };
-
-  const allRequiredAnswered = useMemoRequiredAnswered(questions, answers);
 
   const currentQuestion = questions[activeIndex];
   const canAdvanceCurrent =
