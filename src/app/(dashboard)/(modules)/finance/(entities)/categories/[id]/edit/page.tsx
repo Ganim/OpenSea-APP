@@ -151,10 +151,16 @@ export default function EditFinanceCategoryPage({
         isActive: category.isActive,
         color: category.color || '',
         parentId: category.parentId || '',
+        // Backend stores rates as decimal in [0,1] (e.g., 0.05 = 5%).
+        // Display as percentage so users edit "5" not "0.05".
         interestRate:
-          category.interestRate != null ? String(category.interestRate) : '',
+          category.interestRate != null
+            ? String(category.interestRate * 100)
+            : '',
         penaltyRate:
-          category.penaltyRate != null ? String(category.penaltyRate) : '',
+          category.penaltyRate != null
+            ? String(category.penaltyRate * 100)
+            : '',
         chartOfAccountId: category.chartOfAccountId || '',
       });
     }
@@ -235,6 +241,29 @@ export default function EditFinanceCategoryPage({
       return;
     }
 
+    // Convert percentage strings ("5") back to backend decimal (0.05) and
+    // validate range so the API doesn't reject silently with a 400.
+    const parseRate = (input: string): number | undefined | 'INVALID' => {
+      const trimmed = input.trim();
+      if (!trimmed) return undefined;
+      const parsed = Number(trimmed.replace(',', '.'));
+      if (Number.isNaN(parsed)) return 'INVALID';
+      if (parsed < 0 || parsed > 100) return 'INVALID';
+      return Math.round(parsed * 1_000_000) / 100_000_000; // /100 with 4-decimal precision
+    };
+
+    const interestRateValue = parseRate(formData.interestRate);
+    if (interestRateValue === 'INVALID') {
+      toast.error('Taxa de juros deve ser um número entre 0 e 100.');
+      return;
+    }
+
+    const penaltyRateValue = parseRate(formData.penaltyRate);
+    if (penaltyRateValue === 'INVALID') {
+      toast.error('Taxa de multa deve ser um número entre 0 e 100.');
+      return;
+    }
+
     try {
       setIsSaving(true);
       await updateMutation.mutateAsync({
@@ -248,6 +277,8 @@ export default function EditFinanceCategoryPage({
           color: formData.color || undefined,
           parentId: formData.parentId || undefined,
           chartOfAccountId: formData.chartOfAccountId || null,
+          interestRate: interestRateValue,
+          penaltyRate: penaltyRateValue,
         },
       });
       // Wait for cache to refetch before navigating
@@ -606,6 +637,7 @@ export default function EditFinanceCategoryPage({
                           type="number"
                           step="0.01"
                           min="0"
+                          max="100"
                           value={formData.interestRate}
                           onChange={e =>
                             setFormData({
@@ -613,8 +645,12 @@ export default function EditFinanceCategoryPage({
                               interestRate: e.target.value,
                             })
                           }
-                          placeholder="0,00"
+                          placeholder="Ex.: 2 (=2%)"
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Aplicada por padrão em lançamentos vencidos desta
+                          categoria.
+                        </p>
                       </div>
 
                       <div className="grid gap-2">
@@ -624,6 +660,7 @@ export default function EditFinanceCategoryPage({
                           type="number"
                           step="0.01"
                           min="0"
+                          max="100"
                           value={formData.penaltyRate}
                           onChange={e =>
                             setFormData({
@@ -631,8 +668,12 @@ export default function EditFinanceCategoryPage({
                               penaltyRate: e.target.value,
                             })
                           }
-                          placeholder="0,00"
+                          placeholder="Ex.: 2 (=2%)"
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Multa única aplicada quando o lançamento entra em
+                          atraso.
+                        </p>
                       </div>
                     </div>
                   </div>
