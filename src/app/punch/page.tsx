@@ -23,7 +23,14 @@ import { calculateStreak, filterToday, isWorkingNow } from './utils/streak';
 import { useQuery } from '@tanstack/react-query';
 import { Waves, WifiOff } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import type { TimeEntry } from '@/types/hr';
 
@@ -141,7 +148,11 @@ function PunchPageContent() {
   }, []);
 
   const { data: todayEntriesPage } = useQuery({
-    queryKey: ['punch-today-entries', resolvedEmployeeId, todayParams.startDate],
+    queryKey: [
+      'punch-today-entries',
+      resolvedEmployeeId,
+      todayParams.startDate,
+    ],
     queryFn: async () => {
       const { timeControlService } = await import(
         '@/services/hr/time-control.service'
@@ -204,7 +215,8 @@ function PunchPageContent() {
   const geoState = useMemo<GeoState>(() => {
     if (!locationRef.current) return { kind: 'unknown' };
     if (!geofenceEnabled) return { kind: 'remote' };
-    if (geofenceValid === true) return { kind: 'office', zoneName: 'escritório' };
+    if (geofenceValid === true)
+      return { kind: 'office', zoneName: 'escritório' };
     if (geofenceValid === false) return { kind: 'remote' };
     return { kind: 'unknown' };
   }, [geofenceEnabled, geofenceValid, locationRef.current?.lat]); // eslint-disable-line react-hooks/exhaustive-deps

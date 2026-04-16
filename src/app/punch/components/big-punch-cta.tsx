@@ -28,7 +28,9 @@ export function BigPunchCTA({
   onPunch,
 }: BigPunchCTAProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [ripples, setRipples] = useState<
+    Array<{ id: number; x: number; y: number }>
+  >([]);
 
   useEffect(() => {
     if (ripples.length === 0) return;
@@ -66,7 +68,10 @@ export function BigPunchCTA({
   }
 
   return (
-    <div className="flex flex-col items-center gap-3" data-testid="punch-cta-wrapper">
+    <div
+      className="flex flex-col items-center gap-3"
+      data-testid="punch-cta-wrapper"
+    >
       <button
         ref={buttonRef}
         type="button"

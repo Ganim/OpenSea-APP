@@ -65,7 +65,9 @@ export function filterToday(
   today: Date = new Date()
 ): TimeEntry[] {
   const isoToday = toIsoDate(today);
-  return entries.filter(entry => toIsoDate(new Date(entry.timestamp)) === isoToday);
+  return entries.filter(
+    entry => toIsoDate(new Date(entry.timestamp)) === isoToday
+  );
 }
 
 export function isWorkingNow(entries: TimeEntry[]): boolean {

@@ -2,7 +2,12 @@
 
 import { cn } from '@/lib/utils';
 import type { TimeEntry } from '@/types/hr';
-import { ArrowDownToLine, ArrowUpFromLine, Coffee, History } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Coffee,
+  History,
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 interface TodayHistoryProps {
