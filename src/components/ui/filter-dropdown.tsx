@@ -151,9 +151,17 @@ export function FilterDropdown({
     }
   };
 
+  // Single-value mode (value/onChange) replaces the current selection rather
+  // than appending — otherwise switching from one value to another would feed
+  // a 2-item array into onChange, which only forwards [0] (the *old* value).
+  const isSingleMode =
+    onChange !== undefined && onSelectionChange === undefined;
+
   const toggleOption = (id: string) => {
     if (selectedSet.has(id)) {
       handleSelectionChange(effectiveSelected.filter(s => s !== id));
+    } else if (isSingleMode) {
+      handleSelectionChange([id]);
     } else {
       handleSelectionChange([...effectiveSelected, id]);
     }

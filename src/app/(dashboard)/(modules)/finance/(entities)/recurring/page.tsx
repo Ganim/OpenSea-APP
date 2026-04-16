@@ -55,7 +55,6 @@ import {
   Play,
   Plus,
   RefreshCw,
-  Trash2,
   XCircle,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -169,15 +168,11 @@ function RecurringPageContent() {
   // FILTER STATE (synced with URL params)
   // ============================================================================
 
-  const statusIds = useMemo(() => {
-    const raw = searchParams.get('status');
-    return raw ? raw.split(',').filter(Boolean) : [];
-  }, [searchParams]);
-
-  const typeIds = useMemo(() => {
-    const raw = searchParams.get('type');
-    return raw ? raw.split(',').filter(Boolean) : [];
-  }, [searchParams]);
+  // Single-value filters: backend listRecurringConfigsQuerySchema accepts one
+  // status enum and one type enum, not arrays. Multi-select UI used to pick
+  // multiple values silently ignored everything past the first one.
+  const statusFilter = searchParams.get('status') ?? undefined;
+  const typeFilter = searchParams.get('type') ?? undefined;
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -193,8 +188,12 @@ function RecurringPageContent() {
   // ============================================================================
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  // Only "cancel" is supported here. The previous "delete" branch hit the
+  // exact same cancelMutation and produced misleading copy ("não pode ser
+  // desfeita") for what is actually a soft-cancel. Hard-delete will require
+  // a dedicated backend route + audit trail.
   const [pinAction, setPinAction] = useState<{
-    type: 'delete' | 'cancel';
+    type: 'cancel';
     id: string;
   } | null>(null);
 
@@ -205,12 +204,12 @@ function RecurringPageContent() {
   const filters: RecurringFilters = useMemo(
     () => ({
       search: debouncedSearch || undefined,
-      status: statusIds.length === 1 ? statusIds[0] : undefined,
-      type: typeIds.length === 1 ? typeIds[0] : undefined,
+      status: statusFilter,
+      type: typeFilter,
       sortBy,
       sortOrder,
     }),
-    [debouncedSearch, statusIds, typeIds, sortBy, sortOrder]
+    [debouncedSearch, statusFilter, typeFilter, sortBy, sortOrder]
   );
 
   const {
@@ -261,26 +260,28 @@ function RecurringPageContent() {
   // ============================================================================
 
   const buildFilterUrl = useCallback(
-    (params: { status?: string[]; type?: string[] }) => {
+    (params: { status?: string | undefined; type?: string | undefined }) => {
       const parts: string[] = [];
-      const sts = params.status !== undefined ? params.status : statusIds;
-      const typ = params.type !== undefined ? params.type : typeIds;
-      if (sts.length > 0) parts.push(`status=${sts.join(',')}`);
-      if (typ.length > 0) parts.push(`type=${typ.join(',')}`);
+      const sts = 'status' in params ? params.status : statusFilter;
+      const typ = 'type' in params ? params.type : typeFilter;
+      if (sts) parts.push(`status=${sts}`);
+      if (typ) parts.push(`type=${typ}`);
       return parts.length > 0
         ? `/finance/recurring?${parts.join('&')}`
         : '/finance/recurring';
     },
-    [statusIds, typeIds]
+    [statusFilter, typeFilter]
   );
 
   const setStatusFilter = useCallback(
-    (ids: string[]) => router.push(buildFilterUrl({ status: ids })),
+    (value: string) =>
+      router.push(buildFilterUrl({ status: value || undefined })),
     [router, buildFilterUrl]
   );
 
   const setTypeFilter = useCallback(
-    (ids: string[]) => router.push(buildFilterUrl({ type: ids })),
+    (value: string) =>
+      router.push(buildFilterUrl({ type: value || undefined })),
     [router, buildFilterUrl]
   );
 
@@ -332,29 +333,14 @@ function RecurringPageContent() {
     }
   }, []);
 
-  const handleDeleteRequest = useCallback((ids: string[]) => {
-    if (ids.length === 1) {
-      setPinAction({ type: 'delete', id: ids[0] });
-    }
-  }, []);
-
   const handlePinConfirm = useCallback(async () => {
     if (!pinAction) return;
-    const isDelete = pinAction.type === 'delete';
     try {
       await cancelMutation.mutateAsync(pinAction.id);
-      toast.success(
-        isDelete
-          ? 'Recorrência excluída com sucesso.'
-          : 'Recorrência cancelada com sucesso.'
-      );
+      toast.success('Recorrência cancelada com sucesso.');
       setPinAction(null);
     } catch {
-      toast.error(
-        isDelete
-          ? 'Erro ao excluir recorrência.'
-          : 'Erro ao cancelar recorrência.'
-      );
+      toast.error('Erro ao cancelar recorrência.');
     }
   }, [pinAction, cancelMutation]);
 
@@ -393,7 +379,7 @@ function RecurringPageContent() {
         });
       }
 
-      // Cancel (destructive) - only for non-cancelled
+      // Cancel (destructive, soft) - only for non-cancelled
       if (canAdmin && item.status !== 'CANCELLED') {
         actions.push({
           id: 'cancel',
@@ -405,28 +391,9 @@ function RecurringPageContent() {
         });
       }
 
-      // Delete (destructive) - also cancel under the hood
-      if (canAdmin && item.status !== 'CANCELLED') {
-        actions.push({
-          id: 'delete',
-          label: 'Excluir',
-          icon: Trash2,
-          onClick: handleDeleteRequest,
-          variant: 'destructive',
-          separator: actions.length === 0 ? 'before' : undefined,
-        });
-      }
-
       return actions;
     },
-    [
-      canEdit,
-      canAdmin,
-      handlePause,
-      handleResume,
-      handleCancelRequest,
-      handleDeleteRequest,
-    ]
+    [canEdit, canAdmin, handlePause, handleResume, handleCancelRequest]
   );
 
   const renderGridCard = (item: RecurringConfig, isSelected: boolean) => {
@@ -673,8 +640,8 @@ function RecurringPageContent() {
                         label="Status"
                         icon={RefreshCw}
                         options={STATUS_OPTIONS}
-                        selected={statusIds}
-                        onSelectionChange={setStatusFilter}
+                        value={statusFilter ?? ''}
+                        onChange={setStatusFilter}
                         activeColor="violet"
                         searchPlaceholder="Buscar status..."
                         emptyText="Nenhum status encontrado."
@@ -685,8 +652,8 @@ function RecurringPageContent() {
                         label="Tipo"
                         icon={DollarSign}
                         options={TYPE_OPTIONS}
-                        selected={typeIds}
-                        onSelectionChange={setTypeFilter}
+                        value={typeFilter ?? ''}
+                        onChange={setTypeFilter}
                         activeColor="blue"
                         searchPlaceholder="Buscar tipo..."
                         emptyText="Nenhum tipo encontrado."
@@ -745,21 +712,13 @@ function RecurringPageContent() {
             }}
           />
 
-          {/* PIN Confirmation Modal (cancel / delete) */}
+          {/* PIN Confirmation Modal (cancel) */}
           <VerifyActionPinModal
             isOpen={!!pinAction}
             onClose={() => setPinAction(null)}
             onSuccess={handlePinConfirm}
-            title={
-              pinAction?.type === 'delete'
-                ? 'Excluir Recorrência'
-                : 'Cancelar Recorrência'
-            }
-            description={
-              pinAction?.type === 'delete'
-                ? 'Digite seu PIN de Ação para excluir esta recorrência. Esta ação não pode ser desfeita.'
-                : 'Digite seu PIN de Ação para confirmar o cancelamento desta recorrência. Esta ação não pode ser desfeita.'
-            }
+            title="Cancelar Recorrência"
+            description="Digite seu PIN de Ação para confirmar o cancelamento desta recorrência. Após cancelar, nenhum lançamento futuro será gerado."
           />
         </PageBody>
       </PageLayout>
