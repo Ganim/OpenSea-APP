@@ -1,13 +1,19 @@
 /**
  * HR Kudos / Recognition Feed Page
- * Feed de reconhecimento entre colaboradores
+ *
+ * Feed social de reconhecimento estilo Slack/Lattice:
+ * - Hero compacto com CTA "Enviar Kudos"
+ * - Tabs: Todos | Enviados | Recebidos
+ * - Pinned section acima do feed (apenas em "Todos")
+ * - Cards verticais com reactions, replies e contextual actions
+ * - Infinite scroll via IntersectionObserver
  */
 
 'use client';
 
-import { GridLoading } from '@/components/handlers/grid-loading';
 import { GridError } from '@/components/handlers/grid-error';
-import { Header } from '@/components/layout/header';
+import { GridLoading } from '@/components/handlers/grid-loading';
+import { KudosCard } from '@/components/hr/kudos-card';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import {
   PageBody,
@@ -15,34 +21,39 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
-import type { HeaderButton } from '@/components/layout/types/header.types';
+import { Button } from '@/components/ui/button';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { HR_PERMISSIONS } from '@/app/(dashboard)/(modules)/hr/_shared/constants/hr-permissions';
-import { usePermissions } from '@/hooks/use-permissions';
-import { portalService } from '@/services/hr';
-import type {
-  EmployeeKudos,
-  KudosCategory,
-  KudosListResponse,
-} from '@/types/hr';
 import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
+  useDeleteKudos,
+  useKudosFeed,
+  usePinKudos,
+  useReceivedKudosFeed,
+  useSentKudosFeed,
+  useToggleKudosReaction,
+  useUnpinKudos,
+} from '@/hooks/hr/use-kudos';
+import { useMyEmployee } from '@/hooks/use-me';
+import { usePermissions } from '@/hooks/use-permissions';
+import { translateError } from '@/lib/error-messages';
+import { portalService } from '@/services/hr';
+import type { EmployeeKudos, KudosCategory, SendKudosData } from '@/types/hr';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Award,
   Handshake,
   Inbox,
   Lightbulb,
   Loader2,
+  Pin,
   Plus,
   Send,
   Shield,
   Sparkles,
   Star,
+  type LucideIcon,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -70,65 +81,19 @@ const SendKudosModal = dynamic(
 
 type TabValue = 'feed' | 'sent' | 'received';
 
-const CATEGORY_CONFIG: Record<
-  KudosCategory,
-  {
-    label: string;
-    icon: LucideIcon;
-    badgeClass: string;
-    gradient: string;
-  }
-> = {
-  TEAMWORK: {
-    label: 'Trabalho em Equipe',
-    icon: Handshake,
-    badgeClass:
-      'bg-blue-50 text-blue-700 dark:bg-blue-500/8 dark:text-blue-300',
-    gradient: 'from-blue-500 to-blue-600',
-  },
-  INNOVATION: {
-    label: 'Inovação',
-    icon: Lightbulb,
-    badgeClass:
-      'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
-    gradient: 'from-amber-500 to-amber-600',
-  },
-  LEADERSHIP: {
-    label: 'Liderança',
-    icon: Shield,
-    badgeClass:
-      'bg-purple-50 text-purple-700 dark:bg-purple-500/8 dark:text-purple-300',
-    gradient: 'from-purple-500 to-purple-600',
-  },
-  EXCELLENCE: {
-    label: 'Excelência',
-    icon: Star,
-    badgeClass:
-      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
-    gradient: 'from-emerald-500 to-emerald-600',
-  },
-  HELPFULNESS: {
-    label: 'Prestatividade',
-    icon: Sparkles,
-    badgeClass:
-      'bg-pink-50 text-pink-700 dark:bg-pink-500/8 dark:text-pink-300',
-    gradient: 'from-pink-500 to-pink-600',
-  },
-};
+interface CategoryMeta {
+  id: KudosCategory;
+  label: string;
+  icon: LucideIcon;
+}
 
-const CATEGORY_FILTER_OPTIONS = [
-  { id: 'TEAMWORK', label: 'Trabalho em Equipe' },
-  { id: 'INNOVATION', label: 'Inovação' },
-  { id: 'LEADERSHIP', label: 'Liderança' },
-  { id: 'EXCELLENCE', label: 'Excelência' },
-  { id: 'HELPFULNESS', label: 'Prestatividade' },
+const CATEGORY_OPTIONS: CategoryMeta[] = [
+  { id: 'TEAMWORK', label: 'Trabalho em Equipe', icon: Handshake },
+  { id: 'INNOVATION', label: 'Inovação', icon: Lightbulb },
+  { id: 'LEADERSHIP', label: 'Liderança', icon: Shield },
+  { id: 'EXCELLENCE', label: 'Excelência', icon: Star },
+  { id: 'HELPFULNESS', label: 'Prestatividade', icon: Sparkles },
 ];
-
-const TAB_QUERY_KEYS: Record<TabValue, string> = {
-  feed: 'hr-kudos-feed',
-  sent: 'hr-kudos-sent',
-  received: 'hr-kudos-received',
-};
 
 // ============================================================================
 // PAGE WRAPPER
@@ -153,27 +118,34 @@ function KudosPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const { data: myEmployee } = useMyEmployee();
 
-  // Everyone with HR access can view the feed; sending requires employee link
-  const canSend = hasPermission(HR_PERMISSIONS.EMPLOYEES.LIST);
+  const currentEmployeeId = myEmployee?.employee?.id;
+
+  // Permissions
+  const canSend = hasPermission(HR_PERMISSIONS.KUDOS.CREATE);
+  const canPin = hasPermission(HR_PERMISSIONS.KUDOS.UPDATE);
+  const canDelete = hasPermission(HR_PERMISSIONS.KUDOS.DELETE);
+  const canAdminReplies = hasPermission(HR_PERMISSIONS.KUDOS.MANAGE);
 
   // ============================================================================
-  // STATE
+  // LOCAL STATE
   // ============================================================================
 
   const [isSendOpen, setIsSendOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [pendingDeleteKudos, setPendingDeleteKudos] =
+    useState<EmployeeKudos | null>(null);
 
-  // Tab from URL or default "feed"
+  // ============================================================================
+  // URL-DRIVEN FILTERS
+  // ============================================================================
+
   const activeTab = useMemo<TabValue>(() => {
     const raw = searchParams.get('tab');
     if (raw === 'sent' || raw === 'received') return raw;
     return 'feed';
   }, [searchParams]);
-
-  // ============================================================================
-  // URL-BASED FILTERS
-  // ============================================================================
 
   const categoryFilter = useMemo(() => {
     const raw = searchParams.get('category');
@@ -212,46 +184,35 @@ function KudosPageContent() {
   // DATA FETCHING
   // ============================================================================
 
-  const PAGE_SIZE = 20;
-
-  const fetchFn = useCallback(
-    async (pageParam: number): Promise<KudosListResponse> => {
-      const params = { page: pageParam, perPage: PAGE_SIZE };
-      switch (activeTab) {
-        case 'sent':
-          return portalService.listSentKudos(params);
-        case 'received':
-          return portalService.listReceivedKudos(params);
-        default:
-          return portalService.listKudosFeed(params);
-      }
-    },
-    [activeTab]
-  );
-
-  const {
-    data: infiniteData,
-    isLoading,
-    error,
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: [TAB_QUERY_KEYS[activeTab]],
-    queryFn: async ({ pageParam = 1 }) => fetchFn(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: lastPage => {
-      const currentPage = lastPage.meta?.page ?? 1;
-      const totalPages = lastPage.meta?.totalPages ?? 1;
-      if (currentPage < totalPages) {
-        return currentPage + 1;
-      }
-      return undefined;
-    },
+  // Pinned section: only on "feed" tab
+  const pinnedQuery = useKudosFeed({
+    filter: 'pinned',
+    enabled: activeTab === 'feed',
   });
 
-  const kudosData = infiniteData?.pages.flatMap(p => p.kudos) ?? [];
+  // Regular feed (or sent/received based on tab)
+  const regularFeedQuery = useKudosFeed({
+    filter: 'regular',
+    enabled: activeTab === 'feed',
+  });
+  const sentQuery = useSentKudosFeed();
+  const receivedQuery = useReceivedKudosFeed();
+
+  const activeQuery =
+    activeTab === 'sent'
+      ? sentQuery
+      : activeTab === 'received'
+        ? receivedQuery
+        : regularFeedQuery;
+
+  const pinnedItems = useMemo(
+    () => pinnedQuery.data?.pages.flatMap(p => p.kudos) ?? [],
+    [pinnedQuery.data]
+  );
+  const regularItems = useMemo(
+    () => activeQuery.data?.pages.flatMap(p => p.kudos) ?? [],
+    [activeQuery.data]
+  );
 
   // ============================================================================
   // INFINITE SCROLL SENTINEL
@@ -260,111 +221,143 @@ function KudosPageContent() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          entries[0].isIntersecting &&
+          activeQuery.hasNextPage &&
+          !activeQuery.isFetchingNextPage
+        ) {
+          activeQuery.fetchNextPage();
         }
       },
       { rootMargin: '300px' }
     );
 
-    observer.observe(el);
+    observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [activeQuery]);
 
   // ============================================================================
   // MUTATIONS
   // ============================================================================
 
-  const sendMutation = useMutation({
-    mutationFn: portalService.sendKudos,
+  const sendKudosMutation = useMutation({
+    mutationFn: (payload: SendKudosData) => portalService.sendKudos(payload),
     onSuccess: () => {
       toast.success('Reconhecimento enviado com sucesso');
-      // Invalidate all tabs since the new kudos appears in feed + sent
-      Object.values(TAB_QUERY_KEYS).forEach(key => {
-        queryClient.invalidateQueries({ queryKey: [key] });
-      });
+      queryClient.invalidateQueries({ queryKey: ['hr', 'kudos'] });
     },
-    onError: () => {
-      toast.error('Erro ao enviar reconhecimento');
+    onError: (err: unknown) => {
+      toast.error(
+        translateError(err instanceof Error ? err.message : String(err))
+      );
     },
   });
 
-  // ============================================================================
-  // FILTERED ITEMS
-  // ============================================================================
+  const toggleReactionMutation = useToggleKudosReaction();
+  const pinMutation = usePinKudos();
+  const unpinMutation = useUnpinKudos();
+  const deleteMutation = useDeleteKudos();
 
-  const filteredItems = useMemo(() => {
-    let items = kudosData;
-
-    // Search filter
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      items = items.filter(
-        item =>
-          item.message.toLowerCase().includes(q) ||
-          (item.fromEmployee?.fullName &&
-            item.fromEmployee.fullName.toLowerCase().includes(q)) ||
-          (item.toEmployee?.fullName &&
-            item.toEmployee.fullName.toLowerCase().includes(q))
-      );
-    }
-
-    // Category filter
-    if (categoryFilter.length > 0) {
-      const set = new Set(categoryFilter);
-      items = items.filter(item => set.has(item.category));
-    }
-
-    return items;
-  }, [kudosData, searchQuery, categoryFilter]);
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
-
-  const handleView = useCallback(
-    (id: string) => {
-      router.push(`/hr/kudos/${id}`);
+  const handleReact = useCallback(
+    (kudosId: string, emoji: string) => {
+      toggleReactionMutation.mutate({ kudosId, emoji });
     },
-    [router]
+    [toggleReactionMutation]
   );
 
-  // ============================================================================
-  // ACTION BUTTONS
-  // ============================================================================
-
-  const actionButtons = useMemo<HeaderButton[]>(() => {
-    const buttons: HeaderButton[] = [];
-    if (canSend) {
-      buttons.push({
-        id: 'send-kudos',
-        title: 'Enviar Reconhecimento',
-        icon: Plus,
-        onClick: () => setIsSendOpen(true),
-        variant: 'default',
+  const handleTogglePin = useCallback(
+    (kudos: EmployeeKudos) => {
+      const mutation = kudos.isPinned ? unpinMutation : pinMutation;
+      mutation.mutate(kudos.id, {
+        onSuccess: () => {
+          toast.success(
+            kudos.isPinned
+              ? 'Reconhecimento desafixado'
+              : 'Reconhecimento fixado no topo'
+          );
+        },
+        onError: (err: unknown) => {
+          toast.error(
+            translateError(err instanceof Error ? err.message : String(err))
+          );
+        },
       });
-    }
-    return buttons;
-  }, [canSend]);
+    },
+    [pinMutation, unpinMutation]
+  );
+
+  const handleDeleteRequest = useCallback((kudos: EmployeeKudos) => {
+    setPendingDeleteKudos(kudos);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!pendingDeleteKudos) return;
+    deleteMutation.mutate(pendingDeleteKudos.id, {
+      onSuccess: () => {
+        toast.success('Reconhecimento excluido');
+        setPendingDeleteKudos(null);
+      },
+      onError: (err: unknown) => {
+        toast.error(
+          translateError(err instanceof Error ? err.message : String(err))
+        );
+        setPendingDeleteKudos(null);
+      },
+    });
+  }, [deleteMutation, pendingDeleteKudos]);
 
   // ============================================================================
-  // TAB LABELS
+  // CLIENT-SIDE FILTERING (search + category)
   // ============================================================================
 
-  const tabLabels: { value: TabValue; label: string; icon: LucideIcon }[] = [
-    { value: 'feed', label: 'Feed', icon: Award },
-    { value: 'sent', label: 'Enviados', icon: Send },
-    { value: 'received', label: 'Recebidos', icon: Inbox },
-  ];
+  const filterItems = useCallback(
+    (items: EmployeeKudos[]) => {
+      let visible = items;
+      if (searchQuery) {
+        const needle = searchQuery.toLowerCase();
+        visible = visible.filter(
+          item =>
+            item.message.toLowerCase().includes(needle) ||
+            item.fromEmployee?.fullName?.toLowerCase().includes(needle) ||
+            item.toEmployee?.fullName?.toLowerCase().includes(needle)
+        );
+      }
+      if (categoryFilter.length > 0) {
+        const allowed = new Set(categoryFilter);
+        visible = visible.filter(item => allowed.has(item.category));
+      }
+      return visible;
+    },
+    [searchQuery, categoryFilter]
+  );
+
+  const visiblePinned = useMemo(
+    () => filterItems(pinnedItems),
+    [pinnedItems, filterItems]
+  );
+  const visibleRegular = useMemo(
+    () => filterItems(regularItems),
+    [regularItems, filterItems]
+  );
 
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  const tabs: { value: TabValue; label: string; icon: LucideIcon }[] = [
+    { value: 'feed', label: 'Todos', icon: Award },
+    { value: 'sent', label: 'Enviados', icon: Send },
+    { value: 'received', label: 'Recebidos', icon: Inbox },
+  ];
+
+  const isFeedLoading = activeQuery.isLoading;
+  const feedError = activeQuery.error;
+  const totalVisible = visiblePinned.length + visibleRegular.length;
 
   return (
     <PageLayout>
@@ -374,21 +367,45 @@ function KudosPageContent() {
             { label: 'RH', href: '/hr' },
             { label: 'Reconhecimento', href: '/hr/kudos' },
           ]}
-          buttons={actionButtons}
         />
 
-        <Header
-          title="Reconhecimento"
-          description="Reconheça e celebre as conquistas dos seus colegas de equipe"
-        />
+        {/* HERO compacto */}
+        <div
+          data-testid="kudos-page"
+          className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-gradient-to-br from-violet-50 via-white to-amber-50/40 p-5 dark:border-violet-500/15 dark:from-violet-500/8 dark:via-slate-900/40 dark:to-amber-500/5"
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-amber-500 text-white shadow-sm">
+              <Award className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-semibold text-foreground">
+                Reconhecimento
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Celebre conquistas, reaja com emojis e mantenha o time motivado.
+              </p>
+            </div>
+            {canSend && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setIsSendOpen(true)}
+                data-testid="kudos-send-button"
+              >
+                <Plus className="h-4 w-4" />
+                Enviar Kudos
+              </Button>
+            )}
+          </div>
+        </div>
       </PageHeader>
 
       <PageBody>
-        <div data-testid="kudos-page" className="contents" />
         {/* Tabs */}
         <Tabs value={activeTab} className="w-full" data-testid="kudos-tabs">
           <TabsList className="grid w-full grid-cols-3 h-12 mb-4">
-            {tabLabels.map(tab => {
+            {tabs.map(tab => {
               const Icon = tab.icon;
               return (
                 <TabsTrigger
@@ -422,7 +439,10 @@ function KudosPageContent() {
             <FilterDropdown
               label="Categoria"
               icon={Award}
-              options={CATEGORY_FILTER_OPTIONS}
+              options={CATEGORY_OPTIONS.map(({ id, label }) => ({
+                id,
+                label,
+              }))}
               selected={categoryFilter}
               onSelectionChange={setCategoryFilter}
               activeColor="violet"
@@ -432,64 +452,98 @@ function KudosPageContent() {
           </div>
         </div>
 
-        {/* Content */}
-        {isLoading ? (
-          <GridLoading count={6} layout="list" size="md" gap="gap-4" />
-        ) : error ? (
-          <GridError
-            type="server"
-            title="Erro ao carregar reconhecimentos"
-            message="Ocorreu um erro ao tentar carregar o feed de reconhecimentos. Por favor, tente novamente."
-            action={{
-              label: 'Tentar Novamente',
-              onClick: () => {
-                refetch();
-              },
-            }}
-          />
-        ) : filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Award className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground">
-              {activeTab === 'feed'
-                ? 'Nenhum reconhecimento no feed'
-                : activeTab === 'sent'
-                  ? 'Você ainda não enviou reconhecimentos'
-                  : 'Você ainda não recebeu reconhecimentos'}
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground/70">
-              {activeTab === 'feed'
-                ? 'Seja o primeiro a reconhecer um colega!'
-                : activeTab === 'sent'
-                  ? 'Envie um reconhecimento para um colega de trabalho.'
-                  : 'Continue fazendo um ótimo trabalho!'}
-            </p>
-            {canSend && activeTab !== 'received' && (
-              <button
-                onClick={() => setIsSendOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <Plus className="h-4 w-4" />
-                Enviar Reconhecimento
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredItems.map(kudos => (
-              <KudosCard
-                key={kudos.id}
-                kudos={kudos}
-                activeTab={activeTab}
-                onView={handleView}
-              />
-            ))}
-          </div>
-        )}
+        {/* Feed */}
+        <div className="mt-2 space-y-6" data-testid="kudos-feed">
+          {isFeedLoading ? (
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
+          ) : feedError ? (
+            <GridError
+              type="server"
+              title="Erro ao carregar reconhecimentos"
+              message="Ocorreu um erro ao tentar carregar o feed. Por favor, tente novamente."
+              action={{
+                label: 'Tentar Novamente',
+                onClick: () => {
+                  activeQuery.refetch();
+                },
+              }}
+            />
+          ) : totalVisible === 0 ? (
+            <EmptyState
+              tab={activeTab}
+              canSend={canSend}
+              onCreate={() => setIsSendOpen(true)}
+            />
+          ) : (
+            <>
+              {/* Pinned section (only on "feed" tab) */}
+              {activeTab === 'feed' && visiblePinned.length > 0 && (
+                <section
+                  data-testid="kudos-pinned-section"
+                  className="space-y-3"
+                >
+                  <header className="flex items-center gap-2">
+                    <Pin className="h-4 w-4 text-amber-500" />
+                    <h2 className="text-sm font-semibold text-foreground">
+                      Destaques
+                    </h2>
+                    <span className="text-xs text-muted-foreground">
+                      ({visiblePinned.length})
+                    </span>
+                  </header>
+                  <div className="space-y-3">
+                    {visiblePinned.map(kudos => (
+                      <KudosCard
+                        key={kudos.id}
+                        kudos={kudos}
+                        currentEmployeeId={currentEmployeeId}
+                        canPin={canPin}
+                        canDelete={canDelete}
+                        canAdminReplies={canAdminReplies}
+                        onReact={handleReact}
+                        onTogglePin={handleTogglePin}
+                        onDelete={handleDeleteRequest}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-        {/* Infinite scroll sentinel */}
+              {/* Regular feed */}
+              {visibleRegular.length > 0 && (
+                <section className="space-y-3">
+                  {activeTab === 'feed' && visiblePinned.length > 0 && (
+                    <header className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-violet-500" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Recentes
+                      </h2>
+                    </header>
+                  )}
+                  <div className="space-y-3">
+                    {visibleRegular.map(kudos => (
+                      <KudosCard
+                        key={kudos.id}
+                        kudos={kudos}
+                        currentEmployeeId={currentEmployeeId}
+                        canPin={canPin}
+                        canDelete={canDelete}
+                        canAdminReplies={canAdminReplies}
+                        onReact={handleReact}
+                        onTogglePin={handleTogglePin}
+                        onDelete={handleDeleteRequest}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Sentinel for infinite scroll */}
         <div ref={sentinelRef} className="h-1" />
-        {isFetchingNextPage && (
+        {activeQuery.isFetchingNextPage && (
           <div className="flex justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
@@ -499,10 +553,19 @@ function KudosPageContent() {
         <SendKudosModal
           isOpen={isSendOpen}
           onClose={() => setIsSendOpen(false)}
-          isSubmitting={sendMutation.isPending}
-          onSubmit={async data => {
-            await sendMutation.mutateAsync(data);
+          isSubmitting={sendKudosMutation.isPending}
+          onSubmit={async payload => {
+            await sendKudosMutation.mutateAsync(payload);
           }}
+        />
+
+        {/* Delete confirmation (PIN) */}
+        <VerifyActionPinModal
+          isOpen={!!pendingDeleteKudos}
+          onClose={() => setPendingDeleteKudos(null)}
+          onSuccess={handleConfirmDelete}
+          title="Excluir Reconhecimento"
+          description="Digite seu PIN de Acao para excluir este reconhecimento. Essa acao nao pode ser desfeita."
         />
       </PageBody>
     </PageLayout>
@@ -510,126 +573,50 @@ function KudosPageContent() {
 }
 
 // ============================================================================
-// KUDOS CARD COMPONENT
+// EMPTY STATE
 // ============================================================================
 
-interface KudosCardProps {
-  kudos: EmployeeKudos;
-  activeTab: TabValue;
-  onView: (id: string) => void;
+interface EmptyStateProps {
+  tab: TabValue;
+  canSend: boolean;
+  onCreate: () => void;
 }
 
-function KudosCard({ kudos, activeTab, onView }: KudosCardProps) {
-  const config = CATEGORY_CONFIG[kudos.category];
-  const CategoryIcon = config.icon;
-
-  const senderName = kudos.fromEmployee?.fullName ?? 'Colaborador';
-  const receiverName = kudos.toEmployee?.fullName ?? 'Colaborador';
-  const senderPosition = kudos.fromEmployee?.position?.name;
-  const receiverPosition = kudos.toEmployee?.position?.name;
-  const senderDept = kudos.fromEmployee?.department?.name;
-  const receiverDept = kudos.toEmployee?.department?.name;
-
-  const formattedDate = new Date(kudos.createdAt).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-
-  const relativeTime = getRelativeTime(kudos.createdAt);
+function EmptyState({ tab, canSend, onCreate }: EmptyStateProps) {
+  const titleByTab: Record<TabValue, string> = {
+    feed: 'Nenhum reconhecimento por aqui ainda',
+    sent: 'Voce ainda nao enviou reconhecimentos',
+    received: 'Voce ainda nao recebeu reconhecimentos',
+  };
+  const descriptionByTab: Record<TabValue, string> = {
+    feed: 'Reconheca um colega e seja a faisca dessa cultura.',
+    sent: 'Que tal celebrar uma conquista recente de alguem?',
+    received: 'Continue fazendo um otimo trabalho — em breve aparecerao por aqui.',
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() => onView(kudos.id)}
-      className="w-full text-left rounded-lg border bg-white dark:bg-slate-800/60 border-border p-4 transition-all hover:shadow-md hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <div className="flex items-start gap-4">
-        {/* Category icon */}
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br ${config.gradient} text-white`}
-        >
-          <CategoryIcon className="h-5 w-5" />
-        </div>
-
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          {/* Header line */}
-          <div className="flex items-center gap-1 flex-wrap text-sm">
-            <span className="font-semibold text-foreground">{senderName}</span>
-            <span className="text-muted-foreground">reconheceu</span>
-            <span className="font-semibold text-foreground">
-              {receiverName}
-            </span>
-          </div>
-
-          {/* Subtitle: positions/departments */}
-          <div className="flex items-center gap-1 flex-wrap mt-0.5 text-xs text-muted-foreground">
-            {senderPosition && <span>{senderPosition}</span>}
-            {senderDept && (
-              <>
-                <span>-</span>
-                <span>{senderDept}</span>
-              </>
-            )}
-            <span className="mx-1">{'>'}</span>
-            {receiverPosition && <span>{receiverPosition}</span>}
-            {receiverDept && (
-              <>
-                <span>-</span>
-                <span>{receiverDept}</span>
-              </>
-            )}
-          </div>
-
-          {/* Message */}
-          <p className="mt-2 text-sm text-foreground/80 line-clamp-3">
-            {kudos.message}
-          </p>
-
-          {/* Footer: badge + time */}
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${config.badgeClass}`}
-            >
-              <CategoryIcon className="h-3 w-3" />
-              {config.label}
-            </span>
-
-            {!kudos.isPublic && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400">
-                Privado
-              </span>
-            )}
-
-            <span className="ml-auto text-xs text-muted-foreground">
-              {relativeTime}
-            </span>
-          </div>
-        </div>
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white/40 px-6 py-16 text-center dark:bg-slate-900/20">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/15 to-amber-500/15">
+        <Award className="h-8 w-8 text-violet-500" />
       </div>
-    </button>
+      <h3 className="text-base font-semibold text-foreground">
+        {titleByTab[tab]}
+      </h3>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        {descriptionByTab[tab]}
+      </p>
+      {canSend && tab !== 'received' && (
+        <Button
+          type="button"
+          size="sm"
+          className="mt-4"
+          onClick={onCreate}
+          data-testid="kudos-empty-cta"
+        >
+          <Plus className="h-4 w-4" />
+          Enviar primeiro Kudos
+        </Button>
+      )}
+    </div>
   );
-}
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function getRelativeTime(dateStr: string): string {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMin < 1) return 'Agora mesmo';
-  if (diffMin < 60) return `${diffMin} min atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 7) return `${diffDays}d atrás`;
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-  });
 }
