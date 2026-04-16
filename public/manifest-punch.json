@@ -1,14 +1,48 @@
 {
+  "id": "/punch",
   "name": "OpenSea Ponto",
   "short_name": "Ponto",
-  "description": "Controle de ponto digital",
-  "start_url": "/punch",
+  "description": "Bata o ponto, acompanhe sua jornada e mantenha sua sequência mesmo offline.",
+  "start_url": "/punch?source=pwa",
+  "scope": "/punch",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#7c3aed",
-  "orientation": "portrait",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bater ponto agora",
+      "short_name": "Bater ponto",
+      "description": "Abre a tela de registro de ponto.",
+      "url": "/punch?source=shortcut",
+      "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }
