@@ -403,6 +403,16 @@ const sections: {
         hoverBg: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10',
         permission: HR_PERMISSIONS.EMPLOYEES.LIST,
       },
+      {
+        id: 'one-on-ones',
+        title: 'Reuniões 1:1',
+        description: 'Pautas, anotações e ações compartilhadas com seu time',
+        icon: Users,
+        href: '/hr/one-on-ones',
+        gradient: 'from-violet-500 to-sky-600',
+        hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+        permission: HR_PERMISSIONS.ONE_ON_ONES.LIST,
+      },
     ],
   },
   {
