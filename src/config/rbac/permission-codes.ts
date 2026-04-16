@@ -274,6 +274,15 @@ export const FINANCE_PERMISSIONS = {
     'remove',
     'admin'
   ),
+  PAYMENT_LINKS: perm(
+    'finance',
+    'payment-links',
+    'access',
+    'register',
+    'modify',
+    'remove',
+    'admin'
+  ),
   ACCOUNTANT: perm('finance', 'accountant', 'access', 'register', 'admin'),
 } as const;
 

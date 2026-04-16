@@ -88,7 +88,7 @@ function formatDate(dateStr: string): string {
 
 export default function PaymentLinksPage() {
   const { hasPermission } = usePermissions();
-  const canAdmin = hasPermission(FINANCE_PERMISSIONS.BANK_ACCOUNTS.ADMIN);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.PAYMENT_LINKS.REGISTER);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(
@@ -160,7 +160,7 @@ export default function PaymentLinksPage() {
             { label: 'Links de Pagamento' },
           ]}
           actions={
-            canAdmin ? (
+            canCreate ? (
               <Button
                 size="sm"
                 className="gap-1.5 h-9 px-2.5"
