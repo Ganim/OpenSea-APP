@@ -17,6 +17,8 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -597,19 +599,15 @@ export default function EditPayablePage({
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="expectedAmount">
-                          Valor Esperado (R$){' '}
+                          Valor Esperado{' '}
                           <span className="text-rose-500">*</span>
                         </Label>
-                        <Input
+                        <CurrencyInput
                           id="expectedAmount"
-                          type="number"
-                          step="0.01"
-                          min="0.01"
                           value={expectedAmount}
-                          onChange={e =>
-                            setExpectedAmount(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setExpectedAmount(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
@@ -618,21 +616,24 @@ export default function EditPayablePage({
                           Data de Vencimento{' '}
                           <span className="text-rose-500">*</span>
                         </Label>
-                        <Input
+                        <DatePicker
                           id="dueDate"
-                          type="date"
                           value={dueDate}
-                          onChange={e => setDueDate(e.target.value)}
+                          onChange={v =>
+                            setDueDate(typeof v === 'string' ? v : '')
+                          }
+                          hideClear
                         />
                       </div>
 
                       <div className="grid gap-2">
                         <Label htmlFor="issueDate">Data de Emissão</Label>
-                        <Input
+                        <DatePicker
                           id="issueDate"
-                          type="date"
                           value={issueDate}
-                          onChange={e => setIssueDate(e.target.value)}
+                          onChange={v =>
+                            setIssueDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
 
@@ -640,58 +641,47 @@ export default function EditPayablePage({
                         <Label htmlFor="competenceDate">
                           Data de Competência
                         </Label>
-                        <Input
+                        <DatePicker
                           id="competenceDate"
-                          type="date"
                           value={competenceDate}
-                          onChange={e => setCompetenceDate(e.target.value)}
+                          onChange={v =>
+                            setCompetenceDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="discount">Desconto (R$)</Label>
-                        <Input
+                        <Label htmlFor="discount">Desconto</Label>
+                        <CurrencyInput
                           id="discount"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={discount}
-                          onChange={e =>
-                            setDiscount(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setDiscount(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="interest">Juros (R$)</Label>
-                        <Input
+                        <Label htmlFor="interest">Juros</Label>
+                        <CurrencyInput
                           id="interest"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={interest}
-                          onChange={e =>
-                            setInterest(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setInterest(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="penalty">Multa (R$)</Label>
-                        <Input
+                        <Label htmlFor="penalty">Multa</Label>
+                        <CurrencyInput
                           id="penalty"
-                          type="number"
-                          step="0.01"
-                          min="0"
                           value={penalty}
-                          onChange={e =>
-                            setPenalty(parseFloat(e.target.value) || 0)
-                          }
-                          placeholder="0,00"
+                          onChange={v => setPenalty(v ?? 0)}
+                          placeholder="R$ 0,00"
+                          allowNegative={false}
                         />
                       </div>
                     </div>
