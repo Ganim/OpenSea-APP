@@ -23,24 +23,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { DatePicker } from '@/components/ui/date-picker';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import {
   Table,
   TableBody,
@@ -79,6 +67,7 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { use, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -161,6 +150,15 @@ function PaymentModal({
   const payMutation = usePayConsortiumInstallment();
   const [amount, setAmount] = useState('');
   const [paidAt, setPaidAt] = useState(new Date().toISOString().split('T')[0]);
+  const [step, setStep] = useState(1);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setAmount('');
+      setPaidAt(new Date().toISOString().split('T')[0]);
+    }
+  }, [isOpen]);
 
   const handlePay = async () => {
     if (!payment) return;
@@ -181,47 +179,116 @@ function PaymentModal({
 
   if (!payment) return null;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Registrar Pagamento</DialogTitle>
-          <DialogDescription>
-            Parcela {payment.installmentNumber} - Valor:{' '}
-            {formatCurrency(payment.expectedAmount)}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div>
-            <Label htmlFor="pay-amount">Valor Pago</Label>
-            <CurrencyInput
-              id="pay-amount"
-              value={amount ? Number(amount) : null}
-              onChange={v => setAmount(v == null ? '' : String(v))}
-              placeholder={`R$ ${payment.expectedAmount.toFixed(2).replace('.', ',')}`}
-              allowNegative={false}
-            />
-          </div>
-          <div>
-            <Label htmlFor="pay-date">Data do Pagamento</Label>
-            <DatePicker
-              id="pay-date"
-              value={paidAt}
-              onChange={v => setPaidAt(typeof v === 'string' ? v : '')}
-              hideClear
-            />
-          </div>
+  const finalAmount = parseFloat(amount) || payment.expectedAmount;
+  const diff = finalAmount - payment.expectedAmount;
+
+  const detailsStep: WizardStep = {
+    title: `Registrar Pagamento — Parcela ${payment.installmentNumber}`,
+    description: `Valor esperado: ${formatCurrency(payment.expectedAmount)}`,
+    icon: (
+      <DollarSign className="h-16 w-16 text-emerald-500/80" strokeWidth={1.5} />
+    ),
+    isValid: !!paidAt,
+    content: (
+      <div className="space-y-4 py-2">
+        <div className="space-y-2">
+          <Label htmlFor="pay-amount">Valor Pago</Label>
+          <CurrencyInput
+            id="pay-amount"
+            value={amount ? Number(amount) : null}
+            onChange={v => setAmount(v == null ? '' : String(v))}
+            placeholder={`R$ ${payment.expectedAmount.toFixed(2).replace('.', ',')}`}
+            allowNegative={false}
+          />
+          <p className="text-xs text-muted-foreground">
+            Deixe em branco para pagar o valor exato esperado.
+          </p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handlePay} disabled={payMutation.isPending}>
-            {payMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-2">
+          <Label htmlFor="pay-date">Data do Pagamento</Label>
+          <DatePicker
+            id="pay-date"
+            value={paidAt}
+            onChange={v => setPaidAt(typeof v === 'string' ? v : '')}
+            hideClear
+          />
+        </div>
+      </div>
+    ),
+  };
+
+  const confirmStep: WizardStep = {
+    title: 'Confirmar Pagamento',
+    description: 'Revise os dados antes de gravar a baixa.',
+    icon: (
+      <CheckCircle
+        className="h-16 w-16 text-emerald-500/80"
+        strokeWidth={1.5}
+      />
+    ),
+    onBack: () => setStep(1),
+    content: (
+      <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Parcela</span>
+          <span className="font-mono">{payment.installmentNumber}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Valor esperado</span>
+          <span className="font-mono">
+            {formatCurrency(payment.expectedAmount)}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm font-semibold">
+          <span>Valor pago</span>
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">
+            {formatCurrency(finalAmount)}
+          </span>
+        </div>
+        {Math.abs(diff) > 0.01 && (
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Diferença</span>
+            <span
+              className={cn(
+                'font-mono',
+                diff > 0
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              )}
+            >
+              {diff > 0 ? '+' : ''}
+              {formatCurrency(diff)}
+            </span>
+          </div>
+        )}
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Data</span>
+          <span className="font-mono">{formatDate(paidAt)}</span>
+        </div>
+      </div>
+    ),
+    footer: (
+      <div className="flex items-center justify-between w-full">
+        <Button variant="outline" onClick={() => setStep(1)}>
+          Voltar
+        </Button>
+        <Button onClick={handlePay} disabled={payMutation.isPending}>
+          {payMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
+        </Button>
+      </div>
+    ),
+  };
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => !open && onClose()}
+      onClose={onClose}
+      steps={[detailsStep, confirmStep]}
+      currentStep={step}
+      onStepChange={setStep}
+      heightClass="h-[460px]"
+    />
   );
 }
 
@@ -245,15 +312,21 @@ function ContemplationModal({
   const [contemplatedAt, setContemplatedAt] = useState(
     new Date().toISOString().split('T')[0]
   );
+  const [step, setStep] = useState(1);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setContemplationType('DRAW');
+      setContemplatedAt(new Date().toISOString().split('T')[0]);
+    }
+  }, [isOpen]);
 
   const handleMark = async () => {
     try {
       await markMutation.mutateAsync({
         id: consortiumId,
-        data: {
-          contemplationType,
-          contemplatedAt,
-        },
+        data: { contemplationType, contemplatedAt },
       });
       toast.success('Consórcio marcado como contemplado.');
       onClose();
@@ -262,53 +335,134 @@ function ContemplationModal({
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Marcar como Contemplado</DialogTitle>
-          <DialogDescription>
-            Informe os dados da contemplação do consórcio.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div>
-            <Label htmlFor="contemp-type">Tipo de Contemplação</Label>
-            <Select
-              value={contemplationType}
-              onValueChange={v => setContemplationType(v as 'BID' | 'DRAW')}
-            >
-              <SelectTrigger id="contemp-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="DRAW">Sorteio</SelectItem>
-                <SelectItem value="BID">Lance</SelectItem>
-              </SelectContent>
-            </Select>
+  const typeStep: WizardStep = {
+    title: 'Tipo de Contemplação',
+    description: 'Escolha o método pelo qual a cota foi contemplada.',
+    icon: <Star className="h-16 w-16 text-amber-500/80" strokeWidth={1.5} />,
+    isValid: !!contemplationType,
+    content: (
+      <div className="space-y-3 py-2">
+        <button
+          type="button"
+          onClick={() => setContemplationType('DRAW')}
+          className={cn(
+            'w-full rounded-lg border p-4 text-left transition-colors',
+            contemplationType === 'DRAW'
+              ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10'
+              : 'border-border hover:bg-muted/40'
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="font-semibold text-sm">Sorteio</p>
+              <p className="text-xs text-muted-foreground">
+                Cota contemplada por sorteio na assembleia.
+              </p>
+            </div>
           </div>
-          <div>
-            <Label htmlFor="contemp-date">Data da Contemplação</Label>
-            <DatePicker
-              id="contemp-date"
-              value={contemplatedAt}
-              onChange={v => setContemplatedAt(typeof v === 'string' ? v : '')}
-              hideClear
-            />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setContemplationType('BID')}
+          className={cn(
+            'w-full rounded-lg border p-4 text-left transition-colors',
+            contemplationType === 'BID'
+              ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10'
+              : 'border-border hover:bg-muted/40'
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <DollarSign className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="font-semibold text-sm">Lance</p>
+              <p className="text-xs text-muted-foreground">
+                Cota contemplada por lance vencedor (fixo, livre ou embutido).
+              </p>
+            </div>
           </div>
+        </button>
+      </div>
+    ),
+  };
+
+  const dataStep: WizardStep = {
+    title: 'Data da Contemplação',
+    description:
+      'Informe quando a contemplação foi confirmada pela administradora.',
+    icon: (
+      <Calendar className="h-16 w-16 text-amber-500/80" strokeWidth={1.5} />
+    ),
+    onBack: () => setStep(1),
+    isValid: !!contemplatedAt,
+    content: (
+      <div className="space-y-2 py-2">
+        <Label htmlFor="contemp-date">Data da Contemplação</Label>
+        <DatePicker
+          id="contemp-date"
+          value={contemplatedAt}
+          onChange={v => setContemplatedAt(typeof v === 'string' ? v : '')}
+          toDate={new Date()}
+          hideClear
+        />
+        <p className="text-xs text-muted-foreground">
+          Use a data do ofício ou comunicado oficial da administradora.
+        </p>
+      </div>
+    ),
+  };
+
+  const confirmStep: WizardStep = {
+    title: 'Confirmar Contemplação',
+    description: 'Revise os dados antes de marcar como contemplado.',
+    icon: (
+      <CheckCircle
+        className="h-16 w-16 text-emerald-500/80"
+        strokeWidth={1.5}
+      />
+    ),
+    onBack: () => setStep(2),
+    content: (
+      <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Tipo</span>
+          <span className="font-semibold">
+            {contemplationType === 'DRAW' ? 'Sorteio' : 'Lance'}
+          </span>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handleMark} disabled={markMutation.isPending}>
-            {markMutation.isPending
-              ? 'Processando...'
-              : 'Confirmar Contemplação'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Data</span>
+          <span className="font-mono">{formatDate(contemplatedAt)}</span>
+        </div>
+        <p className="text-xs text-muted-foreground pt-2">
+          O status do consórcio será alterado para Contemplado e a cota será
+          liberada para uso conforme as regras da administradora.
+        </p>
+      </div>
+    ),
+    footer: (
+      <div className="flex items-center justify-between w-full">
+        <Button variant="outline" onClick={() => setStep(2)}>
+          Voltar
+        </Button>
+        <Button onClick={handleMark} disabled={markMutation.isPending}>
+          {markMutation.isPending ? 'Processando...' : 'Confirmar Contemplação'}
+        </Button>
+      </div>
+    ),
+  };
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => !open && onClose()}
+      onClose={onClose}
+      steps={[typeStep, dataStep, confirmStep]}
+      currentStep={step}
+      onStepChange={setStep}
+      heightClass="h-[520px]"
+    />
   );
 }
 

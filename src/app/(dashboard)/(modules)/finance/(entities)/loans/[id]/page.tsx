@@ -22,18 +22,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { DatePicker } from '@/components/ui/date-picker';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
 import { useDeleteLoan, useLoan, usePayLoanInstallment } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -44,6 +39,7 @@ import { LOAN_STATUS_LABELS, LOAN_TYPE_LABELS } from '@/types/finance';
 import {
   Banknote,
   Calendar,
+  CheckCircle,
   CreditCard,
   DollarSign,
   Info,
@@ -53,6 +49,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { use, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -176,6 +173,16 @@ function PaymentModal({
   const payMutation = usePayLoanInstallment();
   const [amount, setAmount] = useState('');
   const [paidAt, setPaidAt] = useState(new Date().toISOString().split('T')[0]);
+  const [step, setStep] = useState(1);
+
+  // Reset wizard state on close
+  React.useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setAmount('');
+      setPaidAt(new Date().toISOString().split('T')[0]);
+    }
+  }, [isOpen]);
 
   const handlePay = async () => {
     if (!installment) return;
@@ -198,47 +205,118 @@ function PaymentModal({
 
   if (!installment) return null;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Registrar Pagamento</DialogTitle>
-          <DialogDescription>
-            Parcela {installment.installmentNumber} - Valor:{' '}
-            {formatCurrency(installment.totalAmount)}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div>
-            <Label htmlFor="pay-amount">Valor Pago</Label>
-            <CurrencyInput
-              id="pay-amount"
-              value={amount ? Number(amount) : null}
-              onChange={v => setAmount(v == null ? '' : String(v))}
-              placeholder={`R$ ${installment.totalAmount.toFixed(2).replace('.', ',')}`}
-              allowNegative={false}
-            />
+  const finalAmount = parseFloat(amount) || installment.totalAmount;
+  const diffFromExpected = finalAmount - installment.totalAmount;
+
+  const detailsStep: WizardStep = {
+    title: `Registrar Pagamento — Parcela ${installment.installmentNumber}`,
+    description: `Valor esperado: ${formatCurrency(installment.totalAmount)}`,
+    icon: (
+      <DollarSign className="h-16 w-16 text-emerald-500/80" strokeWidth={1.5} />
+    ),
+    isValid: !!paidAt,
+    content: (
+      <div className="space-y-4 py-2">
+        <div className="space-y-2">
+          <Label htmlFor="pay-amount">Valor Pago</Label>
+          <CurrencyInput
+            id="pay-amount"
+            value={amount ? Number(amount) : null}
+            onChange={v => setAmount(v == null ? '' : String(v))}
+            placeholder={`R$ ${installment.totalAmount.toFixed(2).replace('.', ',')}`}
+            allowNegative={false}
+          />
+          <p className="text-xs text-muted-foreground">
+            Deixe em branco para pagar o valor exato esperado.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="pay-date">Data do Pagamento</Label>
+          <DatePicker
+            id="pay-date"
+            value={paidAt}
+            onChange={v => setPaidAt(typeof v === 'string' ? v : '')}
+            hideClear
+          />
+        </div>
+      </div>
+    ),
+  };
+
+  const confirmStep: WizardStep = {
+    title: 'Confirmar Pagamento',
+    description: 'Revise os dados antes de gravar a baixa.',
+    icon: (
+      <CheckCircle
+        className="h-16 w-16 text-emerald-500/80"
+        strokeWidth={1.5}
+      />
+    ),
+    onBack: () => setStep(1),
+    content: (
+      <div className="space-y-3 py-2">
+        <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Parcela</span>
+            <span className="font-mono">{installment.installmentNumber}</span>
           </div>
-          <div>
-            <Label htmlFor="pay-date">Data do Pagamento</Label>
-            <DatePicker
-              id="pay-date"
-              value={paidAt}
-              onChange={v => setPaidAt(typeof v === 'string' ? v : '')}
-              hideClear
-            />
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Valor esperado</span>
+            <span className="font-mono">
+              {formatCurrency(installment.totalAmount)}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm font-semibold">
+            <span>Valor pago</span>
+            <span className="font-mono text-emerald-600 dark:text-emerald-400">
+              {formatCurrency(finalAmount)}
+            </span>
+          </div>
+          {Math.abs(diffFromExpected) > 0.01 && (
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Diferença</span>
+              <span
+                className={cn(
+                  'font-mono',
+                  diffFromExpected > 0
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                )}
+              >
+                {diffFromExpected > 0 ? '+' : ''}
+                {formatCurrency(diffFromExpected)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Data</span>
+            <span className="font-mono">{formatDate(paidAt)}</span>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handlePay} disabled={payMutation.isPending}>
-            {payMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+    ),
+    footer: (
+      <div className="flex items-center justify-between w-full">
+        <Button variant="outline" onClick={() => setStep(1)}>
+          Voltar
+        </Button>
+        <Button onClick={handlePay} disabled={payMutation.isPending}>
+          {payMutation.isPending ? 'Processando...' : 'Confirmar Pagamento'}
+        </Button>
+      </div>
+    ),
+  };
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => !open && onClose()}
+      onClose={onClose}
+      steps={[detailsStep, confirmStep]}
+      currentStep={step}
+      onStepChange={setStep}
+      heightClass="h-[460px]"
+    />
   );
 }
 
