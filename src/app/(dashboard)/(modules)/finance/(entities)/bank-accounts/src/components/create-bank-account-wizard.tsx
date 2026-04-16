@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -99,12 +100,9 @@ function StepAccountData({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="wiz-color">Cor</Label>
-          <Input
-            id="wiz-color"
-            type="color"
+          <ColorPicker
             value={form.color}
-            onChange={e => onChange({ color: e.target.value })}
-            className="h-9 p-1 cursor-pointer"
+            onChange={v => onChange({ color: v })}
           />
         </div>
       </div>

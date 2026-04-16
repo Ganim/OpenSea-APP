@@ -7,6 +7,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -476,12 +477,14 @@ export function CreateConsortiumWizard({
             <Label htmlFor="consortium-start-date">
               Data de Adesão <span className="text-rose-500">*</span>
             </Label>
-            <Input
+            <DatePicker
               id="consortium-start-date"
-              type="date"
               value={formData.startDate}
-              onChange={e => updateField('startDate', e.target.value)}
+              onChange={v =>
+                updateField('startDate', typeof v === 'string' ? v : '')
+              }
               disabled={isPending}
+              hideClear
             />
             {fieldErrors.startDate && (
               <p className="text-xs text-rose-500">{fieldErrors.startDate}</p>

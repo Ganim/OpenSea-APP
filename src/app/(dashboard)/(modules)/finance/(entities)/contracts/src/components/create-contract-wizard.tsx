@@ -8,6 +8,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -421,12 +422,14 @@ export function CreateContractWizard({
             <Label htmlFor="contract-start-date">
               Data de Início <span className="text-rose-500">*</span>
             </Label>
-            <Input
+            <DatePicker
               id="contract-start-date"
-              type="date"
               value={formData.startDate}
-              onChange={e => updateField('startDate', e.target.value)}
+              onChange={v =>
+                updateField('startDate', typeof v === 'string' ? v : '')
+              }
               disabled={isPending}
+              hideClear
             />
             {fieldErrors.startDate && (
               <p className="text-xs text-rose-500">{fieldErrors.startDate}</p>
@@ -438,12 +441,14 @@ export function CreateContractWizard({
             <Label htmlFor="contract-end-date">
               Data de Término <span className="text-rose-500">*</span>
             </Label>
-            <Input
+            <DatePicker
               id="contract-end-date"
-              type="date"
               value={formData.endDate}
-              onChange={e => updateField('endDate', e.target.value)}
+              onChange={v =>
+                updateField('endDate', typeof v === 'string' ? v : '')
+              }
               disabled={isPending}
+              hideClear
             />
             {fieldErrors.endDate && (
               <p className="text-xs text-rose-500">{fieldErrors.endDate}</p>

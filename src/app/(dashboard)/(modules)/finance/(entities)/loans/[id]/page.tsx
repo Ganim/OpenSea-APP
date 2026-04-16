@@ -20,6 +20,8 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencyInput } from '@/components/ui/currency-input';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
   DialogContent,
@@ -208,23 +210,22 @@ function PaymentModal({
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div>
-            <Label htmlFor="pay-amount">Valor Pago (R$)</Label>
-            <Input
+            <Label htmlFor="pay-amount">Valor Pago</Label>
+            <CurrencyInput
               id="pay-amount"
-              type="number"
-              step="0.01"
-              placeholder={installment.totalAmount.toFixed(2)}
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
+              value={amount ? Number(amount) : null}
+              onChange={v => setAmount(v == null ? '' : String(v))}
+              placeholder={`R$ ${installment.totalAmount.toFixed(2).replace('.', ',')}`}
+              allowNegative={false}
             />
           </div>
           <div>
             <Label htmlFor="pay-date">Data do Pagamento</Label>
-            <Input
+            <DatePicker
               id="pay-date"
-              type="date"
               value={paidAt}
-              onChange={e => setPaidAt(e.target.value)}
+              onChange={v => setPaidAt(typeof v === 'string' ? v : '')}
+              hideClear
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -151,12 +152,9 @@ export function CreateBankAccountModal({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="create-color">Cor</Label>
-              <Input
-                id="create-color"
-                type="color"
+              <ColorPicker
                 value={form.color}
-                onChange={e => setForm({ ...form, color: e.target.value })}
-                className="h-9 p-1 cursor-pointer"
+                onChange={v => setForm({ ...form, color: v })}
               />
             </div>
           </div>

@@ -7,6 +7,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -498,12 +499,14 @@ export function CreateLoanWizard({
             <Label htmlFor="loan-start-date">
               Data de Início <span className="text-rose-500">*</span>
             </Label>
-            <Input
+            <DatePicker
               id="loan-start-date"
-              type="date"
               value={formData.startDate}
-              onChange={e => updateField('startDate', e.target.value)}
+              onChange={v =>
+                updateField('startDate', typeof v === 'string' ? v : '')
+              }
               disabled={isPending}
+              hideClear
             />
             {fieldErrors.startDate && (
               <p className="text-xs text-rose-500">{fieldErrors.startDate}</p>
@@ -513,11 +516,12 @@ export function CreateLoanWizard({
           {/* End date */}
           <div className="space-y-2">
             <Label htmlFor="loan-end-date">Data de Término</Label>
-            <Input
+            <DatePicker
               id="loan-end-date"
-              type="date"
               value={formData.endDate}
-              onChange={e => updateField('endDate', e.target.value)}
+              onChange={v =>
+                updateField('endDate', typeof v === 'string' ? v : '')
+              }
               disabled={isPending}
             />
           </div>
