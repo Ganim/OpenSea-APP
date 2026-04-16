@@ -46,7 +46,9 @@ class ReviewCompetenciesService {
   async listCompetencies(
     reviewId: string
   ): Promise<ReviewCompetenciesResponse> {
-    return apiClient.get<ReviewCompetenciesResponse>(this.buildBaseUrl(reviewId));
+    return apiClient.get<ReviewCompetenciesResponse>(
+      this.buildBaseUrl(reviewId)
+    );
   }
 
   async createCompetency(

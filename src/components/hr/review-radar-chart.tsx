@@ -111,11 +111,7 @@ export function ReviewRadarChart({
   // ==========================================================================
 
   return (
-    <div
-      className="w-full"
-      style={{ height }}
-      data-testid="review-radar-chart"
-    >
+    <div className="w-full" style={{ height }} data-testid="review-radar-chart">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart
           data={radarData}

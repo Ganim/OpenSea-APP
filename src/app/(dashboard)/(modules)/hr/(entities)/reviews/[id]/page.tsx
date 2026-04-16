@@ -322,10 +322,14 @@ export default function ReviewCycleDetailPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleOpenDetail = useCallback((review: PerformanceReview) => {
-    setSelectedReview(review);
-    setIsDetailOpen(true);
-  }, []);
+  const handleOpenDetail = useCallback(
+    (review: PerformanceReview) => {
+      // Navega para a pagina dedicada de detalhes (radar + competencias).
+      // O modal e mantido apenas para acoes rapidas via botoes na linha.
+      router.push(`/hr/reviews/${cycleId}/review/${review.id}`);
+    },
+    [router, cycleId]
+  );
 
   const handleStartSelfAssessment = useCallback((review: PerformanceReview) => {
     setSelectedReview(review);

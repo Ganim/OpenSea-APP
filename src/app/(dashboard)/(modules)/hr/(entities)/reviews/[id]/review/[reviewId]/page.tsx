@@ -54,10 +54,7 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { reviewsService } from '@/services/hr/reviews.service';
 import { employeesService } from '@/services/hr/employees.service';
-import type {
-  PerformanceReviewStatus,
-  ReviewCompetency,
-} from '@/types/hr';
+import type { PerformanceReviewStatus, ReviewCompetency } from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowRight,
@@ -89,7 +86,10 @@ import {
 // HELPERS
 // ============================================================================
 
-const NEXT_STATUS: Record<PerformanceReviewStatus, PerformanceReviewStatus | null> = {
+const NEXT_STATUS: Record<
+  PerformanceReviewStatus,
+  PerformanceReviewStatus | null
+> = {
   PENDING: 'SELF_ASSESSMENT',
   SELF_ASSESSMENT: 'MANAGER_REVIEW',
   MANAGER_REVIEW: 'COMPLETED',
@@ -171,7 +171,12 @@ export default function PerformanceReviewDetailPage() {
   });
 
   const { data: employeeBundle } = useQuery({
-    queryKey: ['employees', 'pair-for-review', review?.employeeId, review?.reviewerId],
+    queryKey: [
+      'employees',
+      'pair-for-review',
+      review?.employeeId,
+      review?.reviewerId,
+    ],
     queryFn: async () => {
       if (!review) return { employee: null, reviewer: null };
       const [employeeResp, reviewerResp] = await Promise.all([
@@ -296,8 +301,7 @@ export default function PerformanceReviewDetailPage() {
       review.status as PerformanceReviewStatus
     ] ?? review.status;
 
-  const selfAggregate =
-    review.aggregatedSelfScore ?? review.selfScore ?? null;
+  const selfAggregate = review.aggregatedSelfScore ?? review.selfScore ?? null;
   const managerAggregate =
     review.aggregatedManagerScore ?? review.managerScore ?? null;
   const diff =
@@ -307,15 +311,32 @@ export default function PerformanceReviewDetailPage() {
 
   const diffStyles =
     diff === null
-      ? { bg: 'bg-slate-50 dark:bg-slate-500/8', text: 'text-slate-600 dark:text-slate-400', label: '—' }
+      ? {
+          bg: 'bg-slate-50 dark:bg-slate-500/8',
+          text: 'text-slate-600 dark:text-slate-400',
+          label: '—',
+        }
       : diff > 0
-        ? { bg: 'bg-emerald-50 dark:bg-emerald-500/8', text: 'text-emerald-700 dark:text-emerald-300', label: `+${diff.toFixed(1).replace('.', ',')}` }
+        ? {
+            bg: 'bg-emerald-50 dark:bg-emerald-500/8',
+            text: 'text-emerald-700 dark:text-emerald-300',
+            label: `+${diff.toFixed(1).replace('.', ',')}`,
+          }
         : diff < 0
-          ? { bg: 'bg-rose-50 dark:bg-rose-500/8', text: 'text-rose-700 dark:text-rose-300', label: diff.toFixed(1).replace('.', ',') }
-          : { bg: 'bg-slate-50 dark:bg-slate-500/8', text: 'text-slate-700 dark:text-slate-300', label: '0,0' };
+          ? {
+              bg: 'bg-rose-50 dark:bg-rose-500/8',
+              text: 'text-rose-700 dark:text-rose-300',
+              label: diff.toFixed(1).replace('.', ','),
+            }
+          : {
+              bg: 'bg-slate-50 dark:bg-slate-500/8',
+              text: 'text-slate-700 dark:text-slate-300',
+              label: '0,0',
+            };
 
   const nextStatus = NEXT_STATUS[review.status as PerformanceReviewStatus];
-  const nextStatusLabel = NEXT_STATUS_LABEL[review.status as PerformanceReviewStatus];
+  const nextStatusLabel =
+    NEXT_STATUS_LABEL[review.status as PerformanceReviewStatus];
 
   // ==========================================================================
   // RENDER
@@ -328,7 +349,10 @@ export default function PerformanceReviewDetailPage() {
           breadcrumbItems={[
             { label: 'RH', href: '/hr' },
             { label: 'Avaliacoes', href: '/hr/reviews' },
-            { label: cycleData?.name ?? 'Ciclo', href: `/hr/reviews/${cycleId}` },
+            {
+              label: cycleData?.name ?? 'Ciclo',
+              href: `/hr/reviews/${cycleId}`,
+            },
             { label: employeeName },
           ]}
           actions={
@@ -553,12 +577,15 @@ export default function PerformanceReviewDetailPage() {
 
           {competencies.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              Nenhuma competencia cadastrada. Use o botao acima para
-              restaurar as 5 competencias padrao.
+              Nenhuma competencia cadastrada. Use o botao acima para restaurar
+              as 5 competencias padrao.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm" data-testid="competencies-table">
+              <table
+                className="w-full text-sm"
+                data-testid="competencies-table"
+              >
                 <thead className="text-xs text-muted-foreground border-b border-border/60">
                   <tr>
                     <th className="text-left font-medium px-4 py-3">Nome</th>
@@ -577,7 +604,9 @@ export default function PerformanceReviewDetailPage() {
                       key={competency.id}
                       className="border-b border-border/40 last:border-0 hover:bg-accent/30 transition-colors"
                     >
-                      <td className="px-4 py-3 font-medium">{competency.name}</td>
+                      <td className="px-4 py-3 font-medium">
+                        {competency.name}
+                      </td>
                       <td className="px-4 py-3 text-center text-xs text-muted-foreground tabular-nums">
                         x{competency.weight.toFixed(1)}
                       </td>
@@ -808,9 +837,7 @@ function ReflectionField({
             {content}
           </p>
         ) : (
-          <p className="text-xs italic text-muted-foreground">
-            Nao preenchido
-          </p>
+          <p className="text-xs italic text-muted-foreground">Nao preenchido</p>
         )}
       </div>
     </div>
@@ -865,7 +892,8 @@ function CompetencyEditDialog({
     const parsedWeight = Number(weight);
     onSave({
       name: name.trim(),
-      weight: Number.isFinite(parsedWeight) && parsedWeight > 0 ? parsedWeight : 1,
+      weight:
+        Number.isFinite(parsedWeight) && parsedWeight > 0 ? parsedWeight : 1,
       selfScore,
       managerScore,
       comments: comments.trim() || null,

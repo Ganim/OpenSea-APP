@@ -90,10 +90,7 @@ function StarRow({
             <span key={slot} className="relative h-3.5 w-3.5 inline-block">
               <Star className="absolute inset-0 h-3.5 w-3.5 text-slate-300 dark:text-slate-700" />
               <StarHalf
-                className={cn(
-                  'absolute inset-0 h-3.5 w-3.5',
-                  starColorClass
-                )}
+                className={cn('absolute inset-0 h-3.5 w-3.5', starColorClass)}
                 fill="currentColor"
               />
             </span>
@@ -156,9 +153,7 @@ export function ScoreSlider({
         <span
           className={cn(
             'text-xs font-medium tabular-nums shrink-0 min-w-[2.5ch] text-right',
-            value === null
-              ? 'text-muted-foreground'
-              : 'text-foreground'
+            value === null ? 'text-muted-foreground' : 'text-foreground'
           )}
         >
           {formatScore(value)}
