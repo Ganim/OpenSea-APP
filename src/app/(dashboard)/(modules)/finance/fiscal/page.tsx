@@ -345,11 +345,17 @@ function FiscalPageContent() {
     [documents]
   );
 
+  // Cancellation flow: open REASON dialog first; PIN modal only opens after
+  // a valid reason (≥15 chars per SEFAZ) is filled in. This avoids the prior
+  // race where the PIN was confirmed before any reason existed and the API
+  // rejected the empty-reason payload silently.
   const handleCancelDocument = useCallback((ids: string[]) => {
     if (ids.length === 1) {
       setCancelTarget(ids[0]);
       setCancelReason('');
-      setCancelModalOpen(true);
+      // Reason dialog opens via the cancelTarget guard below; PIN modal stays
+      // closed until the user submits the reason form.
+      setCancelModalOpen(false);
     }
   }, []);
 
@@ -363,10 +369,16 @@ function FiscalPageContent() {
 
   const handleCancelConfirm = useCallback(async () => {
     if (!cancelTarget) return;
+    const reason = cancelReason.trim();
+    if (reason.length < 15) {
+      toast.error('O motivo do cancelamento deve ter ao menos 15 caracteres.');
+      setCancelModalOpen(false);
+      return;
+    }
     try {
       await cancelMutation.mutateAsync({
         id: cancelTarget,
-        data: { reason: cancelReason },
+        data: { reason },
       });
       setCancelModalOpen(false);
       setCancelTarget(null);
@@ -832,13 +844,15 @@ function FiscalPageContent() {
             description="Digite seu PIN de Ação para confirmar o cancelamento deste documento fiscal. Esta ação não pode ser desfeita."
           />
 
-          {/* Cancel Reason Dialog (shown after PIN) */}
-          {cancelTarget && !cancelModalOpen && cancelReason === '' && (
+          {/* Cancel Reason Dialog (shown FIRST, before PIN). SEFAZ requires
+              ≥15 characters for cancellation justification. */}
+          {cancelTarget && !cancelModalOpen && (
             <Dialog
               open={!!cancelTarget && !cancelModalOpen}
               onOpenChange={open => {
                 if (!open) {
                   setCancelTarget(null);
+                  setCancelReason('');
                 }
               }}
             >
@@ -846,7 +860,8 @@ function FiscalPageContent() {
                 <DialogHeader>
                   <DialogTitle>Motivo do Cancelamento</DialogTitle>
                   <DialogDescription>
-                    Informe o motivo do cancelamento do documento fiscal.
+                    Informe o motivo do cancelamento do documento fiscal. A
+                    SEFAZ exige no mínimo 15 caracteres.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -854,28 +869,44 @@ function FiscalPageContent() {
                     <Label htmlFor="cancel-reason">Motivo</Label>
                     <Textarea
                       id="cancel-reason"
-                      placeholder="Descreva o motivo do cancelamento..."
+                      placeholder="Ex.: Erro no valor unitário do item 3"
                       value={cancelReason}
                       onChange={e => setCancelReason(e.target.value)}
                       rows={3}
+                      maxLength={255}
                     />
+                    <div className="mt-1 flex items-center justify-between text-xs">
+                      <span
+                        className={
+                          cancelReason.trim().length < 15
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : 'text-emerald-600 dark:text-emerald-400'
+                        }
+                      >
+                        {cancelReason.trim().length} / 15 caracteres mínimos
+                      </span>
+                      <span className="text-muted-foreground">
+                        {cancelReason.length} / 255
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
                     variant="outline"
-                    onClick={() => setCancelTarget(null)}
+                    onClick={() => {
+                      setCancelTarget(null);
+                      setCancelReason('');
+                    }}
                   >
                     Voltar
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={handleCancelConfirm}
-                    disabled={!cancelReason.trim() || cancelMutation.isPending}
+                    onClick={() => setCancelModalOpen(true)}
+                    disabled={cancelReason.trim().length < 15}
                   >
-                    {cancelMutation.isPending
-                      ? 'Cancelando...'
-                      : 'Confirmar Cancelamento'}
+                    Continuar (PIN)
                   </Button>
                 </DialogFooter>
               </DialogContent>

@@ -568,24 +568,52 @@ export default function FiscalConfigPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Último Número NF-e</Label>
+              <Label className="flex items-center gap-2">
+                Último Número NF-e
+                <Shield className="h-3.5 w-3.5 text-amber-500" />
+              </Label>
               <Input
                 type="number"
-                min={0}
                 value={lastNfeNumber}
-                onChange={e => setLastNfeNumber(Number(e.target.value))}
+                disabled
+                className="bg-muted font-mono"
               />
+              <p className="text-xs text-muted-foreground">
+                Atualizado automaticamente a cada emissão.
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label>Último Número NFC-e</Label>
+              <Label className="flex items-center gap-2">
+                Último Número NFC-e
+                <Shield className="h-3.5 w-3.5 text-amber-500" />
+              </Label>
               <Input
                 type="number"
-                min={0}
                 value={lastNfceNumber}
-                onChange={e => setLastNfceNumber(Number(e.target.value))}
-                disabled={!nfceEnabled}
+                disabled
+                className="bg-muted font-mono"
               />
+              <p className="text-xs text-muted-foreground">
+                Atualizado automaticamente a cada emissão.
+              </p>
+            </div>
+
+            <div className="md:col-span-3 flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-500/8 dark:border-amber-500/20">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                  Numeração travada por compliance SEFAZ
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-300">
+                  A numeração de NF-e e NFC-e é gerenciada pela SEFAZ — alterar
+                  manualmente cria gap na sequência e exige solicitação de
+                  inutilização. Para ajustar (em casos justificados de migração
+                  ou recuperação), use uma solicitação de inutilização junto ao
+                  seu contador. Esse fluxo será exposto como ação dedicada com
+                  PIN + motivo em uma próxima etapa do módulo fiscal.
+                </p>
+              </div>
             </div>
 
             <div className="md:col-span-3 flex items-center gap-3 p-3 rounded-lg border">
