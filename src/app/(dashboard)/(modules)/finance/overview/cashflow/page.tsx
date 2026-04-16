@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Activity, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
@@ -66,7 +67,7 @@ export default function CashflowPage() {
   const [endDate, setEndDate] = useState(defaultRange.end);
   const [groupBy, setGroupBy] = useState<CashflowGroupBy>('day');
 
-  const { data, isLoading } = useFinanceCashflow({
+  const { data, isLoading, error, refetch, isFetching } = useFinanceCashflow({
     startDate,
     endDate,
     groupBy,
@@ -187,18 +188,50 @@ export default function CashflowPage() {
         </Card>
       ) : null}
 
+      {/* Error state — surfaces failed cashflow queries instead of falling
+          through to the empty-state branch and looking like "no data". */}
+      {error && (
+        <Card className="border-rose-200 dark:border-rose-500/20 bg-rose-50/40 dark:bg-rose-500/5">
+          <CardContent className="p-8 text-center space-y-3">
+            <div className="mx-auto h-10 w-10 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
+              <TrendingDown className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-semibold text-rose-900 dark:text-rose-200">
+                Não foi possível carregar o fluxo de caixa
+              </p>
+              <p className="text-sm text-rose-800 dark:text-rose-300">
+                {error instanceof Error
+                  ? error.message
+                  : 'Erro ao consultar o fluxo de caixa.'}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="mt-2"
+            >
+              {isFetching ? 'Tentando...' : 'Tentar novamente'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Chart with projected overlay */}
-      <CashflowChart
-        realizedData={data?.data.map(entry => ({
-          date: entry.period,
-          cumulativeBalance: entry.cumulativeBalance,
-        }))}
-        accuracyData={accuracyData ?? undefined}
-        isLoading={isLoading}
-        isAccuracyLoading={isAccuracyLoading}
-        groupBy={groupBy}
-        onGroupByChange={setGroupBy}
-      />
+      {!error && (
+        <CashflowChart
+          realizedData={data?.data.map(entry => ({
+            date: entry.period,
+            cumulativeBalance: entry.cumulativeBalance,
+          }))}
+          accuracyData={accuracyData ?? undefined}
+          isLoading={isLoading}
+          isAccuracyLoading={isAccuracyLoading}
+          groupBy={groupBy}
+          onGroupByChange={setGroupBy}
+        />
+      )}
 
       {isLoading ? (
         <Card>

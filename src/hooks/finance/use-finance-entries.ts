@@ -25,6 +25,7 @@ export interface FinanceEntriesFilters {
   categoryId?: string;
   dueDateFrom?: string;
   dueDateTo?: string;
+  isOverdue?: boolean;
   sortBy?:
     | 'createdAt'
     | 'dueDate'
@@ -81,6 +82,7 @@ export function useFinanceEntriesInfinite(
         categoryId: filters?.categoryId || undefined,
         dueDateFrom: filters?.dueDateFrom || undefined,
         dueDateTo: filters?.dueDateTo || undefined,
+        isOverdue: filters?.isOverdue,
         sortBy: filters?.sortBy || undefined,
         sortOrder: filters?.sortOrder || undefined,
       });

@@ -1,25 +1,58 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
-import { useFinanceEntries } from '@/hooks/finance';
+import { useFinanceEntriesInfinite } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
 import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
-import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 type TabType = 'payable' | 'receivable';
 
 export default function OverduePage() {
   const { hasPermission } = usePermissions();
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState<TabType>('payable');
 
-  const { data, isLoading, error } = useFinanceEntries({
+  const {
+    entries,
+    total,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useFinanceEntriesInfinite({
     type: currentTab === 'payable' ? 'PAYABLE' : 'RECEIVABLE',
     isOverdue: true,
+    sortBy: 'dueDate',
+    sortOrder: 'asc',
   });
-  const entries = data?.entries;
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -86,31 +119,21 @@ export default function OverduePage() {
         hasPermission={hasPermission}
       />
 
-      {/* Tabs */}
-      <div className="flex border-b border-border">
-        <button
-          className={`px-6 py-3 font-medium transition-colors ${
-            currentTab === 'payable'
-              ? 'border-b-2 border-primary text-primary'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          onClick={() => setCurrentTab('payable')}
-        >
-          A Pagar Vencidos
-        </button>
-        <button
-          className={`px-6 py-3 font-medium transition-colors ${
-            currentTab === 'receivable'
-              ? 'border-b-2 border-primary text-primary'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          onClick={() => setCurrentTab('receivable')}
-        >
-          A Receber Vencidos
-        </button>
-      </div>
+      {/* Tabs (a11y-friendly shadcn primitive replaces the old <button> stack) */}
+      <Tabs value={currentTab} onValueChange={v => setCurrentTab(v as TabType)}>
+        <TabsList>
+          <TabsTrigger value="payable">A Pagar Vencidos</TabsTrigger>
+          <TabsTrigger value="receivable">A Receber Vencidos</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      {/* Content */}
+      {!isLoading && !error && entries.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {total} {total === 1 ? 'lançamento vencido' : 'lançamentos vencidos'}
+          {entries.length < total && ` (${entries.length} carregados)`}
+        </p>
+      )}
+
       <Card>
         {isLoading ? (
           <div className="p-8">
@@ -121,12 +144,30 @@ export default function OverduePage() {
             </div>
           </div>
         ) : error ? (
-          <div className="p-8 text-center text-muted-foreground">
-            Erro ao carregar contas vencidas
+          <div className="p-8 text-center space-y-3">
+            <AlertTriangle className="h-8 w-8 mx-auto text-rose-600 dark:text-rose-400" />
+            <p className="text-sm text-rose-800 dark:text-rose-300">
+              {error instanceof Error
+                ? error.message
+                : 'Erro ao carregar contas vencidas.'}
+            </p>
+            <Button variant="outline" onClick={() => refetch()}>
+              Tentar novamente
+            </Button>
           </div>
-        ) : !entries || entries.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            Nenhum registro encontrado
+        ) : entries.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <AlertTriangle className="h-10 w-10 mx-auto text-emerald-500/60" />
+            <div>
+              <p className="font-semibold">Sem contas vencidas</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Tudo em dia para{' '}
+                {currentTab === 'payable'
+                  ? 'contas a pagar'
+                  : 'contas a receber'}{' '}
+                no momento.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -198,6 +239,14 @@ export default function OverduePage() {
           </div>
         )}
       </Card>
+
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} className="h-1" />
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
     </div>
   );
 }
