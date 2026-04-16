@@ -22,6 +22,14 @@ const PhotoUploadDialog = dynamic(
     })),
   { ssr: false }
 );
+
+const PayrollPDFPreviewModal = dynamic(
+  () =>
+    import('@/components/hr/payroll-pdf-preview-modal').then(m => ({
+      default: m.PayrollPDFPreviewModal,
+    })),
+  { ssr: false }
+);
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -58,6 +66,8 @@ import { deductionsService } from '@/services/hr/deductions.service';
 import { timeControlService } from '@/services/hr/time-control.service';
 import { timeBankService } from '@/services/hr/time-bank.service';
 import { overtimeService } from '@/services/hr/overtime.service';
+import { payrollService } from '@/services/hr/payroll.service';
+import type { Payroll } from '@/types/hr';
 import type {
   Employee,
   BenefitEnrollment,
@@ -105,6 +115,7 @@ import {
   Phone,
   Plus,
   Printer,
+  Receipt,
   Shield,
   Stethoscope,
   Timer,
@@ -150,6 +161,11 @@ export default function EmployeeDetailPage() {
   const [passwordError, setPasswordError] = useState('');
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [payslipPreviewTarget, setPayslipPreviewTarget] = useState<{
+    payrollId: string;
+    referenceMonth: number;
+    referenceYear: number;
+  } | null>(null);
 
   // ============================================================================
   // DATA FETCHING
@@ -316,6 +332,16 @@ export default function EmployeeDetailPage() {
       return response.overtime;
     },
     enabled: activeTab === 'attendance',
+  });
+
+  // Payrolls (folha de pagamento — listagem para a aba Holerites)
+  const { data: payrollsData, isLoading: isLoadingPayrolls } = useQuery({
+    queryKey: ['payrolls', 'employee', employeeId],
+    queryFn: async () => {
+      const response = await payrollService.list({ perPage: 50 });
+      return response.payrolls;
+    },
+    enabled: activeTab === 'payroll',
   });
 
   // Print queue
@@ -921,6 +947,10 @@ export default function EmployeeDetailPage() {
             <TabsTrigger value="attendance" className="gap-2 flex-shrink-0">
               <Timer className="h-4 w-4 hidden sm:inline" />
               <span>Ponto</span>
+            </TabsTrigger>
+            <TabsTrigger value="payroll" className="gap-2 flex-shrink-0">
+              <Receipt className="h-4 w-4 hidden sm:inline" />
+              <span>Holerites</span>
             </TabsTrigger>
           </TabsList>
 
@@ -2192,6 +2222,143 @@ export default function EmployeeDetailPage() {
               </div>
             </Card>
           </TabsContent>
+
+          {/* ================================================================ */}
+          {/* Tab: Holerites (Payslips per month — Gusto-style timeline)        */}
+          {/* ================================================================ */}
+          <TabsContent value="payroll" className="flex flex-col gap-6">
+            <Card className="bg-white dark:bg-white/5 border border-border overflow-hidden py-0">
+              <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                <Receipt className="h-5 w-5 text-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold">Holerites</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Histórico de recibos de pagamento do funcionário.
+                  </p>
+                </div>
+                <Link href="/hr/payroll">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 h-9 px-2.5"
+                  >
+                    Folhas
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                </Link>
+              </div>
+              <div className="border-b border-border" />
+              <div className="p-4 sm:p-6">
+                {isLoadingPayrolls ? (
+                  <GridLoading count={3} layout="list" size="sm" />
+                ) : !payrollsData || payrollsData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Receipt className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhuma folha de pagamento disponível ainda
+                    </p>
+                  </div>
+                ) : (
+                  <ol
+                    data-testid="employee-payroll-history-list"
+                    className="relative border-l border-border ml-3 space-y-4 pl-6"
+                  >
+                    {payrollsData
+                      .slice()
+                      .sort(
+                        (a: Payroll, b: Payroll) =>
+                          b.referenceYear * 100 +
+                          b.referenceMonth -
+                          (a.referenceYear * 100 + a.referenceMonth)
+                      )
+                      .slice(0, 12)
+                      .map((payroll: Payroll) => {
+                        const isReady =
+                          payroll.status === 'CALCULATED' ||
+                          payroll.status === 'APPROVED' ||
+                          payroll.status === 'PAID';
+                        const monthNames = [
+                          'Janeiro',
+                          'Fevereiro',
+                          'Março',
+                          'Abril',
+                          'Maio',
+                          'Junho',
+                          'Julho',
+                          'Agosto',
+                          'Setembro',
+                          'Outubro',
+                          'Novembro',
+                          'Dezembro',
+                        ];
+                        return (
+                          <li
+                            key={payroll.id}
+                            data-testid={`employee-payroll-history-item-${payroll.id}`}
+                            className="relative"
+                          >
+                            <span className="absolute -left-[33px] top-4 flex h-4 w-4 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 ring-4 ring-background">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                            </span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border bg-white dark:bg-slate-800/60 border-border gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/30 shrink-0">
+                                  <FileText className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">
+                                    {monthNames[payroll.referenceMonth - 1]}{' '}
+                                    {payroll.referenceYear}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {isReady
+                                      ? 'Disponível para impressão'
+                                      : 'Aguardando cálculo da folha'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-4 text-sm shrink-0">
+                                <div className="text-right">
+                                  <p className="text-xs text-muted-foreground">
+                                    Líquido (folha)
+                                  </p>
+                                  <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                    {formatCurrency(payroll.totalNet)}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={!isReady}
+                                  onClick={() =>
+                                    setPayslipPreviewTarget({
+                                      payrollId: payroll.id,
+                                      referenceMonth: payroll.referenceMonth,
+                                      referenceYear: payroll.referenceYear,
+                                    })
+                                  }
+                                  data-testid={`employee-payroll-history-preview-${payroll.id}`}
+                                  title={
+                                    isReady
+                                      ? 'Pré-visualizar holerite'
+                                      : 'Holerite ainda não disponível'
+                                  }
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span className="hidden sm:inline">
+                                    Pré-visualizar
+                                  </span>
+                                </Button>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                  </ol>
+                )}
+              </div>
+            </Card>
+          </TabsContent>
         </Tabs>
       </PageBody>
 
@@ -2375,6 +2542,23 @@ export default function EmployeeDetailPage() {
         title="Excluir Funcionário"
         description={`Digite seu PIN de ação para excluir o funcionário "${employee?.fullName}". Esta ação não pode ser desfeita.`}
       />
+
+      {/* Payslip PDF preview modal */}
+      {payslipPreviewTarget && employee && (
+        <PayrollPDFPreviewModal
+          isOpen={!!payslipPreviewTarget}
+          onClose={() => setPayslipPreviewTarget(null)}
+          payrollId={payslipPreviewTarget.payrollId}
+          employeeId={employee.id}
+          employeeName={employee.fullName}
+          referenceMonth={payslipPreviewTarget.referenceMonth}
+          referenceYear={payslipPreviewTarget.referenceYear}
+          companyName={
+            employee.company?.tradeName ?? employee.company?.legalName
+          }
+          companyCnpj={employee.company?.cnpj}
+        />
+      )}
     </PageLayout>
   );
 }
