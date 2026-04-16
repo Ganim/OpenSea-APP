@@ -44,7 +44,9 @@ import {
 import { usePermissions } from '@/hooks/use-permissions';
 import { esocialService } from '@/services/hr/esocial.service';
 import { toast } from 'sonner';
-import type { EsocialEventStatus, EsocialEventListItem } from '@/types/esocial';
+import type { EsocialEventListItem } from '@/types/esocial';
+import { EsocialStatusChip } from '@/components/hr/esocial-status-chip';
+import { EsocialRetryButton } from '@/components/hr/esocial-retry-button';
 
 // ============================
 // KPI Card Component
@@ -105,32 +107,6 @@ function KpiCard({ title, value, icon: Icon, color, loading }: KpiCardProps) {
 }
 
 // ============================
-// Status Badge
-// ============================
-
-function StatusBadge({ status }: { status: EsocialEventStatus }) {
-  const config: Record<string, { label: string; variant: string }> = {
-    DRAFT: { label: 'Rascunho', variant: 'secondary' },
-    REVIEWED: { label: 'Revisado', variant: 'outline' },
-    APPROVED: { label: 'Aprovado', variant: 'default' },
-    TRANSMITTING: { label: 'Transmitindo', variant: 'outline' },
-    ACCEPTED: { label: 'Aceito', variant: 'default' },
-    REJECTED: { label: 'Rejeitado', variant: 'destructive' },
-    ERROR: { label: 'Erro', variant: 'destructive' },
-  };
-
-  const c = config[status] || config.DRAFT;
-
-  return (
-    <Badge
-      variant={c.variant as 'default' | 'secondary' | 'outline' | 'destructive'}
-    >
-      {c.label}
-    </Badge>
-  );
-}
-
-// ============================
 // Event Row Component
 // ============================
 
@@ -179,13 +155,19 @@ function EventRow({
           )}
         </div>
       </div>
-      <StatusBadge status={event.status} />
+      <EsocialStatusChip
+        status={event.status}
+        returnCode={event.rejectionCode}
+        returnMessage={event.rejectionMessage}
+      />
       <div className="flex items-center gap-1">
+        <EsocialRetryButton eventId={event.id} status={event.status} />
         <Button
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => onView(event.id)}
+          aria-label="Visualizar evento"
         >
           <Eye className="h-4 w-4" />
         </Button>
@@ -195,6 +177,7 @@ function EventRow({
             size="sm"
             className="h-8 w-8 p-0 text-emerald-600 dark:text-emerald-400"
             onClick={() => onApprove(event.id)}
+            aria-label="Aprovar evento"
           >
             <CheckCircle className="h-4 w-4" />
           </Button>

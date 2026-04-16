@@ -11,104 +11,19 @@ import {
   RefreshCw,
   CheckCircle,
   XCircle,
-  Send,
   AlertTriangle,
-  Clock,
   Loader2,
 } from 'lucide-react';
 
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermissions } from '@/hooks/use-permissions';
 import { esocialService } from '@/services/hr/esocial.service';
 import { toast } from 'sonner';
-import type { EsocialBatchStatus, EsocialBatchListItem } from '@/types/esocial';
-
-// ============================
-// Status Badge
-// ============================
-
-const BATCH_STATUS_CONFIG: Record<
-  EsocialBatchStatus,
-  { label: string; className: string }
-> = {
-  PENDING: {
-    label: 'Pendente',
-    className:
-      'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/8 dark:text-slate-300 dark:border-slate-500/20',
-  },
-  TRANSMITTING: {
-    label: 'Transmitindo',
-    className:
-      'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/8 dark:text-amber-300 dark:border-amber-500/20',
-  },
-  TRANSMITTED: {
-    label: 'Transmitido',
-    className:
-      'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/8 dark:text-sky-300 dark:border-sky-500/20',
-  },
-  PARTIALLY_ACCEPTED: {
-    label: 'Parcialmente Aceito',
-    className:
-      'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/8 dark:text-amber-300 dark:border-amber-500/20',
-  },
-  ACCEPTED: {
-    label: 'Aceito',
-    className:
-      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/8 dark:text-emerald-300 dark:border-emerald-500/20',
-  },
-  REJECTED: {
-    label: 'Rejeitado',
-    className:
-      'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/8 dark:text-rose-300 dark:border-rose-500/20',
-  },
-  ERROR: {
-    label: 'Erro',
-    className:
-      'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/8 dark:text-rose-300 dark:border-rose-500/20',
-  },
-};
-
-function BatchStatusBadge({ status }: { status: EsocialBatchStatus }) {
-  const config = BATCH_STATUS_CONFIG[status] || BATCH_STATUS_CONFIG.PENDING;
-  return (
-    <Badge variant="outline" className={config.className}>
-      {config.label}
-    </Badge>
-  );
-}
-
-// ============================
-// Status Icon
-// ============================
-
-function BatchStatusIcon({ status }: { status: EsocialBatchStatus }) {
-  const iconMap: Record<EsocialBatchStatus, React.ElementType> = {
-    PENDING: Clock,
-    TRANSMITTING: Send,
-    TRANSMITTED: Send,
-    PARTIALLY_ACCEPTED: AlertTriangle,
-    ACCEPTED: CheckCircle,
-    REJECTED: XCircle,
-    ERROR: AlertTriangle,
-  };
-
-  const colorMap: Record<EsocialBatchStatus, string> = {
-    PENDING: 'text-slate-500 dark:text-slate-400',
-    TRANSMITTING: 'text-amber-500 dark:text-amber-400',
-    TRANSMITTED: 'text-sky-500 dark:text-sky-400',
-    PARTIALLY_ACCEPTED: 'text-amber-500 dark:text-amber-400',
-    ACCEPTED: 'text-emerald-500 dark:text-emerald-400',
-    REJECTED: 'text-rose-500 dark:text-rose-400',
-    ERROR: 'text-rose-500 dark:text-rose-400',
-  };
-
-  const Icon = iconMap[status] || Clock;
-  return <Icon className={`h-5 w-5 ${colorMap[status] || ''}`} />;
-}
+import type { EsocialBatchListItem } from '@/types/esocial';
+import { EsocialStatusChip } from '@/components/hr/esocial-status-chip';
 
 // ============================
 // Batch Row
@@ -126,14 +41,15 @@ function BatchRow({ batch, onCheckStatus, isChecking }: BatchRowProps) {
 
   return (
     <div className="flex items-center gap-4 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors">
-      <BatchStatusIcon status={batch.status} />
-
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium font-mono">
             {batch.id.slice(0, 8)}...
           </span>
-          <BatchStatusBadge status={batch.status} />
+          <EsocialStatusChip
+            status={batch.status}
+            returnMessage={batch.errorMessage}
+          />
         </div>
         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
           {batch.protocol && (
@@ -198,7 +114,6 @@ function BatchRow({ batch, onCheckStatus, isChecking }: BatchRowProps) {
 export default function EsocialBatchesPage() {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const checkingBatchRef = useRef<string | null>(null);
 
   // Infinite query for batches
