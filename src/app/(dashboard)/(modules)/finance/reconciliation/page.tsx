@@ -17,6 +17,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
@@ -36,9 +37,11 @@ import {
   Calendar,
   FileText,
   Filter,
+  Landmark,
   Loader2,
   Upload,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Suspense,
@@ -310,15 +313,36 @@ function ReconciliationPageContent() {
             }}
           />
         ) : reconciliations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium mb-1">
-              Nenhuma conciliação encontrada
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Importe um arquivo OFX para iniciar a conciliação bancária das
-              suas transações.
-            </p>
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-600 shadow-lg">
+              <FileText className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium mb-1">
+                Nenhuma conciliação encontrada
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Importe um arquivo OFX do banco ou conecte uma conta via Open
+                Finance para sincronizar as transações automaticamente.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {canImport && (
+                <Button
+                  variant="default"
+                  onClick={() => setImportModalOpen(true)}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar OFX
+                </Button>
+              )}
+              <Button variant="outline" asChild>
+                <Link href="/finance/bank-connections">
+                  <Landmark className="h-4 w-4 mr-2" />
+                  Conectar via Open Finance
+                </Link>
+              </Button>
+            </div>
           </div>
         ) : (
           <>
