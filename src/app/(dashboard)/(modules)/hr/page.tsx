@@ -59,6 +59,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { WhosOutWidget } from './_shared/components/whos-out-widget';
+import { BirthdayAnniversaryWidget } from '@/components/hr/birthday-anniversary-widget';
 
 interface CardItem {
   id: string;
@@ -660,7 +661,15 @@ export default function HRLandingPage() {
         hasPermission={hasPermission}
       />
 
-      {hasPermission(HR_PERMISSIONS.VACATIONS.LIST) && <WhosOutWidget />}
+      {(hasPermission(HR_PERMISSIONS.VACATIONS.LIST) ||
+        hasPermission(HR_PERMISSIONS.EMPLOYEES.LIST)) && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {hasPermission(HR_PERMISSIONS.VACATIONS.LIST) && <WhosOutWidget />}
+          {hasPermission(HR_PERMISSIONS.EMPLOYEES.LIST) && (
+            <BirthdayAnniversaryWidget />
+          )}
+        </div>
+      )}
 
       <PageDashboardSections
         sections={dynamicSections}
