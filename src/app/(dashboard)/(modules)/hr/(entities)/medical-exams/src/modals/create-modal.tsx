@@ -37,6 +37,12 @@ interface CreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateMedicalExamData) => Promise<void>;
+  /**
+   * Pré-seleciona o funcionário ao abrir o modal. Útil quando o
+   * fluxo já está restrito a um único funcionário (ex.: timeline
+   * pessoal de exames).
+   */
+  initialEmployeeId?: string;
 }
 
 const EXAM_TYPE_OPTIONS: { value: MedicalExamType; label: string }[] = [
@@ -59,8 +65,13 @@ const APTITUDE_OPTIONS: { value: MedicalExamAptitude; label: string }[] = [
   { value: 'APTO_COM_RESTRICOES', label: 'Apto com Restrições' },
 ];
 
-export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
-  const [employeeId, setEmployeeId] = useState('');
+export function CreateModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialEmployeeId,
+}: CreateModalProps) {
+  const [employeeId, setEmployeeId] = useState(initialEmployeeId ?? '');
   const [type, setType] = useState<MedicalExamType | ''>('');
   const [examDate, setExamDate] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
@@ -83,7 +94,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
 
   useEffect(() => {
     if (!isOpen) {
-      setEmployeeId('');
+      setEmployeeId(initialEmployeeId ?? '');
       setType('');
       setExamDate(new Date().toISOString().split('T')[0]);
       setExpirationDate('');
@@ -102,8 +113,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
       setNextExamDate('');
       setIsSubmitting(false);
       setFieldErrors({});
+    } else if (initialEmployeeId) {
+      setEmployeeId(initialEmployeeId);
     }
-  }, [isOpen]);
+  }, [isOpen, initialEmployeeId]);
 
   const canSubmit =
     employeeId.trim() &&
