@@ -236,7 +236,7 @@ export default function ExchangeRatesPage() {
                   <Label>Moeda de Destino</Label>
                   <div className="h-12 flex items-center px-4 rounded-lg border border-border bg-muted/50">
                     <span className="text-sm font-medium text-foreground">
-                      🇧🇷 BRL - Real Brasileiro
+                      BRL - Real Brasileiro
                     </span>
                   </div>
                 </div>
