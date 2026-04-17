@@ -314,7 +314,7 @@ export default function PredictiveForecastPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.suggestions.map((suggestion, index) => {
+                  {data.suggestions.map(suggestion => {
                     const isDanger =
                       suggestion.includes('déficit') ||
                       suggestion.includes('negativo') ||
@@ -326,7 +326,7 @@ export default function PredictiveForecastPage() {
 
                     return (
                       <div
-                        key={index}
+                        key={suggestion}
                         className={`flex items-start gap-3 p-3 rounded-lg border ${
                           isDanger
                             ? 'bg-rose-50 border-rose-200 dark:bg-rose-500/5 dark:border-rose-800/30'

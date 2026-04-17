@@ -20,6 +20,7 @@ import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { CashflowChart } from '@/components/finance/analytics/cashflow-chart';
 import { useFinanceCashflow, useCashflowAccuracy } from '@/hooks/finance';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatCurrency } from '@/lib/format';
 
 type CashflowGroupBy = 'day' | 'week' | 'month';
 
@@ -33,31 +34,47 @@ function getMonthRange() {
   };
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
+/**
+ * Maps an accuracy percentage (0-100) to a semantic tier.
+ * Thresholds: high >= 80%, medium >= 50%, low otherwise.
+ */
+function getAccuracyTier(accuracy: number): 'high' | 'medium' | 'low' {
+  if (accuracy >= 80) return 'high';
+  if (accuracy >= 50) return 'medium';
+  return 'low';
 }
 
+const ACCURACY_CLASSES = {
+  high: {
+    badge:
+      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20',
+    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    icon: 'text-emerald-600',
+  },
+  medium: {
+    badge:
+      'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-200 dark:border-amber-500/20',
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    icon: 'text-amber-600',
+  },
+  low: {
+    badge:
+      'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-200 dark:border-rose-500/20',
+    bg: 'bg-rose-100 dark:bg-rose-900/30',
+    icon: 'text-rose-600',
+  },
+} as const;
+
 function getAccuracyColorClass(accuracy: number): string {
-  if (accuracy >= 80)
-    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20';
-  if (accuracy >= 50)
-    return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-200 dark:border-amber-500/20';
-  return 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-200 dark:border-rose-500/20';
+  return ACCURACY_CLASSES[getAccuracyTier(accuracy)].badge;
 }
 
 function getAccuracyBgClass(accuracy: number): string {
-  if (accuracy >= 80) return 'bg-emerald-100 dark:bg-emerald-900/30';
-  if (accuracy >= 50) return 'bg-amber-100 dark:bg-amber-900/30';
-  return 'bg-rose-100 dark:bg-rose-900/30';
+  return ACCURACY_CLASSES[getAccuracyTier(accuracy)].bg;
 }
 
 function getAccuracyIconClass(accuracy: number): string {
-  if (accuracy >= 80) return 'text-emerald-600';
-  if (accuracy >= 50) return 'text-amber-600';
-  return 'text-rose-600';
+  return ACCURACY_CLASSES[getAccuracyTier(accuracy)].icon;
 }
 
 export default function CashflowPage() {
@@ -280,10 +297,13 @@ export default function CashflowPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.data.map((entry, index) => {
+                    {data.data.map(entry => {
                       const isPositiveFlow = entry.netFlow >= 0;
                       return (
-                        <tr key={index} className="border-b last:border-0">
+                        <tr
+                          key={entry.period}
+                          className="border-b last:border-0"
+                        >
                           <td className="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-sm">
                             {entry.period}
                           </td>

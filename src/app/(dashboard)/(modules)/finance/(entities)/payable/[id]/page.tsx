@@ -61,6 +61,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -70,14 +71,6 @@ import { toast } from 'sonner';
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '-';
@@ -651,8 +644,8 @@ export default function PayableDetailPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {entry.costCenterAllocations!.map((alloc, index) => (
-                    <TableRow key={index}>
+                  {entry.costCenterAllocations!.map(alloc => (
+                    <TableRow key={alloc.costCenterId}>
                       <TableCell>
                         {alloc.costCenterName || alloc.costCenterId}
                       </TableCell>
@@ -890,8 +883,8 @@ export default function PayableDetailPage({
           <Card className="p-4 sm:p-6">
             <p className="text-sm text-muted-foreground mb-2">Tags</p>
             <div className="flex flex-wrap gap-2">
-              {entry.tags.map((tag, index) => (
-                <Badge key={index} variant="outline">
+              {entry.tags.map(tag => (
+                <Badge key={tag} variant="outline">
                   {tag}
                 </Badge>
               ))}
