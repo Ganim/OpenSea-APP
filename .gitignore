@@ -4,6 +4,8 @@
 nul
 # E2E test screenshots
 tests/e2e/**/screenshots/
+# Playwright test report (build artifact)
+playwright-report/
 # Logs
 logs
 *.log
