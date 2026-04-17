@@ -19,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -294,11 +295,10 @@ export default function AnnouncementEditPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="expiresAt">Data de expiracao</Label>
-                <Input
+                <DatePicker
                   id="expiresAt"
-                  type="date"
                   value={expiresAt}
-                  onChange={e => setExpiresAt(e.target.value)}
+                  onChange={v => setExpiresAt(typeof v === 'string' ? v : '')}
                 />
               </div>
             </div>

@@ -4,6 +4,7 @@ import {
   StepWizardDialog,
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -557,12 +558,12 @@ export function CreateModal({
               <Label htmlFor="start-date" className="text-xs">
                 Data de Início Prevista <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="start-date"
-                type="date"
                 value={expectedStartDate}
-                onChange={e => setExpectedStartDate(e.target.value)}
-                className="h-9"
+                onChange={v =>
+                  setExpectedStartDate(typeof v === 'string' ? v : '')
+                }
               />
             </div>
             <div className="flex-1 space-y-1.5">

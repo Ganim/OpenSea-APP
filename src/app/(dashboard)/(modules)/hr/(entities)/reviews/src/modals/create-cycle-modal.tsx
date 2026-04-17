@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -139,22 +140,20 @@ export function CreateCycleModal({
         <div className="space-y-4 p-1">
           <div className="space-y-2">
             <Label htmlFor="cycle-start">Data de início *</Label>
-            <Input
+            <DatePicker
               id="cycle-start"
-              type="date"
               value={startDate}
-              onChange={e => setStartDate(e.target.value)}
+              onChange={v => setStartDate(typeof v === 'string' ? v : '')}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cycle-end">Data de fim *</Label>
-            <Input
+            <DatePicker
               id="cycle-end"
-              type="date"
               value={endDate}
-              onChange={e => setEndDate(e.target.value)}
-              min={startDate}
+              onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+              fromDate={startDate ? new Date(startDate) : undefined}
             />
           </div>
 

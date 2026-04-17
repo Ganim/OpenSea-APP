@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -286,24 +287,22 @@ export function CreateModal({
                 <Label htmlFor="exam-date" className="text-xs">
                   Data do Exame <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="exam-date"
-                  type="date"
                   value={examDate}
-                  onChange={e => setExamDate(e.target.value)}
-                  className="h-9"
+                  onChange={v => setExamDate(typeof v === 'string' ? v : '')}
                 />
               </div>
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="exam-expiration" className="text-xs">
                   Data de Validade
                 </Label>
-                <Input
+                <DatePicker
                   id="exam-expiration"
-                  type="date"
                   value={expirationDate}
-                  onChange={e => setExpirationDate(e.target.value)}
-                  className="h-9"
+                  onChange={v =>
+                    setExpirationDate(typeof v === 'string' ? v : '')
+                  }
                 />
               </div>
             </div>
@@ -313,12 +312,10 @@ export function CreateModal({
               <Label htmlFor="next-exam-date" className="text-xs">
                 Próximo Exame Previsto
               </Label>
-              <Input
+              <DatePicker
                 id="next-exam-date"
-                type="date"
                 value={nextExamDate}
-                onChange={e => setNextExamDate(e.target.value)}
-                className="h-9"
+                onChange={v => setNextExamDate(typeof v === 'string' ? v : '')}
               />
             </div>
 

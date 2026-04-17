@@ -16,6 +16,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -434,14 +435,14 @@ export default function DependantEditPage() {
                       <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
-                      <Input
+                      <DatePicker
                         id="birthDate"
-                        type="date"
                         value={formData.birthDate}
-                        onChange={e => {
+                        onChange={v => {
+                          const next = typeof v === 'string' ? v : '';
                           setFormData({
                             ...formData,
-                            birthDate: e.target.value,
+                            birthDate: next,
                           });
                           if (fieldErrors.birthDate)
                             setFieldErrors(prev => ({
@@ -449,7 +450,6 @@ export default function DependantEditPage() {
                               birthDate: '',
                             }));
                         }}
-                        aria-invalid={!!fieldErrors.birthDate}
                       />
                       {fieldErrors.birthDate && (
                         <FormErrorIcon message={fieldErrors.birthDate} />

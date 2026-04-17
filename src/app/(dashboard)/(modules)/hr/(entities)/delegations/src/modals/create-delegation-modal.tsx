@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -218,11 +218,10 @@ export function CreateDelegationModal({
           <div className="space-y-5 p-1">
             <div className="space-y-2">
               <Label htmlFor="startDate">Data de Início</Label>
-              <Input
+              <DatePicker
                 id="startDate"
-                type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={v => setStartDate(typeof v === 'string' ? v : '')}
               />
             </div>
 
@@ -231,12 +230,11 @@ export function CreateDelegationModal({
                 Data de Término{' '}
                 <span className="text-muted-foreground">(opcional)</span>
               </Label>
-              <Input
+              <DatePicker
                 id="endDate"
-                type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                min={startDate || undefined}
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+                fromDate={startDate ? new Date(startDate) : undefined}
               />
               <p className="text-xs text-muted-foreground">
                 Se não informada, a delegação permanece ativa até ser revogada

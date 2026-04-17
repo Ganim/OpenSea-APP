@@ -16,6 +16,7 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -384,23 +385,20 @@ export default function SafetyProgramEditPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">Data de Início *</Label>
-              <Input
+              <DatePicker
                 id="startDate"
-                type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
-                required
+                onChange={v => setStartDate(typeof v === 'string' ? v : '')}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endDate">Data de Término *</Label>
-              <Input
+              <DatePicker
                 id="endDate"
-                type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                required
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+                fromDate={startDate ? new Date(startDate) : undefined}
               />
             </div>
           </div>

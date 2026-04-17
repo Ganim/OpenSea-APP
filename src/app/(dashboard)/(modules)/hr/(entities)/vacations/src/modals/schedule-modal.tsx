@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -99,29 +100,25 @@ export function ScheduleModal({
             <div className="space-y-2">
               <Label htmlFor="schedule-start-date">Data Início</Label>
               <div className="relative">
-                <Input
+                <DatePicker
                   id="schedule-start-date"
-                  type="date"
                   value={startDate}
-                  onChange={e => {
-                    setStartDate(e.target.value);
+                  onChange={v => {
+                    const next = typeof v === 'string' ? v : '';
+                    setStartDate(next);
                     if (fieldErrors.startDate)
                       setFieldErrors(prev => ({ ...prev, startDate: '' }));
                   }}
-                  required
-                  aria-invalid={!!fieldErrors.startDate}
                 />
                 <FormErrorIcon message={fieldErrors.startDate} />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="schedule-end-date">Data Fim</Label>
-              <Input
+              <DatePicker
                 id="schedule-end-date"
-                type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                required
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
               />
             </div>
           </div>

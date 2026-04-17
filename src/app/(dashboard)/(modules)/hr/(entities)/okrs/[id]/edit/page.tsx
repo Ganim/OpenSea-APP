@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,14 +24,7 @@ import type {
   KeyResultType,
 } from '@/types/hr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  BarChart3,
-  Loader2,
-  Plus,
-  Save,
-  Target,
-  Trash2,
-} from 'lucide-react';
+import { BarChart3, Loader2, Plus, Save, Target, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -447,20 +441,20 @@ export default function OKREditPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-start">Data de Início</Label>
-                    <Input
+                    <DatePicker
                       id="edit-start"
-                      type="date"
                       value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
+                      onChange={v =>
+                        setStartDate(typeof v === 'string' ? v : '')
+                      }
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-end">Data de Término</Label>
-                    <Input
+                    <DatePicker
                       id="edit-end"
-                      type="date"
                       value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
+                      onChange={v => setEndDate(typeof v === 'string' ? v : '')}
                     />
                   </div>
                 </div>

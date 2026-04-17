@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -474,20 +475,22 @@ export default function HRReportsPage() {
                         <Label className="text-xs text-muted-foreground">
                           Data Início
                         </Label>
-                        <Input
-                          type="date"
+                        <DatePicker
                           value={absencesStartDate}
-                          onChange={e => setAbsencesStartDate(e.target.value)}
+                          onChange={v =>
+                            setAbsencesStartDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">
                           Data Fim
                         </Label>
-                        <Input
-                          type="date"
+                        <DatePicker
                           value={absencesEndDate}
-                          onChange={e => setAbsencesEndDate(e.target.value)}
+                          onChange={v =>
+                            setAbsencesEndDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
                     </div>

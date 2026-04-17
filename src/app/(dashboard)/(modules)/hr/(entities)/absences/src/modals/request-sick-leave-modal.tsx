@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -157,29 +158,26 @@ export function RequestSickLeaveModal({
                 <div className="space-y-2">
                   <Label htmlFor="sick-start-date">Data Início *</Label>
                   <div className="relative">
-                    <Input
+                    <DatePicker
                       id="sick-start-date"
-                      type="date"
                       value={startDate}
-                      onChange={e => {
-                        setStartDate(e.target.value);
+                      onChange={v => {
+                        const val = typeof v === 'string' ? v : '';
+                        setStartDate(val);
                         if (fieldErrors.startDate)
                           setFieldErrors(prev => ({ ...prev, startDate: '' }));
                       }}
-                      required
-                      aria-invalid={!!fieldErrors.startDate}
                     />
                     <FormErrorIcon message={fieldErrors.startDate} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sick-end-date">Data Fim *</Label>
-                  <Input
+                  <DatePicker
                     id="sick-end-date"
-                    type="date"
                     value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
-                    required
+                    onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+                    fromDate={startDate ? new Date(startDate) : undefined}
                   />
                 </div>
               </div>

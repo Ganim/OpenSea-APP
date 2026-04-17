@@ -21,6 +21,7 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -924,11 +925,12 @@ export default function EmployeeEditPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="hireDate">Data de Admissão</Label>
-                        <Input
+                        <DatePicker
                           id="hireDate"
-                          type="date"
                           value={hireDate}
-                          onChange={e => setHireDate(e.target.value)}
+                          onChange={v =>
+                            setHireDate(typeof v === 'string' ? v : '')
+                          }
                         />
                       </div>
 

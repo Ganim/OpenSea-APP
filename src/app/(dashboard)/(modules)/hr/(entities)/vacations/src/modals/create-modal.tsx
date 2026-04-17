@@ -7,6 +7,7 @@
 
 import { Button } from '@/components/ui/button';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -163,20 +164,18 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <DatePicker
                     id="vacation-acq-start"
-                    type="date"
                     value={acquisitionStart}
-                    aria-invalid={!!fieldErrors.acquisitionStart}
-                    onChange={e => {
-                      setAcquisitionStart(e.target.value);
+                    onChange={v => {
+                      const next = typeof v === 'string' ? v : '';
+                      setAcquisitionStart(next);
                       if (fieldErrors.acquisitionStart)
                         setFieldErrors(prev => ({
                           ...prev,
                           acquisitionStart: '',
                         }));
                     }}
-                    className="h-11"
                   />
                   <FormErrorIcon message={fieldErrors.acquisitionStart} />
                 </div>
@@ -189,20 +188,18 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <DatePicker
                     id="vacation-acq-end"
-                    type="date"
                     value={acquisitionEnd}
-                    aria-invalid={!!fieldErrors.acquisitionEnd}
-                    onChange={e => {
-                      setAcquisitionEnd(e.target.value);
+                    onChange={v => {
+                      const next = typeof v === 'string' ? v : '';
+                      setAcquisitionEnd(next);
                       if (fieldErrors.acquisitionEnd)
                         setFieldErrors(prev => ({
                           ...prev,
                           acquisitionEnd: '',
                         }));
                     }}
-                    className="h-11"
                   />
                   <FormErrorIcon message={fieldErrors.acquisitionEnd} />
                 </div>
@@ -247,20 +244,18 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <DatePicker
                     id="vacation-con-start"
-                    type="date"
                     value={concessionStart}
-                    aria-invalid={!!fieldErrors.concessionStart}
-                    onChange={e => {
-                      setConcessionStart(e.target.value);
+                    onChange={v => {
+                      const next = typeof v === 'string' ? v : '';
+                      setConcessionStart(next);
                       if (fieldErrors.concessionStart)
                         setFieldErrors(prev => ({
                           ...prev,
                           concessionStart: '',
                         }));
                     }}
-                    className="h-11"
                   />
                   <FormErrorIcon message={fieldErrors.concessionStart} />
                 </div>
@@ -273,20 +268,18 @@ export function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <DatePicker
                     id="vacation-con-end"
-                    type="date"
                     value={concessionEnd}
-                    aria-invalid={!!fieldErrors.concessionEnd}
-                    onChange={e => {
-                      setConcessionEnd(e.target.value);
+                    onChange={v => {
+                      const next = typeof v === 'string' ? v : '';
+                      setConcessionEnd(next);
                       if (fieldErrors.concessionEnd)
                         setFieldErrors(prev => ({
                           ...prev,
                           concessionEnd: '',
                         }));
                     }}
-                    className="h-11"
                   />
                   <FormErrorIcon message={fieldErrors.concessionEnd} />
                 </div>

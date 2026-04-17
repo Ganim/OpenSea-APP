@@ -18,6 +18,7 @@ import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -429,11 +430,12 @@ export default function TerminationEditPage() {
                     <Label htmlFor="terminationDate">
                       Data da Rescisão <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
+                    <DatePicker
                       id="terminationDate"
-                      type="date"
                       value={terminationDate}
-                      onChange={e => setTerminationDate(e.target.value)}
+                      onChange={v =>
+                        setTerminationDate(typeof v === 'string' ? v : '')
+                      }
                     />
                   </div>
                 </div>
@@ -455,11 +457,12 @@ export default function TerminationEditPage() {
                       Último Dia de Trabalho{' '}
                       <span className="text-rose-500">*</span>
                     </Label>
-                    <Input
+                    <DatePicker
                       id="lastWorkDay"
-                      type="date"
                       value={lastWorkDay}
-                      onChange={e => setLastWorkDay(e.target.value)}
+                      onChange={v =>
+                        setLastWorkDay(typeof v === 'string' ? v : '')
+                      }
                     />
                   </div>
                 </div>
@@ -552,12 +555,13 @@ export default function TerminationEditPage() {
                         <Label htmlFor="noticePeriodStartDate">
                           Início do Aviso Prévio
                         </Label>
-                        <Input
+                        <DatePicker
                           id="noticePeriodStartDate"
-                          type="date"
                           value={noticePeriodStartDate}
-                          onChange={e =>
-                            setNoticePeriodStartDate(e.target.value)
+                          onChange={v =>
+                            setNoticePeriodStartDate(
+                              typeof v === 'string' ? v : ''
+                            )
                           }
                         />
                       </div>
@@ -566,11 +570,14 @@ export default function TerminationEditPage() {
                         <Label htmlFor="noticePeriodEndDate">
                           Fim do Aviso Prévio
                         </Label>
-                        <Input
+                        <DatePicker
                           id="noticePeriodEndDate"
-                          type="date"
                           value={noticePeriodEndDate}
-                          onChange={e => setNoticePeriodEndDate(e.target.value)}
+                          onChange={v =>
+                            setNoticePeriodEndDate(
+                              typeof v === 'string' ? v : ''
+                            )
+                          }
                         />
                       </div>
                     </div>

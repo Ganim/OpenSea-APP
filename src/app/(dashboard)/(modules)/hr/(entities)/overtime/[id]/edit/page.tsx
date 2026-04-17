@@ -9,6 +9,7 @@ import {
   PageLayout,
 } from '@/components/layout/page-layout';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -256,11 +257,10 @@ export default function OvertimeEditPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-date">Data *</Label>
-                    <Input
+                    <DatePicker
                       id="edit-date"
-                      type="date"
                       value={date}
-                      onChange={e => setDate(e.target.value)}
+                      onChange={v => setDate(typeof v === 'string' ? v : '')}
                       disabled={!isPending}
                     />
                   </div>

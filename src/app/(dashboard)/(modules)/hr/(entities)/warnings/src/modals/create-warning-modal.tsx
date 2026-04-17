@@ -5,6 +5,7 @@
 
 'use client';
 
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -413,10 +414,9 @@ export function CreateWarningModal({
             <Label className="text-sm font-medium">
               Data do Incidente <span className="text-rose-500">*</span>
             </Label>
-            <Input
-              type="date"
+            <DatePicker
               value={incidentDate}
-              onChange={e => setIncidentDate(e.target.value)}
+              onChange={v => setIncidentDate(typeof v === 'string' ? v : '')}
             />
           </div>
 

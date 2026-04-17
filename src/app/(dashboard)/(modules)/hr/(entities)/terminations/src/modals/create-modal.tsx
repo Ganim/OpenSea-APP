@@ -5,6 +5,7 @@ import {
   type WizardStep,
 } from '@/components/ui/step-wizard-dialog';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -234,24 +235,22 @@ export function CreateModal({
               <Label htmlFor="term-date" className="text-xs">
                 Data da Rescisão <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="term-date"
-                type="date"
                 value={terminationDate}
-                onChange={e => setTerminationDate(e.target.value)}
-                className="h-9"
+                onChange={v =>
+                  setTerminationDate(typeof v === 'string' ? v : '')
+                }
               />
             </div>
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="last-work-day" className="text-xs">
                 Último Dia Trabalhado <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="last-work-day"
-                type="date"
                 value={lastWorkDay}
-                onChange={e => setLastWorkDay(e.target.value)}
-                className="h-9"
+                onChange={v => setLastWorkDay(typeof v === 'string' ? v : '')}
               />
             </div>
           </div>
@@ -275,12 +274,12 @@ export function CreateModal({
               <Label htmlFor="payment-deadline" className="text-xs">
                 Prazo de Pagamento <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="payment-deadline"
-                type="date"
                 value={paymentDeadline}
-                onChange={e => setPaymentDeadline(e.target.value)}
-                className="h-9"
+                onChange={v =>
+                  setPaymentDeadline(typeof v === 'string' ? v : '')
+                }
               />
             </div>
           </div>

@@ -10,6 +10,7 @@ import {
 } from '@/components/layout/page-layout';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -336,22 +337,23 @@ export default function ReviewCycleEditPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-start-date">Data de Início *</Label>
-                    <Input
+                    <DatePicker
                       id="edit-start-date"
-                      type="date"
                       value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
+                      onChange={v =>
+                        setStartDate(typeof v === 'string' ? v : '')
+                      }
                       disabled={isClosed}
                     />
                   </div>
                   <div>
                     <Label htmlFor="edit-end-date">Data de Término *</Label>
-                    <Input
+                    <DatePicker
                       id="edit-end-date"
-                      type="date"
                       value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
+                      onChange={v => setEndDate(typeof v === 'string' ? v : '')}
                       disabled={isClosed}
+                      fromDate={startDate ? new Date(startDate) : undefined}
                     />
                   </div>
                 </div>

@@ -17,6 +17,7 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -438,32 +439,30 @@ export default function MedicalExamEditPage() {
               <Label htmlFor="examDate">
                 Data do Exame <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="examDate"
-                type="date"
                 value={examDate}
-                onChange={e => setExamDate(e.target.value)}
-                required
+                onChange={v => setExamDate(typeof v === 'string' ? v : '')}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="expirationDate">Data de Validade</Label>
-              <Input
+              <DatePicker
                 id="expirationDate"
-                type="date"
                 value={expirationDate}
-                onChange={e => setExpirationDate(e.target.value)}
+                onChange={v =>
+                  setExpirationDate(typeof v === 'string' ? v : '')
+                }
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="nextExamDate">Próximo Exame Previsto</Label>
-              <Input
+              <DatePicker
                 id="nextExamDate"
-                type="date"
                 value={nextExamDate}
-                onChange={e => setNextExamDate(e.target.value)}
+                onChange={v => setNextExamDate(typeof v === 'string' ? v : '')}
               />
             </div>
 

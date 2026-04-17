@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -220,12 +221,10 @@ export function DependantModal({
                   <Label htmlFor="dep-birthdate" className="text-xs">
                     Data de Nascimento <span className="text-rose-500">*</span>
                   </Label>
-                  <Input
+                  <DatePicker
                     id="dep-birthdate"
-                    type="date"
                     value={birthDate}
-                    onChange={e => setBirthDate(e.target.value)}
-                    className="h-9"
+                    onChange={v => setBirthDate(typeof v === 'string' ? v : '')}
                   />
                 </div>
                 <div className="flex-1 space-y-1.5">

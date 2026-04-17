@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -124,13 +125,12 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   </span>
                 </Label>
                 <div className="relative">
-                  <Input
+                  <DatePicker
                     id="ot-date"
-                    type="date"
                     value={date}
-                    aria-invalid={!!fieldErrors.date}
-                    onChange={e => {
-                      setDate(e.target.value);
+                    onChange={v => {
+                      const val = typeof v === 'string' ? v : '';
+                      setDate(val);
                       if (fieldErrors.date)
                         setFieldErrors(prev => ({ ...prev, date: '' }));
                     }}

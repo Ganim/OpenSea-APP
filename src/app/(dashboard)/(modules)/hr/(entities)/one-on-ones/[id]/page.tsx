@@ -25,6 +25,7 @@ import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-moda
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -1131,11 +1132,10 @@ function ActionItemsColumn({
                 </option>
               ))}
             </select>
-            <Input
-              type="date"
+            <DatePicker
               value={dueDate}
-              onChange={event => setDueDate(event.target.value)}
-              aria-label="Prazo"
+              onChange={v => setDueDate(typeof v === 'string' ? v : '')}
+              placeholder="Prazo"
             />
           </div>
           <div className="flex justify-end">

@@ -13,7 +13,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useEmployeeMap } from '@/hooks/use-employee-map';
 import type { TimeEntry } from '@/types/hr';
@@ -229,22 +229,20 @@ function TimeControlPageContent() {
             />
           </div>
 
-          <Input
-            type="date"
-            value={startDate}
-            onChange={e => setStartDate(e.target.value)}
-            className="w-40"
-            placeholder="Data início"
-            data-testid="time-control-filter-start-date"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={e => setEndDate(e.target.value)}
-            className="w-40"
-            placeholder="Data fim"
-            data-testid="time-control-filter-end-date"
-          />
+          <div className="w-40" data-testid="time-control-filter-start-date">
+            <DatePicker
+              value={startDate}
+              onChange={v => setStartDate(typeof v === 'string' ? v : '')}
+              placeholder="Data início"
+            />
+          </div>
+          <div className="w-40" data-testid="time-control-filter-end-date">
+            <DatePicker
+              value={endDate}
+              onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+              placeholder="Data fim"
+            />
+          </div>
 
           {hasActiveFilters && (
             <Badge

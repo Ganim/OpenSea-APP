@@ -11,6 +11,7 @@
 import { useCallback, useState } from 'react';
 import { StepWizardDialog } from '@/components/ui/step-wizard-dialog';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -236,20 +237,19 @@ export function CreateRequestModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="start-date">Data Início</Label>
-                <Input
+                <DatePicker
                   id="start-date"
-                  type="date"
                   value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
+                  onChange={v => setStartDate(typeof v === 'string' ? v : '')}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="end-date">Data Fim</Label>
-                <Input
+                <DatePicker
                   id="end-date"
-                  type="date"
                   value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
+                  onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+                  fromDate={startDate ? new Date(startDate) : undefined}
                 />
               </div>
             </div>

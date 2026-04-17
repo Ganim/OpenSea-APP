@@ -16,6 +16,7 @@ import {
   type AudienceSelection,
 } from '@/components/hr/audience-selector';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -381,10 +382,9 @@ export function CreateAnnouncementModal({
                 </SelectContent>
               </Select>
               {expiresAt && (
-                <Input
-                  type="date"
+                <DatePicker
                   value={expiresAt}
-                  onChange={e => setExpiresAt(e.target.value)}
+                  onChange={v => setExpiresAt(typeof v === 'string' ? v : '')}
                 />
               )}
               <p className="text-xs text-muted-foreground">

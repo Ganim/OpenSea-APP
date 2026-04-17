@@ -16,6 +16,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -404,12 +405,14 @@ export default function DeductionEditPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="date">Data</Label>
-                    <Input
+                    <DatePicker
                       id="date"
-                      type="date"
                       value={formData.date}
-                      onChange={e =>
-                        setFormData({ ...formData, date: e.target.value })
+                      onChange={v =>
+                        setFormData({
+                          ...formData,
+                          date: typeof v === 'string' ? v : '',
+                        })
                       }
                     />
                   </div>

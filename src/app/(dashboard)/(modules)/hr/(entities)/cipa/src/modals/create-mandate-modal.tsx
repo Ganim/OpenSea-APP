@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -152,24 +153,20 @@ export function CreateMandateModal({
                 <Label htmlFor="start-date" className="text-xs">
                   Data de Inicio <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="start-date"
-                  type="date"
                   value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
-                  className="h-9"
+                  onChange={v => setStartDate(typeof v === 'string' ? v : '')}
                 />
               </div>
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="end-date" className="text-xs">
                   Data de Termino <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="end-date"
-                  type="date"
                   value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
-                  className="h-9"
+                  onChange={v => setEndDate(typeof v === 'string' ? v : '')}
                 />
               </div>
             </div>
@@ -179,12 +176,10 @@ export function CreateMandateModal({
               <Label htmlFor="election-date" className="text-xs">
                 Data da Eleicao
               </Label>
-              <Input
+              <DatePicker
                 id="election-date"
-                type="date"
                 value={electionDate}
-                onChange={e => setElectionDate(e.target.value)}
-                className="h-9"
+                onChange={v => setElectionDate(typeof v === 'string' ? v : '')}
               />
             </div>
 

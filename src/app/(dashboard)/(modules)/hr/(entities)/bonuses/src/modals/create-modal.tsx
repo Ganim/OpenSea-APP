@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
@@ -163,12 +164,10 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                 <Label htmlFor="bonus-date" className="text-xs">
                   Data <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="bonus-date"
-                  type="date"
                   value={date}
-                  onChange={e => setDate(e.target.value)}
-                  className="h-9"
+                  onChange={v => setDate(typeof v === 'string' ? v : '')}
                 />
               </div>
             </div>

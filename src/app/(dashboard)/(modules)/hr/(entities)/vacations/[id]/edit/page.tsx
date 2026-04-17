@@ -16,6 +16,7 @@ import {
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -406,14 +407,14 @@ export default function VacationEditPage() {
                       <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
-                      <Input
+                      <DatePicker
                         id="startDate"
-                        type="date"
                         value={formData.startDate}
-                        onChange={e => {
+                        onChange={v => {
+                          const next = typeof v === 'string' ? v : '';
                           setFormData({
                             ...formData,
-                            startDate: e.target.value,
+                            startDate: next,
                           });
                           if (fieldErrors.startDate)
                             setFieldErrors(prev => ({
@@ -422,7 +423,6 @@ export default function VacationEditPage() {
                             }));
                         }}
                         disabled={!isEditable}
-                        aria-invalid={!!fieldErrors.startDate}
                       />
                       {fieldErrors.startDate && (
                         <FormErrorIcon message={fieldErrors.startDate} />
@@ -437,20 +437,19 @@ export default function VacationEditPage() {
                       <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
-                      <Input
+                      <DatePicker
                         id="endDate"
-                        type="date"
                         value={formData.endDate}
-                        onChange={e => {
+                        onChange={v => {
+                          const next = typeof v === 'string' ? v : '';
                           setFormData({
                             ...formData,
-                            endDate: e.target.value,
+                            endDate: next,
                           });
                           if (fieldErrors.endDate)
                             setFieldErrors(prev => ({ ...prev, endDate: '' }));
                         }}
                         disabled={!isEditable}
-                        aria-invalid={!!fieldErrors.endDate}
                       />
                       {fieldErrors.endDate && (
                         <FormErrorIcon message={fieldErrors.endDate} />

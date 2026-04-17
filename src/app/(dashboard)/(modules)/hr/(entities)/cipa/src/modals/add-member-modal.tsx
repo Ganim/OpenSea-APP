@@ -6,8 +6,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
@@ -191,12 +191,12 @@ export function AddMemberModal({
                   <Label htmlFor="stable-until" className="text-xs">
                     Estabilidade ate
                   </Label>
-                  <Input
+                  <DatePicker
                     id="stable-until"
-                    type="date"
                     value={stableUntil}
-                    onChange={e => setStableUntil(e.target.value)}
-                    className="h-9"
+                    onChange={v =>
+                      setStableUntil(typeof v === 'string' ? v : '')
+                    }
                   />
                 </div>
               )}

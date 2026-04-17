@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -389,22 +390,20 @@ export function CreateObjectiveModal({
               <Label htmlFor="obj-start">
                 Data de Início <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="obj-start"
-                type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={v => setStartDate(typeof v === 'string' ? v : '')}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="obj-end">
                 Data de Término <span className="text-rose-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="obj-end"
-                type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
               />
             </div>
           </div>

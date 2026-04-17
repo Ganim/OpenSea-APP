@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { EmployeeSelector } from '@/components/shared/employee-selector';
@@ -95,20 +95,18 @@ export function CalculateHoursModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="calc-start">Data Início</Label>
-              <Input
+              <DatePicker
                 id="calc-start"
-                type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={v => setStartDate(typeof v === 'string' ? v : '')}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="calc-end">Data Fim</Label>
-              <Input
+              <DatePicker
                 id="calc-end"
-                type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
               />
             </div>
           </div>

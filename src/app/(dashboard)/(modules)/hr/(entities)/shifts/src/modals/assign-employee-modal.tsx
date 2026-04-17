@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -215,10 +216,9 @@ export function AssignEmployeeModal({
               <Label className="text-xs">
                 Data de Início <span className="text-rose-500">*</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={v => setStartDate(typeof v === 'string' ? v : '')}
               />
             </div>
 
@@ -227,11 +227,10 @@ export function AssignEmployeeModal({
                 Data de Término{' '}
                 <span className="text-muted-foreground">(opcional)</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                min={startDate}
+                onChange={v => setEndDate(typeof v === 'string' ? v : '')}
+                fromDate={startDate ? new Date(startDate) : undefined}
               />
             </div>
 

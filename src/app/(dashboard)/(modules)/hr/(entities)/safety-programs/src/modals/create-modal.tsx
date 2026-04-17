@@ -6,6 +6,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -198,24 +199,21 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                 <Label htmlFor="valid-from" className="text-xs">
                   Vigencia Inicio <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="valid-from"
-                  type="date"
                   value={validFrom}
-                  onChange={e => setValidFrom(e.target.value)}
-                  className="h-9"
+                  onChange={v => setValidFrom(typeof v === 'string' ? v : '')}
                 />
               </div>
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="valid-until" className="text-xs">
                   Vigencia Fim <span className="text-rose-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="valid-until"
-                  type="date"
                   value={validUntil}
-                  onChange={e => setValidUntil(e.target.value)}
-                  className="h-9"
+                  onChange={v => setValidUntil(typeof v === 'string' ? v : '')}
+                  fromDate={validFrom ? new Date(validFrom) : undefined}
                 />
               </div>
             </div>
