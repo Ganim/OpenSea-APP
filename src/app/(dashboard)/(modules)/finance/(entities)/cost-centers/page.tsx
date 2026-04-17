@@ -155,7 +155,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function CostCentersPage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="grid" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="grid" size="md" gap="gap-4" />}
     >
       <CostCentersPageContent />
     </Suspense>
@@ -747,8 +747,7 @@ function CostCentersPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="cost-centers-page" className="contents" />
+        <PageBody data-testid="cost-centers-page">
           {/* Search Bar */}
           <div data-testid="cost-centers-search">
             <SearchBar
@@ -763,7 +762,7 @@ function CostCentersPageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="grid" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -833,7 +832,7 @@ function CostCentersPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
