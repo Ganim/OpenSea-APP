@@ -48,6 +48,7 @@ import {
   useBulkDeleteEntries,
 } from '@/hooks/finance/use-finance-bulk-actions';
 import { useFinanceCategories } from '@/hooks/finance/use-finance-categories';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { FinanceEntry, FinanceEntryStatus } from '@/types/finance';
 import { FINANCE_ENTRY_STATUS_LABELS } from '@/types/finance';
@@ -118,13 +119,6 @@ const RECEIVABLE_STATUSES: FinanceEntryStatus[] = [
 // HELPERS
 // ============================================================================
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('pt-BR');
 }
@@ -163,7 +157,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function ReceivablePage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="list" size="md" gap="gap-4" />}
     >
       <ReceivablePageContent />
     </Suspense>
@@ -783,8 +777,7 @@ function ReceivablePageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="receivable-page" className="contents" />
+        <PageBody data-testid="receivable-page">
           {/* Search Bar */}
           <div data-testid="receivable-search">
             <SearchBar
@@ -799,7 +792,7 @@ function ReceivablePageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -880,7 +873,7 @@ function ReceivablePageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

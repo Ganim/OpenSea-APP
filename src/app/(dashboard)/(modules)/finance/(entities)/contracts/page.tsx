@@ -33,6 +33,7 @@ import {
   useDeleteContract,
   type ContractsFilters,
 } from '@/hooks/finance/use-contracts';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Contract, ContractStatus } from '@/types/finance';
 import {
@@ -78,16 +79,8 @@ const STATUS_OPTIONS = [
 // HELPERS
 // ============================================================================
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '\u2014';
+  if (!dateStr) return '—';
   return new Intl.DateTimeFormat('pt-BR').format(new Date(dateStr));
 }
 
@@ -130,7 +123,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function ContractsPage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="list" size="md" gap="gap-4" />}
     >
       <ContractsPageContent />
     </Suspense>
@@ -608,8 +601,7 @@ function ContractsPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="contracts-page" className="contents" />
+        <PageBody data-testid="contracts-page">
           {/* Search Bar */}
           <div data-testid="contracts-search">
             <SearchBar
@@ -624,7 +616,7 @@ function ContractsPageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -693,7 +685,7 @@ function ContractsPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

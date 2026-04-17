@@ -36,6 +36,7 @@ import {
   useCancelRecurring,
   type RecurringFilters,
 } from '@/hooks/finance/use-recurring';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type {
   RecurringConfig,
@@ -87,16 +88,8 @@ const TYPE_OPTIONS = [
 // HELPERS
 // ============================================================================
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '\u2014';
+  if (!dateStr) return '—';
   return new Intl.DateTimeFormat('pt-BR').format(new Date(dateStr));
 }
 
@@ -143,7 +136,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function RecurringPage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="list" size="md" gap="gap-4" />}
     >
       <RecurringPageContent />
     </Suspense>
@@ -600,8 +593,7 @@ function RecurringPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="recurring-page" className="contents" />
+        <PageBody data-testid="recurring-page">
           {/* Search Bar */}
           <div data-testid="recurring-search">
             <SearchBar
@@ -616,7 +608,7 @@ function RecurringPageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -696,7 +688,7 @@ function RecurringPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

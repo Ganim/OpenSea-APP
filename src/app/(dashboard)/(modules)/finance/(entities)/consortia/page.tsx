@@ -33,6 +33,7 @@ import {
   useDeleteConsortium,
   type ConsortiaFilters,
 } from '@/hooks/finance/use-consortia';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Consortium, ConsortiumStatus } from '@/types/finance';
 import { CONSORTIUM_STATUS_LABELS } from '@/types/finance';
@@ -78,14 +79,6 @@ const CONTEMPLATED_OPTIONS = [
 // HELPERS
 // ============================================================================
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function getStatusColor(status: ConsortiumStatus): string {
   const colors: Record<ConsortiumStatus, string> = {
     ACTIVE:
@@ -117,7 +110,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function ConsortiaPage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="list" size="md" gap="gap-4" />}
     >
       <ConsortiaPageContent />
     </Suspense>
@@ -598,8 +591,7 @@ function ConsortiaPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="consortia-page" className="contents" />
+        <PageBody data-testid="consortia-page">
           {/* Search Bar */}
           <div data-testid="consortia-search">
             <SearchBar
@@ -614,7 +606,7 @@ function ConsortiaPageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -694,7 +686,7 @@ function ConsortiaPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

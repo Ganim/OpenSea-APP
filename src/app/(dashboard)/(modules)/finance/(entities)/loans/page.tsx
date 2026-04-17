@@ -33,6 +33,7 @@ import {
   useDeleteLoan,
   type LoansFilters,
 } from '@/hooks/finance/use-loans';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Loan, LoanStatus, LoanType } from '@/types/finance';
 import { LOAN_STATUS_LABELS, LOAN_TYPE_LABELS } from '@/types/finance';
@@ -81,14 +82,6 @@ const ACTIVE_LOAN_STATUSES: LoanStatus[] = [
 // HELPERS
 // ============================================================================
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function getStatusColor(status: LoanStatus): string {
   const colors: Record<LoanStatus, string> = {
     ACTIVE:
@@ -129,7 +122,7 @@ type ActionButtonWithPermission = HeaderButton & {
 export default function LoansPage() {
   return (
     <Suspense
-      fallback={<GridLoading count={9} layout="list" size="md" gap="gap-4" />}
+      fallback={<GridLoading count={6} layout="list" size="md" gap="gap-4" />}
     >
       <LoansPageContent />
     </Suspense>
@@ -167,15 +160,11 @@ function LoansPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  // Sorting state (server-side)
+  // Sorting state (server-side) — aligned with LoansQuery['sortBy']
+  // (backend Zod enum only accepts these fields; legacy values
+  // totalAmount/institution/outstandingBalance were removed in P1-40).
   const [sortBy, setSortBy] = useState<
-    | 'createdAt'
-    | 'totalAmount'
-    | 'institution'
-    | 'status'
-    | 'name'
-    | 'principalAmount'
-    | 'outstandingBalance'
+    'createdAt' | 'startDate' | 'principalAmount' | 'name' | 'status'
   >('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -614,8 +603,7 @@ function LoansPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="loans-page" className="contents" />
+        <PageBody data-testid="loans-page">
           {/* Search Bar */}
           <div data-testid="loans-search">
             <SearchBar
@@ -630,7 +618,7 @@ function LoansPageContent() {
 
           {/* Grid */}
           {isLoading ? (
-            <GridLoading count={9} layout="list" size="md" gap="gap-4" />
+            <GridLoading count={6} layout="list" size="md" gap="gap-4" />
           ) : error ? (
             <GridError
               type="server"
@@ -703,7 +691,7 @@ function LoansPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
