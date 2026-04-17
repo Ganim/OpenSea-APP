@@ -27,6 +27,7 @@ import {
   type ReconciliationFilters,
 } from '@/hooks/finance/use-reconciliation';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Reconciliation, ReconciliationStatus } from '@/types/finance';
 import { RECONCILIATION_STATUS_LABELS } from '@/types/finance';
@@ -66,13 +67,6 @@ const STATUS_OPTIONS = [
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('pt-BR');
@@ -359,7 +353,7 @@ function ReconciliationPageContent() {
             </div>
 
             {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} className="h-1" />
+            <div ref={sentinelRef} aria-hidden className="h-px" />
             {isFetchingNextPage && (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
