@@ -103,7 +103,7 @@ export function ViewModal({ isOpen, onClose, timeBank }: ViewModalProps) {
               </Badge>
             )}
             {timeBank.hasNegativeBalance && (
-              <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+              <Badge className="bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">
                 Possui saldo negativo
               </Badge>
             )}

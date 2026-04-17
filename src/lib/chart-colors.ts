@@ -9,7 +9,13 @@ export const CHART_COLORS = {
   cyan: '#06b6d4',
   emerald: '#10b981',
   amber: '#f59e0b',
-  red: '#ef4444',
+  /**
+   * Project convention: destructive / warning uses Rose (#f43f5e), not Red.
+   * The `red` key is retained for backward compatibility with existing call
+   * sites but points to the Rose hue so charts stay consistent with the UI.
+   */
+  red: '#f43f5e',
+  rose: '#f43f5e',
   pink: '#ec4899',
   indigo: '#6366f1',
   teal: '#14b8a6',
