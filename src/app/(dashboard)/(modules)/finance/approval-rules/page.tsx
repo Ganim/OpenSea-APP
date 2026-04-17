@@ -91,7 +91,7 @@ function ApprovalRuleCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  'text-[10px]',
+                  'text-xs',
                   actionColors.bg,
                   actionColors.text,
                   actionColors.border
@@ -385,18 +385,16 @@ export default function ApprovalRulesPage() {
         }}
       />
 
-      {/* Edit Modal */}
-      {editId && (
-        <ApprovalRuleModal
-          open={!!editId}
-          onOpenChange={open => !open && setEditId(null)}
-          ruleId={editId}
-          onSaved={() => {
-            refetch();
-            setEditId(null);
-          }}
-        />
-      )}
+      {/* Edit Modal — always mounted for proper open/close animation */}
+      <ApprovalRuleModal
+        open={!!editId}
+        onOpenChange={open => !open && setEditId(null)}
+        ruleId={editId ?? undefined}
+        onSaved={() => {
+          refetch();
+          setEditId(null);
+        }}
+      />
 
       {/* Delete confirmation */}
       <VerifyActionPinModal

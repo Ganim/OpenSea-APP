@@ -345,18 +345,16 @@ export default function EscalationsPage() {
         }}
       />
 
-      {/* Edit Modal */}
-      {editId && (
-        <EscalationConfigModal
-          open={!!editId}
-          onOpenChange={open => !open && setEditId(null)}
-          escalationId={editId}
-          onSaved={() => {
-            invalidateEscalations();
-            setEditId(null);
-          }}
-        />
-      )}
+      {/* Edit Modal — always mounted for proper open/close animation */}
+      <EscalationConfigModal
+        open={!!editId}
+        onOpenChange={open => !open && setEditId(null)}
+        escalationId={editId ?? undefined}
+        onSaved={() => {
+          invalidateEscalations();
+          setEditId(null);
+        }}
+      />
 
       {/* Delete confirmation */}
       <VerifyActionPinModal
