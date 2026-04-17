@@ -1,9 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BarChart3 } from 'lucide-react';
+import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { PageHeroBanner } from '@/components/layout/page-hero-banner';
+import { usePermissions } from '@/hooks/use-permissions';
 import {
   PeriodSelector,
   type DateRange,
@@ -29,7 +35,7 @@ function getDefaultRange(): DateRange {
 }
 
 export default function FinanceAnalyticsPage() {
-  const router = useRouter();
+  const { hasPermission } = usePermissions();
   const [dateRange, setDateRange] = useState<DateRange>(getDefaultRange);
   const [groupBy, setGroupBy] = useState<'day' | 'week' | 'month'>('day');
 
@@ -75,30 +81,29 @@ export default function FinanceAnalyticsPage() {
   )?.byCategory;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/finance')}
-          aria-label="Voltar"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-            <BarChart3 className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">Painel Financeiro</h1>
-            <p className="text-muted-foreground">
-              Indicadores, receitas, despesas e fluxo de caixa
-            </p>
-          </div>
-        </div>
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Relatórios', href: '/finance/reports' },
+            { label: 'Painel Financeiro' },
+          ]}
+          hasPermission={hasPermission}
+        />
+      </PageHeader>
 
-      <PeriodSelector value={dateRange} onChange={setDateRange} />
+      <PageBody>
+        <PageHeroBanner
+          title="Painel Financeiro"
+          description="Indicadores-chave, comparativo de receitas versus despesas, fluxo de caixa realizado e projetado em um único painel analítico."
+          icon={BarChart3}
+          iconGradient="from-violet-500 to-indigo-600"
+          buttons={[]}
+          hasPermission={hasPermission}
+        />
+
+        <PeriodSelector value={dateRange} onChange={setDateRange} />
 
       <KPICards data={dashboardData} isLoading={dashLoading} />
 
@@ -113,19 +118,20 @@ export default function FinanceAnalyticsPage() {
         />
       </div>
 
-      <CashflowChart
-        realizedData={cashflowData?.data?.map(d => ({
-          date: (d as { date?: string; period?: string }).date ?? d.period,
-          cumulativeBalance: d.cumulativeBalance,
-        }))}
-        projectedData={forecastData?.data?.map(d => ({
-          date: d.date,
-          cumulativeNet: d.cumulativeNet,
-        }))}
-        isLoading={cashflowLoading || forecastLoading}
-        groupBy={groupBy}
-        onGroupByChange={setGroupBy}
-      />
-    </div>
+        <CashflowChart
+          realizedData={cashflowData?.data?.map(d => ({
+            date: (d as { date?: string; period?: string }).date ?? d.period,
+            cumulativeBalance: d.cumulativeBalance,
+          }))}
+          projectedData={forecastData?.data?.map(d => ({
+            date: d.date,
+            cumulativeNet: d.cumulativeNet,
+          }))}
+          isLoading={cashflowLoading || forecastLoading}
+          groupBy={groupBy}
+          onGroupByChange={setGroupBy}
+        />
+      </PageBody>
+    </PageLayout>
   );
 }

@@ -13,10 +13,12 @@ export function PageLayout({
   backgroundVariant: _bg,
   maxWidth: _mw,
   className,
+  ...rest
 }: PageLayoutProps) {
   return (
     <div
       id="page"
+      data-testid={rest['data-testid']}
       className={cn(
         // Container
         'w-full',
@@ -63,10 +65,12 @@ export function PageBody({
   children,
   spacing = 'gap-4',
   className,
+  ...rest
 }: PageBodyProps) {
   return (
     <div
       id="page-body"
+      data-testid={rest['data-testid']}
       className={cn(
         // Container
         'w-full',

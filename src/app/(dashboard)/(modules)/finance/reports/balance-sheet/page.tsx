@@ -12,6 +12,12 @@ import {
 } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useBalanceSheet } from '@/hooks/finance';
 import type { BalanceSheetAccount, BalanceSheetSection } from '@/types/finance';
@@ -281,22 +287,33 @@ export default function BalanceSheetPage() {
   const { data, isLoading, error } = useBalanceSheet(params);
 
   return (
-    <div className="space-y-6">
-      {/* Action Bar */}
-      <PageActionBar
-        breadcrumbItems={[
-          { label: 'Financeiro', href: '/finance' },
-          { label: 'Relatórios', href: '/finance/reports' },
-          { label: 'Balanço Patrimonial' },
-        ]}
-        hasPermission={hasPermission}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Relatórios', href: '/finance/reports' },
+            { label: 'Balanço Patrimonial' },
+          ]}
+          hasPermission={hasPermission}
+        />
+      </PageHeader>
 
-      {/* Date Range Selector */}
-      <div className="flex flex-wrap items-center gap-3">
-        <DatePicker label="Início" value={startDate} onChange={setStartDate} />
-        <DatePicker label="Fim" value={endDate} onChange={setEndDate} />
-      </div>
+      <PageBody>
+        <PageHeroBanner
+          title="Balanço Patrimonial"
+          description="Fotografia da posição financeira da empresa no período selecionado: ativos, passivos e patrimônio líquido segundo o plano de contas contábil."
+          icon={Scale}
+          iconGradient="from-violet-500 to-indigo-600"
+          buttons={[]}
+          hasPermission={hasPermission}
+        />
+
+        {/* Date Range Selector */}
+        <div className="flex flex-wrap items-center gap-3">
+          <DatePicker label="Início" value={startDate} onChange={setStartDate} />
+          <DatePicker label="Fim" value={endDate} onChange={setEndDate} />
+        </div>
 
       {/* Loading */}
       {isLoading && <BalanceSheetSkeleton />}
@@ -448,17 +465,18 @@ export default function BalanceSheetPage() {
         </>
       )}
 
-      {/* Empty state */}
-      {!data && !isLoading && !error && (
-        <Card className="bg-white dark:bg-slate-800/60 border border-border">
-          <CardContent className="py-12 text-center">
-            <Scale className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
-            <p className="text-muted-foreground">
-              Selecione um período para gerar o balanço patrimonial.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        {/* Empty state */}
+        {!data && !isLoading && !error && (
+          <Card className="bg-white dark:bg-slate-800/60 border border-border">
+            <CardContent className="py-12 text-center">
+              <Scale className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
+              <p className="text-muted-foreground">
+                Selecione um período para gerar o balanço patrimonial.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </PageBody>
+    </PageLayout>
   );
 }

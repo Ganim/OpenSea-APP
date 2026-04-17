@@ -14,6 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { usePermissions } from '@/hooks/use-permissions';
 import { usePredictiveCashflow } from '@/hooks/finance';
 import { PredictiveChart } from '@/components/finance/analytics/predictive-chart';
@@ -95,17 +101,28 @@ export default function PredictiveForecastPage() {
     0;
 
   return (
-    <div className="space-y-6">
-      {/* Action Bar */}
-      <PageActionBar
-        breadcrumbItems={[
-          { label: 'Financeiro', href: '/finance' },
-          { label: 'Relatórios', href: '/finance/reports' },
-          { label: 'Previsão de Fluxo de Caixa' },
-        ]}
-        hasPermission={hasPermission}
-        buttons={[]}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Relatórios', href: '/finance/reports' },
+            { label: 'Previsão de Fluxo de Caixa' },
+          ]}
+          hasPermission={hasPermission}
+          buttons={[]}
+        />
+      </PageHeader>
+
+      <PageBody>
+        <PageHeroBanner
+          title="Previsão de Fluxo de Caixa"
+          description="Projeção baseada em média móvel e tendência dos últimos meses. Identifica semanas em risco de saldo negativo e sugere ações corretivas."
+          icon={TrendingUp}
+          iconGradient="from-violet-500 to-indigo-600"
+          buttons={[]}
+          hasPermission={hasPermission}
+        />
 
       {/* Period Selector + Data Quality */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -407,7 +424,8 @@ export default function PredictiveForecastPage() {
           )}
         </>
       )}
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }
 

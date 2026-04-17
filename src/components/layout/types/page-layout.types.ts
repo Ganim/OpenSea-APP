@@ -40,6 +40,8 @@ export interface PageLayoutProps {
   maxWidth?: PageMaxWidth;
   /** Classes Tailwind customizadas para o container externo */
   className?: string;
+  /** Data-testid para localização em testes E2E */
+  'data-testid'?: string;
 }
 
 /**
@@ -64,5 +66,6 @@ export interface PageBodyProps {
   spacing?: PageSpacing;
   /** Classes Tailwind customizadas para o container externo */
   className?: string;
-  /** Classes Tailwind customizadas para o wrapper interno */
+  /** Data-testid para localização em testes E2E */
+  'data-testid'?: string;
 }

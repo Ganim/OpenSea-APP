@@ -21,6 +21,12 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
+import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useChartOfAccounts } from '@/hooks/finance/use-chart-of-accounts';
 import { useLedger } from '@/hooks/finance/use-reports';
@@ -291,16 +297,27 @@ export default function LedgerPage() {
   }, [data]);
 
   return (
-    <div className="space-y-6">
-      {/* Action Bar */}
-      <PageActionBar
-        breadcrumbItems={[
-          { label: 'Financeiro', href: '/finance' },
-          { label: 'Relatórios', href: '/finance/reports' },
-          { label: 'Razão' },
-        ]}
-        hasPermission={hasPermission}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Relatórios', href: '/finance/reports' },
+            { label: 'Razão' },
+          ]}
+          hasPermission={hasPermission}
+        />
+      </PageHeader>
+
+      <PageBody>
+        <PageHeroBanner
+          title="Razão Contábil"
+          description="Histórico cronológico de lançamentos de uma conta contábil específica, com débitos, créditos e saldo acumulado no período."
+          icon={BookOpen}
+          iconGradient="from-violet-500 to-indigo-600"
+          buttons={[]}
+          hasPermission={hasPermission}
+        />
 
       {/* Filter Bar */}
       <Card className="bg-white dark:bg-slate-800/60 border border-border">
@@ -522,6 +539,7 @@ export default function LedgerPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }

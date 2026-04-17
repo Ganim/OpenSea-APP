@@ -20,6 +20,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { PageActionBar } from '@/components/layout/page-action-bar';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { useDreAnnual } from '@/hooks/finance/use-reports';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -75,24 +80,27 @@ export default function DREPage() {
     : 1;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <PageActionBar
-        breadcrumbItems={[
-          { label: 'Financeiro', href: '/finance' },
-          { label: 'Relatórios', href: '/finance/reports' },
-          { label: 'DRE' },
-        ]}
-        hasPermission={hasPermission}
-      />
+    <PageLayout>
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Relatórios', href: '/finance/reports' },
+            { label: 'DRE' },
+          ]}
+          hasPermission={hasPermission}
+        />
+      </PageHeader>
 
-      <PageHeroBanner
-        title="DRE — Demonstração do Resultado"
-        description="Resultado do exercício do ano selecionado: receitas e despesas realizadas, resultado líquido e margem. Detalhamento mês a mês para identificar sazonalidade."
-        icon={FileText}
-        iconGradient="from-violet-500 to-indigo-600"
-        buttons={[]}
-        hasPermission={hasPermission}
-      />
+      <PageBody>
+        <PageHeroBanner
+          title="DRE — Demonstração do Resultado"
+          description="Resultado do exercício do ano selecionado: receitas e despesas realizadas, resultado líquido e margem. Detalhamento mês a mês para identificar sazonalidade."
+          icon={FileText}
+          iconGradient="from-violet-500 to-indigo-600"
+          buttons={[]}
+          hasPermission={hasPermission}
+        />
 
       {/* Year selector */}
       <Card>
@@ -361,6 +369,7 @@ export default function DREPage() {
           </Card>
         </>
       )}
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }
