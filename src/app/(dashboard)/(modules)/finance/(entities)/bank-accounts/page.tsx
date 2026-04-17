@@ -709,8 +709,7 @@ function BankAccountsPageContent() {
           />
         </PageHeader>
 
-        <PageBody>
-          <div data-testid="bank-accounts-page" className="contents" />
+        <PageBody data-testid="bank-accounts-page">
           {/* Search Bar */}
           <div data-testid="bank-accounts-search">
             <SearchBar
@@ -806,7 +805,7 @@ function BankAccountsPageContent() {
               />
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} className="h-1" />
+              <div ref={sentinelRef} aria-hidden className="h-px" />
               {isFetchingNextPage && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
