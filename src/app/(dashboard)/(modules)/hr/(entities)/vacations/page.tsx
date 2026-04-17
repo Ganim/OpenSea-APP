@@ -364,11 +364,11 @@ export default function VacationsPage() {
           ]}
           metadata={
             <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <User className="h-3 w-3" />
                 <span>{getName(item.employeeId)}</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <CalendarDays className="h-3 w-3" />
                 <span>
                   {formatDate(item.acquisitionStart)} &mdash;{' '}
@@ -572,7 +572,7 @@ export default function VacationsPage() {
             <button
               type="button"
               data-testid="vacations-view-toggle-list"
-              className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+              className="inline-flex items-center gap-2 rounded-sm bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
             >
               <LayoutGrid className="h-3.5 w-3.5" />
               Lista
@@ -581,7 +581,7 @@ export default function VacationsPage() {
               type="button"
               data-testid="vacations-view-toggle-calendar"
               onClick={() => router.push('/hr/vacations/calendar')}
-              className="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-sm px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               <CalendarDays className="h-3.5 w-3.5" />
               Calendário

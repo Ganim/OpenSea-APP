@@ -143,7 +143,7 @@ export function CreateModal({
       icon: <UserCheck className="h-6 w-6" />,
       content: (
         <div className="space-y-4 p-1">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label className="text-xs">
               Funcionário <span className="text-rose-500">*</span>
             </Label>
@@ -187,7 +187,7 @@ export function CreateModal({
         <div className="space-y-4 p-1">
           {/* Tipo + Aviso Prévio */}
           <div className="flex items-end gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Tipo de Rescisão <span className="text-rose-500">*</span>
               </Label>
@@ -207,7 +207,7 @@ export function CreateModal({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Tipo de Aviso Prévio <span className="text-rose-500">*</span>
               </Label>
@@ -231,7 +231,7 @@ export function CreateModal({
 
           {/* Datas */}
           <div className="flex items-end gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="term-date" className="text-xs">
                 Data da Rescisão <span className="text-rose-500">*</span>
               </Label>
@@ -243,7 +243,7 @@ export function CreateModal({
                 }
               />
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="last-work-day" className="text-xs">
                 Último Dia Trabalhado <span className="text-rose-500">*</span>
               </Label>
@@ -257,7 +257,7 @@ export function CreateModal({
 
           {/* Dias de Aviso + Prazo */}
           <div className="flex items-end gap-3">
-            <div className="w-32 space-y-1.5">
+            <div className="w-32 space-y-2">
               <Label htmlFor="notice-days" className="text-xs">
                 Dias de Aviso
               </Label>
@@ -270,7 +270,7 @@ export function CreateModal({
                 className="h-9"
               />
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="payment-deadline" className="text-xs">
                 Prazo de Pagamento <span className="text-rose-500">*</span>
               </Label>
@@ -285,7 +285,7 @@ export function CreateModal({
           </div>
 
           {/* Observações */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="term-notes" className="text-xs">
               Observações
             </Label>

@@ -116,7 +116,7 @@ export function AddMemberModal({
         content: (
           <div className="space-y-4 py-2">
             {/* Funcionário */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Funcionário <span className="text-rose-500">*</span>
               </Label>
@@ -136,7 +136,7 @@ export function AddMemberModal({
 
             {/* Cargo + Representacao */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Cargo na CIPA <span className="text-rose-500">*</span>
                 </Label>
@@ -156,7 +156,7 @@ export function AddMemberModal({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Representacao <span className="text-rose-500">*</span>
                 </Label>
@@ -187,7 +187,7 @@ export function AddMemberModal({
                 </Label>
               </div>
               {isStable && (
-                <div className="w-1/2 space-y-1.5">
+                <div className="w-1/2 space-y-2">
                   <Label htmlFor="stable-until" className="text-xs">
                     Estabilidade ate
                   </Label>

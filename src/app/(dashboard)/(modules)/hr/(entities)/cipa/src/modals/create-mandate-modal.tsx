@@ -106,7 +106,7 @@ export function CreateMandateModal({
           <div className="space-y-4 py-2">
             {/* Nome + Status */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="mandate-name" className="text-xs">
                   Nome do Mandato <span className="text-rose-500">*</span>
                 </Label>
@@ -127,7 +127,7 @@ export function CreateMandateModal({
                   <FormErrorIcon message={fieldErrors.name} />
                 </div>
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label className="text-xs">Status</Label>
                 <Select
                   value={status}
@@ -149,7 +149,7 @@ export function CreateMandateModal({
 
             {/* Período */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="start-date" className="text-xs">
                   Data de Inicio <span className="text-rose-500">*</span>
                 </Label>
@@ -159,7 +159,7 @@ export function CreateMandateModal({
                   onChange={v => setStartDate(typeof v === 'string' ? v : '')}
                 />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="end-date" className="text-xs">
                   Data de Termino <span className="text-rose-500">*</span>
                 </Label>
@@ -172,7 +172,7 @@ export function CreateMandateModal({
             </div>
 
             {/* Data da Eleicao */}
-            <div className="w-1/2 space-y-1.5">
+            <div className="w-1/2 space-y-2">
               <Label htmlFor="election-date" className="text-xs">
                 Data da Eleicao
               </Label>
@@ -184,7 +184,7 @@ export function CreateMandateModal({
             </div>
 
             {/* Observacoes */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="mandate-notes" className="text-xs">
                 Observacoes
               </Label>

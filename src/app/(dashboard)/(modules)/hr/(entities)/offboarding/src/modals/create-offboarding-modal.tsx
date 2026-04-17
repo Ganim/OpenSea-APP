@@ -140,7 +140,7 @@ export function CreateOffboardingModal({
       isValid: step1Valid,
       content: (
         <div className="space-y-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="offb-title" className="text-xs">
               Título do Checklist <span className="text-rose-500">*</span>
             </Label>
@@ -154,7 +154,7 @@ export function CreateOffboardingModal({
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label className="text-xs">
               Itens do Checklist <span className="text-rose-500">*</span>
             </Label>
@@ -170,7 +170,7 @@ export function CreateOffboardingModal({
                         {index + 1}
                       </span>
                     </div>
-                    <div className="flex-1 space-y-1.5">
+                    <div className="flex-1 space-y-2">
                       <Input
                         value={item.title}
                         onChange={e =>

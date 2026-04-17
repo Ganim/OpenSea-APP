@@ -353,11 +353,11 @@ export default function OKRsPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <BarChart3 className="h-3 w-3" />
               <span>{item._count?.keyResults ?? 0} resultado(s)-chave</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Users className="h-3 w-3" />
               <span>{item.owner?.fullName ?? 'Sem responsável'}</span>
             </div>

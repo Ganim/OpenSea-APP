@@ -581,7 +581,7 @@ function SurveyCard({
       </div>
 
       {/* Badges */}
-      <div className="flex flex-wrap gap-1.5 mb-3">
+      <div className="flex flex-wrap gap-2 mb-3">
         <Badge
           variant="outline"
           className={`text-xs ${typeColors.bg} ${typeColors.text} border-0`}

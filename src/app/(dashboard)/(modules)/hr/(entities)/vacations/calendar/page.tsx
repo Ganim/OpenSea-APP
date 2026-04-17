@@ -845,7 +845,7 @@ export default function VacationsCalendarPage() {
                         Semana de {dayMonthFormatter.format(report.week.start)}{' '}
                         a {dayMonthFormatter.format(report.week.end)}
                       </p>
-                      <ul className="mt-2 flex flex-col gap-1.5">
+                      <ul className="mt-2 flex flex-col gap-2">
                         {report.conflictingDepartments.map(conflict => (
                           <li
                             key={conflict.departmentId}

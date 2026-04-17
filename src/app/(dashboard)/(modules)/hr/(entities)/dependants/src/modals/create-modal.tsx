@@ -135,7 +135,7 @@ export function CreateModal({
         content: (
           <div className="space-y-4 py-2">
             {/* Funcionário */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Funcionário <span className="text-rose-500">*</span>
               </Label>
@@ -149,7 +149,7 @@ export function CreateModal({
 
             {/* Nome + CPF */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="dep-name" className="text-xs">
                   Nome Completo <span className="text-rose-500">*</span>
                 </Label>
@@ -169,7 +169,7 @@ export function CreateModal({
                   <FormErrorIcon message={fieldErrors.name} />
                 </div>
               </div>
-              <div className="w-44 space-y-1.5">
+              <div className="w-44 space-y-2">
                 <Label htmlFor="dep-cpf" className="text-xs">
                   CPF
                 </Label>
@@ -193,7 +193,7 @@ export function CreateModal({
 
             {/* Data de Nascimento + Parentesco */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="dep-birthdate" className="text-xs">
                   Data de Nascimento <span className="text-rose-500">*</span>
                 </Label>
@@ -203,7 +203,7 @@ export function CreateModal({
                   onChange={v => setBirthDate(typeof v === 'string' ? v : '')}
                 />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Parentesco <span className="text-rose-500">*</span>
                 </Label>

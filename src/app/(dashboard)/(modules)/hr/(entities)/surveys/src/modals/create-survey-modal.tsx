@@ -847,7 +847,7 @@ function DraftQuestionEditor({
           </div>
 
           {isMultipleChoice && (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Opções de resposta</Label>
               {visibleOptions.map((option, optionIndex) => (
                 <div key={optionIndex} className="flex items-center gap-2">

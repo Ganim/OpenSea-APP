@@ -401,7 +401,7 @@ export function CreateModal({
       icon: <UserPlus className="h-16 w-16 text-blue-500/60" />,
       content: (
         <div className="space-y-4 p-1">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label className="text-xs">
               Nome Completo <span className="text-rose-500">*</span>
             </Label>
@@ -416,7 +416,7 @@ export function CreateModal({
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 E-mail <span className="text-rose-500">*</span>
               </Label>
@@ -435,7 +435,7 @@ export function CreateModal({
                 <FormErrorIcon message={fieldErrors.email || ''} />
               </div>
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">Telefone</Label>
               <Input
                 value={phone}
@@ -474,7 +474,7 @@ export function CreateModal({
       content: (
         <div className="space-y-4 p-1">
           <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Departamento <span className="text-rose-500">*</span>
               </Label>
@@ -491,7 +491,7 @@ export function CreateModal({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Cargo <span className="text-rose-500">*</span>
               </Label>
@@ -511,7 +511,7 @@ export function CreateModal({
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Tipo de Contrato <span className="text-rose-500">*</span>
               </Label>
@@ -531,7 +531,7 @@ export function CreateModal({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label className="text-xs">
                 Regime de Trabalho <span className="text-rose-500">*</span>
               </Label>
@@ -554,7 +554,7 @@ export function CreateModal({
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="start-date" className="text-xs">
                 Data de Início Prevista <span className="text-rose-500">*</span>
               </Label>
@@ -566,7 +566,7 @@ export function CreateModal({
                 }
               />
             </div>
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="salary" className="text-xs">
                 Salário (R$)
               </Label>
@@ -693,7 +693,7 @@ export function CreateModal({
           <div className="space-y-2">
             <Label className="text-xs font-medium">Link do Convite</Label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 rounded-lg border bg-muted/50 px-3 py-2.5 overflow-hidden">
+              <div className="flex-1 rounded-lg border bg-muted/50 px-3 py-3 overflow-hidden">
                 <p className="text-sm font-mono truncate">
                   {createdToken
                     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/admission/${createdToken}`

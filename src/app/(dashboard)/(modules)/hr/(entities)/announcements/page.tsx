@@ -414,7 +414,7 @@ function AnnouncementsPageContent() {
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-violet-600"
+          className="mt-2 inline-flex items-center gap-2 rounded-md bg-violet-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-600"
         >
           <Plus className="h-4 w-4" />
           Novo Comunicado
@@ -460,7 +460,7 @@ function AnnouncementsPageContent() {
                     key={key}
                     value={key}
                     data-testid={config.testId}
-                    className="gap-1.5"
+                    className="gap-2"
                   >
                     {key === 'pinned' && <Pin className="h-3.5 w-3.5" />}
                     {config.label}

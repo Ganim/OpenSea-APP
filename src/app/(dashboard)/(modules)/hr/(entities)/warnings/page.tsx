@@ -335,21 +335,21 @@ export default function WarningsPage() {
           },
         ]}
         metadata={
-          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
               <User className="h-3 w-3" />
               <span>{getName(item.employeeId)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <ShieldAlert className="h-3 w-3" />
               <span>Emitido por: {getName(item.issuedBy)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Calendar className="h-3 w-3" />
               <span>Incidente: {formatDate(item.incidentDate)}</span>
             </div>
             {item.employeeAcknowledged && (
-              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <CircleCheck className="h-3 w-3" />
                 <span>Reconhecida</span>
               </div>

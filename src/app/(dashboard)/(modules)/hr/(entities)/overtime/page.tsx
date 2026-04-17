@@ -380,12 +380,12 @@ export default function OvertimePage() {
           },
         ]}
         metadata={
-          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
               <User className="h-3 w-3" />
               <span>{getName(item.employeeId)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Clock className="h-3 w-3" />
               <span>{formatDate(item.date)}</span>
             </div>

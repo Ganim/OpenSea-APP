@@ -414,14 +414,14 @@ function RequestsPageContent() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground">
               {item.employee && (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <ClipboardList className="h-3 w-3" />
                   <span>{item.employee.fullName}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <Calendar className="h-3 w-3" />
                 <span>
                   {new Date(item.createdAt).toLocaleDateString('pt-BR', {

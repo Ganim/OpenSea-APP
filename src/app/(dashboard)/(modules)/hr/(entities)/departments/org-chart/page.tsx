@@ -389,7 +389,7 @@ function OrgNode({
         onClick={() => onDeptClick(department.id)}
         title={`Clique para ver detalhes de ${department.name}`}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div
             className={`
               w-9 h-9 rounded-lg flex items-center justify-center shrink-0

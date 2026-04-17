@@ -398,7 +398,7 @@ function CycleCard({
       </div>
 
       {/* Dates */}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <CalendarDays className="h-3.5 w-3.5" />
         <span>
           {new Date(cycle.startDate).toLocaleDateString('pt-BR', {

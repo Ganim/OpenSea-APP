@@ -78,8 +78,8 @@ export function ReviewDetailModal({
   ) => {
     if (!content) return null;
     return (
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {icon}
           {title}
         </div>
@@ -117,14 +117,14 @@ export function ReviewDetailModal({
           <Card className="bg-white dark:bg-slate-800/60 border border-border p-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <User className="h-3.5 w-3.5" />
                   Funcionário
                 </div>
                 <p className="text-sm font-medium">{employeeName}</p>
               </div>
               <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <User className="h-3.5 w-3.5" />
                   Avaliador
                 </div>

@@ -401,7 +401,7 @@ export default function TerminationDetailPage() {
                       row.value !== null && (
                         <div
                           key={row.label}
-                          className="flex items-center justify-between py-1.5 px-3 rounded hover:bg-muted/30"
+                          className="flex items-center justify-between py-2 px-3 rounded hover:bg-muted/30"
                         >
                           <span className="text-sm">{row.label}</span>
                           <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
@@ -411,7 +411,7 @@ export default function TerminationDetailPage() {
                       )
                   )}
                   <div className="border-t border-dashed pt-2 mt-2">
-                    <div className="flex items-center justify-between py-1.5 px-3 font-semibold">
+                    <div className="flex items-center justify-between py-2 px-3 font-semibold">
                       <span className="text-sm uppercase">Total Bruto</span>
                       <span className="text-sm text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(termination.totalBruto)}
@@ -433,7 +433,7 @@ export default function TerminationDetailPage() {
                       row.value !== null && (
                         <div
                           key={row.label}
-                          className="flex items-center justify-between py-1.5 px-3 rounded hover:bg-muted/30"
+                          className="flex items-center justify-between py-2 px-3 rounded hover:bg-muted/30"
                         >
                           <span className="text-sm">{row.label}</span>
                           <span className="text-sm font-medium text-rose-600 dark:text-rose-400">
@@ -443,7 +443,7 @@ export default function TerminationDetailPage() {
                       )
                   )}
                   <div className="border-t border-dashed pt-2 mt-2">
-                    <div className="flex items-center justify-between py-1.5 px-3 font-semibold">
+                    <div className="flex items-center justify-between py-2 px-3 font-semibold">
                       <span className="text-sm uppercase">Total Descontos</span>
                       <span className="text-sm text-rose-600 dark:text-rose-400">
                         - {formatCurrency(termination.totalDescontos)}

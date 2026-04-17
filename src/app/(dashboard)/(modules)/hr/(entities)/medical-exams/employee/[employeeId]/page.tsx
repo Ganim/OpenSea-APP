@@ -339,14 +339,14 @@ export default function EmployeeMedicalExamsTimelinePage() {
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {positionLabel && (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-2">
                   <Briefcase className="h-3.5 w-3.5" />
                   {positionLabel}
                   {departmentLabel ? ` · ${departmentLabel}` : ''}
                 </span>
               )}
               {employee.hireDate && (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" />
                   Admitido em {formatDateLong(employee.hireDate)}
                 </span>

@@ -212,7 +212,7 @@ export function AssignEmployeeModal({
               </p>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Data de Início <span className="text-rose-500">*</span>
               </Label>
@@ -222,7 +222,7 @@ export function AssignEmployeeModal({
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Data de Término{' '}
                 <span className="text-muted-foreground">(opcional)</span>
@@ -234,7 +234,7 @@ export function AssignEmployeeModal({
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Observações</Label>
               <Input
                 placeholder="Observações sobre a atribuição..."

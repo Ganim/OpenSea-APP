@@ -2120,13 +2120,13 @@ export default function EmployeeDetailPage() {
                             key={entry.id}
                             className="border-b last:border-0 hover:bg-muted/50"
                           >
-                            <td className="py-2.5 pr-4">
+                            <td className="py-3 pr-4">
                               {formatDateShort(entry.timestamp)}
                             </td>
-                            <td className="py-2.5 pr-4 font-medium">
+                            <td className="py-3 pr-4 font-medium">
                               {formatTime(entry.timestamp)}
                             </td>
-                            <td className="py-2.5 pr-4">
+                            <td className="py-3 pr-4">
                               <Badge
                                 variant={
                                   entry.entryType === 'CLOCK_IN'
@@ -2140,7 +2140,7 @@ export default function EmployeeDetailPage() {
                                 {getTimeEntryTypeLabel(entry.entryType)}
                               </Badge>
                             </td>
-                            <td className="py-2.5 text-muted-foreground truncate max-w-[200px]">
+                            <td className="py-3 text-muted-foreground truncate max-w-[200px]">
                               {entry.notes || '—'}
                             </td>
                           </tr>

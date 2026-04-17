@@ -546,7 +546,7 @@ export function CreateModal({
         content: (
           <div className="space-y-4">
             {/* Login Methods */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Métodos de Login</Label>
               <p className="text-xs text-muted-foreground">
                 Selecione como o funcionário poderá acessar o sistema
@@ -560,7 +560,7 @@ export function CreateModal({
                   className={`rounded-lg border p-3 transition-colors ${enableCpfLogin ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5' : 'border-border'}`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-3">
                       <div
                         className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableCpfLogin ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-muted'}`}
                       >
@@ -581,7 +581,7 @@ export function CreateModal({
                     />
                   </div>
                   {enableCpfLogin && (
-                    <div className="mt-2.5 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-emerald-100 dark:border-emerald-500/10 px-3 py-2">
+                    <div className="mt-3 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-emerald-100 dark:border-emerald-500/10 px-3 py-2">
                       <span className="text-sm font-mono flex-1">{cpf}</span>
                       <Button
                         type="button"
@@ -608,7 +608,7 @@ export function CreateModal({
                 className={`rounded-lg border p-3 transition-colors ${enableEmailLogin ? 'border-sky-200 dark:border-sky-500/20 bg-sky-50/50 dark:bg-sky-500/5' : 'border-border'}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-3">
                     <div
                       className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEmailLogin ? 'bg-sky-100 dark:bg-sky-500/10' : 'bg-muted'}`}
                     >
@@ -629,7 +629,7 @@ export function CreateModal({
                   />
                 </div>
                 {enableEmailLogin && (
-                  <div className="mt-2.5 space-y-2">
+                  <div className="mt-3 space-y-2">
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -652,7 +652,7 @@ export function CreateModal({
                 className={`rounded-lg border p-3 transition-colors ${enableEnrollmentLogin ? 'border-violet-200 dark:border-violet-500/20 bg-violet-50/50 dark:bg-violet-500/5' : 'border-border'}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-3">
                     <div
                       className={`flex items-center justify-center h-8 w-8 rounded-lg ${enableEnrollmentLogin ? 'bg-violet-100 dark:bg-violet-500/10' : 'bg-muted'}`}
                     >
@@ -673,7 +673,7 @@ export function CreateModal({
                   />
                 </div>
                 {enableEnrollmentLogin && (
-                  <div className="mt-2.5 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-violet-100 dark:border-violet-500/10 px-3 py-2">
+                  <div className="mt-3 flex items-center gap-2 rounded-md bg-white/60 dark:bg-white/5 border border-violet-100 dark:border-violet-500/10 px-3 py-2">
                     <span className="text-sm font-mono flex-1">
                       {registrationNumber}
                     </span>
@@ -704,8 +704,8 @@ export function CreateModal({
             )}
 
             {/* Temporary Password */}
-            <div className="rounded-lg border border-border p-3 space-y-2.5">
-              <div className="flex items-center gap-2.5">
+            <div className="rounded-lg border border-border p-3 space-y-3">
+              <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-500/10">
                   <Lock className="h-4 w-4 text-amber-700 dark:text-amber-300" />
                 </div>

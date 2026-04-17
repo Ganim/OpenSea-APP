@@ -104,7 +104,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
         content: (
           <div className="space-y-4 py-2">
             {/* Funcionário */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Funcionário <span className="text-rose-500">*</span>
               </Label>
@@ -117,7 +117,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
 
             {/* Nome + Valor + Data */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="bonus-name" className="text-xs">
                   Nome <span className="text-rose-500">*</span>
                 </Label>
@@ -137,7 +137,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   <FormErrorIcon message={fieldErrors.name} />
                 </div>
               </div>
-              <div className="w-32 space-y-1.5">
+              <div className="w-32 space-y-2">
                 <Label htmlFor="bonus-amount" className="text-xs">
                   Valor (R$) <span className="text-rose-500">*</span>
                 </Label>
@@ -160,7 +160,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   <FormErrorIcon message={fieldErrors.amount} />
                 </div>
               </div>
-              <div className="w-36 space-y-1.5">
+              <div className="w-36 space-y-2">
                 <Label htmlFor="bonus-date" className="text-xs">
                   Data <span className="text-rose-500">*</span>
                 </Label>
@@ -173,7 +173,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
             </div>
 
             {/* Motivo */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="bonus-reason" className="text-xs">
                 Motivo <span className="text-rose-500">*</span>
               </Label>

@@ -468,7 +468,7 @@ function EditQuestionCard({
           {question.type === 'MULTIPLE_CHOICE' &&
             question.options &&
             question.options.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {question.options.map((opt, i) => (
                   <Badge key={i} variant="outline" className="text-xs">
                     {opt}

@@ -924,16 +924,16 @@ export default function MyProfilePage() {
                         .slice(0, 50)
                         .map((entry: TimeEntry) => (
                           <tr key={entry.id} className="hover:bg-muted/50">
-                            <td className="py-2.5">
+                            <td className="py-3">
                               {formatDateTime(entry.timestamp)}
                             </td>
-                            <td className="py-2.5">
+                            <td className="py-3">
                               <div className="flex items-center gap-2">
                                 {getEntryTypeIcon(entry.entryType)}
                                 {getEntryTypeLabel(entry.entryType)}
                               </div>
                             </td>
-                            <td className="py-2.5 text-muted-foreground">
+                            <td className="py-3 text-muted-foreground">
                               {entry.notes || '-'}
                             </td>
                           </tr>

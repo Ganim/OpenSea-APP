@@ -171,11 +171,11 @@ export function KudosTab() {
         onValueChange={v => setSubTab(v as 'received' | 'sent')}
       >
         <TabsList className="grid w-full grid-cols-2 h-10">
-          <TabsTrigger value="received" className="gap-1.5">
+          <TabsTrigger value="received" className="gap-2">
             <Star className="h-4 w-4" />
             Recebidos
           </TabsTrigger>
-          <TabsTrigger value="sent" className="gap-1.5">
+          <TabsTrigger value="sent" className="gap-2">
             <Sparkles className="h-4 w-4" />
             Enviados
           </TabsTrigger>

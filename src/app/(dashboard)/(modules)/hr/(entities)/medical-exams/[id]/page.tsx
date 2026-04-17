@@ -206,7 +206,7 @@ export default function MedicalExamDetailPage() {
                 </Badge>
                 {exam.expirationDate && (
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${getExpirationBadgeClasses(expirationStatus)}`}
+                    className={`inline-flex items-center gap-2 rounded-full px-2.5 py-0.5 text-xs font-medium ${getExpirationBadgeClasses(expirationStatus)}`}
                   >
                     {expirationStatus === 'EXPIRED' && (
                       <ShieldAlert className="h-3 w-3" />

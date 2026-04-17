@@ -183,7 +183,7 @@ export function CreateModal({
         content: (
           <div className="space-y-4 py-2">
             {/* Funcionário */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Funcionário <span className="text-rose-500">*</span>
               </Label>
@@ -203,7 +203,7 @@ export function CreateModal({
 
             {/* Tipo + Resultado */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Tipo de Exame <span className="text-rose-500">*</span>
                 </Label>
@@ -223,7 +223,7 @@ export function CreateModal({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Resultado <span className="text-rose-500">*</span>
                 </Label>
@@ -247,7 +247,7 @@ export function CreateModal({
 
             {/* Aptidão PCMSO */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">Aptidão (ASO)</Label>
                 <Select
                   value={aptitude}
@@ -265,7 +265,7 @@ export function CreateModal({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="validity-months" className="text-xs">
                   Validade (meses)
                 </Label>
@@ -283,7 +283,7 @@ export function CreateModal({
 
             {/* Datas */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="exam-date" className="text-xs">
                   Data do Exame <span className="text-rose-500">*</span>
                 </Label>
@@ -293,7 +293,7 @@ export function CreateModal({
                   onChange={v => setExamDate(typeof v === 'string' ? v : '')}
                 />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="exam-expiration" className="text-xs">
                   Data de Validade
                 </Label>
@@ -308,7 +308,7 @@ export function CreateModal({
             </div>
 
             {/* Próximo Exame */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="next-exam-date" className="text-xs">
                 Próximo Exame Previsto
               </Label>
@@ -321,7 +321,7 @@ export function CreateModal({
 
             {/* Médico Examinador */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="doctor-name" className="text-xs">
                   Médico Examinador <span className="text-rose-500">*</span>
                 </Label>
@@ -341,7 +341,7 @@ export function CreateModal({
                   <FormErrorIcon message={fieldErrors.doctorName} />
                 </div>
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label htmlFor="doctor-crm" className="text-xs">
                   CRM <span className="text-rose-500">*</span>
                 </Label>
@@ -365,7 +365,7 @@ export function CreateModal({
 
             {/* Médico Coordenador (PCMSO) */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="physician-name" className="text-xs">
                   Médico Coordenador (PCMSO)
                 </Label>
@@ -377,7 +377,7 @@ export function CreateModal({
                   className="h-9"
                 />
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label htmlFor="physician-crm" className="text-xs">
                   CRM Coordenador
                 </Label>
@@ -393,7 +393,7 @@ export function CreateModal({
 
             {/* Clínica */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="clinic-name" className="text-xs">
                   Clínica / Laboratório
                 </Label>
@@ -406,7 +406,7 @@ export function CreateModal({
                 />
               </div>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="clinic-address" className="text-xs">
                 Endereço da Clínica
               </Label>
@@ -420,7 +420,7 @@ export function CreateModal({
             </div>
 
             {/* Restrições */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="exam-restrictions" className="text-xs">
                 Restrições
               </Label>
@@ -434,7 +434,7 @@ export function CreateModal({
             </div>
 
             {/* Observações */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="exam-observations" className="text-xs">
                 Observações
               </Label>
@@ -448,7 +448,7 @@ export function CreateModal({
             </div>
 
             {/* URL do Documento */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="exam-doc-url" className="text-xs">
                 URL do Documento (ASO)
               </Label>

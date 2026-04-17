@@ -134,7 +134,7 @@ export function CreateReviewsModal({
               Adicionar atribuição
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-xs">Funcionário</Label>
                 <Select
                   value={selectedEmployeeId}
@@ -158,7 +158,7 @@ export function CreateReviewsModal({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-xs">Avaliador</Label>
                 <Select
                   value={selectedReviewerId}
@@ -208,7 +208,7 @@ export function CreateReviewsModal({
                   className="flex items-center justify-between rounded-lg border border-border p-2.5"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <UserCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <span className="text-xs truncate">
                         {getEmployeeName(assignment.employeeId)}

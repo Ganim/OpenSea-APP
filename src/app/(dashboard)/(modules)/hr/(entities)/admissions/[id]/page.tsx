@@ -670,7 +670,7 @@ export default function AdmissionDetailPage() {
                 </div>
                 <div className="border-b border-border" />
                 <div className="p-4 sm:p-6 space-y-3">
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <Label className="text-xs">Motivo da rejeição</Label>
                     <Textarea
                       value={rejectionReason}

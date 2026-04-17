@@ -483,7 +483,7 @@ export default function PayrollDetailPage() {
               <div className="flex-1 min-w-0">
                 <label
                   htmlFor="employee-select"
-                  className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5"
+                  className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-2"
                 >
                   <Users className="h-3.5 w-3.5" />
                   Funcionário

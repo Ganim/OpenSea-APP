@@ -259,7 +259,7 @@ export default function ReviewCycleEditPage() {
                   {REVIEW_CYCLE_STATUS_LABELS[cycle.status] ?? cycle.status}
                 </Badge>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                 <CalendarDays className="h-3.5 w-3.5" />
                 <span>
                   Cadastrado em{' '}

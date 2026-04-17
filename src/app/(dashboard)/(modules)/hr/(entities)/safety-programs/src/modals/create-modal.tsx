@@ -130,7 +130,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
           <div className="space-y-4 py-2">
             {/* Tipo + Status */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Tipo <span className="text-rose-500">*</span>
                 </Label>
@@ -150,7 +150,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label className="text-xs">Status</Label>
                 <Select
                   value={status}
@@ -171,7 +171,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
             </div>
 
             {/* Nome */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="program-name" className="text-xs">
                 Nome do Programa <span className="text-rose-500">*</span>
               </Label>
@@ -195,7 +195,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
 
             {/* Vigencia */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="valid-from" className="text-xs">
                   Vigencia Inicio <span className="text-rose-500">*</span>
                 </Label>
@@ -205,7 +205,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   onChange={v => setValidFrom(typeof v === 'string' ? v : '')}
                 />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="valid-until" className="text-xs">
                   Vigencia Fim <span className="text-rose-500">*</span>
                 </Label>
@@ -220,7 +220,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
 
             {/* Responsavel */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="responsible-name" className="text-xs">
                   Responsavel Tecnico <span className="text-rose-500">*</span>
                 </Label>
@@ -243,7 +243,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
                   <FormErrorIcon message={fieldErrors.responsibleName} />
                 </div>
               </div>
-              <div className="w-48 space-y-1.5">
+              <div className="w-48 space-y-2">
                 <Label htmlFor="responsible-reg" className="text-xs">
                   Registro <span className="text-rose-500">*</span>
                 </Label>
@@ -271,7 +271,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
             </div>
 
             {/* Observacoes */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="program-notes" className="text-xs">
                 Observacoes
               </Label>
@@ -285,7 +285,7 @@ export function CreateModal({ isOpen, onClose, onSubmit }: CreateModalProps) {
             </div>
 
             {/* URL do Documento */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="program-doc-url" className="text-xs">
                 URL do Documento
               </Label>

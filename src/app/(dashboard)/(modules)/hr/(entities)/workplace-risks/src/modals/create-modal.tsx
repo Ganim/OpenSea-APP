@@ -121,7 +121,7 @@ export function CreateModal({
         content: (
           <div className="space-y-4 py-2">
             {/* Programa de Segurança */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Programa de Segurança <span className="text-rose-500">*</span>
               </Label>
@@ -140,7 +140,7 @@ export function CreateModal({
             </div>
 
             {/* Nome */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="risk-name" className="text-xs">
                 Nome do Risco <span className="text-rose-500">*</span>
               </Label>
@@ -164,7 +164,7 @@ export function CreateModal({
 
             {/* Categoria + Severidade */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Categoria <span className="text-rose-500">*</span>
                 </Label>
@@ -184,7 +184,7 @@ export function CreateModal({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Severidade <span className="text-rose-500">*</span>
                 </Label>
@@ -208,7 +208,7 @@ export function CreateModal({
 
             {/* Fonte + Área Afetada */}
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="risk-source" className="text-xs">
                   Fonte do Risco
                 </Label>
@@ -220,7 +220,7 @@ export function CreateModal({
                   className="h-9"
                 />
               </div>
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="risk-area" className="text-xs">
                   Área Afetada
                 </Label>
@@ -235,7 +235,7 @@ export function CreateModal({
             </div>
 
             {/* Medidas de Controle */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="risk-measures" className="text-xs">
                 Medidas de Controle
               </Label>
@@ -249,7 +249,7 @@ export function CreateModal({
             </div>
 
             {/* EPI */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="risk-epi" className="text-xs">
                 EPI Necessário
               </Label>

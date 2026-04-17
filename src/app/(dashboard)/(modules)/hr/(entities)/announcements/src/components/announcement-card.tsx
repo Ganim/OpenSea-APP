@@ -228,7 +228,7 @@ export function AnnouncementCard({
         </p>
 
         {/* Audience target chips */}
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {isBroadcast ? (
             <Badge
               variant="outline"
@@ -302,7 +302,7 @@ export function AnnouncementCard({
                 disabled={isMarkingRead}
                 onClick={handleMarkRead}
                 data-testid={`announcement-mark-read-${announcement.id}`}
-                className="gap-1.5"
+                className="gap-2"
               >
                 <Check className="h-3.5 w-3.5" />
                 Marcar lido

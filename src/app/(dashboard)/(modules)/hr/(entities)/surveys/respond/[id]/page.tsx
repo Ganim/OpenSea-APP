@@ -331,7 +331,7 @@ export default function SurveyRespondPage() {
 
           {/* Progress bar */}
           <div className="mt-5">
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">
                 {isProgressive
                   ? `Pergunta ${currentStep} de ${totalSteps}`

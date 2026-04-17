@@ -102,7 +102,7 @@ export function CreateShiftModal({
         isValid: !!name && !!type,
         content: (
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Nome do Turno <span className="text-rose-500">*</span>
               </Label>
@@ -113,7 +113,7 @@ export function CreateShiftModal({
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Código (opcional)</Label>
               <Input
                 placeholder="Ex: TM01"
@@ -123,7 +123,7 @@ export function CreateShiftModal({
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Tipo de Turno <span className="text-rose-500">*</span>
               </Label>
@@ -141,7 +141,7 @@ export function CreateShiftModal({
               </Select>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Cor</Label>
               <div className="flex items-center gap-3">
                 <input
@@ -187,7 +187,7 @@ export function CreateShiftModal({
         content: (
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-xs">
                   Hora de Início <span className="text-rose-500">*</span>
                 </Label>
@@ -198,7 +198,7 @@ export function CreateShiftModal({
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-xs">
                   Hora de Término <span className="text-rose-500">*</span>
                 </Label>
@@ -210,7 +210,7 @@ export function CreateShiftModal({
               </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Intervalo (minutos)</Label>
               <Input
                 type="number"

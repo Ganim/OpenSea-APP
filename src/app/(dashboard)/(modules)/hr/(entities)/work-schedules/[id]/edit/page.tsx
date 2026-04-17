@@ -556,7 +556,7 @@ export default function WorkScheduleEditPage() {
 
                   {/* Day rows */}
                   <div className="w-full rounded-xl border border-border bg-white p-4 dark:bg-slate-800/60">
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {WEEK_DAYS.map(day => {
                         const d = days[day];
                         if (!d) return null;
@@ -589,7 +589,7 @@ export default function WorkScheduleEditPage() {
                             </span>
                             {d.enabled ? (
                               <>
-                                <div className="flex items-center gap-1.5 flex-1">
+                                <div className="flex items-center gap-2 flex-1">
                                   <TimePicker
                                     value={d.start}
                                     onChange={v =>

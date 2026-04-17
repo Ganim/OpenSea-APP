@@ -419,7 +419,7 @@ export default function PerformanceReviewDetailPage() {
               <h1 className="text-lg font-semibold leading-tight">
                 {employeeName}
               </h1>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                 <ChevronRight className="h-3 w-3" />
                 <span>Avaliador: {reviewerName}</span>
               </div>
@@ -827,7 +827,7 @@ function ReflectionField({
 }) {
   return (
     <div className={fullWidth ? 'md:col-span-2' : undefined}>
-      <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
+      <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
         {icon}
         {label}
       </div>
@@ -908,7 +908,7 @@ function CompetencyEditDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="competency-name">Nome</Label>
             <Input
               id="competency-name"
@@ -918,7 +918,7 @@ function CompetencyEditDialog({
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="competency-weight">Peso (multiplicador)</Label>
             <Input
               id="competency-weight"
@@ -931,7 +931,7 @@ function CompetencyEditDialog({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Auto-avaliacao</Label>
               <ScoreSlider
                 value={selfScore}
@@ -939,7 +939,7 @@ function CompetencyEditDialog({
                 starColorClass="text-rose-400"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Avaliacao do gestor</Label>
               <ScoreSlider
                 value={managerScore}
@@ -949,7 +949,7 @@ function CompetencyEditDialog({
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="competency-comments">Comentario</Label>
             <Textarea
               id="competency-comments"
@@ -1024,7 +1024,7 @@ function CompetencyCreateDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="new-competency-name">Nome</Label>
             <Input
               id="new-competency-name"
@@ -1035,7 +1035,7 @@ function CompetencyCreateDialog({
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="new-competency-weight">Peso (multiplicador)</Label>
             <Input
               id="new-competency-weight"

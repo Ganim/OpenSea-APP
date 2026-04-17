@@ -388,7 +388,7 @@ export default function MedicalExamsPage() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {getName(item.employeeId)}

@@ -374,7 +374,7 @@ export default function PCMSODashboardPage() {
         isValid: !!canSubmitReq,
         content: (
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">
                 Tipo de Exame <span className="text-rose-500">*</span>
               </Label>
@@ -387,7 +387,7 @@ export default function PCMSODashboardPage() {
             </div>
 
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">
                   Categoria <span className="text-rose-500">*</span>
                 </Label>
@@ -407,7 +407,7 @@ export default function PCMSODashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label className="text-xs">Frequência (meses)</Label>
                 <Input
                   type="number"
@@ -421,7 +421,7 @@ export default function PCMSODashboardPage() {
             </div>
 
             <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label className="text-xs">Cargo (opcional)</Label>
                 <Select
                   value={reqPositionId || '__none__'}
@@ -444,7 +444,7 @@ export default function PCMSODashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="w-40 space-y-1.5">
+              <div className="w-40 space-y-2">
                 <Label className="text-xs">Obrigatório</Label>
                 <Select
                   value={reqIsMandatory ? 'true' : 'false'}
@@ -461,7 +461,7 @@ export default function PCMSODashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="text-xs">Descrição</Label>
               <Textarea
                 value={reqDescription}
@@ -718,7 +718,7 @@ export default function PCMSODashboardPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
+                    className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                       activeTab === tab.id
                         ? 'border-teal-500 text-teal-700 dark:text-teal-300'
                         : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'

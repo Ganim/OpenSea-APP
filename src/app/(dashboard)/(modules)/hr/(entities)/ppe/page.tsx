@@ -251,7 +251,7 @@ export default function PPEPage() {
             },
           ]}
           metadata={
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <span
                 className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium ${PPE_CATEGORY_COLORS[item.category]}`}
               >

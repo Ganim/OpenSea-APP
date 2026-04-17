@@ -379,7 +379,7 @@ export default function EmployeesOrgChartPage() {
             </ReactFlow>
 
             {isStillFetchingPages && (
-              <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full border border-border bg-white/90 px-3 py-1.5 text-xs text-muted-foreground shadow-sm dark:bg-slate-900/90">
+              <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full border border-border bg-white/90 px-3 py-2 text-xs text-muted-foreground shadow-sm dark:bg-slate-900/90">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                 Carregando funcionários adicionais...
               </div>

@@ -507,7 +507,7 @@ export default function ReviewCycleDetailPage() {
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                 <CalendarDays className="h-3.5 w-3.5" />
                 <span>
                   {new Date(cycleData.startDate).toLocaleDateString('pt-BR')} -{' '}
@@ -765,7 +765,7 @@ function ReviewRow({
 
         {/* Actions */}
         <div
-          className="flex items-center gap-1.5 shrink-0"
+          className="flex items-center gap-2 shrink-0"
           onClick={e => e.stopPropagation()}
         >
           {showSelfBtn && (

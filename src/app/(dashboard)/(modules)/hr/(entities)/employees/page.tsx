@@ -1123,7 +1123,6 @@ function EmployeesPageContent() {
             }}
           />
 
-
           {/* Delete Confirmation */}
           <VerifyActionPinModal
             isOpen={page.modals.isOpen('delete')}

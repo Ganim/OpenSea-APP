@@ -355,12 +355,11 @@ export default function PerformanceReviewEditPage() {
             iconColorClass="text-rose-500"
             title="Auto-avaliacao"
             subtitle="Reflexao do colaborador sobre o proprio desempenho"
-          
             wrapperClassName={REVIEW_SECTION_WRAPPER}
             bodyClassName={REVIEW_SECTION_BODY}
           >
             <div className="space-y-3">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Nota geral (auto)</Label>
                 <ScoreSlider
                   value={selfScore}
@@ -369,7 +368,7 @@ export default function PerformanceReviewEditPage() {
                   testId="self-score-slider"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label htmlFor="self-comments">Comentarios</Label>
                 <Textarea
                   id="self-comments"
@@ -387,12 +386,11 @@ export default function PerformanceReviewEditPage() {
             iconColorClass="text-violet-500"
             title="Avaliacao do gestor"
             subtitle="Visao do gestor direto sobre o desempenho do colaborador"
-          
             wrapperClassName={REVIEW_SECTION_WRAPPER}
             bodyClassName={REVIEW_SECTION_BODY}
           >
             <div className="space-y-3">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Nota geral (gestor)</Label>
                 <ScoreSlider
                   value={managerScore}
@@ -401,7 +399,7 @@ export default function PerformanceReviewEditPage() {
                   testId="manager-score-slider"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label htmlFor="manager-comments">Comentarios</Label>
                 <Textarea
                   id="manager-comments"
@@ -419,16 +417,12 @@ export default function PerformanceReviewEditPage() {
             iconColorClass="text-emerald-500"
             title="Pontos fortes / a melhorar / metas"
             subtitle="Sintese qualitativa para os proximos ciclos"
-          
             wrapperClassName={REVIEW_SECTION_WRAPPER}
             bodyClassName={REVIEW_SECTION_BODY}
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="strengths"
-                  className="flex items-center gap-1.5"
-                >
+              <div className="space-y-2">
+                <Label htmlFor="strengths" className="flex items-center gap-2">
                   <ThumbsUp className="h-3.5 w-3.5 text-emerald-500" />
                   Pontos fortes
                 </Label>
@@ -440,10 +434,10 @@ export default function PerformanceReviewEditPage() {
                   placeholder="O que mais se destacou neste ciclo?"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label
                   htmlFor="improvements"
-                  className="flex items-center gap-1.5"
+                  className="flex items-center gap-2"
                 >
                   <TrendingUp className="h-3.5 w-3.5 text-sky-500" />
                   Pontos a melhorar
@@ -456,8 +450,8 @@ export default function PerformanceReviewEditPage() {
                   placeholder="Quais comportamentos ou habilidades podem evoluir?"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="goals" className="flex items-center gap-1.5">
+              <div className="space-y-2">
+                <Label htmlFor="goals" className="flex items-center gap-2">
                   <Target className="h-3.5 w-3.5 text-amber-500" />
                   Metas
                 </Label>
@@ -480,7 +474,6 @@ export default function PerformanceReviewEditPage() {
             iconColorClass="text-amber-500"
             title="Competencias"
             subtitle={`${localCompetencies.length} competencia(s) avaliada(s)`}
-          
             wrapperClassName={REVIEW_SECTION_WRAPPER}
             bodyClassName={REVIEW_SECTION_BODY}
           >
@@ -614,7 +607,7 @@ function CompetenciesEditor({
                   <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
                     Auto
                   </Label>
-                  <div className="mt-1.5">
+                  <div className="mt-2">
                     <ScoreSlider
                       value={competency.selfScore}
                       onChange={next =>
@@ -631,7 +624,7 @@ function CompetenciesEditor({
                   <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
                     Gestor
                   </Label>
-                  <div className="mt-1.5">
+                  <div className="mt-2">
                     <ScoreSlider
                       value={competency.managerScore}
                       onChange={next =>

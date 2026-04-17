@@ -316,7 +316,7 @@ export default function KudosDetailPage() {
         {/* Category badge */}
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${config.badgeClass}`}
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${config.badgeClass}`}
           >
             <CategoryIcon className="h-4 w-4" />
             {config.label}
