@@ -307,7 +307,7 @@ export default function FinanceCategoriesPage() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Financeiro', href: '/finance' },
-            { label: 'Categorias' },
+            { label: 'Categorias Financeiras' },
           ]}
           buttons={actionButtons}
         />
