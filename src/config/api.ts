@@ -819,10 +819,13 @@ export const API_ENDPOINTS = {
     CANCEL: (id: string) => `/v1/finance/recurring/${id}/cancel`,
   },
   // Finance - Budget
+  // P0-25: backend exposes /v1/finance/budgets (plural) + /v1/finance/reports/budget-vs-actual.
+  // Previous singular endpoints were never registered on the backend — every
+  // call from the budget page returned 404.
   FINANCE_BUDGET: {
-    REPORT: '/v1/finance/budget/report',
-    CONFIG: '/v1/finance/budget/config',
-    SAVE: '/v1/finance/budget',
+    REPORT: '/v1/finance/reports/budget-vs-actual',
+    LIST: '/v1/finance/budgets',
+    BULK_SAVE: '/v1/finance/budgets/bulk',
   },
   // Finance - Escalation
   FINANCE_ESCALATION: {
