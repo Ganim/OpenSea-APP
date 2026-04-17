@@ -15,6 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { CashflowChart } from '@/components/finance/analytics/cashflow-chart';
@@ -276,60 +284,57 @@ export default function CashflowPage() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
+                <Table aria-label="Detalhamento do fluxo de caixa por período">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs sm:text-sm">
                         Período
-                      </th>
-                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
+                      </TableHead>
+                      <TableHead className="text-right text-xs sm:text-sm">
                         Entradas
-                      </th>
-                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
+                      </TableHead>
+                      <TableHead className="text-right text-xs sm:text-sm">
                         Saídas
-                      </th>
-                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
+                      </TableHead>
+                      <TableHead className="text-right text-xs sm:text-sm">
                         Fluxo Líquido
-                      </th>
-                      <th className="text-right py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-sm">
+                      </TableHead>
+                      <TableHead className="text-right text-xs sm:text-sm">
                         Saldo Acumulado
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {data.data.map(entry => {
                       const isPositiveFlow = entry.netFlow >= 0;
                       return (
-                        <tr
-                          key={entry.period}
-                          className="border-b last:border-0"
-                        >
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-sm">
+                        <TableRow key={entry.period}>
+                          <TableCell className="text-xs sm:text-sm">
                             {entry.period}
-                          </td>
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-emerald-600 font-medium text-xs sm:text-sm">
+                          </TableCell>
+                          <TableCell className="text-right text-emerald-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.inflow)}
-                          </td>
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right text-rose-600 font-medium text-xs sm:text-sm">
+                          </TableCell>
+                          <TableCell className="text-right text-rose-600 font-medium text-xs sm:text-sm">
                             {formatCurrency(entry.outflow)}
-                          </td>
-                          <td
-                            className={`py-2 px-2 sm:py-3 sm:px-4 text-right font-medium text-xs sm:text-sm ${
+                          </TableCell>
+                          <TableCell
+                            className={`text-right font-medium text-xs sm:text-sm ${
                               isPositiveFlow
                                 ? 'text-emerald-600'
                                 : 'text-rose-600'
                             }`}
                           >
                             {formatCurrency(entry.netFlow)}
-                          </td>
-                          <td className="py-2 px-2 sm:py-3 sm:px-4 text-right font-semibold text-xs sm:text-sm">
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-xs sm:text-sm">
                             {formatCurrency(entry.cumulativeBalance)}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
