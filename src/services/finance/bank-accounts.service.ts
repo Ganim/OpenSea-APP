@@ -71,12 +71,30 @@ export const bankAccountsService = {
     );
   },
 
-  async testBankApiConnection(
-    id: string
-  ): Promise<{ balance: number; message: string }> {
-    return apiClient.get<{ balance: number; message: string }>(
-      `/v1/finance/bank-accounts/${id}/balance`
-    );
+  async getBalance(id: string): Promise<{
+    balance: {
+      available: number;
+      current: number;
+      currency: string;
+      updatedAt: string;
+    };
+  }> {
+    return apiClient.get(`/v1/finance/bank-accounts/${id}/balance`);
+  },
+
+  /**
+   * @deprecated Use getBalance. Typed shape was wrong; retained temporarily
+   * para facilitar migracao de callers externos.
+   */
+  async testBankApiConnection(id: string): Promise<{
+    balance: {
+      available: number;
+      current: number;
+      currency: string;
+      updatedAt: string;
+    };
+  }> {
+    return this.getBalance(id);
   },
 
   async healthCheck(id: string): Promise<{
