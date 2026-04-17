@@ -44,9 +44,11 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  Plus,
   ShieldCheck,
   XCircle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -303,8 +305,10 @@ function OrderCard({ order, canApprove, onApprove, onReject }: OrderCardProps) {
 // ============================================================================
 
 export default function PaymentOrdersPage() {
+  const router = useRouter();
   const { hasPermission } = usePermissions();
   const canApprove = hasPermission(FINANCE_PERMISSIONS.PAYMENT_ORDERS.ADMIN);
+  const canCreate = hasPermission(FINANCE_PERMISSIONS.ENTRIES.REGISTER);
 
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
 
@@ -445,6 +449,16 @@ export default function PaymentOrdersPage() {
               As ordens de pagamento bancário aparecem aqui para aprovação e
               acompanhamento.
             </p>
+            {canCreate && (
+              <Button
+                size="sm"
+                className="mt-6"
+                onClick={() => router.push('/finance/payable?create=true')}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Criar ordem
+              </Button>
+            )}
           </Card>
         ) : (
           <div className="space-y-3">
