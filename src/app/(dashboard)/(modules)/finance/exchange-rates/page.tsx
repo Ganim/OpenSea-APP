@@ -31,10 +31,13 @@ import { useCallback, useMemo, useState } from 'react';
 // CONSTANTS
 // ============================================================================
 
+// Per project rule (CLAUDE.md): no emojis in UI unless the user
+// explicitly requests them. ISO currency codes serve as the visual
+// anchor instead of country flags.
 const CURRENCIES = [
-  { code: 'USD', name: 'Dólar Americano', flag: '🇺🇸' },
-  { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
-  { code: 'GBP', name: 'Libra Esterlina', flag: '🇬🇧' },
+  { code: 'USD', name: 'Dólar Americano' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'GBP', name: 'Libra Esterlina' },
 ] as const;
 
 // ============================================================================
@@ -84,7 +87,9 @@ function RateCard({ currency, date }: RateCardProps) {
     <Card className="bg-white dark:bg-slate-800/60 border border-border">
       <CardContent className="pt-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">{currency.flag}</span>
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-sm font-semibold text-violet-700 dark:bg-violet-500/8 dark:text-violet-300">
+            {currency.code}
+          </span>
           <div>
             <p className="font-semibold text-sm text-foreground">
               {currency.name}
@@ -214,7 +219,7 @@ export default function ExchangeRatesPage() {
                     <SelectContent>
                       {CURRENCIES.map(curr => (
                         <SelectItem key={curr.code} value={curr.code}>
-                          {curr.flag} {curr.code} - {curr.name}
+                          {curr.code} — {curr.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -256,7 +261,6 @@ export default function ExchangeRatesPage() {
                   <div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-sm text-muted-foreground">
-                        {selectedCurrencyInfo?.flag}{' '}
                         {amount.toLocaleString('pt-BR', {
                           minimumFractionDigits: 2,
                         })}{' '}

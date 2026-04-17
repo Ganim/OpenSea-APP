@@ -60,8 +60,10 @@ const reportCards = [
     description:
       'Demonstração do Resultado do Exercício com hierarquia e comparativo',
     icon: FileBarChart,
-    color: 'text-blue-600',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    // P2-23: paleta proíbe blue/red bootstrap. Sky é o equivalente da
+    // paleta para "informativo / azul".
+    color: 'text-sky-600',
+    bg: 'bg-sky-100 dark:bg-sky-500/8',
   },
   {
     id: 'dre-consolidated' as const,

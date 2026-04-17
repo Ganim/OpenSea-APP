@@ -546,7 +546,7 @@ export default function FinanceCategoriesPage() {
                                     handleDeleteRequest(category.id)
                                   }
                                 >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                  <Trash2 className="h-4 w-4 text-rose-600" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>Excluir</TooltipContent>
