@@ -74,28 +74,28 @@ export default function OverduePage() {
     return diff > 0 ? diff : 0;
   };
 
-  // Aging colors: avoid yellow/orange (CLAUDE.md) — use rose ramps + amber
-  // only for the lightest 7-day bucket where the warning isn't yet critical.
+  // Aging colors: paleta finance proíbe amber/yellow. Rose para vencido e
+  // teal para o bucket mais leve (7 dias — aviso brando, ainda não crítico).
   const getAgingBadge = (days: number) => {
     if (days <= 7) {
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300';
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300';
     } else if (days <= 30) {
-      return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300';
+      return 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300';
     } else if (days <= 60) {
-      return 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200';
+      return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-200';
     } else {
-      return 'bg-rose-200 text-rose-900 dark:bg-rose-500/30 dark:text-rose-100';
+      return 'bg-rose-200 text-rose-900 dark:bg-rose-500/25 dark:text-rose-100';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'OVERDUE':
-        return 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200';
+        return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-200';
       case 'PARTIALLY_PAID':
-        return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300';
+        return 'bg-teal-50 text-teal-700 dark:bg-teal-500/8 dark:text-teal-300';
       default:
-        return 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300';
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-500/15 dark:text-slate-300';
     }
   };
 
