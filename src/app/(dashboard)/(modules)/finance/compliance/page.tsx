@@ -56,7 +56,9 @@ import {
   usePayObligation,
   useExportSpedEcd,
 } from '@/hooks/finance/use-compliance';
+import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { MONTH_NAMES_PT_BR } from '@/constants/months';
 import type {
   TaxObligation,
   TaxObligationStatus,
@@ -68,38 +70,11 @@ import {
 } from '@/types/finance';
 
 // =============================================================================
-// CONSTANTS
-// =============================================================================
-
-const MONTH_NAMES = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dezembro',
-];
-
-// =============================================================================
 // HELPERS
 // =============================================================================
 
-function formatCurrency(value: number | null | undefined): string {
-  if (value == null) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
-
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-';
+  if (dateStr === null || dateStr === undefined || dateStr === '') return '-';
   return new Date(dateStr).toLocaleDateString('pt-BR');
 }
 
@@ -196,11 +171,13 @@ function CompliancePageContent() {
   // STATE
   // ---------------------------------------------------------------------------
 
-  const now = new Date();
-  const [simplesYear, setSimplesYear] = useState(now.getFullYear());
-  const [calendarMonth, setCalendarMonth] = useState(now.getMonth() + 1);
-  const [calendarYear, setCalendarYear] = useState(now.getFullYear());
-  const [spedYear, setSpedYear] = useState(now.getFullYear());
+  const now = useMemo(() => new Date(), []);
+  const [simplesYear, setSimplesYear] = useState(() => new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(
+    () => new Date().getMonth() + 1
+  );
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [spedYear, setSpedYear] = useState(() => new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState('');
   const [payTargetId, setPayTargetId] = useState<string | null>(null);
 
@@ -564,7 +541,7 @@ function CompliancePageContent() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm font-medium px-2 min-w-[130px] text-center">
-                    {MONTH_NAMES[calendarMonth - 1]} {calendarYear}
+                    {MONTH_NAMES_PT_BR[calendarMonth - 1]} {calendarYear}
                   </span>
                   <Button
                     variant="ghost"
