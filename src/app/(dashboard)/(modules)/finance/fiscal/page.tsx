@@ -18,14 +18,7 @@ import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { StepWizardDialog } from '@/components/ui/step-wizard-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -848,77 +841,87 @@ function FiscalPageContent() {
             description="Digite seu PIN de Ação para confirmar o cancelamento deste documento fiscal. Esta ação não pode ser desfeita."
           />
 
-          {/* Cancel Reason Dialog (shown FIRST, before PIN). SEFAZ requires
+          {/* Cancel Reason Wizard (shown FIRST, before PIN). SEFAZ requires
               ≥15 characters for cancellation justification. */}
-          {cancelTarget && !cancelModalOpen && (
-            <Dialog
-              open={!!cancelTarget && !cancelModalOpen}
-              onOpenChange={open => {
-                if (!open) {
-                  setCancelTarget(null);
-                  setCancelReason('');
-                }
-              }}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Motivo do Cancelamento</DialogTitle>
-                  <DialogDescription>
-                    Informe o motivo do cancelamento do documento fiscal. A
-                    SEFAZ exige no mínimo 15 caracteres.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div>
-                    <Label htmlFor="cancel-reason">Motivo</Label>
-                    <Textarea
-                      id="cancel-reason"
-                      placeholder="Ex.: Erro no valor unitário do item 3"
-                      value={cancelReason}
-                      onChange={e => setCancelReason(e.target.value)}
-                      rows={3}
-                      maxLength={255}
-                    />
-                    <div className="mt-1 flex items-center justify-between text-xs">
-                      <span
-                        className={
-                          cancelReason.trim().length < 15
-                            ? 'text-rose-600 dark:text-rose-400'
-                            : 'text-emerald-600 dark:text-emerald-400'
-                        }
-                      >
-                        {cancelReason.trim().length} / 15 caracteres mínimos
-                      </span>
-                      <span className="text-muted-foreground">
-                        {cancelReason.length} / 255
-                      </span>
+          <StepWizardDialog
+            open={!!cancelTarget && !cancelModalOpen}
+            onOpenChange={open => {
+              if (!open) {
+                setCancelTarget(null);
+                setCancelReason('');
+              }
+            }}
+            onClose={() => {
+              setCancelTarget(null);
+              setCancelReason('');
+            }}
+            currentStep={1}
+            onStepChange={() => {}}
+            heightClass="h-[420px]"
+            steps={[
+              {
+                title: 'Motivo do Cancelamento',
+                description:
+                  'Informe o motivo do cancelamento do documento fiscal. A SEFAZ exige no mínimo 15 caracteres.',
+                icon: (
+                  <XCircle className="h-16 w-16 text-rose-600 dark:text-rose-400" />
+                ),
+                isValid: cancelReason.trim().length >= 15,
+                content: (
+                  <div className="space-y-4 py-2">
+                    <div>
+                      <Label htmlFor="cancel-reason">Motivo</Label>
+                      <Textarea
+                        id="cancel-reason"
+                        placeholder="Ex.: Erro no valor unitário do item 3"
+                        value={cancelReason}
+                        onChange={e => setCancelReason(e.target.value)}
+                        rows={3}
+                        maxLength={255}
+                      />
+                      <div className="mt-1 flex items-center justify-between text-xs">
+                        <span
+                          className={
+                            cancelReason.trim().length < 15
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-emerald-600 dark:text-emerald-400'
+                          }
+                        >
+                          {cancelReason.trim().length} / 15 caracteres mínimos
+                        </span>
+                        <span className="text-muted-foreground">
+                          {cancelReason.length} / 255
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setCancelTarget(null);
-                      setCancelReason('');
-                    }}
-                  >
-                    Voltar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setCancelModalOpen(true)}
-                    disabled={cancelReason.trim().length < 15}
-                  >
-                    Continuar (PIN)
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
+                ),
+                footer: (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setCancelTarget(null);
+                        setCancelReason('');
+                      }}
+                    >
+                      Voltar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setCancelModalOpen(true)}
+                      disabled={cancelReason.trim().length < 15}
+                    >
+                      Continuar (PIN)
+                    </Button>
+                  </>
+                ),
+              },
+            ]}
+          />
 
-          {/* Correction Letter Dialog */}
-          <Dialog
+          {/* Correction Letter Wizard */}
+          <StepWizardDialog
             open={correctionModalOpen}
             onOpenChange={open => {
               if (!open) {
@@ -927,50 +930,67 @@ function FiscalPageContent() {
                 setCorrectionText('');
               }
             }}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Carta de Correção</DialogTitle>
-                <DialogDescription>
-                  Informe o texto de correção para o documento fiscal.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="correction-text">Texto de Correção</Label>
-                  <Textarea
-                    id="correction-text"
-                    placeholder="Descreva a correção a ser feita..."
-                    value={correctionText}
-                    onChange={e => setCorrectionText(e.target.value)}
-                    rows={4}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setCorrectionModalOpen(false);
-                    setCorrectionTarget(null);
-                    setCorrectionText('');
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleCorrectionConfirm}
-                  disabled={
-                    !correctionText.trim() || correctionMutation.isPending
-                  }
-                >
-                  {correctionMutation.isPending
-                    ? 'Enviando...'
-                    : 'Emitir Carta de Correção'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            onClose={() => {
+              setCorrectionModalOpen(false);
+              setCorrectionTarget(null);
+              setCorrectionText('');
+            }}
+            currentStep={1}
+            onStepChange={() => {}}
+            heightClass="h-[420px]"
+            steps={[
+              {
+                title: 'Carta de Correção',
+                description:
+                  'Informe o texto de correção para o documento fiscal.',
+                icon: (
+                  <PenLine className="h-16 w-16 text-sky-600 dark:text-sky-400" />
+                ),
+                isValid:
+                  !!correctionText.trim() && !correctionMutation.isPending,
+                content: (
+                  <div className="space-y-4 py-2">
+                    <div>
+                      <Label htmlFor="correction-text">
+                        Texto de Correção
+                      </Label>
+                      <Textarea
+                        id="correction-text"
+                        placeholder="Descreva a correção a ser feita..."
+                        value={correctionText}
+                        onChange={e => setCorrectionText(e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                ),
+                footer: (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setCorrectionModalOpen(false);
+                        setCorrectionTarget(null);
+                        setCorrectionText('');
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleCorrectionConfirm}
+                      disabled={
+                        !correctionText.trim() || correctionMutation.isPending
+                      }
+                    >
+                      {correctionMutation.isPending
+                        ? 'Enviando...'
+                        : 'Emitir Carta de Correção'}
+                    </Button>
+                  </>
+                ),
+              },
+            ]}
+          />
           {/* NF-e Emission Wizard */}
           <EmitNfeWizard
             open={nfeWizardOpen}
