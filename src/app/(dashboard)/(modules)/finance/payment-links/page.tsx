@@ -128,9 +128,10 @@ export default function PaymentLinksPage() {
     [data]
   );
 
-  // Infinite scroll observer
+  // Infinite scroll observer — observe sentinel as soon as it mounts
   useEffect(() => {
-    if (!sentinelRef.current) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       entries => {
@@ -141,9 +142,9 @@ export default function PaymentLinksPage() {
       { threshold: 0.1 }
     );
 
-    observer.observe(sentinelRef.current);
+    observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, links.length]);
 
   const copyLink = useCallback((slug: string) => {
     const baseUrl = window.location.origin;
@@ -184,8 +185,10 @@ export default function PaymentLinksPage() {
           <FilterDropdown
             label="Status"
             options={STATUS_OPTIONS}
-            value={statusFilter}
-            onChange={v => setStatusFilter(v || undefined)}
+            selected={statusFilter ? [statusFilter] : []}
+            onSelectionChange={ids => setStatusFilter(ids[0] ?? undefined)}
+            searchPlaceholder="Buscar status..."
+            emptyText="Nenhum status encontrado."
           />
         </div>
 
