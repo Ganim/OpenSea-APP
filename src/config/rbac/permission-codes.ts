@@ -477,6 +477,14 @@ export const HR_PERMISSIONS = {
     'remove',
     'admin'
   ),
+  CONTRACTS: perm(
+    'hr',
+    'contracts',
+    'access',
+    'register',
+    'modify',
+    'remove'
+  ),
 } as const;
 
 // =============================================================================

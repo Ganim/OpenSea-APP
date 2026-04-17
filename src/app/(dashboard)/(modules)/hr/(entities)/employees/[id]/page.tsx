@@ -102,6 +102,7 @@ import {
   Eye,
   EyeOff,
   Factory,
+  FileSignature,
   FileText,
   FolderOpen,
   Gift,
@@ -141,6 +142,7 @@ import {
   getWorkRegimeLabel,
 } from '../src';
 import { EmployeeDocumentsChecklist } from '../src/components/employee-documents-checklist';
+import { EmployeeContractsSection } from './_shared/employee-contracts-section';
 import { MedicalExamTimeline } from '@/components/hr/medical-exam-timeline';
 import { SalaryTimelineCard } from '@/components/hr/salary-timeline-card';
 import type { SalaryTimelineUserSummary } from '@/components/hr/salary-timeline-card';
@@ -989,6 +991,10 @@ export default function EmployeeDetailPage() {
               <FolderOpen className="h-4 w-4 hidden sm:inline" />
               <span>Documentos</span>
             </TabsTrigger>
+            <TabsTrigger value="contracts" className="gap-2 flex-shrink-0">
+              <FileSignature className="h-4 w-4 hidden sm:inline" />
+              <span>Contratos</span>
+            </TabsTrigger>
             <TabsTrigger value="benefits" className="gap-2 flex-shrink-0">
               <Gift className="h-4 w-4 hidden sm:inline" />
               <span>Benefícios</span>
@@ -1468,6 +1474,15 @@ export default function EmployeeDetailPage() {
               employeeName={employee.fullName}
               gender={employee.gender}
               readOnly
+            />
+          </TabsContent>
+
+          {/* Aba Contratos */}
+          <TabsContent value="contracts" className="flex flex-col gap-6">
+            <EmployeeContractsSection
+              employeeId={employeeId}
+              employeeName={employee.fullName}
+              employeeEmail={employee.email}
             />
           </TabsContent>
 

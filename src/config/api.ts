@@ -808,6 +808,15 @@ export const API_ENDPOINTS = {
       `/v1/finance/contracts/${id}/generate-entries`,
     SUPPLIER_HISTORY: '/v1/finance/contracts/supplier-history',
   },
+  // HR - Generated Employment Contracts (signature bridge)
+  HR_CONTRACTS: {
+    LIST_BY_EMPLOYEE: (employeeId: string) =>
+      `/v1/hr/employees/${employeeId}/contracts`,
+    DOWNLOAD: (id: string) => `/v1/hr/contracts/${id}/download`,
+    REQUEST_SIGNATURE: (id: string) => `/v1/hr/contracts/${id}/signature`,
+    SIGNATURE_STATUS: (id: string) => `/v1/hr/contracts/${id}/signature`,
+    CANCEL_SIGNATURE: (id: string) => `/v1/hr/contracts/${id}/signature`,
+  },
   // Finance - Recurring
   FINANCE_RECURRING: {
     LIST: '/v1/finance/recurring',
