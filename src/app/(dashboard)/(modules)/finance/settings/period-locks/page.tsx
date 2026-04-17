@@ -8,8 +8,13 @@
 
 'use client';
 
+import { Header } from '@/components/layout/header';
 import { PageActionBar } from '@/components/layout/page-action-bar';
-import { PageHeroBanner } from '@/components/layout/page-hero-banner';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,25 +42,11 @@ import {
 } from '@/hooks/finance/use-period-locks';
 import { usePermissions } from '@/hooks/use-permissions';
 import { FINANCE_PERMISSIONS } from '@/config/rbac/permission-codes';
+import { MONTH_LABELS_PT_BR } from '@/constants/months';
 import { cn } from '@/lib/utils';
-import { Lock, LockOpen, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Lock, LockOpen, ShieldOff } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-
-const MONTH_LABELS = [
-  'Jan',
-  'Fev',
-  'Mar',
-  'Abr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Set',
-  'Out',
-  'Nov',
-  'Dez',
-];
 
 const currentYear = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => currentYear - 4 + i);
@@ -122,29 +113,25 @@ export default function PeriodLocksPage() {
   }
 
   return (
-    <div
-      className="container mx-auto p-6 space-y-6"
-      data-testid="period-locks-page"
-    >
-      <PageActionBar
-        breadcrumbItems={[
-          { label: 'Financeiro', href: '/finance' },
-          { label: 'Configurações', href: '/finance/settings' },
-          { label: 'Fechamento Contábil' },
-        ]}
-        hasPermission={hasPermission}
-      />
+    <PageLayout data-testid="period-locks-page">
+      <PageHeader>
+        <PageActionBar
+          breadcrumbItems={[
+            { label: 'Financeiro', href: '/finance' },
+            { label: 'Configurações', href: '/finance/settings' },
+            { label: 'Fechamento Contábil' },
+          ]}
+          hasPermission={hasPermission}
+        />
 
-      <PageHeroBanner
-        title="Fechamento Contábil"
-        description="Trave um período contábil para impedir inclusão, edição ou exclusão de lançamentos daquela competência. Liberação da trava fica registrada em auditoria."
-        icon={ShieldCheck}
-        iconGradient="from-amber-500 to-orange-600"
-        buttons={[]}
-        hasPermission={hasPermission}
-      />
+        <Header
+          title="Fechamento Contábil"
+          description="Trave um período contábil para impedir inclusão, edição ou exclusão de lançamentos daquela competência. A liberação da trava fica registrada em auditoria."
+        />
+      </PageHeader>
 
-      <Card>
+      <PageBody>
+        <Card>
         <CardContent className="pt-6">
           <div className="flex items-end gap-3 flex-wrap">
             <div className="space-y-2">
@@ -176,7 +163,7 @@ export default function PeriodLocksPage() {
 
       {/* Grid 12 meses */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {MONTH_LABELS.map((label, idx) => {
+        {MONTH_LABELS_PT_BR.map((label, idx) => {
           const month = idx + 1;
           const lockId = activeLockByMonth.get(month);
           const locked = !!lockId;
@@ -231,7 +218,7 @@ export default function PeriodLocksPage() {
             </h3>
             <div className="space-y-2 max-h-[320px] overflow-y-auto">
               {lockRecords.map(lock => {
-                const label = `${MONTH_LABELS[lock.month - 1]}/${lock.year}`;
+                const label = `${MONTH_LABELS_PT_BR[lock.month - 1]}/${lock.year}`;
                 const isActive = lock.releasedAt === null;
                 return (
                   <div
@@ -283,7 +270,7 @@ export default function PeriodLocksPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              Travar {lockDialog ? MONTH_LABELS[lockDialog.month - 1] : ''}/
+              Travar {lockDialog ? MONTH_LABELS_PT_BR[lockDialog.month - 1] : ''}/
               {year}
             </DialogTitle>
             <DialogDescription>
@@ -321,6 +308,7 @@ export default function PeriodLocksPage() {
         title="Liberar período"
         description="Digite seu PIN de ação para liberar o período. Isso permitirá novamente a edição dos lançamentos dessa competência."
       />
-    </div>
+      </PageBody>
+    </PageLayout>
   );
 }
