@@ -95,14 +95,16 @@ export interface LoansQuery {
   costCenterId?: string;
   type?: LoanType;
   status?: LoanStatus;
+  // P1-40: aligned with the real backend enum. `totalAmount`/`institution`
+  // were removed (they were never real columns on the Loan model) and
+  // `outstandingBalance` is not part of the whitelist either — keep only
+  // values the backend Zod enum accepts so we don't send 400-bound requests.
   sortBy?:
     | 'createdAt'
-    | 'totalAmount'
-    | 'institution'
-    | 'status'
-    | 'name'
+    | 'startDate'
     | 'principalAmount'
-    | 'outstandingBalance';
+    | 'name'
+    | 'status';
   sortOrder?: 'asc' | 'desc';
 }
 
