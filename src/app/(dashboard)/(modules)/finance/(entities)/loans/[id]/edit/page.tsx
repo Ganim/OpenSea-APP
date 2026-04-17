@@ -90,13 +90,15 @@ function SectionHeader({
 
 const STATUS_COLORS: Record<LoanStatus, string> = {
   ACTIVE:
-    'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
-  PAID_OFF: 'bg-sky-50 text-sky-700 dark:bg-sky-500/8 dark:text-sky-300',
-  DEFAULTED: 'bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
+    'border border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+  PAID_OFF:
+    'border border-emerald-600/25 dark:border-emerald-500/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/8 dark:text-emerald-300',
+  DEFAULTED:
+    'border border-rose-600/25 dark:border-rose-500/20 bg-rose-50 text-rose-700 dark:bg-rose-500/8 dark:text-rose-300',
   RENEGOTIATED:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
+    'border border-amber-600/25 dark:border-amber-500/20 bg-amber-50 text-amber-700 dark:bg-amber-500/8 dark:text-amber-300',
   CANCELLED:
-    'bg-slate-50 text-slate-700 dark:bg-slate-500/8 dark:text-slate-300',
+    'border border-slate-600/25 dark:border-slate-500/20 bg-slate-50 text-slate-700 dark:bg-slate-500/8 dark:text-slate-300',
 };
 
 function getStatusLabel(status: LoanStatus): string {
@@ -383,7 +385,7 @@ export default function EditLoanPage({
         {/* Identity Card */}
         <Card className="bg-white/5 p-5">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-violet-600 shadow-lg">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg">
               <Landmark className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
