@@ -1,10 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -21,9 +24,8 @@ import type {
   WorkplaceRiskCategory,
   WorkplaceRiskSeverity,
 } from '@/types/hr';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { AlertTriangle, Check, Loader2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, Check, Loader2, ShieldCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface RiskModalProps {
@@ -58,6 +60,7 @@ export function RiskModal({
 }: RiskModalProps) {
   const isEditing = !!risk;
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<WorkplaceRiskCategory | ''>('');
   const [severity, setSeverity] = useState<WorkplaceRiskSeverity | ''>('');
@@ -70,6 +73,7 @@ export function RiskModal({
 
   useEffect(() => {
     if (isOpen) {
+      setCurrentStep(1);
       if (risk) {
         setName(risk.name);
         setCategory(risk.category);
@@ -93,10 +97,16 @@ export function RiskModal({
     }
   }, [isOpen, risk]);
 
-  const canSubmit = name.trim() && category && severity;
+  const canSubmit = !!(name.trim() && category && severity);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setCurrentStep(1);
+      onClose();
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!canSubmit) return;
 
     const data: CreateWorkplaceRiskData = {
@@ -120,215 +130,241 @@ export function RiskModal({
         msg.includes('nome')
       ) {
         setFieldErrors(prev => ({ ...prev, name: translateError(msg) }));
+        setCurrentStep(1);
       } else {
         toast.error(translateError(msg));
       }
     }
   };
 
-  const handleClose = () => {
-    if (!isSubmitting) onClose();
-  };
-
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={open => {
-        if (!open) handleClose();
-      }}
-    >
-      <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-[700px] max-w-[700px] h-[520px] p-0 gap-0 overflow-hidden flex flex-row"
-      >
-        <VisuallyHidden>
-          <DialogTitle>{isEditing ? 'Editar Risco' : 'Novo Risco'}</DialogTitle>
-        </VisuallyHidden>
-
-        {/* Left icon column */}
-        <div className="w-[200px] shrink-0 bg-slate-50 dark:bg-white/5 flex items-center justify-center border-r border-border/50">
+  const steps: WizardStep[] = useMemo(
+    () => [
+      {
+        title: isEditing ? 'Editar Risco' : 'Novo Risco Ambiental',
+        description: isEditing
+          ? 'Atualize as informações do risco.'
+          : 'Identifique o risco ambiental do trabalho.',
+        icon: (
           <AlertTriangle
             className="h-16 w-16 text-amber-400"
             strokeWidth={1.2}
           />
-        </div>
-
-        {/* Right content column */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-5 pb-3">
-            <div>
-              <h2 className="text-lg font-semibold leading-none">
-                {isEditing ? 'Editar Risco' : 'Novo Risco Ambiental'}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isEditing
-                  ? 'Atualize as informações do risco.'
-                  : 'Registre um novo risco ambiental do trabalho.'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </button>
-          </div>
-
-          {/* Body */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex-1 flex flex-col min-h-0"
-          >
-            <div
-              className="flex-1 overflow-y-auto px-6 py-2 space-y-4"
-              onWheel={e => e.stopPropagation()}
-            >
-              {/* Nome */}
-              <div className="space-y-1.5">
-                <Label htmlFor="risk-name" className="text-xs">
-                  Nome do Risco <span className="text-rose-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="risk-name"
-                    value={name}
-                    onChange={e => {
-                      setName(e.target.value);
-                      if (fieldErrors.name)
-                        setFieldErrors(prev => ({ ...prev, name: '' }));
-                    }}
-                    placeholder="Ex: Ruído contínuo acima de 85 dB"
-                    className="h-9"
-                    aria-invalid={!!fieldErrors.name}
-                  />
-                  <FormErrorIcon message={fieldErrors.name} />
-                </div>
-              </div>
-
-              {/* Categoria + Severidade */}
-              <div className="flex items-end gap-3">
-                <div className="flex-1 space-y-1.5">
-                  <Label className="text-xs">
-                    Categoria <span className="text-rose-500">*</span>
-                  </Label>
-                  <Select
-                    value={category}
-                    onValueChange={v => setCategory(v as WorkplaceRiskCategory)}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Selecionar..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORY_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1 space-y-1.5">
-                  <Label className="text-xs">
-                    Severidade <span className="text-rose-500">*</span>
-                  </Label>
-                  <Select
-                    value={severity}
-                    onValueChange={v => setSeverity(v as WorkplaceRiskSeverity)}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Selecionar..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SEVERITY_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Fonte + Área */}
-              <div className="flex items-end gap-3">
-                <div className="flex-1 space-y-1.5">
-                  <Label htmlFor="risk-source" className="text-xs">
-                    Fonte Geradora
-                  </Label>
-                  <Input
-                    id="risk-source"
-                    value={source}
-                    onChange={e => setSource(e.target.value)}
-                    placeholder="Ex: Máquina de corte"
-                    className="h-9"
-                  />
-                </div>
-                <div className="flex-1 space-y-1.5">
-                  <Label htmlFor="risk-area" className="text-xs">
-                    Área Afetada
-                  </Label>
-                  <Input
-                    id="risk-area"
-                    value={affectedArea}
-                    onChange={e => setAffectedArea(e.target.value)}
-                    placeholder="Ex: Setor de produção"
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              {/* Medidas de Controle */}
-              <div className="space-y-1.5">
-                <Label htmlFor="risk-controls" className="text-xs">
-                  Medidas de Controle
-                </Label>
-                <Textarea
-                  id="risk-controls"
-                  value={controlMeasures}
-                  onChange={e => setControlMeasures(e.target.value)}
-                  placeholder="Descreva as medidas preventivas e corretivas..."
-                  rows={2}
+        ),
+        isValid: canSubmit,
+        content: (
+          <div className="space-y-4 py-2">
+            {/* Nome */}
+            <div className="space-y-2">
+              <Label htmlFor="risk-name" className="text-xs">
+                Nome do Risco <span className="text-rose-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="risk-name"
+                  data-testid="risk-name"
+                  value={name}
+                  onChange={e => {
+                    setName(e.target.value);
+                    if (fieldErrors.name)
+                      setFieldErrors(prev => ({ ...prev, name: '' }));
+                  }}
+                  placeholder="Ex: Ruído contínuo acima de 85 dB"
+                  className="h-9"
+                  aria-invalid={!!fieldErrors.name}
                 />
+                <FormErrorIcon message={fieldErrors.name} />
               </div>
+            </div>
 
-              {/* EPI */}
-              <div className="space-y-1.5">
-                <Label htmlFor="risk-epi" className="text-xs">
-                  EPI Necessário
+            {/* Categoria + Severidade */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-2">
+                <Label className="text-xs">
+                  Categoria <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  value={category}
+                  onValueChange={v => setCategory(v as WorkplaceRiskCategory)}
+                >
+                  <SelectTrigger className="h-9" data-testid="risk-category">
+                    <SelectValue placeholder="Selecionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label className="text-xs">
+                  Severidade <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  value={severity}
+                  onValueChange={v => setSeverity(v as WorkplaceRiskSeverity)}
+                >
+                  <SelectTrigger className="h-9" data-testid="risk-severity">
+                    <SelectValue placeholder="Selecionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SEVERITY_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: 'Contexto do Risco',
+        description: 'Informe a fonte geradora e onde o risco ocorre.',
+        icon: (
+          <ShieldCheck className="h-16 w-16 text-sky-400" strokeWidth={1.2} />
+        ),
+        content: (
+          <div className="space-y-4 py-2">
+            {/* Fonte + Área */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="risk-source" className="text-xs">
+                  Fonte Geradora
                 </Label>
                 <Input
-                  id="risk-epi"
-                  value={epiRequired}
-                  onChange={e => setEpiRequired(e.target.value)}
-                  placeholder="Ex: Protetor auricular, luvas"
+                  id="risk-source"
+                  data-testid="risk-source"
+                  value={source}
+                  onChange={e => setSource(e.target.value)}
+                  placeholder="Ex: Máquina de corte"
                   className="h-9"
                 />
               </div>
-
-              {/* Ativo */}
-              <div className="flex items-center gap-3">
-                <Switch checked={isActive} onCheckedChange={setIsActive} />
-                <Label className="text-xs">Risco ativo</Label>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="risk-area" className="text-xs">
+                  Área Afetada
+                </Label>
+                <Input
+                  id="risk-area"
+                  data-testid="risk-area"
+                  value={affectedArea}
+                  onChange={e => setAffectedArea(e.target.value)}
+                  placeholder="Ex: Setor de produção"
+                  className="h-9"
+                />
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-4 border-t border-border/50">
-              <Button type="submit" disabled={isSubmitting || !canSubmit}>
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Check className="h-4 w-4 mr-2" />
-                )}
-                {isEditing ? 'Salvar Alterações' : 'Adicionar Risco'}
-              </Button>
+            {/* Ativo */}
+            <div className="flex items-center gap-3 pt-2">
+              <Switch
+                checked={isActive}
+                onCheckedChange={setIsActive}
+                data-testid="risk-active"
+              />
+              <Label className="text-xs">Risco ativo</Label>
             </div>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        ),
+      },
+      {
+        title: 'Medidas de Controle',
+        description: 'Descreva as medidas preventivas e o EPI necessário.',
+        icon: (
+          <Check className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+        ),
+        content: (
+          <div className="space-y-4 py-2">
+            {/* Medidas de Controle */}
+            <div className="space-y-2">
+              <Label htmlFor="risk-controls" className="text-xs">
+                Medidas de Controle
+              </Label>
+              <Textarea
+                id="risk-controls"
+                data-testid="risk-controls"
+                value={controlMeasures}
+                onChange={e => setControlMeasures(e.target.value)}
+                placeholder="Descreva as medidas preventivas e corretivas..."
+                rows={4}
+              />
+            </div>
+
+            {/* EPI */}
+            <div className="space-y-2">
+              <Label htmlFor="risk-epi" className="text-xs">
+                EPI Necessário
+              </Label>
+              <Input
+                id="risk-epi"
+                data-testid="risk-epi"
+                value={epiRequired}
+                onChange={e => setEpiRequired(e.target.value)}
+                placeholder="Ex: Protetor auricular, luvas"
+                className="h-9"
+              />
+            </div>
+          </div>
+        ),
+        footer: (
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(2)}
+              disabled={isSubmitting}
+            >
+              ← Voltar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmit}
+              data-testid="risk-submit"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              {isEditing ? 'Salvar Alterações' : 'Adicionar Risco'}
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isEditing,
+      name,
+      category,
+      severity,
+      source,
+      affectedArea,
+      controlMeasures,
+      epiRequired,
+      isActive,
+      isSubmitting,
+      canSubmit,
+      fieldErrors,
+    ]
+  );
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) handleClose();
+      }}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }

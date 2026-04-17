@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { FormErrorIcon } from '@/components/ui/form-error-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,11 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  StepWizardDialog,
+  type WizardStep,
+} from '@/components/ui/step-wizard-dialog';
 import { translateError } from '@/lib/error-messages';
 import type { CreatePayrollData } from '@/types/hr';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Check, Loader2, Receipt, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, Loader2, Receipt } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 const MONTHS = [
@@ -52,19 +54,26 @@ export function CreateModal({
     String(new Date().getFullYear())
   );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     if (isOpen) {
       setReferenceMonth('');
       setReferenceYear(String(new Date().getFullYear()));
       setFieldErrors({});
+      setCurrentStep(1);
     }
   }, [isOpen]);
 
   const parsedYear = parseInt(referenceYear, 10);
   const isYearValid =
     !isNaN(parsedYear) && parsedYear >= 2000 && parsedYear <= 2100;
-  const canSubmit = referenceMonth && isYearValid;
+  const canSubmit = !!(referenceMonth && isYearValid);
+
+  const selectedMonthLabel = useMemo(
+    () => MONTHS.find(m => m.value === referenceMonth)?.label ?? '',
+    [referenceMonth]
+  );
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -95,54 +104,22 @@ export function CreateModal({
 
   const handleClose = () => {
     if (!isSubmitting) {
+      setCurrentStep(1);
       onClose();
     }
   };
 
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={val => {
-        if (!val) handleClose();
-      }}
-    >
-      <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-[800px] max-w-[800px] h-[490px] p-0 gap-0 overflow-hidden flex flex-row"
-      >
-        <VisuallyHidden>
-          <DialogTitle>Nova Folha de Pagamento</DialogTitle>
-        </VisuallyHidden>
-
-        {/* Left icon column */}
-        <div className="w-[200px] shrink-0 bg-slate-50 dark:bg-white/5 flex items-center justify-center border-r border-border/50">
+  const steps: WizardStep[] = useMemo(
+    () => [
+      {
+        title: 'Período de referência',
+        description: 'Qual mês e ano esta folha de pagamento cobre?',
+        icon: (
           <Receipt className="h-16 w-16 text-violet-400" strokeWidth={1.2} />
-        </div>
-
-        {/* Right content column */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-5 pb-3">
-            <div>
-              <h2 className="text-lg font-semibold leading-none">
-                Nova Folha de Pagamento
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Crie uma folha de pagamento para o período desejado.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
+        ),
+        isValid: canSubmit,
+        content: (
+          <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               {/* Mês de referência */}
               <div className="space-y-2">
@@ -191,9 +168,50 @@ export function CreateModal({
               </div>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border/50">
+        ),
+      },
+      {
+        title: 'Confirmar criação',
+        description: 'Revise antes de gerar o rascunho.',
+        icon: (
+          <Check className="h-16 w-16 text-emerald-400" strokeWidth={1.2} />
+        ),
+        isValid: canSubmit,
+        content: (
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg border border-border bg-white dark:bg-slate-800/60 p-4">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                Período selecionado
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-semibold">
+                  {selectedMonthLabel || '—'}
+                </span>
+                <span className="text-lg font-semibold text-muted-foreground">
+                  /
+                </span>
+                <span className="text-lg font-semibold">
+                  {isYearValid ? parsedYear : '—'}
+                </span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Uma folha em rascunho será criada. Nenhum cálculo é executado aqui
+              — use <span className="font-medium">Calcular</span> na lista para
+              processar os itens.
+            </p>
+          </div>
+        ),
+        footer: (
+          <div className="flex items-center gap-2 w-full justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(1)}
+              disabled={isSubmitting}
+            >
+              ← Voltar
+            </Button>
             <Button
               onClick={handleSubmit}
               disabled={!canSubmit || isSubmitting}
@@ -206,8 +224,32 @@ export function CreateModal({
               Criar Folha
             </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      referenceMonth,
+      referenceYear,
+      fieldErrors,
+      canSubmit,
+      isYearValid,
+      parsedYear,
+      selectedMonthLabel,
+      isSubmitting,
+    ]
+  );
+
+  return (
+    <StepWizardDialog
+      open={isOpen}
+      onOpenChange={val => {
+        if (!val) handleClose();
+      }}
+      steps={steps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onClose={handleClose}
+    />
   );
 }
