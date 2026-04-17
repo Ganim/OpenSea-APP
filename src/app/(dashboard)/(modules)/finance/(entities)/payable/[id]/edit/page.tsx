@@ -192,7 +192,7 @@ export default function EditPayablePage({
       setDescription(entry.description || '');
       setCategoryId(entry.categoryId || '');
       setSupplierName(entry.supplierName || '');
-      setTags((entry.tags || []).join(', '));
+      setTags(entry.tags.join(', '));
 
       setExpectedAmount(entry.expectedAmount || 0);
       setDueDate(entry.dueDate ? entry.dueDate.split('T')[0] : '');

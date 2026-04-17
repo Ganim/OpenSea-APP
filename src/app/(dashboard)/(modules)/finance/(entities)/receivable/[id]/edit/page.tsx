@@ -192,7 +192,7 @@ export default function EditReceivablePage({
       setDescription(entry.description || '');
       setCategoryId(entry.categoryId || '');
       setCustomerName(entry.customerName || '');
-      setTags((entry.tags || []).join(', '));
+      setTags(entry.tags.join(', '));
 
       setExpectedAmount(entry.expectedAmount || 0);
       setDueDate(entry.dueDate ? entry.dueDate.split('T')[0] : '');
