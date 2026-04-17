@@ -8,7 +8,10 @@ import type {
 } from '@/types/finance';
 import type { PaginationMeta } from '@/types/pagination';
 
+// P1-43: standard `{ data, meta }` shape with legacy `configs` alias
+// kept during the migration window.
 export interface RecurringConfigsResponse {
+  data: RecurringConfig[];
   configs: RecurringConfig[];
   meta: PaginationMeta;
 }
@@ -32,9 +35,19 @@ export const financeRecurringService = {
     if (params?.sortBy) query.append('sortBy', params.sortBy);
     if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
 
-    return apiClient.get<RecurringConfigsResponse>(
-      `${API_ENDPOINTS.FINANCE_RECURRING.LIST}?${query.toString()}`
-    );
+    // P1-43: tolerate both the new `data` key and the legacy `configs`.
+    const raw = await apiClient.get<
+      Partial<RecurringConfigsResponse> & {
+        data?: RecurringConfig[];
+        configs?: RecurringConfig[];
+      }
+    >(`${API_ENDPOINTS.FINANCE_RECURRING.LIST}?${query.toString()}`);
+    const list = raw.data ?? raw.configs ?? [];
+    return {
+      data: list,
+      configs: list,
+      meta: raw.meta as PaginationMeta,
+    };
   },
 
   async get(id: string): Promise<RecurringConfigResponse> {

@@ -9,7 +9,11 @@ import type {
 } from '@/types/finance';
 import type { PaginationMeta } from '@/types/pagination';
 
+// P1-43: every paginated finance endpoint now returns `{ data, meta }`.
+// Backend still sends the legacy key (`bankAccounts`) in parallel so we
+// tolerate either response during the migration window.
 export interface BankAccountsResponse {
+  data: BankAccount[];
   bankAccounts: BankAccount[];
   meta: PaginationMeta;
 }
@@ -32,9 +36,22 @@ export const bankAccountsService = {
     if (params?.sortBy) query.append('sortBy', params.sortBy);
     if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
 
-    return apiClient.get<BankAccountsResponse>(
-      `${API_ENDPOINTS.BANK_ACCOUNTS.LIST}?${query.toString()}`
-    );
+    // P1-43: normalize legacy/standard shapes so callers can safely read
+    // `.data` going forward. If the backend ever drops the legacy alias
+    // we keep working; if a stale bundle still reads `.bankAccounts` it
+    // keeps working too.
+    const raw = await apiClient.get<
+      Partial<BankAccountsResponse> & {
+        data?: BankAccount[];
+        bankAccounts?: BankAccount[];
+      }
+    >(`${API_ENDPOINTS.BANK_ACCOUNTS.LIST}?${query.toString()}`);
+    const list = raw.data ?? raw.bankAccounts ?? [];
+    return {
+      data: list,
+      bankAccounts: list,
+      meta: raw.meta as PaginationMeta,
+    };
   },
 
   async get(id: string): Promise<BankAccountResponse> {
