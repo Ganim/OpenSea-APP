@@ -104,6 +104,7 @@ export default function BankConnectionsPage() {
       const response = await bankConnectionsService.list();
       return response.data;
     },
+    enabled: canAdmin,
   });
 
   const connections = connectionsData ?? [];
@@ -118,6 +119,10 @@ export default function BankConnectionsPage() {
   const disconnectMutation = useMutation({
     mutationFn: (connectionId: string) =>
       bankConnectionsService.disconnect(connectionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+    },
   });
 
   const handleSync = useCallback(
@@ -128,6 +133,7 @@ export default function BankConnectionsPage() {
           `Sincronização concluída: ${result.transactionsImported} transações importadas, ${result.matchedCount} conciliadas`
         );
         queryClient.invalidateQueries({ queryKey: ['bank-connections'] });
+        queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
       } catch {
         toast.error('Erro ao sincronizar transações');
       }
