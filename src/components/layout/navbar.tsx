@@ -5,7 +5,7 @@
 
 'use client';
 
-import { NotificationsPanel } from '@/components/shared/notifications-panel';
+import { NotificationsBell } from '@/features/notifications/components/notifications-bell';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { useUltrawide } from '@/hooks/use-layout-preferences';
@@ -56,7 +56,7 @@ export function Navbar({ onMenuOpen }: NavbarProps) {
             )}
             <PrintQueuePanel />
             <CartIndicator />
-            <NotificationsPanel />
+            <NotificationsBell />
 
             <Button
               variant="ghost"

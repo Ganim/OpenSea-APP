@@ -9,17 +9,20 @@ import { cn } from '@/lib/utils';
 
 import {
   Activity,
+  Bell,
   Briefcase,
   ChevronRight,
   Link,
   Shield,
   User,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { ActivityTab } from './_components/activity-tab';
 import { ConnectedAccountsTab } from './_components/connected-accounts-tab';
 import { EmployeeTab } from './_components/employee-tab';
+import { NotificationsTab } from './_components/notifications-tab';
 import { ProfileTab } from './_components/profile-tab';
 import { SecurityTab } from './_components/security-tab';
 
@@ -27,6 +30,7 @@ type TabId =
   | 'profile'
   | 'security'
   | 'connected-accounts'
+  | 'notifications'
   | 'employee'
   | 'activity';
 
@@ -58,6 +62,12 @@ const tabs: TabItem[] = [
     description: 'Métodos de login',
   },
   {
+    id: 'notifications',
+    label: 'Notificações',
+    icon: <Bell className="w-5 h-5" />,
+    description: 'Canais e módulos',
+  },
+  {
     id: 'employee',
     label: 'Funcionário',
     icon: <Briefcase className="w-5 h-5" />,
@@ -72,9 +82,30 @@ const tabs: TabItem[] = [
   },
 ];
 
+const VALID_TABS: TabId[] = [
+  'profile',
+  'security',
+  'connected-accounts',
+  'notifications',
+  'employee',
+  'activity',
+];
+
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabId>('profile');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') ?? 'profile') as TabId;
+  const [activeTab, setActiveTab] = useState<TabId>(
+    VALID_TABS.includes(initialTab) ? initialTab : 'profile'
+  );
+
+  useEffect(() => {
+    const qp = searchParams.get('tab') as TabId | null;
+    if (qp && VALID_TABS.includes(qp) && qp !== activeTab) {
+      setActiveTab(qp);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Verifica se o usuário tem um funcionário vinculado
   const { data: employeeData, isLoading: employeeLoading } = useMyEmployee();
@@ -157,6 +188,7 @@ export default function ProfilePage() {
           {activeTab === 'profile' && <ProfileTab user={user} />}
           {activeTab === 'security' && <SecurityTab />}
           {activeTab === 'connected-accounts' && <ConnectedAccountsTab />}
+          {activeTab === 'notifications' && <NotificationsTab />}
           {activeTab === 'employee' && hasEmployee && (
             <EmployeeTab
               employee={employeeData.employee}
