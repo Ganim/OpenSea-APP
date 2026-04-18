@@ -38,30 +38,49 @@ export function NotificationItem({
 }: NotificationItemProps) {
   const kind = notification.kind ?? NotificationKind.INFORMATIONAL;
 
+  const isUnread = !notification.isRead;
+
   return (
     <div
       className={cn(
-        'flex gap-3 p-3 rounded-lg border',
-        notification.isRead
-          ? 'bg-muted/20 border-transparent'
-          : 'bg-background border-border'
+        'flex gap-3 p-3.5 rounded-lg border transition-colors relative',
+        'border-l-4',
+        isUnread
+          ? 'bg-white dark:bg-slate-800/60 border-gray-200 dark:border-white/10 shadow-sm'
+          : 'bg-gray-50/60 dark:bg-white/[0.02] border-gray-100 dark:border-white/5',
+        isUnread
+          ? priorityBorderColor(notification.priority)
+          : 'border-l-transparent'
       )}
     >
+      {isUnread && (
+        <span className="absolute top-3.5 right-3.5 h-2 w-2 rounded-full bg-blue-500 ring-4 ring-blue-500/20" />
+      )}
+
       <div className="shrink-0">
         <KindBadge kind={kind} />
       </div>
 
-      <div className="flex-1 min-w-0 space-y-1">
+      <div className="flex-1 min-w-0 space-y-1.5 pr-4">
         <div className="flex items-start justify-between gap-2">
           <h4
             className={cn(
-              'text-sm font-medium truncate',
-              notification.isRead && 'text-muted-foreground'
+              'text-sm truncate',
+              isUnread
+                ? 'font-semibold text-gray-900 dark:text-white'
+                : 'font-medium text-gray-500 dark:text-white/50'
             )}
           >
             {notification.title}
           </h4>
-          <span className="text-[11px] text-muted-foreground shrink-0">
+          <span
+            className={cn(
+              'text-[11px] shrink-0 tabular-nums',
+              isUnread
+                ? 'text-gray-600 dark:text-white/60'
+                : 'text-gray-400 dark:text-white/30'
+            )}
+          >
             {formatDistanceToNow(new Date(notification.createdAt), {
               addSuffix: true,
               locale: ptBR,
@@ -69,7 +88,14 @@ export function NotificationItem({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground line-clamp-2">
+        <p
+          className={cn(
+            'text-xs line-clamp-2',
+            isUnread
+              ? 'text-gray-700 dark:text-white/70'
+              : 'text-gray-400 dark:text-white/30'
+          )}
+        >
           {notification.message}
         </p>
 
@@ -82,6 +108,21 @@ export function NotificationItem({
       </div>
     </div>
   );
+}
+
+function priorityBorderColor(priority: string): string {
+  switch (priority) {
+    case 'URGENT':
+      return 'border-l-rose-500';
+    case 'HIGH':
+      return 'border-l-amber-500';
+    case 'NORMAL':
+      return 'border-l-blue-500';
+    case 'LOW':
+      return 'border-l-slate-400';
+    default:
+      return 'border-l-blue-500';
+  }
 }
 
 function KindBadge({ kind }: { kind: NotificationKind }) {

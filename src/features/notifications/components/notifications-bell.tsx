@@ -14,7 +14,6 @@
 import { Bell, CheckCheck, Loader2, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,57 +23,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 import {
-  useMarkAllNotificationsAsRead,
-  useNotificationsList,
-} from '@/hooks/notifications';
-import type { BackendNotification } from '@/types/admin';
-
-import type { NotificationRecord } from '../types';
+  useMarkAllReadV2,
+  useNotificationsListV2,
+} from '../hooks/use-notifications-v2';
 import { NotificationItem } from './renderers/notification-item';
-
-function toV2Record(n: BackendNotification): NotificationRecord {
-  return {
-    id: n.id,
-    title: n.title,
-    message: n.message,
-    // Legacy rows persisted before v2 have kind = null and still render as INFORMATIONAL.
-    kind: (n as unknown as { kind?: NotificationRecord['kind'] }).kind ?? null,
-    priority: n.priority as unknown as NotificationRecord['priority'],
-    state:
-      (n as unknown as { state?: NotificationRecord['state'] }).state ?? null,
-    actionUrl: n.actionUrl ?? null,
-    fallbackUrl:
-      (n as unknown as { fallbackUrl?: string | null }).fallbackUrl ?? null,
-    actions:
-      (n as unknown as { actions?: NotificationRecord['actions'] }).actions ??
-      null,
-    resolvedAction:
-      (n as unknown as { resolvedAction?: string | null }).resolvedAction ??
-      null,
-    entityType: n.entityType ?? null,
-    entityId: n.entityId ?? null,
-    metadata: n.metadata ?? null,
-    isRead: n.isRead,
-    progress: (n as unknown as { progress?: number | null }).progress ?? null,
-    progressTotal:
-      (n as unknown as { progressTotal?: number | null }).progressTotal ?? null,
-    expiresAt:
-      (n as unknown as { expiresAt?: string | null }).expiresAt ?? null,
-    createdAt: n.createdAt,
-  };
-}
 
 export function NotificationsBell() {
   const router = useRouter();
-  const { data, isLoading } = useNotificationsList({ limit: 30 });
-  const markAllRead = useMarkAllNotificationsAsRead();
+  const { data, isLoading } = useNotificationsListV2({ limit: 30 });
+  const markAllRead = useMarkAllReadV2();
 
-  const items = useMemo(
-    () => (data?.notifications ?? []).map(toV2Record),
-    [data?.notifications]
-  );
-  const unread = items.filter(n => !n.isRead).length;
+  const items = data?.notifications ?? [];
+  const unread = data?.totalUnread ?? 0;
 
   return (
     <DropdownMenu>

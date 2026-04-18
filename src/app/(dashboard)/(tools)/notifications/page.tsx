@@ -23,69 +23,33 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  useMarkAllNotificationsAsRead,
-  useNotificationsList,
-} from '@/hooks/notifications';
-import type { BackendNotification } from '@/types/admin';
 
 import { NotificationItem } from '@/features/notifications/components/renderers/notification-item';
-import type { NotificationRecord } from '@/features/notifications/types';
-
-function toV2Record(n: BackendNotification): NotificationRecord {
-  return {
-    id: n.id,
-    title: n.title,
-    message: n.message,
-    kind: (n as unknown as { kind?: NotificationRecord['kind'] }).kind ?? null,
-    priority: n.priority as unknown as NotificationRecord['priority'],
-    state:
-      (n as unknown as { state?: NotificationRecord['state'] }).state ?? null,
-    actionUrl: n.actionUrl ?? null,
-    fallbackUrl:
-      (n as unknown as { fallbackUrl?: string | null }).fallbackUrl ?? null,
-    actions:
-      (n as unknown as { actions?: NotificationRecord['actions'] }).actions ??
-      null,
-    resolvedAction:
-      (n as unknown as { resolvedAction?: string | null }).resolvedAction ??
-      null,
-    entityType: n.entityType ?? null,
-    entityId: n.entityId ?? null,
-    metadata: n.metadata ?? null,
-    isRead: n.isRead,
-    progress: (n as unknown as { progress?: number | null }).progress ?? null,
-    progressTotal:
-      (n as unknown as { progressTotal?: number | null }).progressTotal ?? null,
-    expiresAt:
-      (n as unknown as { expiresAt?: string | null }).expiresAt ?? null,
-    createdAt: n.createdAt,
-  };
-}
+import {
+  useMarkAllReadV2,
+  useNotificationsListV2,
+} from '@/features/notifications/hooks/use-notifications-v2';
 
 type ReadFilter = 'all' | 'unread' | 'read';
 
 export default function NotificationsPage() {
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [kindFilter, setKindFilter] = useState<string>('all');
 
   const filters = useMemo(() => {
     const f: Record<string, unknown> = { limit: 50 };
     if (readFilter === 'read') f.isRead = true;
     if (readFilter === 'unread') f.isRead = false;
-    if (typeFilter !== 'all') f.type = typeFilter;
+    if (kindFilter !== 'all') f.kind = kindFilter;
     return f;
-  }, [readFilter, typeFilter]);
+  }, [readFilter, kindFilter]);
 
   const { data, isLoading, refetch, isFetching } =
-    useNotificationsList(filters);
-  const markAll = useMarkAllNotificationsAsRead();
+    useNotificationsListV2(filters);
+  const markAll = useMarkAllReadV2();
 
-  const items = useMemo(
-    () => (data?.notifications ?? []).map(toV2Record),
-    [data?.notifications]
-  );
-  const unread = items.filter(n => !n.isRead).length;
+  const items = data?.notifications ?? [];
+  const unread = data?.totalUnread ?? 0;
   const total = data?.total ?? 0;
 
   return (
@@ -149,17 +113,19 @@ export default function NotificationsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={typeFilter} onValueChange={v => setTypeFilter(v)}>
+          <Select value={kindFilter} onValueChange={v => setKindFilter(v)}>
             <SelectTrigger className="w-44 h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="INFO">Informativa</SelectItem>
-              <SelectItem value="WARNING">Alerta</SelectItem>
-              <SelectItem value="ERROR">Erro</SelectItem>
-              <SelectItem value="SUCCESS">Sucesso</SelectItem>
-              <SelectItem value="REMINDER">Lembrete</SelectItem>
+              <SelectItem value="INFORMATIONAL">Informativa</SelectItem>
+              <SelectItem value="LINK">Link</SelectItem>
+              <SelectItem value="ACTIONABLE">Com ações</SelectItem>
+              <SelectItem value="APPROVAL">Aprovação</SelectItem>
+              <SelectItem value="FORM">Formulário</SelectItem>
+              <SelectItem value="PROGRESS">Progresso</SelectItem>
+              <SelectItem value="SYSTEM_BANNER">Banner do sistema</SelectItem>
             </SelectContent>
           </Select>
 
