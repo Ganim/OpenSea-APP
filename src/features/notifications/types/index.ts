@@ -11,6 +11,9 @@ export enum NotificationKind {
   FORM = 'FORM',
   PROGRESS = 'PROGRESS',
   SYSTEM_BANNER = 'SYSTEM_BANNER',
+  IMAGE_BANNER = 'IMAGE_BANNER',
+  REPORT = 'REPORT',
+  EMAIL_PREVIEW = 'EMAIL_PREVIEW',
 }
 
 export enum NotificationPriority {

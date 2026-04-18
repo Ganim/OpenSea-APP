@@ -126,6 +126,9 @@ export default function NotificationsPage() {
               <SelectItem value="FORM">Formulário</SelectItem>
               <SelectItem value="PROGRESS">Progresso</SelectItem>
               <SelectItem value="SYSTEM_BANNER">Banner do sistema</SelectItem>
+              <SelectItem value="IMAGE_BANNER">Banner com imagem</SelectItem>
+              <SelectItem value="REPORT">Relatório</SelectItem>
+              <SelectItem value="EMAIL_PREVIEW">Preview de e-mail</SelectItem>
             </SelectContent>
           </Select>
 
