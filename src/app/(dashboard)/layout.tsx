@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Navbar } from '@/components/layout/navbar';
 import { ToolsPanel } from '@/components/layout/tools-panel';
 import { CommandBar } from '@/components/shared/command-bar';
+import { NotificationSocketListener } from '@/features/notifications/components/notification-socket-listener';
 import { menuItems } from '@/config/menu-items';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
@@ -60,6 +61,7 @@ export default function DashboardLayout({
     <ProtectedRoute>
       <PrintQueueProvider>
         <CartProvider>
+          <NotificationSocketListener />
           <CommandBar />
           {/* Dark Mode Background */}
           <div className="min-h-screen bg-linear-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
