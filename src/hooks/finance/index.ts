@@ -12,7 +12,6 @@ export * from './use-suppliers';
 export * from './use-customers';
 export * from './use-contracts';
 export * from './use-recurring';
-export * from './use-notifications';
 export * from './use-ocr';
 export * from './use-analytics';
 export * from './use-reports';

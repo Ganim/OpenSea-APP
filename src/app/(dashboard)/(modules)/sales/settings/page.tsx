@@ -107,9 +107,10 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     id: 'notifications',
     title: 'Notificações',
-    description: 'Configure preferências de e-mail, push e SMS por categoria.',
+    description:
+      'Configure preferências de e-mail, push e SMS por categoria no seu perfil.',
     icon: Bell,
-    href: '/sales/notification-preferences',
+    href: '/profile?tab=notifications',
     gradient: 'from-amber-500 to-orange-600',
   },
   {
