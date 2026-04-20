@@ -128,11 +128,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     '/magic-link',
     '/',
     '/select-tenant',
+    // Kiosk — authenticates by x-punch-device-token, not user JWT.
+    // Setup flow (/kiosk/setup) opts into admin auth manually when it
+    // needs to list pairable devices. Phase 5 — Plan 05-10 / Rule 3.
+    '/kiosk',
+    '/kiosk/setup',
   ];
 
   // Verifica se a rota atual é pública
   const isPublicRoute = publicRoutes.some(
-    route => pathname === route || pathname?.startsWith('/reset-password')
+    route =>
+      pathname === route ||
+      pathname?.startsWith('/reset-password') ||
+      pathname?.startsWith('/kiosk')
   );
 
   // Se houve erro ao buscar usuário (token inválido/expirado), coordena com refresh
