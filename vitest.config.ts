@@ -11,7 +11,14 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'tests/', '**/*.test.ts', '**/*.test.tsx'],
     },
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    include: [
+      'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
+      'src/**/*.spec.ts',
+      'src/**/*.spec.tsx',
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+    ],
     exclude: ['node_modules', 'dist', '.next', 'build'],
     alias: {
       '@': path.resolve(__dirname, './src'),
