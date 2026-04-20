@@ -34,6 +34,10 @@ import { usePrintQueue } from '@/core/print-queue';
 import { useSelection } from '@/core/selection/hooks/use-selection';
 import { formatQuantity, formatUnitOfMeasure } from '@/helpers/formatters';
 import { useCareOptions } from '@/hooks/stock';
+import {
+  useVariantItemsInfinite,
+  useVariantItemsStats,
+} from '@/hooks/stock/use-items';
 import { useProductCareInstructions } from '@/hooks/stock/use-product-care-instructions';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -166,20 +170,16 @@ export function ProductViewer({
     queryFn: async () => {
       if (!variants || variants.length === 0) return {};
 
+      const results = await Promise.all(
+        variants.map(v => itemsService.getVariantItemsStats(v.id))
+      );
       const stats: Record<string, { count: number; totalQty: number }> = {};
-      for (const variant of variants) {
-        const itemsResponse = await itemsService.listItems(variant.id);
-        const inStockItems = itemsResponse.items.filter(
-          item => item.currentQuantity > 0
-        );
+      variants.forEach((variant, idx) => {
         stats[variant.id] = {
-          count: inStockItems.length,
-          totalQty: inStockItems.reduce(
-            (sum, item) => sum + item.currentQuantity,
-            0
-          ),
+          count: results[idx].inStockItems,
+          totalQty: results[idx].inStockQuantity,
         };
-      }
+      });
       return stats;
     },
     enabled: variants.length > 0,
@@ -187,22 +187,36 @@ export function ProductViewer({
   });
 
   // ============================================================================
-  // DATA FETCHING - ITEMS
+  // DATA FETCHING - ITEMS (infinite scroll)
   // ============================================================================
 
   const {
-    data: itemsData,
+    items: loadedItems,
     isLoading: isLoadingItems,
     error: itemsError,
-  } = useQuery({
-    queryKey: ['items', 'by-variant', selectedVariant?.id],
-    queryFn: async () => {
-      if (!selectedVariant?.id) return { items: [] };
-      const response = await itemsService.listItems(selectedVariant.id);
-      return response;
-    },
-    enabled: !!selectedVariant?.id,
-  });
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useVariantItemsInfinite(selectedVariant?.id ?? '', !!selectedVariant);
+
+  const { data: selectedVariantStats } = useVariantItemsStats(
+    selectedVariant?.id ?? '',
+    !!selectedVariant
+  );
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) fetchNextPage();
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, loadedItems.length]);
 
   // ============================================================================
   // DATA FETCHING - EXIT REASONS (for exited items badges)
@@ -210,10 +224,10 @@ export function ProductViewer({
 
   const exitedItemIds = useMemo(
     () =>
-      (itemsData?.items || [])
+      loadedItems
         .filter((item: Item) => item.currentQuantity === 0)
         .map((item: Item) => item.id),
-    [itemsData]
+    [loadedItems]
   );
 
   const { data: fetchedExitReasons } = useQuery({
@@ -256,7 +270,7 @@ export function ProductViewer({
   // ITEM SELECTION
   // ============================================================================
 
-  const items = useMemo(() => itemsData?.items || [], [itemsData]);
+  const items = loadedItems;
   // Apenas itens com qty > 0 são selecionáveis
   const itemIds = useMemo(
     () =>
@@ -347,14 +361,13 @@ export function ProductViewer({
     });
   }, [items, itemsSearch, hideExitedItems]);
 
-  const totalItemsQuantity = useMemo(
-    () =>
-      filteredItems.reduce(
-        (sum: number, item: Item) => sum + item.currentQuantity,
-        0
-      ),
-    [filteredItems]
-  );
+  const totalItemsQuantity = hideExitedItems
+    ? (selectedVariantStats?.inStockQuantity ?? 0)
+    : (selectedVariantStats?.totalQuantity ?? 0);
+
+  const totalItemsCount = hideExitedItems
+    ? (selectedVariantStats?.inStockItems ?? 0)
+    : (selectedVariantStats?.totalItems ?? 0);
 
   const unitOfMeasure = formatUnitOfMeasure(
     product.template?.unitOfMeasure || 'UNITS'
@@ -474,6 +487,12 @@ export function ProductViewer({
           queryKey: ['items', 'by-variant', selectedVariant?.id],
         });
         await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'infinite', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'stats', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
           queryKey: ['items', 'stats-by-variants', product.id],
         });
         await queryClient.invalidateQueries({ queryKey: ['item-history'] });
@@ -519,6 +538,12 @@ export function ProductViewer({
         // Invalidate queries to refresh data
         await queryClient.invalidateQueries({
           queryKey: ['items', 'by-variant', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'infinite', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'stats', selectedVariant?.id],
         });
         await queryClient.invalidateQueries({
           queryKey: ['items', 'stats-by-variants', product.id],
@@ -605,23 +630,41 @@ export function ProductViewer({
     );
   }, [printActions, selectedItems, selectedVariant, product]);
 
-  // Print all filtered items
-  const handlePrintAllItems = useCallback(() => {
-    if (filteredItems.length === 0) {
+  // Print all items (fetch every page, not just loaded)
+  const handlePrintAllItems = useCallback(async () => {
+    if (!selectedVariant) {
+      toast.warning('Nenhuma variante selecionada');
+      return;
+    }
+    const allItems: Item[] = [];
+    let page = 1;
+    while (true) {
+      const response = await itemsService.listItems(selectedVariant.id, {
+        page,
+        limit: 100,
+      });
+      allItems.push(...response.items);
+      if (!response.meta || response.meta.page >= response.meta.pages) break;
+      page++;
+    }
+    const printable = hideExitedItems
+      ? allItems.filter(i => i.currentQuantity > 0)
+      : allItems;
+    if (printable.length === 0) {
       toast.warning('Nenhum item para imprimir');
       return;
     }
     printActions.addToQueue(
-      filteredItems.map(item => ({
+      printable.map(item => ({
         item,
         variant: selectedVariant || undefined,
         product: product || undefined,
       }))
     );
     toast.success(
-      `${filteredItems.length} item(s) adicionado(s) à fila de impressão`
+      `${printable.length} item(s) adicionado(s) à fila de impressão`
     );
-  }, [printActions, filteredItems, selectedVariant, product]);
+  }, [printActions, selectedVariant, product, hideExitedItems]);
 
   // ============================================================================
   // RENDER
@@ -979,7 +1022,10 @@ export function ProductViewer({
                           </Button>
                         )}
                         <span className="text-xs text-muted-foreground">
-                          {filteredItems.length} itens •{' '}
+                          {itemsSearch.trim()
+                            ? `${filteredItems.length} de ${totalItemsCount}`
+                            : `${totalItemsCount}`}{' '}
+                          {totalItemsCount === 1 ? 'item' : 'itens'} •{' '}
                           {formatQuantity(totalItemsQuantity)} {unitOfMeasure}
                         </span>
                       </div>
@@ -1040,20 +1086,30 @@ export function ProductViewer({
                         </p>
                       </div>
                     ) : (
-                      filteredItems.map((item: Item) => (
-                        <ItemRow
-                          key={item.id}
-                          item={item}
-                          unitLabel={unitOfMeasure}
-                          itemAttributes={product.template?.itemAttributes}
-                          isSelected={selectionActions.isSelected(item.id)}
-                          onClick={e => handleItemClick(item, e)}
-                          onDoubleClick={() => handleItemDoubleClick(item)}
-                          onPrint={handlePrintItem}
-                          onExit={handleExitItem}
-                          lastExitReasonCode={exitReasonMap[item.id]}
-                        />
-                      ))
+                      <>
+                        {filteredItems.map((item: Item) => (
+                          <ItemRow
+                            key={item.id}
+                            item={item}
+                            unitLabel={unitOfMeasure}
+                            itemAttributes={product.template?.itemAttributes}
+                            isSelected={selectionActions.isSelected(item.id)}
+                            onClick={e => handleItemClick(item, e)}
+                            onDoubleClick={() => handleItemDoubleClick(item)}
+                            onPrint={handlePrintItem}
+                            onExit={handleExitItem}
+                            lastExitReasonCode={exitReasonMap[item.id]}
+                          />
+                        ))}
+                        {hasNextPage && (
+                          <div
+                            ref={sentinelRef}
+                            className="h-8 flex items-center justify-center text-xs text-muted-foreground"
+                          >
+                            {isFetchingNextPage ? 'Carregando...' : ''}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
 

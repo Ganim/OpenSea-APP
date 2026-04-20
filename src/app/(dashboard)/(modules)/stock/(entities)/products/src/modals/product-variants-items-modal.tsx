@@ -42,7 +42,11 @@ import {
   Search,
   X,
 } from 'lucide-react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useVariantItemsInfinite,
+  useVariantItemsStats,
+} from '@/hooks/stock/use-items';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -86,6 +90,7 @@ export function ProductVariantsItemsModal({
     Record<string, string>
   >({});
 
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const previousProductIdRef = useRef<string | null>(null);
   if (product?.id !== previousProductIdRef.current) {
     previousProductIdRef.current = product?.id ?? null;
@@ -116,42 +121,55 @@ export function ProductVariantsItemsModal({
     queryFn: async () => {
       if (!variantsData?.variants?.length) return {};
       const stats: Record<string, { count: number; totalQty: number }> = {};
-      for (const variant of variantsData.variants) {
-        const itemsResponse = await itemsService.listItems(variant.id);
-        const inStockItems = itemsResponse.items.filter(
-          item => item.currentQuantity > 0
-        );
+      const results = await Promise.all(
+        variantsData.variants.map(v => itemsService.getVariantItemsStats(v.id))
+      );
+      variantsData.variants.forEach((variant, idx) => {
         stats[variant.id] = {
-          count: inStockItems.length,
-          totalQty: inStockItems.reduce(
-            (sum, item) => sum + item.currentQuantity,
-            0
-          ),
+          count: results[idx].inStockItems,
+          totalQty: results[idx].inStockQuantity,
         };
-      }
+      });
       return stats;
     },
     enabled: !!variantsData?.variants?.length && open,
   });
 
   const {
-    data: itemsData,
+    items: loadedItems,
     isLoading: isLoadingItems,
     error: itemsError,
-  } = useQuery({
-    queryKey: ['items', 'by-variant', selectedVariant?.id],
-    queryFn: async () => {
-      if (!selectedVariant?.id) return { items: [] };
-      return itemsService.listItems(selectedVariant.id);
-    },
-    enabled: !!selectedVariant?.id && open,
-  });
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useVariantItemsInfinite(
+    selectedVariant?.id ?? '',
+    !!selectedVariant && open
+  );
+
+  const { data: selectedVariantStats } = useVariantItemsStats(
+    selectedVariant?.id ?? '',
+    !!selectedVariant && open
+  );
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) fetchNextPage();
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, loadedItems.length]);
 
   // ==========================================================================
   // EXIT REASONS
   // ==========================================================================
 
-  const items = useMemo(() => itemsData?.items || [], [itemsData]);
+  const items = loadedItems;
 
   const exitedItemIds = useMemo(
     () =>
@@ -273,7 +291,7 @@ export function ProductVariantsItemsModal({
     [printActions, selectedVariant, product]
   );
 
-  const handlePrintListing = useCallback(() => {
+  const handlePrintListing = useCallback(async () => {
     if (!selectedVariant || !product) return;
 
     const tplName = product.template?.name || 'Template';
@@ -284,7 +302,20 @@ export function ProductVariantsItemsModal({
     const patternLabel =
       PATTERN_LABELS[selectedVariant.pattern as Pattern] || '';
 
-    const inStockItems = items.filter((i: Item) => i.currentQuantity > 0);
+    // Fetch ALL items across all pages (print needs complete list, not just loaded).
+    const allItems: Item[] = [];
+    let page = 1;
+    while (true) {
+      const response = await itemsService.listItems(selectedVariant.id, {
+        page,
+        limit: 100,
+      });
+      allItems.push(...response.items);
+      if (!response.meta || response.meta.page >= response.meta.pages) break;
+      page++;
+    }
+
+    const inStockItems = allItems.filter((i: Item) => i.currentQuantity > 0);
     const totalQty =
       Math.round(
         inStockItems.reduce((sum, i) => sum + i.currentQuantity, 0) * 1000
@@ -359,7 +390,7 @@ export function ProductVariantsItemsModal({
       footerValueColumn: 'qty',
       footerRight: `${tplName} ${product.name} — ${selectedVariant.name}`,
     });
-  }, [selectedVariant, product, items]);
+  }, [selectedVariant, product]);
 
   const handleItemExit = useCallback((item: Item) => {
     setExitItem(item);
@@ -393,6 +424,12 @@ export function ProductVariantsItemsModal({
 
         await queryClient.invalidateQueries({
           queryKey: ['items', 'by-variant', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'infinite', selectedVariant?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['items', 'variant', 'stats', selectedVariant?.id],
         });
         await queryClient.invalidateQueries({
           queryKey: ['items', 'stats-by-variants', product?.id],
@@ -587,7 +624,9 @@ export function ProductVariantsItemsModal({
                   variant={selectedVariant}
                   unitLabel={unitOfMeasure}
                   totalQuantity={
-                    variantStatsMap?.[selectedVariant.id]?.totalQty || 0
+                    selectedVariantStats?.inStockQuantity ??
+                    variantStatsMap?.[selectedVariant.id]?.totalQty ??
+                    0
                   }
                   onEdit={() => {
                     setEditingVariant(selectedVariant);
@@ -633,8 +672,21 @@ export function ProductVariantsItemsModal({
                       Itens em estoque
                     </span>
                     <span className="text-[10px] text-muted-foreground">
-                      {filteredItems.length}{' '}
-                      {filteredItems.length === 1 ? 'item' : 'itens'}
+                      {itemsSearch.trim()
+                        ? `${filteredItems.length} de ${hideExitedItems ? (selectedVariantStats?.inStockItems ?? 0) : (selectedVariantStats?.totalItems ?? 0)} ${
+                            (hideExitedItems
+                              ? (selectedVariantStats?.inStockItems ?? 0)
+                              : (selectedVariantStats?.totalItems ?? 0)) === 1
+                              ? 'item'
+                              : 'itens'
+                          }`
+                        : `${hideExitedItems ? (selectedVariantStats?.inStockItems ?? 0) : (selectedVariantStats?.totalItems ?? 0)} ${
+                            (hideExitedItems
+                              ? (selectedVariantStats?.inStockItems ?? 0)
+                              : (selectedVariantStats?.totalItems ?? 0)) === 1
+                              ? 'item'
+                              : 'itens'
+                          }`}
                     </span>
                   </div>
                 </div>
@@ -663,17 +715,27 @@ export function ProductVariantsItemsModal({
                       </p>
                     </div>
                   ) : (
-                    filteredItems.map((item: Item) => (
-                      <ItemRow
-                        key={item.id}
-                        item={item}
-                        unitLabel={unitOfMeasure}
-                        onDoubleClick={() => handleItemDoubleClick(item)}
-                        onPrint={handlePrintItem}
-                        onExit={handleItemExit}
-                        lastExitReasonCode={exitReasonMap[item.id]}
-                      />
-                    ))
+                    <>
+                      {filteredItems.map((item: Item) => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          unitLabel={unitOfMeasure}
+                          onDoubleClick={() => handleItemDoubleClick(item)}
+                          onPrint={handlePrintItem}
+                          onExit={handleItemExit}
+                          lastExitReasonCode={exitReasonMap[item.id]}
+                        />
+                      ))}
+                      {hasNextPage && (
+                        <div
+                          ref={sentinelRef}
+                          className="h-8 flex items-center justify-center text-[11px] text-muted-foreground"
+                        >
+                          {isFetchingNextPage ? 'Carregando...' : ''}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 

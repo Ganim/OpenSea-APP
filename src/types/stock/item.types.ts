@@ -275,6 +275,12 @@ export interface LocationHistoryResponse {
 
 export interface ItemsResponse {
   items: Item[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }
 
 export interface ItemResponse {
@@ -364,8 +370,7 @@ export interface ItemMovementExtended extends ItemMovement {
   approver?: { id: string; name: string };
 }
 
-export interface RegisterItemEntryExtendedRequest
-  extends RegisterItemEntryRequest {
+export interface RegisterItemEntryExtendedRequest extends RegisterItemEntryRequest {
   unitCost?: number;
   purchaseOrderId?: string;
   generateLabel?: boolean;
@@ -377,8 +382,7 @@ export interface RegisterItemEntryExtendedRequest
   invoiceDescription?: string;
 }
 
-export interface RegisterItemExitExtendedRequest
-  extends RegisterItemExitRequest {
+export interface RegisterItemExitExtendedRequest extends RegisterItemExitRequest {
   unitPrice?: number;
   volumeId?: string;
   requiresApproval?: boolean;

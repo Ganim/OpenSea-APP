@@ -21,13 +21,38 @@ import type {
   TransferItemRequest,
 } from '@/types/stock';
 
+export interface VariantItemsStatsResponse {
+  totalItems: number;
+  inStockItems: number;
+  totalQuantity: number;
+  inStockQuantity: number;
+}
+
 export const itemsService = {
   // GET /v1/items/by-variant/:variantId (preferred) or /v1/items (all items)
-  async listItems(variantId?: string): Promise<ItemsResponse> {
-    const url = variantId
+  async listItems(
+    variantId?: string,
+    options?: { page?: number; limit?: number }
+  ): Promise<ItemsResponse> {
+    const baseUrl = variantId
       ? API_ENDPOINTS.ITEMS.BY_VARIANT(variantId)
       : API_ENDPOINTS.ITEMS.LIST;
+
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
     return apiClient.get<ItemsResponse>(url);
+  },
+
+  // GET /v1/items/by-variant/:variantId/stats — aggregated stats (count + sum)
+  async getVariantItemsStats(
+    variantId: string
+  ): Promise<VariantItemsStatsResponse> {
+    return apiClient.get<VariantItemsStatsResponse>(
+      API_ENDPOINTS.ITEMS.BY_VARIANT_STATS(variantId)
+    );
   },
 
   // GET /v1/items/by-product/:productId

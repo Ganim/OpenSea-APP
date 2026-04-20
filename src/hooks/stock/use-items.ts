@@ -42,12 +42,57 @@ export function useItemsPaginated(query?: ItemsQuery) {
   });
 }
 
-// GET /v1/items?variantId=:variantId - Lista itens de uma variante
+// GET /v1/items/by-variant/:variantId - Lista itens de uma variante (legacy, não pagina)
 export function useVariantItems(variantId: string) {
   return useQuery({
     queryKey: ['items', 'variant', variantId],
     queryFn: () => itemsService.listItems(variantId),
     enabled: !!variantId,
+  });
+}
+
+// GET /v1/items/by-variant/:variantId - Infinite scroll dos itens de uma variante
+const VARIANT_ITEMS_PAGE_SIZE = 50;
+
+export function useVariantItemsInfinite(variantId: string, enabled = true) {
+  const result = useInfiniteQuery({
+    queryKey: ['items', 'variant', 'infinite', variantId],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await itemsService.listItems(variantId, {
+        page: pageParam,
+        limit: VARIANT_ITEMS_PAGE_SIZE,
+      });
+      return response;
+    },
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const meta = lastPage.meta;
+      if (meta && meta.page < meta.pages) {
+        return meta.page + 1;
+      }
+      return undefined;
+    },
+    enabled: enabled && !!variantId,
+    staleTime: 30_000,
+  });
+
+  const items = result.data?.pages.flatMap(p => p.items) ?? [];
+  const total = result.data?.pages[0]?.meta?.total ?? items.length;
+
+  return {
+    ...result,
+    items,
+    total,
+  };
+}
+
+// GET /v1/items/by-variant/:variantId/stats - Totais agregados da variante
+export function useVariantItemsStats(variantId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['items', 'variant', 'stats', variantId],
+    queryFn: () => itemsService.getVariantItemsStats(variantId),
+    enabled: enabled && !!variantId,
+    staleTime: 30_000,
   });
 }
 

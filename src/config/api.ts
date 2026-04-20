@@ -124,6 +124,8 @@ export const API_ENDPOINTS = {
     GET: (itemId: string) => `/v1/items/${itemId}`,
     DELETE: (itemId: string) => `/v1/items/${itemId}`,
     BY_VARIANT: (variantId: string) => `/v1/items/by-variant/${variantId}`,
+    BY_VARIANT_STATS: (variantId: string) =>
+      `/v1/items/by-variant/${variantId}/stats`,
     BY_PRODUCT: (productId: string) => `/v1/items/by-product/${productId}`,
     ENTRY: '/v1/items/entry',
     EXIT: '/v1/items/exit',
