@@ -67,6 +67,24 @@ import { toast } from 'sonner';
 import { employeesApi, getStatusLabel } from '../../src';
 import { DependantsSection } from '../../src/components/dependants-section';
 import { EmployeeDocumentsChecklist } from '../../src/components/employee-documents-checklist';
+import { FaceEnrollmentModal } from '@/components/hr/biometria/FaceEnrollmentModal';
+import { SetPunchPinForm } from '@/components/hr/biometria/SetPunchPinForm';
+import { UnlockPinButton } from '@/components/hr/biometria/UnlockPinButton';
+import {
+  useListFaceEnrollments,
+  useRemoveFaceEnrollments,
+} from '@/hooks/hr/use-face-enrollments';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { CheckCircle2, ShieldCheck, UserX } from 'lucide-react';
 
 export default function EmployeeEditPage() {
   const params = useParams();
@@ -75,6 +93,25 @@ export default function EmployeeEditPage() {
   const employeeId = params.id as string;
   const { hasPermission } = usePermissions();
   const canDelete = hasPermission(HR_PERMISSIONS.EMPLOYEES.DELETE);
+
+  // Biometria tab permissions (Phase 05 plan 05-08).
+  // Permissions hide UI entirely when missing (CLAUDE.md §6 — never
+  // render disabled; just don't render).
+  const canAccessBiometria = hasPermission(
+    HR_PERMISSIONS.FACE_ENROLLMENT.ACCESS
+  );
+  const canEnrollBiometria = hasPermission(
+    HR_PERMISSIONS.FACE_ENROLLMENT.REGISTER
+  );
+  const canRemoveBiometria = hasPermission(
+    HR_PERMISSIONS.FACE_ENROLLMENT.REMOVE
+  );
+  const canAdminPunchPin = hasPermission(HR_PERMISSIONS.PUNCH_PIN.ADMIN);
+
+  // Biometria local state
+  const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
+  const [isRemoveBiometriaOpen, setIsRemoveBiometriaOpen] = useState(false);
+  const [isRemoveVerifyPinOpen, setIsRemoveVerifyPinOpen] = useState(false);
 
   // Tab state
   const [activeTab, setActiveTab] = useState('personal');
@@ -121,6 +158,14 @@ export default function EmployeeEditPage() {
       return employeesApi.get(employeeId);
     },
   });
+
+  // Biometria queries / mutations — only enabled when tab is visible and
+  // the user has access permission (avoids extra request for non-admins).
+  const enrollmentsQuery = useListFaceEnrollments(
+    employeeId,
+    canAccessBiometria && activeTab === 'biometria'
+  );
+  const removeEnrollmentsMutation = useRemoveFaceEnrollments(employeeId);
 
   // Linked user data
   const { data: linkedUser } = useQuery({
@@ -711,9 +756,14 @@ export default function EmployeeEditPage() {
           <>
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4 h-12 mb-4">
+              <TabsList
+                className={`grid w-full ${canAccessBiometria ? 'grid-cols-5' : 'grid-cols-4'} h-12 mb-4`}
+              >
                 <TabsTrigger value="personal">Dados Pessoais</TabsTrigger>
                 <TabsTrigger value="dependants">Dependentes</TabsTrigger>
+                {canAccessBiometria && (
+                  <TabsTrigger value="biometria">Biometria</TabsTrigger>
+                )}
                 <TabsTrigger value="documents">Documentos</TabsTrigger>
                 <TabsTrigger value="linked-user">Usuário Vinculado</TabsTrigger>
               </TabsList>
@@ -1093,6 +1143,198 @@ export default function EmployeeEditPage() {
               <TabsContent value="dependants" className="flex-col gap-6 w-full">
                 <DependantsSection employeeId={employeeId} />
               </TabsContent>
+
+              {/* ============================================================ */}
+              {/* TAB: Biometria (Phase 05 plan 05-08) */}
+              {/* ============================================================ */}
+              {canAccessBiometria && (
+                <TabsContent
+                  value="biometria"
+                  className="flex-col gap-6 w-full"
+                >
+                  <div className="flex flex-col gap-6">
+                    {/* Biometria facial */}
+                    <Card className="bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 overflow-hidden py-0">
+                      <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                        <ShieldCheck className="h-5 w-5 text-foreground" />
+                        <div className="flex-1">
+                          <h3 className="text-base font-semibold">
+                            Biometria facial
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Cadastro de 3 a 5 fotos em ângulos leves. Embeddings
+                            criptografados pelo servidor (AES-256).
+                          </p>
+                        </div>
+                      </div>
+                      <div className="border-b border-border" />
+                      <div className="p-4 space-y-4">
+                        {enrollmentsQuery.isLoading ? (
+                          <p className="text-sm text-muted-foreground">
+                            Carregando…
+                          </p>
+                        ) : enrollmentsQuery.isError ? (
+                          <p className="text-sm text-destructive">
+                            Não foi possível carregar a biometria.{' '}
+                            <button
+                              type="button"
+                              className="underline"
+                              onClick={() => enrollmentsQuery.refetch()}
+                            >
+                              Tentar novamente
+                            </button>
+                          </p>
+                        ) : (enrollmentsQuery.data?.count ?? 0) === 0 ? (
+                          <div className="flex flex-col items-start gap-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <UserX
+                                className="h-4 w-4 text-muted-foreground"
+                                aria-hidden="true"
+                              />
+                              <span className="font-medium">
+                                Nenhuma biometria cadastrada
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Cadastre a biometria facial deste funcionário para
+                              habilitar o reconhecimento no kiosk.
+                            </p>
+                            {canEnrollBiometria && (
+                              <Button
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => setIsEnrollmentModalOpen(true)}
+                              >
+                                Cadastrar biometria
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2 text-sm">
+                              <CheckCircle2
+                                className="h-5 w-5 text-green-600 dark:text-green-400"
+                                aria-hidden="true"
+                              />
+                              <span className="font-medium">
+                                {enrollmentsQuery.data?.count ?? 0} fotos
+                                cadastradas
+                              </span>
+                              {enrollmentsQuery.data?.items?.[0]
+                                ?.capturedAt && (
+                                <span className="text-muted-foreground">
+                                  {' '}
+                                  · cadastrado em{' '}
+                                  {new Date(
+                                    enrollmentsQuery.data.items[0].capturedAt
+                                  ).toLocaleDateString('pt-BR')}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {canEnrollBiometria && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setIsEnrollmentModalOpen(true)}
+                                >
+                                  Refazer biometria
+                                </Button>
+                              )}
+                              {canRemoveBiometria && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => setIsRemoveBiometriaOpen(true)}
+                                >
+                                  Remover biometria
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    {/* PIN de ponto */}
+                    {canAdminPunchPin && (
+                      <Card className="bg-white/95 dark:bg-white/5 border-gray-200 dark:border-white/10 overflow-hidden py-0">
+                        <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+                          <Shield className="h-5 w-5 text-foreground" />
+                          <div className="flex-1">
+                            <h3 className="text-base font-semibold">
+                              PIN de ponto
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              PIN de 6 dígitos usado como fallback quando o
+                              crachá estiver indisponível.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="border-b border-border" />
+                        <div className="p-4 space-y-4">
+                          <SetPunchPinForm
+                            employeeId={employeeId}
+                            employeeName={employee.fullName}
+                          />
+                          <div className="pt-2 border-t border-border">
+                            <UnlockPinButton
+                              employeeId={employeeId}
+                              employeeName={employee.fullName}
+                            />
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+                  </div>
+
+                  {/* Modal de enrollment */}
+                  <FaceEnrollmentModal
+                    isOpen={isEnrollmentModalOpen}
+                    onClose={() => setIsEnrollmentModalOpen(false)}
+                    employeeId={employeeId}
+                    employeeName={employee.fullName}
+                  />
+
+                  {/* Remover biometria: AlertDialog + VerifyActionPinModal */}
+                  <AlertDialog
+                    open={isRemoveBiometriaOpen}
+                    onOpenChange={setIsRemoveBiometriaOpen}
+                  >
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remover biometria</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja remover a biometria de{' '}
+                          {employee.fullName}? O funcionário não conseguirá
+                          bater ponto no kiosk até refazer o cadastro.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            setIsRemoveBiometriaOpen(false);
+                            setIsRemoveVerifyPinOpen(true);
+                          }}
+                        >
+                          Remover
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <VerifyActionPinModal
+                    isOpen={isRemoveVerifyPinOpen}
+                    onClose={() => setIsRemoveVerifyPinOpen(false)}
+                    onSuccess={async () => {
+                      await removeEnrollmentsMutation.mutateAsync();
+                    }}
+                    title="Confirmar remoção de biometria"
+                    description={`Digite seu PIN de ação para remover a biometria de ${employee.fullName}.`}
+                  />
+                </TabsContent>
+              )}
 
               {/* ============================================================ */}
               {/* TAB: Documentos */}
