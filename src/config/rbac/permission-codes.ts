@@ -478,6 +478,23 @@ export const HR_PERMISSIONS = {
     'admin'
   ),
   CONTRACTS: perm('hr', 'contracts', 'access', 'register', 'modify', 'remove'),
+  /**
+   * Phase 06 — Compliance Portaria 671 (Plan 06-01).
+   *
+   * Multi-level codes (backend usa 3- e 4-níveis por action).
+   * Declarados manualmente porque o helper `perm` só emite 3-níveis.
+   * Admin-only por design (D-08): funcionários comuns não veem /hr/compliance.
+   */
+  COMPLIANCE: {
+    ACCESS: 'hr.compliance.access',
+    AFD_GENERATE: 'hr.compliance.afd.generate',
+    AFDT_GENERATE: 'hr.compliance.afdt.generate',
+    FOLHA_ESPELHO_GENERATE: 'hr.compliance.folha-espelho.generate',
+    S1200_SUBMIT: 'hr.compliance.s1200.submit',
+    ARTIFACT_DOWNLOAD: 'hr.compliance.artifact.download',
+    CONFIG_MODIFY: 'hr.compliance.config.modify',
+    ADMIN: 'hr.compliance.admin',
+  },
 } as const;
 
 // =============================================================================

@@ -573,6 +573,22 @@ export const HR_PERMISSIONS = {
   PUNCH_PIN: {
     ADMIN: 'hr.punch-devices.admin',
   },
+
+  /**
+   * Permissões de Compliance Portaria 671 (Phase 06).
+   * Admin-only por design (D-08). Declaradas multi-nível — proxy
+   * aponta direto para `HR_CODES.COMPLIANCE.*`.
+   */
+  COMPLIANCE: {
+    ACCESS: HR_CODES.COMPLIANCE.ACCESS,
+    AFD_GENERATE: HR_CODES.COMPLIANCE.AFD_GENERATE,
+    AFDT_GENERATE: HR_CODES.COMPLIANCE.AFDT_GENERATE,
+    FOLHA_ESPELHO_GENERATE: HR_CODES.COMPLIANCE.FOLHA_ESPELHO_GENERATE,
+    S1200_SUBMIT: HR_CODES.COMPLIANCE.S1200_SUBMIT,
+    ARTIFACT_DOWNLOAD: HR_CODES.COMPLIANCE.ARTIFACT_DOWNLOAD,
+    CONFIG_MODIFY: HR_CODES.COMPLIANCE.CONFIG_MODIFY,
+    ADMIN: HR_CODES.COMPLIANCE.ADMIN,
+  },
 } as const;
 
 /* ===========================================

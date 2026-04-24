@@ -507,6 +507,17 @@ const sections: {
         permission: HR_PERMISSIONS.CONFIG.VIEW,
       },
       {
+        id: 'compliance',
+        title: 'Compliance — Portaria 671',
+        description:
+          'AFD, AFDT, recibos de ponto, folhas espelho e eSocial S-1200',
+        icon: ShieldCheck,
+        href: '/hr/compliance',
+        gradient: 'from-blue-500 to-indigo-600',
+        hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
+        permission: HR_PERMISSIONS.COMPLIANCE.ACCESS,
+      },
+      {
         id: 'delegations',
         title: 'Delegações de Aprovação',
         description: 'Delegue aprovações temporariamente a outros gestores',

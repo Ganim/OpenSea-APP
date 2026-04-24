@@ -304,31 +304,32 @@ The dashboard is the internal hub. All navigation happens FROM here. Uses the Pa
 
 ## 4. Dashboard Section Visibility by Skills
 
-| Section | Required skill | Fallback if disabled |
-|---|---|---|
-| CRM (Clientes, Contatos, Pipeline, Inbox, etc.) | `sales.crm` (core — always on with SALES) | Always visible |
-| Automações | `sales.automations` | Hidden |
-| Formulários | `sales.forms` | Hidden |
-| Propostas | `sales.proposals` | Hidden |
-| Tabelas de Preço | `sales.pricing` | Hidden |
-| Campanhas | `sales.pricing.campaigns` | Hidden |
-| Cupons | `sales.pricing.coupons` | Hidden |
-| Combos/Kits | `sales.pricing.combos` | Hidden |
-| Tax | `sales.pricing.tax` | Hidden |
-| Pedidos, Orçamentos, Devoluções | `sales.orders` | Hidden |
-| Comissões | `sales.orders.commissions` | Hidden |
-| PDV | `sales.pos` | Hidden |
-| Caixa | `sales.cashier` | Hidden |
-| Licitações | `sales.bids` | Hidden |
-| Marketplaces | `sales.marketplaces` | Hidden |
-| Catálogos | `sales.catalogs` | Hidden |
-| Content AI, Mockups, Email Mkt | `sales.catalogs.content-ai` etc. | Hidden |
-| Analytics (básico) | `sales.analytics` | Hidden |
-| Analytics (avançado) | `sales.analytics` + `sales.ai` | Show basic only |
-| AI Config | `sales.ai` | Hidden |
-| Canais (WhatsApp, etc.) | `sales.inbox` | Hidden |
+| Section                                         | Required skill                            | Fallback if disabled |
+| ----------------------------------------------- | ----------------------------------------- | -------------------- |
+| CRM (Clientes, Contatos, Pipeline, Inbox, etc.) | `sales.crm` (core — always on with SALES) | Always visible       |
+| Automações                                      | `sales.automations`                       | Hidden               |
+| Formulários                                     | `sales.forms`                             | Hidden               |
+| Propostas                                       | `sales.proposals`                         | Hidden               |
+| Tabelas de Preço                                | `sales.pricing`                           | Hidden               |
+| Campanhas                                       | `sales.pricing.campaigns`                 | Hidden               |
+| Cupons                                          | `sales.pricing.coupons`                   | Hidden               |
+| Combos/Kits                                     | `sales.pricing.combos`                    | Hidden               |
+| Tax                                             | `sales.pricing.tax`                       | Hidden               |
+| Pedidos, Orçamentos, Devoluções                 | `sales.orders`                            | Hidden               |
+| Comissões                                       | `sales.orders.commissions`                | Hidden               |
+| PDV                                             | `sales.pos`                               | Hidden               |
+| Caixa                                           | `sales.cashier`                           | Hidden               |
+| Licitações                                      | `sales.bids`                              | Hidden               |
+| Marketplaces                                    | `sales.marketplaces`                      | Hidden               |
+| Catálogos                                       | `sales.catalogs`                          | Hidden               |
+| Content AI, Mockups, Email Mkt                  | `sales.catalogs.content-ai` etc.          | Hidden               |
+| Analytics (básico)                              | `sales.analytics`                         | Hidden               |
+| Analytics (avançado)                            | `sales.analytics` + `sales.ai`            | Show basic only      |
+| AI Config                                       | `sales.ai`                                | Hidden               |
+| Canais (WhatsApp, etc.)                         | `sales.inbox`                             | Hidden               |
 
 **Implementation pattern:**
+
 ```typescript
 const { hasFeatureFlag } = useFeatureFlags();
 
@@ -391,3 +392,63 @@ Order detail → links to:
   ├── Marketplace order (se veio de marketplace) → /sales/marketplaces/[connId]/orders
   └── Deliveries, Payments, Returns (inline sections)
 ```
+
+---
+
+# HR Module — Compliance (Portaria MTP 671/2021)
+
+**Date:** 2026-04-23
+**Status:** Approved (Plan 06-06)
+**Phase:** 06 — compliance-portaria-671
+
+### /hr/compliance dashboard
+
+Dashboard hub do módulo Compliance com 5 tabs de artefatos legais:
+
+- Permission gate: requer `hr.compliance.access` (admin-only por design, D-08).
+- Infinite scroll com filtros (tipo, competência, janela de período, funcionário).
+- 5 tabs: AFD / AFDT / Recibos / Folhas Espelho / eSocial S-1200.
+- Botão "Baixar" por linha abre URL presigned 15min (window.open) — audit log
+  `COMPLIANCE_ARTIFACT_DOWNLOADED` registrado no backend.
+
+### Sub-rotas
+
+```
+/hr/compliance/afd              → Gerador AFD (oficial Portaria 671)
+/hr/compliance/afdt             → Gerador AFDT (artefato proprietário — banner D-05 obrigatório)
+/hr/compliance/folhas-espelho   → Individual + bulk por departamento (Socket.IO progress)
+/hr/compliance/esocial-s1200    → Submissão eventos S-1200 com PIN obrigatório
+/hr/compliance/esocial-rubricas → Configuração mapeamento CLT → codRubr (HE_50/HE_100/DSR obrigatórios)
+/hr/compliance/esocial-config   → Config eSocial incluindo campo INPI (REP-P) — D-06
+```
+
+### Permission matrix
+
+| Rota                              | Permissão                              |
+| --------------------------------- | -------------------------------------- |
+| `/hr/compliance` (dashboard)      | `hr.compliance.access`                 |
+| `/hr/compliance/afd`              | `hr.compliance.afd.generate`           |
+| `/hr/compliance/afdt`             | `hr.compliance.afdt.generate`          |
+| `/hr/compliance/folhas-espelho`   | `hr.compliance.folha-espelho.generate` |
+| `/hr/compliance/esocial-s1200`    | `hr.compliance.s1200.submit` (+ PIN)   |
+| `/hr/compliance/esocial-rubricas` | `hr.compliance.config.modify`          |
+| `/hr/compliance/esocial-config`   | `hr.compliance.config.modify`          |
+| Download button em cada artefato  | `hr.compliance.artifact.download`      |
+
+### Entry points
+
+- Card "Compliance — Portaria 671" em `/hr` (seção "Obrigações e Configurações"),
+  ao lado de "Relatórios" e "eSocial".
+
+### Realtime
+
+- Folhas espelho em lote: Socket.IO `compliance.folha_espelho.progress` e
+  `compliance.folha_espelho.completed` em room `tenant:{id}:hr`.
+- Hook: `useComplianceBulkProgress(bulkJobId)`.
+
+### Sensitive operations
+
+- Submissão S-1200 ao eSocial → `VerifyActionPinModal` obrigatório (operação
+  regulatória + audit log `ESOCIAL_SUBMIT`).
+- Edição `EsocialConfig.inpiNumber` → audit log `ESOCIAL_CONFIG_UPDATED` com
+  `{ inpiChanged: boolean }` (valor do INPI nunca é logado).

@@ -38,3 +38,4 @@ export * from './kanban.types';
 export * from './one-on-ones.types';
 export * from './biometria.types';
 export * from './crachas.types';
+export * from './compliance.types';
