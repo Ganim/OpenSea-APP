@@ -25,6 +25,13 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GridError } from '@/components/handlers/grid-error';
 import {
@@ -71,12 +78,14 @@ function RubricaCard({
   const [editing, setEditing] = useState(false);
   const [codRubr, setCodRubr] = useState(existing?.codRubr ?? '');
   const [ideTabRubr, setIdeTabRubr] = useState(existing?.ideTabRubr ?? '');
-  const [indApurIR, setIndApurIR] = useState(existing?.indApurIR ?? '0');
+  const [indApurIR, setIndApurIR] = useState<0 | 1>(
+    existing?.indApurIR === 1 ? 1 : 0
+  );
 
   const reset = () => {
     setCodRubr(existing?.codRubr ?? '');
     setIdeTabRubr(existing?.ideTabRubr ?? '');
-    setIndApurIR(existing?.indApurIR ?? '0');
+    setIndApurIR(existing?.indApurIR === 1 ? 1 : 0);
     setEditing(false);
   };
 
@@ -91,7 +100,7 @@ function RubricaCard({
         body: {
           codRubr: codRubr.trim(),
           ideTabRubr: ideTabRubr.trim(),
-          indApurIR: indApurIR.trim() || '0',
+          indApurIR,
         },
       });
       toast.success(`${label} salvo.`);
@@ -177,13 +186,18 @@ function RubricaCard({
               <Label htmlFor={`rub-${concept}-ir`} className="text-xs">
                 indApurIR
               </Label>
-              <Input
-                id={`rub-${concept}-ir`}
-                value={indApurIR}
-                onChange={e => setIndApurIR(e.target.value)}
-                placeholder="0, 1 ou 2"
-                maxLength={1}
-              />
+              <Select
+                value={String(indApurIR)}
+                onValueChange={v => setIndApurIR(v === '1' ? 1 : 0)}
+              >
+                <SelectTrigger id={`rub-${concept}-ir`}>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0 — Normal</SelectItem>
+                  <SelectItem value="1">1 — 13º salário</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">

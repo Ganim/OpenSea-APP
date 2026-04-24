@@ -140,7 +140,7 @@ export interface ComplianceRubricaMapDto {
   clrConcept: ComplianceRubricaConcept;
   codRubr: string;
   ideTabRubr: string;
-  indApurIR: string;
+  indApurIR: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -153,7 +153,7 @@ export interface ListRubricaMapResponse {
 export interface UpsertRubricaMapRequest {
   codRubr: string;
   ideTabRubr: string;
-  indApurIR: string;
+  indApurIR?: number;
 }
 
 /* ========================================================================== */
