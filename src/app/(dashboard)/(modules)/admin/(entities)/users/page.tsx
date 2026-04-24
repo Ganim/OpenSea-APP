@@ -17,6 +17,7 @@ import {
 } from '@/components/layout/page-layout';
 import { SearchBar } from '@/components/layout/search-bar';
 import type { HeaderButton } from '@/components/layout/types/header.types';
+import { AdminSetPasswordModal } from '@/components/modals/admin-set-password-modal';
 import { ForcePasswordResetModal } from '@/components/modals/force-password-reset-modal';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { AccessDenied } from '@/components/rbac/access-denied';
@@ -95,6 +96,8 @@ export default function UsersPage() {
   const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
     null
   );
+  const [setPasswordOpen, setSetPasswordOpen] = useState(false);
+  const [userToSetPassword, setUserToSetPassword] = useState<User | null>(null);
   const [assignEmployeeOpen, setAssignEmployeeOpen] = useState(false);
   const [userForAssign, setUserForAssign] = useState<User | null>(null);
   const [changeUsernameOpen, setChangeUsernameOpen] = useState(false);
@@ -392,6 +395,11 @@ export default function UsersPage() {
     setForcePasswordResetOpen(true);
   };
 
+  const handleSetPassword = (user: User) => {
+    setUserToSetPassword(user);
+    setSetPasswordOpen(true);
+  };
+
   const handleDoubleClick = (itemId: string) => {
     router.push(`/admin/users/${itemId}`);
   };
@@ -499,6 +507,21 @@ export default function UsersPage() {
         separator: 'before',
       });
     }
+    const canSetPassword = hasPermission(
+      ADMIN_PERMISSIONS.USERS.SECURITY.SET_PASSWORD
+    );
+    if (canSetPassword) {
+      actions.push({
+        id: 'set-password',
+        label: 'Definir Senha',
+        icon: KeyRound,
+        onClick: (ids: string[]) => {
+          const user = page.items?.find(u => u.id === ids[0]);
+          if (user) handleSetPassword(user);
+        },
+        ...(!canUpdate && { separator: 'before' as const }),
+      });
+    }
     actions.push({
       id: 'force-password-reset',
       label: 'Resetar Senha',
@@ -507,7 +530,7 @@ export default function UsersPage() {
         const user = page.items?.find(u => u.id === ids[0]);
         if (user) handleForcePasswordReset(user);
       },
-      ...(!canUpdate && { separator: 'before' as const }),
+      ...(!canUpdate && !canSetPassword && { separator: 'before' as const }),
     });
     actions.push({
       id: 'reset-access-pin',
@@ -1052,6 +1075,16 @@ export default function UsersPage() {
               setUserToResetPassword(null);
             }}
             user={userToResetPassword}
+          />
+
+          {/* Admin Set Password Modal */}
+          <AdminSetPasswordModal
+            isOpen={setPasswordOpen}
+            onClose={() => {
+              setSetPasswordOpen(false);
+              setUserToSetPassword(null);
+            }}
+            user={userToSetPassword}
           />
         </PageBody>
       </PageLayout>

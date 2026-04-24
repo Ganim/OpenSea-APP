@@ -876,16 +876,22 @@ export const SALES_PERMISSIONS = {
 // =============================================================================
 
 export const ADMIN_PERMISSIONS = {
-  USERS: perm(
-    'admin',
-    'users',
-    'access',
-    'register',
-    'modify',
-    'remove',
-    'admin',
-    'import'
-  ),
+  USERS: {
+    ...perm(
+      'admin',
+      'users',
+      'access',
+      'register',
+      'modify',
+      'remove',
+      'admin',
+      'import'
+    ),
+    SECURITY: {
+      SET_PASSWORD: 'admin.users.security.setPassword',
+      REVEAL_ADMIN_TOKEN: 'admin.users.security.revealAdminToken',
+    },
+  },
   PERMISSION_GROUPS: perm(
     'admin',
     'permission-groups',

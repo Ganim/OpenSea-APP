@@ -134,6 +134,14 @@ export const authService = {
     );
   },
 
+  // POST /v1/auth/password-reset/initiate-by-totp
+  async initiatePasswordResetByTotp(data: {
+    email: string;
+    totpCode: string;
+  }): Promise<{ resetToken: string; expiresAt: string }> {
+    return apiClient.post(API_ENDPOINTS.PASSWORD_RESET_BY_TOTP.INITIATE, data);
+  },
+
   // PATCH /v1/sessions/refresh
   async refreshToken(): Promise<AuthResponse> {
     const refreshToken = this.getRefreshToken();

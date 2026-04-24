@@ -126,4 +126,27 @@ export const usersService = {
       {}
     );
   },
+
+  // POST /v1/users/:userId/set-password (admin)
+  async adminSetPassword(
+    userId: string,
+    data: {
+      newPassword: string;
+      forceChangeOnNextLogin: boolean;
+    }
+  ): Promise<{
+    user: import('@/types/auth').User;
+    revokedSessionsCount: number;
+  }> {
+    return apiClient.post(API_ENDPOINTS.USERS.SET_PASSWORD(userId), data);
+  },
+
+  // GET /v1/users/:userId/totp/reveal (admin)
+  async revealAdminTotp(userId: string): Promise<{
+    code: string;
+    expiresAt: string;
+    periodSeconds: number;
+  }> {
+    return apiClient.get(API_ENDPOINTS.USERS.REVEAL_TOTP(userId));
+  },
 };

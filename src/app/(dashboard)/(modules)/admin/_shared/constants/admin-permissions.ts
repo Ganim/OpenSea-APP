@@ -30,6 +30,13 @@ export const ADMIN_PERMISSIONS = {
     MANAGE_GROUPS: ADMIN_CODES.PERMISSION_GROUPS.ADMIN,
     /** Forçar reset de senha */
     FORCE_PASSWORD_RESET: ADMIN_CODES.USERS.ADMIN,
+    /** Permissões granulares de segurança (formato 4-níveis) */
+    SECURITY: {
+      /** Definir senha diretamente pelo admin */
+      SET_PASSWORD: ADMIN_CODES.USERS.SECURITY.SET_PASSWORD,
+      /** Revelar token TOTP administrativo de um usuário */
+      REVEAL_ADMIN_TOKEN: ADMIN_CODES.USERS.SECURITY.REVEAL_ADMIN_TOKEN,
+    },
   },
 
   /**

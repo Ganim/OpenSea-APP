@@ -11,7 +11,11 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
+import { AdminSetPasswordModal } from '@/components/modals/admin-set-password-modal';
+import { RevealAdminTotpModal } from '@/components/modals/reveal-admin-totp-modal';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
+import { ADMIN_PERMISSIONS } from '@/app/(dashboard)/(modules)/admin/_shared/constants';
+import { usePermissions } from '@/hooks/use-permissions';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -37,11 +41,14 @@ import type { GroupWithExpiration, PermissionGroup } from '@/types/rbac';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ExternalLink,
+  KeyRound,
   Loader2,
   Plus,
   Save,
   Search,
   Shield,
+  ShieldAlert,
+  ShieldCheck,
   Trash2,
   Unlink,
   UserCheck,
@@ -70,6 +77,17 @@ export default function EditUserPage() {
   const [addGroupOpen, setAddGroupOpen] = useState(false);
   const [searchGroup, setSearchGroup] = useState('');
   const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const [setPasswordOpen, setSetPasswordOpen] = useState(false);
+  const [revealPinOpen, setRevealPinOpen] = useState(false);
+  const [revealTotpOpen, setRevealTotpOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const canSetPassword = hasPermission(
+    ADMIN_PERMISSIONS.USERS.SECURITY.SET_PASSWORD
+  );
+  const canRevealTotp = hasPermission(
+    ADMIN_PERMISSIONS.USERS.SECURITY.REVEAL_ADMIN_TOKEN
+  );
 
   // ============================================================================
   // DATA FETCHING
@@ -390,7 +408,7 @@ export default function EditUserPage() {
 
       <PageBody>
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-10 mb-4">
+          <TabsList className="grid w-full grid-cols-4 h-10 mb-4">
             <TabsTrigger value="info" className="flex items-center gap-2">
               <PiUserDuotone className="h-4 w-4" />
               Dados Pessoais
@@ -402,6 +420,10 @@ export default function EditUserPage() {
             <TabsTrigger value="groups" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Grupos ({userGroups.length})
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Segurança
             </TabsTrigger>
           </TabsList>
 
@@ -672,6 +694,77 @@ export default function EditUserPage() {
               )}
             </Card>
           </TabsContent>
+
+          {/* Tab: Segurança */}
+          <TabsContent value="security" className="space-y-4">
+            {/* Card — Senha */}
+            {canSetPassword && (
+              <Card className="bg-white/5 p-6 w-full">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0 bg-linear-to-br from-blue-500 to-cyan-600">
+                      <KeyRound className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Senha</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mt-1">
+                        Definir uma nova senha diretamente para este usuário. As
+                        sessões ativas serão encerradas após a troca.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setSetPasswordOpen(true)}
+                    className="gap-2 shrink-0"
+                  >
+                    <KeyRound className="h-4 w-4" />
+                    Definir Nova Senha
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* Card — Token de Reset Administrativo */}
+            {canRevealTotp && (
+              <Card className="bg-white/5 p-6 w-full">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0 bg-linear-to-br from-amber-500 to-orange-600">
+                      <ShieldAlert className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        Token de Reset Administrativo
+                      </h3>
+                      <p className="text-sm text-muted-foreground max-w-md mt-1">
+                        Gera um código rotativo (60s) que você passa ao usuário
+                        por telefone ou presencialmente. Ele poderá usá-lo em
+                        "Esqueci minha senha" para redefinir sem precisar de
+                        email. Exige PIN de ação para revelar.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setRevealPinOpen(true)}
+                    variant="outline"
+                    className="gap-2 shrink-0"
+                  >
+                    <ShieldAlert className="h-4 w-4" />
+                    Revelar Token Atual
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {!canSetPassword && !canRevealTotp && (
+              <Card className="bg-white/5 p-12 text-center">
+                <ShieldCheck className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground">
+                  Você não tem permissões para ações de segurança neste usuário.
+                </p>
+              </Card>
+            )}
+          </TabsContent>
         </Tabs>
 
         {/* Add Group Modal */}
@@ -780,6 +873,32 @@ export default function EditUserPage() {
           }}
           title="Desvincular Funcionário"
           description={`${linkedEmployee?.fullName} será desvinculado deste usuário. Digite seu PIN de ação para confirmar.`}
+        />
+
+        {/* Admin Set Password Modal */}
+        <AdminSetPasswordModal
+          isOpen={setPasswordOpen}
+          onClose={() => setSetPasswordOpen(false)}
+          user={user ?? null}
+        />
+
+        {/* PIN gate for revealing admin TOTP */}
+        <VerifyActionPinModal
+          isOpen={revealPinOpen}
+          onClose={() => setRevealPinOpen(false)}
+          onSuccess={() => {
+            setRevealPinOpen(false);
+            setRevealTotpOpen(true);
+          }}
+          title="Revelar Token de Reset"
+          description={`Digite seu PIN de ação para revelar o token administrativo de reset de senha de ${user?.email || 'este usuário'}. Esta ação fica registrada no log de auditoria.`}
+        />
+
+        {/* Reveal Admin TOTP Modal */}
+        <RevealAdminTotpModal
+          isOpen={revealTotpOpen}
+          onClose={() => setRevealTotpOpen(false)}
+          user={user ?? null}
         />
       </PageBody>
     </PageLayout>

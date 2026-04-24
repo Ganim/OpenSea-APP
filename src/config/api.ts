@@ -80,6 +80,12 @@ export const API_ENDPOINTS = {
       `/v1/users/${userId}/force-access-pin-reset`,
     FORCE_ACTION_PIN_RESET: (userId: string) =>
       `/v1/users/${userId}/force-action-pin-reset`,
+    SET_PASSWORD: (userId: string) => `/v1/users/${userId}/set-password`,
+    REVEAL_TOTP: (userId: string) => `/v1/users/${userId}/totp/reveal`,
+  },
+  // Password reset via admin-provided TOTP
+  PASSWORD_RESET_BY_TOTP: {
+    INITIATE: '/v1/auth/password-reset/initiate-by-totp',
   },
   // HR - Employees
   EMPLOYEES: {
