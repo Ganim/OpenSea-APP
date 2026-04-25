@@ -7,26 +7,43 @@
  * 2. Intercept punch POSTs that fail / happen offline, persist them in
  *    IndexedDB, and register a Background Sync to flush them later.
  * 3. On the `sync` event, replay queued punches against the API.
+ * 4. Phase 8 / Plan 08-01: handle Web Push events from backend dispatcher
+ *    (Plan 04-05) and surface system notifications. Click → focus existing
+ *    /punch tab or open a new one with the actionUrl.
  *
  * Notes:
  * - This file is plain JavaScript on purpose: it runs in the worker scope,
  *   not in the bundler.
  * - The IndexedDB schema MUST stay aligned with `src/lib/pwa/punch-db.ts`.
  *   When that file bumps DB_VERSION, bump it here as well.
+ * - Endpoint migrated to the unified Phase 4-04 `/v1/hr/punch/clock` with
+ *   `requestId` UUID v4 per batida (idempotency server-wins). Legacy
+ *   `/v1/hr/time-control/clock-in|clock-out` is still matched in the
+ *   intercept regex for backward-compat with old PWA installs that have
+ *   not yet refreshed the SW — the helper rewrites them to the unified
+ *   endpoint on replay.
  */
 
-const SHELL_CACHE = 'opensea-punch-shell-v1';
-const RUNTIME_CACHE = 'opensea-punch-runtime-v1';
+const SHELL_CACHE = 'opensea-punch-shell-v2';
+const RUNTIME_CACHE = 'opensea-punch-runtime-v2';
 
 const SHELL_URLS = ['/punch', '/manifest-punch.json', '/manifest.json'];
 
+// Phase 4-04 unified endpoint (preferred) + Phase 8 legacy compat (defensive).
 const PUNCH_API_PATTERN =
-  /\/v1\/hr\/time-control\/clock-(in|out)$/;
+  /\/v1\/hr\/(punch\/clock|time-control\/clock-(in|out))$/;
+const PUNCH_API_V2 = '/v1/hr/punch/clock';
 const SYNC_TAG = 'opensea-punch-sync';
 
 const DB_NAME = 'opensea-punch';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'pending-punches';
+
+// Backoff sequence for failed punches (Plan 8-01 D-05). On attempt N
+// (1-indexed), `nextRetryAt = now + BACKOFF_MS[N-1]`. After exhausting the
+// sequence, the entry transitions to status='paused' and only retries on
+// manual user intervention (`punch:flush` message from foreground).
+const BACKOFF_MS = [30_000, 60_000, 5 * 60_000, 30 * 60_000];
 
 /* ---------- Lifecycle ---------- */
 
@@ -117,10 +134,7 @@ async function handlePunchPost(request) {
     if (!response.ok && response.status >= 500) {
       await persistPunchFromRequest(cloned);
       await registerBackgroundSync();
-      return jsonResponse(
-        { queued: true, reason: 'server-error' },
-        202
-      );
+      return jsonResponse({ queued: true, reason: 'server-error' }, 202);
     }
     return response;
   } catch {
@@ -140,8 +154,17 @@ async function persistPunchFromRequest(request) {
   if (!body || typeof body !== 'object' || !body.employeeId) return;
 
   const url = new URL(request.url);
-  const type = url.pathname.endsWith('clock-in') ? 'CLOCK_IN' : 'CLOCK_OUT';
+  // Phase 4-04 v2 body carries `entryType` directly. Legacy /clock-in vs
+  // /clock-out path-based fallback preserved for backward-compat.
+  const type =
+    body.entryType ||
+    (url.pathname.endsWith('clock-in') ? 'CLOCK_IN' : 'CLOCK_OUT');
   const nowIso = new Date().toISOString();
+  const requestId =
+    body.requestId ||
+    (typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const pendingPunch = {
     id:
       typeof crypto !== 'undefined' && crypto.randomUUID
@@ -156,6 +179,10 @@ async function persistPunchFromRequest(request) {
     attempts: 0,
     createdAt: nowIso,
     lastError: null,
+    // Phase 8 / Plan 08-01 — D-05/D-06: status + nextRetryAt + idempotency.
+    status: 'pending',
+    nextRetryAt: undefined,
+    requestId,
   };
   await idbAdd(pendingPunch);
   await broadcast({ kind: 'punch-queued', punch: pendingPunch });
@@ -187,20 +214,34 @@ async function registerBackgroundSync() {
 async function replayQueuedPunches() {
   const queue = await idbGetAll();
   for (const punch of queue) {
-    const endpoint =
-      punch.type === 'CLOCK_IN'
-        ? '/v1/hr/time-control/clock-in'
-        : '/v1/hr/time-control/clock-out';
+    // Phase 8 / Plan 08-01 — D-05: backoff gate.
+    if (punch.status === 'paused' || punch.status === 'expired') continue;
+    if (punch.nextRetryAt && Date.now() < punch.nextRetryAt) continue;
+
+    // Phase 4-04 unified endpoint with idempotency requestId (D-06).
+    const requestId =
+      punch.requestId ||
+      (typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    if (!punch.requestId) {
+      punch.requestId = requestId;
+      await idbPut(punch);
+    }
+
+    const endpoint = PUNCH_API_V2;
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           employeeId: punch.employeeId,
+          entryType: punch.type,
           timestamp: punch.timestamp,
           latitude: punch.latitude,
           longitude: punch.longitude,
           notes: punch.notes,
+          requestId,
         }),
         credentials: 'include',
       });
@@ -219,7 +260,7 @@ async function replayQueuedPunches() {
       }
     } catch (err) {
       await markFailed(punch, err && err.message ? err.message : 'network');
-      throw err;
+      // Não throw — outras batidas da fila ainda devem ser tentadas.
     }
   }
 }
@@ -227,20 +268,91 @@ async function replayQueuedPunches() {
 async function markFailed(punch, message) {
   punch.attempts = (punch.attempts || 0) + 1;
   punch.lastError = message;
+  // Phase 8 / Plan 08-01 — D-05: backoff exponencial + status enum.
+  const idx = Math.min(punch.attempts - 1, BACKOFF_MS.length - 1);
+  const isLast = punch.attempts > BACKOFF_MS.length;
+  punch.status = isLast ? 'paused' : 'failed';
+  punch.nextRetryAt = isLast ? undefined : Date.now() + BACKOFF_MS[idx];
   await idbPut(punch);
 }
+
+/* ---------- Push notifications (Phase 8 / Plan 08-01 — D-03) ---------- */
+
+self.addEventListener('push', event => {
+  if (!event.data) return;
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: 'OpenSea Ponto', body: event.data.text() };
+  }
+  const title = payload.title || 'OpenSea Ponto';
+  const body = payload.body || '';
+  const actionUrl = payload.actionUrl || '/punch';
+  const kind = payload.kind || 'INFORMATIONAL';
+  const tag = payload.notificationId
+    ? `punch-${payload.notificationId}`
+    : `punch-${Date.now()}`;
+  const options = {
+    body,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag,
+    data: {
+      notificationId: payload.notificationId,
+      url: actionUrl,
+      kind,
+    },
+    actions:
+      kind === 'APPROVAL'
+        ? [
+            { action: 'open', title: 'Justificar' },
+            { action: 'dismiss', title: 'Ignorar' },
+          ]
+        : undefined,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const action = event.action;
+  if (action === 'dismiss') return;
+  const url =
+    (event.notification.data && event.notification.data.url) || '/punch';
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clients => {
+        for (const c of clients) {
+          if (c.url && c.url.indexOf('/punch') !== -1 && 'focus' in c) {
+            return c.focus();
+          }
+        }
+        if (self.clients.openWindow) return self.clients.openWindow(url);
+        return undefined;
+      })
+  );
+});
 
 /* ---------- IndexedDB primitives (mirror of src/lib/pwa/punch-db.ts) ---------- */
 
 function openDb() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = event => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         store.createIndex('createdAt', 'createdAt', { unique: false });
         store.createIndex('employeeId', 'employeeId', { unique: false });
+      }
+      // Phase 8 / Plan 08-01 — D-05: schema bump v1→v2. New fields
+      // (`status`, `nextRetryAt`, `requestId`) are optional and written
+      // via .put() — no data migration needed for legacy rows. Block kept
+      // explicit so future readers see the version transition.
+      if (event.oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
+        // no-op: aditivo, sem schema change no objectStore.
       }
     };
     request.onsuccess = () => resolve(request.result);
