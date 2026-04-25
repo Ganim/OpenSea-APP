@@ -22,6 +22,10 @@ export interface Zone {
   createdAt: string;
   updatedAt: string;
 
+  // Emporion Fase 1 — venda fracionada habilitada para esta zona.
+  // Optional pois listagens legadas podem não trazer o campo.
+  allowsFractionalSale?: boolean;
+
   // Estatísticas (calculadas)
   stats?: ZoneStats;
 }
