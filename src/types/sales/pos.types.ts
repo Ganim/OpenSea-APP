@@ -5,6 +5,11 @@ export type PosTerminalMode =
   | 'CASHIER'
   | 'TOTEM';
 
+// Emporion Fase 1 — operator session + coordination behavior
+export type PosOperatorSessionMode = 'PER_SALE' | 'STAY_LOGGED_IN';
+
+export type PosCoordinationMode = 'STANDALONE' | 'SELLER' | 'CASHIER' | 'BOTH';
+
 export interface PosTerminal {
   id: string;
   tenantId: string;
@@ -18,8 +23,45 @@ export interface PosTerminal {
   isActive: boolean;
   hasPairing: boolean;
   defaultPriceTableId: string | null;
+  // Emporion Fase 1 — operator session + coordination + applied profile.
+  // Optional in the type because legacy seeds / older list responses may not
+  // surface them; consumers should fall back to backend defaults.
+  operatorSessionMode?: PosOperatorSessionMode;
+  operatorSessionTimeout?: number | null;
+  autoCloseSessionAt?: string | null;
+  coordinationMode?: PosCoordinationMode;
+  appliedProfileId?: string | null;
   createdAt: string;
   updatedAt: string | null;
+}
+
+/**
+ * Body for `PATCH /v1/pos/terminals/:terminalId/config` (Emporion Fase 1).
+ */
+export interface UpdateTerminalSessionModeRequest {
+  operatorSessionMode: PosOperatorSessionMode;
+  operatorSessionTimeout?: number | null;
+  autoCloseSessionAt?: string | null;
+  coordinationMode?: PosCoordinationMode;
+}
+
+export interface UpdateTerminalSessionModeResponse {
+  terminal: Pick<
+    PosTerminal,
+    | 'id'
+    | 'tenantId'
+    | 'terminalName'
+    | 'terminalCode'
+    | 'isActive'
+    | 'createdAt'
+    | 'updatedAt'
+  > & {
+    operatorSessionMode: PosOperatorSessionMode;
+    operatorSessionTimeout: number | null;
+    autoCloseSessionAt: string | null;
+    coordinationMode: PosCoordinationMode;
+    appliedProfileId: string | null;
+  };
 }
 
 export interface CreatePosTerminalRequest {

@@ -47,6 +47,12 @@ export interface HealthCondition {
 export interface Employee {
   id: string;
   registrationNumber: string;
+  /**
+   * Public 6-character Crockford-like identifier used by the Emporion POS
+   * operator login flow. Optional in legacy datasets that pre-date the
+   * Emporion Fase 1 backfill.
+   */
+  shortId?: string | null;
   fullName: string;
   cpf: string;
   hireDate: string;

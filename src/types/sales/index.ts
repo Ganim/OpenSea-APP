@@ -48,6 +48,10 @@ export {
 } from './pdv.types';
 export * from './pipeline.types';
 export * from './pos.types';
+export * from './pos-conflict.types';
+export * from './pos-fiscal-config.types';
+export * from './pos-terminal-operator.types';
+export * from './pos-terminal-zone.types';
 export * from './price-table.types';
 export * from './printer.types';
 export {
