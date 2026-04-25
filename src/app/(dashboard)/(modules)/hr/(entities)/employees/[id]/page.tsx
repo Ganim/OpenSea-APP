@@ -143,6 +143,7 @@ import {
 } from '../src';
 import { EmployeeDocumentsChecklist } from '../src/components/employee-documents-checklist';
 import { EmployeeContractsSection } from './_shared/employee-contracts-section';
+import { ShortIdDisplay } from './_components/short-id-display';
 import { MedicalExamTimeline } from '@/components/hr/medical-exam-timeline';
 import { SalaryTimelineCard } from '@/components/hr/salary-timeline-card';
 import type { SalaryTimelineUserSummary } from '@/components/hr/salary-timeline-card';
@@ -1111,6 +1112,13 @@ export default function EmployeeDetailPage() {
                       icon={<CreditCard className="h-4 w-4" />}
                       showCopyButton
                       copyTooltip="Copiar CPF"
+                    />
+                    <ShortIdDisplay
+                      employeeId={employee.id}
+                      shortId={employee.shortId}
+                      canRegenerate={hasPermission(
+                        HR_PERMISSIONS.EMPLOYEES.MANAGE
+                      )}
                     />
                   </div>
                 </div>
