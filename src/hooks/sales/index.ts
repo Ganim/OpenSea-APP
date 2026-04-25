@@ -29,6 +29,7 @@ export * from './use-payment-config';
 export * from './use-pdv';
 export * from './use-pipelines';
 export * from './use-pos';
+export * from './use-pos-terminal';
 export * from './use-pos-conflicts';
 export * from './use-pos-fiscal-config';
 export * from './use-pos-terminal-operators';
