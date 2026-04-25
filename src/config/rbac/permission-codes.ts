@@ -700,6 +700,11 @@ export const SALES_PERMISSIONS = {
       SUPPLY: 'sales.pos.cash.supply',
     },
     RECEIVE: 'sales.pos.receive',
+    OPERATE: 'sales.pos.operate',
+    CONFLICTS_RESOLVE: 'sales.pos.conflicts-resolve',
+    PROFILES_MANAGE: 'sales.pos.profiles-manage',
+    FISCAL_CONFIGURE: 'sales.pos.fiscal-configure',
+    ORPHAN_PAYMENTS_RECONCILE: 'sales.pos.orphan-payments-reconcile',
   },
 
   // --- Caixa ---

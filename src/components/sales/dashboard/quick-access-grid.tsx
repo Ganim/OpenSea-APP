@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SALES_PERMISSIONS } from '@/config/rbac/permission-codes';
 import type { SalesDashboardData } from '@/hooks/sales/use-sales-dashboard';
 import {
+  AlertTriangle,
   ArrowRight,
   BookOpen,
   Calculator,
@@ -19,6 +20,7 @@ import {
   Percent,
   Receipt,
   Route,
+  ShieldCheck,
   ShoppingCart,
   Shuffle,
   Tag,
@@ -84,6 +86,26 @@ const QUICK_CARDS: QuickCard[] = [
     hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
     permission: SALES_PERMISSIONS.POS.ACCESS,
     getSubtitle: () => 'Ponto de venda',
+  },
+  {
+    id: 'pos-conflicts',
+    title: 'Conflitos POS',
+    icon: AlertTriangle,
+    href: '/sales/pos/conflicts',
+    gradient: 'from-amber-500 to-amber-600',
+    hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
+    permission: SALES_PERMISSIONS.POS.CONFLICTS_RESOLVE,
+    getSubtitle: () => 'Resolver pendências de venda',
+  },
+  {
+    id: 'pos-fiscal',
+    title: 'Fiscal POS',
+    icon: ShieldCheck,
+    href: '/sales/pos/fiscal',
+    gradient: 'from-emerald-500 to-emerald-600',
+    hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10',
+    permission: SALES_PERMISSIONS.POS.FISCAL_CONFIGURE,
+    getSubtitle: () => 'NFC-e, certificados e séries',
   },
   {
     id: 'contacts',
