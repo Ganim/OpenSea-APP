@@ -495,3 +495,61 @@ Consome endpoints Wave 2 (Plans 03/04/05) + Socket.IO scope do Plan 02.
 - Backend não retorna CPF nas 4 rotas (DTO sanitiza).
 - Filtros não usam CPF/PIS/CNPJ na query string.
 - Playwright sentinel valida ausência de "cpf" no DOM.
+
+---
+
+## PWA Pessoal de Ponto (Funcionário) — Phase 8 (Plans 08-01..08-03)
+
+PWA pessoal instalável para que o colaborador bata ponto pelo próprio
+celular — com GPS, selfie opcional, push notifications, sync offline e
+justificativa com anexo. Discovery dual-track: distribuição centralizada
+pelo RH (`/devices/downloads/punch-pwa` com QR + cartaz A4) + descoberta
+natural pelo funcionário (`/hr` card "Bater Ponto pelo Celular" + banner
+sticky em `/punch` quando mobile fora de standalone).
+
+### Routes
+
+| Rota                           | Permissão                                  | Descrição                                                                                                          |
+| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `/punch`                       | auth-only (sem permission gate específica) | Página principal da PWA — CTA grande, GPS, selfie, today history, install banner                                   |
+| `/punch/justify/[id]`          | `hr.punch-approvals.access`                | Form de justificativa com câmera/galeria/PDF picker (Plan 8-03)                                                    |
+| `/punch/history`               | auth-only                                  | Histórico 7 dias com infinite scroll + status badges + retry manual (Plan 8-03)                                    |
+| `/devices/downloads/punch-pwa` | `admin.devices.access`                     | Distribuição admin: QR code + instruções por SO (Android Chrome / iOS Safari / Desktop) + cartaz A4 print-friendly |
+
+### Entry points
+
+- Card **"Punch PWA"** em `/devices` (seção "Gerenciamento") — gradient violet
+  → roxo, aponta para `/devices/downloads/punch-pwa`. Para RH/admin distribuir.
+- Card **"Bater Ponto pelo Celular"** em `/hr` (seção "Autoatendimento") —
+  aponta para `/punch`. Sem permission gate (auth-only). Para descoberta
+  natural pelo colaborador.
+- **`PWAInstallBanner`** sticky dentro de `/punch` — renderiza só em mobile
+  UA + sem standalone + sem dismiss flag. Em iOS abre `IOSAddToHomeScreenModal`;
+  em Android Chrome chama deferred `beforeinstallprompt`.
+
+### Realtime
+
+- Push notifications de confirmação de batida via `sw-punch.js` push handler
+  (Plan 8-01) — payload `{ notificationId, title, body, actionUrl, kind }`
+  alinhado a Phase 4-05 web-push-adapter.
+- Socket.IO sala `user:{userId}` para histórico em tempo real (Plan 8-03,
+  reusa Phase 7-02 auto-join).
+
+### Service Worker
+
+- Scope: `/punch` (isolado do dashboard)
+- File: `OpenSea-APP/public/sw-punch.js` (Plan 8-01)
+- Manifest: `OpenSea-APP/public/manifest-punch.json` (Plan 8-01) — 3 shortcuts.
+- Backoff offline queue: 30s / 1m / 5m / 30m + TTL 7 dias (Plan 8-01).
+
+### Sensitive operations
+
+- Sem operações destrutivas com PIN no flow PWA pessoal — funcionário cria
+  PunchApproval (criação imutável) ou apenas envia batida.
+- Upload de evidência (justificativa) — Plan 8-03 reusa S3 presigned (Phase 6).
+
+### LGPD
+
+- Tenant.id no QR code é UUID interno (não PII) — accept disposition (T-8-02-01).
+- Cartaz impresso contém apenas URL pública + nome do tenant — accept (T-8-02-04).
+- localStorage `punch-pwa-install-dismissed` é UX-only flag — accept (T-8-02-03).
