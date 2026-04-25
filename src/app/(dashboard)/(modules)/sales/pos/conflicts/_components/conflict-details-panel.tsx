@@ -183,9 +183,11 @@ export function ConflictDetailsPanel({
                 <Badge variant="outline">{conflict.status}</Badge>
                 {conflict.resolvedByUserId && (
                   <p className="text-sm text-muted-foreground">
-                    Resolvido pelo usuário{' '}
-                    <span className="font-mono">
-                      {conflict.resolvedByUserId}
+                    Resolvido por{' '}
+                    <span className="font-medium text-foreground">
+                      {conflict.resolvedByUserName?.length
+                        ? conflict.resolvedByUserName
+                        : conflict.resolvedByUserId}
                     </span>
                   </p>
                 )}

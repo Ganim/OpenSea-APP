@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Loader2, Plus, Users, UserMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GridError } from '@/components/handlers/grid-error';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   usePosTerminalOperators,
   useRevokeTerminalOperator,
@@ -19,6 +20,10 @@ import { OperatorSelector } from './operator-selector';
  */
 export function OperatorsTab({ terminalId }: { terminalId: string }) {
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [pendingRevoke, setPendingRevoke] = useState<{
+    employeeId: string;
+    employeeName: string;
+  } | null>(null);
   const { data, isLoading, error, refetch } = usePosTerminalOperators(
     terminalId,
     { page: 1, limit: 100, isActive: 'true' }
@@ -103,7 +108,12 @@ export function OperatorsTab({ terminalId }: { terminalId: string }) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => revoke.mutate(op.employeeId)}
+                onClick={() =>
+                  setPendingRevoke({
+                    employeeId: op.employeeId,
+                    employeeName: op.employeeName,
+                  })
+                }
                 disabled={revoke.isPending}
                 data-testid={`operator-row-${op.employeeId}-revoke`}
               >
@@ -120,6 +130,23 @@ export function OperatorsTab({ terminalId }: { terminalId: string }) {
         existingEmployeeIds={existingIds}
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
+      />
+
+      <VerifyActionPinModal
+        isOpen={pendingRevoke !== null}
+        onClose={() => setPendingRevoke(null)}
+        onSuccess={() => {
+          if (pendingRevoke) {
+            revoke.mutate(pendingRevoke.employeeId);
+            setPendingRevoke(null);
+          }
+        }}
+        title="Revogar operador"
+        description={
+          pendingRevoke
+            ? `Digite seu PIN de Ação para revogar ${pendingRevoke.employeeName} como operador deste terminal. Esta ação fica registrada na auditoria.`
+            : ''
+        }
       />
     </div>
   );

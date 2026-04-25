@@ -1,13 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { FilterDropdown } from '@/components/ui/filter-dropdown';
 import { GridError } from '@/components/handlers/grid-error';
 import { PageActionBar } from '@/components/layout/page-action-bar';
@@ -16,7 +10,7 @@ import {
   PageHeader,
   PageLayout,
 } from '@/components/layout/page-layout';
-import { usePosConflicts } from '@/hooks/sales/use-pos-conflicts';
+import { usePosConflictsInfinite } from '@/hooks/sales/use-pos-conflicts';
 import type { PosOrderConflictStatus } from '@/types/sales';
 import { ConflictCard } from './_components/conflict-card';
 import { ConflictDetailsPanel } from './_components/conflict-details-panel';
@@ -38,18 +32,45 @@ export default function ConflictsPage() {
   const [statusFilter, setStatusFilter] = useState<PosOrderConflictStatus[]>([
     'PENDING_RESOLUTION',
   ]);
-  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isLoading, error, refetch } = usePosConflicts({
-    page,
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePosConflictsInfinite({
     limit: PAGE_SIZE,
     status: statusFilter.length > 0 ? statusFilter : undefined,
   });
 
-  const items = data?.data ?? [];
-  const total = data?.meta.total ?? 0;
-  const pages = data?.meta.pages ?? 0;
+  const items = useMemo(
+    () => data?.pages.flatMap(p => p.data) ?? [],
+    [data?.pages]
+  );
+  const total = data?.pages[0]?.meta.total ?? 0;
+
+  // IntersectionObserver-based auto-load for the next page when the sentinel
+  // enters the viewport.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const filterOptions = useMemo(
     () => STATUS_OPTIONS.map(o => ({ id: o.value, label: o.label })),
@@ -83,50 +104,21 @@ export default function ConflictsPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <FilterDropdown
-              label="Status"
-              options={filterOptions}
-              selected={statusFilter}
-              onSelectionChange={ids => {
-                setStatusFilter(ids as PosOrderConflictStatus[]);
-                setPage(1);
-              }}
-              activeColor="violet"
-            />
-            <span className="text-sm text-muted-foreground">
-              {total === 0
-                ? 'Nenhum conflito encontrado'
-                : `${total} ${total === 1 ? 'conflito' : 'conflitos'}`}
-            </span>
-          </div>
-
-          {pages > 1 && (
-            <div className="flex items-center gap-2 text-sm">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-muted-foreground">
-                Página {page} de {pages}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setPage(p => Math.min(pages, p + 1))}
-                disabled={page >= pages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterDropdown
+            label="Status"
+            options={filterOptions}
+            selected={statusFilter}
+            onSelectionChange={ids => {
+              setStatusFilter(ids as PosOrderConflictStatus[]);
+            }}
+            activeColor="violet"
+          />
+          <span className="text-sm text-muted-foreground">
+            {total === 0
+              ? 'Nenhum conflito encontrado'
+              : `${total} ${total === 1 ? 'conflito' : 'conflitos'}`}
+          </span>
         </div>
 
         {error ? (
@@ -156,15 +148,34 @@ export default function ConflictsPage() {
             Nenhum conflito com os filtros selecionados.
           </div>
         ) : (
-          <div className="space-y-3" data-testid="conflicts-list">
-            {items.map(conflict => (
-              <ConflictCard
-                key={conflict.id}
-                conflict={conflict}
-                onSelect={() => setSelectedId(conflict.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3" data-testid="conflicts-list">
+              {items.map(conflict => (
+                <ConflictCard
+                  key={conflict.id}
+                  conflict={conflict}
+                  onSelect={() => setSelectedId(conflict.id)}
+                />
+              ))}
+            </div>
+
+            <div ref={sentinelRef} aria-hidden className="h-1" />
+
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+
+            {!hasNextPage && items.length > 0 && (
+              <p
+                className="py-4 text-center text-xs text-muted-foreground"
+                data-testid="conflicts-end-of-list"
+              >
+                Fim da lista — {items.length} de {total} conflitos exibidos.
+              </p>
+            )}
+          </>
         )}
 
         <ConflictDetailsPanel

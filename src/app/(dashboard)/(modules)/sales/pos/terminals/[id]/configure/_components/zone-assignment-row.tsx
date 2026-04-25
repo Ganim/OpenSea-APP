@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import {
   useAssignTerminalZone,
   useRemoveTerminalZone,
@@ -20,6 +22,7 @@ export function ZoneAssignmentRow({
   terminalId,
   assignment,
 }: ZoneAssignmentRowProps) {
+  const [pinModalOpen, setPinModalOpen] = useState(false);
   const assign = useAssignTerminalZone(terminalId);
   const remove = useRemoveTerminalZone(terminalId);
 
@@ -77,13 +80,21 @@ export function ZoneAssignmentRow({
         type="button"
         variant="ghost"
         size="sm"
-        onClick={() => remove.mutate(assignment.zoneId)}
+        onClick={() => setPinModalOpen(true)}
         disabled={remove.isPending}
         aria-label="Remover zona do terminal"
         data-testid={`zone-row-${assignment.zone.id}-remove`}
       >
         <Trash2 className="h-4 w-4" />
       </Button>
+
+      <VerifyActionPinModal
+        isOpen={pinModalOpen}
+        onClose={() => setPinModalOpen(false)}
+        onSuccess={() => remove.mutate(assignment.zoneId)}
+        title="Remover zona do terminal"
+        description={`Digite seu PIN de Ação para remover a zona ${assignment.zone.name} deste terminal. Esta ação fica registrada na auditoria.`}
+      />
     </div>
   );
 }

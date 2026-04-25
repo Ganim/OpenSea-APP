@@ -72,10 +72,18 @@ const COORDINATION_OPTIONS: Array<{
 export function FiscalAdvancedTab({ terminal }: { terminal: PosTerminal }) {
   const update = useUpdateTerminalSessionMode(terminal.id);
 
+  // Backend stores `operatorSessionTimeout` in seconds (Phase A on-the-wire
+  // contract); the form UI is in minutes for usability. Convert at the
+  // boundary: seconds → minutes when loading, minutes → seconds on submit.
+  const timeoutMinutes =
+    terminal.operatorSessionTimeout != null
+      ? Math.round(terminal.operatorSessionTimeout / 60)
+      : '';
+
   const defaultValues: FormInput = {
     operatorSessionMode:
       (terminal.operatorSessionMode as PosOperatorSessionMode) ?? 'PER_SALE',
-    operatorSessionTimeout: terminal.operatorSessionTimeout ?? '',
+    operatorSessionTimeout: timeoutMinutes,
     autoCloseSessionAt: terminal.autoCloseSessionAt ?? '',
     coordinationMode:
       (terminal.coordinationMode as PosCoordinationMode) ?? 'STANDALONE',
@@ -95,9 +103,15 @@ export function FiscalAdvancedTab({ terminal }: { terminal: PosTerminal }) {
   const sessionMode = form.watch('operatorSessionMode');
 
   const onSubmit = (values: FormOutput) => {
+    // Convert minutes → seconds for backend persistence.
+    const timeoutSeconds =
+      values.operatorSessionTimeout != null
+        ? values.operatorSessionTimeout * 60
+        : null;
+
     update.mutate({
       operatorSessionMode: values.operatorSessionMode,
-      operatorSessionTimeout: values.operatorSessionTimeout ?? null,
+      operatorSessionTimeout: timeoutSeconds,
       autoCloseSessionAt: values.autoCloseSessionAt ?? null,
       coordinationMode: values.coordinationMode,
     });

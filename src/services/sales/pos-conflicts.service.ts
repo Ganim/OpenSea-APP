@@ -2,7 +2,7 @@ import { apiClient } from '@/lib/api-client';
 import type {
   ListConflictsParams,
   ListConflictsResponse,
-  PosOrderConflictEnriched,
+  PosOrderConflictDetailed,
   ResolveConflictRequest,
   ResolveConflictResponse,
 } from '@/types/sales';
@@ -32,8 +32,8 @@ export const posConflictsService = {
     return apiClient.get<ListConflictsResponse>(url);
   },
 
-  async get(id: string): Promise<{ conflict: PosOrderConflictEnriched }> {
-    return apiClient.get<{ conflict: PosOrderConflictEnriched }>(
+  async get(id: string): Promise<{ conflict: PosOrderConflictDetailed }> {
+    return apiClient.get<{ conflict: PosOrderConflictDetailed }>(
       `/v1/admin/pos/conflicts/${id}`
     );
   },

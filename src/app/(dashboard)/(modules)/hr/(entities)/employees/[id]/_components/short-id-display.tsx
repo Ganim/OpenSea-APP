@@ -2,23 +2,13 @@
 
 import { useState } from 'react';
 import { Check, Copy, KeyRound, RefreshCw } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { useRegenerateEmployeeShortId } from '@/hooks/hr/use-regenerate-employee-short-id';
 
 interface ShortIdDisplayProps {
@@ -39,6 +29,7 @@ export function ShortIdDisplay({
   canRegenerate,
 }: ShortIdDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [pinModalOpen, setPinModalOpen] = useState(false);
   const regenerate = useRegenerateEmployeeShortId(employeeId);
 
   const handleCopy = async () => {
@@ -91,47 +82,28 @@ export function ShortIdDisplay({
         </Tooltip>
 
         {canRegenerate && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={regenerate.isPending}
-                data-testid="employee-short-id-regenerate"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${regenerate.isPending ? 'animate-spin' : ''}`}
-                />
-                <span className="hidden md:inline">Regenerar</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Regenerar código curto do funcionário?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  O código atual{' '}
-                  <strong className="font-mono tracking-widest">
-                    {shortId ?? '—'}
-                  </strong>{' '}
-                  será substituído por um novo código de 6 caracteres. O
-                  funcionário precisará usar o novo código para acessar os
-                  terminais POS. Esta ação fica registrada na auditoria.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => regenerate.mutate()}
-                  disabled={regenerate.isPending}
-                >
-                  Regenerar código
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={regenerate.isPending}
+              onClick={() => setPinModalOpen(true)}
+              data-testid="employee-short-id-regenerate"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${regenerate.isPending ? 'animate-spin' : ''}`}
+              />
+              <span className="hidden md:inline">Regenerar</span>
+            </Button>
+            <VerifyActionPinModal
+              isOpen={pinModalOpen}
+              onClose={() => setPinModalOpen(false)}
+              onSuccess={() => regenerate.mutate()}
+              title="Regenerar código curto"
+              description={`Digite seu PIN de Ação para regenerar o código atual ${shortId ?? '—'}. O funcionário precisará usar o novo código para acessar terminais POS.`}
+            />
+          </>
         )}
       </div>
     </div>
