@@ -21,6 +21,8 @@ import type {
   PosTransactionPayment,
   SessionSummary,
   UpdatePosTerminalRequest,
+  UpdateTerminalSessionModeRequest,
+  UpdateTerminalSessionModeResponse,
 } from '@/types/sales';
 
 const DEVICE_TOKEN_KEY = 'pos_device_token';
@@ -103,6 +105,21 @@ export const posService = {
       ? `${API_ENDPOINTS.POS.TERMINALS.UNPAIR(id)}?reason=${encodeURIComponent(reason)}`
       : API_ENDPOINTS.POS.TERMINALS.UNPAIR(id);
     return apiClient.delete(url);
+  },
+
+  /**
+   * Updates session-mode / coordination-mode / auto-close fields on a POS
+   * Terminal (Emporion Fase 1). Backed by
+   * `PATCH /v1/pos/terminals/:terminalId/config`.
+   */
+  async updateSessionMode(
+    terminalId: string,
+    payload: UpdateTerminalSessionModeRequest
+  ): Promise<UpdateTerminalSessionModeResponse> {
+    return apiClient.patch<UpdateTerminalSessionModeResponse>(
+      `/v1/pos/terminals/${terminalId}/config`,
+      payload
+    );
   },
 
   // Devices

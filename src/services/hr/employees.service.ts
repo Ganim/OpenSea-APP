@@ -300,6 +300,21 @@ export const employeesService = {
     );
   },
 
+  /**
+   * Regenerates the public 6-character `shortId` of an Employee, used by the
+   * Emporion POS operator login flow. Requires `hr.employees.admin`
+   * permission. Backed by
+   * `PATCH /v1/hr/employees/:employeeId/regenerate-short-id`.
+   */
+  async regenerateShortId(
+    employeeId: string
+  ): Promise<{ employee: Employee; previousShortId: string | null }> {
+    return apiClient.patch<{
+      employee: Employee;
+      previousShortId: string | null;
+    }>(`/v1/hr/employees/${employeeId}/regenerate-short-id`);
+  },
+
   // POST /v1/hr/employees/:id/photo (multipart)
   async uploadPhoto(
     employeeId: string,
