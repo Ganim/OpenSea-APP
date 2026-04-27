@@ -4,9 +4,10 @@
  * DeliveryDetailDrawer — Drawer 480px com 8 D-29 fields + responseBody
  * truncado (1KB pelo backend) + 2 CTAs (Reenviar entrega / Copiar payload).
  *
- * LGPD T-11-14: signature exibida MASCARADA (`v1=a3b1c...`); o payload
- * original (request body) NÃO é exibido aqui — apenas o response body do
- * customer (já truncado pelo backend).
+ * LGPD T-11-14: signature NÃO é exposta pelo backend (não persistida em
+ * WebhookDelivery); o cabeçalho da requisição mostra um placeholder estático
+ * `t=<unix>,v1=<hex>` apenas para documentar o shape. O response body do
+ * customer é truncado a ~1KB pelo backend (`responseBodyTruncated`).
  */
 
 import { Button } from '@/components/ui/button';
@@ -144,7 +145,7 @@ export function DeliveryDetailDrawer({
 
           <Field label="Mensagem">
             <span className="text-sm text-muted-foreground">
-              {delivery.lastErrorMessageSanitized ?? '—'}
+              {delivery.lastErrorMessage ?? '—'}
             </span>
           </Field>
 
@@ -162,15 +163,16 @@ export function DeliveryDetailDrawer({
             </span>
           </Field>
 
+          {/* Backend não retorna signature mascarada (por segurança); placeholder é puramente ilustrativo do shape do header. */}
           <Field label="Cabeçalhos da requisição">
             <pre className="font-mono text-xs leading-relaxed bg-slate-50 dark:bg-slate-900/60 rounded-md p-2 overflow-x-auto">
-              {`X-OpenSea-Signature: ${delivery.signatureMasked ?? 't=…,v1=…'}\nX-OpenSea-Webhook-ID: ${delivery.endpointId}\nX-OpenSea-Event-ID: ${delivery.eventId}`}
+              {`X-OpenSea-Signature: t=<unix>,v1=<hex>\nX-OpenSea-Webhook-ID: ${delivery.endpointId}\nX-OpenSea-Event-ID: ${delivery.eventId}`}
             </pre>
           </Field>
 
           <Field label="Corpo da resposta (truncado a 1KB)">
             <pre className="font-mono text-xs leading-relaxed bg-slate-50 dark:bg-slate-900/60 rounded-md p-2 overflow-x-auto max-h-48 overflow-y-auto">
-              {delivery.lastResponseBody ?? '(vazio)'}
+              {delivery.responseBodyTruncated ?? '(vazio)'}
             </pre>
           </Field>
         </div>

@@ -23,11 +23,13 @@ export function useReprocessWebhookDeliveriesBulk() {
       });
       const parts: string[] = [];
       parts.push(`${data.enqueued} reenvios enfileirados`);
-      if (data.skippedCooldown > 0)
-        parts.push(`${data.skippedCooldown} em cooldown`);
-      if (data.skippedCap > 0) parts.push(`${data.skippedCap} no cap`);
-      if (data.skippedNotFound > 0)
-        parts.push(`${data.skippedNotFound} não encontradas`);
+      if (data.skippedCooldown.length > 0)
+        parts.push(`${data.skippedCooldown.length} em cooldown`);
+      if (data.skippedCap.length > 0)
+        parts.push(`${data.skippedCap.length} no cap`);
+      if (data.skippedNotFound.length > 0)
+        parts.push(`${data.skippedNotFound.length} não encontradas`);
+      if (data.errors.length > 0) parts.push(`${data.errors.length} com erro`);
       toast.success(parts.join(', ') + '.');
     },
     onError: () => {
