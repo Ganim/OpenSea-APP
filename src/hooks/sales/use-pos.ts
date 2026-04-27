@@ -150,10 +150,16 @@ export function usePairDevice() {
   });
 }
 
-export function useMyDevice() {
+export function useMyDevice(options: { enabled?: boolean } = {}) {
   const hasToken =
     typeof window !== 'undefined' &&
     !!window.localStorage.getItem(DEVICE_TOKEN_KEY);
+
+  // Caller-controlled gate: device pairing is a POS-mode concern, so consumers
+  // should pass `enabled: isPosContext` to avoid running this query on every
+  // dashboard page (a stale `pos_device_token` in localStorage was triggering
+  // the API 401 + JWT refresh cascade that logged users out of the ERP).
+  const enabled = (options.enabled ?? true) && hasToken;
 
   return useQuery({
     queryKey: POS_KEYS.deviceMe,
@@ -161,7 +167,7 @@ export function useMyDevice() {
       const response = await posService.getMyDevice();
       return response;
     },
-    enabled: hasToken,
+    enabled,
     retry: false,
     staleTime: 60_000, // 1 min — device state is relatively stable
     refetchOnWindowFocus: false,

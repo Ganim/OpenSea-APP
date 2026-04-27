@@ -33,6 +33,20 @@ function getDeviceTokenHeader(): Record<string, string> {
   return token ? { 'X-Pos-Device-Token': token } : {};
 }
 
+// Device token is a separate auth credential from the user JWT.
+// A 401 here means the device pairing is invalid — never trigger
+// the user JWT refresh + clear flow, which would log the user out
+// of an unrelated session (regression triggered the dashboard logout cascade).
+function getDeviceRequestOptions(): {
+  headers: Record<string, string>;
+  skipRefresh: true;
+} {
+  return {
+    headers: getDeviceTokenHeader(),
+    skipRefresh: true,
+  };
+}
+
 export const posService = {
   // Terminals
   async listTerminals(
@@ -131,9 +145,10 @@ export const posService = {
   },
 
   async getMyDevice(): Promise<DeviceState> {
-    return apiClient.get<DeviceState>(API_ENDPOINTS.POS.DEVICES.ME, {
-      headers: getDeviceTokenHeader(),
-    });
+    return apiClient.get<DeviceState>(
+      API_ENDPOINTS.POS.DEVICES.ME,
+      getDeviceRequestOptions()
+    );
   },
 
   // Sessions
@@ -143,7 +158,7 @@ export const posService = {
     return apiClient.post<{ session: PosSession }>(
       API_ENDPOINTS.POS.SESSIONS.OPEN,
       data,
-      { headers: getDeviceTokenHeader() }
+      getDeviceRequestOptions()
     );
   },
 
@@ -163,7 +178,7 @@ export const posService = {
     return apiClient.post<{ session: PosSession }>(
       API_ENDPOINTS.POS.SESSIONS.CLOSE(id),
       data,
-      { headers: getDeviceTokenHeader() }
+      getDeviceRequestOptions()
     );
   },
 
@@ -180,9 +195,10 @@ export const posService = {
     const url = terminalId
       ? `${API_ENDPOINTS.POS.SESSIONS.CURRENT}?terminalId=${terminalId}`
       : API_ENDPOINTS.POS.SESSIONS.CURRENT;
-    return apiClient.get<{ session: PosSession | null }>(url, {
-      headers: getDeviceTokenHeader(),
-    });
+    return apiClient.get<{ session: PosSession | null }>(
+      url,
+      getDeviceRequestOptions()
+    );
   },
 
   async getActiveSession(
@@ -219,7 +235,7 @@ export const posService = {
   ): Promise<{ summary: SessionSummary }> {
     return apiClient.get<{ summary: SessionSummary }>(
       API_ENDPOINTS.POS.SESSIONS.SUMMARY(sessionId),
-      { headers: getDeviceTokenHeader() }
+      getDeviceRequestOptions()
     );
   },
 
