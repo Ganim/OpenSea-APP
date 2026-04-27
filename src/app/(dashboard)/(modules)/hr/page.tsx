@@ -319,6 +319,17 @@ const sections: {
         permission: 'hr.punch-approvals.access',
       },
       {
+        id: 'punch-audit',
+        title: 'Auditoria de Ponto',
+        description:
+          'Análise de comportamentos suspeitos, fraudes GPS e de dispositivo',
+        icon: Shield,
+        href: '/hr/punch/audit',
+        gradient: 'from-rose-500 to-rose-600',
+        hoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-500/10',
+        permission: 'hr.punch.audit.access',
+      },
+      {
         id: 'punch-agent-downloads',
         title: 'Punch-Agent (downloads)',
         description:

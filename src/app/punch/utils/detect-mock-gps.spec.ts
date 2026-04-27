@@ -1,20 +1,149 @@
-// Wave 0 stub — Phase 9 / Plan 09-01. Implementation arrives in Plan 09-03. See 09-VALIDATION.md.
-//
-// D-04 — Mock GPS detection client-side (heurísticas baseadas em 2 fixes consecutivos).
-// Plan 09-03 implements `detectMockGps(fix1, fix2)` retornando boolean:
-//   - coords idênticas em ambas as chamadas → suspectMock=true
-//   - accuracy=0 → suspectMock=true (implausível em GPS real)
-//   - accuracy idêntica exata em 2 fixes → suspectMock=true (real flutua)
+// Wave 0 stub → Plan 09-03 implementation.
+// D-04 — Mock GPS detection client-side via 2 fixes + 3 heuristics.
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { detectMockGps } from './detect-mock-gps';
 
-describe('detectMockGps (Plan 09-03 — Wave 0 stub)', () => {
-  it('placeholder — Wave 0 RED gate; replaced in Plan 09-03', () => {
-    expect(() => require('./detect-mock-gps')).toThrow();
+describe('detectMockGps (Plan 09-03 implementation)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it.skip('coords idênticas em 2 fixes → suspectMock=true', () => {});
-  it.skip('accuracy=0 → suspectMock=true', () => {});
-  it.skip('accuracy idêntica exata em 2 fixes → suspectMock=true', () => {});
-  it.skip('coords variando + accuracy variando → suspectMock=false', () => {});
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('coords idênticas em 2 fixes → retorna true', async () => {
+    let callCount = 0;
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      const fix = {
+        coords: {
+          latitude: 23.5505,
+          longitude: -46.6333,
+          accuracy: 15.5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as unknown as GeolocationPosition;
+      callCount++;
+      success(fix);
+    });
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = await detectMockGps();
+    expect(result).toBe(true);
+    expect(callCount).toBe(2);
+  });
+
+  it('accuracy=0 em uma das fixes → retorna true', async () => {
+    let callCount = 0;
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      const fix = {
+        coords: {
+          latitude: 23.5505,
+          longitude: -46.6333,
+          accuracy: callCount === 0 ? 0 : 15.5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as unknown as GeolocationPosition;
+      callCount++;
+      success(fix);
+    });
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = await detectMockGps();
+    expect(result).toBe(true);
+  });
+
+  it('accuracy idêntica exata em 2 fixes → retorna true', async () => {
+    let callCount = 0;
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      const fix = {
+        coords: {
+          latitude: callCount === 0 ? 23.5505 : 23.5506,
+          longitude: callCount === 0 ? -46.6333 : -46.6334,
+          accuracy: 15.5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as unknown as GeolocationPosition;
+      callCount++;
+      success(fix);
+    });
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = await detectMockGps();
+    expect(result).toBe(true);
+  });
+
+  it('coords variando + accuracy variando → retorna false', async () => {
+    let callCount = 0;
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      const fix = {
+        coords: {
+          latitude: callCount === 0 ? 23.5505 : 23.5506,
+          longitude: callCount === 0 ? -46.6333 : -46.6334,
+          accuracy: callCount === 0 ? 15.5 : 16.2,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as unknown as GeolocationPosition;
+      callCount++;
+      success(fix);
+    });
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = await detectMockGps();
+    expect(result).toBe(false);
+  });
+
+  it('erro/timeout → retorna false (graceful fallback)', async () => {
+    const mockGetCurrentPosition = vi.fn(
+      (success: PositionCallback, error?: PositionErrorCallback) => {
+        error?.(new Error('Timeout') as unknown as GeolocationPositionError);
+      }
+    );
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = await detectMockGps();
+    expect(result).toBe(false);
+  });
 });

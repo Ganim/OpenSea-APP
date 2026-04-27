@@ -1,18 +1,94 @@
-// Wave 0 stub — Phase 9 / Plan 09-01. Implementation arrives in Plan 09-03. See 09-VALIDATION.md.
-//
-// PUNCH-FRAUD UI feedback — surface novos error codes do backend Plan 09-02:
-//   - GPS_ACCURACY_LOW → toast 'GPS impreciso' duration 6000 (D-01)
-//   - CLOCK_DRIFT → toast 'Relógio do dispositivo desalinhado' duration 8000 (D-07)
-//   - RATE_LIMIT_EXCEEDED → showRateLimitToast(retryAfterSec) com countdown (D-18)
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { toast } from 'sonner';
+import { showRateLimitToast } from '@/components/punch/PunchRateLimitToast';
+import {
+  showPunchErrorToast,
+  type PunchErrorResponse,
+} from './punch-error-toasts';
 
-import { describe, it, expect } from 'vitest';
+// Mock Sonner
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    dismiss: vi.fn(),
+  },
+}));
 
-describe('punch-error-toasts (Plan 09-03 — Wave 0 stub)', () => {
-  it('placeholder — Wave 0 RED gate; replaced in Plan 09-03', () => {
-    expect(() => require('./punch-error-toasts')).toThrow();
+// Mock showRateLimitToast
+vi.mock('@/components/punch/PunchRateLimitToast', () => ({
+  showRateLimitToast: vi.fn(),
+}));
+
+describe('punch.api error toasts (Phase 9 D-07)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it.skip('error.code=GPS_ACCURACY_LOW → toast.error "GPS impreciso" duration 6000', () => {});
-  it.skip('error.code=CLOCK_DRIFT → toast.error "Relógio do dispositivo desalinhado" duration 8000', () => {});
-  it.skip('error.code=RATE_LIMIT_EXCEEDED → showRateLimitToast(retryAfterSec) com countdown', () => {});
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('400 GPS_ACCURACY_LOW → toast.error com "GPS impreciso" + duration 6000', () => {
+    const error: PunchErrorResponse = {
+      status: 400,
+      code: 'GPS_ACCURACY_LOW',
+      accuracy: 45.2,
+    };
+
+    showPunchErrorToast(error);
+
+    expect(toast.error).toHaveBeenCalledWith(
+      'GPS impreciso. Tente novamente',
+      expect.objectContaining({
+        duration: 6000,
+      })
+    );
+  });
+
+  it('400 CLOCK_DRIFT → toast.error com "Ajuste o relógio do dispositivo" + duration 8000', () => {
+    const error: PunchErrorResponse = {
+      status: 400,
+      code: 'CLOCK_DRIFT',
+      driftSec: 120,
+    };
+
+    showPunchErrorToast(error);
+
+    expect(toast.error).toHaveBeenCalledWith(
+      'Ajuste o relógio do dispositivo. Diferença: 2 min',
+      expect.objectContaining({
+        duration: 8000,
+      })
+    );
+  });
+
+  it('429 RATE_LIMIT_EXCEEDED → showRateLimitToast chamado com retryAfterSec', () => {
+    const error: PunchErrorResponse = {
+      status: 429,
+      code: 'RATE_LIMIT_EXCEEDED',
+      retryAfterSec: 60,
+    };
+
+    showPunchErrorToast(error);
+
+    expect(showRateLimitToast).toHaveBeenCalledWith(60);
+  });
+
+  it('500 erro genérico → nenhum dos 3 toasts especiais disparado', () => {
+    const error: PunchErrorResponse = {
+      status: 500,
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Something went wrong',
+    };
+
+    showPunchErrorToast(error);
+
+    expect(showRateLimitToast).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith(
+      'Something went wrong',
+      expect.objectContaining({
+        duration: 5000,
+      })
+    );
+  });
 });

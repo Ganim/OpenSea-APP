@@ -1,147 +1,161 @@
+/**
+ * Location Display Component (Phase 9 Plan 09-03)
+ *
+ * Shows current location + accuracy + mock GPS detection status.
+ * Renders during punch flow; calls detectMockGps after geolocation success.
+ *
+ * Visual states:
+ * - Loading: spinner + "Obtendo localização..."
+ * - Success: lat/lng + accuracy (m) + mock detection badge
+ * - Error: "Localização não disponível" + manual punch CTA
+ */
+
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { MapPin, MapPinOff, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { MapPin, AlertTriangle } from 'lucide-react';
+import { detectMockGps } from '@/app/punch/utils/detect-mock-gps';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-interface LocationDisplayProps {
-  onLocationReady: (lat: number, lng: number) => void;
+export interface LocationDisplayProps {
+  onLocationDetected?: (location: {
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+    suspectMock: boolean;
+  }) => void;
+  onError?: (error: Error) => void;
 }
 
-interface LocationState {
-  latitude: number | null;
-  longitude: number | null;
-  accuracy: number | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const REFRESH_INTERVAL = 30_000;
-
-export function LocationDisplay({ onLocationReady }: LocationDisplayProps) {
-  const [location, setLocation] = useState<LocationState>({
-    latitude: null,
-    longitude: null,
-    accuracy: null,
-    loading: true,
-    error: null,
-  });
-
-  const onLocationReadyRef = useRef(onLocationReady);
-  onLocationReadyRef.current = onLocationReady;
-
-  const fetchLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocation(prev => ({
-        ...prev,
-        loading: false,
-        error: 'Geolocalização não suportada neste navegador.',
-      }));
-      return;
-    }
-
-    setLocation(prev => ({ ...prev, loading: true, error: null }));
-
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const { latitude, longitude, accuracy } = position.coords;
-        setLocation({
-          latitude,
-          longitude,
-          accuracy,
-          loading: false,
-          error: null,
-        });
-        onLocationReadyRef.current(latitude, longitude);
-      },
-      err => {
-        let message = 'Erro ao obter localização.';
-        if (err.code === err.PERMISSION_DENIED) {
-          message =
-            'Permissão de localização negada. Habilite nas configurações.';
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          message = 'Localização indisponível no momento.';
-        } else if (err.code === err.TIMEOUT) {
-          message = 'Tempo limite para obter localização excedido.';
-        }
-        setLocation(prev => ({
-          ...prev,
-          loading: false,
-          error: message,
-        }));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10_000,
-        maximumAge: 0,
-      }
-    );
-  }, []);
+export function LocationDisplay({
+  onLocationDetected,
+  onError,
+}: LocationDisplayProps) {
+  const [state, setState] = useState<
+    'loading' | 'success' | 'error' | 'mock-detected'
+  >('loading');
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+  } | null>(null);
+  const [suspectMock, setSuspectMock] = useState(false);
 
   useEffect(() => {
-    fetchLocation();
-    const interval = setInterval(fetchLocation, REFRESH_INTERVAL);
-    return () => clearInterval(interval);
-  }, [fetchLocation]);
+    let isMounted = true;
 
-  if (location.error) {
+    const getLocation = async () => {
+      try {
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          }
+        );
+
+        if (!isMounted) return;
+
+        const loc = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        };
+
+        setLocation(loc);
+
+        // Check for mock GPS
+        const isMock = await detectMockGps();
+        if (!isMounted) return;
+
+        setSuspectMock(isMock);
+        setState(isMock ? 'mock-detected' : 'success');
+
+        onLocationDetected?.({
+          ...loc,
+          suspectMock: isMock,
+        });
+      } catch (err) {
+        if (!isMounted) return;
+
+        setState('error');
+        const error = err instanceof Error ? err : new Error(String(err));
+        onError?.(error);
+      }
+    };
+
+    getLocation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [onLocationDetected, onError]);
+
+  if (state === 'loading') {
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 px-4 py-3">
-        <MapPinOff className="size-5 text-rose-500 shrink-0" />
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
-            Localização indisponível
-          </p>
-          <p className="text-xs text-rose-600/70 dark:text-rose-400/70 truncate">
-            {location.error}
-          </p>
+      <Card className="p-4 bg-white/5">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="animate-spin h-4 w-4">⟳</div>
+          <span>Obtendo localização...</span>
         </div>
-        <button
-          type="button"
-          onClick={fetchLocation}
-          className="ml-auto text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline shrink-0"
-        >
-          Tentar novamente
-        </button>
-      </div>
+      </Card>
     );
   }
 
-  if (location.loading && location.latitude === null) {
+  if (state === 'error') {
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-slate-100 dark:bg-slate-800 px-4 py-3">
-        <Loader2 className="size-5 text-slate-400 animate-spin shrink-0" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Obtendo localização...
-        </p>
-      </div>
+      <Card className="p-4 bg-rose-50 dark:bg-rose-500/8 border border-rose-200 dark:border-rose-500/20">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-rose-900 dark:text-rose-300">
+              Localização não disponível
+            </p>
+            <p className="text-rose-700 dark:text-rose-400 text-xs mt-1">
+              Ative o GPS e tente novamente
+            </p>
+          </div>
+        </div>
+      </Card>
     );
+  }
+
+  if (!location) {
+    return null;
   }
 
   return (
-    <div
-      className={cn(
-        'flex items-center gap-3 rounded-xl px-4 py-3',
-        'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800'
-      )}
+    <Card
+      className={`p-4 ${
+        suspectMock
+          ? 'bg-amber-50 dark:bg-amber-500/8 border border-amber-200 dark:border-amber-500/20'
+          : 'bg-white/5'
+      }`}
     >
-      <MapPin className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-          Localização capturada
-        </p>
-        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 font-mono tabular-nums">
-          {location.latitude?.toFixed(6)}, {location.longitude?.toFixed(6)}
-          {location.accuracy && (
-            <span className="ml-1.5">
-              (&plusmn;{Math.round(location.accuracy)}m)
-            </span>
-          )}
-        </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2">
+          <MapPin
+            className={`h-4 w-4 mt-0.5 ${
+              suspectMock
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-foreground/60'
+            }`}
+          />
+          <div>
+            <p className="text-xs text-muted-foreground">Localização</p>
+            <p className="text-sm font-mono">
+              {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Precisão: ±{location.accuracy.toFixed(1)}m
+            </p>
+          </div>
+        </div>
+        {suspectMock && (
+          <Badge variant="destructive" className="ml-auto">
+            GPS Suspeito
+          </Badge>
+        )}
       </div>
-      {location.loading && (
-        <Loader2 className="size-4 text-emerald-500 animate-spin ml-auto shrink-0" />
-      )}
-    </div>
+    </Card>
   );
 }

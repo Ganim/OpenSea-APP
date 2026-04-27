@@ -459,7 +459,11 @@ function PunchPageContent() {
 
             {/* Hidden location/geofence drivers (UI surfaces in GeoBadge below) */}
             <div className="sr-only">
-              <LocationDisplay onLocationReady={handleLocationReady} />
+              <LocationDisplay
+                onLocationDetected={loc =>
+                  handleLocationReady(loc.latitude, loc.longitude)
+                }
+              />
               <GeofenceStatus
                 latitude={locationRef.current?.lat ?? null}
                 longitude={locationRef.current?.lng ?? null}
