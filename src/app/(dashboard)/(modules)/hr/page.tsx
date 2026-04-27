@@ -34,6 +34,7 @@ import {
   Coffee,
   FileUser,
   FileX2,
+  Fingerprint,
   HardHat,
   GraduationCap,
   Heart,
@@ -316,6 +317,17 @@ const sections: {
         gradient: 'from-blue-500 to-indigo-600',
         hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-500/10',
         permission: 'hr.punch-approvals.access',
+      },
+      {
+        id: 'punch-agent-downloads',
+        title: 'Punch-Agent (downloads)',
+        description:
+          'Aplicativo desktop para leitores biométricos DigitalPersona ou Windows Hello',
+        icon: Fingerprint,
+        href: '/hr/punch-devices/downloads',
+        gradient: 'from-indigo-500 to-indigo-600',
+        hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
+        permission: 'hr.punch-devices.access',
       },
       {
         id: 'crachas',

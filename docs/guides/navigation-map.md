@@ -552,4 +552,19 @@ sticky em `/punch` quando mobile fora de standalone).
 
 - Tenant.id no QR code é UUID interno (não PII) — accept disposition (T-8-02-01).
 - Cartaz impresso contém apenas URL pública + nome do tenant — accept (T-8-02-04).
+
+---
+
+## Phase 10 — Punch-Agent biométrico (Plan 10-06)
+
+### /hr/punch-devices/downloads
+
+- **Permission:** `hr.punch-devices.access`
+- **Purpose:** Página de download do Punch-Agent (Phase 10) com botões NSIS (.exe) + MSI + guia de pareamento passo a passo.
+- **Components:** `PunchAgentDownloadCard` (hero), hook `useLatestPunchAgentRelease` (GitHub Releases API).
+- **Entry points:**
+  - Card "Punch-Agent (downloads)" na landing `/hr` (seção "Ponto") — permission `hr.punch-devices.access`.
+  - Link "Baixar Punch-Agent" na página `/hr/punch/health` (health dos dispositivos).
+- **Download targets:** NSIS .exe (instalação interativa) + MSI (distribuição corporativa via GPO/SCCM/Intune).
+- **Fallback:** Se GitHub API indisponível (rate-limit/403), links apontam para `/releases/latest/download/` estático — sem erro para o usuário.
 - localStorage `punch-pwa-install-dismissed` é UX-only flag — accept (T-8-02-03).
