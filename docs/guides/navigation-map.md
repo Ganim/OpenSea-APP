@@ -568,3 +568,45 @@ sticky em `/punch` quando mobile fora de standalone).
 - **Download targets:** NSIS .exe (instalação interativa) + MSI (distribuição corporativa via GPO/SCCM/Intune).
 - **Fallback:** Se GitHub API indisponível (rate-limit/403), links apontam para `/releases/latest/download/` estático — sem erro para o usuário.
 - localStorage `punch-pwa-install-dismissed` é UX-only flag — accept (T-8-02-03).
+
+---
+
+## Phase 11 — Webhooks outbound (Plan 11-03)
+
+Painel admin para configurar endpoints externos que recebem eventos `punch.*`
+em tempo real com assinatura HMAC-SHA256 (envelope Stripe-style),
+retry exponencial automático, anti-SSRF, anti-replay e reprocessamento
+manual. RBAC 4-níveis `system.webhooks.endpoints.*` (ADR-031, admin-only D-10).
+
+### Routes
+
+| Rota                           | Permissão                                  | Descrição                                                                                                                                  |
+| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/devices/webhooks`            | `system.webhooks.endpoints.access`         | Listing infinite scroll com Status DropdownMenu (4 opções) + busca + counter `N/50` (slate→amber@45→rose@50, D-34); auto-disabled no topo. |
+| `/devices/webhooks/new`        | `system.webhooks.endpoints.register`       | Wizard 3 passos (Identificação → Eventos → Secret revelado UMA vez). Step 3 mostra snippets Node/Python/Go anti-replay (D-06).             |
+| `/devices/webhooks/[id]`       | `system.webhooks.endpoints.access`         | Detail + 3 tabs (Visão geral / Entregas / Configuração). Banner auto-disable + DeliveryDetailDrawer 480px + 4 ações inline. PIN gate em Excluir + Reativar. |
+| `/devices/webhooks/[id]/edit`  | `system.webhooks.endpoints.modify`         | Form com URL read-only + descrição + status switch + eventos + versão + Regenerar secret. PIN gate (`system.webhooks.endpoints.admin`) em Regenerar (D-08). |
+
+### Entry points
+
+- Card **"Webhooks"** em `/devices` (seção "Gerenciamento") — gradient `from-amber-500 to-orange-600` (cor reservada exclusiva Phase 11).
+
+### Realtime
+
+- React Query polling `refetchInterval: 30_000` na lista de entregas quando filtro inclui PENDING ou FAILED (V1 A5 simplification).
+- v2 deferred: Socket.IO room `tenant:{id}:system:webhooks` evento `webhook.endpoint.status_changed`.
+
+### Sensitive operations
+
+- **Excluir webhook** (`system.webhooks.endpoints.remove`): VerifyActionPinModal — entregas pendentes canceladas + soft-delete (cascade WebhookDelivery).
+- **Regenerar secret** (`system.webhooks.endpoints.admin`): VerifyActionPinModal — secret antigo válido por 7 dias (D-07 rotação suave).
+- **Reativar auto-desativado** (`system.webhooks.endpoints.admin`): VerifyActionPinModal — conta DEAD volta a contar para auto-disable.
+
+Header: `x-action-pin-token` (JWT scope=action-pin) — verificado pelo middleware `verifyActionPin` no backend (Plan 11-02 Task 4).
+
+### LGPD
+
+- Secret cleartext exibido APENAS no body do POST /v1/system/webhooks (Step 3 do wizard) e no response do /regenerate-secret. UI nunca persiste em localStorage (T-11-03).
+- DTO sempre traz `secretMasked = whsec_••••••••<last4>` (D-08).
+- Signature no Drawer mascarada após primeiros 8 hex chars (`v1=a3b1c...`).
+- Payload completo do request body NÃO é exibido no log — apenas response body do customer (truncado a 1KB pelo backend) (T-11-14).

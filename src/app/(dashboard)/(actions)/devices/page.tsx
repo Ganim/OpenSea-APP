@@ -9,7 +9,13 @@ import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { usePermissions } from '@/hooks/use-permissions';
-import { Monitor, Printer, MonitorSmartphone, Smartphone } from 'lucide-react';
+import {
+  Monitor,
+  Printer,
+  MonitorSmartphone,
+  Smartphone,
+  Webhook,
+} from 'lucide-react';
 
 const sections = [
   {
@@ -42,6 +48,16 @@ const sections = [
         href: '/devices/downloads/punch-pwa',
         gradient: 'from-violet-500 to-purple-600',
         hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+      },
+      {
+        id: 'webhooks',
+        title: 'Webhooks',
+        description:
+          'Configure endpoints para receber eventos do sistema em tempo real (assinatura HMAC).',
+        icon: Webhook,
+        href: '/devices/webhooks',
+        gradient: 'from-amber-500 to-orange-600',
+        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
       },
     ],
   },
