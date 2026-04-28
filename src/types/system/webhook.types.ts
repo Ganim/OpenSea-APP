@@ -175,8 +175,18 @@ export interface ReprocessBulkResponse {
 }
 
 export interface PingWebhookResponse {
-  /** ID of the synthetic delivery that was enqueued */
-  deliveryId: string;
+  /**
+   * ID da entrega sintética que foi enfileirada.
+   * Mapeado 1:1 ao backend `pingWebhookResponseSchema.pingDeliveryId`
+   * (formato `ping_<uuid>`). Use este id para correlacionar com a linha
+   * que aparece no log de entregas.
+   */
+  pingDeliveryId: string;
+  /**
+   * ID do job na fila BullMQ `webhook-deliveries` (formato `<eventId>:<endpointId>`).
+   * Mapeado 1:1 ao backend `pingWebhookResponseSchema.jobId`.
+   */
+  jobId: string;
 }
 
 /**
