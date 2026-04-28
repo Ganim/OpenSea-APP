@@ -64,12 +64,19 @@ export default function EditWebhookPage() {
   );
   const [rotationUntil, setRotationUntil] = useState<string | null>(null);
 
+  // Inicializa o form uma única vez por webhook carregado. Depender de
+  // `webhook?.id` (estável) em vez do objeto `webhook` (referência nova a
+  // cada refetch — window focus, staleTime, tab switch) evita sobrescrever
+  // edições em andamento se o React Query revalidar enquanto o usuário
+  // digita. Para resetar manualmente, o usuário usa "Cancelar" (volta para
+  // a página de detalhe).
   useEffect(() => {
     if (!webhook) return;
     setDescription(webhook.description ?? '');
     setEvents(webhook.subscribedEvents as WebhookEventType[]);
     setActive(webhook.status === 'ACTIVE');
-  }, [webhook]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [webhook?.id]);
 
   function handleRegenerateSuccess() {
     if (!id) return;
