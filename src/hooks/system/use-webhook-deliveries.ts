@@ -13,22 +13,14 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { webhooksService } from '@/services/system/webhooks-service';
-import type {
-  WebhookDeliveryFilters,
-  WebhookDeliveryStatus,
-} from '@/types/system';
+import type { WebhookDeliveryFilters } from '@/types/system';
 import { WEBHOOKS_QUERY_KEYS } from './use-webhooks';
 
 const DELIVERIES_PAGE_SIZE = 25;
 
 function shouldPoll(filters?: WebhookDeliveryFilters): boolean {
   if (!filters || !filters.status || filters.status === 'all') return false;
-  const list = Array.isArray(filters.status)
-    ? filters.status
-    : [filters.status];
-  return list.some(
-    (s: WebhookDeliveryStatus) => s === 'PENDING' || s === 'FAILED'
-  );
+  return filters.status === 'PENDING' || filters.status === 'FAILED';
 }
 
 export function useWebhookDeliveries(

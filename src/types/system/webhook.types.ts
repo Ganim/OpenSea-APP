@@ -122,9 +122,15 @@ export interface WebhookEndpointFilters {
 }
 
 // Backend uses offset/limit, not page/limit. Frontend service computes offset from React Query pageParam.
+//
+// `status` and `eventType` are single-valued because backend
+// `listDeliveriesQuerySchema` accepts a single value per Fastify+Zod query
+// validation (ADR-032 — backend Zod is the canonical contract). If a
+// multi-status filter UX is needed, extend the backend schema first
+// (`z.preprocess` + `z.array(...)`) and then loosen this type.
 export interface WebhookDeliveryFilters {
-  status?: WebhookDeliveryStatus | WebhookDeliveryStatus[] | 'all';
-  eventType?: string | string[];
+  status?: WebhookDeliveryStatus | 'all';
+  eventType?: string;
   /**
    * ISO 8601 date or `YYYY-MM-DD`.
    * Mapped 1:1 to backend `listDeliveriesQuerySchema.createdAfter` (z.coerce.date()).

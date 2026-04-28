@@ -44,19 +44,13 @@ function buildDeliveryQuery(
 ): string {
   const q = new URLSearchParams();
   if (!params) return '';
+  // Single-valued: backend `listDeliveriesQuerySchema` accepts one value per
+  // key. If multi-select is needed, extend the backend schema first.
   if (params.status && params.status !== 'all') {
-    if (Array.isArray(params.status)) {
-      params.status.forEach(s => q.append('status', s));
-    } else {
-      q.set('status', params.status);
-    }
+    q.set('status', params.status);
   }
   if (params.eventType) {
-    if (Array.isArray(params.eventType)) {
-      params.eventType.forEach(e => q.append('eventType', e));
-    } else {
-      q.set('eventType', params.eventType);
-    }
+    q.set('eventType', params.eventType);
   }
   if (params.createdAfter) q.set('createdAfter', params.createdAfter);
   if (params.createdBefore) q.set('createdBefore', params.createdBefore);
