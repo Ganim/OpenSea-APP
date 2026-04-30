@@ -21,13 +21,16 @@ export const mockProduct = (
   ...overrides,
 });
 
+// Deterministic generator (seeded from index) — stories must render
+// identically every run, otherwise visual regression tests + Storybook
+// snapshots break on benign re-renders.
 export const mockProducts = (count: number): MockProduct[] =>
   Array.from({ length: count }, (_, i) =>
     mockProduct({
       id: `prod-${i + 1}`,
       name: `Produto Demo ${i + 1}`,
       sku: `DEMO-${String(i + 1).padStart(3, '0')}`,
-      price: Math.round((50 + Math.random() * 500) * 100) / 100,
-      stock: Math.floor(Math.random() * 200),
+      price: Math.round((50 + ((i * 37) % 500)) * 100) / 100,
+      stock: ((i * 13) % 200) + 5,
     })
   );
