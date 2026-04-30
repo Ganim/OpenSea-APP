@@ -1,0 +1,113 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { RadiusBox, ShadowBox, Grid } from './_swatch';
+
+<Meta title="Foundations/RadiusAndShadows" />
+
+# Raio e Elevação
+
+Esta página documenta os utilitários `rounded-*` (border-radius) e `shadow-*`
+(box-shadow) e o uso convencionado no OpenSea-APP. Os tokens primitivos vêm do
+Tailwind 4 + tokens custom em `:root` (`--radius-*` em `globals.css`,
+seção 6 — Spacing & Sizing).
+
+## Border radius (`rounded-*`)
+
+<Grid min={160}>
+  <RadiusBox
+    className="rounded-sm"
+    rem="0.125rem (2px)"
+    usage="checkboxes, micro elementos"
+    borderRadius="2px"
+  />
+  <RadiusBox
+    className="rounded-md"
+    rem="0.375rem (6px)"
+    usage="botões pequenos, chips densos"
+    borderRadius="6px"
+  />
+  <RadiusBox
+    className="rounded-lg"
+    rem="0.5rem (8px)"
+    usage="form fields (Input, Select)"
+    borderRadius="8px"
+  />
+  <RadiusBox
+    className="rounded-xl"
+    rem="0.75rem (12px)"
+    usage="cards de detalhe e identidade"
+    borderRadius="12px"
+  />
+  <RadiusBox
+    className="rounded-2xl"
+    rem="1rem (16px)"
+    usage="cards hero / destaque, modais grandes"
+    borderRadius="16px"
+  />
+  <RadiusBox
+    className="rounded-full"
+    rem="9999px"
+    usage="avatars, badges pílula, ícones circulares"
+    borderRadius="9999px"
+  />
+</Grid>
+
+### Convenções de uso
+
+- **Form fields** (`Input`, `Select`, `Textarea`) → `rounded-lg`. Token
+  `--input-radius: 0.75rem` em `globals.css` reforça esse valor para componentes
+  que consomem o token.
+- **Botões `size="sm"`** → `rounded-lg` (CLAUDE.md §9.1: `h-9 px-2.5 rounded-lg`).
+- **Cards de detalhe / Identity Card** → `rounded-xl` (CLAUDE.md §9).
+- **Cards hero, modais grandes** → `rounded-2xl`.
+- **Avatars, badges pílula, status dots** → `rounded-full`.
+- **Tabela e linhas** → sem `rounded` (bordas retas com bordas externas).
+
+## Sombra / Elevação (`shadow-*`)
+
+<Grid min={180}>
+  <ShadowBox
+    className="shadow-none"
+    boxShadow="none"
+    usage="default flat, ações destrutivas"
+  />
+  <ShadowBox
+    className="shadow-sm"
+    boxShadow="0 1px 2px 0 rgb(0 0 0 / 0.05)"
+    usage="botão default, cards leves, hover sutil"
+  />
+  <ShadowBox
+    className="shadow-md"
+    boxShadow="0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+    usage="dropdowns, popovers, cards selecionados"
+  />
+  <ShadowBox
+    className="shadow-lg"
+    boxShadow="0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+    usage="modais, sheets, command palette"
+  />
+  <ShadowBox
+    className="shadow-xl"
+    boxShadow="0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+    usage="overlays prominentes, toasts top"
+  />
+</Grid>
+
+### Regras específicas (CLAUDE.md §9.1)
+
+- **`<Button>` default** → `shadow-sm` (não `shadow-lg`). Mantém peso visual
+  baixo, evita o efeito "Bootstrap pesado".
+- **`<Button variant="destructive">`** → **flat, sem sombra**. A intenção é que a
+  cor rose já carregue o peso visual; sombra duplicaria o sinal de alerta.
+- **Cards de detalhe** → sombra implícita via background `bg-white/5` ou
+  `bg-white dark:bg-slate-800/60` (CLAUDE.md §9). Evite `shadow-md` em cards
+  internos a menos que sejam selecionáveis ou estejam em destaque.
+- **Tabs em modo light** → fundo `slate-100/0.6` (não cinza pesado), sem sombra
+  no `TabsList` (CLAUDE.md §9.1).
+- **Modais e dropdowns** → consomem tokens `--modal-shadow` e `--dropdown-shadow`
+  diretamente; não use `shadow-lg` cru sobre eles.
+
+> **Resumo prático para botões:**
+>
+> - default / outline / ghost → `shadow-sm`
+> - destructive → flat, sem `shadow`
+> - link / text → flat, sem `shadow`

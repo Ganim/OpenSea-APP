@@ -28,3 +28,46 @@ jobs:
         run: flyctl deploy --config fly.storybook.toml --remote-only --app opensea-storybook
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Smoke health check (root + /mcp)
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          echo "Aguardando 10s para a máquina iniciar..."
+          sleep 10
+
+          echo "==> Smoke 1/2: GET https://opensea-storybook.fly.dev/"
+          if ! curl -fsSL --max-time 90 -o /tmp/sb-root.html -w "HTTP %{http_code} | total %{time_total}s\n" https://opensea-storybook.fly.dev/; then
+            echo "::error::Root health check failed (non-2xx or timeout)"
+            echo "==> Tentando capturar últimas 100 linhas de logs do Fly..."
+            flyctl logs --app opensea-storybook --no-tail 2>/dev/null | tail -n 100 || echo "(flyctl logs indisponível)"
+            exit 1
+          fi
+          echo "Root OK (response salvo em /tmp/sb-root.html, $(wc -c < /tmp/sb-root.html) bytes)"
+
+          echo "==> Smoke 2/2: POST https://opensea-storybook.fly.dev/mcp (initialize)"
+          MCP_BODY='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"deploy-smoke","version":"1.0"}}}'
+          if ! curl -fsSL --max-time 60 \
+              -X POST https://opensea-storybook.fly.dev/mcp \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json, text/event-stream" \
+              -d "$MCP_BODY" \
+              -o /tmp/sb-mcp.txt \
+              -w "HTTP %{http_code} | total %{time_total}s\n"; then
+            echo "::error::MCP /mcp initialize call failed"
+            echo "==> Tentando capturar últimas 100 linhas de logs do Fly..."
+            flyctl logs --app opensea-storybook --no-tail 2>/dev/null | tail -n 100 || echo "(flyctl logs indisponível)"
+            exit 1
+          fi
+
+          if ! grep -q '"protocolVersion"' /tmp/sb-mcp.txt; then
+            echo "::error::Resposta do /mcp não contém \"protocolVersion\" — endpoint pode estar caído"
+            echo "==> Conteúdo da resposta (primeiras 50 linhas):"
+            head -n 50 /tmp/sb-mcp.txt || true
+            echo "==> Tentando capturar últimas 100 linhas de logs do Fly..."
+            flyctl logs --app opensea-storybook --no-tail 2>/dev/null | tail -n 100 || echo "(flyctl logs indisponível)"
+            exit 1
+          fi
+          echo "MCP OK (protocolVersion encontrado na resposta)"

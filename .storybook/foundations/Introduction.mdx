@@ -1,0 +1,52 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Introduction" />
+
+# Foundations
+
+**Foundations** é o catálogo vivo dos _design tokens_ que sustentam o OpenSea-APP:
+cores semânticas, escala de espaçamento, tipografia, raios e elevações. Cada página
+desta seção lê diretamente os tokens definidos em `src/app/globals.css` (Tailwind 4 +
+camadas de tokens primitivos, semânticos e de componente) e os apresenta de forma
+inspecionável para humanos e para agentes de IA via MCP (`list-all-documentation`).
+
+A audiência inclui:
+
+- **Agentes de IA** — Claude Code, Codex e outros, que consultam estas páginas via MCP
+  para produzir UI consistente sem ter que ler `globals.css` inteiro.
+- **Engenheiros frontend** — referência rápida ao montar telas novas ou revisar
+  consistência cromática/tipográfica.
+- **Designers** — verificação de que o sistema implementado bate com a intenção do
+  Figma/Claude Design.
+
+Para extender: crie um novo arquivo MDX em `.storybook/foundations/` com
+`<Meta title="Foundations/<Tópico>" />`. O glob já está incluído em
+`.storybook/main.ts`. Para componentes inline (swatches, chips, samples), reuse
+`.storybook/foundations/_swatch.tsx` — o helper é JSX puro e não depende de pacotes
+do app, evitando acoplamento entre catálogo e código real.
+
+## Páginas desta seção
+
+- [Colors](?path=/docs/foundations-colors--docs) — paleta semântica, regra
+  _destrutivo é rose (não red)_, status semantic e padrão de chips dual-theme.
+- [Spacing](?path=/docs/foundations-spacing--docs) — escala de espaçamento Tailwind 4
+  com valores em rem e px.
+- [Typography](?path=/docs/foundations-typography--docs) — escala tipográfica de
+  `text-xs` a `text-4xl` com altura de linha e caso de uso de cada degrau.
+- [Radius and Shadows](?path=/docs/foundations-radiusandshadows--docs) — raios
+  (`rounded-*`) e elevações (`shadow-*`) com regras específicas para `<Button>` e
+  ações destrutivas.
+
+## Referências canônicas
+
+- **Padrões de código frontend:** `OpenSea-APP/docs/patterns/frontend-patterns.md`
+- **Regras de UX:** `OpenSea-APP/docs/patterns/ux-rules.md`
+- **Convenções Storybook:** `OpenSea-APP/docs/patterns/storybook-pattern.md`
+- **Regras universais:** `OpenSea-APP/docs/guides/developer-golden-rules.md`
+- **CLAUDE.md** (§9 Detail/Edit, §9.1 Color System, §10 Labels PT-BR) — fonte das
+  regras particulares do projeto que estas páginas formalizam visualmente.
+
+## Idioma
+
+Tudo aqui é em **português formal com acentuação correta**. Mesma regra da UI real
+do OpenSea — agentes que consumirem este catálogo devem reproduzir o tom.

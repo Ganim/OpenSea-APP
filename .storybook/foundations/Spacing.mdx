@@ -1,0 +1,56 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { SpacingBox, Grid } from './_swatch';
+
+<Meta title="Foundations/Spacing" />
+
+# Espaçamento
+
+A escala de espaçamento segue o **default do Tailwind 4**, baseado em uma unidade
+de `0.25rem` (4px) por _step_. O OpenSea-APP **não sobrescreve** essa escala via
+`@theme` em `globals.css` — o que está pintado abaixo é exatamente o que o framework
+fornece.
+
+Use as classes utilitárias `p-{n}`, `m-{n}`, `gap-{n}`, `space-x-{n}`, `space-y-{n}`,
+`px-{n}` etc. com os valores documentados aqui.
+
+## Escala canônica (0–16)
+
+Cada barra azul abaixo representa o tamanho real em pixels. Steps acima de 16
+(20, 24, 32, 40, 48, 56, 64, ...) seguem o mesmo princípio: `step * 0.25rem`.
+
+<Grid min={320}>
+  <SpacingBox step={0} rem={0} px={0} />
+  <SpacingBox step={0.5} rem={0.125} px={2} />
+  <SpacingBox step={1} rem={0.25} px={4} />
+  <SpacingBox step={1.5} rem={0.375} px={6} />
+  <SpacingBox step={2} rem={0.5} px={8} />
+  <SpacingBox step={2.5} rem={0.625} px={10} />
+  <SpacingBox step={3} rem={0.75} px={12} />
+  <SpacingBox step={3.5} rem={0.875} px={14} />
+  <SpacingBox step={4} rem={1} px={16} />
+  <SpacingBox step={5} rem={1.25} px={20} />
+  <SpacingBox step={6} rem={1.5} px={24} />
+  <SpacingBox step={7} rem={1.75} px={28} />
+  <SpacingBox step={8} rem={2} px={32} />
+  <SpacingBox step={9} rem={2.25} px={36} />
+  <SpacingBox step={10} rem={2.5} px={40} />
+  <SpacingBox step={11} rem={2.75} px={44} />
+  <SpacingBox step={12} rem={3} px={48} />
+  <SpacingBox step={14} rem={3.5} px={56} />
+  <SpacingBox step={16} rem={4} px={64} />
+</Grid>
+
+## Onde isto vem
+
+- **Fonte de verdade:** default do Tailwind 4 (não há `--spacing-*` custom em
+  `@theme` no `globals.css`).
+- **Como mudar:** adicionar `--spacing` ou tokens próprios dentro do bloco
+  `@theme {}` em `src/app/globals.css`. Atualmente o bloco só sobrescreve cores
+  e a sidebar — espaçamento permanece padrão.
+- **Boas práticas:**
+  - Cards de detalhe usam `p-5` (CLAUDE.md §9 — Identity Card).
+  - Cards de form usam `py-2` reduzido (CLAUDE.md §9 — Form Card).
+  - `Tabs` headers ganham `mb-4` quando têm `TabsList` (CLAUDE.md §9).
+  - `gap-2` / `gap-3` em ações inline; `gap-4` / `gap-6` em seções de form.
+
+> Para conferir um valor desconhecido: `step * 4 = px`. Ex.: `p-7` → 28px.

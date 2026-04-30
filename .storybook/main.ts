@@ -4,8 +4,10 @@ const config: StorybookConfig = {
   stories: [
     '../src/components/**/*.stories.@(ts|tsx)',
     './templates/**/*.stories.@(ts|tsx)',
+    './foundations/**/*.mdx',
   ],
   addons: [
+    '@storybook/addon-docs',
     '@storybook/addon-themes',
     '@storybook/addon-a11y',
     '@storybook/addon-vitest',

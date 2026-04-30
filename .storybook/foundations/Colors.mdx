@@ -1,0 +1,185 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { ColorSwatch, ThemePair, DualThemeChip, Grid } from './_swatch';
+
+<Meta title="Foundations/Colors" />
+
+# Cores
+
+A paleta do OpenSea está estruturada em três camadas (ver `src/app/globals.css`):
+
+1. **Primitivos** — `--os-{color}-{shade}` (gray, slate, blue, rose, green, orange,
+   purple). Não use diretamente em componentes.
+2. **Semânticos** — `--color-{role}` (background, foreground, primary, destructive,
+   etc.). É o que componentes consomem.
+3. **Componente** — `--btn-*`, `--card-*`, `--badge-*`, etc. Refinam o token
+   semântico para um componente específico.
+
+Esta página foca nos tokens semânticos — é o nível em que telas novas são
+implementadas.
+
+## Tokens semânticos
+
+Cada token é mostrado em **light** + **dark** lado a lado, com o valor real
+extraído de `:root` e `.dark` em `globals.css`.
+
+<Grid min={280}>
+  <ThemePair
+    name="--background"
+    description="Fundo da página."
+    light="rgb(249 250 251)"
+    dark="rgb(15 23 42)"
+  />
+  <ThemePair
+    name="--foreground"
+    description="Texto principal."
+    light="rgb(31 41 55)"
+    dark="rgb(248 250 252)"
+  />
+  <ThemePair
+    name="--primary"
+    description="Ações e links."
+    light="rgb(37 99 235)"
+    dark="rgb(59 130 246)"
+  />
+  <ThemePair
+    name="--secondary"
+    description="Botões/chips secundários."
+    light="rgb(241 245 249)"
+    dark="rgb(51 65 85)"
+  />
+  <ThemePair
+    name="--destructive"
+    description="Ações destrutivas (ROSE, não red)."
+    light="rgb(244 63 94)"
+    dark="rgb(225 29 72)"
+  />
+  <ThemePair
+    name="--muted"
+    description="Fundo neutro silencioso."
+    light="rgb(241 245 249)"
+    dark="rgb(51 65 85)"
+  />
+  <ThemePair
+    name="--accent"
+    description="Destaques e estados ativos."
+    light="rgb(239 246 255)"
+    dark="rgb(51 65 85)"
+  />
+  <ThemePair
+    name="--border"
+    description="Bordas padrão."
+    light="rgb(229 231 235)"
+    dark="rgb(51 65 85)"
+  />
+  <ThemePair
+    name="--input"
+    description="Background de inputs (compat)."
+    light="rgb(241 245 249)"
+    dark="rgb(51 65 85)"
+  />
+  <ThemePair
+    name="--ring"
+    description="Anel de foco (3px com 50% opacidade)."
+    light="rgb(59 130 246)"
+    dark="rgb(59 130 246)"
+  />
+</Grid>
+
+## Destrutivo é Rose, não Red
+
+Regra do projeto (CLAUDE.md §9.1): **toda ação destrutiva usa `rose`, nunca `red`**.
+Isso vale para botões, alertas, badges, ícones de exclusão, animação
+`error-highlight` e bordas de erro.
+
+<Grid min={220}>
+  <ColorSwatch
+    name="rose-500 (uso)"
+    value="rgb(244 63 94)"
+    textColor="light"
+    description="Excluir / revogar / cancelar"
+  />
+  <ColorSwatch
+    name="red-500 (NÃO usar)"
+    value="rgb(239 68 68)"
+    textColor="light"
+    description="Bootstrap-style — proibido"
+  />
+</Grid>
+
+**Por quê rose?** Tom mais quente, integra melhor à UI clara/escura do OpenSea e
+evita o vermelho "agressivo" estilo Bootstrap. O `red-500` permanece apenas como
+_primitive_ (`--os-red-500`) por razões de compatibilidade — não consuma direto.
+
+## Status semantic
+
+Cada estado tem um par light/dark de tons de superfície (`-50` no light, `-500/8`
+no dark) e texto (`-700` no light, `-300` no dark). Combine com o componente
+`<Badge>` — veja [Badge story](?path=/docs/ui-badge--default).
+
+<Grid min={280}>
+  <ThemePair
+    name="Success — emerald"
+    description="Concluído, ativo, aprovado."
+    light="rgb(16 185 129)"
+    dark="rgb(5 150 105)"
+  />
+  <ThemePair
+    name="Warning — amber"
+    description="Atenção, pendente de revisão."
+    light="rgb(245 158 11)"
+    dark="rgb(217 119 6)"
+  />
+  <ThemePair
+    name="Info — sky"
+    description="Informacional, dica, neutro positivo."
+    light="rgb(14 165 233)"
+    dark="rgb(2 132 199)"
+  />
+  <ThemePair
+    name="Pending — slate"
+    description="Aguardando, em rascunho."
+    light="rgb(100 116 139)"
+    dark="rgb(71 85 105)"
+  />
+</Grid>
+
+## Chips dual-theme
+
+Padrão recorrente em CLAUDE.md §9: para chips/badges semânticos, use **classes
+diferentes em light e dark** — light com fundo `-50` opaco e texto `-700`; dark
+com fundo `-500/8` translúcido e texto `-300`. Isso garante contraste WCAG AA em
+ambos os temas sem brilho excessivo no modo escuro.
+
+<Grid min={320}>
+  <DualThemeChip
+    label="Aprovado"
+    lightClasses="bg-emerald-50 text-emerald-700"
+    darkClasses="bg-emerald-500/8 text-emerald-300"
+    lightBg="rgb(236 253 245)"
+    lightFg="rgb(4 120 87)"
+    darkBg="rgba(16 185 129 / 0.08)"
+    darkFg="rgb(110 231 183)"
+  />
+  <DualThemeChip
+    label="Pendente"
+    lightClasses="bg-amber-50 text-amber-700"
+    darkClasses="bg-amber-500/8 text-amber-300"
+    lightBg="rgb(255 251 235)"
+    lightFg="rgb(180 83 9)"
+    darkBg="rgba(245 158 11 / 0.08)"
+    darkFg="rgb(252 211 77)"
+  />
+  <DualThemeChip
+    label="Excluído"
+    lightClasses="bg-rose-50 text-rose-700"
+    darkClasses="bg-rose-500/8 text-rose-300"
+    lightBg="rgb(255 241 242)"
+    lightFg="rgb(190 18 60)"
+    darkBg="rgba(244 63 94 / 0.08)"
+    darkFg="rgb(253 164 175)"
+  />
+</Grid>
+
+> **Regra de ouro:** se você está prestes a usar `bg-red-*`, pare. É `rose`. Se
+> você está prestes a usar a mesma classe em light e dark, pare — chips dual-theme
+> têm pares específicos.

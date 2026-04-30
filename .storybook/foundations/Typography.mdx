@@ -1,0 +1,117 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TypeSample } from './_swatch';
+
+<Meta title="Foundations/Typography" />
+
+# Tipografia
+
+A escala tipográfica segue o **default do Tailwind 4** (mesmo princípio da escala
+de espaçamento). A família principal é a do Next.js / `next/font` — tipicamente
+**Geist Sans** para texto e **Geist Mono** para código, configuradas em
+`src/app/layout.tsx`. Se for adicionar outra família custom, faça via `@theme {}`
+em `src/app/globals.css`.
+
+## Escala canônica
+
+Cada amostra abaixo é renderizada com o `font-size` + `line-height` reais da
+classe Tailwind correspondente, em PT-BR para refletir a UI real do produto.
+
+<TypeSample
+  className="text-xs"
+  fontSizePx={12}
+  lineHeightPx={16}
+  usage="legendas, badges, microcopy"
+  fontSize="12px"
+  lineHeight="16px"
+/>
+
+<TypeSample
+  className="text-sm"
+  fontSizePx={14}
+  lineHeightPx={20}
+  usage="UI density, body em forms, breadcrumbs"
+  fontSize="14px"
+  lineHeight="20px"
+/>
+
+<TypeSample
+  className="text-base"
+  fontSizePx={16}
+  lineHeightPx={24}
+  usage="body padrão, parágrafos longos"
+  fontSize="16px"
+  lineHeight="24px"
+/>
+
+<TypeSample
+  className="text-lg"
+  fontSizePx={18}
+  lineHeightPx={28}
+  usage="lead, subtítulos de card"
+  fontSize="18px"
+  lineHeight="28px"
+/>
+
+<TypeSample
+  className="text-xl"
+  fontSizePx={20}
+  lineHeightPx={28}
+  usage="títulos de seção, h3"
+  fontSize="20px"
+  lineHeight="28px"
+/>
+
+<TypeSample
+  className="text-2xl"
+  fontSizePx={24}
+  lineHeightPx={32}
+  usage="títulos de página, h2"
+  fontSize="24px"
+  lineHeight="32px"
+/>
+
+<TypeSample
+  className="text-3xl"
+  fontSizePx={30}
+  lineHeightPx={36}
+  usage="hero / título primário, h1"
+  fontSize="30px"
+  lineHeight="36px"
+/>
+
+<TypeSample
+  className="text-4xl"
+  fontSizePx={36}
+  lineHeightPx={40}
+  usage="dashboards, KPI numérico de destaque"
+  fontSize="36px"
+  lineHeight="40px"
+/>
+
+## Família de fonte
+
+- **Sans (default):** Geist Sans via `next/font/google` em `src/app/layout.tsx`
+  (variável CSS `--font-geist-sans`). Tailwind aplica via `font-sans` (utilitário
+  default).
+- **Mono:** Geist Mono via `next/font/google` (variável `--font-geist-mono`,
+  utilitário `font-mono`).
+- Para aplicar pesos, use as utilitárias do Tailwind: `font-medium` (500),
+  `font-semibold` (600), `font-bold` (700). Pesos abaixo de 400 são raros no
+  produto.
+
+## Pesos recomendados
+
+| Peso | Uso                                          |
+| ---- | -------------------------------------------- |
+| 400  | body padrão                                  |
+| 500  | labels, navegação, CTAs secundários          |
+| 600  | títulos de card, subtítulos, valores em KPIs |
+| 700  | títulos de página, números de destaque       |
+
+## Lembrete PT-BR
+
+Toda string visível ao usuário (label, placeholder, toast, título, mensagem de
+erro, modal, breadcrumb) é em **português formal com acentuação correta**
+(CLAUDE.md §10). Logs, comentários e identificadores em código permanecem em
+inglês. Se você está revisando uma tela e encontra "Save", "Cancel", "Loading…"
+em string visível, é bug.

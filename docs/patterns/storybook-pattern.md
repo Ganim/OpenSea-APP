@@ -133,3 +133,26 @@ Resposta esperada: SSE stream com `result.tools` listando 6 tools.
 - Edição de componente catalogado → atualizar story no mesmo PR.
 - Componentes específicos de módulo (`components/<modulo>/...`) → catalogar quando padrão se repete em 3+ módulos.
 - Revisão trimestral: rodar `npm run storybook:coverage` e identificar gaps de cobertura.
+
+## CI/Deploy
+
+### Secret obrigatório
+
+- **`FLY_API_TOKEN`** — configurar em GitHub repo → Settings → Secrets and variables → Actions → New repository secret. Token com permissão de deploy no app Fly `opensea-storybook`. Sem ele, os workflows abaixo falham.
+
+### Workflow `storybook-deploy.yml`
+
+- **Trigger:** push em `main` afetando `src/components/**`, `src/__fixtures__/**`, `.storybook/**`, `Dockerfile.storybook`, `fly.storybook.toml`, `package.json`, `package-lock.json`. Também aceita `workflow_dispatch`.
+- **Steps:** checkout → setup-flyctl → `flyctl deploy --config fly.storybook.toml --remote-only` → **Smoke health check (root + /mcp)**.
+- **Smoke health check (root + /mcp)** — depois do deploy:
+  1. Espera 10s para a máquina subir.
+  2. `GET /` com timeout 90s — falha se não-2xx.
+  3. `POST /mcp` (JSON-RPC `initialize`) com timeout 60s — falha se a resposta não contiver `"protocolVersion"`.
+  4. Em qualquer falha, tenta despejar as últimas 100 linhas de `flyctl logs --app opensea-storybook` (best-effort).
+
+### Workflow `storybook-warmup.yml`
+
+- **Schedule:** a cada 30 minutos das 11:00 às 22:00 UTC, segunda a sexta (= 8:00–19:00 BRT). Também aceita `workflow_dispatch`.
+- **Por que existe:** o app Fly tem `auto_stop_machines = true`, então fica suspenso após ociosidade. Cold start é ~20s, ruim para agentes que consultam o MCP de forma reativa. O ping mantém quente durante horário de trabalho.
+- **Trade-off:** gasta uma fração da quota Fly free; aceitável em troca da latência sumir.
+- **Como desabilitar:** deletar o arquivo `.github/workflows/storybook-warmup.yml` OU comentar todo o bloco `schedule:` dele (mantendo `workflow_dispatch:` se quiser ainda poder pingar manualmente).
