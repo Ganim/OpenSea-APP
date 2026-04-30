@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "storybook-local": {
+      "type": "http",
+      "url": "http://localhost:6006/mcp"
+    },
+    "storybook-deployed": {
+      "type": "http",
+      "url": "https://opensea-storybook.fly.dev/mcp"
+    }
+  }
+}
