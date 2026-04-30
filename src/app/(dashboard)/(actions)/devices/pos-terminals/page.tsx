@@ -37,8 +37,11 @@ import {
   useUpdatePosTerminal,
   useDeletePosTerminal,
   usePairThisDevice,
-  useUnpairDevice,
+  useRevokeDevice,
+  useTerminalEvents,
 } from '@/hooks/sales';
+import { ApiError } from '@/lib/api-client.types';
+import { toast } from 'sonner';
 import { useWarehouses } from '@/hooks/stock/use-warehouses';
 import type {
   PosTerminal,
@@ -68,6 +71,7 @@ import {
 } from 'lucide-react';
 import { PairingCodeDisplay } from './_components/pairing-code-display';
 import { EditTerminalDialog } from './_components/edit-terminal-dialog';
+import { ForceRevokeDialog } from './_components/force-revoke-dialog';
 
 const DEVICE_TOKEN_KEY = 'pos_device_token';
 
@@ -178,7 +182,11 @@ export default function PosTerminalsPage() {
   const updateTerminal = useUpdatePosTerminal();
   const deleteTerminal = useDeletePosTerminal();
   const pairThisDevice = usePairThisDevice();
-  const unpairDevice = useUnpairDevice();
+  const revokeDevice = useRevokeDevice();
+
+  // Subscribe to /admin/pos WS events (terminal.synced/unpaired/paired) and
+  // patch the React Query cache reactively without manual refetches.
+  useTerminalEvents();
 
   // Wizard state
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -190,6 +198,13 @@ export default function PosTerminalsPage() {
   const [deleteTarget, setDeleteTarget] = useState<PosTerminal | null>(null);
   const [unpairTarget, setUnpairTarget] = useState<PosTerminal | null>(null);
   const [editTarget, setEditTarget] = useState<PosTerminal | null>(null);
+
+  // Revoke flow 4b — initial PIN-gated revoke + 409 force fallback dialog.
+  const [forceRevokeState, setForceRevokeState] = useState<{
+    open: boolean;
+    terminal: { id: string; name: string } | null;
+    openSessionId: string | null;
+  }>({ open: false, terminal: null, openSessionId: null });
 
   // Device-already-paired state (to hide "Pair this device" button)
   const [hasLocalDeviceToken, setHasLocalDeviceToken] = useState(false);
@@ -246,8 +261,52 @@ export default function PosTerminalsPage() {
 
   async function handleConfirmUnpair() {
     if (!unpairTarget) return;
-    await unpairDevice.mutateAsync({ id: unpairTarget.id });
+    const { id, terminalName } = unpairTarget;
     setUnpairTarget(null);
+
+    try {
+      await revokeDevice.mutateAsync({ terminalId: id });
+      toast.success(`Terminal "${terminalName}" revogado.`);
+    } catch (err: unknown) {
+      const data =
+        err instanceof ApiError
+          ? (err.data as
+              | { requiresForce?: boolean; openSessionId?: string }
+              | undefined)
+          : undefined;
+
+      if (
+        err instanceof ApiError &&
+        err.status === 409 &&
+        data?.requiresForce &&
+        data.openSessionId
+      ) {
+        setForceRevokeState({
+          open: true,
+          terminal: { id, name: terminalName },
+          openSessionId: data.openSessionId,
+        });
+      } else {
+        toast.error('Falha ao revogar terminal.');
+      }
+    }
+  }
+
+  async function handleForceRevoke() {
+    if (!forceRevokeState.terminal) return;
+    const { id, name } = forceRevokeState.terminal;
+    try {
+      await revokeDevice.mutateAsync({ terminalId: id, force: true });
+      toast.success(`Terminal "${name}" revogado (sessão descartada).`);
+    } catch {
+      toast.error('Falha ao forçar revogação.');
+    } finally {
+      setForceRevokeState({
+        open: false,
+        terminal: null,
+        openSessionId: null,
+      });
+    }
   }
 
   const wizardSteps: WizardStep[] = useMemo(() => {
@@ -482,6 +541,7 @@ export default function PosTerminalsPage() {
                 return (
                   <Card
                     key={terminal.id}
+                    data-testid={`pos-terminal-row-${terminal.id}`}
                     className={cn(
                       'group relative overflow-hidden border bg-white dark:bg-slate-800/60 p-5 transition-all hover:shadow-md',
                       cfg.border
@@ -518,6 +578,7 @@ export default function PosTerminalsPage() {
                             )}
                             {canModify && terminal.hasPairing && (
                               <DropdownMenuItem
+                                data-testid={`pos-terminal-revoke-${terminal.id}`}
                                 onClick={() => setUnpairTarget(terminal)}
                               >
                                 <Link2Off className="mr-2 h-4 w-4" />
@@ -629,6 +690,16 @@ export default function PosTerminalsPage() {
                               : 'Nunca conectou'}
                           </span>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Download className="h-3 w-3 shrink-0" />
+                          <span
+                            data-testid={`pos-terminal-last-sync-${terminal.id}`}
+                          >
+                            {terminal.lastCatalogSyncAt
+                              ? `Sincronizado ${formatRelative(terminal.lastCatalogSyncAt)}`
+                              : 'Nunca sincronizado'}
+                          </span>
+                        </div>
                       </div>
                     )}
 
@@ -717,6 +788,17 @@ export default function PosTerminalsPage() {
           if (!open) setEditTarget(null);
         }}
       />
+
+      {/* Force-revoke (revoke flow 4b) — open-session warning + PIN gate */}
+      {forceRevokeState.terminal && forceRevokeState.openSessionId && (
+        <ForceRevokeDialog
+          open={forceRevokeState.open}
+          onOpenChange={open => setForceRevokeState(s => ({ ...s, open }))}
+          terminalName={forceRevokeState.terminal.name}
+          openSessionId={forceRevokeState.openSessionId}
+          onConfirm={handleForceRevoke}
+        />
+      )}
     </PageLayout>
   );
 }
