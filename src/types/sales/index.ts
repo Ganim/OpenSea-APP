@@ -49,6 +49,7 @@ export {
 export * from './pipeline.types';
 export * from './pos.types';
 export * from './pos-conflict.types';
+export * from './pos-terminal-events.types';
 export * from './pos-fiscal-config.types';
 export * from './pos-terminal-operator.types';
 export * from './pos-terminal-zone.types';

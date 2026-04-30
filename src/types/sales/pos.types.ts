@@ -34,6 +34,11 @@ export interface PosTerminal {
   // Pairing summary + connectivity (only present in list responses; null when unpaired).
   pairing?: PosTerminalPairingSummary | null;
   isOnline?: boolean;
+  // Realtime sync telemetry (Emporion WS events). Optional because legacy
+  // responses may not surface them; consumers must tolerate `undefined`.
+  lastCatalogSyncAt?: string | null;
+  pendingSales?: number;
+  conflictSales?: number;
   // Emporion Fase 1 — operator session + coordination + applied profile.
   // Optional in the type because legacy seeds / older list responses may not
   // surface them; consumers should fall back to backend defaults.
