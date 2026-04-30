@@ -2,6 +2,7 @@ import type { Preview } from '@storybook/react';
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { withThemeByClassName } from '@storybook/addon-themes';
+import { MINIMAL_VIEWPORTS } from 'storybook/viewport';
 import React from 'react';
 import '../src/app/globals.css';
 
@@ -31,6 +32,13 @@ const preview: Preview = {
       },
     },
     backgrounds: { disable: true },
+    viewport: {
+      // Built-in viewports do core do Storybook 10 (`storybook/viewport`).
+      // Não exigimos addon separado: `parameters.viewport.options` já habilita
+      // o toolbar de viewport no canvas. `initialGlobals.viewport` (abaixo)
+      // não é definido => canvas inicia em "reset" (full responsive).
+      options: MINIMAL_VIEWPORTS,
+    },
   },
   decorators: [
     withThemeByClassName({
