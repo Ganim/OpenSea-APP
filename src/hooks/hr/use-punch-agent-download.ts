@@ -20,10 +20,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+// Renomeado em Milestone v3.0 (2026-04-30): OpenSea-Punch-Agent → OpenSea-Horus.
+// O repo público de releases segue o padrão `*-Releases` do Satellite Contract v1.
 const OWNER = 'OpenSea-ERP';
-const REPO = 'OpenSea-Punch-Agent';
+const REPO = 'OpenSea-Horus-Releases';
 const GITHUB_RELEASES_API = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
 const FALLBACK_BASE = `https://github.com/${OWNER}/${REPO}/releases/latest/download`;
+// v0.1.0+ usa filename pattern `OpenSeaHorus-Setup-*` (renomeado de `OpenSeaPunchAgent-Setup-*`).
+const FILENAME_PREFIX = 'OpenSeaHorus-Setup-';
 
 export interface PunchAgentRelease {
   version: string;
@@ -68,20 +72,19 @@ async function fetchLatestRelease(): Promise<PunchAgentRelease> {
       publishedAt: data.published_at ?? null,
       msiUrl:
         msiAsset?.browser_download_url ??
-        `${FALLBACK_BASE}/OpenSeaPunchAgent-Setup-${version}.msi`,
+        `${FALLBACK_BASE}/${FILENAME_PREFIX}${version}.msi`,
       exeUrl:
         exeAsset?.browser_download_url ??
-        `${FALLBACK_BASE}/OpenSeaPunchAgent-Setup-${version}.exe`,
+        `${FALLBACK_BASE}/${FILENAME_PREFIX}${version}.exe`,
       isFallback: false,
     };
   } catch {
     // Graceful degradation: return fallback URLs without a version number.
-    // The download page will still function; version shown as "mais recente".
     return {
       version: 'latest',
       publishedAt: null,
-      msiUrl: `${FALLBACK_BASE}/OpenSeaPunchAgent-Setup-latest.msi`,
-      exeUrl: `${FALLBACK_BASE}/OpenSeaPunchAgent-Setup-latest.exe`,
+      msiUrl: `${FALLBACK_BASE}/${FILENAME_PREFIX}latest.msi`,
+      exeUrl: `${FALLBACK_BASE}/${FILENAME_PREFIX}latest.exe`,
       isFallback: true,
     };
   }
