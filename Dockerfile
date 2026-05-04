@@ -28,6 +28,8 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV NEXT_PUBLIC_EXTERNAL_API_BASE_URL=${NEXT_PUBLIC_EXTERNAL_API_BASE_URL}
 
 # Build the application
+# Bumping heap to 4GB — Next.js 16 + project size estoura o default ~2GB durante typecheck
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # Next.js 16 standalone output nests files under a project-name subdirectory.
