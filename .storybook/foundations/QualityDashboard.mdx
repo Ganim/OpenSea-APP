@@ -32,12 +32,14 @@ Proporção de componentes `.tsx` (excluindo stories) que possuem ao menos um ar
   <tbody>
     {coverageBySubfolder.map(row => (
       <tr key={row.path}>
-        <td><code>{row.path}</code></td>
+        <td>
+          <code>{row.path}</code>
+        </td>
         <td>{row.total}</td>
         <td>{row.storied}</td>
         <td>
           {row.total > 0
-            ? `${Math.round(row.storied / row.total * 100)}%`
+            ? `${Math.round((row.storied / row.total) * 100)}%`
             : '—'}
         </td>
       </tr>
@@ -52,15 +54,18 @@ Proporção de componentes `.tsx` (excluindo stories) que possuem ao menos um ar
 Componentes com anotação `@deprecated` no código-fonte. Devem ser substituídos ou removidos.
 
 {deprecatedComponents.length === 0 ? (
-  <p>Nenhum componente marcado como <code>@deprecated</code> encontrado.</p>
+
+<p>
+  Nenhum componente marcado como <code>@deprecated</code> encontrado.
+</p>
 ) : (
-  <ul>
-    {deprecatedComponents.map(d => (
-      <li key={d.file}>
-        <code>{d.file}</code> — {d.count} ocorrência(s)
-      </li>
-    ))}
-  </ul>
+<ul>
+  {deprecatedComponents.map(d => (
+    <li key={d.file}>
+      <code>{d.file}</code> — {d.count} ocorrência(s)
+    </li>
+  ))}
+</ul>
 )}
 
 ---
@@ -70,16 +75,23 @@ Componentes com anotação `@deprecated` no código-fonte. Devem ser substituíd
 Stories que não possuem um bloco `play:` para testes de interação automatizados. Considere adicionar interações para aumentar a cobertura de comportamento.
 
 {storiesWithoutPlay.length === 0 ? (
-  <p>Todas as stories possuem função <code>play</code>.</p>
+
+<p>
+  Todas as stories possuem função <code>play</code>.
+</p>
 ) : (
-  <details>
-    <summary>{storiesWithoutPlay.length} stories sem <code>play</code></summary>
-    <ul>
-      {storiesWithoutPlay.map(f => (
-        <li key={f}><code>{f}</code></li>
-      ))}
-    </ul>
-  </details>
+<details>
+  <summary>
+    {storiesWithoutPlay.length} stories sem <code>play</code>
+  </summary>
+  <ul>
+    {storiesWithoutPlay.map(f => (
+      <li key={f}>
+        <code>{f}</code>
+      </li>
+    ))}
+  </ul>
+</details>
 )}
 
 ---
@@ -113,7 +125,9 @@ Top 10 stories por data de última modificação (via `git log`).
   <tbody>
     {recentStories.map(s => (
       <tr key={s.file}>
-        <td><code>{s.file}</code></td>
+        <td>
+          <code>{s.file}</code>
+        </td>
         <td>{s.modifiedAt || '—'}</td>
       </tr>
     ))}

@@ -3,12 +3,15 @@ import { Meta } from '@storybook/blocks';
 <Meta title="Patterns/Creating Dashboard" />
 
 O dashboard de módulo deve seguir o template documentado em
-<a href="?path=/docs/pages-dashboardpagetemplate--default">Pages/DashboardPageTemplate</a>.
-A anatomia é simples, mas precisa ser disciplinada: `PageLayout` > `PageHeader` >
-`PageBody` > grade de métricas > seções secundárias. As quatro métricas principais
-sempre aparecem no topo em um grid responsivo `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`.
-Esse bloco concentra leitura executiva imediata; não misture atalhos ou alertas no
-mesmo agrupamento.
+
+<a href="?path=/docs/pages-dashboardpagetemplate--default">
+  Pages/DashboardPageTemplate
+</a>
+. A anatomia é simples, mas precisa ser disciplinada: `PageLayout` >
+`PageHeader` > `PageBody` > grade de métricas > seções secundárias. As quatro
+métricas principais sempre aparecem no topo em um grid responsivo `grid-cols-1
+sm:grid-cols-2 lg:grid-cols-4`. Esse bloco concentra leitura executiva imediata;
+não misture atalhos ou alertas no mesmo agrupamento.
 
 Cada `StatsCard` recebe `label`, `value`, `trend.value`, `trend.isPositive` e
 `gradient`, além do `icon`. A ideia é padronizar densidade e leitura visual sem
@@ -23,7 +26,13 @@ profunda, direcione para a rota específica do módulo. Aqui o foco é orientar,
 resumir e destravar ação rápida.
 
 ```tsx
-import { AlertTriangle, Package, Plus, TrendingUp, Warehouse } from 'lucide-react';
+import {
+  AlertTriangle,
+  Package,
+  Plus,
+  TrendingUp,
+  Warehouse,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageBody, PageLayout } from '@/components/layout/page-layout';
@@ -31,23 +40,65 @@ import { PageHeader } from '@/components/shared/page-header';
 import { StatsCard } from '@/components/shared/stats-card';
 
 const stats = [
-  { label: 'Produtos ativos', value: '1.248', icon: <Package />, trend: { value: 8, isPositive: true }, gradient: 'from-blue-500 to-indigo-600' },
-  { label: 'Armazéns', value: '12', icon: <Warehouse />, trend: { value: 0, isPositive: true }, gradient: 'from-emerald-500 to-teal-600' },
-  { label: 'Entradas hoje', value: '84', icon: <TrendingUp />, trend: { value: 12, isPositive: true }, gradient: 'from-amber-500 to-orange-600' },
-  { label: 'Alertas críticos', value: '3', icon: <AlertTriangle />, trend: { value: 25, isPositive: false }, gradient: 'from-rose-500 to-red-600' },
+  {
+    label: 'Produtos ativos',
+    value: '1.248',
+    icon: <Package />,
+    trend: { value: 8, isPositive: true },
+    gradient: 'from-blue-500 to-indigo-600',
+  },
+  {
+    label: 'Armazéns',
+    value: '12',
+    icon: <Warehouse />,
+    trend: { value: 0, isPositive: true },
+    gradient: 'from-emerald-500 to-teal-600',
+  },
+  {
+    label: 'Entradas hoje',
+    value: '84',
+    icon: <TrendingUp />,
+    trend: { value: 12, isPositive: true },
+    gradient: 'from-amber-500 to-orange-600',
+  },
+  {
+    label: 'Alertas críticos',
+    value: '3',
+    icon: <AlertTriangle />,
+    trend: { value: 25, isPositive: false },
+    gradient: 'from-rose-500 to-red-600',
+  },
 ];
 
 export function StockDashboardPage() {
   return (
     <PageLayout>
-      <PageHeader title="Estoque" description="Visão geral do módulo" icon={<Package />} gradient="from-blue-500 to-indigo-600" actions={<Button size="sm"><Plus className="h-4 w-4" /> Novo produto</Button>} />
+      <PageHeader
+        title="Estoque"
+        description="Visão geral do módulo"
+        icon={<Package />}
+        gradient="from-blue-500 to-indigo-600"
+        actions={
+          <Button size="sm">
+            <Plus className="h-4 w-4" /> Novo produto
+          </Button>
+        }
+      />
       <PageBody>
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(stat => <StatsCard key={stat.label} {...stat} />)}
+          {stats.map(stat => (
+            <StatsCard key={stat.label} {...stat} />
+          ))}
         </section>
-        <section><Card className="p-6">Atalhos rápidos</Card></section>
-        <section><Card className="p-6">Atividade recente</Card></section>
-        <section><Card className="p-6">Alertas</Card></section>
+        <section>
+          <Card className="p-6">Atalhos rápidos</Card>
+        </section>
+        <section>
+          <Card className="p-6">Atividade recente</Card>
+        </section>
+        <section>
+          <Card className="p-6">Alertas</Card>
+        </section>
       </PageBody>
     </PageLayout>
   );

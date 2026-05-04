@@ -580,12 +580,12 @@ manual. RBAC 4-níveis `system.webhooks.endpoints.*` (ADR-031, admin-only D-10).
 
 ### Routes
 
-| Rota                           | Permissão                                  | Descrição                                                                                                                                  |
-| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/devices/webhooks`            | `system.webhooks.endpoints.access`         | Listing infinite scroll com Status DropdownMenu (4 opções) + busca + counter `N/50` (slate→amber@45→rose@50, D-34); auto-disabled no topo. |
-| `/devices/webhooks/new`        | `system.webhooks.endpoints.register`       | Wizard 3 passos (Identificação → Eventos → Secret revelado UMA vez). Step 3 mostra snippets Node/Python/Go anti-replay (D-06).             |
-| `/devices/webhooks/[id]`       | `system.webhooks.endpoints.access`         | Detail + 3 tabs (Visão geral / Entregas / Configuração). Banner auto-disable + DeliveryDetailDrawer 480px + 4 ações inline. PIN gate em Excluir + Reativar. |
-| `/devices/webhooks/[id]/edit`  | `system.webhooks.endpoints.modify`         | Form com URL read-only + descrição + status switch + eventos + versão + Regenerar secret. PIN gate (`system.webhooks.endpoints.admin`) em Regenerar (D-08). |
+| Rota                          | Permissão                            | Descrição                                                                                                                                                   |
+| ----------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/devices/webhooks`           | `system.webhooks.endpoints.access`   | Listing infinite scroll com Status DropdownMenu (4 opções) + busca + counter `N/50` (slate→amber@45→rose@50, D-34); auto-disabled no topo.                  |
+| `/devices/webhooks/new`       | `system.webhooks.endpoints.register` | Wizard 3 passos (Identificação → Eventos → Secret revelado UMA vez). Step 3 mostra snippets Node/Python/Go anti-replay (D-06).                              |
+| `/devices/webhooks/[id]`      | `system.webhooks.endpoints.access`   | Detail + 3 tabs (Visão geral / Entregas / Configuração). Banner auto-disable + DeliveryDetailDrawer 480px + 4 ações inline. PIN gate em Excluir + Reativar. |
+| `/devices/webhooks/[id]/edit` | `system.webhooks.endpoints.modify`   | Form com URL read-only + descrição + status switch + eventos + versão + Regenerar secret. PIN gate (`system.webhooks.endpoints.admin`) em Regenerar (D-08). |
 
 ### Entry points
 

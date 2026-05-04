@@ -27,9 +27,16 @@ import type { ContextMenuAction } from '@/core/components/entity-context-menu';
 import { EntityContextMenu } from '@/core/components/entity-context-menu';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 
-export function ContractRow({ contract }: { contract: { id: string; name: string } }) {
+export function ContractRow({
+  contract,
+}: {
+  contract: { id: string; name: string };
+}) {
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
-  const [pendingContract, setPendingContract] = useState<{ id: string; name: string } | null>(null);
+  const [pendingContract, setPendingContract] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const actions: ContextMenuAction[] = [
     {
@@ -51,7 +58,9 @@ export function ContractRow({ contract }: { contract: { id: string; name: string
       <VerifyActionPinModal
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}
-        onSuccess={() => pendingContract ? deleteContract(pendingContract.id) : undefined}
+        onSuccess={() =>
+          pendingContract ? deleteContract(pendingContract.id) : undefined
+        }
         title="Excluir contrato"
         description={`Digite seu PIN de ação para excluir "${pendingContract?.name ?? 'este contrato'}". Esta ação não pode ser desfeita.`}
       />

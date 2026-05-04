@@ -71,29 +71,63 @@ export default defineConfig({
         plugins: [
           storybookTest({
             configDir: path.join(dirname, '.storybook'),
-            // When OPENSEA_VISUAL_REGRESSION=1, restrict to stories that opt in
-            // via `tags: ['visual']` so the screenshot suite is isolated from the
-            // a11y gate (which runs on the default `'test'` tag).
-            ...(VISUAL_REGRESSION ? { tags: { include: ['visual'] } } : {}),
+            // OPENSEA_VISUAL_REGRESSION=1 → roda APENAS stories tagged 'visual'.
+            // Default (CI/local sem flag) → exclui 'visual' (baselines hoje são
+            // win32-only; CI Linux gera pixels diferentes e quebra). Reabilitar
+            // no default quando os baselines forem regenerados em CI Linux ou
+            // quando comparator tolerar drift cross-platform. Tracked em memory:
+            // "Visual regression DESBLOQUEADO 2026-04-30, perguntas pendentes".
+            ...(VISUAL_REGRESSION
+              ? { tags: { include: ['visual'] } }
+              : { tags: { exclude: ['visual'] } }),
           }),
         ],
         resolve: { alias: sharedAlias },
         test: {
           name: 'storybook',
+          // `toMatchScreenshot` polls up to its `timeout` waiting for two
+          // pixel-stable captures. The default browser-mode `testTimeout`
+          // (15s) aborts the test wrapper before the matcher can resolve, so
+          // the run fails with "Test timed out in 15000ms" even when the
+          // screenshot would have settled. Set well above the matcher
+          // timeout (60s below) so we always see the matcher's own error
+          // rather than the wrapper's.
+          testTimeout: 90000,
           browser: {
             enabled: true,
             headless: true,
             provider: playwright({}),
             instances: [{ browser: 'chromium' }],
-            // Sensible default for visual regression: pixelmatch with a small
-            // ratio tolerance to absorb sub-pixel font/AA noise. Stories can
-            // override per-call via `toMatchScreenshot(name, { ... })`.
+            // Visual regression comparator. Pixelmatch with 1% mismatch
+            // tolerance absorbs minor sub-pixel rendering noise across
+            // platforms. Per-call overrides via `toMatchScreenshot(name, {})`.
+            //
+            // `timeout` is the stability poll budget: the matcher repeatedly
+            // captures screenshots and compares N+1 vs N until two consecutive
+            // captures are pixel-equal (within tolerance), then runs the final
+            // baseline comparison. 60s is needed in practice because cold
+            // Chromium mounts in this monorepo (heavy globals.css + tokens
+            // resolution) take 10-20s before first paint, and the cross-frame
+            // sequence (mount → hydrate → next-themes apply class → screenshot)
+            // needs 2-3 stable poll iterations. The default (5s) is too short.
             expect: {
               toMatchScreenshot: {
                 comparatorName: 'pixelmatch',
                 comparatorOptions: {
                   allowedMismatchedPixelRatio: 0.01,
                 },
+                screenshotOptions: {
+                  animations: 'disabled',
+                  // Each `locator.screenshot()` call has its own actionability
+                  // timeout (Playwright default 30s). The matcher polls until
+                  // two captures match, but each capture call must succeed
+                  // first. Without this, the underlying call dies at 30s with
+                  // `locator.screenshot: Timeout 30000ms exceeded` even though
+                  // the matcher budget is 60s. Aligning to 60s lets Playwright
+                  // wait for the element to settle within the matcher window.
+                  timeout: 60000,
+                },
+                timeout: 60000,
               },
             },
           },

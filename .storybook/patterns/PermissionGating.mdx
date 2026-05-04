@@ -28,7 +28,13 @@ import { STOCK_PERMISSIONS } from '@/app/(dashboard)/(modules)/stock/_shared/con
 
 const PERMISSIONS = { STOCK: STOCK_PERMISSIONS };
 
-export function ProductsActions({ item, selectedIds }: { item: { id: string }; selectedIds: string[] }) {
+export function ProductsActions({
+  item,
+  selectedIds,
+}: {
+  item: { id: string };
+  selectedIds: string[];
+}) {
   const { hasPermission } = usePermissions();
   const canCreate = hasPermission(PERMISSIONS.STOCK.PRODUCTS.CREATE);
   const canEdit = hasPermission(PERMISSIONS.STOCK.PRODUCTS.MODIFY);
@@ -36,19 +42,47 @@ export function ProductsActions({ item, selectedIds }: { item: { id: string }; s
 
   return (
     <>
-      {canCreate ? <Button size="sm"><Plus className="h-4 w-4" /> Novo produto</Button> : null}
+      {canCreate ? (
+        <Button size="sm">
+          <Plus className="h-4 w-4" /> Novo produto
+        </Button>
+      ) : null}
 
       <EntityContextMenu
         itemId={item.id}
         actions={[
-          ...(canEdit ? [{ label: 'Editar', icon: Edit, onClick: () => openEdit(item.id) }] : []),
-          ...(canDelete ? [{ label: 'Excluir', icon: Trash2, onClick: () => requestDelete(item.id) }] : []),
+          ...(canEdit
+            ? [
+                {
+                  label: 'Editar',
+                  icon: Edit,
+                  onClick: () => openEdit(item.id),
+                },
+              ]
+            : []),
+          ...(canDelete
+            ? [
+                {
+                  label: 'Excluir',
+                  icon: Trash2,
+                  onClick: () => requestDelete(item.id),
+                },
+              ]
+            : []),
         ]}
       >
         <div data-item-card />
       </EntityContextMenu>
 
-      {canDelete ? <SelectionToolbar selectedIds={selectedIds} totalItems={200} onClear={clearSelection} defaultActions={{ delete: true }} handlers={{ onDelete: requestBulkDelete }} /> : null}
+      {canDelete ? (
+        <SelectionToolbar
+          selectedIds={selectedIds}
+          totalItems={200}
+          onClear={clearSelection}
+          defaultActions={{ delete: true }}
+          handlers={{ onDelete: requestBulkDelete }}
+        />
+      ) : null}
     </>
   );
 }

@@ -3,11 +3,14 @@ import { Meta } from '@storybook/blocks';
 <Meta title="Patterns/Creating Listing Page" />
 
 Este padrão descreve a montagem de uma página de listagem nova a partir da story
-<a href="?path=/docs/pages-entitylistpagetemplate--default">Pages/EntityListPageTemplate</a>.
-A sequência canônica é: `PageLayout` > `PageHeader` > `PageBody` >
-`SearchBar` > `GridLoading | GridError | EntityGrid` > `SelectionToolbar` >
-modais. A regra mais importante é estrutural: a busca livre fica acima do grid,
-mas filtros facetados e chips de refinamento entram dentro do `EntityGrid` via
+
+<a href="?path=/docs/pages-entitylistpagetemplate--default">
+  Pages/EntityListPageTemplate
+</a>
+. A sequência canônica é: `PageLayout` > `PageHeader` > `PageBody` > `SearchBar`
+> `GridLoading | GridError | EntityGrid` > `SelectionToolbar` > modais. A regra
+mais importante é estrutural: a busca livre fica acima do grid, mas filtros
+facetados e chips de refinamento entram dentro do `EntityGrid` via
 `toolbarStart`, nunca em um bloco solto antes da grade. Isso mantém desktop e
 mobile consistentes, inclusive no drawer de filtros do grid.
 
@@ -28,7 +31,11 @@ import { GridError } from '@/components/handlers/grid-error';
 import { GridLoading } from '@/components/handlers/grid-loading';
 import { SearchBar } from '@/components/layout/search-bar';
 import { PageActionBar } from '@/components/layout/page-action-bar';
-import { PageBody, PageHeader, PageLayout } from '@/components/layout/page-layout';
+import {
+  PageBody,
+  PageHeader,
+  PageLayout,
+} from '@/components/layout/page-layout';
 import { VerifyActionPinModal } from '@/components/modals/verify-action-pin-modal';
 import { Button } from '@/components/ui/button';
 import { EntityGrid } from '@/core/components/entity-grid';
@@ -38,11 +45,18 @@ export function ProductsPage() {
   return (
     <PageLayout>
       <PageHeader>
-        <PageActionBar breadcrumbItems={breadcrumbItems} buttons={headerButtons} />
+        <PageActionBar
+          breadcrumbItems={breadcrumbItems}
+          buttons={headerButtons}
+        />
       </PageHeader>
 
       <PageBody>
-        <SearchBar value={query} onSearch={setQuery} placeholder="Buscar produtos..." />
+        <SearchBar
+          value={query}
+          onSearch={setQuery}
+          placeholder="Buscar produtos..."
+        />
 
         {isLoading ? (
           <GridLoading count={9} layout="grid" size="md" gap="gap-4" />
@@ -59,19 +73,35 @@ export function ProductsPage() {
             renderListItem={renderListItem}
             toolbarStart={
               <>
-                <Button size="sm" variant="outline">Status: Ativos</Button>
-                <Button size="sm" variant="outline">Categoria: Camisetas</Button>
+                <Button size="sm" variant="outline">
+                  Status: Ativos
+                </Button>
+                <Button size="sm" variant="outline">
+                  Categoria: Camisetas
+                </Button>
               </>
             }
             activeFilterCount={2}
-            onItemDoubleClick={item => router.push(`/stock/products/${item.id}`)}
+            onItemDoubleClick={item =>
+              router.push(`/stock/products/${item.id}`)
+            }
           />
         )}
 
-        {selectedIds.length > 0 && <SelectionToolbar selectedIds={selectedIds} totalItems={totalItems} onClear={clearSelection} />}
+        {selectedIds.length > 0 && (
+          <SelectionToolbar
+            selectedIds={selectedIds}
+            totalItems={totalItems}
+            onClear={clearSelection}
+          />
+        )}
         <div ref={loadMoreRef} />
         {/* Modais do módulo: Rename, Create, Duplicate; Delete sempre com PIN */}
-        <VerifyActionPinModal isOpen={isDeletePinOpen} onClose={closeDeletePin} onSuccess={confirmDelete} />
+        <VerifyActionPinModal
+          isOpen={isDeletePinOpen}
+          onClose={closeDeletePin}
+          onSuccess={confirmDelete}
+        />
       </PageBody>
     </PageLayout>
   );
