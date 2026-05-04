@@ -96,7 +96,7 @@ function DeviceRow({ device }: { device: PunchDeviceHealthItem }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{device.name ?? 'Sem nome'}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {device.deviceKind ?? '—'} ·{' '}
+          {device.location ?? '—'} ·{' '}
           {device.lastSeenAt
             ? new Date(device.lastSeenAt).toLocaleString('pt-BR')
             : 'Sem comunicação'}
