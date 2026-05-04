@@ -417,7 +417,12 @@ function Content() {
             message={
               translateError(error) ?? 'Não foi possível carregar dispositivos.'
             }
-            onRetry={() => refetch()}
+            action={{
+              label: 'Tentar novamente',
+              onClick: () => {
+                refetch();
+              },
+            }}
           />
         )}
         {!isLoading && !isError && data && (
