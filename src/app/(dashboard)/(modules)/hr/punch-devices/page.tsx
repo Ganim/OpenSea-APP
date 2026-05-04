@@ -427,7 +427,7 @@ function Content() {
         )}
         {!isLoading && !isError && data && (
           <div className="space-y-3">
-            {data.length === 0 ? (
+            {data.devices.length === 0 ? (
               <Card className="flex flex-col items-center gap-3 p-12 text-center">
                 <Cpu className="h-12 w-12 text-muted-foreground/50" />
                 <div>
@@ -450,7 +450,9 @@ function Content() {
                 )}
               </Card>
             ) : (
-              data.map(device => <DeviceRow key={device.id} device={device} />)
+              data.devices.map(device => (
+                <DeviceRow key={device.id} device={device} />
+              ))
             )}
           </div>
         )}
