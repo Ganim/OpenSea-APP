@@ -5,7 +5,6 @@
 
 import type { MenuItem } from '@/types/menu';
 import { adminMenu } from './admin';
-import { devicesMenu } from './devices';
 import { financeMenu } from './finance';
 import { hrMenu } from './hr';
 import { productionMenu } from './production';
@@ -18,6 +17,5 @@ export const menuItems: MenuItem[] = [
   productionMenu,
   hrMenu,
   financeMenu,
-  devicesMenu,
   adminMenu,
 ];

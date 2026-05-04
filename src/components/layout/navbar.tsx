@@ -12,7 +12,8 @@ import { useUltrawide } from '@/hooks/use-layout-preferences';
 import { PrintQueuePanel } from '@/core/print-queue';
 import { CartIndicator } from '@/components/layout/cart-indicator';
 
-import { Crown, Grid3x3, LayoutDashboard } from 'lucide-react';
+import { Crown, LayoutDashboard } from 'lucide-react';
+import { PiGridFourFill } from 'react-icons/pi';
 import Link from 'next/link';
 import { UserDropdown } from './user-dropdown';
 
@@ -65,7 +66,7 @@ export function Navbar({ onMenuOpen }: NavbarProps) {
               onClick={onMenuOpen}
               aria-label="Abrir menu de navegação"
             >
-              <Grid3x3 className="w-5 h-5" />
+              <PiGridFourFill className="w-5 h-5" />
             </Button>
 
             <UserDropdown />

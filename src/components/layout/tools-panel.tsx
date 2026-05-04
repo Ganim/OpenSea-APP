@@ -23,13 +23,16 @@ import {
   FileSignature,
   FolderOpen,
   KanbanSquare,
-  Layout,
   Mail,
+  Printer,
   Search,
-  Wrench,
+  ShoppingCart,
+  Clock,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { PiDesktopDuotone } from 'react-icons/pi';
+import { RiAppsFill, RiAppsLine } from 'react-icons/ri';
 
 // Mapeamento de nomes de ícones Lucide para componentes
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -46,7 +49,35 @@ interface ToolsPanelProps {
   menuItems: MenuItem[];
 }
 
-type TabId = 'navigation' | 'tools';
+type TabId = 'navigation' | 'devices' | 'tools';
+
+interface DeviceItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+}
+
+const DEVICES: DeviceItem[] = [
+  {
+    id: 'remote-prints',
+    label: 'Impressoras Remotas',
+    icon: Printer,
+    href: '/devices/remote-prints',
+  },
+  {
+    id: 'pos-terminals',
+    label: 'Terminal de Vendas',
+    icon: ShoppingCart,
+    href: '/devices/pos-terminals',
+  },
+  {
+    id: 'punch-terminal',
+    label: 'Terminal de Ponto',
+    icon: Clock,
+    href: '/devices/punch-terminal',
+  },
+];
 
 export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
   const router = useRouter();
@@ -131,6 +162,19 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
           tool.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : visibleTools;
+
+  // ──────────── Dispositivos filtrados pela busca ────────────
+
+  const filteredDevices = searchQuery
+    ? DEVICES.filter(device =>
+        device.label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : DEVICES;
+
+  const handleDeviceClick = (device: DeviceItem) => {
+    router.push(device.href);
+    handleClose();
+  };
 
   // ──────────── Handlers ────────────
 
@@ -225,13 +269,15 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
 
   const getTitle = () => {
     if (activeTab === 'tools') return 'Ferramentas';
+    if (activeTab === 'devices') return 'Dispositivos';
     if (menuHistory.length > 0) return 'Menu';
-    return 'Aplicações';
+    return 'Navegação';
   };
 
   const getSearchPlaceholder = () => {
     if (activeTab === 'tools') return 'Buscar ferramentas...';
-    return 'Buscar aplicações...';
+    if (activeTab === 'devices') return 'Buscar dispositivos...';
+    return 'Buscar módulos...';
   };
 
   return (
@@ -291,8 +337,8 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                       }`}
                     >
-                      <Layout className="w-4 h-4" />
-                      Navegação
+                      <RiAppsFill className="w-4 h-4" />
+                      Módulos
                     </button>
                     <button
                       onClick={() => handleTabChange('tools')}
@@ -302,8 +348,19 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                       }`}
                     >
-                      <Wrench className="w-4 h-4" />
+                      <RiAppsLine className="w-4 h-4" />
                       Ferramentas
+                    </button>
+                    <button
+                      onClick={() => handleTabChange('devices')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        activeTab === 'devices'
+                          ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      <PiDesktopDuotone className="w-4 h-4" />
+                      Dispositivos
                     </button>
                   </div>
                 </div>
@@ -323,7 +380,7 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
               {/* Content Area */}
               <div className="p-3 sm:p-6 max-h-[60vh] overflow-y-auto">
                 <AnimatePresence mode="wait">
-                  {activeTab === 'navigation' ? (
+                  {activeTab === 'navigation' && (
                     <motion.div
                       key="navigation"
                       initial={{ opacity: 0, x: -20 }}
@@ -391,7 +448,56 @@ export function ToolsPanel({ isOpen, onClose, menuItems }: ToolsPanelProps) {
                         </div>
                       )}
                     </motion.div>
-                  ) : (
+                  )}
+
+                  {activeTab === 'devices' && (
+                    <motion.div
+                      key="devices"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {filteredDevices.length === 0 ? (
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
+                            <Search className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <p className="text-gray-600 dark:text-white/60">
+                            Nenhum dispositivo encontrado para &quot;
+                            {searchQuery}&quot;
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                          {filteredDevices.map(device => {
+                            const Icon = device.icon;
+                            const styles = getVariantStyles('primary');
+                            return (
+                              <button
+                                key={device.id}
+                                onClick={() => handleDeviceClick(device)}
+                                className={`group relative aspect-square rounded-2xl border p-3 sm:p-6 flex flex-col items-center justify-center gap-2 sm:gap-3 transition-colors duration-150 ${styles.button}`}
+                              >
+                                <div
+                                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg ${styles.icon}`}
+                                >
+                                  <Icon className="w-8 h-8" />
+                                </div>
+                                <span
+                                  className={`font-semibold text-sm text-center leading-tight ${styles.label}`}
+                                >
+                                  {device.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {activeTab === 'tools' && (
                     <motion.div
                       key="tools"
                       initial={{ opacity: 0, x: 20 }}
