@@ -9,13 +9,20 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const COMPONENTS_DIR = join(ROOT, 'src', 'components');
-const OUTPUT_FILE = join(ROOT, '.storybook', 'foundations', 'quality-dashboard.data.ts');
-const BS = sep; // platform path separator (backslash on Windows, slash on Unix)
-
+const OUTPUT_FILE = join(
+  ROOT,
+  '.storybook',
+  'foundations',
+  'quality-dashboard.data.ts'
+);
 function walkDir(dir, ext, exclude) {
   const results = [];
   let entries;
-  try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return results; }
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return results;
+  }
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
@@ -36,29 +43,43 @@ function subfolder(filePath) {
 }
 
 function fileContains(filePath, pattern) {
-  try { return readFileSync(filePath, 'utf8').includes(pattern); }
-  catch { return false; }
+  try {
+    return readFileSync(filePath, 'utf8').includes(pattern);
+  } catch {
+    return false;
+  }
 }
 
 function countDeprecated(filePath) {
   try {
     const m = readFileSync(filePath, 'utf8').match(/@deprecated/g);
     return m ? m.length : 0;
-  } catch { return 0; }
+  } catch {
+    return 0;
+  }
 }
 
-function toUnix(p) { return p.split(sep).join('/'); }
+function toUnix(p) {
+  return p.split(sep).join('/');
+}
 
 function gitModifiedAt(filePath) {
   try {
     const rel = toUnix(relative(ROOT, filePath));
     return execSync('git log -1 --format=%ci -- "' + rel + '"', {
-      cwd: ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 5000,
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 5000,
     }).trim();
-  } catch { return ''; }
+  } catch {
+    return '';
+  }
 }
 
-function esc(str) { return str.replace(/'/g, String.fromCharCode(92) + "'"); }
+function esc(str) {
+  return str.replace(/'/g, String.fromCharCode(92) + "'");
+}
 
 const componentFiles = walkDir(COMPONENTS_DIR, '.tsx', '.stories.tsx');
 const storyFiles = walkDir(COMPONENTS_DIR, '.stories.tsx');
@@ -101,31 +122,58 @@ const recentStories = allWithDates
   .slice(0, 10);
 
 const q = "'";
-const out = [
-  '// AUTO-GENERATED. Run: npm run storybook:dashboard',
-  '// Generated: ' + new Date().toISOString(),
-  '',
-  'export const coverageBySubfolder: Array<{ path: string; total: number; storied: number }> = [',
-  ...coverageBySubfolder.map(r => '  { path: ' + q + esc(r.path) + q + ', total: ' + r.total + ', storied: ' + r.storied + ' },'),
-  '];',
-  '',
-  'export const deprecatedComponents: Array<{ file: string; count: number }> = [',
-  ...deprecatedComponents.map(d => '  { file: ' + q + esc(d.file) + q + ', count: ' + d.count + ' },'),
-  '];',
-  '',
-  'export const storiesWithoutPlay: string[] = [',
-  ...storiesWithoutPlay.map(f => '  ' + q + esc(f) + q + ','),
-  '];',
-  '',
-  'export const recentStories: Array<{ file: string; modifiedAt: string }> = [',
-  ...recentStories.map(s => '  { file: ' + q + esc(s.file) + q + ', modifiedAt: ' + q + esc(s.modifiedAt) + q + ' },'),
-  '];',
-].join(String.fromCharCode(10)) + String.fromCharCode(10);
+const out =
+  [
+    '// AUTO-GENERATED. Run: npm run storybook:dashboard',
+    '// Generated: ' + new Date().toISOString(),
+    '',
+    'export const coverageBySubfolder: Array<{ path: string; total: number; storied: number }> = [',
+    ...coverageBySubfolder.map(
+      r =>
+        '  { path: ' +
+        q +
+        esc(r.path) +
+        q +
+        ', total: ' +
+        r.total +
+        ', storied: ' +
+        r.storied +
+        ' },'
+    ),
+    '];',
+    '',
+    'export const deprecatedComponents: Array<{ file: string; count: number }> = [',
+    ...deprecatedComponents.map(
+      d => '  { file: ' + q + esc(d.file) + q + ', count: ' + d.count + ' },'
+    ),
+    '];',
+    '',
+    'export const storiesWithoutPlay: string[] = [',
+    ...storiesWithoutPlay.map(f => '  ' + q + esc(f) + q + ','),
+    '];',
+    '',
+    'export const recentStories: Array<{ file: string; modifiedAt: string }> = [',
+    ...recentStories.map(
+      s =>
+        '  { file: ' +
+        q +
+        esc(s.file) +
+        q +
+        ', modifiedAt: ' +
+        q +
+        esc(s.modifiedAt) +
+        q +
+        ' },'
+    ),
+    '];',
+  ].join(String.fromCharCode(10)) + String.fromCharCode(10);
 
 writeFileSync(OUTPUT_FILE, out, 'utf8');
 
 console.log('quality-dashboard.data.ts generated');
-console.log('  coverageBySubfolder: ' + coverageBySubfolder.length + ' subfolders');
+console.log(
+  '  coverageBySubfolder: ' + coverageBySubfolder.length + ' subfolders'
+);
 console.log('  deprecatedComponents: ' + deprecatedComponents.length);
 console.log('  storiesWithoutPlay: ' + storiesWithoutPlay.length);
 console.log('  recentStories: ' + recentStories.length);

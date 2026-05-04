@@ -1,18 +1,31 @@
-# Deploy to Fly.io on push to main
+# Deploy to Fly.io after CI completes successfully on main.
+# Triggered by `workflow_run` instead of `push` so a green CI gates the deploy:
+# previously every push to main fired this workflow even when CI failed,
+# which led to 5+ broken/wasted deploys (build memory + missing TS gate).
 name: Fly Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  # Manual fallback: allows triggering a deploy without going through CI
+  # (e.g. infra hotfix where CI is unrelated/broken).
+  workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy Frontend to Fly.io
     runs-on: ubuntu-latest
     concurrency: deploy-frontend
+    # Only deploy when CI succeeded. workflow_dispatch always gets through.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Pin to the SHA that CI validated (workflow_run defaults to default
+          # branch HEAD, which can drift if another push lands meanwhile).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 

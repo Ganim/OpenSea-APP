@@ -1,18 +1,25 @@
-# Deploy staging to Fly.io on push to develop
+# Deploy staging to Fly.io after CI completes successfully on develop.
+# Same gating pattern as fly-deploy.yml: ungated push triggers shipped
+# broken builds in the past, so this waits on a green CI run.
 name: Fly Deploy (Staging)
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
 
 jobs:
   deploy-staging:
     name: Deploy Frontend to Staging
     runs-on: ubuntu-latest
     concurrency: deploy-frontend-staging
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
