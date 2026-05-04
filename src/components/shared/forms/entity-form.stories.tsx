@@ -120,6 +120,31 @@ export const Submitting: Story = {
   render: () => wrap(<EntityForm config={buildConfig({ loading: true })} />),
 };
 
+function WithRefControlDemo() {
+  const formRef = useRef<EntityFormRef>(null);
+  return wrap(
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Button onClick={() => formRef.current?.submit()}>
+          Submit via ref
+        </Button>
+        <Button variant="outline" onClick={() => formRef.current?.reset()}>
+          Reset via ref
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() =>
+            formRef.current?.setFieldValue('name', 'Valor injetado')
+          }
+        >
+          Set name field
+        </Button>
+      </div>
+      <EntityForm ref={formRef} config={buildConfig()} />
+    </div>
+  );
+}
+
 export const WithRefControl: Story = {
   parameters: {
     docs: {
@@ -129,30 +154,7 @@ export const WithRefControl: Story = {
       },
     },
   },
-  render: () => {
-    const formRef = useRef<EntityFormRef>(null);
-    return wrap(
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Button onClick={() => formRef.current?.submit()}>
-            Submit via ref
-          </Button>
-          <Button variant="outline" onClick={() => formRef.current?.reset()}>
-            Reset via ref
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() =>
-              formRef.current?.setFieldValue('name', 'Valor injetado')
-            }
-          >
-            Set name field
-          </Button>
-        </div>
-        <EntityForm ref={formRef} config={buildConfig()} />
-      </div>
-    );
-  },
+  render: () => <WithRefControlDemo />,
 };
 
 export const Dark: Story = {

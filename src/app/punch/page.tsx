@@ -186,8 +186,9 @@ function PunchPageContent() {
       todayParams.startDate,
     ],
     queryFn: async () => {
-      const { timeControlService } =
-        await import('@/services/hr/time-control.service');
+      const { timeControlService } = await import(
+        '@/services/hr/time-control.service'
+      );
       return timeControlService.listTimeEntries({
         employeeId: resolvedEmployeeId,
         startDate: todayParams.startDate,
@@ -202,8 +203,9 @@ function PunchPageContent() {
   const { data: streakEntriesPage } = useQuery({
     queryKey: ['punch-streak-entries', resolvedEmployeeId],
     queryFn: async () => {
-      const { timeControlService } =
-        await import('@/services/hr/time-control.service');
+      const { timeControlService } = await import(
+        '@/services/hr/time-control.service'
+      );
       const fromDate = new Date();
       fromDate.setDate(fromDate.getDate() - 30);
       return timeControlService.listTimeEntries({

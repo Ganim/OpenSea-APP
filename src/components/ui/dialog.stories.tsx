@@ -84,25 +84,27 @@ export const DestructiveConfirmation: Story = {
   ),
 };
 
+function WithLoadingDemo() {
+  const [open, setOpen] = useState(true);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Salvando alterações...</DialogTitle>
+          <DialogDescription>
+            Aguarde enquanto sincronizamos com o servidor.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex items-center justify-center py-6">
+          <div className="size-8 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export const WithLoading: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Salvando alterações...</DialogTitle>
-            <DialogDescription>
-              Aguarde enquanto sincronizamos com o servidor.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center py-6">
-            <div className="size-8 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  },
+  render: () => <WithLoadingDemo />,
 };
 
 export const FullscreenOnMobile: Story = {

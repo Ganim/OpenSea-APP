@@ -32,10 +32,7 @@ function wait(ms: number): Promise<void> {
 function getGeolocationFix(timeoutMs: number = 10000): Promise<GeolocationFix> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(
-      () =>
-        reject(
-          new Error('Geolocation timeout after ' + timeoutMs + 'ms')
-        ),
+      () => reject(new Error('Geolocation timeout after ' + timeoutMs + 'ms')),
       timeoutMs
     );
 

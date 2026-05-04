@@ -74,31 +74,35 @@ const wrap = (children: React.ReactNode) => (
   <div className="bg-background min-h-[600px] p-6">{children}</div>
 );
 
+function DefaultDemo() {
+  const items = useMemo(() => mockProducts(12), []);
+  return wrap(
+    <EntityGrid
+      items={items}
+      renderGridItem={renderGridItem}
+      renderListItem={renderListItem}
+    />
+  );
+}
+
 export const Default: Story = {
-  render: () => {
-    const items = useMemo(() => mockProducts(12), []);
-    return wrap(
-      <EntityGrid
-        items={items}
-        renderGridItem={renderGridItem}
-        renderListItem={renderListItem}
-      />
-    );
-  },
+  render: () => <DefaultDemo />,
 };
 
+function ListViewDemo() {
+  const items = useMemo(() => mockProducts(8), []);
+  return wrap(
+    <EntityGrid
+      items={items}
+      renderGridItem={renderGridItem}
+      renderListItem={renderListItem}
+      defaultView="list"
+    />
+  );
+}
+
 export const ListView: Story = {
-  render: () => {
-    const items = useMemo(() => mockProducts(8), []);
-    return wrap(
-      <EntityGrid
-        items={items}
-        renderGridItem={renderGridItem}
-        renderListItem={renderListItem}
-        defaultView="list"
-      />
-    );
-  },
+  render: () => <ListViewDemo />,
 };
 
 export const Empty: Story = {
@@ -114,38 +118,40 @@ export const Empty: Story = {
     ),
 };
 
-export const WithSelection: Story = {
-  render: () => {
-    const items = useMemo(() => mockProducts(8), []);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(
-      new Set([items[0].id, items[2].id, items[4].id])
-    );
+function WithSelectionDemo() {
+  const items = useMemo(() => mockProducts(8), []);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    new Set([items[0].id, items[2].id, items[4].id])
+  );
 
-    return wrap(
-      <EntityGrid
-        items={items}
-        renderGridItem={renderGridItem}
-        renderListItem={renderListItem}
-        selectedIds={selectedIds}
-        onItemClick={(id, e) => {
-          if (e.metaKey || e.ctrlKey) {
-            setSelectedIds(prev => {
-              const next = new Set(prev);
-              if (next.has(id)) {
-                next.delete(id);
-              } else {
-                next.add(id);
-              }
-              return next;
-            });
-          } else {
-            setSelectedIds(new Set([id]));
-          }
-        }}
-        onClearSelection={() => setSelectedIds(new Set())}
-      />
-    );
-  },
+  return wrap(
+    <EntityGrid
+      items={items}
+      renderGridItem={renderGridItem}
+      renderListItem={renderListItem}
+      selectedIds={selectedIds}
+      onItemClick={(id, e) => {
+        if (e.metaKey || e.ctrlKey) {
+          setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+              next.delete(id);
+            } else {
+              next.add(id);
+            }
+            return next;
+          });
+        } else {
+          setSelectedIds(new Set([id]));
+        }
+      }}
+      onClearSelection={() => setSelectedIds(new Set())}
+    />
+  );
+}
+
+export const WithSelection: Story = {
+  render: () => <WithSelectionDemo />,
 };
 
 export const SingleItem: Story = {
@@ -159,16 +165,18 @@ export const SingleItem: Story = {
     ),
 };
 
+function DarkDemo() {
+  const items = useMemo(() => mockProducts(8), []);
+  return wrap(
+    <EntityGrid
+      items={items}
+      renderGridItem={renderGridItem}
+      renderListItem={renderListItem}
+    />
+  );
+}
+
 export const Dark: Story = {
   globals: { theme: 'dark' },
-  render: () => {
-    const items = useMemo(() => mockProducts(8), []);
-    return wrap(
-      <EntityGrid
-        items={items}
-        renderGridItem={renderGridItem}
-        renderListItem={renderListItem}
-      />
-    );
-  },
+  render: () => <DarkDemo />,
 };

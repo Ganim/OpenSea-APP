@@ -26,11 +26,13 @@ import {
   type CreateSelfPunchApprovalResponse,
 } from '@/services/hr/punch-approvals.service';
 
-export interface CreateSelfPunchApprovalInput extends CreateSelfPunchApprovalRequest {
+export interface CreateSelfPunchApprovalInput
+  extends CreateSelfPunchApprovalRequest {
   attachments?: File[];
 }
 
-export interface CreateSelfPunchApprovalResult extends CreateSelfPunchApprovalResponse {
+export interface CreateSelfPunchApprovalResult
+  extends CreateSelfPunchApprovalResponse {
   evidenceFileKeys: string[];
 }
 

@@ -18,7 +18,8 @@ export const COMPLIANCE_ARTIFACTS_QUERY_KEY = (
   filters: ListComplianceArtifactsParams
 ) => ['compliance-artifacts', filters] as const;
 
-export interface UseComplianceArtifactsParams extends ListComplianceArtifactsParams {
+export interface UseComplianceArtifactsParams
+  extends ListComplianceArtifactsParams {
   pageSize?: number;
 }
 

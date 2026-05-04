@@ -41,12 +41,12 @@ let settingsState: {
   },
 };
 
-let manifestState: { isLoading: boolean; data: { modules: unknown[] } } = {
+const manifestState: { isLoading: boolean; data: { modules: unknown[] } } = {
   isLoading: false,
   data: { modules: [] },
 };
 
-let preferencesState: {
+const preferencesState: {
   isLoading: boolean;
   data: { modules: unknown[]; preferences: unknown[] };
 } = {
