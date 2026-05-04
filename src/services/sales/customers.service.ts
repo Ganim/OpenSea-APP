@@ -79,4 +79,24 @@ export const customersService = {
   async delete(customerId: string): Promise<void> {
     return apiClient.delete<void>(API_ENDPOINTS.CUSTOMERS.DELETE(customerId));
   },
+
+  // GET /v1/customers/:customerId/credit
+  async getCredit(customerId: string): Promise<CustomerCreditResponse> {
+    return apiClient.get<CustomerCreditResponse>(
+      API_ENDPOINTS.CUSTOMERS.CREDIT(customerId)
+    );
+  },
 };
+
+export interface CustomerCreditResponse {
+  customerId: string;
+  hasLimit: boolean;
+  creditLimit: number;
+  currentBalance: number;
+  available: number;
+  isActive: boolean;
+  lastReviewDate: string | null;
+  notes: string | null;
+  storeCreditBalance: number;
+  totalAvailable: number;
+}

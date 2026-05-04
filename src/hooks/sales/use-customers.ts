@@ -125,3 +125,16 @@ export function useDeleteCustomer() {
     },
   });
 }
+
+// GET /v1/customers/:customerId/credit - Snapshot de crédito (limite + store credit)
+export function useCustomerCredit(
+  customerId: string | null | undefined,
+  options?: { enabled?: boolean }
+) {
+  return useQuery({
+    queryKey: ['customers', customerId, 'credit'],
+    queryFn: () => customersService.getCredit(customerId as string),
+    enabled: !!customerId && options?.enabled !== false,
+    staleTime: 30_000,
+  });
+}

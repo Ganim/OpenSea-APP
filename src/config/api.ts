@@ -295,6 +295,7 @@ export const API_ENDPOINTS = {
     CREATE: '/v1/customers',
     UPDATE: (id: string) => `/v1/customers/${id}`,
     DELETE: (id: string) => `/v1/customers/${id}`,
+    CREDIT: (id: string) => `/v1/customers/${id}/credit`,
   },
   // Sales - Contacts
   CONTACTS: {
@@ -425,6 +426,7 @@ export const API_ENDPOINTS = {
       UPSERT: (tableId: string) => `/v1/price-tables/${tableId}/items`,
     },
     RESOLVE: '/v1/price-resolver',
+    SYNC: '/v1/price-tables/sync',
   },
   // Sales - Customer Prices
   CUSTOMER_PRICES: {
