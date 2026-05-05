@@ -542,26 +542,22 @@ export function LabelEditor({
       // O StyleManager emite eventos quando propriedades são alteradas
 
       // 1. Quando uma propriedade de estilo é atualizada
-      editor.on(
-        'style:property:update',
-        (prop: Property | string, val: string | undefined) => {
-          const selected = editor.getSelected();
-          if (selected) {
-            const propObj = typeof prop === 'string' ? null : prop;
-            const property =
-              propObj?.get?.('property') ||
-              (typeof prop === 'string' ? prop : undefined);
-            const value =
-              val || propObj?.get?.('value') || propObj?.getFullValue?.();
-            if (property && value) {
-              selected.addStyle({ [property]: value });
-            }
+      editor.on('style:property:update', data => {
+        const selected = editor.getSelected();
+        if (selected) {
+          const property = data.property?.get?.('property');
+          const value =
+            data.value ??
+            data.property?.get?.('value') ??
+            data.property?.getFullValue?.();
+          if (property && value) {
+            selected.addStyle({ [property]: value });
           }
         }
-      );
+      });
 
       // 2. Monitorar mudanças no target do StyleManager
-      editor.on('style:target', (_target: Component | undefined) => {
+      editor.on('style:target', () => {
         // Quando o target muda, sincronizar estilos
         setTimeout(() => syncStylesToComponent(editor), 100);
       });
