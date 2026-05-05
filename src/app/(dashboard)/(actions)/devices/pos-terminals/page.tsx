@@ -481,7 +481,7 @@ export default function PosTerminalsPage() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Dispositivos', href: '/devices' },
-            { label: 'Terminais POS' },
+            { label: 'Terminais de Venda' },
           ]}
           actions={
             canRegister ? (
@@ -497,7 +497,7 @@ export default function PosTerminalsPage() {
       <PageBody spacing="gap-6">
         {/* Hero Banner */}
         <PageHeroBanner
-          title="Terminais POS"
+          title="Terminais de Venda"
           description="Gerencie terminais de PDV, modos de operação e pareamento de dispositivos. Cada terminal representa uma máquina ou tablet rodando o OpenSea Emporion."
           icon={ShoppingCart}
           iconGradient="from-violet-500 to-indigo-600"

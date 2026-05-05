@@ -1,6 +1,6 @@
 /**
- * Emporion Full Changelog Page
- * Histórico completo de versões do OpenSea Emporion
+ * Horus Full Changelog Page
+ * Histórico completo de versões do OpenSea Horus
  */
 
 'use client';
@@ -18,8 +18,8 @@ import { History, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Repo público onde os installers são publicados (release.yml).
-// O repo principal Emporion é privado e a GitHub API anônima retorna 404.
-const GITHUB_REPO = 'OpenSea-ERP/OpenSea-Emporion-Releases';
+// O repo principal Horus é privado e a GitHub API anônima retorna 404.
+const GITHUB_REPO = 'OpenSea-ERP/OpenSea-Horus-Releases';
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
 
 interface GitHubAsset {
@@ -40,7 +40,8 @@ interface ParsedRelease {
   version: string;
   date: string;
   changes: string[];
-  windowsUrl?: string;
+  exeUrl?: string;
+  msiUrl?: string;
 }
 
 function parseReleaseBody(body: string): string[] {
@@ -56,7 +57,7 @@ function parseReleaseBody(body: string): string[] {
   return changes;
 }
 
-export default function EmporionChangelogPage() {
+export default function HorusChangelogPage() {
   const [releases, setReleases] = useState<ParsedRelease[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +77,9 @@ export default function EmporionChangelogPage() {
             version: r.tag_name.replace(/^v/, ''),
             date: r.published_at,
             changes: parseReleaseBody(r.body),
-            windowsUrl: r.assets.find(a => /\.exe$/i.test(a.name))
+            exeUrl: r.assets.find(a => /\.exe$/i.test(a.name))
+              ?.browser_download_url,
+            msiUrl: r.assets.find(a => /\.msi$/i.test(a.name))
               ?.browser_download_url,
           }));
         setReleases(parsed);
@@ -91,8 +94,11 @@ export default function EmporionChangelogPage() {
         <PageActionBar
           breadcrumbItems={[
             { label: 'Dispositivos', href: '/devices' },
-            { label: 'Terminais de Venda', href: '/devices/pos-terminals' },
-            { label: 'Download Emporion', href: '/downloads/emporion' },
+            {
+              label: 'Terminais de Ponto',
+              href: '/devices/punch-terminals',
+            },
+            { label: 'Download Horus', href: '/downloads/horus' },
             { label: 'Changelog' },
           ]}
         />
@@ -106,7 +112,7 @@ export default function EmporionChangelogPage() {
               <div>
                 <h3 className="text-base font-semibold">Changelog Completo</h3>
                 <p className="text-sm text-muted-foreground">
-                  Todas as versões publicadas do OpenSea Emporion
+                  Todas as versões publicadas do OpenSea Horus
                 </p>
               </div>
             </div>
@@ -135,7 +141,7 @@ export default function EmporionChangelogPage() {
                       className={cn(
                         'text-xs font-mono',
                         idx === 0
-                          ? 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/10 dark:text-violet-300 dark:border-violet-500/20'
+                          ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20'
                           : 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20'
                       )}
                     >
@@ -152,14 +158,24 @@ export default function EmporionChangelogPage() {
                         Atual
                       </Badge>
                     )}
-                    {release.windowsUrl && (
+                    {release.exeUrl && (
                       <a
-                        href={release.windowsUrl}
+                        href={release.exeUrl}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        .exe
+                      </a>
+                    )}
+                    {release.msiUrl && (
+                      <a
+                        href={release.msiUrl}
                         className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Download
+                        .msi
                       </a>
                     )}
                   </div>
@@ -170,7 +186,7 @@ export default function EmporionChangelogPage() {
                           key={j}
                           className="text-sm text-muted-foreground flex items-start gap-2"
                         >
-                          <span className="text-violet-500 mt-1.5">•</span>
+                          <span className="text-indigo-500 mt-1.5">•</span>
                           {change}
                         </li>
                       ))}

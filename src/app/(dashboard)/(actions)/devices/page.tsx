@@ -10,10 +10,10 @@ import { PageDashboardSections } from '@/components/layout/page-dashboard-sectio
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
+  Fingerprint,
   Monitor,
   Printer,
-  MonitorSmartphone,
-  Smartphone,
+  ShoppingCart,
   Webhook,
 } from 'lucide-react';
 
@@ -32,22 +32,23 @@ const sections = [
       },
       {
         id: 'pos-terminals',
-        title: 'Terminais POS',
-        description: 'Configure e monitore terminais de ponto de venda',
-        icon: MonitorSmartphone,
+        title: 'Terminais de Venda',
+        description:
+          'Configure e monitore terminais PDV (Emporion) — modos de operação e pareamento',
+        icon: ShoppingCart,
         href: '/devices/pos-terminals',
         gradient: 'from-violet-500 to-purple-600',
         hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
       },
       {
-        id: 'punch-pwa',
-        title: 'Punch PWA',
+        id: 'punch-terminals',
+        title: 'Terminais de Ponto',
         description:
-          'Distribua a PWA de ponto pessoal aos colaboradores (QR + cartaz)',
-        icon: Smartphone,
-        href: '/devices/downloads/punch-pwa',
-        gradient: 'from-violet-500 to-purple-600',
-        hoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-500/10',
+          'Gerencie terminais Horus de ponto — kiosks, leitores biométricos e PCs pessoais',
+        icon: Fingerprint,
+        href: '/devices/punch-terminals',
+        gradient: 'from-indigo-500 to-violet-600',
+        hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
       },
       {
         id: 'webhooks',
