@@ -5,9 +5,11 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { PageActionBar } from '@/components/layout/page-action-bar';
 import { PageDashboardSections } from '@/components/layout/page-dashboard-sections';
 import { PageHeroBanner } from '@/components/layout/page-hero-banner';
+import { SYSTEM_WEBHOOKS_PERMISSIONS } from '@/constants/permissions';
 import { usePermissions } from '@/hooks/use-permissions';
 import {
   Fingerprint,
@@ -16,6 +18,7 @@ import {
   ShoppingCart,
   Webhook,
 } from 'lucide-react';
+import Link from 'next/link';
 
 const sections = [
   {
@@ -50,33 +53,34 @@ const sections = [
         gradient: 'from-indigo-500 to-violet-600',
         hoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-500/10',
       },
-      {
-        id: 'webhooks',
-        title: 'Webhooks',
-        description:
-          'Configure endpoints para receber eventos do sistema em tempo real (assinatura HMAC).',
-        icon: Webhook,
-        href: '/devices/webhooks',
-        gradient: 'from-amber-500 to-orange-600',
-        hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-500/10',
-      },
     ],
   },
 ];
 
 export default function DevicesLandingPage() {
   const { hasPermission } = usePermissions();
+  const canAccessWebhooks = hasPermission(SYSTEM_WEBHOOKS_PERMISSIONS.ACCESS);
 
   return (
     <div className="space-y-8">
       <PageActionBar
         breadcrumbItems={[{ label: 'Dispositivos', href: '/devices' }]}
         hasPermission={hasPermission}
+        actions={
+          canAccessWebhooks ? (
+            <Link href="/devices/webhooks">
+              <Button variant="outline" size="sm" className="h-9 px-2.5">
+                <Webhook className="w-4 h-4 mr-1" />
+                Webhooks
+              </Button>
+            </Link>
+          ) : undefined
+        }
       />
 
       <PageHeroBanner
         title="Dispositivos"
-        description="Gerencie impressoras remotas, terminais POS e outros dispositivos conectados ao seu sistema."
+        description="Gerencie impressoras remotas, terminais de venda e terminais de ponto conectados ao seu sistema."
         icon={Monitor}
         iconGradient="from-blue-500 to-indigo-600"
         buttons={[]}
